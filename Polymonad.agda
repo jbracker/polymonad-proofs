@@ -21,24 +21,14 @@ open import Identity
 
 record Polymonad {l : Level} (TyCons : Set l) (Id : TyCons) : Set (lsuc l) where
   field
-    -- Enumerations/Names of unary type constructors
-    -- TyCons : Set
-    
     -- Enumerations/Names of bind operators
     B[_,_]▷_ : (M N P : TyCons) → Set l
 
     -- Interpretation of unary type constructors
     ⟨_⟩ : TyCons → TyCon
+    
     -- Interpretation of bind operators
     bind : {M N P : TyCons} → B[ M , N ]▷ P → [ ⟨ M ⟩ , ⟨ N ⟩ ]▷ ⟨ P ⟩
-
-    -- Distinguished Id type constructor.
-    -- Id : TyCons
-    -- Lift an element into Id.
-    -- This operation is required for the equations to be well-typed.
-    -- In contrast to the paper we do not assume everyting is automatically 
-    -- typed as a monad.
-    --id : ∀ {τ : Type} → (x : τ) → ⟨ Id ⟩ τ
     
     -- Law of the Id type constructor: Id τ = τ
     lawId : ⟨ Id ⟩ ≡ Identity
