@@ -19,7 +19,7 @@ open import Haskell
 --------------------------------------------------------------------------------
 
 -- Pure identity type constructor
-Identity : Set → Set
+Identity : TyCon
 Identity τ = τ
 
 -- Pure identity lift function
@@ -68,6 +68,7 @@ idTC = inj₁ IdentTC
 -- Generalised Identity Functions
 --------------------------------------------------------------------------------
 
+-- Identity Kleisli-arrow that is polymorphic over the identity type constructor.
 id : ∀ {τ : Type} {Id : TyCon} → Id ≡ Identity → τ → Id τ
 id {τ = τ} lawId x = subst (λ X → X τ) (sym lawId) x
 

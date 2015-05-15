@@ -21,19 +21,19 @@ open import Identity
 
 record Polymonad {l : Level} (TyCons : Set l) (Id : TyCons) : Set (lsuc l) where
   field
-    -- Enumerations/Names of bind operators
+    -- Set of bind operator names for each combination of type constructors
     B[_,_]▷_ : (M N P : TyCons) → Set l
 
-    -- Interpretation of unary type constructors
+    -- Interpretation of type constructor names into actual type constructors
     ⟨_⟩ : TyCons → TyCon
     
-    -- Interpretation of bind operators
+    -- Interpretation of bind operator names into actual bind-operations
     bind : {M N P : TyCons} → B[ M , N ]▷ P → [ ⟨ M ⟩ , ⟨ N ⟩ ]▷ ⟨ P ⟩
     
     -- Law of the Id type constructor: Id τ = τ
     lawId : ⟨ Id ⟩ ≡ Identity
     
-    -- Functor law from the paper
+    -- Functor law from the definition:
     lawFunctor : ∀ (M : TyCons) → ∃ λ(b : B[ M , Id ]▷ M) 
                → ∀ {α : Type} (m : ⟨ M ⟩ α) → (bind b) m (id lawId) ≡ m
     
@@ -47,7 +47,7 @@ record Polymonad {l : Level} (TyCons : Set l) (Id : TyCons) : Set (lsuc l) where
     -- Right to left direction of the paired morphism law equivalancy:
     lawMorph2 : ∀ (M N : TyCons) 
               → (B[ Id , M ]▷ N → B[ M , Id ]▷ N)
-    -- Equation from the paired morphism law:
+    -- Equation of the paired morphism law:
     lawMorph3 : ∀ (M N : TyCons) (b₁ : B[ M , Id ]▷ N) (b₂ : B[ Id , M ]▷ N)
               → ∀ {α β : Type} (v : α) (f : α → ⟨ M ⟩ β) 
               → (bind b₁) (f v) (id lawId) ≡ (bind b₂) ((id lawId) v) f
@@ -70,8 +70,8 @@ record Polymonad {l : Level} (TyCons : Set l) (Id : TyCons) : Set (lsuc l) where
     -- "If" { b₁:(M,N)▷P, b₂:(P,R)▷T, b₃:(N,R)▷S, b₄:(M,S)▷T } ⊆ Σ
     -- "then" b₂ (b₁ m f) g = b₄ m (λ x . b₃ (f x) g)
     lawAssoc : ∀ (M N P R T S : TyCons) 
-               (b₁ : B[ M , N ]▷ P) (b₂ : B[ P , R ]▷ T) 
-               (b₃ : B[ N , R ]▷ S) (b₄ : B[ M , S ]▷ T)
+             → (b₁ : B[ M , N ]▷ P) → (b₂ : B[ P , R ]▷ T) 
+             → (b₃ : B[ N , R ]▷ S) → (b₄ : B[ M , S ]▷ T)
              → ∀ {α β γ : Type} (m : ⟨ M ⟩ α) (f : α → ⟨ N ⟩ β) (g : β → ⟨ R ⟩ γ)
              → (bind b₂) ((bind b₁) m f) g ≡ (bind b₄) m (λ x → (bind b₃) (f x) g)
     
