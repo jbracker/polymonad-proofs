@@ -14,15 +14,19 @@ open import Haskell
 open import Polymonad
 open import Identity
 
+-- Formalization of subsets of a given set
 SubsetOf : Type → Set
 SubsetOf X = X → Bool
 
+-- An element is in the subset, if the subset predicate is true
 _∈_ : ∀ {X : Type} → (x : X) → (S : SubsetOf X) → Set
 x ∈ S = S x ≡ true
 
+-- Decide if an element is in a subset
 _∈?_ : ∀ {X : Type} → (x : X) → (S : SubsetOf X) → Dec (S x ≡ true)
 x ∈? S = S x ≟ true
 
+-- Predicate describing a principal polymonad
 PrincipalPM : ∀ {TyCons : Set} {Id : TyCons} →  Polymonad TyCons Id → Set
 PrincipalPM {TyCons} {Id} pm 
   = (F : SubsetOf (TyCons × TyCons))

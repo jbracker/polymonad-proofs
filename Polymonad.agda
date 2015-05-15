@@ -100,8 +100,9 @@ pmId = Polymonad.pmId
 ⟨_▷_⟩ : ∀ {l} {TyCons : Set l} {Id : TyCons} → Polymonad TyCons Id → TyCons → TyCon
 ⟨ pm ▷ tyCon ⟩ = (Polymonad.⟨_⟩ pm) tyCon
 
--- Bind identifier set for a combination of type constructors in a specific polymonad. 
-B[_,_]_▷_ : ∀ {TyCons} {Id : TyCons} → (M N : TyCons) → Polymonad TyCons Id → (P : TyCons) → Set
+-- Bind identifier set for a combination of type constructors in a specific polymonad
+B[_,_]_▷_ : ∀ {TyCons} {Id : TyCons} 
+          → (M N : TyCons) → Polymonad TyCons Id → (P : TyCons) → Set
 B[ M , N ] pm ▷ P = Polymonad.B[_,_]▷_ pm M N P
 
 -- Actuall bind operator for a bind identifier.
