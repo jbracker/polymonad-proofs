@@ -138,12 +138,3 @@ pmIdBind∃ : {TyCons : Set} {Id : TyCons}
           → B[ Id , Id ] pm ▷ Id
 pmIdBind∃ {Id = Id} pm = proj₁ (pmLawFunctor pm Id)
 
-{-
-pmReturn∃ : {TyCons : Set} → (pm : Polymonad (IdTyCons ⊎ TyCons) idTC) → (M : TyCons) → B[ idTC , idTC ] pm ▷ (inj₂ M)
-pmReturn∃ = ?
--}
-{-
-pmReturn∃ : {TyCons : Set} {Id : TyCons} → (pm : Polymonad TyCons Id) → (M : TyCons) → B[ Id , Id ] pm ▷ M
-pmReturn∃ {Id = Id} pm M with pmLawDiamond1 pm M Id Id M (M , (proj₁ (pmLawFunctor pm M)) , (proj₁ (pmLawFunctor pm M)))
-pmReturn∃ pm M | S , retS , morphS = {!!}
--}
