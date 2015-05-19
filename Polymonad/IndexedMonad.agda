@@ -72,7 +72,8 @@ IxMonad→Polymonad {Ixs = Ixs} {M = M'} monad = record
   ; ⟨_⟩ = ⟨_⟩
   ; bind = λ {m} {n} {p} b → bind m n p b
   ; lawId = lawId
-  ; lawFunctor = lawFunctor
+  ; lawFunctor1 = lawFunctor1
+  ; lawFunctor2 = lawFunctor2
   ; lawMorph1 = lawMorph1 
   ; lawMorph2 = lawMorph2
   ; lawMorph3 = lawMorph3
@@ -110,10 +111,15 @@ IxMonad→Polymonad {Ixs = Ixs} {M = M'} monad = record
     lawId : ⟨ Id ⟩ ≡ Identity
     lawId = refl
     
-    lawFunctor : ∀ (M : TyCons) → ∃ λ(b : B[ M , Id ]▷ M) 
+    lawFunctor1 : ∀ (M : TyCons) → B[ M , Id ]▷ M
+    lawFunctor1 (inj₁ IdentTC) = IdentB
+    lawFunctor1 (inj₂ (IxMonadTC i j)) = FunctorB
+    
+    lawFunctor2 : ∀ (M : TyCons) → (b : B[ M , Id ]▷ M) 
                → ∀ {α : Type} (m : ⟨ M ⟩ α) → (bind M Id M b) m (id lawId) ≡ m
-    lawFunctor (inj₁ IdentTC) = IdentB , (λ {α} m → refl)
-    lawFunctor (inj₂ (IxMonadTC i j)) = FunctorB , lawIdL monad
+    lawFunctor2 (inj₁ IdentTC) IdentB m = refl
+    lawFunctor2 (inj₂ (IxMonadTC i j)) FunctorB m = lawIdL monad m
+
     
     lawMorph1 : ∀ (M N : TyCons) 
               → (B[ M , Id ]▷ N → B[ Id , M ]▷ N)

@@ -203,10 +203,10 @@ principalPolymonadCompose {TyCons₁} {TyCons₂} {pm₁} {pm₂} cpm₁ cpm₂ 
          
     
     mkFunctor : (M : TyCons₁ ⊎ TyCons₂) → B[ inj₂ M , idTC ] pm ▷ inj₂ M
-    mkFunctor M = proj₁ (pmLawFunctor pm (inj₂ M))
+    mkFunctor M = pmLawFunctor1 pm (inj₂ M)
     
     mkBindId : B[ idTC , idTC ] pm ▷ idTC
-    mkBindId = proj₁ (pmLawFunctor pm idTC)
+    mkBindId = pmLawFunctor1 pm idTC
     
     mkReturn : {N : TyCons₁ ⊎ TyCons₂}
              → (F : SubsetOf (TyCons × TyCons))

@@ -98,7 +98,8 @@ polymonadMaybeList {M₁ = M₁} {M₂ = M₂} monad₁ monad₂ functorMorph ap
   ; ⟨_⟩ = ⟨_⟩
   ; bind = {!!} --λ {m} {n} {p} b → bind m n p b
   ; lawId = {!!} --lawId
-  ; lawFunctor = {!!} --lawFunctor
+  ; lawFunctor1 = {!!} --lawFunctor1
+  ; lawFunctor2 = {!!} --lawFunctor2
   ; lawMorph1 = {!!} --lawMorph1 
   ; lawMorph2 = {!!} --lawMorph2
   ; lawMorph3 = {!!} --lawMorph3
@@ -186,12 +187,17 @@ polymonadMaybeList {M₁ = M₁} {M₂ = M₂} monad₁ monad₂ functorMorph ap
     lawId : ⟨ Id ⟩ ≡ Identity
     lawId = refl
  
-    lawFunctor : ∀ (M : TyCons) → ∃ λ(b : B[ M , Id ]▷ M) 
-               → ∀ {α : Type} (m : ⟨ M ⟩ α) → (bind M Id M b) m (id lawId) ≡ m
-    lawFunctor (inj₁ IdentTC) = IdentB , (λ {α} m → refl)
-    lawFunctor (inj₂ (inj₁ MonadTC)) = FunctorB , proj₂ (pmLawFunctor pm₁ (inj₂ MonadTC))
-    lawFunctor (inj₂ (inj₂ MonadTC)) = FunctorB , proj₂ (pmLawFunctor pm₂ (inj₂ MonadTC))
+    lawFunctor1 : ∀ (M : TyCons) → B[ M , Id ]▷ M
+    lawFunctor1 (inj₁ IdentTC) = IdentB
+    lawFunctor1 (inj₂ (inj₁ MonadTC)) = FunctorB
+    lawFunctor1 (inj₂ (inj₂ MonadTC)) = FunctorB
     
+    lawFunctor2 : ∀ (M : TyCons) → (b : B[ M , Id ]▷ M) 
+                → ∀ {α : Type} (m : ⟨ M ⟩ α) → (bind M Id M b) m (id lawId) ≡ m
+    lawFunctor2 (inj₁ IdentTC) IdentB m = refl
+    lawFunctor2 (inj₂ (inj₁ MonadTC)) FunctorB m = pmLawFunctor2 pm₁ (inj₂ MonadTC) FunctorB m
+    lawFunctor2 (inj₂ (inj₂ MonadTC)) FunctorB m = pmLawFunctor2 pm₂ (inj₂ MonadTC) FunctorB m
+
     lawMorph1 : ∀ (M N : TyCons) 
               → (B[ M , Id ]▷ N → B[ Id , M ]▷ N)
     lawMorph1 (inj₁ IdentTC) (inj₁ IdentTC) IdentB = IdentB

@@ -30,7 +30,8 @@ polymonadId = record
   ; ⟨_⟩ = id⟨_⟩
   ; bind = λ {M} {N} {P} → bind {M} {N} {P}
   ; lawId = refl    
-  ; lawFunctor = lawFunctor
+  ; lawFunctor1 = lawFunctor1
+  ; lawFunctor2 = lawFunctor2
   ; lawMorph1 = lawMorph1
   ; lawMorph2 = lawMorph2
   ; lawMorph3 = lawMorph3
@@ -60,10 +61,14 @@ polymonadId = record
       bind {inj₁ IdentTC} {inj₂ ()}
       bind {inj₂ ()}
       
-      lawFunctor : ∀ (M : TyCons) → ∃ λ(b : id[ M , Id ]▷ M) 
+      lawFunctor1 : ∀ (M : TyCons) → id[ M , Id ]▷ M
+      lawFunctor1 (inj₁ IdentTC) = IdentB
+      lawFunctor1 (inj₂ ())
+
+      lawFunctor2 : ∀ (M : TyCons) → (b : id[ M , Id ]▷ M) 
                  → ∀ {a : Type} (m : id⟨ M ⟩ a) → (bind {M} {Id} {M} b) m identity ≡ m
-      lawFunctor (inj₁ IdentTC) = IdentB , (λ m → refl)
-      lawFunctor (inj₂ ())
+      lawFunctor2 (inj₁ IdentTC) IdentB m = refl
+      lawFunctor2 (inj₂ ())
       
       lawMorph1 : ∀ (M N : TyCons) 
                 → (id[ M , Id ]▷ N → id[ Id , M ]▷ N)

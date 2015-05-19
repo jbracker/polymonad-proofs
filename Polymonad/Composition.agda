@@ -33,7 +33,8 @@ polymonadCompose {TyCons₁} {TyCons₂} {pm₁} {pm₂} cpm₁ cpm₂ = record
   ; ⟨_⟩ = ⟨_⟩
   ; bind = λ {M} {N} {P} → bind {M} {N} {P}
   ; lawId = lawId
-  ; lawFunctor = lawFunctor
+  ; lawFunctor1 = lawFunctor1
+  ; lawFunctor2 = lawFunctor2
   ; lawMorph1 = lawMorph1 
   ; lawMorph2 = lawMorph2
   ; lawMorph3 = lawMorph3
@@ -179,28 +180,30 @@ polymonadCompose {TyCons₁} {TyCons₂} {pm₁} {pm₂} cpm₁ cpm₂ = record
                 → id lawId ≡ subst (λ N → (α → N α)) eqId' (id eqId')
       eqIdSubst refl = refl
       
-      lawFunctor : (M : TyCons) 
-                  → ∃ λ (b : B[ M , Id ]▷ M) 
+      lawFunctor1 : (M : TyCons) → B[ M , Id ]▷ M
+      lawFunctor1 (inj₁ IdentTC  ) = pmLawFunctor1 pm₁ idTC
+      lawFunctor1 (inj₂ (inj₁ M₁)) = pmLawFunctor1 pm₁ (inj₂ M₁)
+      lawFunctor1 (inj₂ (inj₂ M₂)) = pmLawFunctor1 pm₂ (inj₂ M₂)
+
+      lawFunctor2 : (M : TyCons) 
+                  → (b : B[ M , Id ]▷ M) 
                   → {α : Type} (m : ⟨ M ⟩ α) 
                   → bind {M} {Id} {M} b m (id lawId) ≡ m
-      lawFunctor (inj₁ IdentTC  ) = 
-        let b₁ , proof₁ = pmLawFunctor pm₁ idTC
+      lawFunctor2 (inj₁ IdentTC  ) b₁ m = 
+        let proof₁ = pmLawFunctor2 pm₁ idTC b₁
             M = inj₁ IdentTC
             eqM = eqId₁
-            proof : ∀ {α : Type} → (m : ⟨ M ⟩ α) → bind {M} {Id} {M} b₁ m (id lawId) ≡ m
-            proof {α} m = begin
+        in begin
               bind {M} {Id} {M} b₁ m (id lawId)  
                 ≡⟨ cong (λ x → x m (id lawId)) (eqBindId₁ b₁) ⟩
               bindId m (id lawId) 
                 ≡⟨ refl ⟩
               m ∎
-        in b₁ , proof
-      lawFunctor (inj₂ (inj₁ M₁)) = 
-        let b₁ , proof₁ = pmLawFunctor pm₁ (inj₂ M₁)
+      lawFunctor2 (inj₂ (inj₁ M₁)) b₁ {α = α} m = 
+        let proof₁ = pmLawFunctor2 pm₁ (inj₂ M₁) b₁
             M = inj₂ (inj₁ M₁)
             eqM = eqTC₁ (inj₂ M₁)
-            proof : ∀ {α : Type} → (m : ⟨ M ⟩ α) → bind {M} {Id} {M} b₁ m (id lawId) ≡ m
-            proof {α} m = begin
+        in begin
               bind {M} {Id} {M} b₁ m (id lawId)
                 ≡⟨ cong (λ x → bind {M} {Id} {M} b₁ m x) (eqIdSubst eqId₁) ⟩
               bind {M} {Id} {M} b₁ m (subst (λ N → (α → N α)) eqId₁ (id lawId₁)) 
@@ -214,13 +217,11 @@ polymonadCompose {TyCons₁} {TyCons₂} {pm₁} {pm₂} cpm₁ cpm₂ = record
               subst (λ P → P α) eqM (subst (λ M → M α) eqM m)
                 ≡⟨ refl ⟩
               m ∎
-        in b₁ , proof
-      lawFunctor (inj₂ (inj₂ M₂)) = 
-        let b₂ , proof₂ = pmLawFunctor pm₂ (inj₂ M₂)
+      lawFunctor2 (inj₂ (inj₂ M₂)) b₂ {α = α} m = 
+        let proof₂ = pmLawFunctor2 pm₂ (inj₂ M₂) b₂
             M = inj₂ (inj₂ M₂)
             eqM = eqTC₂ (inj₂ M₂)
-            proof : ∀ {α : Type} → (m : ⟨ M ⟩ α) → bind {M} {Id} {M} b₂ m (id lawId) ≡ m
-            proof {α} m = begin
+        in begin
               bind {M} {Id} {M} b₂ m (id lawId) 
                 ≡⟨ cong (λ x → bind {M} {Id} {M} b₂ m x) (eqIdSubst eqId₂) ⟩
               bind {M} {Id} {M} b₂ m (subst (λ N → (α → N α)) eqId₂ (id lawId₂)) 
@@ -234,7 +235,6 @@ polymonadCompose {TyCons₁} {TyCons₂} {pm₁} {pm₂} cpm₁ cpm₂ = record
               subst (λ P → P α) eqM (subst (λ M → M α) eqM m)
                 ≡⟨ refl ⟩
               m ∎
-        in b₂ , proof
 
       lawMorph1 : ∀ (M P : TyCons) 
                 → (B[ M , Id ]▷ P → B[ Id , M ]▷ P)
