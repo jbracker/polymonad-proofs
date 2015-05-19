@@ -34,8 +34,11 @@ record Polymonad {l : Level} (TyCons : Set l) (Id : TyCons) : Set (lsuc l) where
     lawId : ⟨ Id ⟩ ≡ Identity
     
     -- Functor law from the definition:
-    lawFunctor : ∀ (M : TyCons) → ∃ λ(b : B[ M , Id ]▷ M) 
-               → ∀ {α : Type} (m : ⟨ M ⟩ α) → (bind b) m (id lawId) ≡ m
+    -- There exists a functor bind operation for each type constructor
+    lawFunctor1 : ∀ (M : TyCons) → B[ M , Id ]▷ M 
+    -- Every bind operation in shape of a functor needs to be an identity
+    lawFunctor2 : ∀ (M : TyCons) → ∀ (b : B[ M , Id ]▷ M)
+                → ∀ {α : Type} (m : ⟨ M ⟩ α) → (bind b) m (id lawId) ≡ m
     
     -- Paired morphism law from the definition:
     -- ∃ b₁:(M,Id)▷N ∈ Σ ⇔ ∃ b₂:(Id,M)▷N ∈ Σ
@@ -112,10 +115,10 @@ pmBind = Polymonad.bind
 pmLawId = Polymonad.lawId
 
 -- Access to the functor law.
-pmLawFunctor = Polymonad.lawFunctor
+pmLawFunctor1 = Polymonad.lawFunctor1
+pmLawFunctor2 = Polymonad.lawFunctor2
 
-pmGetFunctor : ∀ {TyCons : Set} {Id : TyCons} → (pm : Polymonad TyCons Id) → (M : TyCons) → B[ M , Id ] pm ▷ M
-pmGetFunctor pm M = let b , p = pmLawFunctor pm M in b
+pmGetFunctor = pmLawFunctor1
 
 pmLawMorph1 = Polymonad.lawMorph1
 pmLawMorph2 = Polymonad.lawMorph2
@@ -136,5 +139,5 @@ pmLawClosure = Polymonad.lawClosure
 pmIdBind∃ : {TyCons : Set} {Id : TyCons}
           → (pm : Polymonad TyCons Id)
           → B[ Id , Id ] pm ▷ Id
-pmIdBind∃ {Id = Id} pm = proj₁ (pmLawFunctor pm Id)
+pmIdBind∃ {Id = Id} pm = pmLawFunctor1 pm Id
 

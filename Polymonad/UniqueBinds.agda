@@ -50,10 +50,10 @@ uniqueBind {TyCons = TyCons} {Id = Id} pm M N P b₁ b₂ = funExt₂ proof
         (bind pm b₂') m (λ x → (bind pm b₂) (f x) g) ∎
     
     mkFunctor : (N : TyCons) → B[ N , Id ] pm ▷ N
-    mkFunctor N = proj₁ (lawFunctor pm N)
+    mkFunctor N = lawFunctor1 pm N
     
     functionAsFunctor : {α β : Type} → (N : TyCons) → (f : α → ⟨ pm ▷ N ⟩ β) → f ≡ (λ y → (bind pm (mkFunctor N)) (f y) (id lawId'))
-    functionAsFunctor N f = let b , q = lawFunctor pm N in funExt (λ x → sym (q (f x)))
+    functionAsFunctor N f = let q = lawFunctor2 pm N (lawFunctor1 pm N) in funExt (λ x → sym (q (f x)))
     
     proof : ∀ {α β} 
           → (x : ⟨ pm ▷ M ⟩ α) → (f : α → ⟨ pm ▷ N ⟩ β)
