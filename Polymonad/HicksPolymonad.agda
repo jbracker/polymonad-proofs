@@ -87,3 +87,11 @@ record HicksPolymonad {l : Level} (TyCons : Set l) (Id : TyCons) : Set (lsuc l) 
   pmId : TyCons
   pmId = Id
 
+-- Interpretation of a type constructor for a specific polymonad.
+H⟨_▷_⟩ : ∀ {l} {TyCons : Set l} {Id : TyCons} → HicksPolymonad TyCons Id → TyCons → TyCon
+H⟨ pm ▷ tyCon ⟩ = (HicksPolymonad.⟨_⟩ pm) tyCon
+
+-- Bind identifier set for a combination of type constructors in a specific polymonad
+HB[_,_]_▷_ : ∀ {TyCons} {Id : TyCons} 
+          → (M N : TyCons) → HicksPolymonad TyCons Id → (P : TyCons) → Set
+HB[ M , N ] pm ▷ P = HicksPolymonad.B[_,_]▷_ pm M N P
