@@ -186,7 +186,7 @@ polymonadMaybeList {M₁ = M₁} {M₂ = M₂} monad₁ monad₂ functorMorph ap
 
     lawId : ⟨ Id ⟩ ≡ Identity
     lawId = refl
- {- DONE
+ 
     lawFunctor1 : ∀ (M : TyCons) → B[ M , Id ]▷ M
     lawFunctor1 (inj₁ IdentTC) = IdentB
     lawFunctor1 (inj₂ (inj₁ MonadTC)) = FunctorB
@@ -234,9 +234,9 @@ polymonadMaybeList {M₁ = M₁} {M₂ = M₂} monad₁ monad₂ functorMorph ap
     lawMorph3 (inj₂ (inj₂ MonadTC)) (inj₁ IdentTC) () b₂ v f
     lawMorph3 (inj₂ (inj₂ MonadTC)) (inj₂ (inj₁ MonadTC)) () b₂ v f
     lawMorph3 (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) FunctorB ApplyB v f = pmLawMorph3 pm₂ (inj₂ MonadTC) (inj₂ MonadTC) FunctorB ApplyB v f
-DONE -}
 
-{-
+
+
     lawDiamond1 : ∀ (M N R T : TyCons)
                 → (∃ λ(P : TyCons) → B[ M , N ]▷ P × B[ P , R ]▷ T)
                 → (∃ λ(S : TyCons) → B[ N , R ]▷ S × B[ M , S ]▷ T)
@@ -426,7 +426,7 @@ DONE -}
     lawDiamond2 (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC) , FunctorB , MonadB) = inj₂ (inj₂ MonadTC) , MonadB , FunctorB
     lawDiamond2 (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC) , () , MonadB)
     lawDiamond2 (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC) , MonadB , MonadB) = inj₂ (inj₂ MonadTC) , MonadB , MonadB
--}
+
 {-
     lawIdRF : ∀ {M : TyCon} 
             → (monad : Monad M) 
@@ -613,11 +613,15 @@ DONE -}
     lawClosure (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₁ MonadTC)) S T (inj₂ U) (() , b₂ , b₃ , b₄)
     lawClosure M N (inj₂ (inj₂ MonadTC)) S T (inj₁ IdentTC) (b₁ , b₂ , b₃ , ())
     lawClosure M (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) S (inj₁ IdentTC) (inj₂ (inj₁ MonadTC)) (b₁ , b₂ , IdentB , ())
-    lawClosure (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) S (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (ReturnB , b₂ , IdentB , FunctorB) = {!!}
+    lawClosure (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (ReturnB , IdentB , IdentB , FunctorB) = ReturnB
+    lawClosure (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (ReturnB , () , IdentB , FunctorB)
+    lawClosure (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (ReturnB , () , IdentB , FunctorB)
     lawClosure (inj₂ (inj₁ MonadTC)) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (FunctorMorphB , ReturnB , IdentB , FunctorB) = ReturnB
     lawClosure (inj₂ (inj₁ MonadTC)) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (FunctorMorphB , FunctorB , IdentB , FunctorB) = FunctorMorphB
     lawClosure (inj₂ (inj₁ MonadTC)) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (FunctorMorphB , () , IdentB , FunctorB)
-    lawClosure (inj₂ (inj₂ MonadTC)) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) S (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (FunctorB , b₂ , IdentB , FunctorB) = {!!}
+    lawClosure (inj₂ (inj₂ MonadTC)) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (FunctorB , ReturnB , IdentB , FunctorB) = ReturnB
+    lawClosure (inj₂ (inj₂ MonadTC)) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (FunctorB , FunctorMorphB , IdentB , FunctorB) = FunctorMorphB
+    lawClosure (inj₂ (inj₂ MonadTC)) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (FunctorB , FunctorB , IdentB , FunctorB) = FunctorB
     lawClosure M (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) S (inj₂ (inj₁ MonadTC)) (inj₂ U) (b₁ , b₂ , () , b₄)
     lawClosure M (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) S (inj₂ (inj₂ MonadTC)) (inj₂ U) (b₁ , b₂ , () , b₄)
     lawClosure (inj₁ IdentTC) (inj₂ N) (inj₂ (inj₂ MonadTC)) (inj₁ IdentTC) T (inj₂ (inj₁ MonadTC)) (b₁ , IdentB , b₃ , ())
@@ -633,11 +637,15 @@ DONE -}
     lawClosure (inj₂ (inj₁ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (Morph112B , ReturnB , ReturnB , FunctorB) = ReturnB
     lawClosure (inj₂ (inj₁ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₁ IdentTC) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) (Morph112B , ReturnB , FunctorB , FunctorB) = MorphApplyB
     lawClosure (inj₂ (inj₁ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (Morph112B , ReturnB , () , FunctorB)
-    lawClosure (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₁ IdentTC) T (inj₂ (inj₂ MonadTC)) (Morph122B , ReturnB , b₃ , FunctorB) = {!!}
-    lawClosure (inj₂ (inj₁ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (Morph112B , FunctorB , ReturnB , FunctorB) = {!!}
+    lawClosure (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (Morph122B , ReturnB , ReturnB , FunctorB) = ReturnB
+    lawClosure (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₁ IdentTC) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) (Morph122B , ReturnB , FunctorMorphB , FunctorB) = MorphApplyB
+    lawClosure (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (Morph122B , ReturnB , FunctorB , FunctorB) = ApplyB
+    lawClosure (inj₂ (inj₁ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (Morph112B , FunctorB , ReturnB , FunctorB) = MorphFunctorB
     lawClosure (inj₂ (inj₁ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) (Morph112B , FunctorB , FunctorB , FunctorB) = Morph112B
     lawClosure (inj₂ (inj₁ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (Morph112B , FunctorB , () , FunctorB)
-    lawClosure (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₁ MonadTC)) T (inj₂ (inj₂ MonadTC)) (Morph122B , FunctorB , b₃ , FunctorB) = {!!}
+    lawClosure (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (Morph122B , FunctorB , ReturnB , FunctorB) = MorphFunctorB
+    lawClosure (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) (Morph122B , FunctorB , FunctorMorphB , FunctorB) = Morph112B
+    lawClosure (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (Morph122B , FunctorB , FunctorB , FunctorB) = Morph122B
     lawClosure (inj₂ (inj₁ MonadTC)) (inj₂ N) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) T (inj₂ (inj₂ MonadTC)) (b₁ , () , b₃ , FunctorB)
     lawClosure (inj₂ (inj₂ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) S T (inj₂ (inj₂ MonadTC)) (() , b₂ , b₃ , FunctorB)
     lawClosure (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (MonadB , ReturnB , ReturnB , FunctorB) = ReturnB
@@ -645,7 +653,7 @@ DONE -}
     lawClosure (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (MonadB , FunctorB , ReturnB , FunctorB) = FunctorB
     lawClosure (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₁ IdentTC) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) (MonadB , ReturnB , MorphFunctorB , FunctorB) = MorphApplyB
     lawClosure (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) (MonadB , MorphFunctorB , MorphFunctorB , FunctorB) = Morph112B
-    lawClosure (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) (MonadB , FunctorB , MorphFunctorB , FunctorB) = {!!}
+    lawClosure (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ x)) (MonadB , FunctorB , MorphFunctorB , b₄) = {!!}
     lawClosure (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (MonadB , ReturnB , FunctorB , FunctorB) = ApplyB
     lawClosure (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (MonadB , MorphFunctorB , FunctorB , FunctorB) = Morph122B
     lawClosure (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (MonadB , FunctorB , FunctorB , FunctorB) = MonadB
