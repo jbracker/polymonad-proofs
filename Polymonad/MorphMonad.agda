@@ -165,6 +165,21 @@ polymonadMorphMonad {M₁ = M₁} {M₂ = M₂} monad₁ monad₂ bindMorph2I1 b
     -- bindMorph1I2 retB m112B m f = m112B m (λ a → retB (f a) (id refl))
 
     -- bindMorphI21 m2I1B m f = m2I1B (f m) (id refl)
+    -- bindApply m ma f = mBind m (mReturn m ma) f
+
+    -- lawIdR = return a >>= k ≡ k a
+
+    -- morphReturnIdLaw = (∀ {α : Type} → (x : M₁ α) → bindMorph112 x (mReturn monad₁) ≡ bindMorph112 ((mReturn monad₁) x) (id refl))
+    
+    lawIdR2I1 : ∀ {α : Type} → (m : α) → bindMorph2I1 (mReturn monad₂ m) (id refl) ≡ (mReturn monad₁ m)
+    lawIdR2I1 = {!!}
+    
+    lawIdR112 : ∀ {α β} → (a : α) → (k : α → M₁ β) → bindMorph112 (mReturn monad₁ a) k ≡ bindMorph112 (k a) (mReturn monad₁)
+    lawIdR112 = {!!}
+
+    lawIdL112 : ∀ {α β} → (a : α) → bindMorph112 (mReturn monad₁ a) (mReturn monad₁) ≡ mReturn monad₂ a
+    lawIdL112 = {!!}
+
 
     lawAssocMorph : ∀ (M N P R T S : MonadMorphTyCons) 
                     (b₁ : Morph[ M , N ]▷ P) (b₂ : Morph[ P , R ]▷ T) 
@@ -176,36 +191,91 @@ polymonadMorphMonad {M₁ = M₁} {M₂ = M₂} monad₁ monad₂ bindMorph2I1 b
     lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) IdentB IdentB ReturnB () m f g
     lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ MonadTC)) (inj₁ IdentTC) IdentB ReturnB IdentB ReturnB m f g = refl
     lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (inj₁ IdentTC) IdentB ReturnB IdentB ReturnB m f g = refl
-    lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₁ MonadTC)) IdentB ReturnB ReturnB ApplyB m f g = {!!}
-    lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) IdentB ReturnB ReturnB MorphI21B m f g = {!!}
-    lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₁ MonadTC)) IdentB ReturnB ReturnB MorphI12B m f g = {!!}
-    lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) IdentB ReturnB ReturnB ApplyB m f g = {!!}
+    lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₁ MonadTC)) IdentB ReturnB ReturnB ApplyB m f g =
+      sym (lawIdR monad₁ m (λ x → mReturn monad₁ (g (f x))))
+    lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) IdentB ReturnB ReturnB MorphI21B m f g = begin
+      bindReturn monad₁ (bindId m f) g
+        ≡⟨ refl ⟩
+      mReturn monad₁ (g (f m)) 
+        ≡⟨ sym (lawIdR2I1 (g (f m))) ⟩
+      bindMorph2I1 (mReturn monad₂ (g (f m))) (id refl)
+        ≡⟨ refl ⟩
+      bindMorphI21 bindMorph2I1 m (λ x → bindReturn monad₂ (f x) g) ∎
+    lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₁ MonadTC)) IdentB ReturnB ReturnB MorphI12B m f g = begin
+      bindReturn monad₂ (bindId m f) g
+        ≡⟨ refl ⟩
+      mReturn monad₂ (g (f m))
+        ≡⟨ sym {!lawIdL112 (g (f m))!} ⟩
+      bindMorph112 (mReturn monad₁ (g (f m))) (mReturn monad₁)
+        ≡⟨ morphReturnIdLaw (mReturn monad₁ (g (f m))) ⟩ 
+      -- -- morphReturnIdLaw = (∀ {α : Type} → (x : M₁ α) → bindMorph112 x (mReturn monad₁) ≡ bindMorph112 ((mReturn monad₁) x) (id refl))
+      bindMorph112 (mReturn monad₁ (mReturn monad₁ (g (f m)))) (id refl)
+        ≡⟨ refl ⟩
+      bindMorphI12 (bindReturn monad₁) bindMorph112 m (λ x → bindReturn monad₁ (f x) g) ∎
+    lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) IdentB ReturnB ReturnB ApplyB m f g = 
+      sym (lawIdR monad₂ m (λ x → mReturn monad₂ (g (f x))))
     lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ MonadTC)) (inj₁ IdentTC) S IdentB () b3 b4 m f g
     lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (inj₁ IdentTC) S IdentB () b3 b4 m f g
     lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ MonadTC)) (inj₂ T) (inj₁ IdentTC) IdentB b2 () b4 m f g
     lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (inj₂ T) (inj₁ IdentTC) IdentB b2 () b4 m f g
-    lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₁ MonadTC)) IdentB ApplyB ApplyB ApplyB m f g = {!!}
+    lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₁ MonadTC)) IdentB ApplyB ApplyB ApplyB m f g =
+      sym (lawIdR monad₁ m ((λ x → mBind monad₁ (mReturn monad₁ (f x)) g)))
     lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) IdentB ApplyB MorphI12B MorphI21B m f g = {!!}
     lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₁ MonadTC)) IdentB MorphI12B ApplyB MorphI12B m f g = {!!}
     lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) IdentB MorphI12B MorphI12B ApplyB m f g = {!!}
     lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₁ MonadTC)) IdentB MorphI21B MorphI21B ApplyB m f g = {!!}
     lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) IdentB MorphI21B ApplyB MorphI21B m f g = {!!}
     lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₁ MonadTC)) IdentB ApplyB MorphI21B MorphI12B m f g = {!!}
-    lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) IdentB ApplyB ApplyB ApplyB m f g = {!!}
+    lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) IdentB ApplyB ApplyB ApplyB m f g = 
+      sym (lawIdR monad₂ m (λ x → mBind monad₂ (mReturn monad₂ (f x)) g))
     lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ MonadTC)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) b1 () IdentB b4 m f g
     lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) b1 () IdentB b4 m f g
-    lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ MonadTC)) (inj₁ IdentTC) (inj₂ T) (inj₁ IdentTC) b1 b2 IdentB b4 m f g = {!!}
-    lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (inj₁ IdentTC) (inj₂ T) (inj₁ IdentTC) b1 b2 IdentB b4 m f g = {!!}
+    lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ MonadTC)) (inj₁ IdentTC) (inj₂ (inj₁ MonadTC)) (inj₁ IdentTC) ReturnB FunctorB IdentB ReturnB m f g = begin
+      bindFunctor monad₁ (bindReturn monad₁ m f) g
+        ≡⟨ refl ⟩
+      mBind monad₁ (mReturn monad₁ (f m)) (λ x → mReturn monad₁ (g x)) 
+        ≡⟨ lawIdR monad₁ (f m) (λ x → mReturn monad₁ (g x)) ⟩
+      mReturn monad₁ (g (f m))
+        ≡⟨ refl ⟩
+      bindReturn monad₁ m (λ x → bindId (f x) g) ∎
+    lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ MonadTC)) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (inj₁ IdentTC) ReturnB Morph1I2B IdentB ReturnB m f g = {!!}
+    lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (inj₁ IdentTC) (inj₂ (inj₁ MonadTC)) (inj₁ IdentTC) ReturnB Morph2I1B IdentB ReturnB m f g = {!!}
+    lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (inj₁ IdentTC) ReturnB FunctorB IdentB ReturnB m f g = 
+      lawIdR monad₂ (f m) (λ x → mReturn monad₂ (g x))
     lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ P) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ MonadTC)) b1 b2 b3 () m f g
     lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ P) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) b1 b2 b3 () m f g
-    lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ P) (inj₁ IdentTC) (inj₂ T) (inj₂ (inj₁ MonadTC)) b1 b2 b3 b4 m f g = {!!}
-    lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ P) (inj₁ IdentTC) (inj₂ T) (inj₂ (inj₂ MonadTC)) b1 b2 b3 b4 m f g = {!!}
+    lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ MonadTC)) (inj₁ IdentTC) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₁ MonadTC)) ReturnB FunctorB ReturnB ApplyB m f g = 
+      trans (lawIdR monad₁ (f m) (λ x → mReturn monad₁ (g x))) (sym (lawIdR monad₁ m (λ x → mReturn monad₁ (g (f x)))))
+    lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ MonadTC)) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₁ MonadTC)) ReturnB Morph1I2B ReturnB MorphI12B m f g = {!!}
+    lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (inj₁ IdentTC) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₁ MonadTC)) ReturnB Morph2I1B ReturnB ApplyB m f g = {!!}
+    lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₁ MonadTC)) ReturnB FunctorB ReturnB MorphI12B m f g = {!!}
+    lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ MonadTC)) (inj₁ IdentTC) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) ReturnB FunctorB ReturnB MorphI21B m f g = {!!}
+    lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ MonadTC)) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) ReturnB Morph1I2B ReturnB ApplyB m f g = {!!}
+    lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (inj₁ IdentTC) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) ReturnB Morph2I1B ReturnB MorphI21B m f g = {!!}
+    lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) ReturnB FunctorB ReturnB ApplyB m f g =
+      trans (lawIdR monad₂ (f m) (λ x → mReturn monad₂ (g x))) (sym (lawIdR monad₂ m (λ x → mReturn monad₂ (g (f x)))))
     lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ P) (inj₂ (inj₁ MonadTC)) T (inj₁ IdentTC) b1 b2 () b4 m f g
     lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ P) (inj₂ (inj₂ MonadTC)) T (inj₁ IdentTC) b1 b2 () b4 m f g
     lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ P) (inj₂ R) (inj₁ IdentTC) (inj₂ (inj₁ MonadTC)) b1 b2 b3 () m f g
     lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ P) (inj₂ R) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) b1 b2 b3 () m f g
-    lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ P) (inj₂ R) (inj₂ T) (inj₂ (inj₁ MonadTC)) b1 b2 b3 b4 m f g = {!!}
-    lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ P) (inj₂ R) (inj₂ T) (inj₂ (inj₂ MonadTC)) b1 b2 b3 b4 m f g = {!!}
+    lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₁ MonadTC)) ReturnB MonadB ApplyB ApplyB m f g = 
+      sym (lawIdR monad₁ m (λ x → mBind monad₁ (mReturn monad₁ (f x)) g))
+    lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₁ MonadTC)) ReturnB Morph112B ApplyB MorphI12B m f g = {!!}
+    lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₁ MonadTC)) ReturnB Morph121B MorphI21B ApplyB m f g = {!!}
+    lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₁ MonadTC)) ReturnB Morph122B MorphI21B MorphI12B m f g = {!!}
+    lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₁ MonadTC)) ReturnB Morph211B ApplyB ApplyB m f g = {!!}
+    lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₁ MonadTC)) ReturnB Morph212B ApplyB MorphI12B m f g = {!!}
+    lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₁ MonadTC)) ReturnB Morph221B MorphI21B ApplyB m f g = {!!}
+    lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₁ MonadTC)) ReturnB MonadB MorphI21B MorphI12B m f g = {!!}
+    lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) ReturnB MonadB MorphI12B MorphI21B m f g = {!!}
+    lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) ReturnB Morph112B MorphI12B ApplyB m f g = {!!}
+    lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) ReturnB Morph121B ApplyB MorphI21B m f g = {!!}
+    lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) ReturnB Morph122B ApplyB ApplyB m f g = {!!}
+    lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) ReturnB Morph211B MorphI12B MorphI21B m f g = {!!}
+    lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) ReturnB Morph212B MorphI12B ApplyB m f g = {!!}
+    lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) ReturnB Morph221B ApplyB MorphI21B m f g = {!!}
+    lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) ReturnB MonadB ApplyB ApplyB m f g = 
+      sym (lawIdR monad₂ m (λ x → mBind monad₂ (mReturn monad₂ (f x)) g))
     lawAssocMorph (inj₁ IdentTC) (inj₂ (inj₁ MonadTC)) (inj₁ IdentTC) R T S () b2 b3 b4 m f g
     lawAssocMorph (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (inj₁ IdentTC) R T S () b2 b3 b4 m f g
     lawAssocMorph (inj₁ IdentTC) (inj₂ (inj₁ MonadTC)) (inj₂ P) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) b1 b2 () IdentB m f g
