@@ -171,14 +171,17 @@ polymonadMorphMonad {M₁ = M₁} {M₂ = M₂} monad₁ monad₂ bindMorph2I1 b
 
     -- morphReturnIdLaw = (∀ {α : Type} → (x : M₁ α) → bindMorph112 x (mReturn monad₁) ≡ bindMorph112 ((mReturn monad₁) x) (id refl))
     
-    lawIdR2I1 : ∀ {α : Type} → (m : α) → bindMorph2I1 (mReturn monad₂ m) (id refl) ≡ (mReturn monad₁ m)
+    
+    lawReturnSym112 : ∀ {α β} → (a : α) → (k : α → M₁ β) → bindMorph112 (mReturn monad₁ a) k ≡ bindMorph112 (k a) (mReturn monad₁)
+    lawReturnSym112 = {!!}
+
+    lawIdR2I1 : ∀ {α β} → (m : α) → (f : α → β) → bindMorph2I1 (mReturn monad₂ m) f ≡ (mReturn monad₁ (f m))
     lawIdR2I1 = {!!}
     
-    lawIdR112 : ∀ {α β} → (a : α) → (k : α → M₁ β) → bindMorph112 (mReturn monad₁ a) k ≡ bindMorph112 (k a) (mReturn monad₁)
+    lawIdR112 : ∀ {α β} → (a : α) → (f : α → β) → bindMorph112 (mReturn monad₁ a) (λ x → mReturn monad₁ (f x)) ≡ mReturn monad₂ (f a)
     lawIdR112 = {!!}
 
-    lawIdL112 : ∀ {α β} → (a : α) → bindMorph112 (mReturn monad₁ a) (mReturn monad₁) ≡ mReturn monad₂ a
-    lawIdL112 = {!!}
+     -- TODO: monadMorph112 x (mReturn monad₁) ≡ x
 
 
     lawAssocMorph : ∀ (M N P R T S : MonadMorphTyCons) 
@@ -197,7 +200,7 @@ polymonadMorphMonad {M₁ = M₁} {M₂ = M₂} monad₁ monad₂ bindMorph2I1 b
       bindReturn monad₁ (bindId m f) g
         ≡⟨ refl ⟩
       mReturn monad₁ (g (f m)) 
-        ≡⟨ sym (lawIdR2I1 (g (f m))) ⟩
+        ≡⟨ sym (lawIdR2I1 (g (f m)) (id refl)) ⟩
       bindMorph2I1 (mReturn monad₂ (g (f m))) (id refl)
         ≡⟨ refl ⟩
       bindMorphI21 bindMorph2I1 m (λ x → bindReturn monad₂ (f x) g) ∎
@@ -205,10 +208,9 @@ polymonadMorphMonad {M₁ = M₁} {M₂ = M₂} monad₁ monad₂ bindMorph2I1 b
       bindReturn monad₂ (bindId m f) g
         ≡⟨ refl ⟩
       mReturn monad₂ (g (f m))
-        ≡⟨ sym {!lawIdL112 (g (f m))!} ⟩
+        ≡⟨ sym (lawIdR112 (g (f m)) (id refl)) ⟩
       bindMorph112 (mReturn monad₁ (g (f m))) (mReturn monad₁)
         ≡⟨ morphReturnIdLaw (mReturn monad₁ (g (f m))) ⟩ 
-      -- -- morphReturnIdLaw = (∀ {α : Type} → (x : M₁ α) → bindMorph112 x (mReturn monad₁) ≡ bindMorph112 ((mReturn monad₁) x) (id refl))
       bindMorph112 (mReturn monad₁ (mReturn monad₁ (g (f m)))) (id refl)
         ≡⟨ refl ⟩
       bindMorphI12 (bindReturn monad₁) bindMorph112 m (λ x → bindReturn monad₁ (f x) g) ∎
@@ -220,7 +222,19 @@ polymonadMorphMonad {M₁ = M₁} {M₂ = M₂} monad₁ monad₂ bindMorph2I1 b
     lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (inj₂ T) (inj₁ IdentTC) IdentB b2 () b4 m f g
     lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₁ MonadTC)) IdentB ApplyB ApplyB ApplyB m f g =
       sym (lawIdR monad₁ m ((λ x → mBind monad₁ (mReturn monad₁ (f x)) g)))
-    lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) IdentB ApplyB MorphI12B MorphI21B m f g = {!!}
+    lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) IdentB ApplyB MorphI12B MorphI21B m f g = begin
+      bindApply monad₁ (bindId m f) g
+        ≡⟨ refl ⟩
+      mBind monad₁ (mReturn monad₁ (f m)) g
+        ≡⟨ lawIdR monad₁ (f m) g ⟩
+      g (f m)
+        ≡⟨ {!!} ⟩
+-- morphReturnIdLaw = (∀ {α : Type} → (x : M₁ α) → bindMorph112 x (mReturn monad₁) ≡ bindMorph112 ((mReturn monad₁) x) (id refl))
+      bindMorph2I1 (bindMorph112 (g (f m)) (mReturn monad₁)) (id refl)
+        ≡⟨ cong (λ X → bindMorph2I1 X (id refl)) (morphReturnIdLaw (g (f m))) ⟩
+      bindMorph2I1 (bindMorph112 (mReturn monad₁ (g (f m))) (id refl)) (id refl)
+        ≡⟨ refl ⟩
+      bindMorphI21 bindMorph2I1 m (λ x → bindMorphI12 (bindReturn monad₁) bindMorph112 (f x) g) ∎
     lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₁ MonadTC)) IdentB MorphI12B ApplyB MorphI12B m f g = {!!}
     lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) IdentB MorphI12B MorphI12B ApplyB m f g = {!!}
     lawAssocMorph (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₁ MonadTC)) IdentB MorphI21B MorphI21B ApplyB m f g = {!!}
