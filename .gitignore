@@ -1,0 +1,17 @@
+
+# Backup files
+*.bak
+~*
+*~
+*.backup
+
+# Temporary files
+*.o
+*.tmp
+*.log
+*.kate-swp
+
+# Build products
+*.ibc
+*.hi
+*.agdai
