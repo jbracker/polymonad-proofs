@@ -96,9 +96,6 @@ record Polymonad {l : Level} (TyCons : Set l) (Id : TyCons) : Set (lsuc l) where
 -- Access to Id TyCon of a polymonad
 pmId = Polymonad.pmId
 
--- Access to id function of a polymonad
---pmId→ = Polymonad.id
-
 -- Interpretation of a type constructor for a specific polymonad.
 ⟨_▷_⟩ : ∀ {l} {TyCons : Set l} {Id : TyCons} → Polymonad TyCons Id → TyCons → TyCon
 ⟨ pm ▷ tyCon ⟩ = (Polymonad.⟨_⟩ pm) tyCon
