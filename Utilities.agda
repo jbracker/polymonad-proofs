@@ -14,12 +14,20 @@ open ≡-Reasoning
 -- Utilities
 --------------------------------------------------------------------------------
 
+-- Disprove a proposition by providing a counterexample.
+counterexample : ∀ {k l} {A : Set k} {P : A → Set l}
+           → (((a : A) → P a) → ∃ λ(a : A) → ¬ (P a)) 
+           → ¬ ((a : A) → P a)
+counterexample ce P = let a , ¬Pa = ce P in ¬Pa (P a)
+
+-- Congruence with three arguments.
 cong₃ : ∀ {a b c d} {A : Set a} {B : Set b} {C : Set c}
         (f : A → B → C → Set d) {x y u v r s} 
       → x ≡ y → u ≡ v → r ≡ s 
       → f x u r ≡ f y v s
 cong₃ f refl refl refl = refl
 
+-- Substitution with three arguments.
 subst₃ : ∀ {a b c d} {A : Set a} {B : Set b} {C : Set c} 
          (P : A → B → C → Set d) {x₁ x₂ y₁ y₂ z₁ z₂} 
        → x₁ ≡ x₂ → y₁ ≡ y₂ → z₁ ≡ z₂ → P x₁ y₁ z₁ → P x₂ y₂ z₂
