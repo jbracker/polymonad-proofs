@@ -4,6 +4,7 @@
 ~*
 *~
 *.backup
+\#*#
 
 # Temporary files
 *.o
