@@ -190,6 +190,17 @@ principalPolymonadCompose {TyCons₁} {TyCons₂} {pm₁} {pm₂} cpm₁ cpm₂ 
            × (∀ (M M' : IdTyCons ⊎ TyCons₁) → (M , M') ∈ F → B[ M , M' ] pm₁ ▷ M̂)
     -}
 
+    morph₂¬∃ : (F : SubsetOf (TyCons × TyCons))
+            → (M₁ : TyCons₁) → (N₂ : TyCons₂) → (N : TyCons)
+            → ((inj₂ (inj₁ M₁) , N) ∈ F ⊎ (N , inj₂ (inj₁ M₁)) ∈ F) 
+            → ¬ ((M M' : TyCons) → (M , M') ∈ F → B[ M , M' ] pm ▷ inj₂ (inj₂ N₂))
+    morph₂¬∃ F M₁ N₂ (inj₁ IdentTC) (inj₁ MN∈F) morph = morph (inj₂ (inj₁ M₁)) idTC MN∈F
+    morph₂¬∃ F M₁ N₂ (inj₁ IdentTC) (inj₂ NM∈F) morph = morph idTC (inj₂ (inj₁ M₁)) NM∈F
+    morph₂¬∃ F M₁ N₂ (inj₂ (inj₁ N)) (inj₁ MN∈F) morph = morph (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N)) MN∈F
+    morph₂¬∃ F M₁ N₂ (inj₂ (inj₁ N)) (inj₂ NM∈F) morph = morph (inj₂ (inj₁ N)) (inj₂ (inj₁ M₁)) NM∈F
+    morph₂¬∃ F M₁ N₂ (inj₂ (inj₂ N)) (inj₁ MN∈F) morph = morph (inj₂ (inj₁ M₁)) (inj₂ (inj₂ N)) MN∈F
+    morph₂¬∃ F M₁ N₂ (inj₂ (inj₂ N)) (inj₂ NM∈F) morph = morph (inj₂ (inj₂ N)) (inj₂ (inj₁ M₁)) NM∈F
+
     princ : PrincipalPM (polymonadCompose cpm₁ cpm₂)
     princ F (inj₁ IdentTC  ) (inj₁ IdentTC  ) morph₁ morph₂ = inj₁ IdentTC , mkBindId , mkBindId , morph₂
     princ F (inj₁ IdentTC  ) (inj₂ (inj₁ N₁)) morph₁ morph₂ = princRes₁→princRes F (idTC   ) (inj₂ N₁) (princ₁ (F→F₁ F) (idTC   ) (inj₂ N₁) (morph→morph₁ F morph₁) (morph→morph₁ F morph₂))
@@ -197,26 +208,8 @@ principalPolymonadCompose {TyCons₁} {TyCons₂} {pm₁} {pm₂} cpm₁ cpm₂ 
     princ F (inj₂ (inj₁ M₁)) (inj₁ IdentTC  ) morph₁ morph₂ = princRes₁→princRes F (inj₂ M₁) (idTC   ) (princ₁ (F→F₁ F) (inj₂ M₁) (idTC   ) (morph→morph₁ F morph₁) (morph→morph₁ F morph₂))
     princ F (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) morph₁ morph₂ = princRes₁→princRes F (inj₂ M₁) (inj₂ N₁) (princ₁ (F→F₁ F) (inj₂ M₁) (inj₂ N₁) (morph→morph₁ F morph₁) (morph→morph₁ F morph₂))
     princ F (inj₂ (inj₁ M₁)) (inj₂ (inj₂ N₂)) morph₁ morph₂ with (inj₂ (inj₁ M₁) , inj₂ (inj₂ N₂)) ∈? F
-    princ F (inj₂ (inj₁ M₁)) (inj₂ (inj₂ N₂)) morph₁ morph₂ | yes pMN with morph₁ (inj₂ (inj₁ M₁)) (inj₂ (inj₂ N₂)) pMN
-    princ F (inj₂ (inj₁ M₁)) (inj₂ (inj₂ N₂)) morph₁ morph₂ | yes pMN | ()
-    princ F (inj₂ (inj₁ M₁)) (inj₂ (inj₂ N₂)) morph₁ morph₂ | no ¬pMN with (inj₂ (inj₂ N₂) , inj₂ (inj₁ M₁)) ∈? F
-    princ F (inj₂ (inj₁ M₁)) (inj₂ (inj₂ N₂)) morph₁ morph₂ | no ¬pMN | yes pNM with morph₁ (inj₂ (inj₂ N₂)) (inj₂ (inj₁ M₁)) pNM
-    princ F (inj₂ (inj₁ M₁)) (inj₂ (inj₂ N₂)) morph₁ morph₂ | no ¬pMN | yes pNM | ()
-    princ F (inj₂ (inj₁ M₁)) (inj₂ (inj₂ N₂)) morph₁ morph₂ | no ¬pMN | no ¬pNM with (inj₂ (inj₁ M₁) , idTC) ∈? F 
-    princ F (inj₂ (inj₁ M₁)) (inj₂ (inj₂ N₂)) morph₁ morph₂ | no ¬pMN | no ¬pNM | yes pMI with morph₂ (inj₂ (inj₁ M₁)) idTC pMI
-    princ F (inj₂ (inj₁ M₁)) (inj₂ (inj₂ N₂)) morph₁ morph₂ | no ¬pMN | no ¬pNM | yes pMI | ()
-    princ F (inj₂ (inj₁ M₁)) (inj₂ (inj₂ N₂)) morph₁ morph₂ | no ¬pMN | no ¬pNM | no ¬pMI with (idTC , inj₂ (inj₁ M₁)) ∈? F
-    princ F (inj₂ (inj₁ M₁)) (inj₂ (inj₂ N₂)) morph₁ morph₂ | no ¬pMN | no ¬pNM | no ¬pMI | yes pIM with morph₂ idTC (inj₂ (inj₁ M₁)) pIM
-    princ F (inj₂ (inj₁ M₁)) (inj₂ (inj₂ N₂)) morph₁ morph₂ | no ¬pMN | no ¬pNM | no ¬pMI | yes pIM | ()
-    princ F (inj₂ (inj₁ M₁)) (inj₂ (inj₂ N₂)) morph₁ morph₂ | no ¬pMN | no ¬pNM | no ¬pMI | no ¬pIM with (inj₂ (inj₂ N₂) , idTC) ∈? F 
-    princ F (inj₂ (inj₁ M₁)) (inj₂ (inj₂ N₂)) morph₁ morph₂ | no ¬pMN | no ¬pNM | no ¬pMI | no ¬pIM | yes pNI with morph₁ (inj₂ (inj₂ N₂)) idTC pNI
-    princ F (inj₂ (inj₁ M₁)) (inj₂ (inj₂ N₂)) morph₁ morph₂ | no ¬pMN | no ¬pNM | no ¬pMI | no ¬pIM | yes pNI | ()
-    princ F (inj₂ (inj₁ M₁)) (inj₂ (inj₂ N₂)) morph₁ morph₂ | no ¬pMN | no ¬pNM | no ¬pMI | no ¬pIM | no ¬pNI with (idTC , inj₂ (inj₂ N₂)) ∈? F
-    princ F (inj₂ (inj₁ M₁)) (inj₂ (inj₂ N₂)) morph₁ morph₂ | no ¬pMN | no ¬pNM | no ¬pMI | no ¬pIM | no ¬pNI | yes pIN with morph₁ idTC (inj₂ (inj₂ N₂)) pIN
-    princ F (inj₂ (inj₁ M₁)) (inj₂ (inj₂ N₂)) morph₁ morph₂ | no ¬pMN | no ¬pNM | no ¬pMI | no ¬pIM | no ¬pNI | yes pIN | ()
-    princ F (inj₂ (inj₁ M₁)) (inj₂ (inj₂ N₂)) morph₁ morph₂ | no ¬pMN | no ¬pNM | no ¬pMI | no ¬pIM | no ¬pNI | no ¬pIN with (idTC , idTC) ∈? F
-    princ F (inj₂ (inj₁ M₁)) (inj₂ (inj₂ N₂)) morph₁ morph₂ | no ¬pMN | no ¬pNM | no ¬pMI | no ¬pIM | no ¬pNI | no ¬pIN | yes pII = {!!}
-    princ F (inj₂ (inj₁ M₁)) (inj₂ (inj₂ N₂)) morph₁ morph₂ | no ¬pMN | no ¬pNM | no ¬pMI | no ¬pIM | no ¬pNI | no ¬pIN | no ¬pII = {!!}
+    princ F (inj₂ (inj₁ M₁)) (inj₂ (inj₂ N₂)) morph₁ morph₂ | yes MN∈F = ⊥-elim (morph₂¬∃ F M₁ N₂ (inj₂ (inj₂ N₂)) (inj₁ MN∈F) morph₂)
+    princ F (inj₂ (inj₁ M₁)) (inj₂ (inj₂ N₂)) morph₁ morph₂ | no ¬MN∈F = {!!}
     -- inj₂ (inj₁ M₁) , mkFunctor (inj₁ M₁) , mkMorph (inj₁ M₁) F morph₂ , morph₁
     princ F (inj₂ (inj₂ M₂)) (inj₁ IdentTC  ) morph₁ morph₂ = princRes₂→princRes F (inj₂ M₂) (idTC   ) (princ₂ (F→F₂ F) (inj₂ M₂) (idTC   ) (morph→morph₂ F morph₁) (morph→morph₂ F morph₂))
     princ F (inj₂ (inj₂ M₂)) (inj₂ (inj₁ N₁)) morph₁ morph₂ = {!!}
