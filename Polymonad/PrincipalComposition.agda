@@ -19,6 +19,10 @@ open import Polymonad
 open import Polymonad.Composable
 open import Polymonad.Principal
 open import Polymonad.Composition
+open import Monad.Polymonad
+open import Monad.Composable
+open import Monad.List
+open import Monad.Maybe
 
 principalPolymonadCompose : ∀ {TyCons₁ TyCons₂ : Set}
                           → {pm₁ : Polymonad (IdTyCons ⊎ TyCons₁) idTC}
@@ -27,8 +31,9 @@ principalPolymonadCompose : ∀ {TyCons₁ TyCons₂ : Set}
                           → (cpm₂ : ComposablePolymonad pm₂)
                           → PrincipalPM pm₁
                           → PrincipalPM pm₂
+                          → (∀ (M N P : IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) → B[ M , N ] (polymonadCompose cpm₁ cpm₂) ▷ P ⊎ ¬ (B[ M , N ] (polymonadCompose cpm₁ cpm₂) ▷ P))
                           → PrincipalPM (polymonadCompose cpm₁ cpm₂)
-principalPolymonadCompose {TyCons₁} {TyCons₂} {pm₁} {pm₂} cpm₁ cpm₂ princ₁ princ₂ = princ
+principalPolymonadCompose {TyCons₁} {TyCons₂} {pm₁} {pm₂} cpm₁ cpm₂ princ₁ princ₂ noneOrSomeBind = princ
   where
     open Polymonad.Polymonad
 
@@ -251,7 +256,7 @@ principalPolymonadCompose {TyCons₁} {TyCons₂} {pm₁} {pm₂} cpm₁ cpm₂ 
     subsetId (inj₂ M , N) = false
     
     mkIdBind : B[ idTC , idTC ] polymonadCompose cpm₁ cpm₂ ▷ idTC
-    mkIdBind = proj₁ (pmLawFunctor (polymonadCompose cpm₁ cpm₂) idTC)
+    mkIdBind = pmLawFunctor1 (polymonadCompose cpm₁ cpm₂) idTC
     
     morphId : (M M' : IdTyCons ⊎ TyCons₁ ⊎ TyCons₂) 
             → (M , M') ∈ subsetId 
@@ -276,10 +281,8 @@ principalPolymonadCompose {TyCons₁} {TyCons₂} {pm₁} {pm₂} cpm₁ cpm₂ 
     empty : ⊥
     empty with princ subsetId idTC idTC morphId morphId
     empty | inj₁ IdentTC , b₁ , b₂ , morph' = {!!}
-    empty | inj₂ (inj₁ M₁) , b₁ , b₂ , morph' with cpmIdMorph¬∃ cpm₁ (inj₁ (M₁ , refl)) b₁
-    empty | inj₂ (inj₁ M₁) , b₁ , b₂ , morph' | ()
-    empty | inj₂ (inj₂ M₂) , b₁ , b₂ , morph' with cpmIdMorph¬∃ cpm₂ (inj₁ (M₂ , refl)) b₁
-    empty | inj₂ (inj₂ M₂) , b₁ , b₂ , morph' | ()
-
+    empty | inj₂ (inj₁ M₁) , b₁ , b₂ , morph' = cpmIdMorph¬∃ cpm₁ (inj₁ (M₁ , refl)) b₁
+    empty | inj₂ (inj₂ M₂) , b₁ , b₂ , morph' = cpmIdMorph¬∃ cpm₂ (inj₁ (M₂ , refl)) b₁
 
 -}
+
