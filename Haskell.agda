@@ -20,7 +20,7 @@ Type = Set
 TyCon : Set₁
 TyCon = Type → Type
 
--- Short-hand notation for bind operators as used in the paper.
+-- Short-hand notation for bind-operation type signatures as used in the paper.
 [_,_]▷_ : (M N P : TyCon) → Set₁
 [ M , N ]▷ P = (∀ {α β : Type} → (M α → (α → N β) → P β))
 

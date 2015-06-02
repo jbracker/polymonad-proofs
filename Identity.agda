@@ -18,11 +18,11 @@ open import Haskell
 -- Identity Type Constructor
 --------------------------------------------------------------------------------
 
--- Pure identity type constructor
+-- Pure identity type constructor.
 Identity : TyCon
 Identity τ = τ
 
--- Pure identity lift function
+-- Pure identity function.
 identity : {A : Set} → A → Identity A
 identity x = x
 

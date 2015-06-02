@@ -21,22 +21,22 @@ open import Identity
 
 record Polymonad {l : Level} (TyCons : Set l) (Id : TyCons) : Set (lsuc l) where
   field
-    -- Set of bind operator names for each combination of type constructors
+    -- Set of bind-operation names for each combination of type constructors.
     B[_,_]▷_ : (M N P : TyCons) → Set l
 
-    -- Interpretation of type constructor names into actual type constructors
+    -- Interpretation of type constructor names into actual type constructors.
     ⟨_⟩ : TyCons → TyCon
     
-    -- Interpretation of bind operator names into actual bind-operations
+    -- Interpretation of bind-operation names into actual bind-operations.
     bind : {M N P : TyCons} → B[ M , N ]▷ P → [ ⟨ M ⟩ , ⟨ N ⟩ ]▷ ⟨ P ⟩
     
     -- Law of the Id type constructor: Id τ = τ
     lawId : ⟨ Id ⟩ ≡ Identity
     
     -- Functor law from the definition:
-    -- There exists a functor bind operation for each type constructor
+    -- There exists a functor bind-operation for each type constructor:
     lawFunctor1 : ∀ (M : TyCons) → B[ M , Id ]▷ M 
-    -- Every bind operation in shape of a functor needs to be an identity
+    -- Every bind-operation in shape of a functor needs to be an identity:
     lawFunctor2 : ∀ (M : TyCons) → ∀ (b : B[ M , Id ]▷ M)
                 → ∀ {α : Type} (m : ⟨ M ⟩ α) → (bind b) m (id lawId) ≡ m
     
@@ -96,11 +96,11 @@ record Polymonad {l : Level} (TyCons : Set l) (Id : TyCons) : Set (lsuc l) where
 -- Access to Id TyCon of a polymonad
 pmId = Polymonad.pmId
 
--- Interpretation of a type constructor for a specific polymonad.
+-- Interpretation of a type constructor name for a specific polymonad.
 ⟨_▷_⟩ : ∀ {l} {TyCons : Set l} {Id : TyCons} → Polymonad TyCons Id → TyCons → TyCon
 ⟨ pm ▷ tyCon ⟩ = (Polymonad.⟨_⟩ pm) tyCon
 
--- Bind identifier set for a combination of type constructors in a specific polymonad
+-- Set of bind-operation names for a combination of type constructors in a specific polymonad.
 B[_,_]_▷_ : ∀ {TyCons} {Id : TyCons} 
           → (M N : TyCons) → Polymonad TyCons Id → (P : TyCons) → Set
 B[ M , N ] pm ▷ P = Polymonad.B[_,_]▷_ pm M N P
