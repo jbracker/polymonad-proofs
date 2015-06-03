@@ -178,17 +178,6 @@ principalPolymonadCompose {TyCons₁} {TyCons₂} {pm₁} {pm₂} cpm₁ cpm₂ 
                                                      , subst (λ X → X) (eqBindT₂ M̂ idTC M₁) b₁ 
                                                      , subst (λ X → X) (eqBindT₂ M̂ idTC M₂) b₂ 
                                                      , {!!}
-    -- eqBindT₁ : (M N P : IdTyCons ⊎ TyCons₁) → B[ M , N ] pm₁ ▷ P ≡ B[ TC₁→TC M , TC₁→TC N ] pm ▷ TC₁→TC P
-    {-
-    princ₁ : (F : SubsetOf ((IdTyCons ⊎ TyCons₁) × (IdTyCons ⊎ TyCons₁)))
-           → (M₁ M₂ : IdTyCons ⊎ TyCons₁)
-           → (∀ (M M' : IdTyCons ⊎ TyCons₁) → (M , M') ∈ F → B[ M , M' ] pm₁ ▷ M₁)
-           → (∀ (M M' : IdTyCons ⊎ TyCons₁) → (M , M') ∈ F → B[ M , M' ] pm₁ ▷ M₂)
-           → ∃ λ(M̂ : IdTyCons ⊎ TyCons₁) 
-           → B[ M̂ , Id ] pm₁ ▷ M₁ 
-           × B[ M̂ , Id ] pm₁ ▷ M₂ 
-           × (∀ (M M' : IdTyCons ⊎ TyCons₁) → (M , M') ∈ F → B[ M , M' ] pm₁ ▷ M̂)
-    -}
 
     morph₂¬∃ : (F : SubsetOf (TyCons × TyCons))
             → (M₁ : TyCons₁) → (N₂ : TyCons₂) → (N : TyCons)
@@ -202,7 +191,7 @@ principalPolymonadCompose {TyCons₁} {TyCons₂} {pm₁} {pm₂} cpm₁ cpm₂ 
     morph₂¬∃ F M₁ N₂ (inj₂ (inj₂ N)) (inj₂ NM∈F) morph = morph (inj₂ (inj₂ N)) (inj₂ (inj₁ M₁)) NM∈F
 
     princ : PrincipalPM (polymonadCompose cpm₁ cpm₂)
-    princ F (inj₁ IdentTC  ) (inj₁ IdentTC  ) morph₁ morph₂ = inj₁ IdentTC , mkBindId , mkBindId , morph₂
+    princ F (inj₁ IdentTC  ) (inj₁ IdentTC  ) morph₁ morph₂ = idTC , mkBindId , mkBindId , morph₂
     princ F (inj₁ IdentTC  ) (inj₂ (inj₁ N₁)) morph₁ morph₂ = princRes₁→princRes F (idTC   ) (inj₂ N₁) (princ₁ (F→F₁ F) (idTC   ) (inj₂ N₁) (morph→morph₁ F morph₁) (morph→morph₁ F morph₂))
     princ F (inj₁ IdentTC  ) (inj₂ (inj₂ N₂)) morph₁ morph₂ = princRes₂→princRes F (idTC   ) (inj₂ N₂) (princ₂ (F→F₂ F) (idTC   ) (inj₂ N₂) (morph→morph₂ F morph₁) (morph→morph₂ F morph₂))
     princ F (inj₂ (inj₁ M₁)) (inj₁ IdentTC  ) morph₁ morph₂ = princRes₁→princRes F (inj₂ M₁) (idTC   ) (princ₁ (F→F₁ F) (inj₂ M₁) (idTC   ) (morph→morph₁ F morph₁) (morph→morph₁ F morph₂))
@@ -226,56 +215,3 @@ principalPolymonadCompose {TyCons₁} {TyCons₂} {pm₁} {pm₂} cpm₁ cpm₂ 
       → ¬ ((inj₁ IdentTC   , inj₂ (inj₂ M₂)) ∈ F)
       → (∀ (M M' : TyCons) → F (M , M') ≡ false)
     p = {!!}
-
-{-
-¬principalPolymonadCompose : ∀ {TyCons₁ TyCons₂ : Set}
-                           → {pm₁ : Polymonad (IdTyCons ⊎ TyCons₁) idTC}
-                           → {pm₂ : Polymonad (IdTyCons ⊎ TyCons₂) idTC}
-                           → (cpm₁ : ComposablePolymonad pm₁)
-                           → (cpm₂ : ComposablePolymonad pm₂)
-                           → PrincipalPM pm₁
-                           → PrincipalPM pm₂
-                           → ¬ (PrincipalPM (polymonadCompose cpm₁ cpm₂))
-¬principalPolymonadCompose {TyCons₁} {TyCons₂} {pm₁} {pm₂} cpm₁ cpm₂ princ₁ princ₂ princ = empty
-  where
-    TyCons = IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)
-    
-    subsetAll : SubsetOf (TyCons × TyCons)
-    subsetAll _ = true
-    
-    subsetId : SubsetOf (TyCons × TyCons)
-    subsetId (inj₁ IdentTC , inj₁ IdentTC) = true
-    subsetId (inj₁ IdentTC , inj₂ N) = false
-    subsetId (inj₂ M , N) = false
-    
-    mkIdBind : B[ idTC , idTC ] polymonadCompose cpm₁ cpm₂ ▷ idTC
-    mkIdBind = pmLawFunctor1 (polymonadCompose cpm₁ cpm₂) idTC
-    
-    morphId : (M M' : IdTyCons ⊎ TyCons₁ ⊎ TyCons₂) 
-            → (M , M') ∈ subsetId 
-            → B[ M , M' ] polymonadCompose cpm₁ cpm₂ ▷ idTC
-    morphId (inj₁ IdentTC) (inj₁ IdentTC) refl = mkIdBind
-    morphId (inj₁ IdentTC) (inj₂ M') ()
-    morphId (inj₂ M) M' ()
-    
-    morphAll : (M M' : IdTyCons ⊎ TyCons₁ ⊎ TyCons₂) 
-             → (M , M') ∈ subsetAll
-             → B[ M , M' ] polymonadCompose cpm₁ cpm₂ ▷ idTC
-    morphAll (inj₁ IdentTC  ) (inj₁ IdentTC   ) refl = mkIdBind
-    morphAll (inj₁ IdentTC  ) (inj₂ (inj₁ M'₁)) refl = {!!}
-    morphAll (inj₁ IdentTC  ) (inj₂ (inj₂ M'₂)) refl = {!!}
-    morphAll (inj₂ (inj₁ M₁)) (inj₁ IdentTC   ) refl = {!!}
-    morphAll (inj₂ (inj₁ M₁)) (inj₂ (inj₁ M'₁)) refl = {!!}
-    morphAll (inj₂ (inj₁ M₁)) (inj₂ (inj₂ M'₂)) refl = {!!}
-    morphAll (inj₂ (inj₂ M₂)) (inj₁ IdentTC   ) refl = {!!}
-    morphAll (inj₂ (inj₂ M₂)) (inj₂ (inj₁ M'₁)) refl = {!!}
-    morphAll (inj₂ (inj₂ M₂)) (inj₂ (inj₂ M'₂)) refl = {!!}
-    
-    empty : ⊥
-    empty with princ subsetId idTC idTC morphId morphId
-    empty | inj₁ IdentTC , b₁ , b₂ , morph' = {!!}
-    empty | inj₂ (inj₁ M₁) , b₁ , b₂ , morph' = cpmIdMorph¬∃ cpm₁ (inj₁ (M₁ , refl)) b₁
-    empty | inj₂ (inj₂ M₂) , b₁ , b₂ , morph' = cpmIdMorph¬∃ cpm₂ (inj₁ (M₂ , refl)) b₁
-
--}
-
