@@ -31,9 +31,9 @@ principalPolymonadCompose : ∀ {TyCons₁ TyCons₂ : Set}
                           → (cpm₂ : ComposablePolymonad pm₂)
                           → PrincipalPM pm₁
                           → PrincipalPM pm₂
-                          → (∀ (M N P : IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) → B[ M , N ] (polymonadCompose cpm₁ cpm₂) ▷ P ⊎ ¬ (B[ M , N ] (polymonadCompose cpm₁ cpm₂) ▷ P))
+                          → ((M : TyCons₁) → (N : TyCons₁) → Dec (M ≡ N))
                           → PrincipalPM (polymonadCompose cpm₁ cpm₂)
-principalPolymonadCompose {TyCons₁} {TyCons₂} {pm₁} {pm₂} cpm₁ cpm₂ princ₁ princ₂ noneOrSomeBind = princ
+principalPolymonadCompose {TyCons₁} {TyCons₂} {pm₁} {pm₂} cpm₁ cpm₂ princ₁ princ₂ _≡TC₁_ = princ
   where
     open Polymonad.Polymonad
 
@@ -42,6 +42,76 @@ principalPolymonadCompose {TyCons₁} {TyCons₂} {pm₁} {pm₂} cpm₁ cpm₂ 
 
     idMorph¬∃₁ = cpmIdMorph¬∃ cpm₁
     
+    mkBindId : B[ idTC , idTC ] pm ▷ idTC
+    mkBindId = lawFunctor1 pm idTC
+
+    mTC₁ : TyCons₁ → TyCons
+    mTC₁ M = inj₂ (inj₁ M)
+
+    mTC₂ : TyCons₂ → TyCons
+    mTC₂ M = inj₂ (inj₂ M)
+    
+    contradiction : ∀ {l} {P : Set l} → P → ¬ P → ⊥
+    contradiction P ¬P = ¬P P
+    
+    mixedPrinc : (M₁ : TyCons₁) → (M₂ : TyCons₂)
+               → (F : SubsetOf (TyCons × TyCons)) 
+               → ((M M' : TyCons) → (M , M') ∈ F → B[ M , M' ] pm ▷ mTC₁ M₁)
+               → ((M M' : TyCons) → (M , M') ∈ F → B[ M , M' ] pm ▷ mTC₂ M₂)
+               → Dec ((mTC₁ M₁ , idTC   ) ∈ F)
+               → Dec ((idTC    , mTC₁ M₁) ∈ F)
+               → Dec ((mTC₂ M₂ , idTC   ) ∈ F)
+               → Dec ((idTC    , mTC₂ M₂) ∈ F)
+               → Dec ((mTC₁ M₁ , mTC₂ M₂) ∈ F)
+               → Dec ((mTC₂ M₂ , mTC₁ M₁) ∈ F)
+               → Dec ((mTC₁ M₁ , mTC₁ M₁) ∈ F)
+               → Dec ((mTC₂ M₂ , mTC₂ M₂) ∈ F)
+               → ( B[ idTC , idTC ] pm ▷ mTC₁ M₁
+                 × B[ idTC , idTC ] pm ▷ mTC₂ M₂
+                 × ((M M' : TyCons) → (M , M') ∈ F → B[ M , M' ] pm ▷ idTC))
+    mixedPrinc M₁ M₂ F morph₁ morph₂ (yes M₁I∈F) IM₁∈?F M₂I∈?F IM₂∈?F M₁M₂∈?F M₂M₁∈?F M₁M₁∈?F M₂M₂∈?F = ⊥-elim (morph₂ (mTC₁ M₁) idTC M₁I∈F)
+    mixedPrinc M₁ M₂ F morph₁ morph₂ (no ¬M₁I∈F) (yes IM₁∈F) M₂I∈?F IM₂∈?F M₁M₂∈?F M₂M₁∈?F M₁M₁∈?F M₂M₂∈?F = ⊥-elim (morph₂ idTC (mTC₁ M₁) IM₁∈F)
+    mixedPrinc M₁ M₂ F morph₁ morph₂ (no ¬M₁I∈F) (no ¬IM₁∈F) (yes M₂I∈F) IM₂∈?F M₁M₂∈?F M₂M₁∈?F M₁M₁∈?F M₂M₂∈?F = ⊥-elim (morph₁ (mTC₂ M₂) idTC M₂I∈F)
+    mixedPrinc M₁ M₂ F morph₁ morph₂ (no ¬M₁I∈F) (no ¬IM₁∈F) (no ¬M₂I∈F) (yes IM₂∈F) M₁M₂∈?F M₂M₁∈?F M₁M₁∈?F M₂M₂∈?F = ⊥-elim (morph₁ idTC (mTC₂ M₂) IM₂∈F)
+    mixedPrinc M₁ M₂ F morph₁ morph₂ (no ¬M₁I∈F) (no ¬IM₁∈F) (no ¬M₂I∈F) (no ¬IM₂∈F) (yes M₁M₂∈F) M₂M₁∈?F M₁M₁∈?F M₂M₂∈?F = ⊥-elim (morph₂ (mTC₁ M₁) (mTC₂ M₂) M₁M₂∈F)
+    mixedPrinc M₁ M₂ F morph₁ morph₂ (no ¬M₁I∈F) (no ¬IM₁∈F) (no ¬M₂I∈F) (no ¬IM₂∈F) (no ¬M₁M₂∈F) (yes M₂M₁∈F) M₁M₁∈?F M₂M₂∈?F = ⊥-elim (morph₁ (mTC₂ M₂) (mTC₁ M₁) M₂M₁∈F)
+    mixedPrinc M₁ M₂ F morph₁ morph₂ (no ¬M₁I∈F) (no ¬IM₁∈F) (no ¬M₂I∈F) (no ¬IM₂∈F) (no ¬M₁M₂∈F) (no ¬M₂M₁∈F) (yes M₁M₁∈F) M₂M₂∈?F = ⊥-elim (morph₂ (mTC₁ M₁) (mTC₁ M₁) M₁M₁∈F)
+    mixedPrinc M₁ M₂ F morph₁ morph₂ (no ¬M₁I∈F) (no ¬IM₁∈F) (no ¬M₂I∈F) (no ¬IM₂∈F) (no ¬M₁M₂∈F) (no ¬M₂M₁∈F) (no ¬M₁M₁∈F) (yes M₂M₂∈F) = ⊥-elim (morph₁ (mTC₂ M₂) (mTC₂ M₂) M₂M₂∈F)
+    mixedPrinc M₁ M₂ F morph₁ morph₂ (no ¬M₁I∈F) (no ¬IM₁∈F) (no ¬M₂I∈F) (no ¬IM₂∈F) (no ¬M₁M₂∈F) (no ¬M₂M₁∈F) (no ¬M₁M₁∈F) (no ¬M₂M₂∈F) = solution
+      where
+        newMorph : (M M' : TyCons) → (M , M') ∈ F → B[ M , M' ] pm ▷ idTC
+        newMorph (inj₁ IdentTC) (inj₁ IdentTC) II∈F = mkBindId
+        newMorph (inj₁ IdentTC) (inj₂ (inj₁ N₁)) IM₁∈F = {!!}
+        newMorph (inj₁ IdentTC) (inj₂ (inj₂ N₂)) IM₂∈F = ⊥-elim (contradiction IM₂∈F {!!})
+        newMorph (inj₂ (inj₁ M₁)) (inj₁ IdentTC) M₁I∈F = ⊥-elim (contradiction M₁I∈F {!!})
+        newMorph (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) M₁M₁∈F = ⊥-elim (contradiction M₁M₁∈F {!!})
+        newMorph (inj₂ (inj₁ M₁)) (inj₂ (inj₂ N₂)) M₁M₂∈F = {!!}
+        newMorph (inj₂ (inj₂ M₂)) (inj₁ IdentTC) M₂I∈F = ⊥-elim (contradiction M₂I∈F {!!})
+        newMorph (inj₂ (inj₂ M₂)) (inj₂ (inj₁ N₁)) M₂M₁∈F = ⊥-elim (contradiction M₂M₁∈F {!!})
+        newMorph (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) M₂M₂∈F = ⊥-elim (contradiction M₂M₂∈F {!!})
+        
+        solution : B[ idTC , idTC ] pm ▷ mTC₁ M₁ 
+                 × B[ idTC , idTC ] pm ▷ mTC₂ M₂
+                 × ((M M' : TyCons) → (M , M') ∈ F → B[ M , M' ] pm ▷ idTC)
+        solution = {!!} , {!!} , newMorph
+    
+    princ : PrincipalPM pm
+    princ F (inj₁ IdentTC) (inj₁ IdentTC) morph₁ morph₂ = idTC , mkBindId , mkBindId , morph₂
+    princ F (inj₁ IdentTC) (inj₂ (inj₁ N₁)) morph₁ morph₂ = idTC , {!!} , {!!} , {!!}
+    princ F (inj₁ IdentTC) (inj₂ (inj₂ N₂)) morph₁ morph₂ = {!!}
+    princ F (inj₂ (inj₁ M₁)) (inj₁ IdentTC) morph₁ morph₂ = {!!}
+    princ F (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) morph₁ morph₂ = {!!}
+    princ F (inj₂ (inj₁ M₁)) (inj₂ (inj₂ N₂)) morph₁ morph₂ = 
+      idTC , (mixedPrinc M₁ N₂ F morph₁ morph₂ 
+               ((mTC₁ M₁ , idTC) ∈? F) ((idTC , mTC₁ M₁) ∈? F) 
+               ((mTC₂ N₂ , idTC) ∈? F) ((idTC , mTC₂ N₂) ∈? F)
+               ((mTC₁ M₁ , mTC₂ N₂) ∈? F) ((mTC₂ N₂ , mTC₁ M₁) ∈? F)
+               ((mTC₁ M₁ , mTC₁ M₁) ∈? F) ((mTC₂ N₂ , mTC₂ N₂) ∈? F)
+             )
+    princ F (inj₂ (inj₂ M₂)) N morph₁ morph₂ = {!!}
+
+   
+    {-
     TC₁→TC : IdTyCons ⊎ TyCons₁ → TyCons
     TC₁→TC (inj₁ IdentTC) = inj₁ IdentTC
     TC₁→TC (inj₂ M) = inj₂ (inj₁ M)
@@ -215,3 +285,4 @@ principalPolymonadCompose {TyCons₁} {TyCons₂} {pm₁} {pm₂} cpm₁ cpm₂ 
       → ¬ ((inj₁ IdentTC   , inj₂ (inj₂ M₂)) ∈ F)
       → (∀ (M M' : TyCons) → F (M , M') ≡ false)
     p = {!!}
+-}
