@@ -8,7 +8,7 @@ presented in the paper
 Calling `make` should type check all files that don't contain 
 unsolved holes.
 
-## Module Structure
+## Module Structure and Guide
 
 * **`Haskell` and `Utilities`**:
   Basic stuff to formalize things related to Haskell and provide utilities that
@@ -34,7 +34,7 @@ unsolved holes.
     compose two polymonads that do not have morphism between them.
   * `Polymonad.Composition`: 
     The proof that `ComposablePolymonad`s actually
-    form a polymonad again. The submodules prove further properties.
+    form a polymonad again. The submodules prove further properties (Principality is *WIP*).
   * `Polymonad.Principal`: 
     The formalization of principal polymonads.
   * `Polymonad.UniqueBinds`: 
@@ -43,7 +43,13 @@ unsolved holes.
   * `Polymonad.MaybeList` and `Polymonad.MorphMonad`: 
     These and the submodules contain
     ideas about composing standard monads to polymonads by providing lifting
-    functions between them.
+    functions between them (*WIP*).
+* **`Parameterized`**:
+  Formalizations of different parameterized monads.
+  * `Parameterized.IndexedMonad`: 
+    Formalization and proofs for indexed monads that model pre- and poststate (Hoare triples).
+  * `Parameterized.EffectMonad`:
+    Formalization of effect monads that are parameterized by a monoid (*WIP*).
 * **`Hicks`**:
   Contains a formalization of Hicks polymonads without 
   my alteration. 
