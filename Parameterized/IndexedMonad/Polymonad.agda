@@ -1,8 +1,7 @@
  
-module Polymonad.IndexedMonad where
+module Parameterized.IndexedMonad.Polymonad where
 
 -- Stdlib
-open import Agda.Primitive
 open import Data.Product
 open import Data.Sum
 open import Data.Unit
@@ -16,55 +15,9 @@ open import Utilities
 open import Haskell
 open import Identity
 open import Polymonad
-open import Polymonad.Identity
-open import Polymonad.Composable
-
-record IxMonad (Ixs : Set) (M : Ixs → Ixs → TyCon) : Set₁ where
-  field
-    _>>=_ : ∀ {α β : Type} {i j k : Ixs} → M i j α → (α → M j k β) → M i k β
-    return : ∀ {α : Type} {i : Ixs} → α → M i i α
-    
-    lawIdR : ∀ {α β : Type} {i j : Ixs}
-           → (a : α) → (k : α → M i j β) 
-           → return a >>= k ≡ k a
-    lawIdL : ∀ {α : Type} {i j : Ixs}
-           → (m : M i j α)
-           → m >>= return ≡ m
-    lawAssoc : ∀ {α β γ : Type} {i j k l : Ixs}
-             → (m : M i j α) → (f : α → M j k β) → (g : β → M k l γ)
-             → m >>= (λ x → f x >>= g) ≡ (m >>= f) >>= g
-  
-  _>>_ : ∀ {α β : Type} {i j k : Ixs} → M i j α → M j k β → M i k β
-  ma >> mb = ma >>= λ a → mb
-
-  bind = _>>=_
-
-data IxMonadTyCons (Ixs : Set) : Set where
-  IxMonadTC : Ixs → Ixs → IxMonadTyCons Ixs
-
-data IxMonadBinds (Ixs : Set) : (M N P : IdTyCons ⊎ IxMonadTyCons Ixs) → Set where
-  MonadB   : ∀ {i j k} → IxMonadBinds Ixs (inj₂ (IxMonadTC i j)) (inj₂ (IxMonadTC j k)) (inj₂ (IxMonadTC i k))
-  FunctorB : ∀ {i j} → IxMonadBinds Ixs (inj₂ (IxMonadTC i j)) idTC (inj₂ (IxMonadTC i j))
-  ApplyB   : ∀ {i j} → IxMonadBinds Ixs idTC (inj₂ (IxMonadTC i j)) (inj₂ (IxMonadTC i j))
-  ReturnB  : ∀ {i} → IxMonadBinds Ixs idTC idTC (inj₂ (IxMonadTC i i)) 
+open import Parameterized.IndexedMonad
 
 open IxMonad renaming (bind to mBind; return to mReturn; lawAssoc to mLawAssoc)
-
-bindMonad : ∀ {Ixs : Set} {M : Ixs → Ixs → TyCon} {i j k} → (m : IxMonad Ixs M)
-          → [ M i j , M j k ]▷ M i k
-bindMonad m = mBind m
-
-bindFunctor : ∀ {Ixs : Set} {M : Ixs → Ixs → TyCon} {i j} → (m : IxMonad Ixs M)
-            → [ M i j , Identity ]▷ M i j
-bindFunctor m ma f = mBind m ma (λ a → mReturn m (f a))
-
-bindApply : ∀ {Ixs : Set} {M : Ixs → Ixs → TyCon} {i j} → (m : IxMonad Ixs M)
-          → [ Identity , M i j ]▷ M i j
-bindApply m ma f = mBind m (mReturn m ma) f
-
-bindReturn : ∀ {Ixs : Set} {M : Ixs → Ixs → TyCon} {i} → (m : IxMonad Ixs M)
-           → [ Identity , Identity ]▷ M i i
-bindReturn m ma f = mReturn m (f ma)
 
 IxMonad→Polymonad : ∀ {Ixs : Set} {M : Ixs → Ixs → TyCon} 
                   → (monad : IxMonad Ixs M)
@@ -385,31 +338,3 @@ IxMonad→Polymonad {Ixs = Ixs} {M = M'} monad = record
     lawClosure (inj₂ (IxMonadTC i .i)) (inj₂ (IxMonadTC .i k)) (inj₂ (IxMonadTC .i .k)) (inj₁ IdentTC) (inj₂ (IxMonadTC .i .k)) (inj₂ (IxMonadTC .i .k)) (MonadB , ReturnB , FunctorB , FunctorB) = ApplyB
     lawClosure (inj₂ (IxMonadTC i j)) (inj₂ (IxMonadTC .j .j)) (inj₂ (IxMonadTC .i .j)) (inj₂ (IxMonadTC .i .j)) (inj₁ IdentTC) (inj₂ (IxMonadTC .i .j)) (MonadB , FunctorB , ReturnB , FunctorB) = FunctorB
     lawClosure (inj₂ (IxMonadTC i j)) (inj₂ (IxMonadTC .j k)) (inj₂ (IxMonadTC .i .k)) (inj₂ (IxMonadTC .i .j)) (inj₂ (IxMonadTC .j .k)) (inj₂ (IxMonadTC .i .k)) (MonadB , FunctorB , FunctorB , FunctorB) = MonadB
-
-open Polymonad.Polymonad
-
-IxMonad→ComposablePolymonad : ∀ {Ixs : Set} {M : Ixs → Ixs → TyCon} 
-                  → (monad : IxMonad Ixs M)
-                  → ComposablePolymonad (IxMonad→Polymonad monad)
-IxMonad→ComposablePolymonad {Ixs = Ixs} {M = M'} monad = record 
-  { lawEqBindId = lawEqBindId 
-  ; lawEqIdBinds = refl 
-  ; idMorph¬∃ = idMorph¬∃ 
-  } where
-    pm = IxMonad→Polymonad monad
-
-    TyCons = IdTyCons ⊎ IxMonadTyCons Ixs
-    
-    lawEqBindId : {α β : Type}
-      → (b : B[ idTC , idTC ] pm ▷ idTC)
-      → substBind (lawId pm) (lawId pm) (lawId pm) (bind pm {M = idTC} {N = idTC} {P = idTC} b) {α = α} {β = β} ≡ bindId {α = α} {β = β}
-    lawEqBindId IdentB = refl
-    
-    idMorph¬∃ : {M N : TyCons} 
-              → ∃ (λ M' → M ≡ inj₂ M') ⊎ ∃ (λ N' → N ≡ inj₂ N')
-              → ¬ B[ M , N ] pm ▷ idTC
-    idMorph¬∃ {inj₁ IdentTC} {inj₁ IdentTC} (inj₁ (M' , ())) IdentB
-    idMorph¬∃ {inj₁ IdentTC} {inj₁ IdentTC} (inj₂ (N' , ())) IdentB
-    idMorph¬∃ {inj₁ IdentTC} {inj₂ (IxMonadTC i j)} p ()
-    idMorph¬∃ {inj₂ (IxMonadTC i j)} {inj₁ IdentTC} p ()
-    idMorph¬∃ {inj₂ (IxMonadTC i j)} {inj₂ (IxMonadTC k l)} p ()
