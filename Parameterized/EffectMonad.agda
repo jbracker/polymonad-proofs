@@ -17,6 +17,9 @@ open import Identity
 open import Polymonad
 open import Polymonad.Identity
 
+-- TODO: This is still unfinished work, since the constraints that can be applied to the monoid
+-- elements are not modelled at all right now.
+
 module Monoid where
   record Monoid {k} (C : Set k) : Set k where
     field
