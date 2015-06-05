@@ -1,5 +1,5 @@
 
-module Polymonad.HicksPolymonadEquivalency where
+module Hicks.Equivalency where
 
 -- Stdlib
 open import Agda.Primitive
@@ -15,8 +15,8 @@ open import Utilities
 open import Haskell
 open import Identity
 open import Polymonad
-open import Polymonad.HicksPolymonad
-open import Polymonad.HicksUniqueBinds using ( uniqueFunctor )
+open import Hicks.Polymonad
+open import Hicks.UniqueBinds using ( uniqueFunctor )
     
 --------------------------------------------------------------------------------
 -- Polymonad functor law equivalency proofs

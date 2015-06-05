@@ -1,5 +1,5 @@
  
-module Polymonad.HicksUniqueBinds where
+module Hicks.UniqueBinds where
 
 -- Stdlib
 open import Data.Product
@@ -13,10 +13,10 @@ open ≡-Reasoning
 open import Haskell
 open import Identity
 open import Utilities
-open import Polymonad.HicksPolymonad
+open import Hicks.Polymonad
 
 -- Records
-open Polymonad.HicksPolymonad.HicksPolymonad
+open Hicks.Polymonad.HicksPolymonad
 
 -- -----------------------------------------------------------------------------
 -- Bind operators are unique

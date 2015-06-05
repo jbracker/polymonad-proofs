@@ -1,5 +1,5 @@
 
-module Polymonad.HicksPolymonad where
+module Hicks.Polymonad where
 
 -- Stdlib
 open import Agda.Primitive
