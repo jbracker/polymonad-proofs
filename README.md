@@ -20,10 +20,30 @@ unsolved holes.
   constructor; this is central to the formalization of polymonads.
 * **`Monad`**:
   Formalization of monads as they are represented in Haskell.
+  * `Monad.Polymonad`, `Monad.Composable` and `Monad.Principal`:
+    Monads form polymonads, are composable, and principal.
+  * `Monad.Identity`, `Monad.List` and `Monad.Maybe`:
+    The `Identity`, `List`, and `Maybe` monad.
 * **`Polymonad`**:
   Formalization of polymonads (slightly altered from the version in Hicks paper).
-* **`Polymonad`**:
-  Proofs about polymonads.
+  The submodules contains proofs and formalization of ther polymonad concepts.
+  * `Polymonad.Identity`: 
+    The identity polymonad.
+  * `Polymonad.Composable`: 
+    The formalization of what is required to 
+    compose two polymonads that do not have morphism between them.
+  * `Polymonad.Composition`: 
+    The proof that `ComposablePolymonad`s actually
+    form a polymonad again. The submodules prove further properties.
+  * `Polymonad.Principal`: 
+    The formalization of principal polymonads.
+  * `Polymonad.UniqueBinds`: 
+    Proof that bind-operations on the same type 
+    are unique, i.e., bind-operations with the same type have the same semantics.
+  * `Polymonad.MaybeList` and `Polymonad.MorphMonad`: 
+    These and the submodules contain
+    ideas about composing standard monads to polymonads by providing lifting
+    functions between them.
 * **`Hicks`**:
   Contains a formalization of Hicks polymonads without 
   my alteration. 
