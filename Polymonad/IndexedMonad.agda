@@ -7,6 +7,7 @@ open import Data.Product
 open import Data.Sum
 open import Data.Unit
 open import Data.Empty
+open import Relation.Nullary
 open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning
 
@@ -16,6 +17,7 @@ open import Haskell
 open import Identity
 open import Polymonad
 open import Polymonad.Identity
+open import Polymonad.Composable
 
 record IxMonad (Ixs : Set) (M : Ixs → Ixs → TyCon) : Set₁ where
   field
@@ -383,3 +385,31 @@ IxMonad→Polymonad {Ixs = Ixs} {M = M'} monad = record
     lawClosure (inj₂ (IxMonadTC i .i)) (inj₂ (IxMonadTC .i k)) (inj₂ (IxMonadTC .i .k)) (inj₁ IdentTC) (inj₂ (IxMonadTC .i .k)) (inj₂ (IxMonadTC .i .k)) (MonadB , ReturnB , FunctorB , FunctorB) = ApplyB
     lawClosure (inj₂ (IxMonadTC i j)) (inj₂ (IxMonadTC .j .j)) (inj₂ (IxMonadTC .i .j)) (inj₂ (IxMonadTC .i .j)) (inj₁ IdentTC) (inj₂ (IxMonadTC .i .j)) (MonadB , FunctorB , ReturnB , FunctorB) = FunctorB
     lawClosure (inj₂ (IxMonadTC i j)) (inj₂ (IxMonadTC .j k)) (inj₂ (IxMonadTC .i .k)) (inj₂ (IxMonadTC .i .j)) (inj₂ (IxMonadTC .j .k)) (inj₂ (IxMonadTC .i .k)) (MonadB , FunctorB , FunctorB , FunctorB) = MonadB
+
+open Polymonad.Polymonad
+
+IxMonad→ComposablePolymonad : ∀ {Ixs : Set} {M : Ixs → Ixs → TyCon} 
+                  → (monad : IxMonad Ixs M)
+                  → ComposablePolymonad (IxMonad→Polymonad monad)
+IxMonad→ComposablePolymonad {Ixs = Ixs} {M = M'} monad = record 
+  { lawEqBindId = lawEqBindId 
+  ; lawEqIdBinds = refl 
+  ; idMorph¬∃ = idMorph¬∃ 
+  } where
+    pm = IxMonad→Polymonad monad
+
+    TyCons = IdTyCons ⊎ IxMonadTyCons Ixs
+    
+    lawEqBindId : {α β : Type}
+      → (b : B[ idTC , idTC ] pm ▷ idTC)
+      → substBind (lawId pm) (lawId pm) (lawId pm) (bind pm {M = idTC} {N = idTC} {P = idTC} b) {α = α} {β = β} ≡ bindId {α = α} {β = β}
+    lawEqBindId IdentB = refl
+    
+    idMorph¬∃ : {M N : TyCons} 
+              → ∃ (λ M' → M ≡ inj₂ M') ⊎ ∃ (λ N' → N ≡ inj₂ N')
+              → ¬ B[ M , N ] pm ▷ idTC
+    idMorph¬∃ {inj₁ IdentTC} {inj₁ IdentTC} (inj₁ (M' , ())) IdentB
+    idMorph¬∃ {inj₁ IdentTC} {inj₁ IdentTC} (inj₂ (N' , ())) IdentB
+    idMorph¬∃ {inj₁ IdentTC} {inj₂ (IxMonadTC i j)} p ()
+    idMorph¬∃ {inj₂ (IxMonadTC i j)} {inj₁ IdentTC} p ()
+    idMorph¬∃ {inj₂ (IxMonadTC i j)} {inj₂ (IxMonadTC k l)} p ()
