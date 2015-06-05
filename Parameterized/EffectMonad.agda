@@ -1,5 +1,5 @@
  
-module Polymonad.EffectMonad where
+module Parameterized.EffectMonad where
 
 -- Stdlib
 open import Agda.Primitive
