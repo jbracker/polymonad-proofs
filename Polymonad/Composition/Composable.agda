@@ -1,5 +1,5 @@
  
-module Polymonad.ComposableComposition where
+module Polymonad.Composition.Composable where
 
 -- Stdlib
 open import Data.Product
