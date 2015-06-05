@@ -22,8 +22,6 @@ open import Polymonad.Composition
 open import Monad
 open import Monad.Polymonad
 open import Monad.Composable
-open import Monad.List
-open import Monad.Maybe
 
 principalPolymonadMonadCompose : ∀ {M₁ M₂ : TyCon} 
                           → (monad₁ : Monad M₁) → (monad₂ : Monad M₂) 
