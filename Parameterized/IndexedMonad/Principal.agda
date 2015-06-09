@@ -24,9 +24,23 @@ open import Parameterized.IndexedMonad.Polymonad
 open IxMonad renaming (bind to mBind; return to mReturn; lawAssoc to mLawAssoc)
 open Polymonad.Polymonad
 
+
+-- Alternate formulation of principality that requires F to be non empty.
+PrincipalPM' : ∀ {TyCons : Set} {Id : TyCons} →  Polymonad TyCons Id → Set
+PrincipalPM' {TyCons} {Id} pm 
+  = (F : SubsetOf (TyCons × TyCons))
+  → (∃ λ(PS : TyCons × TyCons) → PS ∈ F)
+  → (M₁ M₂ : TyCons)
+  → (∀ (M M' : TyCons) → (M , M') ∈ F → B[ M , M' ] pm ▷ M₁)
+  → (∀ (M M' : TyCons) → (M , M') ∈ F → B[ M , M' ] pm ▷ M₂)
+  → ∃ λ(M̂ : TyCons) 
+  → B[ M̂ , Id ] pm ▷ M₁ 
+  × B[ M̂ , Id ] pm ▷ M₂ 
+  × (∀ (M M' : TyCons) → (M , M') ∈ F → B[ M , M' ] pm ▷ M̂)
+
 IxMonad→PrincipalPolymonad : ∀ {Ixs : Set} {M : Ixs → Ixs → TyCon} 
                            → (monad : IxMonad Ixs M)
-                           → PrincipalPM (IxMonad→Polymonad monad)
+                           → PrincipalPM' (IxMonad→Polymonad monad)
 IxMonad→PrincipalPolymonad {Ixs = Ixs} monad = princ
   where
     TyCons = IdTyCons ⊎ IxMonadTyCons Ixs
@@ -57,17 +71,62 @@ IxMonad→PrincipalPolymonad {Ixs = Ixs} monad = princ
     emptyF F ¬II∈F morph (inj₂ (IxMonadTC i j)) (inj₁ IdentTC) = ¬MN∈F F morph (mTC i j) idTC ((IxMonadTC i j) , (inj₁ refl))
     emptyF F ¬II∈F morph (inj₂ (IxMonadTC i j)) (inj₂ (IxMonadTC k l)) = ¬MN∈F F morph (mTC i j) (mTC k l) ((IxMonadTC i j) , (inj₁ refl))
     
-    princ : PrincipalPM pm
-    princ F (inj₁ IdentTC) (inj₁ IdentTC) morph₁ morph₂ = idTC , IdentB , IdentB , morph₁
-    princ F (inj₁ IdentTC) (inj₂ (IxMonadTC i j)) morph₁ morph₂ with (idTC , idTC) ∈? F
-    princ F (inj₁ IdentTC) (inj₂ (IxMonadTC i j)) morph₁ morph₂ | yes II∈F = idTC , IdentB , morph₂ idTC idTC II∈F , morph₁
-    princ F (inj₁ IdentTC) (inj₂ (IxMonadTC i j)) morph₁ morph₂ | no ¬II∈F = mTC i j , {!!} , FunctorB , (λ M N MN∈F → ⊥-elim (emptyF F ¬II∈F morph₁ M N MN∈F))
-    princ F (inj₂ (IxMonadTC i j)) (inj₁ IdentTC) morph₁ morph₂ = idTC , {!!} , {!!} , {!!}
-    princ F (inj₂ (IxMonadTC i j)) (inj₂ (IxMonadTC k l)) morph₁ morph₂ = mTC i j , FunctorB , {!!} , morph₁
+    princ : PrincipalPM' pm
+    princ F ((P , S) , PS∈F) (inj₁ IdentTC) (inj₁ IdentTC) morph₁ morph₂ = idTC , IdentB , IdentB , morph₁
+    princ F ((inj₁ IdentTC , inj₁ IdentTC) , PS∈F) (inj₁ IdentTC) (inj₂ (IxMonadTC k l)) morph₁ morph₂ = idTC , IdentB , morph₂ idTC idTC PS∈F , morph₁
+    princ F ((inj₁ IdentTC , inj₂ (IxMonadTC k' l')) , PS∈F) (inj₁ IdentTC) (inj₂ (IxMonadTC k l)) morph₁ morph₂ = {!!}
+    princ F ((inj₂ y , S) , PS∈F) (inj₁ IdentTC) (inj₂ (IxMonadTC k l)) morph₁ morph₂ = {!!}
+    princ F ((P , S) , PS∈F) (inj₂ (IxMonadTC i j)) (inj₁ IdentTC) morph₁ morph₂ = {!!}
+    princ F ((P , S) , PS∈F) (inj₂ (IxMonadTC i j)) (inj₂ (IxMonadTC k l)) morph₁ morph₂ = {!!}
 
+-- -----------------------------------------------------------------------------
+--
+-- -----------------------------------------------------------------------------
+IxMonad→¬PrincipalPolymonad' : ∀ {Ixs : Set} {M : Ixs → Ixs → TyCon}
+                             → (∃ λ(i : Ixs) → ∃ λ(j : Ixs) → ¬ (i ≡ j))
+                             → (monad : IxMonad Ixs M)
+                             → ¬ (PrincipalPM' (IxMonad→Polymonad monad))
+IxMonad→¬PrincipalPolymonad' {Ixs = Ixs} (i , j , ¬i≡j) monad princ = bottom
+  where
+    TyCons = IdTyCons ⊎ IxMonadTyCons Ixs
+    
+    pm = IxMonad→Polymonad monad
+    
+    mTC : Ixs → Ixs → TyCons
+    mTC i j = inj₂ (IxMonadTC i j)
+    
+    idF : SubsetOf (TyCons × TyCons)
+    idF (inj₁ IdentTC , inj₁ IdentTC) = true
+    idF (inj₁ IdentTC , inj₂ N) = false
+    idF (inj₂ M , N) = false
+    
+    ¬returnB : (k l : Ixs)
+              → ¬ k ≡ l 
+              → ¬ B[ idTC , idTC ] pm ▷ (inj₂ (IxMonadTC k l))
+    ¬returnB k .k ¬k≡l ReturnB = ¬k≡l refl
+    
+    morphIJ : (M M' : IdTyCons ⊎ IxMonadTyCons Ixs) 
+            → (M , M') ∈ idF
+            → B[ M , M' ] pm ▷ mTC i j
+    morphIJ (inj₁ IdentTC) (inj₁ IdentTC) refl = {!!}
+    morphIJ (inj₁ IdentTC) (inj₂ M) ()
+    morphIJ (inj₂ M) M' ()
+    
+    morphId : (M M' : IdTyCons ⊎ IxMonadTyCons Ixs) 
+            → (M , M') ∈ idF 
+            → B[ M , M' ] pm ▷ idTC
+    morphId (inj₁ IdentTC) (inj₁ IdentTC) refl = IdentB
+    morphId (inj₁ IdentTC) (inj₂ M') ()
+    morphId (inj₂ M) M' ()
+    
+    bottom : ⊥
+    bottom with princ idF ((idTC , idTC) , refl) (mTC i j) idTC morphIJ morphId
+    bottom | inj₁ IdentTC , b₁ , IdentB , morph = ¬returnB i j ¬i≡j b₁
+    bottom | inj₂ (IxMonadTC k l) , b₁ , () , morph
 
-
-
+-- -----------------------------------------------------------------------------
+-- The formulation of principal polymonads from the paper does not allow indexed monads.
+-- -----------------------------------------------------------------------------
 IxMonad→¬PrincipalPolymonad : ∀ {Ixs : Set} {M : Ixs → Ixs → TyCon}
                             → (∃ λ(i : Ixs) → ∃ λ(j : Ixs) → ¬ (i ≡ j))
                             → (monad : IxMonad Ixs M)
@@ -96,6 +155,8 @@ IxMonad→¬PrincipalPolymonad {Ixs = Ixs} (i , j , ¬i≡j) monad princ = botto
 
 
 
+-- -----------------------------------------------------------------------------
+-- -----------------------------------------------------------------------------
 
 {-
 principalPolymonadMonadIxMonadCompose : ∀ {Ixs : Set} {M₁ : TyCon} {M₂ : Ixs → Ixs → TyCon} 
