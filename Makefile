@@ -34,7 +34,7 @@ type-check:
 	$(AGDA_TC) Polymonad/Composition.agda
 	$(AGDA_TC) Polymonad/Composition/Composable.agda
 	# $(AGDA_TC) Polymonad/Composition/Principal.agda
-	# $(AGDA_TC) Polymonad/Composition/Principal/Examples.agda
+	$(AGDA_TC) Polymonad/Composition/Principal/Examples.agda
 	
 	# Composition of polymonads via morphisms between them
 	# $(AGDA_TC) Polymonad/MorphMonad.agda
