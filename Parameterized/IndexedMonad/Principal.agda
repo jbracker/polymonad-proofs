@@ -66,6 +66,37 @@ IxMonad→PrincipalPolymonad {Ixs = Ixs} monad = princ
     princ F (inj₂ (IxMonadTC i j)) (inj₂ (IxMonadTC k l)) morph₁ morph₂ = mTC i j , FunctorB , {!!} , morph₁
 
 
+
+
+IxMonad→¬PrincipalPolymonad : ∀ {Ixs : Set} {M : Ixs → Ixs → TyCon}
+                            → (∃ λ(i : Ixs) → ∃ λ(j : Ixs) → ¬ (i ≡ j))
+                            → (monad : IxMonad Ixs M)
+                            → ¬ (PrincipalPM (IxMonad→Polymonad monad))
+IxMonad→¬PrincipalPolymonad {Ixs = Ixs} (i , j , ¬i≡j) monad princ = bottom
+  where
+    TyCons = IdTyCons ⊎ IxMonadTyCons Ixs
+    
+    pm = IxMonad→Polymonad monad
+    
+    mTC : Ixs → Ixs → TyCons
+    mTC i j = inj₂ (IxMonadTC i j)
+
+    emptyF : SubsetOf (TyCons × TyCons)
+    emptyF (M , N) = false
+    
+    ¬returnB : (k l : Ixs)
+              → ¬ k ≡ l 
+              → ¬ B[ idTC , idTC ] pm ▷ (inj₂ (IxMonadTC k l))
+    ¬returnB k .k ¬k≡l ReturnB = ¬k≡l refl
+    
+    bottom : ⊥
+    bottom with princ emptyF (mTC i j) idTC (λ M N ()) (λ M N ())
+    bottom | inj₁ IdentTC , b₁ , IdentB , morph = ¬returnB i j ¬i≡j b₁
+    bottom | inj₂ (IxMonadTC k l) , b₁ , () , morph
+
+
+
+
 {-
 principalPolymonadMonadIxMonadCompose : ∀ {Ixs : Set} {M₁ : TyCon} {M₂ : Ixs → Ixs → TyCon} 
                           → (monad₁ : Monad M₁) → (monad₂ : IxMonad Ixs M₂) 
