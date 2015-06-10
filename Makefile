@@ -57,6 +57,7 @@ type-check:
 	$(AGDA_TC) Parameterized/IndexedMonad/Polymonad.agda
 	$(AGDA_TC) Parameterized/IndexedMonad/Composable.agda
 	# $(AGDA_TC) Parameterized/IndexedMonad/Principal.agda
+	# $(AGDA_TC) Parameterized/IndexedMonad/SessionTypes.agda
 	# $(AGDA_TC) Parameterized/EffectMonad.agda
 
 
