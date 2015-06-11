@@ -61,6 +61,58 @@ IxMonad→PrincipalPolymonad {Ixs = Ixs} _∼_ monad = princ
     ¬MN∈F F morphId .(inj₂ (IxMonadTC i j)) (inj₂ (IxMonadTC k l)) (IxMonadTC i j , inj₁ refl) MN∈F = morphId (mTC i j) (mTC k l) MN∈F
     ¬MN∈F F morphId (inj₁ IdentTC) .(inj₂ (IxMonadTC i j)) (IxMonadTC i j , inj₂ refl) MN∈F = morphId idTC (mTC i j) MN∈F
     ¬MN∈F F morphId (inj₂ (IxMonadTC i j)) .(inj₂ (IxMonadTC k l)) (IxMonadTC k l , inj₂ refl) MN∈F = morphId (mTC i j) (mTC k l) MN∈F
+
+    ¬returnB : (k l : Ixs)
+              → ¬ k ≡ l 
+              → ¬ B[ idTC , idTC ] pm ▷ (inj₂ (IxMonadTC k l))
+    ¬returnB k .k ¬k≡l ReturnB = ¬k≡l refl
+    
+    ¬applyB : (k l i j : Ixs)
+              → (¬ i ≡ k ⊎ ¬ j ≡ l)
+              → ¬ B[ idTC , mTC k l ] pm ▷ mTC i j
+    ¬applyB .i .j i j (inj₁ ¬i≡k) ApplyB = ¬i≡k refl
+    ¬applyB .i .j i j (inj₂ ¬j≡l) ApplyB = ¬j≡l refl
+    
+    ¬functorB : (k l i j : Ixs)
+              → (¬ i ≡ k ⊎ ¬ j ≡ l)
+              → ¬ B[ mTC k l , idTC ] pm ▷ mTC i j
+    ¬functorB .i .j i j (inj₁ ¬i≡k) FunctorB = ¬i≡k refl
+    ¬functorB .i .j i j (inj₂ ¬j≡l) FunctorB = ¬j≡l refl
+    
+    ¬monadB : (k l s t i j : Ixs)
+              → ((¬ i ≡ k ⊎ ¬ j ≡ t) ⊎ ¬ l ≡ s)
+              → ¬ B[ mTC k l , mTC s t ] pm ▷ mTC i j
+    ¬monadB k l .l t .k .t (inj₁ (inj₁ ¬i≡k)) MonadB = ¬i≡k refl
+    ¬monadB k l .l t .k .t (inj₁ (inj₂ ¬j≡t)) MonadB = ¬j≡t refl
+    ¬monadB k l .l t .k .t (inj₂ ¬l≡s) MonadB = ¬l≡s refl
+
+    ¬MN∈F' : ∀ {i j : Ixs}
+           → (F : SubsetOf (TyCons × TyCons)) 
+           → ((M N : TyCons) → (M , N) ∈ F → B[ M , N ] pm ▷ mTC i j)
+           → (M N : TyCons) 
+           → ( ∃ λ(k : Ixs) → ∃ λ(l : Ixs) 
+             → ( ( M ≡ mTC k l × ¬ i ≡ k )
+               ⊎ ( N ≡ mTC k l × ¬ j ≡ l )
+               )
+             ) ⊎ (M ≡ idTC × N ≡ idTC × ¬ i ≡ j) 
+           → ¬ ((M , N) ∈ F)
+    ¬MN∈F' F morph (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ (k , l , inj₁ ((), ¬i≡k))) MN∈F
+    ¬MN∈F' F morph (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ (k , l , inj₂ ((), ¬j≡l))) MN∈F
+    ¬MN∈F' {i = i} {j = j} F morph (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (refl , refl , ¬i≡j)) MN∈F 
+      = ¬returnB i j ¬i≡j (morph idTC idTC MN∈F)
+    ¬MN∈F' F morph (inj₁ IdentTC) (inj₂ (IxMonadTC i j)) (inj₁ (k , l , inj₁ (() , ¬i≡k))) MN∈F
+    ¬MN∈F' {i = i} {j = j} F morph (inj₁ IdentTC) (inj₂ (IxMonadTC k l)) (inj₁ (.k , .l , inj₂ (refl , ¬j≡l))) MN∈F
+      = ¬applyB k l i j (inj₂ ¬j≡l) (morph idTC (mTC k l) MN∈F)
+    ¬MN∈F' F morph (inj₁ IdentTC) (inj₂ (IxMonadTC i j)) (inj₂ (refl , () , ¬i≡j)) MN∈F
+    ¬MN∈F' {i = i} {j = j} F morph (inj₂ (IxMonadTC k l)) (inj₁ IdentTC) (inj₁ (.k , .l , inj₁ (refl , ¬i≡k))) MN∈F
+      = ¬functorB k l i j (inj₁ ¬i≡k) (morph (mTC k l) idTC MN∈F)
+    ¬MN∈F' F morph (inj₂ (IxMonadTC k l)) (inj₁ IdentTC) (inj₁ (s , t , inj₂ (() , ¬i≡k))) MN∈F
+    ¬MN∈F' F morph (inj₂ (IxMonadTC i j)) (inj₁ IdentTC) (inj₂ (() , refl , ¬i≡j)) MN∈F
+    ¬MN∈F' {i = i} {j = j} F morph (inj₂ (IxMonadTC k l)) (inj₂ (IxMonadTC s t)) (inj₁ (.k , .l , inj₁ (refl , ¬i≡k))) MN∈F
+      = ¬monadB k l s t i j (inj₁ (inj₁ ¬i≡k)) (morph (mTC k l) (mTC s t) MN∈F)
+    ¬MN∈F' {i = i} {j = j} F morph (inj₂ (IxMonadTC k l)) (inj₂ (IxMonadTC s t)) (inj₁ (.s , .t , inj₂ (refl , ¬j≡t))) MN∈F 
+      = ¬monadB k l s t i j (inj₁ (inj₂ ¬j≡t)) (morph (mTC k l) (mTC s t) MN∈F)
+    ¬MN∈F' F morph (inj₂ (IxMonadTC i j)) (inj₂ (IxMonadTC k' l')) (inj₂ (() , () , ¬i≡j)) MN∈F
     
     ¬true→false : ∀ {x : Bool} → ¬ (x ≡ true) → x ≡ false
     ¬true→false {true} ¬x≡true = ⊥-elim (¬x≡true refl)
@@ -74,7 +126,6 @@ IxMonad→PrincipalPolymonad {Ixs = Ixs} _∼_ monad = princ
     emptyF F ¬II∈F morph (inj₁ IdentTC) (inj₂ (IxMonadTC k l)) = ¬MN∈F F morph idTC (mTC k l) ((IxMonadTC k l) , (inj₂ refl))
     emptyF F ¬II∈F morph (inj₂ (IxMonadTC i j)) (inj₁ IdentTC) = ¬MN∈F F morph (mTC i j) idTC ((IxMonadTC i j) , (inj₁ refl))
     emptyF F ¬II∈F morph (inj₂ (IxMonadTC i j)) (inj₂ (IxMonadTC k l)) = ¬MN∈F F morph (mTC i j) (mTC k l) ((IxMonadTC i j) , (inj₁ refl))
-
     
     II∈F→¬morphMij : ∀ {Ixs : Set} {N : Ixs → Ixs → TyCon}
                    → (monad : IxMonad Ixs N)
@@ -95,10 +146,6 @@ IxMonad→PrincipalPolymonad {Ixs = Ixs} _∼_ monad = princ
     IM∈F→¬morphMij monad i j .i .j (inj₁ ¬i≡k) F IM∈F morph | ApplyB = ¬i≡k refl
     IM∈F→¬morphMij monad i j .i .j (inj₂ ¬j≡l) F IM∈F morph | ApplyB = ¬j≡l refl
 
-    ¬returnB : (k l : Ixs)
-              → ¬ k ≡ l 
-              → ¬ B[ idTC , idTC ] pm ▷ (inj₂ (IxMonadTC k l))
-    ¬returnB k .k ¬k≡l ReturnB = ¬k≡l refl
     
     princ : PrincipalPM' pm
     princ F PS∈F (inj₁ IdentTC) (inj₁ IdentTC) morph₁ morph₂ = idTC , IdentB , IdentB , morph₁
@@ -110,14 +157,14 @@ IxMonad→PrincipalPolymonad {Ixs = Ixs} _∼_ monad = princ
     princ F PS∈F (inj₂ (IxMonadTC i j)) (inj₁ IdentTC) morph₁ morph₂ | yes II∈F = idTC , morph₁ idTC idTC II∈F , IdentB , morph₂
     princ F PS∈F (inj₂ (IxMonadTC i j)) (inj₁ IdentTC) morph₁ morph₂ | no ¬II∈F with emptyF F ¬II∈F morph₂ 
     princ F ((P , S) , PS∈F) (inj₂ (IxMonadTC i j)) (inj₁ IdentTC) morph₁ morph₂ | no ¬II∈F | ¬MN∈F = ⊥-elim (¬MN∈F P S PS∈F)
-    princ F PS∈F (inj₂ (IxMonadTC i j)) (inj₂ (IxMonadTC k l)) morph₁ morph₂ with (idTC , idTC) ∈? F 
-    princ F PS∈F (inj₂ (IxMonadTC i j)) (inj₂ (IxMonadTC k l)) morph₁ morph₂ | yes II∈F = idTC , morph₁ idTC idTC II∈F , morph₂ idTC idTC II∈F , morphId
-      where
-        morphId : (M M' : IdTyCons ⊎ IxMonadTyCons Ixs) 
-                → (M , M') ∈ F 
-                → B[ M , M' ] pm ▷ idTC
-        morphId M M' MM'∈F = {!!}
-    princ F PS∈F (inj₂ (IxMonadTC i j)) (inj₂ (IxMonadTC k l)) morph₁ morph₂ | no ¬II∈F = {!!}
+    princ F ((inj₁ IdentTC , S) , PS∈F) (inj₂ (IxMonadTC i j)) (inj₂ (IxMonadTC k l)) morph₁ morph₂ = {!!}
+    princ F ((inj₂ (IxMonadTC s t) , S) , PS∈F) (inj₂ (IxMonadTC i j)) (inj₂ (IxMonadTC k l)) morph₁ morph₂ with i ∼ s 
+    princ F ((inj₂ (IxMonadTC .i t) , S) , PS∈F) (inj₂ (IxMonadTC i j)) (inj₂ (IxMonadTC k l)) morph₁ morph₂ | yes refl with j ∼ t
+    princ F ((inj₂ (IxMonadTC .i .j) , S) , PS∈F) (inj₂ (IxMonadTC i j)) (inj₂ (IxMonadTC k l)) morph₁ morph₂ | yes refl | yes refl = {!!}
+    princ F ((inj₂ (IxMonadTC .i t) , S) , PS∈F) (inj₂ (IxMonadTC i j)) (inj₂ (IxMonadTC k l)) morph₁ morph₂ | yes refl | no ¬j≡t
+      = ⊥-elim (¬MN∈F' F morph₁ (mTC i t) S {!!} PS∈F)
+    princ F ((inj₂ (IxMonadTC s t) , S) , PS∈F) (inj₂ (IxMonadTC i j)) (inj₂ (IxMonadTC k l)) morph₁ morph₂ | no ¬i≡s
+      = ⊥-elim (¬MN∈F' F morph₁ (mTC s t) S (inj₁ (s , t , {!!})) PS∈F)
 -- -----------------------------------------------------------------------------
 --
 -- -----------------------------------------------------------------------------
