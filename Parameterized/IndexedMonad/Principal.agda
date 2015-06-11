@@ -94,7 +94,8 @@ IxMonad→PrincipalPolymonad {Ixs = Ixs} _∼_ monad = princ
              → ( ( M ≡ mTC k l × ¬ i ≡ k )
                ⊎ ( N ≡ mTC k l × ¬ j ≡ l )
                )
-             ) ⊎ (M ≡ idTC × N ≡ idTC × ¬ i ≡ j) 
+             ) 
+             ⊎ (M ≡ idTC × N ≡ idTC × ¬ i ≡ j)
            → ¬ ((M , N) ∈ F)
     ¬MN∈F' F morph (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ (k , l , inj₁ ((), ¬i≡k))) MN∈F
     ¬MN∈F' F morph (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ (k , l , inj₂ ((), ¬j≡l))) MN∈F
@@ -145,7 +146,15 @@ IxMonad→PrincipalPolymonad {Ixs = Ixs} _∼_ monad = princ
     IM∈F→¬morphMij monad i j k l unequal F IM∈F morph with morph idTC (inj₂ (IxMonadTC k l)) IM∈F
     IM∈F→¬morphMij monad i j .i .j (inj₁ ¬i≡k) F IM∈F morph | ApplyB = ¬i≡k refl
     IM∈F→¬morphMij monad i j .i .j (inj₂ ¬j≡l) F IM∈F morph | ApplyB = ¬j≡l refl
-
+    
+    ¬morphId : (F : SubsetOf (TyCons × TyCons)) 
+             → (∃ λ(P : TyCons) → ¬ P ≡ idTC × ∃ λ(S : TyCons) → (P , S) ∈ F ⊎ (S , P) ∈ F) 
+             → ¬ ((M M' : TyCons) → (M , M') ∈ F → B[ M , M' ] pm ▷ idTC)
+    ¬morphId F (inj₁ IdentTC         , ¬P≡Id , S , inj₁ PS∈F) morphId = ¬P≡Id refl
+    ¬morphId F (inj₂ (IxMonadTC i j) , ¬P≡Id , S , inj₁ PS∈F) morphId = ⊥-elim (morphId (mTC i j) S PS∈F)
+    ¬morphId F (inj₁ IdentTC         , ¬P≡Id , S , inj₂ SP∈F) morphId = ¬P≡Id refl
+    ¬morphId F (inj₂ (IxMonadTC i j) , ¬P≡Id , inj₁ IdentTC         , inj₂ SP∈F) morphId = morphId idTC (mTC i j) SP∈F
+    ¬morphId F (inj₂ (IxMonadTC i j) , ¬P≡Id , inj₂ (IxMonadTC k l) , inj₂ SP∈F) morphId = morphId (mTC k l) (mTC i j) SP∈F
     
     princ : PrincipalPM' pm
     princ F PS∈F (inj₁ IdentTC) (inj₁ IdentTC) morph₁ morph₂ = idTC , IdentB , IdentB , morph₁
@@ -157,14 +166,40 @@ IxMonad→PrincipalPolymonad {Ixs = Ixs} _∼_ monad = princ
     princ F PS∈F (inj₂ (IxMonadTC i j)) (inj₁ IdentTC) morph₁ morph₂ | yes II∈F = idTC , morph₁ idTC idTC II∈F , IdentB , morph₂
     princ F PS∈F (inj₂ (IxMonadTC i j)) (inj₁ IdentTC) morph₁ morph₂ | no ¬II∈F with emptyF F ¬II∈F morph₂ 
     princ F ((P , S) , PS∈F) (inj₂ (IxMonadTC i j)) (inj₁ IdentTC) morph₁ morph₂ | no ¬II∈F | ¬MN∈F = ⊥-elim (¬MN∈F P S PS∈F)
-    princ F ((inj₁ IdentTC , S) , PS∈F) (inj₂ (IxMonadTC i j)) (inj₂ (IxMonadTC k l)) morph₁ morph₂ = {!!}
-    princ F ((inj₂ (IxMonadTC s t) , S) , PS∈F) (inj₂ (IxMonadTC i j)) (inj₂ (IxMonadTC k l)) morph₁ morph₂ with i ∼ s 
-    princ F ((inj₂ (IxMonadTC .i t) , S) , PS∈F) (inj₂ (IxMonadTC i j)) (inj₂ (IxMonadTC k l)) morph₁ morph₂ | yes refl with j ∼ t
-    princ F ((inj₂ (IxMonadTC .i .j) , S) , PS∈F) (inj₂ (IxMonadTC i j)) (inj₂ (IxMonadTC k l)) morph₁ morph₂ | yes refl | yes refl = {!!}
-    princ F ((inj₂ (IxMonadTC .i t) , S) , PS∈F) (inj₂ (IxMonadTC i j)) (inj₂ (IxMonadTC k l)) morph₁ morph₂ | yes refl | no ¬j≡t
-      = ⊥-elim (¬MN∈F' F morph₁ (mTC i t) S {!!} PS∈F)
-    princ F ((inj₂ (IxMonadTC s t) , S) , PS∈F) (inj₂ (IxMonadTC i j)) (inj₂ (IxMonadTC k l)) morph₁ morph₂ | no ¬i≡s
-      = ⊥-elim (¬MN∈F' F morph₁ (mTC s t) S (inj₁ (s , t , {!!})) PS∈F)
+    {-
+    princ F ((inj₁ IdentTC , inj₁ IdentTC) , PS∈F) (inj₂ (IxMonadTC i j)) (inj₂ (IxMonadTC k l)) morph₁ morph₂ = solution (i ∼ j) (k ∼ l) (i ∼ k)
+      where
+        solution : Dec (i ≡ j) → Dec (k ≡ l) → Dec (i ≡ k)
+                 → ∃ (λ M̂ 
+                     → B[ M̂ , idTC ] pm ▷ inj₂ (IxMonadTC i j)
+                     × B[ M̂ , idTC ] pm ▷ inj₂ (IxMonadTC k l)
+                     × ((M M' : IdTyCons ⊎ IxMonadTyCons Ixs) → (M , M') ∈ F → B[ M , M' ] pm ▷ M̂)
+                     )
+        solution (yes i≡j) (yes k≡l) (yes i≡k)
+          = mTC i j , FunctorB , subst₂ (λ K L → B[ mTC i j , idTC ] pm ▷ mTC K L) i≡k (trans (sym i≡j) (trans i≡k k≡l)) FunctorB , morph₁
+        solution (yes i≡j) (yes k≡l) (no ¬i≡k) = {!!}
+        solution (yes i≡j) (no ¬k≡l) = ⊥-elim (¬MN∈F' F morph₂ idTC idTC (inj₂ (refl , refl , ¬k≡l)) PS∈F)
+        solution (no ¬i≡j) = ⊥-elim (¬MN∈F' F morph₁ idTC idTC (inj₂ (refl , refl , ¬i≡j)) PS∈F)
+    princ F ((inj₁ x , inj₂ y) , PS∈F) (inj₂ (IxMonadTC i j)) (inj₂ (IxMonadTC k l)) morph₁ morph₂ = {!!}
+    princ F ((inj₂ y , S) , PS∈F) (inj₂ (IxMonadTC i j)) (inj₂ (IxMonadTC k l)) morph₁ morph₂ = {!!}
+    -}
+    princ F ((P , S) , PS∈F) (inj₂ (IxMonadTC i j)) (inj₂ (IxMonadTC k l)) morph₁ morph₂ =
+      solution ((mTC i j , idTC) ∈? F) ((idTC , mTC i j) ∈? F) 
+               ((mTC k l , idTC) ∈? F) ((idTC , mTC k l) ∈? F)
+      where
+        solution : Dec ((mTC i j , idTC) ∈ F) → Dec ((idTC , mTC i j) ∈ F)
+                 → Dec ((mTC k l , idTC) ∈ F) → Dec ((idTC , mTC k l) ∈ F)
+                 → ∃ (λ M̂ 
+                     → B[ M̂ , idTC ] pm ▷ inj₂ (IxMonadTC i j)
+                     × B[ M̂ , idTC ] pm ▷ inj₂ (IxMonadTC k l)
+                     × ((M M' : IdTyCons ⊎ IxMonadTyCons Ixs) → (M , M') ∈ F → B[ M , M' ] pm ▷ M̂)
+                     )
+        solution (yes MijI∈F) IMij∈F MklI∈F IMkl∈F = mTC i j , FunctorB , morph₂ (mTC i j) idTC MijI∈F , morph₁
+        solution (no ¬MijI∈F) (yes IMij∈F) MklI∈F IMkl∈F = mTC i j , FunctorB , pmLawMorph2 pm (mTC i j) (mTC k l) (morph₂ idTC (mTC i j) IMij∈F) , morph₁
+        solution (no ¬MijI∈F) (no ¬IMij∈F) (yes MklI∈F) IMkl∈F = mTC k l , (morph₁ (mTC k l) idTC MklI∈F) , FunctorB , morph₂
+        solution (no ¬MijI∈F) (no ¬IMij∈F) (no ¬MklI∈F) (yes IMkl∈F) = (mTC k l) , {!!}
+        solution (no ¬MijI∈F) (no ¬IMij∈F) (no ¬MklI∈F) (no ¬IMkl∈F) = {!!}
+
 -- -----------------------------------------------------------------------------
 --
 -- -----------------------------------------------------------------------------
