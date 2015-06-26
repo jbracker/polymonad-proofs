@@ -15,19 +15,15 @@ open import Polymonad
 open import Identity
 
 -- Formalization of a subsets for a given set.
-SubsetOf : Type → Set
-SubsetOf X = X → Bool
+SubsetOf : Type → Set₁
+SubsetOf X = X → Set
 
 -- An element is in the subset, if the subset predicate is true.
 _∈_ : ∀ {X : Type} → (x : X) → (S : SubsetOf X) → Set
-x ∈ S = S x ≡ true
-
--- Decide if an element is in a subset
-_∈?_ : ∀ {X : Type} → (x : X) → (S : SubsetOf X) → Dec (S x ≡ true)
-x ∈? S = S x ≟ true
+x ∈ S = S x
 
 -- Predicate describing a principal polymonad.
-PrincipalPM : ∀ {TyCons : Set} {Id : TyCons} →  Polymonad TyCons Id → Set
+PrincipalPM : ∀ {TyCons : Set} {Id : TyCons} →  Polymonad TyCons Id → Set₁
 PrincipalPM {TyCons} {Id} pm 
   = (F : SubsetOf (TyCons × TyCons))
   → (M₁ M₂ : TyCons)
