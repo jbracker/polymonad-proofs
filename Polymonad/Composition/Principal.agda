@@ -29,11 +29,14 @@ principalPolymonadCompose : ∀ {TyCons₁ TyCons₂ : Set}
                           → {pm₂ : Polymonad (IdTyCons ⊎ TyCons₂) idTC}
                           → (cpm₁ : ComposablePolymonad pm₁)
                           → (cpm₂ : ComposablePolymonad pm₂)
+                          → ( (x : ((IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) × (IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)))) 
+                            → (F : SubsetOf ((IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) × (IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)))) 
+                            → Dec (x ∈ F))
                           → PrincipalPM pm₁
                           → PrincipalPM pm₂
                           → ((M : TyCons₁) → (N : TyCons₁) → Dec (M ≡ N))
                           → PrincipalPM (polymonadCompose cpm₁ cpm₂)
-principalPolymonadCompose {TyCons₁} {TyCons₂} {pm₁} {pm₂} cpm₁ cpm₂ princ₁ princ₂ _≡TC₁_ = princ
+principalPolymonadCompose {TyCons₁} {TyCons₂} {pm₁} {pm₂} cpm₁ cpm₂ _∈?_ princ₁ princ₂ _≡TC₁_ = princ
   where
     open Polymonad.Polymonad
 
@@ -50,6 +53,9 @@ principalPolymonadCompose {TyCons₁} {TyCons₂} {pm₁} {pm₂} cpm₁ cpm₂ 
 
     mTC₂ : TyCons₂ → TyCons
     mTC₂ M = inj₂ (inj₂ M)
+
+    idTC' : TyCons
+    idTC' = idTC
     
     contradiction : ∀ {l} {P : Set l} → P → ¬ P → ⊥
     contradiction P ¬P = ¬P P
@@ -103,7 +109,7 @@ principalPolymonadCompose {TyCons₁} {TyCons₂} {pm₁} {pm₂} cpm₁ cpm₂ 
     princ F (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) morph₁ morph₂ = {!!}
     princ F (inj₂ (inj₁ M₁)) (inj₂ (inj₂ N₂)) morph₁ morph₂ = 
       idTC , (mixedPrinc M₁ N₂ F morph₁ morph₂ 
-               ((mTC₁ M₁ , idTC) ∈? F) ((idTC , mTC₁ M₁) ∈? F) 
+               ((mTC₁ M₁ , idTC') ∈? F) ((idTC , mTC₁ M₁) ∈? F) 
                ((mTC₂ N₂ , idTC) ∈? F) ((idTC , mTC₂ N₂) ∈? F)
                ((mTC₁ M₁ , mTC₂ N₂) ∈? F) ((mTC₂ N₂ , mTC₁ M₁) ∈? F)
                ((mTC₁ M₁ , mTC₁ M₁) ∈? F) ((mTC₂ N₂ , mTC₂ N₂) ∈? F)

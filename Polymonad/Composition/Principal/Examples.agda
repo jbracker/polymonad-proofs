@@ -33,9 +33,12 @@ open import Monad.Composable
 -- -----------------------------------------------------------------------------
 
 principalPolymonadMonadCompose : ∀ {M₁ M₂ : TyCon} 
-                          → (monad₁ : Monad M₁) → (monad₂ : Monad M₂) 
+                          → (monad₁ : Monad M₁) → (monad₂ : Monad M₂)
+                          → ( (x : ((IdTyCons ⊎ (MonadTyCons ⊎ MonadTyCons)) × (IdTyCons ⊎ (MonadTyCons ⊎ MonadTyCons)))) 
+                            → (F : SubsetOf ((IdTyCons ⊎ (MonadTyCons ⊎ MonadTyCons)) × (IdTyCons ⊎ (MonadTyCons ⊎ MonadTyCons)))) 
+                            → Dec (x ∈ F))
                           → PrincipalPM (polymonadCompose (Monad→ComposablePolymonad monad₁) (Monad→ComposablePolymonad monad₂))
-principalPolymonadMonadCompose monad₁ monad₂ = princ
+principalPolymonadMonadCompose monad₁ monad₂ _∈?_ = princ
   where
     TyCons = IdTyCons ⊎ (MonadTyCons ⊎ MonadTyCons)
     
@@ -160,7 +163,7 @@ principalPolymonadMonadCompose monad₁ monad₂ = princ
     ¬returnB₂ k .k ¬k≡l ReturnB = ¬k≡l refl
     
     emptySubset : ∀ {S : Set} → SubsetOf S
-    emptySubset s = false
+    emptySubset s = ⊥
     
     bottom : ⊥
     bottom with princ emptySubset mTC₁ (mTC₂ k l) (λ M N ()) (λ M N ()) 
