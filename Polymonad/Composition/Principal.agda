@@ -102,19 +102,19 @@ principalPolymonadCompose {TyCons₁} {TyCons₂} {pm₁} {pm₂} cpm₁ cpm₂ 
         solution = {!!} , {!!} , newMorph
     
     princ : PrincipalPM pm
-    princ F (inj₁ IdentTC) (inj₁ IdentTC) morph₁ morph₂ = idTC , mkBindId , mkBindId , morph₂
-    princ F (inj₁ IdentTC) (inj₂ (inj₁ N₁)) morph₁ morph₂ = idTC , {!!} , {!!} , {!!}
-    princ F (inj₁ IdentTC) (inj₂ (inj₂ N₂)) morph₁ morph₂ = {!!}
-    princ F (inj₂ (inj₁ M₁)) (inj₁ IdentTC) morph₁ morph₂ = {!!}
-    princ F (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) morph₁ morph₂ = {!!}
-    princ F (inj₂ (inj₁ M₁)) (inj₂ (inj₂ N₂)) morph₁ morph₂ = 
+    princ F (M , M' , MM'∈F) (inj₁ IdentTC) (inj₁ IdentTC) morph₁ morph₂ = idTC , mkBindId , mkBindId , morph₂
+    princ F (M , M' , MM'∈F) (inj₁ IdentTC) (inj₂ (inj₁ N₁)) morph₁ morph₂ = idTC , {!!} , {!!} , {!!}
+    princ F (M , M' , MM'∈F) (inj₁ IdentTC) (inj₂ (inj₂ N₂)) morph₁ morph₂ = {!!}
+    princ F (M , M' , MM'∈F) (inj₂ (inj₁ M₁)) (inj₁ IdentTC) morph₁ morph₂ = {!!}
+    princ F (M , M' , MM'∈F) (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) morph₁ morph₂ = {!!}
+    princ F (M , M' , MM'∈F) (inj₂ (inj₁ M₁)) (inj₂ (inj₂ N₂)) morph₁ morph₂ = 
       idTC , (mixedPrinc M₁ N₂ F morph₁ morph₂ 
                ((mTC₁ M₁ , idTC') ∈? F) ((idTC , mTC₁ M₁) ∈? F) 
                ((mTC₂ N₂ , idTC) ∈? F) ((idTC , mTC₂ N₂) ∈? F)
                ((mTC₁ M₁ , mTC₂ N₂) ∈? F) ((mTC₂ N₂ , mTC₁ M₁) ∈? F)
                ((mTC₁ M₁ , mTC₁ M₁) ∈? F) ((mTC₂ N₂ , mTC₂ N₂) ∈? F)
              )
-    princ F (inj₂ (inj₂ M₂)) N morph₁ morph₂ = {!!}
+    princ F (M , M' , MM'∈F) (inj₂ (inj₂ M₂)) N morph₁ morph₂ = {!!}
 
    
     {-

@@ -144,9 +144,9 @@ pmId≡identity : ∀ {τ : Type} {x : τ} → id {τ} (pmLawId polymonadId) ≡
 pmId≡identity {τ} {x} = refl
 
 principalPolymonadId : PrincipalPM polymonadId
-principalPolymonadId F (inj₁ IdentTC) (inj₁ IdentTC) morph₁ morph₂ = (inj₁ IdentTC) , IdentB , IdentB , morph₁
-principalPolymonadId F (inj₁ IdentTC) (inj₂ ()) morph₁ morph₂
-principalPolymonadId F (inj₂ ()) M₂ morph₁ morph₂
+principalPolymonadId F (M , M' , MM'∈F) (inj₁ IdentTC) (inj₁ IdentTC) morph₁ morph₂ = (inj₁ IdentTC) , IdentB , IdentB , morph₁
+principalPolymonadId F (M , M' , MM'∈F) (inj₁ IdentTC) (inj₂ ()) morph₁ morph₂
+principalPolymonadId F (M , M' , MM'∈F) (inj₂ ()) M₂ morph₁ morph₂
 
 -- -----------------------------------------------------------------------------
 -- Monad Identity Polymonad

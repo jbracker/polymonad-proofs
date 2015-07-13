@@ -19,8 +19,8 @@ open import Polymonad
 open import Polymonad.Principal
 
 Monad→PrincipalPolymonad : ∀ {M : TyCon} → (monad : Monad M) → PrincipalPM (Monad→Polymonad monad)
-Monad→PrincipalPolymonad monad F (inj₁ IdentTC) (inj₁ IdentTC) morph₁ morph₂ = inj₁ IdentTC , IdentB   , IdentB   , morph₁
-Monad→PrincipalPolymonad monad F (inj₁ IdentTC) (inj₂ MonadTC) morph₁ morph₂ = inj₁ IdentTC , IdentB   , ReturnB  , morph₁
-Monad→PrincipalPolymonad monad F (inj₂ MonadTC) (inj₁ IdentTC) morph₁ morph₂ = inj₁ IdentTC , ReturnB  , IdentB   , morph₂
-Monad→PrincipalPolymonad monad F (inj₂ MonadTC) (inj₂ MonadTC) morph₁ morph₂ = inj₂ MonadTC , FunctorB , FunctorB , morph₂
+Monad→PrincipalPolymonad monad F (M , M' , MM'∈F) (inj₁ IdentTC) (inj₁ IdentTC) morph₁ morph₂ = inj₁ IdentTC , IdentB   , IdentB   , morph₁
+Monad→PrincipalPolymonad monad F (M , M' , MM'∈F) (inj₁ IdentTC) (inj₂ MonadTC) morph₁ morph₂ = inj₁ IdentTC , IdentB   , ReturnB  , morph₁
+Monad→PrincipalPolymonad monad F (M , M' , MM'∈F) (inj₂ MonadTC) (inj₁ IdentTC) morph₁ morph₂ = inj₁ IdentTC , ReturnB  , IdentB   , morph₂
+Monad→PrincipalPolymonad monad F (M , M' , MM'∈F) (inj₂ MonadTC) (inj₂ MonadTC) morph₁ morph₂ = inj₂ MonadTC , FunctorB , FunctorB , morph₂
 

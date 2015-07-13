@@ -23,9 +23,13 @@ _∈_ : ∀ {X : Type} → (x : X) → (S : SubsetOf X) → Set
 x ∈ S = S x
 
 -- Predicate describing a principal polymonad.
+-- This deviates from Hicks original definition in that F may not be empty.
+-- This is an important restriction, because otherwise every two elements in 
+-- the set of type constructors would have a common lower-bound.
 PrincipalPM : ∀ {TyCons : Set} {Id : TyCons} →  Polymonad TyCons Id → Set₁
 PrincipalPM {TyCons} {Id} pm 
   = (F : SubsetOf (TyCons × TyCons))
+  → (∃ λ(M : TyCons) → ∃ λ(M' : TyCons) → (M , M') ∈ F)
   → (M₁ M₂ : TyCons)
   → (∀ (M M' : TyCons) → (M , M') ∈ F → B[ M , M' ] pm ▷ M₁)
   → (∀ (M M' : TyCons) → (M , M') ∈ F → B[ M , M' ] pm ▷ M₂)

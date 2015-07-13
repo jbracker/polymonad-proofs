@@ -104,33 +104,35 @@ principalPolymonadMonadCompose monad₁ monad₂ _∈?_ = princ
         solution = idTC , ReturnB , ReturnB , newMorph
 
     princ : PrincipalPM pm
-    princ F (inj₁ IdentTC) (inj₁ IdentTC) morph₁ morph₂ = idTC , IdentB , IdentB , morph₁
-    princ F (inj₁ IdentTC) (inj₂ (inj₁ MonadTC)) morph₁ morph₂ = idTC , IdentB , ReturnB , morph₁
-    princ F (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) morph₁ morph₂ = idTC , IdentB , ReturnB , morph₁
-    princ F (inj₂ (inj₁ MonadTC)) (inj₁ IdentTC) morph₁ morph₂ = idTC , ReturnB , IdentB , morph₂
-    princ F (inj₂ (inj₁ MonadTC)) (inj₂ (inj₁ MonadTC)) morph₁ morph₂ = mTC₁ , FunctorB , FunctorB , morph₁
-    princ F (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) morph₁ morph₂ = 
+    princ F (M , M' , MM'∈F) (inj₁ IdentTC) (inj₁ IdentTC) morph₁ morph₂ = idTC , IdentB , IdentB , morph₁
+    princ F (M , M' , MM'∈F) (inj₁ IdentTC) (inj₂ (inj₁ MonadTC)) morph₁ morph₂ = idTC , IdentB , ReturnB , morph₁
+    princ F (M , M' , MM'∈F) (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) morph₁ morph₂ = idTC , IdentB , ReturnB , morph₁
+    princ F (M , M' , MM'∈F) (inj₂ (inj₁ MonadTC)) (inj₁ IdentTC) morph₁ morph₂ = idTC , ReturnB , IdentB , morph₂
+    princ F (M , M' , MM'∈F) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₁ MonadTC)) morph₁ morph₂ = mTC₁ , FunctorB , FunctorB , morph₁
+    princ F (M , M' , MM'∈F) (inj₂ (inj₁ MonadTC)) (inj₂ (inj₂ MonadTC)) morph₁ morph₂ = 
       mixedPrinc F morph₁ morph₂ 
         ((mTC₁ , idTC) ∈? F) ((idTC , mTC₁) ∈? F) 
         ((mTC₂ , idTC) ∈? F) ((idTC , mTC₂) ∈? F)
         ((mTC₁ , mTC₂) ∈? F) ((mTC₂ , mTC₁) ∈? F)
         ((mTC₁ , mTC₁) ∈? F) ((mTC₂ , mTC₂) ∈? F)
-    princ F (inj₂ (inj₂ MonadTC)) (inj₁ IdentTC) morph₁ morph₂ = idTC , ReturnB , IdentB , morph₂
-    princ F (inj₂ (inj₂ MonadTC)) (inj₂ (inj₁ MonadTC)) morph₁ morph₂ = 
+    princ F (M , M' , MM'∈F) (inj₂ (inj₂ MonadTC)) (inj₁ IdentTC) morph₁ morph₂ = idTC , ReturnB , IdentB , morph₂
+    princ F (M , M' , MM'∈F) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₁ MonadTC)) morph₁ morph₂ = 
       let M , b₁ , b₂ , morph = mixedPrinc F morph₂ morph₁ 
                                   ((mTC₁ , idTC) ∈? F) ((idTC , mTC₁) ∈? F) 
                                   ((mTC₂ , idTC) ∈? F) ((idTC , mTC₂) ∈? F)
                                   ((mTC₁ , mTC₂) ∈? F) ((mTC₂ , mTC₁) ∈? F)
                                   ((mTC₁ , mTC₁) ∈? F) ((mTC₂ , mTC₂) ∈? F)
       in M , b₂ , b₁ , morph
-    princ F (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) morph₁ morph₂ = mTC₂ , FunctorB , FunctorB , morph₂
+    princ F (M , M' , MM'∈F) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) morph₁ morph₂ = mTC₂ , FunctorB , FunctorB , morph₂
 
 -- -----------------------------------------------------------------------------
 -- COUNTEREXAMPLE for principality of polymonad composition
 -- Composition of a standard and an indexed monad is not principal,
 -- if there exist two different indices.
+-- 
+-- Does not work anymore because F needs to be non-empty now.
 -- -----------------------------------------------------------------------------
-
+{-
 ¬principalPolymonadMonadIxMonadCompose : ∀ {Ixs : Set} {M₁ : TyCon} {M₂ : Ixs → Ixs → TyCon}
                                        → (k l : Ixs) → ¬ k ≡ l
                                        → (monad₁ : Monad M₁) → (monad₂ : IxMonad Ixs M₂)
@@ -170,3 +172,4 @@ principalPolymonadMonadCompose monad₁ monad₂ _∈?_ = princ
     bottom | inj₁ IdentTC , b₁ , b₂ , morph = ¬returnB₂ k l ¬k≡l b₂
     bottom | inj₂ (inj₁ MonadTC) , b₁ , () , morph
     bottom | inj₂ (inj₂ (IxMonadTC i j)) , () , b₂ , morph
+-}
