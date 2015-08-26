@@ -48,6 +48,12 @@ x≡subst²x : ∀ {M M' : TyCon}
           → x ≡ subst (λ M → M α) (sym eqM) (subst (λ M → M α) eqM x)
 x≡subst²x refl = refl
 
+x≡subst²x' : ∀ {M M' : TyCon} 
+           → (eqM : M ≡ M')
+           → ∀ {α : Type} {x : M' α}
+           → x ≡ subst (λ M → M α) eqM (subst (λ M → M α) (sym eqM) x)
+x≡subst²x' refl = refl
+
 b≡substBind²b : ∀ {M N P M' N' P' : TyCon} 
               → (b : [ M , N ]▷ P)
               → (eqM : M ≡ M')

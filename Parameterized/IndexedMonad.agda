@@ -71,33 +71,99 @@ PhantomIndex M = ∃ λ(K : TyCon) → ∀ {i j} → M i j ≡ K
 castPhantomBind : ∀ {Ixs} {i j k : Ixs} {M : Ixs → Ixs → TyCon} 
                 → (K : PhantomIndex M) 
                 → [ M i j , M j k ]▷ M i k → [ proj₁ K , proj₁ K ]▷ proj₁ K
-castPhantomBind (_ , Mij≡K) b {α} {β} = subst₃ [_,_]▷_ Mij≡K Mij≡K Mij≡K b {α} {β}
+castPhantomBind (_ , Mij≡K) b {α} {β} = substBind Mij≡K Mij≡K Mij≡K b {α} {β}
 
 castPhantomReturn : ∀ {Ixs} {i : Ixs} {M : Ixs → Ixs → TyCon} 
                   → (K : PhantomIndex M) → {α : Type} 
                   → (α → M i i α) → (α → proj₁ K α)
 castPhantomReturn (_ , Mij≡K) {α = α} r = subst (\X → (α → X α)) Mij≡K r
 
+Mij≡Mkl : ∀ {Ixs : Set} → {M : Ixs → Ixs → TyCon} → (K : PhantomIndex M)
+        → ∀ {i j k l} → M i j ≡ M k l
+Mij≡Mkl (_ , Mij≡K) = trans Mij≡K (sym Mij≡K)
+
+Mij→K : ∀ {Ixs : Set} → {M : Ixs → Ixs → TyCon} → (K : PhantomIndex M)
+      → ∀ {i j} → ∀ {α} → M i j α → (proj₁ K) α
+Mij→K (K , Mij≡K) {α = α} mij = subst (λ X → X α) Mij≡K mij
+
+K→Mij : ∀ {Ixs : Set} → {M : Ixs → Ixs → TyCon} → (K : PhantomIndex M)
+      → ∀ {i j} → ∀ {α} → (proj₁ K) α → M i j α
+K→Mij (K , Mij≡K) {α = α} k = subst (λ X → X α) (sym Mij≡K) k
+
+id≡K→Mij∘Mij→K : {Ixs : Set} → {M : Ixs → Ixs → TyCon} 
+               → (K : PhantomIndex M)
+               → ∀ {i j} → ∀ {α} → {mij : M i j α} 
+               → mij ≡ (K→Mij K (Mij→K K mij))
+id≡K→Mij∘Mij→K K = x≡subst²x (proj₂ K)
+
+id≡Mij→K∘K→Mij : {Ixs : Set} → {M : Ixs → Ixs → TyCon} 
+               → (K : PhantomIndex M)
+               → ∀ {i j} → ∀ {α} → {k : (proj₁ K) α} 
+               → k ≡ (Mij→K K (K→Mij K {i = i} {j = j} k))
+id≡Mij→K∘K→Mij K = x≡subst²x' (proj₂ K)
+
 PhantomIxMonad→Monad : ∀ {Ixs} {M} → Ixs → IxMonad Ixs M → (K : PhantomIndex M) → Monad (proj₁ K)
-PhantomIxMonad→Monad i ixMonad K = record
+PhantomIxMonad→Monad {Ixs = Ixs} {M = IxM} i ixMonad K = record
   { _>>=_ = _>>=_
   ; return = return
-  ; lawIdR = {!!}
-  ; lawIdL = {!!}
-  ; lawAssoc = {!!}
+  ; lawIdR = lawIdR
+  ; lawIdL = lawIdL
+  ; lawAssoc = lawAssoc
   } where
+      ixReturn : ∀ {α} → α → IxM i i α
+      ixReturn = IxMonad.return ixMonad
+      
+      _>>=ix_ : [ IxM i i , IxM i i ]▷ IxM i i
+      _>>=ix_ = IxMonad.bind ixMonad
+      
+      M : TyCon
       M = proj₁ K
+      Mij≡K : IxM i i ≡ proj₁ K
+      Mij≡K = proj₂ K
       
       _>>=_ : [ M , M ]▷ M
-      _>>=_ = castPhantomBind {i = i} {j = i} {k = i} K (mBind ixMonad)
+      _>>=_ = castPhantomBind K (_>>=ix_)
     
       return : ∀ {α : Type} → α → M α
-      return {α = α} = castPhantomReturn {i = i} K {α} (mReturn ixMonad)
+      return {α = α} = castPhantomReturn K {α} ixReturn
+      
+      commuteBindK→Mij : ∀ {α β} → (k : M α) → (f : α → M β) 
+                       → K→Mij K (k >>= f) ≡ K→Mij K k >>=ix (subst (λ X → (α → X β)) (sym Mij≡K) f)
+      commuteBindK→Mij {α = α} {β = β} k f = begin
+        K→Mij K (k >>= f) ≡⟨ refl ⟩
+        K→Mij K (castPhantomBind K _>>=ix_ k f) 
+          ≡⟨ refl ⟩
+        K→Mij K (substBind Mij≡K Mij≡K Mij≡K _>>=ix_ {α} {β} k f)
+          ≡⟨ cong (λ X → K→Mij K X) (substBindInwardEq _>>=ix_ Mij≡K Mij≡K Mij≡K k f) ⟩
+        K→Mij K ( subst (λ X → X β) Mij≡K (_>>=ix_ (subst (λ X → X α) (sym Mij≡K) k) (subst (λ X → (α → X β)) (sym Mij≡K) f)) )
+          ≡⟨ refl ⟩
+        K→Mij K ( Mij→K K (K→Mij K k >>=ix (subst (λ X → (α → X β)) (sym Mij≡K) f)) )
+          ≡⟨ sym (id≡K→Mij∘Mij→K K) ⟩
+        K→Mij K k >>=ix (subst (λ X → (α → X β)) (sym Mij≡K) f) ∎
+
+      -- TODO: Commute Return
 
       lawIdR : ∀ {α β : Type} 
            → (a : α) → (k : α → M β) 
            → return a >>= k ≡ k a
-      lawIdR a k = {!mLawIdR a k!}
+      lawIdR {α = α} {β = β} a k = begin
+        return a >>= k 
+          ≡⟨ id≡Mij→K∘K→Mij K {i = i} {j = i} ⟩
+        Mij→K K (K→Mij K (return a >>= k)) 
+          ≡⟨ cong (λ X → Mij→K K X) (commuteBindK→Mij (return a) k) ⟩
+        Mij→K K (K→Mij K (return a) >>=ix (subst (λ X → (α → X β)) (sym Mij≡K) k)) 
+          ≡⟨ {!cong (λ X → Mij→K K X) ?!} ⟩
+        --Mij→K K (K→Mij K (return a) >>=ix (subst (λ X → (α → X β)) (sym Mij≡K) k))
+        --  ≡⟨ ? ⟩
+        k a ∎
+
+{-
+
+    lawIdR : ∀ {α β : Type} {i j : Ixs}
+           → (a : α) → (k : α → M i j β) 
+           → return a >>= k ≡ k a
+
+-}
 
 -- ∀ {α β : Type} {i j : Ixs}
 --           → (a : α) → (k : α → M i j β) 
@@ -106,9 +172,13 @@ PhantomIxMonad→Monad i ixMonad K = record
       lawIdL : ∀ {α : Type} 
            → (m : M α)
            → m >>= return ≡ m
-      lawIdL = {!!}
+      lawIdL m = begin
+        m >>= return ≡⟨ {!!} ⟩
+        m ∎
       
       lawAssoc : ∀ {α β γ : Type} 
              → (m : M α) → (k : α → M β) → (h : β → M γ) 
              → m >>= (λ x → k x >>= h) ≡ (m >>= k) >>= h
-      lawAssoc = {!!}
+      lawAssoc m k h = begin
+        m >>= (λ x → k x >>= h) ≡⟨ {!!} ⟩
+        (m >>= k) >>= h ∎
