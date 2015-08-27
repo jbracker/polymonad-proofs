@@ -17,6 +17,12 @@ open import Utilities
 open import Haskell
 open import Identity
 open import Monad renaming ( mBind to monadBind ; mReturn to monadReturn )
+open import Monad.Polymonad
+open import Monad.Principal
+open import Monad.Composable
+open import Polymonad
+open import Polymonad.Principal
+open import Polymonad.Composable
 open import Parameterized.IndexedMonad
 open import Parameterized.PhantomIndices
 
@@ -44,8 +50,11 @@ id≡Mij→K∘K→Mij : {Ixs : Set} → {M : Ixs → Ixs → TyCon}
                → k ≡ (IxM→K (Ixs ∷ Ixs ∷ []) K (K→IxM (Ixs ∷ Ixs ∷ []) K {i} {j} k))
 id≡Mij→K∘K→Mij K = x≡subst²x' (proj₂ K)
 
-PhantomIxMonad→Monad : ∀ {Ixs} {M} → Ixs → IxMonad Ixs M → (K : PhantomIndices (Ixs ∷ Ixs ∷ []) M) → Monad (proj₁ K)
-PhantomIxMonad→Monad {Ixs = Ixs} {M = IxM} i ixMonad K = record
+-- -----------------------------------------------------------------------------
+-- A indexed monad with phantom indices is basically equivalent to a normal monad.
+-- -----------------------------------------------------------------------------
+PhantomIxMonad→Monad : ∀ {Ixs} {M} → Ixs → (K : PhantomIndices (Ixs ∷ Ixs ∷ []) M) → IxMonad Ixs M → Monad (proj₁ K)
+PhantomIxMonad→Monad {Ixs = Ixs} {M = IxM} i K ixMonad = record
   { _>>=_ = _>>=_
   ; return = return
   ; lawIdR = lawIdR
@@ -179,3 +188,36 @@ PhantomIxMonad→Monad {Ixs = Ixs} {M = IxM} i ixMonad K = record
           ≡⟨ sym (id≡Mij→K∘K→Mij K) ⟩
         (m >>= k) >>= h ∎
 
+-- -----------------------------------------------------------------------------
+-- Indexed monads are principal polymonads
+-- -----------------------------------------------------------------------------
+PhantomIxMonad→Polymonad 
+  : ∀ {Ixs : Set} {M : Ixs → Ixs → TyCon}
+  → Ixs
+  → (K : PhantomIndices (Ixs ∷ Ixs ∷ []) M)
+  → (ixMonad : IxMonad Ixs M)
+  → Polymonad (IdTyCons ⊎ MonadTyCons) idTC
+PhantomIxMonad→Polymonad i K ixMonad = Monad→Polymonad (PhantomIxMonad→Monad i K ixMonad)
+
+PhantomIxMonad→PrincipalPolymonad 
+  : ∀ {Ixs : Set} {M : Ixs → Ixs → TyCon}
+  → (i : Ixs)
+  → (K : PhantomIndices (Ixs ∷ Ixs ∷ []) M)
+  → (ixMonad : IxMonad Ixs M)
+  → PrincipalPM (PhantomIxMonad→Polymonad i K ixMonad)
+PhantomIxMonad→PrincipalPolymonad i K ixMonad = Monad→PrincipalPolymonad (PhantomIxMonad→Monad i K ixMonad)
+
+PhantomIxMonad→ComposablePolymonad 
+  : ∀ {Ixs : Set} {M : Ixs → Ixs → TyCon}
+  → (i : Ixs)
+  → (K : PhantomIndices (Ixs ∷ Ixs ∷ []) M)
+  → (ixMonad : IxMonad Ixs M)
+  → ComposablePolymonad (PhantomIxMonad→Polymonad i K ixMonad)
+PhantomIxMonad→ComposablePolymonad i K ixMonad = Monad→ComposablePolymonad (PhantomIxMonad→Monad i K ixMonad)
+
+-- -----------------------------------------------------------------------------
+-- Indexed monads preserve principality when composed with other indexed monads or normal monads.
+-- -----------------------------------------------------------------------------
+
+-- Using the example from Polymonad.Principal.Examples we can not compose indexed monads with phantom indices 
+-- with each other and with monads.
