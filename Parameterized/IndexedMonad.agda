@@ -141,7 +141,17 @@ PhantomIxMonad→Monad {Ixs = Ixs} {M = IxM} i ixMonad K = record
           ≡⟨ sym (id≡K→Mij∘Mij→K K) ⟩
         K→Mij K k >>=ix (subst (λ X → (α → X β)) (sym Mij≡K) f) ∎
 
-      -- TODO: Commute Return
+      commuteReturnK→Mij : ∀ {α} → (a : α) → K→Mij K (return a) ≡ ixReturn a
+      commuteReturnK→Mij {α = α} a = begin
+        K→Mij K (return a) 
+          ≡⟨ refl ⟩ 
+        K→Mij K (castPhantomReturn K ixReturn a)
+          ≡⟨ refl ⟩
+        K→Mij K (subst (\X → (α → X α)) Mij≡K ixReturn a)
+          ≡⟨ cong (λ X → K→Mij K X) (sym (shiftFunSubst' Mij≡K a ixReturn)) ⟩
+        K→Mij K (subst (\X → X α) Mij≡K (ixReturn a))
+          ≡⟨ sym (id≡K→Mij∘Mij→K K) ⟩
+        ixReturn a ∎
 
       lawIdR : ∀ {α β : Type} 
            → (a : α) → (k : α → M β) 
@@ -152,33 +162,27 @@ PhantomIxMonad→Monad {Ixs = Ixs} {M = IxM} i ixMonad K = record
         Mij→K K (K→Mij K (return a >>= k)) 
           ≡⟨ cong (λ X → Mij→K K X) (commuteBindK→Mij (return a) k) ⟩
         Mij→K K (K→Mij K (return a) >>=ix (subst (λ X → (α → X β)) (sym Mij≡K) k)) 
-          ≡⟨ {!cong (λ X → Mij→K K X) ?!} ⟩
-        --Mij→K K (K→Mij K (return a) >>=ix (subst (λ X → (α → X β)) (sym Mij≡K) k))
-        --  ≡⟨ ? ⟩
+          ≡⟨ cong (λ X → Mij→K K (X >>=ix (subst (λ X → (α → X β)) (sym Mij≡K) k))) (commuteReturnK→Mij a) ⟩
+        Mij→K K (ixReturn a >>=ix (subst (λ X → (α → X β)) (sym Mij≡K) k))
+          ≡⟨ cong (λ X → Mij→K K X) (IxMonad.lawIdR ixMonad a (subst (λ X → (α → X β)) (sym Mij≡K) k)) ⟩
+        Mij→K K (subst (λ X → (α → X β)) (sym Mij≡K) k a)
+          ≡⟨ (cong (λ X → Mij→K K X) (sym (shiftFunSubst' (sym Mij≡K) a k))) ⟩
+        Mij→K K (subst (λ X → X β) (sym Mij≡K) (k a))
+          ≡⟨ sym (id≡Mij→K∘K→Mij K) ⟩
         k a ∎
-
-{-
-
-    lawIdR : ∀ {α β : Type} {i j : Ixs}
-           → (a : α) → (k : α → M i j β) 
-           → return a >>= k ≡ k a
-
--}
-
--- ∀ {α β : Type} {i j : Ixs}
---           → (a : α) → (k : α → M i j β) 
---           → return a >>= k ≡ k a
       
       lawIdL : ∀ {α : Type} 
            → (m : M α)
            → m >>= return ≡ m
       lawIdL m = begin
-        m >>= return ≡⟨ {!!} ⟩
+        m >>= return 
+          ≡⟨ {!!} ⟩
         m ∎
       
       lawAssoc : ∀ {α β γ : Type} 
              → (m : M α) → (k : α → M β) → (h : β → M γ) 
              → m >>= (λ x → k x >>= h) ≡ (m >>= k) >>= h
       lawAssoc m k h = begin
-        m >>= (λ x → k x >>= h) ≡⟨ {!!} ⟩
+        m >>= (λ x → k x >>= h) 
+          ≡⟨ {!!} ⟩
         (m >>= k) >>= h ∎

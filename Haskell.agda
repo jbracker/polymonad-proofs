@@ -102,3 +102,10 @@ shiftFunSubst : ∀ {M M' : TyCon}
               → (λ x → subst (λ M → M β) eqM (f x)) ≡ subst (λ N → (α → N β)) eqM f
 shiftFunSubst refl f = refl
 
+shiftFunSubst' : ∀ {M M' : TyCon}
+               → (eqM : M ≡ M')
+               → ∀ {α β : Type}
+               → (x : α)
+               → (f : α → M β)
+               → subst (λ M → M β) eqM (f x) ≡ subst (λ N → (α → N β)) eqM f x
+shiftFunSubst' refl x f = refl
