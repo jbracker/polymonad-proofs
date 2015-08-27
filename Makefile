@@ -53,6 +53,7 @@ type-check:
 	$(AGDA_TC) Monad/Principal.agda
 	
 	# Parameterized Monads
+	$(AGDA_TC) Parameterized/PhantomIndices.agda
 	$(AGDA_TC) Parameterized/IndexedMonad.agda
 	$(AGDA_TC) Parameterized/IndexedMonad/Polymonad.agda
 	$(AGDA_TC) Parameterized/IndexedMonad/Composable.agda
