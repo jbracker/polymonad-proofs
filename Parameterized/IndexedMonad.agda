@@ -130,7 +130,8 @@ PhantomIxMonad→Monad {Ixs = Ixs} {M = IxM} i ixMonad K = record
       commuteBindK→Mij : ∀ {α β} → (k : M α) → (f : α → M β) 
                        → K→Mij K (k >>= f) ≡ K→Mij K k >>=ix (subst (λ X → (α → X β)) (sym Mij≡K) f)
       commuteBindK→Mij {α = α} {β = β} k f = begin
-        K→Mij K (k >>= f) ≡⟨ refl ⟩
+        K→Mij K (k >>= f) 
+          ≡⟨ refl ⟩
         K→Mij K (castPhantomBind K _>>=ix_ k f) 
           ≡⟨ refl ⟩
         K→Mij K (substBind Mij≡K Mij≡K Mij≡K _>>=ix_ {α} {β} k f)
@@ -153,6 +154,16 @@ PhantomIxMonad→Monad {Ixs = Ixs} {M = IxM} i ixMonad K = record
           ≡⟨ sym (id≡K→Mij∘Mij→K K) ⟩
         ixReturn a ∎
 
+      commuteReturnK→Mij' : ∀ {α} → subst (\X → (α → X α)) (sym Mij≡K) return ≡ ixReturn
+      commuteReturnK→Mij' {α = α} = begin
+        subst (\X → (α → X α)) (sym Mij≡K) return
+          ≡⟨ refl ⟩ 
+        subst (\X → (α → X α)) (sym Mij≡K) (castPhantomReturn K ixReturn)
+          ≡⟨ refl ⟩
+        subst (\X → (α → X α)) (sym Mij≡K) (subst (\X → (α → X α)) Mij≡K ixReturn)
+          ≡⟨ sym (f≡subst²f Mij≡K) ⟩
+        ixReturn ∎
+
       lawIdR : ∀ {α β : Type} 
            → (a : α) → (k : α → M β) 
            → return a >>= k ≡ k a
@@ -174,9 +185,17 @@ PhantomIxMonad→Monad {Ixs = Ixs} {M = IxM} i ixMonad K = record
       lawIdL : ∀ {α : Type} 
            → (m : M α)
            → m >>= return ≡ m
-      lawIdL m = begin
+      lawIdL {α = α} m = begin
         m >>= return 
-          ≡⟨ {!!} ⟩
+          ≡⟨ id≡Mij→K∘K→Mij K {i = i} {j = i} ⟩
+        Mij→K K (K→Mij K (m >>= return)) 
+          ≡⟨ cong (λ X → Mij→K K X) (commuteBindK→Mij m return) ⟩
+        Mij→K K (K→Mij K m >>=ix (subst (λ X → (α → X α)) (sym Mij≡K) return)) 
+          ≡⟨ cong (λ X → Mij→K K (K→Mij K m >>=ix X)) commuteReturnK→Mij' ⟩
+        Mij→K K (K→Mij K m >>=ix ixReturn) 
+          ≡⟨ cong (λ X → Mij→K K X) (IxMonad.lawIdL ixMonad (K→Mij K m)) ⟩
+        Mij→K K (K→Mij K m)
+          ≡⟨ sym (id≡Mij→K∘K→Mij K) ⟩
         m ∎
       
       lawAssoc : ∀ {α β γ : Type} 
