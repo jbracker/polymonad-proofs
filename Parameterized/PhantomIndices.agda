@@ -13,11 +13,46 @@ ParamTyCon : ∀ {n} → (ts : Vec Set n) → Set₁
 ParamTyCon [] = TyCon
 ParamTyCon (T ∷ ts) = T → ParamTyCon ts
 
-∀IndicesM≡K : ∀ {n} {ts : Vec Set n} → (M : ParamTyCon ts) → (K : TyCon) → Set₁
-∀IndicesM≡K {ts = []} M K = M ≡ K
-∀IndicesM≡K {ts = T ∷ ts} M K = ∀ {i : T} → ∀IndicesM≡K {ts = ts} (M i) K
+∀Indices : ∀ {n} → (ts : Vec Set n) → (M : ParamTyCon ts) → (TyCon → Set₁) → Set₁
+∀Indices [] M pred = pred M
+∀Indices (T ∷ ts) M pred = ∀ {i : T} → ∀Indices ts (M i) pred
 
-PhantomIndices : ∀ {n} {ts : Vec Set n} → (M : ParamTyCon ts) → Set₁
-PhantomIndices {ts = ts} M = ∃ λ(K : TyCon) → ∀IndicesM≡K {ts = ts} M K
+∀IndicesImpl : ∀ {n} {Accum : TyCon → Set₁} {Result : TyCon → Set₁} 
+             → (ts : Vec Set n) 
+             → (M : ParamTyCon ts) 
+             → ∀Indices ts M Accum 
+             → ((X : TyCon) → Accum X → Result X) 
+             → ∀Indices ts M Result
+∀IndicesImpl [] M assum impl = impl M assum
+∀IndicesImpl (I ∷ ts) M accum impl = λ {i : I} → ∀IndicesImpl ts (M i) (accum {i}) impl
 
+PhantomIndices : ∀ {n} (ts : Vec Set n) → (M : ParamTyCon ts) → Set₁
+PhantomIndices ts M = ∃ λ(K : TyCon) → ∀Indices ts M (λ X → X ≡ K)
+
+-- We can type case any applied parameterized type constructor into 
+-- its representing type constructor.
+IxM→K : ∀ {n} 
+      → (ts : Vec Set n)
+      → {M : ParamTyCon ts} 
+      → (K : PhantomIndices ts M)
+      → ∀Indices ts M (λ AppM → ∀ {α} → AppM α → (proj₁ K) α)
+IxM→K ts {M = M} (K , IxM≡K) = ∀IndicesImpl ts M IxM≡K (λ AppM AppM≡K {α} ma → subst (λ X → X α) AppM≡K ma)
+
+-- We can type case any applied parameterized type constructor into 
+-- its representing type constructor.
+K→IxM : ∀ {n}
+      → (ts : Vec Set n)
+      → {M : ParamTyCon ts}
+      → (K : PhantomIndices ts M)
+      → ∀Indices ts M (λ AppM → ∀ {α} → (proj₁ K) α → AppM α)
+K→IxM ts {M = M} (K , IxM≡K) = ∀IndicesImpl ts M IxM≡K (λ AppM AppM≡K {α} k → subst (λ X → X α) (sym AppM≡K) k)
+
+-- Independent of which indices we apply the type parameterized type constructor to it will 
+-- always remain the same type.
+IxM≡IxM : ∀ {n} 
+        → (ts : Vec Set n)
+        → {M : ParamTyCon ts} 
+        → (K : PhantomIndices ts M)
+        → ∀Indices ts M (λ AppM → ∀Indices ts M (λ AppM' → AppM ≡ AppM'))
+IxM≡IxM ts {M = M} (_ , IxM≡K) = ∀IndicesImpl ts M IxM≡K (λ AppM AppM≡K → ∀IndicesImpl ts M IxM≡K (λ AppM' AppM'≡K → trans AppM≡K (sym AppM'≡K))) 
 
