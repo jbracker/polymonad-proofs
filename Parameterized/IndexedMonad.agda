@@ -201,7 +201,19 @@ PhantomIxMonad→Monad {Ixs = Ixs} {M = IxM} i ixMonad K = record
       lawAssoc : ∀ {α β γ : Type} 
              → (m : M α) → (k : α → M β) → (h : β → M γ) 
              → m >>= (λ x → k x >>= h) ≡ (m >>= k) >>= h
-      lawAssoc m k h = begin
+      lawAssoc {α = α} {β = β} {γ = γ} m k h = begin
         m >>= (λ x → k x >>= h) 
-          ≡⟨ {!!} ⟩
+          ≡⟨ id≡Mij→K∘K→Mij K {i = i} {j = i} ⟩
+        Mij→K K (K→Mij K (m >>= (λ x → k x >>= h))) 
+          ≡⟨ cong (λ X → Mij→K K X) (commuteBindK→Mij m (λ x → k x >>= h)) ⟩
+        Mij→K K (K→Mij K m >>=ix subst (λ X → (α → X γ)) (sym Mij≡K) (λ x → k x >>= h)) 
+          ≡⟨ cong (λ X → Mij→K K (K→Mij K m >>=ix X)) {!!} ⟩
+        Mij→K K (K→Mij K m >>=ix (λ x → (subst (λ X → (α → X β)) (sym Mij≡K) k) x >>=ix (subst (λ X → (β → X γ)) (sym Mij≡K) h))) 
+          ≡⟨ cong (λ X → Mij→K K X) (IxMonad.lawAssoc ixMonad (K→Mij K m) ((subst (λ X → (α → X β)) (sym Mij≡K) k)) ((subst (λ X → (β → X γ)) (sym Mij≡K) h))) ⟩
+        Mij→K K ((K→Mij K m >>=ix (subst (λ X → (α → X β)) (sym Mij≡K) k)) >>=ix (subst (λ X → (β → X γ)) (sym Mij≡K) h))
+          ≡⟨ cong (λ X → Mij→K K (X >>=ix (subst (λ X → (β → X γ)) (sym Mij≡K) h))) (sym (commuteBindK→Mij m k)) ⟩
+        Mij→K K (K→Mij K (m >>= k) >>=ix (subst (λ X → (β → X γ)) (sym Mij≡K) h))
+          ≡⟨ cong (λ X → Mij→K K X) (sym (commuteBindK→Mij (m >>= k) h)) ⟩
+        Mij→K K (K→Mij K ((m >>= k) >>= h))
+          ≡⟨ sym (id≡Mij→K∘K→Mij K) ⟩
         (m >>= k) >>= h ∎
