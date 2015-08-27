@@ -141,6 +141,20 @@ PhantomIxMonad→Monad {Ixs = Ixs} {M = IxM} i ixMonad K = record
         K→Mij K ( Mij→K K (K→Mij K k >>=ix (subst (λ X → (α → X β)) (sym Mij≡K) f)) )
           ≡⟨ sym (id≡K→Mij∘Mij→K K) ⟩
         K→Mij K k >>=ix (subst (λ X → (α → X β)) (sym Mij≡K) f) ∎
+        
+      commuteBindK→Mij' : {α β γ : Type} → (k : α → M β) → (h : β → M γ)
+                        → subst (λ X → α → X γ) (sym Mij≡K) (λ x → k x >>= h) 
+                        ≡ (λ x → subst (λ X → α → X β) (sym Mij≡K) k x >>=ix subst (λ X → β → X γ) (sym Mij≡K) h)
+      commuteBindK→Mij' {α = α} {β = β} {γ = γ} k h = funExt (λ a → begin
+        subst (λ X → α → X γ) (sym Mij≡K) (λ x → k x >>= h) a
+          ≡⟨ sym (shiftFunSubst' (sym Mij≡K) a (λ x → k x >>= h)) ⟩
+        subst (λ X → X γ) (sym Mij≡K) ((λ x → k x >>= h) a)
+          ≡⟨ refl ⟩
+        subst (λ X → X γ) (sym Mij≡K) (k a >>= h)
+          ≡⟨ commuteBindK→Mij (k a) h ⟩
+        subst (λ X → X β) (sym Mij≡K) (k a) >>=ix (subst (λ X → (β → X γ)) (sym Mij≡K) h)
+          ≡⟨ cong (λ X → X >>=ix (subst (λ X → (β → X γ)) (sym Mij≡K) h)) (shiftFunSubst' (sym Mij≡K) a k) ⟩
+        subst (λ X → α → X β) (sym Mij≡K) k a >>=ix subst (λ X → β → X γ) (sym Mij≡K) h ∎)
 
       commuteReturnK→Mij : ∀ {α} → (a : α) → K→Mij K (return a) ≡ ixReturn a
       commuteReturnK→Mij {α = α} a = begin
@@ -207,7 +221,7 @@ PhantomIxMonad→Monad {Ixs = Ixs} {M = IxM} i ixMonad K = record
         Mij→K K (K→Mij K (m >>= (λ x → k x >>= h))) 
           ≡⟨ cong (λ X → Mij→K K X) (commuteBindK→Mij m (λ x → k x >>= h)) ⟩
         Mij→K K (K→Mij K m >>=ix subst (λ X → (α → X γ)) (sym Mij≡K) (λ x → k x >>= h)) 
-          ≡⟨ cong (λ X → Mij→K K (K→Mij K m >>=ix X)) {!!} ⟩
+          ≡⟨ cong (λ X → Mij→K K (K→Mij K m >>=ix X)) (commuteBindK→Mij' k h) ⟩
         Mij→K K (K→Mij K m >>=ix (λ x → (subst (λ X → (α → X β)) (sym Mij≡K) k) x >>=ix (subst (λ X → (β → X γ)) (sym Mij≡K) h))) 
           ≡⟨ cong (λ X → Mij→K K X) (IxMonad.lawAssoc ixMonad (K→Mij K m) ((subst (λ X → (α → X β)) (sym Mij≡K) k)) ((subst (λ X → (β → X γ)) (sym Mij≡K) h))) ⟩
         Mij→K K ((K→Mij K m >>=ix (subst (λ X → (α → X β)) (sym Mij≡K) k)) >>=ix (subst (λ X → (β → X γ)) (sym Mij≡K) h))
