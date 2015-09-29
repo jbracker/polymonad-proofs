@@ -60,7 +60,8 @@ type-check:
 	$(AGDA_TC) Parameterized/IndexedMonad/PhantomMonad.agda
 	# $(AGDA_TC) Parameterized/IndexedMonad/Principal.agda
 	# $(AGDA_TC) Parameterized/IndexedMonad/SessionTypes.agda
-	# $(AGDA_TC) Parameterized/EffectMonad.agda
+	$(AGDA_TC) Parameterized/EffectMonad.agda
+	$(AGDA_TC) Parameterized/EffectMonad/Polymonad.agda
 
 
 clean:
@@ -68,5 +69,6 @@ clean:
 	$(REMOVE) Monad/*.agdai
 	$(REMOVE) Parameterized/*.agdai
 	$(REMOVE) Parameterized/IndexedMonad/*.agdai
+	$(REMOVE) Parameterized/EffectMonad/*.agdai
 	$(REMOVE) Polymonad/*.agdai
 	$(REMOVE) Polymonad/MorphMonad/*.agdai
