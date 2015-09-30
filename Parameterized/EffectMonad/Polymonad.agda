@@ -56,11 +56,11 @@ EffectMonad→Polymonad {Effect = Effect} {M = M'} {{effMonoid = mon}} monad = r
   ; ⟨_⟩ = ⟨_⟩
   ; bind = λ {m} {n} {p} b → bind m n p b
   ; lawId = lawId
-  ; lawFunctor1 = lawFunctor1
-  ; lawFunctor2 = lawFunctor2
-  ; lawMorph1 = lawMorph1 
-  ; lawMorph2 = lawMorph2
-  ; lawMorph3 = lawMorph3
+  ; lawFunctor1 = {!!} --lawFunctor1
+  ; lawFunctor2 = {!!} --lawFunctor2
+  ; lawMorph1 = {!!} --lawMorph1 
+  ; lawMorph2 = {!!} --lawMorph2
+  ; lawMorph3 = {!!} --lawMorph3
   ; lawDiamond1 = {!!} --lawDiamond1 
   ; lawDiamond2 = {!!} --lawDiamond2
   ; lawAssoc = {!!} --lawAssoc
@@ -94,7 +94,7 @@ EffectMonad→Polymonad {Effect = Effect} {M = M'} {{effMonoid = mon}} monad = r
     
     lawId : ⟨ Id ⟩ ≡ Identity
     lawId = refl
-    
+    {-
     lawFunctor1 : ∀ (M : TyCons) → B[ M , Id ]▷ M
     lawFunctor1 (inj₁ IdentTC)        = IdentB
     lawFunctor1 (inj₂ (EffMonadTC i)) = FunctorB
@@ -148,7 +148,7 @@ EffectMonad→Polymonad {Effect = Effect} {M = M'} {{effMonoid = mon}} monad = r
       subst₂ M' (monLawIdL i) refl (mBind monad (mReturn monad v) f)
         ≡⟨ refl ⟩
       bindApply monad (id lawId v) f ∎
-
+-}
     castMonadB : (x y : monCarrier) {k z : monCarrier}
                → k ≡ z
                → B[ inj₂ (EffMonadTC x) , inj₂ (EffMonadTC y) ]▷ inj₂ (EffMonadTC k)
@@ -229,7 +229,6 @@ EffectMonad→Polymonad {Effect = Effect} {M = M'} {{effMonoid = mon}} monad = r
     lawDiamond2 (inj₂ (EffMonadTC x)) (inj₂ (EffMonadTC y)) (inj₂ (EffMonadTC z)) (inj₂ (EffMonadTC ._)) (inj₂ (EffMonadTC ._) , MonadB , MonadB) 
       = inj₂ (EffMonadTC (x ∙ y)) , MonadB , (castMonadB (x ∙ y) z (monLawAssoc x y z) MonadB)
 -}
-
     contractSubst₂ : ∀ {α : Type} {x y z : monCarrier} {X : M' z α} 
                    → (p : x ≡ y) → (q : z ≡ x) 
                    → subst₂ M' p refl (subst₂ M' q refl X) ≡ subst₂ M' (trans q p) refl X
@@ -400,3 +399,33 @@ subst₂²≡id : ∀ {a b k} {A : Set a} {B : Set b} {X₁ X₂ : A} {Y₁ Y₂
       = {!!}
     lawAssoc (inj₂ (EffMonadTC x)) (inj₂ (EffMonadTC x₁)) (inj₂ (EffMonadTC ._)) (inj₂ (EffMonadTC x₃)) (inj₂ (EffMonadTC ._)) (inj₂ (EffMonadTC ._)) MonadB MonadB MonadB b₄ m f g 
       = {!!}
+
+
+{-
+    lawClosure : ∀ (M N P S T U : TyCons)
+               → ( B[ M , N ]▷ P × B[ S , Id ]▷ M × B[ T , Id ]▷ N × B[ P , Id ]▷ U )
+               → B[ S , T ]▷ U
+    lawClosure (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (IdentB , IdentB , IdentB , IdentB) = IdentB
+    lawClosure (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (EffMonadTC ._)) (IdentB , IdentB , IdentB , ReturnB) = ReturnB
+    lawClosure (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (EffMonadTC x)) (inj₁ IdentTC) U (IdentB , () , IdentB , e)
+    lawClosure (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) S (inj₂ (EffMonadTC x)) U (IdentB , c , () , e)
+    lawClosure (inj₁ IdentTC) (inj₂ (EffMonadTC x)) (inj₁ IdentTC) S T U (() , c , d , e)
+    lawClosure (inj₂ (EffMonadTC x)) N (inj₁ IdentTC) S T U (() , c , d , e)
+    lawClosure M N (inj₂ (EffMonadTC x)) S T (inj₁ IdentTC) (b , c , d , ())
+    lawClosure (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (EffMonadTC ._)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (EffMonadTC ._)) (ReturnB , IdentB , IdentB , FunctorB) = ReturnB
+    lawClosure (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (EffMonadTC ._)) (inj₂ (EffMonadTC x)) (inj₁ IdentTC) (inj₂ (EffMonadTC ._)) (ReturnB , () , IdentB , FunctorB)
+    lawClosure (inj₂ (EffMonadTC ._)) (inj₁ IdentTC) (inj₂ (EffMonadTC ._)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (EffMonadTC ._)) (FunctorB , ReturnB , IdentB , FunctorB) = ReturnB
+    lawClosure (inj₂ (EffMonadTC x)) (inj₁ IdentTC) (inj₂ (EffMonadTC .x)) (inj₂ (EffMonadTC .x)) (inj₁ IdentTC) (inj₂ (EffMonadTC .x)) (FunctorB , FunctorB , IdentB , FunctorB) = FunctorB
+    lawClosure M (inj₁ IdentTC) (inj₂ (EffMonadTC x₁)) S (inj₂ (EffMonadTC x)) (inj₂ (EffMonadTC .x₁)) (b , c , () , FunctorB)
+    lawClosure (inj₁ IdentTC) (inj₂ (EffMonadTC ._)) (inj₂ (EffMonadTC ._)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (EffMonadTC ._)) (ApplyB , IdentB , ReturnB , FunctorB) = ReturnB
+    lawClosure (inj₁ IdentTC) (inj₂ (EffMonadTC x₁)) (inj₂ (EffMonadTC .x₁)) (inj₁ IdentTC) (inj₂ (EffMonadTC .x₁)) (inj₂ (EffMonadTC .x₁)) (ApplyB , IdentB , FunctorB , FunctorB) = ApplyB
+    lawClosure (inj₁ IdentTC) (inj₂ (EffMonadTC x₁)) (inj₂ (EffMonadTC .x₁)) (inj₂ (EffMonadTC x)) T (inj₂ (EffMonadTC .x₁)) (ApplyB , () , d , FunctorB)
+    lawClosure (inj₂ (EffMonadTC ._)) (inj₂ (EffMonadTC ._)) (inj₂ (EffMonadTC ._)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (EffMonadTC ._)) (MonadB , ReturnB , ReturnB , FunctorB) 
+      = subst (λ X → EffMonadBinds Effect Id Id (inj₂ (EffMonadTC X))) (sym (monLawIdR ε)) ReturnB
+    lawClosure (inj₂ (EffMonadTC x)) (inj₂ (EffMonadTC ._)) (inj₂ (EffMonadTC ._)) (inj₂ (EffMonadTC .x)) (inj₁ IdentTC) (inj₂ (EffMonadTC ._)) (MonadB , FunctorB , ReturnB , FunctorB) 
+      = subst (λ X → EffMonadBinds Effect (inj₂ (EffMonadTC x)) Id (inj₂ (EffMonadTC X))) (sym (monLawIdR x)) FunctorB
+    lawClosure (inj₂ (EffMonadTC ._)) (inj₂ (EffMonadTC x₁)) (inj₂ (EffMonadTC ._)) (inj₁ IdentTC) (inj₂ (EffMonadTC .x₁)) (inj₂ (EffMonadTC ._)) (MonadB , ReturnB , FunctorB , FunctorB) 
+      = subst (λ X → EffMonadBinds Effect Id (inj₂ (EffMonadTC x₁)) (inj₂ (EffMonadTC X))) (sym (monLawIdL x₁)) ApplyB
+    lawClosure (inj₂ (EffMonadTC x)) (inj₂ (EffMonadTC x₁)) (inj₂ (EffMonadTC ._)) (inj₂ (EffMonadTC .x)) (inj₂ (EffMonadTC .x₁)) (inj₂ (EffMonadTC ._)) (MonadB , FunctorB , FunctorB , FunctorB) 
+      = MonadB
+-}
