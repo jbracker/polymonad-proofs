@@ -13,6 +13,10 @@ ParamTyCon : ∀ {n} → (ts : Vec Set n) → Set₁
 ParamTyCon [] = TyCon
 ParamTyCon (T ∷ ts) = T → ParamTyCon ts
 
+∃Indices : ∀ {n} → (ts : Vec Set n) → (M : ParamTyCon ts) → (TyCon → Set₁) → Set₁
+∃Indices [] M pred = pred M
+∃Indices (T ∷ ts) M pred = ∃ λ(i : T) → ∃Indices ts (M i) pred
+
 ∀Indices : ∀ {n} → (ts : Vec Set n) → (M : ParamTyCon ts) → (TyCon → Set₁) → Set₁
 ∀Indices [] M pred = pred M
 ∀Indices (T ∷ ts) M pred = ∀ {i : T} → ∀Indices ts (M i) pred
