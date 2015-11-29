@@ -19,6 +19,8 @@ open import Polymonad
 open import Polymonad.Composable
 open import Polymonad.Principal
 open import Polymonad.Composition
+open import Polymonad.Composition.Composable
+open import Polymonad.Composition.Properties
 open import Monad.Polymonad
 open import Monad.Composable
 open import Monad.List
@@ -41,8 +43,10 @@ principalPolymonadCompose {TyCons₁} {TyCons₂} {pm₁} {pm₂} cpm₁ cpm₂ 
     open Polymonad.Polymonad
 
     pm = polymonadCompose cpm₁ cpm₂
+    cpm = polymonadComposableCompose cpm₁ cpm₂
     TyCons = IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)
 
+    idMorph¬∃ = cpmIdMorph¬∃ cpm
     idMorph¬∃₁ = cpmIdMorph¬∃ cpm₁
     
     mkBindId : B[ idTC , idTC ] pm ▷ idTC
@@ -56,7 +60,37 @@ principalPolymonadCompose {TyCons₁} {TyCons₂} {pm₁} {pm₂} cpm₁ cpm₂ 
 
     idTC' : TyCons
     idTC' = idTC
-    
+
+    mkFunctor : (M : TyCons₁ ⊎ TyCons₂) → B[ inj₂ M , idTC ] pm ▷ inj₂ M
+    mkFunctor M = pmLawFunctor1 pm (inj₂ M)
+
+    princ : PrincipalPM pm
+    princ F (inj₁ IdentTC , inj₁ IdentTC , MM'∈F) M₁ M₂ morph₁ morph₂ = {!!}
+    princ F (inj₁ IdentTC , inj₂ M' , MM'∈F) M₁ M₂ morph₁ morph₂ = {!!}
+    princ F (inj₂ (inj₁ M) , inj₁ IdentTC , MM'∈F) N₁ N₂ morph₁ morph₂ = {!!}
+    princ F (inj₂ (inj₁ M) , inj₂ (inj₁ M') , MM'∈F) N₁ N₂ morph₁ morph₂ = {!!}
+    princ F (inj₂ (inj₁ M) , inj₂ (inj₂ M') , MM'∈F) (inj₁ IdentTC) N₂ morph₁ morph₂ 
+      = ⊥-elim (idMorph¬∃ {M = mTC₁ M} {N = mTC₂ M'} (inj₁ ((inj₁ M) , refl)) (morph₁ (mTC₁ M) (mTC₂ M') MM'∈F))
+    princ F (inj₂ (inj₁ M) , inj₂ (inj₂ M') , MM'∈F) (inj₂ (inj₁ N₁)) N₂ morph₁ morph₂
+      = ⊥-elim (composition→¬[N,M₂]▷M₁ cpm {N = mTC₁ M} {M₂ = M'} {M₁ = N₁} (morph₁ (mTC₁ M) (mTC₂ M') MM'∈F))
+    princ F (inj₂ (inj₁ M) , inj₂ (inj₂ M') , MM'∈F) (inj₂ (inj₂ N₁)) N₂ morph₁ morph₂ 
+      = ⊥-elim (composition→¬[M₁,N]▷M₂ cpm {M₁ = M} {N = mTC₂ M'} {M₂ = N₁} (morph₁ (mTC₁ M) (mTC₂ M') MM'∈F))
+    princ F (inj₂ (inj₂ M) , inj₁ IdentTC , MM'∈F) N₁ N₂ morph₁ morph₂ = {!!}
+    princ F (inj₂ (inj₂ M) , inj₂ (inj₁ M') , MM'∈F) (inj₁ IdentTC) N₂ morph₁ morph₂ 
+      = ⊥-elim (idMorph¬∃ {M = mTC₂ M} {N = mTC₁ M'} (inj₁ (inj₂ M , refl)) (morph₁ (mTC₂ M) (mTC₁ M') MM'∈F))
+    princ F (inj₂ (inj₂ M) , inj₂ (inj₁ M') , MM'∈F) (inj₂ (inj₁ N₁)) N₂ morph₁ morph₂ 
+      = ⊥-elim (composition→¬[M₂,N]▷M₁ cpm {M₂ = M} {N = mTC₁ M'} {M₁ = N₁} (morph₁ (mTC₂ M) (mTC₁ M') MM'∈F))
+    princ F (inj₂ (inj₂ M) , inj₂ (inj₁ M') , MM'∈F) (inj₂ (inj₂ N₁)) N₂ morph₁ morph₂ 
+      = ⊥-elim (composition→¬[N,M₁]▷M₂ cpm {N = mTC₂ M} {M₁ = M'} {M₂ = N₁} (morph₁ (mTC₂ M) (mTC₁ M') MM'∈F))
+    princ F (inj₂ (inj₂ M) , inj₂ (inj₂ M') , MM'∈F) (inj₁ IdentTC) N' morph₁ morph₂ = {!!}
+    princ F (inj₂ (inj₂ M) , inj₂ (inj₂ M') , MM'∈F) (inj₂ (inj₁ N)) N' morph₁ morph₂ = {!!}
+    princ F (inj₂ (inj₂ M) , inj₂ (inj₂ M') , MM'∈F) (inj₂ (inj₂ N)) (inj₁ IdentTC) morph₁ morph₂ = {!!}
+    princ F (inj₂ (inj₂ M) , inj₂ (inj₂ M') , MM'∈F) (inj₂ (inj₂ N)) (inj₂ (inj₁ N')) morph₁ morph₂ = {!!}
+    princ F (inj₂ (inj₂ M) , inj₂ (inj₂ M') , MM'∈F) (inj₂ (inj₂ N)) (inj₂ (inj₂ N')) morph₁ morph₂ = mTC₂ N , mkFunctor (inj₂ N) , {!!} , morph₁
+
+--  idMorph¬∃ : ∀ {M N : IdTyCons ⊎ TyCons} → (∃ λ(M' : TyCons) → M ≡ inj₂ M') ⊎ (∃ λ(N' : TyCons) → N ≡ inj₂ N') → ¬ (B[ M , N ] pm ▷ idTC)
+
+    {-
     contradiction : ∀ {l} {P : Set l} → P → ¬ P → ⊥
     contradiction P ¬P = ¬P P
     
@@ -115,7 +149,7 @@ principalPolymonadCompose {TyCons₁} {TyCons₂} {pm₁} {pm₂} cpm₁ cpm₂ 
                ((mTC₁ M₁ , mTC₁ M₁) ∈? F) ((mTC₂ N₂ , mTC₂ N₂) ∈? F)
              )
     princ F (M , M' , MM'∈F) (inj₂ (inj₂ M₂)) N morph₁ morph₂ = {!!}
-
+-}
    
     {-
     TC₁→TC : IdTyCons ⊎ TyCons₁ → TyCons
