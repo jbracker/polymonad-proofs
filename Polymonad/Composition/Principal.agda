@@ -26,6 +26,14 @@ open import Monad.Composable
 open import Monad.List
 open import Monad.Maybe
 
+mTyCon₁ : ∀ {TyCons₁ TyCons₂ : Set} → IdTyCons ⊎ TyCons₁ → IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)
+mTyCon₁ (inj₁ IdTyCon) = inj₁ IdTyCon
+mTyCon₁ (inj₂ M) = inj₂ (inj₁ M)
+
+mTyCon₂ : ∀ {TyCons₁ TyCons₂ : Set} → IdTyCons ⊎ TyCons₂ → IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)
+mTyCon₂ (inj₁ IdTyCon) = inj₁ IdTyCon
+mTyCon₂ (inj₂ M) = inj₂ (inj₂ M)
+
 principalPolymonadCompose : ∀ {TyCons₁ TyCons₂ : Set}
                           → {pm₁ : Polymonad (IdTyCons ⊎ TyCons₁) idTC}
                           → {pm₂ : Polymonad (IdTyCons ⊎ TyCons₂) idTC}
@@ -34,11 +42,23 @@ principalPolymonadCompose : ∀ {TyCons₁ TyCons₂ : Set}
                           → ( (x : ((IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) × (IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)))) 
                             → (F : SubsetOf ((IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) × (IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)))) 
                             → Dec (x ∈ F))
+                          → ( (F : SubsetOf ((IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) × (IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)))) 
+                            → ( ∀ (M M' : IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) 
+                              → (M , M') ∈ F 
+                              → ∃ λ(M₁ : IdTyCons ⊎ TyCons₁) → ∃ λ(M₁' : IdTyCons ⊎ TyCons₁) 
+                              → (M ≡ mTyCon₁ M₁) × (M' ≡ mTyCon₁ M₁') )
+                            ⊎ ( ∀ (M M' : IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) 
+                              → (M , M') ∈ F 
+                              → ∃ λ(M₂ : IdTyCons ⊎ TyCons₂) → ∃ λ(M₂' : IdTyCons ⊎ TyCons₂) 
+                              → (M ≡ mTyCon₂ M₂) × (M' ≡ mTyCon₂ M₂') )
+                            ⊎ ( ∃ λ(M₁ : IdTyCons ⊎ TyCons₁) → ∃ λ(M₂ : IdTyCons ⊎ TyCons₂) 
+                              → ∃ λ(M : IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) → ∃ λ(M' : IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) 
+                              → ( (mTyCon₁ M₁ , M) ∈ F ⊎ (M , mTyCon₁ M₁) ∈ F) × ( (mTyCon₂ M₂ , M) ∈ F ⊎ (M , mTyCon₂ M₂) ∈ F )  ) )
                           → PrincipalPM pm₁
                           → PrincipalPM pm₂
                           → ((M : TyCons₁) → (N : TyCons₁) → Dec (M ≡ N))
                           → PrincipalPM (polymonadCompose cpm₁ cpm₂)
-principalPolymonadCompose {TyCons₁} {TyCons₂} {pm₁} {pm₂} cpm₁ cpm₂ _∈?_ princ₁ princ₂ _≡TC₁_ = princ
+principalPolymonadCompose {TyCons₁} {TyCons₂} {pm₁} {pm₂} cpm₁ cpm₂ _∈?_ partition princ₁ princ₂ _≡TC₁_ = princ
   where
     open Polymonad.Polymonad
 
