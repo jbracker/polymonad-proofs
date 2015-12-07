@@ -90,7 +90,24 @@ principalPolymonadCompose {TyCons₁} {TyCons₂} {pm₁} {pm₂} cpm₁ cpm₂ 
                              (morph→morph₂ cpm₁ cpm₂ F (inj₂ M₂) morph₂))
     princ F (M , M' , MM'∈F) (inj₂ (inj₁ M₁)) (inj₁ IdentTC) morph₁ morph₂ | inj₂ (inj₁ pairIn2) = {!!}
     princ F (M , M' , MM'∈F) (inj₂ (inj₁ M₁)) (inj₂ (inj₁ M₂)) morph₁ morph₂ | inj₂ (inj₁ pairIn2) = {!!}
-    princ F (M , M' , MM'∈F) (inj₂ (inj₁ M₁)) (inj₂ (inj₂ M₂)) morph₁ morph₂ | inj₂ (inj₁ pairIn2) = {!!}
+    princ F (M , M' , MM'∈F) (inj₂ (inj₁ M₁)) (inj₂ (inj₂ M₂)) morph₁ morph₂ | inj₂ (inj₁ pairIn2) = p (M , M' , MM'∈F)
+      where newMorph : (idTC , idTC) ∈ F → (N N' : TyCons) → (N , N') ∈ F → B[ N , N' ] pm ▷ idTC
+            newMorph IdId∈F (inj₁ IdentTC) (inj₁ IdentTC) NN∈F = lawFunctor1 pm₁ (inj₁ IdentTC)
+            newMorph IdId∈F (inj₁ IdentTC) (inj₂ (inj₁ N')) NN∈F with pairIn2 idTC (mTC₁ N') NN∈F 
+            newMorph IdId∈F (inj₁ IdentTC) (inj₂ (inj₁ N')) NN∈F | P , inj₁ IdentTC , eq , ()
+            newMorph IdId∈F (inj₁ IdentTC) (inj₂ (inj₁ N')) NN∈F | P , inj₂ P' , eq , ()
+            newMorph IdId∈F (inj₁ IdentTC) (inj₂ (inj₂ N')) NN∈F = {!!}
+            newMorph IdId∈F (inj₂ N) N' NN∈F = {!!}
+            
+            p : (∃ λ(M : TyCons) → ∃ λ(M' : TyCons) → (M , M') ∈ F) → ∃ λ(M̂ : TyCons) → B[ M̂ , idTC ] pm ▷ mTC₁ M₁ 
+                                                                                      × B[ M̂ , idTC ] pm ▷ mTC₂ M₂
+                                                                                      × ( (N N' : TyCons) → (N , N') ∈ F → B[ N , N' ] pm ▷ M̂ )
+            p (N , N' , NN'∈F) with pairIn2 N N' NN'∈F
+            p (.idTC , .idTC , NN'∈F) | inj₁ IdentTC , inj₁ IdentTC , refl , refl = idTC , morph₁ idTC idTC NN'∈F , morph₂ idTC idTC NN'∈F , newMorph NN'∈F
+            p (.idTC , .(mTC₂ P') , NN'∈F) | inj₁ IdentTC , inj₂ P' , refl , refl = ⊥-elim (morph₁ idTC (mTC₂ P') NN'∈F)
+            p (.(mTC₂ P) , .idTC , NN'∈F) | inj₂ P , inj₁ IdentTC , refl , refl = ⊥-elim (morph₁ (mTC₂ P) idTC NN'∈F)
+            p (.(mTC₂ P) , .(mTC₂ P') , NN'∈F) | inj₂ P , inj₂ P' , refl , refl = ⊥-elim (morph₁ (mTC₂ P) (mTC₂ P') NN'∈F)
+
     princ F (M , M' , MM'∈F) (inj₂ (inj₂ M₁)) (inj₁ IdentTC) morph₁ morph₂ | inj₂ (inj₁ pairIn2) 
       = princ₂→princ cpm₁ cpm₂ F pairIn2 (inj₂ M₁) idTC 
                      (princ₂ (F→F₂ F) (NN∈F→NN∈F₂ F pairIn2 M M' MM'∈F) (inj₂ M₁) idTC 
