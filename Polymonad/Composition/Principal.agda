@@ -21,18 +21,11 @@ open import Polymonad.Principal
 open import Polymonad.Composition
 open import Polymonad.Composition.Composable
 open import Polymonad.Composition.Properties
+open import Polymonad.Composition.Principal.Utilities
 open import Monad.Polymonad
 open import Monad.Composable
 open import Monad.List
 open import Monad.Maybe
-
-mTyCon₁ : ∀ {TyCons₁ TyCons₂ : Set} → IdTyCons ⊎ TyCons₁ → IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)
-mTyCon₁ (inj₁ IdTyCon) = inj₁ IdTyCon
-mTyCon₁ (inj₂ M) = inj₂ (inj₁ M)
-
-mTyCon₂ : ∀ {TyCons₁ TyCons₂ : Set} → IdTyCons ⊎ TyCons₂ → IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)
-mTyCon₂ (inj₁ IdTyCon) = inj₁ IdTyCon
-mTyCon₂ (inj₂ M) = inj₂ (inj₂ M)
 
 principalPolymonadCompose : ∀ {TyCons₁ TyCons₂ : Set}
                           → {pm₁ : Polymonad (IdTyCons ⊎ TyCons₁) idTC}
@@ -90,14 +83,25 @@ principalPolymonadCompose {TyCons₁} {TyCons₂} {pm₁} {pm₂} cpm₁ cpm₂ 
     
     princ F (M , M' , MM'∈F) (inj₁ IdentTC) (inj₁ IdentTC) morph₁ morph₂ | inj₂ (inj₁ pairIn2) = {!!}
     princ F (M , M' , MM'∈F) (inj₁ IdentTC) (inj₂ (inj₁ M₂)) morph₁ morph₂ | inj₂ (inj₁ pairIn2) = {!!}
-    princ F (M , M' , MM'∈F) (inj₁ IdentTC) (inj₂ (inj₂ M₂)) morph₁ morph₂ | inj₂ (inj₁ pairIn2) = {!!}
+    princ F (M , M' , MM'∈F) (inj₁ IdentTC) (inj₂ (inj₂ M₂)) morph₁ morph₂ | inj₂ (inj₁ pairIn2) 
+      = princ₂→princ cpm₁ cpm₂ F pairIn2 idTC (inj₂ M₂)  
+                     (princ₂ (F→F₂ F) (NN∈F→NN∈F₂ F pairIn2 M M' MM'∈F) idTC (inj₂ M₂) 
+                             (morph→morph₂ cpm₁ cpm₂ F idTC morph₁) 
+                             (morph→morph₂ cpm₁ cpm₂ F (inj₂ M₂) morph₂))
     princ F (M , M' , MM'∈F) (inj₂ (inj₁ M₁)) (inj₁ IdentTC) morph₁ morph₂ | inj₂ (inj₁ pairIn2) = {!!}
     princ F (M , M' , MM'∈F) (inj₂ (inj₁ M₁)) (inj₂ (inj₁ M₂)) morph₁ morph₂ | inj₂ (inj₁ pairIn2) = {!!}
     princ F (M , M' , MM'∈F) (inj₂ (inj₁ M₁)) (inj₂ (inj₂ M₂)) morph₁ morph₂ | inj₂ (inj₁ pairIn2) = {!!}
-    princ F (M , M' , MM'∈F) (inj₂ (inj₂ M₁)) (inj₁ IdentTC) morph₁ morph₂ | inj₂ (inj₁ pairIn2) = {!!}
+    princ F (M , M' , MM'∈F) (inj₂ (inj₂ M₁)) (inj₁ IdentTC) morph₁ morph₂ | inj₂ (inj₁ pairIn2) 
+      = princ₂→princ cpm₁ cpm₂ F pairIn2 (inj₂ M₁) idTC 
+                     (princ₂ (F→F₂ F) (NN∈F→NN∈F₂ F pairIn2 M M' MM'∈F) (inj₂ M₁) idTC 
+                             (morph→morph₂ cpm₁ cpm₂ F (inj₂ M₁) morph₁) 
+                             (morph→morph₂ cpm₁ cpm₂ F idTC morph₂))
     princ F (M , M' , MM'∈F) (inj₂ (inj₂ M₁)) (inj₂ (inj₁ M₂)) morph₁ morph₂ | inj₂ (inj₁ pairIn2) = {!!}
-    princ F (M , M' , MM'∈F) (inj₂ (inj₂ M₁)) (inj₂ (inj₂ M₂)) morph₁ morph₂ | inj₂ (inj₁ pairIn2) = {!!}
-    
+    princ F (M , M' , MM'∈F) (inj₂ (inj₂ M₁)) (inj₂ (inj₂ M₂)) morph₁ morph₂ | inj₂ (inj₁ pairIn2) 
+      = princ₂→princ cpm₁ cpm₂ F pairIn2 (inj₂ M₁) (inj₂ M₂) 
+                     (princ₂ (F→F₂ F) (NN∈F→NN∈F₂ F pairIn2 M M' MM'∈F) (inj₂ M₁) (inj₂ M₂) 
+                             (morph→morph₂ cpm₁ cpm₂ F (inj₂ M₁) morph₁) 
+                             (morph→morph₂ cpm₁ cpm₂ F (inj₂ M₂) morph₂))
     princ F (M , M' , MM'∈F) (inj₁ IdentTC) M₂ morph₁ morph₂ | inj₂ (inj₂ (N₁ , N₂ , N , N' , inj₁ N₁N∈F , inj₁ N₂N'∈F))
       = ⊥-elim (idMorph¬∃ {M = mTC₁ N₁} {N = N} (inj₁ ((inj₁ N₁) , refl)) (morph₁ (mTC₁ N₁) N N₁N∈F))
     princ F (M , M' , MM'∈F) (inj₂ (inj₁ M₁)) M₂ morph₁ morph₂ | inj₂ (inj₂ (N₁ , N₂ , N , N' , inj₁ N₁N∈F , inj₁ N₂N'∈F)) 
