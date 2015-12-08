@@ -27,6 +27,22 @@ mTyCon₂ : ∀ {TyCons₁ TyCons₂ : Set} → IdTyCons ⊎ TyCons₂ → IdTyC
 mTyCon₂ (inj₁ IdTyCon) = inj₁ IdTyCon
 mTyCon₂ (inj₂ M) = inj₂ (inj₂ M)
 
+pairIn1→⊥ : ∀ {TyCons₁ TyCons₂ : Set}
+          → (F : SubsetOf ( (IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) × (IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) ))
+          → ( ∀ (M M' : IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) 
+            → (M , M') ∈ F 
+            → ∃ λ(M₁ : IdTyCons ⊎ TyCons₁) → ∃ λ(M₁' : IdTyCons ⊎ TyCons₁) 
+            → (M ≡ mTyCon₁ M₁) × (M' ≡ mTyCon₁ M₁') )
+          → (N N' : IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂))
+          → (N , N') ∈ F
+          → (∃ λ(M : TyCons₂) → N ≡ i₂i₂ M ⊎ N' ≡ i₂i₂ M)
+          → ⊥
+pairIn1→⊥ F pairIn1 N N' NN'∈F (M , N≡M) with pairIn1 N N' NN'∈F
+pairIn1→⊥ F pairIn1 .(inj₂ (inj₂ M)) N' NN'∈F (M , inj₁ refl) | inj₁ IdentTC , P' , () , eq2
+pairIn1→⊥ F pairIn1 .(inj₂ (inj₂ M)) N' NN'∈F (M , inj₁ refl) | inj₂ P , P' , () , eq2
+pairIn1→⊥ F pairIn1 N .(inj₂ (inj₂ M)) NN'∈F (M , inj₂ refl) | P , inj₁ IdentTC , eq1 , ()
+pairIn1→⊥ F pairIn1 N .(inj₂ (inj₂ M)) NN'∈F (M , inj₂ refl) | P , inj₂ P' , eq1 , ()
+
 pairIn2→⊥ : ∀ {TyCons₁ TyCons₂ : Set}
           → (F : SubsetOf ( (IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) × (IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) ))
           → ( ∀ (M M' : IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) 
@@ -149,6 +165,35 @@ morph→morph₂ cpm₁ cpm₂ F (inj₂ P) morph₁ (inj₂ N) (inj₁ IdentTC)
 morph→morph₂ cpm₁ cpm₂ F (inj₁ IdentTC) morph₁ (inj₂ N) (inj₂ N') NN'∈F₂ = morph₁ (i₂i₂ N) (i₂i₂ N') NN'∈F₂
 morph→morph₂ cpm₁ cpm₂ F (inj₂ P) morph₁ (inj₂ N) (inj₂ N') NN'∈F₂ = morph₁ (i₂i₂ N) (i₂i₂ N') NN'∈F₂
 
+morph₁→morph : ∀ {TyCons₁ TyCons₂ : Set}
+             → {pm₁ : Polymonad (IdTyCons ⊎ TyCons₁) idTC}
+             → {pm₂ : Polymonad (IdTyCons ⊎ TyCons₂) idTC}
+             → (cpm₁ : ComposablePolymonad pm₁)
+             → (cpm₂ : ComposablePolymonad pm₂)
+             → (F : SubsetOf ( (IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) × (IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) ))
+             → ( ∀ (M M' : IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) 
+               → (M , M') ∈ F 
+               → ∃ λ(M₁ : IdTyCons ⊎ TyCons₁) → ∃ λ(M₁' : IdTyCons ⊎ TyCons₁) 
+               → (M ≡ mTyCon₁ M₁) × (M' ≡ mTyCon₁ M₁') ) 
+             → (P : IdTyCons ⊎ TyCons₁)
+             → ( (N N' : IdTyCons ⊎ TyCons₁) 
+               → (N , N') ∈ F→F₁ F
+               → B[ N , N' ] pm₁ ▷ P )
+             → ( (N N' : IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) 
+               → (N , N') ∈ F
+               → B[ N , N' ] polymonadCompose cpm₁ cpm₂ ▷ mTyCon₁ P )
+morph₁→morph cpm₁ cpm₂ F pairIn1 (inj₁ IdentTC) morph₁ (inj₁ IdentTC) (inj₁ IdentTC) NN'∈F = morph₁ idTC idTC NN'∈F
+morph₁→morph cpm₁ cpm₂ F pairIn1 (inj₂ P) morph₁ (inj₁ IdentTC) (inj₁ IdentTC) NN'∈F = morph₁ idTC idTC NN'∈F
+morph₁→morph cpm₁ cpm₂ F pairIn1 (inj₁ IdentTC) morph₁ (inj₁ IdentTC) (inj₂ (inj₁ N')) NN'∈F = morph₁ (inj₁ IdentTC) (inj₂ N') NN'∈F
+morph₁→morph cpm₁ cpm₂ F pairIn1 (inj₂ P) morph₁ (inj₁ IdentTC) (inj₂ (inj₁ N')) NN'∈F = morph₁ (inj₁ IdentTC) (inj₂ N') NN'∈F
+morph₁→morph cpm₁ cpm₂ F pairIn1 P morph₁ (inj₁ IdentTC) (inj₂ (inj₂ N')) NN'∈F = ⊥-elim (pairIn1→⊥ F pairIn1 idTC (i₂i₂ N') NN'∈F (N' , inj₂ refl))
+morph₁→morph cpm₁ cpm₂ F pairIn1 (inj₁ IdentTC) morph₁ (inj₂ (inj₁ N)) (inj₁ IdentTC) NN'∈F = morph₁ (inj₂ N) (inj₁ IdentTC) NN'∈F
+morph₁→morph cpm₁ cpm₂ F pairIn1 (inj₂ P) morph₁ (inj₂ (inj₁ N)) (inj₁ IdentTC) NN'∈F = morph₁ (inj₂ N) (inj₁ IdentTC) NN'∈F
+morph₁→morph cpm₁ cpm₂ F pairIn1 (inj₁ IdentTC) morph₁ (inj₂ (inj₁ N)) (inj₂ (inj₁ N')) NN'∈F = morph₁ (inj₂ N) (inj₂ N') NN'∈F
+morph₁→morph cpm₁ cpm₂ F pairIn1 (inj₂ P) morph₁ (inj₂ (inj₁ N)) (inj₂ (inj₁ N')) NN'∈F = morph₁ (inj₂ N) (inj₂ N') NN'∈F
+morph₁→morph cpm₁ cpm₂ F pairIn1 P morph₁ (inj₂ (inj₁ N)) (inj₂ (inj₂ N')) NN'∈F = ⊥-elim (pairIn1→⊥ F pairIn1 (i₂i₁ N) (i₂i₂ N') NN'∈F (N' , inj₂ refl))
+morph₁→morph cpm₁ cpm₂ F pairIn1 P morph₁ (inj₂ (inj₂ N)) N' NN'∈F = ⊥-elim (pairIn1→⊥ F pairIn1 (i₂i₂ N) N' NN'∈F (N , inj₁ refl))
+
 morph₂→morph : ∀ {TyCons₁ TyCons₂ : Set}
              → {pm₁ : Polymonad (IdTyCons ⊎ TyCons₁) idTC}
              → {pm₂ : Polymonad (IdTyCons ⊎ TyCons₂) idTC}
@@ -180,6 +225,34 @@ morph₂→morph cpm₁ cpm₂ F pairIn2 (inj₂ P) morph₂ (inj₂ (inj₂ N))
 morph₂→morph cpm₁ cpm₂ F pairIn2 P morph₂ (inj₂ (inj₂ N)) (inj₂ (inj₁ N')) NN'∈F = ⊥-elim (pairIn2→⊥ F pairIn2 (i₂i₂ N) (i₂i₁ N') NN'∈F (N' , inj₂ refl))
 morph₂→morph cpm₁ cpm₂ F pairIn2 (inj₁ IdentTC) morph₂ (inj₂ (inj₂ N)) (inj₂ (inj₂ N')) NN'∈F = morph₂ (inj₂ N) (inj₂ N') NN'∈F
 morph₂→morph cpm₁ cpm₂ F pairIn2 (inj₂ P) morph₂ (inj₂ (inj₂ N)) (inj₂ (inj₂ N')) NN'∈F = morph₂ (inj₂ N) (inj₂ N') NN'∈F
+
+princ₁→princ : ∀ {TyCons₁ TyCons₂ : Set}
+             → {pm₁ : Polymonad (IdTyCons ⊎ TyCons₁) idTC}
+             → {pm₂ : Polymonad (IdTyCons ⊎ TyCons₂) idTC}
+             → (cpm₁ : ComposablePolymonad pm₁)
+             → (cpm₂ : ComposablePolymonad pm₂)
+             → (F : SubsetOf ( (IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) × (IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) ))
+             → ( ∀ (M M' : IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) 
+               → (M , M') ∈ F 
+               → ∃ λ(M₁ : IdTyCons ⊎ TyCons₁) → ∃ λ(M₁' : IdTyCons ⊎ TyCons₁) 
+               → (M ≡ mTyCon₁ M₁) × (M' ≡ mTyCon₁ M₁') )
+             → (M₁ M₂ : IdTyCons ⊎ TyCons₁)
+             → ( ∃ λ(M̂ : IdTyCons ⊎ TyCons₁) 
+                 → B[ M̂ , idTC ] pm₁ ▷ M₁ 
+                 × B[ M̂ , idTC ] pm₁ ▷ M₂ 
+                 × ( (N N' : IdTyCons ⊎ TyCons₁) → (N , N') ∈ F→F₁ F → B[ N , N' ] pm₁ ▷ M̂ ) )
+             → ( ∃ λ(M̂ : IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) 
+                 → B[ M̂ , idTC ] polymonadCompose cpm₁ cpm₂ ▷ mTyCon₁ M₁ 
+                 × B[ M̂ , idTC ] polymonadCompose cpm₁ cpm₂ ▷ mTyCon₁ M₂ 
+                 × ( (N N' : IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) → (N , N') ∈ F → B[ N , N' ] polymonadCompose cpm₁ cpm₂ ▷ M̂ ) )
+princ₁→princ cpm₁ cpm₂ F pairIn1 (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC , b₁ , b₂ , morph) = idTC , b₁ , b₂ , morph₁→morph cpm₁ cpm₂ F pairIn1 idTC morph
+princ₁→princ cpm₁ cpm₂ F pairIn1 (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ P , b₁ , b₂ , morph) = i₂i₁ P , b₁ , b₂ , morph₁→morph cpm₁ cpm₂ F pairIn1 (inj₂ P) morph
+princ₁→princ cpm₁ cpm₂ F pairIn1 (inj₁ IdentTC) (inj₂ N') (inj₁ IdentTC , b₁ , b₂ , morph) = idTC , b₁ , b₂ , morph₁→morph cpm₁ cpm₂ F pairIn1 idTC morph
+princ₁→princ cpm₁ cpm₂ F pairIn1 (inj₁ IdentTC) (inj₂ N') (inj₂ P , b₁ , b₂ , morph) = i₂i₁ P , b₁ , b₂ , morph₁→morph cpm₁ cpm₂ F pairIn1 (inj₂ P) morph
+princ₁→princ cpm₁ cpm₂ F pairIn1 (inj₂ N) (inj₁ IdentTC) (inj₁ IdentTC , b₁ , b₂ , morph) = idTC , b₁ , b₂ , morph₁→morph cpm₁ cpm₂ F pairIn1 idTC morph
+princ₁→princ cpm₁ cpm₂ F pairIn1 (inj₂ N) (inj₁ IdentTC) (inj₂ P , b₁ , b₂ , morph) = i₂i₁ P , b₁ , b₂ , morph₁→morph cpm₁ cpm₂ F pairIn1 (inj₂ P) morph
+princ₁→princ cpm₁ cpm₂ F pairIn1 (inj₂ N) (inj₂ N') (inj₁ IdentTC , b₁ , b₂ , morph) = idTC , b₁ , b₂ , morph₁→morph cpm₁ cpm₂ F pairIn1 idTC morph 
+princ₁→princ cpm₁ cpm₂ F pairIn1 (inj₂ N) (inj₂ N') (inj₂ P , b₁ , b₂ , morph) = i₂i₁ P , b₁ , b₂ , morph₁→morph cpm₁ cpm₂ F pairIn1 (inj₂ P) morph
 
 princ₂→princ : ∀ {TyCons₁ TyCons₂ : Set}
              → {pm₁ : Polymonad (IdTyCons ⊎ TyCons₁) idTC}

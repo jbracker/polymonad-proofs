@@ -32,9 +32,14 @@ principalPolymonadCompose : ∀ {TyCons₁ TyCons₂ : Set}
                           → {pm₂ : Polymonad (IdTyCons ⊎ TyCons₂) idTC}
                           → (cpm₁ : ComposablePolymonad pm₁)
                           → (cpm₂ : ComposablePolymonad pm₂)
+                          -- It is decidable wether an element it in F or not.
                           → ( (x : ((IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) × (IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)))) 
                             → (F : SubsetOf ((IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) × (IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)))) 
                             → Dec (x ∈ F))
+                          -- We know that F falls in either of three categories:
+                          --  - F is a subset of (IdTyCons ⊎ TyCons₁)²
+                          --  - F is a subset of (IdTyCons ⊎ TyCons₂)²
+                          --  - F contains a pair with a tycon from TyCons₁ and a pair with a tycon from TyCons₂ (could be the same pair).
                           → ( (F : SubsetOf ((IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) × (IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)))) 
                             → ( ∀ (M M' : IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) 
                               → (M , M') ∈ F 
@@ -47,11 +52,18 @@ principalPolymonadCompose : ∀ {TyCons₁ TyCons₂ : Set}
                             ⊎ ( ∃ λ(M₁ : TyCons₁) → ∃ λ(M₂ : TyCons₂) 
                               → ∃ λ(M : IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) → ∃ λ(M' : IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) 
                               → ( (inj₂ (inj₁ M₁) , M) ∈ F ⊎ (M , inj₂ (inj₁ M₁)) ∈ F) × ( (inj₂ (inj₂ M₂) , M') ∈ F ⊎ (M' , inj₂ (inj₂ M₂)) ∈ F )  ) )
+                          -- We know if either:
+                          --  - F contains at least one element aside of (Id,Id) or
+                          --  - F = { (Id,Id) }
+                          → ( (F : SubsetOf ((IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) × (IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)))) 
+                            → ( (∃ λ(M : IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) → ∃ λ(M' : IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) → (M , M') ∈ F × ¬ (M ≡ idTC) × ¬ (M' ≡ idTC))
+                              ⊎ ((idTC , idTC) ∈ F × (∀ (M M' : IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) → (¬ (M ≡ idTC) ⊎ ¬ (M' ≡ idTC)) → ¬ ((M , M') ∈ F))) )
+                            )
                           → PrincipalPM pm₁
                           → PrincipalPM pm₂
                           → ((M : TyCons₁) → (N : TyCons₁) → Dec (M ≡ N))
                           → PrincipalPM (polymonadCompose cpm₁ cpm₂)
-principalPolymonadCompose {TyCons₁} {TyCons₂} {pm₁} {pm₂} cpm₁ cpm₂ _∈?_ partition princ₁ princ₂ _≡TC₁_ = princ
+principalPolymonadCompose {TyCons₁} {TyCons₂} {pm₁} {pm₂} cpm₁ cpm₂ _∈?_ partition onlyIdPair princ₁ princ₂ _≡TC₁_ = princ
   where
     open Polymonad.Polymonad
 
@@ -90,7 +102,16 @@ principalPolymonadCompose {TyCons₁} {TyCons₂} {pm₁} {pm₂} cpm₁ cpm₂ 
                              (morph→morph₂ cpm₁ cpm₂ F (inj₂ M₂) morph₂))
     princ F (M , M' , MM'∈F) (inj₂ (inj₁ M₁)) (inj₁ IdentTC) morph₁ morph₂ | inj₂ (inj₁ pairIn2) = {!!}
     princ F (M , M' , MM'∈F) (inj₂ (inj₁ M₁)) (inj₂ (inj₁ M₂)) morph₁ morph₂ | inj₂ (inj₁ pairIn2) = {!!}
-    princ F (M , M' , MM'∈F) (inj₂ (inj₁ M₁)) (inj₂ (inj₂ M₂)) morph₁ morph₂ | inj₂ (inj₁ pairIn2) = p (M , M' , MM'∈F)
+    princ F (M , M' , MM'∈F) (inj₂ (inj₁ M₁)) (inj₂ (inj₂ M₂)) morph₁ morph₂ | inj₂ (inj₁ pairIn2) with onlyIdPair F
+    princ F (M , M' , MM'∈F) (inj₂ (inj₁ M₁)) (inj₂ (inj₂ M₂)) morph₁ morph₂ | inj₂ (inj₁ pairIn2) | inj₁ x = {!x!}
+    princ F (M , M' , MM'∈F) (inj₂ (inj₁ M₁)) (inj₂ (inj₂ M₂)) morph₁ morph₂ | inj₂ (inj₁ pairIn2) | inj₂ (IdId∈F , F≡IdId)
+      = idTC , morph₁ idTC idTC IdId∈F , morph₂ idTC idTC IdId∈F , {!!}
+      where newMorph : (N N' : TyCons) → (N , N') ∈ F → B[ N , N' ] pm ▷ idTC
+            newMorph (inj₁ IdentTC) (inj₁ IdentTC) NN∈F = lawFunctor1 pm₁ (inj₁ IdentTC)
+            newMorph (inj₁ IdentTC) (inj₂ (inj₁ N')) NN∈F = ⊥-elim (F≡IdId idTC (mTC₁ N') (inj₂ (λ ())) {!NN∈F!})
+            newMorph (inj₁ IdentTC) (inj₂ (inj₂ N')) NN∈F = {!!}
+            newMorph (inj₂ N) N' NN∈F = {!!}
+      {- -- p (M , M' , MM'∈F)
       where newMorph : (idTC , idTC) ∈ F → (N N' : TyCons) → (N , N') ∈ F → B[ N , N' ] pm ▷ idTC
             newMorph IdId∈F (inj₁ IdentTC) (inj₁ IdentTC) NN∈F = lawFunctor1 pm₁ (inj₁ IdentTC)
             newMorph IdId∈F (inj₁ IdentTC) (inj₂ (inj₁ N')) NN∈F with pairIn2 idTC (mTC₁ N') NN∈F 
@@ -104,10 +125,10 @@ principalPolymonadCompose {TyCons₁} {TyCons₂} {pm₁} {pm₂} cpm₁ cpm₂ 
                                                                                       × ( (N N' : TyCons) → (N , N') ∈ F → B[ N , N' ] pm ▷ M̂ )
             p (N , N' , NN'∈F) with pairIn2 N N' NN'∈F
             p (.idTC , .idTC , NN'∈F) | inj₁ IdentTC , inj₁ IdentTC , refl , refl = idTC , morph₁ idTC idTC NN'∈F , morph₂ idTC idTC NN'∈F , newMorph NN'∈F
-            p (.idTC , .(mTC₂ P') , NN'∈F) | inj₁ IdentTC , inj₂ P' , refl , refl = ⊥-elim (morph₁ idTC (mTC₂ P') NN'∈F)
+            p (.idTC , .(mTC₂ P') , NN'∈F) | inj₁ IdentTC , inj₂ P' , refl , refl = {!!} --  ⊥-elim (morph₁ idTC (mTC₂ P') NN'∈F)
             p (.(mTC₂ P) , .idTC , NN'∈F) | inj₂ P , inj₁ IdentTC , refl , refl = ⊥-elim (morph₁ (mTC₂ P) idTC NN'∈F)
             p (.(mTC₂ P) , .(mTC₂ P') , NN'∈F) | inj₂ P , inj₂ P' , refl , refl = ⊥-elim (morph₁ (mTC₂ P) (mTC₂ P') NN'∈F)
-
+-}
     princ F (M , M' , MM'∈F) (inj₂ (inj₂ M₁)) (inj₁ IdentTC) morph₁ morph₂ | inj₂ (inj₁ pairIn2) 
       = princ₂→princ cpm₁ cpm₂ F pairIn2 (inj₂ M₁) idTC 
                      (princ₂ (F→F₂ F) (NN∈F→NN∈F₂ F pairIn2 M M' MM'∈F) (inj₂ M₁) idTC 
