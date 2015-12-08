@@ -89,339 +89,220 @@ principalPolymonadCompose {TyCons₁} {TyCons₂} {pm₁} {pm₂} cpm₁ cpm₂ 
     mkFunctor : (M : TyCons₁ ⊎ TyCons₂) → B[ inj₂ M , idTC ] pm ▷ inj₂ M
     mkFunctor M = pmLawFunctor1 pm (inj₂ M)
 
-    princ : PrincipalPM pm
-    princ F (M , M' , MM'∈F) M₁ M₂ morph₁ morph₂ with partition F
-    princ F (M , M' , MM'∈F) M₁ M₂ morph₁ morph₂ | inj₁ pairIn1 = {!!}
+    morphId : (F : SubsetOf (TyCons × TyCons))
+            → (∀ (M M' : TyCons) → (¬ (M ≡ idTC) ⊎ ¬ (M' ≡ idTC)) → ¬ ((M , M') ∈ F))
+            → ( (N N' : TyCons) → (N , N') ∈ F → B[ N , N' ] pm ▷ idTC )
+    morphId F F≡IdId (inj₁ IdentTC) (inj₁ IdentTC) NN∈F = lawFunctor1 pm₁ (inj₁ IdentTC)
+    morphId F F≡IdId (inj₁ IdentTC) (inj₂ (inj₁ N')) NN∈F = ⊥-elim (F≡IdId idTC (mTC₁ N') (inj₂ (λ ())) NN∈F)
+    morphId F F≡IdId (inj₁ IdentTC) (inj₂ (inj₂ N')) NN∈F = ⊥-elim (F≡IdId idTC (mTC₂ N') (inj₂ (λ ())) NN∈F)
+    morphId F F≡IdId (inj₂ N) N' NN∈F = ⊥-elim (F≡IdId (inj₂ N) N' (inj₁ (λ ())) NN∈F)
     
-    princ F (M , M' , MM'∈F) (inj₁ IdentTC) (inj₁ IdentTC) morph₁ morph₂ | inj₂ (inj₁ pairIn2) = {!!}
-    princ F (M , M' , MM'∈F) (inj₁ IdentTC) (inj₂ (inj₁ M₂)) morph₁ morph₂ | inj₂ (inj₁ pairIn2) = {!!}
-    princ F (M , M' , MM'∈F) (inj₁ IdentTC) (inj₂ (inj₂ M₂)) morph₁ morph₂ | inj₂ (inj₁ pairIn2) 
+    helpPrinc1 : (F : SubsetOf ( TyCons × TyCons ))
+               → (M₁ : TyCons₁) → (M₂ : TyCons)
+               -- All pairs in F are from (IdTyCons ⊎ TyCons₁)²
+               → ( ∀ (M M' : TyCons) → (M , M') ∈ F 
+                 → ∃ λ(M₂ : IdTyCons ⊎ TyCons₂) → ∃ λ(M₂' : IdTyCons ⊎ TyCons₂) 
+                 → (M ≡ mTyCon₂ M₂) × (M' ≡ mTyCon₂ M₂') )
+               -- Create binds to TyCons₁
+               → ( (N N' : TyCons) → (N , N') ∈ F → B[ N , N' ] pm ▷ mTC₁ M₁ )
+               -- Create binds to TyCons₂
+               → ( (N N' : TyCons) → (N , N') ∈ F → B[ N , N' ] pm ▷ M₂ )
+               -- F contains for then just identity
+               → (∃ λ(M : TyCons) → ∃ λ(M' : TyCons) → (M , M') ∈ F × ¬ (M ≡ idTC) × ¬ (M' ≡ idTC))
+               -- Principality result pair
+               → ( ∃ λ(M̂ : TyCons) → B[ M̂ , idTC ] pm ▷ mTC₁ M₁ × B[ M̂ , idTC ] pm ▷ M₂ 
+                 × ( (N N' : TyCons) → (N , N') ∈ F → B[ N , N' ] pm ▷ M̂ ) )
+    helpPrinc1 F M₁ M₂ pairIn2 morph₁ morph₂ (inj₁ IdentTC , N' , NN∈F , ¬N≡Id , ¬N'≡Id) 
+      = ⊥-elim (¬N≡Id refl)
+    helpPrinc1 F M₁ M₂ pairIn2 morph₁ morph₂ (inj₂ N , inj₁ IdentTC , NN∈F , ¬N≡Id , ¬N'≡Id) 
+      = ⊥-elim (¬N'≡Id refl)
+    helpPrinc1 F M₁ M₂ pairIn2 morph₁ morph₂ (inj₂ (inj₁ N) , inj₂ (inj₁ N') , NN∈F , ¬N≡Id , ¬N'≡Id) 
+      = ⊥-elim (pairIn2→⊥ F pairIn2 (mTC₁ N) (mTC₁ N') NN∈F (N , inj₁ refl))
+    helpPrinc1 F M₁ M₂ pairIn2 morph₁ morph₂ (inj₂ (inj₁ N) , inj₂ (inj₂ N') , NN∈F , ¬N≡Id , ¬N'≡Id)
+      = ⊥-elim (composition→¬[N,M₂]▷M₁ cpm {N = mTC₁ N} {M₂ = N'} {M₁ = M₁} (morph₁ (mTC₁ N) (mTC₂ N') NN∈F))
+    helpPrinc1 F M₁ M₂ pairIn2 morph₁ morph₂ (inj₂ (inj₂ N) , inj₂ (inj₁ N') , NN∈F , ¬N≡Id , ¬N'≡Id) 
+      = ⊥-elim (composition→¬[M₂,N]▷M₁ cpm {M₂ = N} {N = mTC₁ N'} {M₁ = M₁} (morph₁ (mTC₂ N) (mTC₁ N') NN∈F))
+    helpPrinc1 F M₁ M₂ pairIn2 morph₁ morph₂ (inj₂ (inj₂ N) , inj₂ (inj₂ N') , NN∈F , ¬N≡Id , ¬N'≡Id) 
+      = ⊥-elim (composition→¬[M₂,N]▷M₁ cpm {M₂ = N} {N = mTC₂ N'} {M₁ = M₁} (morph₁ (mTC₂ N) (mTC₂ N') NN∈F))
+    
+    helpPrinc2 : (F : SubsetOf ( TyCons × TyCons ))
+               → (M₁ : TyCons) → (M₂ : TyCons₁)
+               -- All pairs in F are from (IdTyCons ⊎ TyCons₁)²
+               → ( ∀ (M M' : TyCons) → (M , M') ∈ F 
+                 → ∃ λ(M₂ : IdTyCons ⊎ TyCons₂) → ∃ λ(M₂' : IdTyCons ⊎ TyCons₂) 
+                 → (M ≡ mTyCon₂ M₂) × (M' ≡ mTyCon₂ M₂') )
+               -- Create binds to TyCons₁
+               → ( (N N' : TyCons) → (N , N') ∈ F → B[ N , N' ] pm ▷ M₁ )
+               -- Create binds to TyCons₂
+               → ( (N N' : TyCons) → (N , N') ∈ F → B[ N , N' ] pm ▷ mTC₁ M₂ )
+               -- F contains for then just identity
+               → (∃ λ(M : TyCons) → ∃ λ(M' : TyCons) → (M , M') ∈ F × ¬ (M ≡ idTC) × ¬ (M' ≡ idTC))
+               -- Principality result pair
+               → ( ∃ λ(M̂ : TyCons) → B[ M̂ , idTC ] pm ▷ M₁ × B[ M̂ , idTC ] pm ▷ mTC₁ M₂ 
+                 × ( (N N' : TyCons) → (N , N') ∈ F → B[ N , N' ] pm ▷ M̂ ) )
+    helpPrinc2 F M₁ M₂ pairIn2 morph₁ morph₂ (inj₁ IdentTC , N' , NN∈F , ¬N≡Id , ¬N'≡Id) 
+      = ⊥-elim (¬N≡Id refl)
+    helpPrinc2 F M₁ M₂ pairIn2 morph₁ morph₂ (inj₂ N , inj₁ IdentTC , NN∈F , ¬N≡Id , ¬N'≡Id) 
+      = ⊥-elim (¬N'≡Id refl)
+    helpPrinc2 F M₁ M₂ pairIn2 morph₁ morph₂ (inj₂ (inj₁ N) , inj₂ (inj₁ N') , NN∈F , ¬N≡Id , ¬N'≡Id) 
+      = ⊥-elim (pairIn2→⊥ F pairIn2 (mTC₁ N) (mTC₁ N') NN∈F (N , inj₁ refl))
+    helpPrinc2 F M₁ M₂ pairIn2 morph₁ morph₂ (inj₂ (inj₁ N) , inj₂ (inj₂ N') , NN∈F , ¬N≡Id , ¬N'≡Id)
+      = ⊥-elim (composition→¬[N,M₂]▷M₁ cpm {N = mTC₁ N} {M₂ = N'} {M₁ = M₂} (morph₂ (mTC₁ N) (mTC₂ N') NN∈F))
+    helpPrinc2 F M₁ M₂ pairIn2 morph₁ morph₂ (inj₂ (inj₂ N) , inj₂ (inj₁ N') , NN∈F , ¬N≡Id , ¬N'≡Id) 
+      = ⊥-elim (composition→¬[M₂,N]▷M₁ cpm {M₂ = N} {N = mTC₁ N'} {M₁ = M₂} (morph₂ (mTC₂ N) (mTC₁ N') NN∈F))
+    helpPrinc2 F M₁ M₂ pairIn2 morph₁ morph₂ (inj₂ (inj₂ N) , inj₂ (inj₂ N') , NN∈F , ¬N≡Id , ¬N'≡Id) 
+      = ⊥-elim (composition→¬[M₂,N]▷M₁ cpm {M₂ = N} {N = mTC₂ N'} {M₁ = M₂} (morph₂ (mTC₂ N) (mTC₂ N') NN∈F))
+
+    helpPrinc3 : (F : SubsetOf ( TyCons × TyCons ))
+                → (M₁ : TyCons₂) → (M₂ : TyCons)
+                -- All pairs in F are from (IdTyCons ⊎ TyCons₁)²
+                → ( ∀ (M M' : TyCons) → (M , M') ∈ F 
+                  → ∃ λ(M₁ : IdTyCons ⊎ TyCons₁) → ∃ λ(M₁' : IdTyCons ⊎ TyCons₁) 
+                  → (M ≡ mTyCon₁ M₁) × (M' ≡ mTyCon₁ M₁') )
+                -- Create binds to M₁
+                → ( (N N' : TyCons) → (N , N') ∈ F → B[ N , N' ] pm ▷ mTC₂ M₁ )
+                -- Create binds to M₂
+                → ( (N N' : TyCons) → (N , N') ∈ F → B[ N , N' ] pm ▷ M₂ )
+                -- F contains for then just identity
+                → (∃ λ(M : TyCons) → ∃ λ(M' : TyCons) → (M , M') ∈ F × ¬ (M ≡ idTC) × ¬ (M' ≡ idTC))
+                -- Principality result pair
+                → ( ∃ λ(M̂ : TyCons) → B[ M̂ , idTC ] pm ▷ mTC₂ M₁ × B[ M̂ , idTC ] pm ▷ M₂
+                  × ( (N N' : TyCons) → (N , N') ∈ F → B[ N , N' ] pm ▷ M̂ ) )
+    helpPrinc3 F M₁ M₂ pairIn1 morph₁ morph₂ (inj₁ IdentTC , N' , NN∈F , ¬N≡Id , ¬N'≡Id) 
+      = ⊥-elim (¬N≡Id refl)
+    helpPrinc3 F M₁ M₂ pairIn1 morph₁ morph₂ (inj₂ N , inj₁ IdentTC , NN∈F , ¬N≡Id , ¬N'≡Id) 
+      = ⊥-elim (¬N'≡Id refl)
+    helpPrinc3 F M₁ M₂ pairIn1 morph₁ morph₂ (inj₂ (inj₁ N) , inj₂ (inj₁ N') , NN∈F , ¬N≡Id , ¬N'≡Id) 
+      = ⊥-elim (composition→¬[M₁,N]▷M₂ cpm {M₁ = N} {N = mTC₁ N'} {M₂ = M₁} (morph₁ (mTC₁ N) (mTC₁ N') NN∈F))
+    helpPrinc3 F M₁ M₂ pairIn1 morph₁ morph₂ (inj₂ (inj₁ N) , inj₂ (inj₂ N') , NN∈F , ¬N≡Id , ¬N'≡Id)
+      = ⊥-elim (composition→¬[M₁,N]▷M₂ cpm {M₁ = N} {N = mTC₂ N'} {M₂ = M₁} (morph₁ (mTC₁ N) (mTC₂ N') NN∈F))
+    helpPrinc3 F M₁ M₂ pairIn1 morph₁ morph₂ (inj₂ (inj₂ N) , inj₂ (inj₁ N') , NN∈F , ¬N≡Id , ¬N'≡Id) 
+      = ⊥-elim (composition→¬[N,M₁]▷M₂ cpm {N = mTC₂ N} {M₁ = N'} {M₂ = M₁} (morph₁ (mTC₂ N) (mTC₁ N') NN∈F))
+    helpPrinc3 F M₁ M₂ pairIn1 morph₁ morph₂ (inj₂ (inj₂ N) , inj₂ (inj₂ N') , NN∈F , ¬N≡Id , ¬N'≡Id) 
+      = ⊥-elim (pairIn1→⊥ F pairIn1 (mTC₂ N) (mTC₂ N') NN∈F (N , (inj₁ refl)))
+    
+    helpPrinc4 : (F : SubsetOf ( TyCons × TyCons ))
+               → (M₁ : TyCons) → (M₂ : TyCons₂)
+               -- All pairs in F are from (IdTyCons ⊎ TyCons₁)²
+               → ( ∀ (M M' : TyCons) → (M , M') ∈ F 
+                 → ∃ λ(M₁ : IdTyCons ⊎ TyCons₁) → ∃ λ(M₁' : IdTyCons ⊎ TyCons₁) 
+                 → (M ≡ mTyCon₁ M₁) × (M' ≡ mTyCon₁ M₁') )
+               -- Create binds to TyCons₁
+               → ( (N N' : TyCons) → (N , N') ∈ F → B[ N , N' ] pm ▷ M₁ )
+               -- Create binds to TyCons₂
+               → ( (N N' : TyCons) → (N , N') ∈ F → B[ N , N' ] pm ▷ mTC₂ M₂ )
+               -- F contains for then just identity
+               → (∃ λ(M : TyCons) → ∃ λ(M' : TyCons) → (M , M') ∈ F × ¬ (M ≡ idTC) × ¬ (M' ≡ idTC))
+               -- Principality result pair
+               → ( ∃ λ(M̂ : TyCons) → B[ M̂ , idTC ] pm ▷ M₁ × B[ M̂ , idTC ] pm ▷ mTC₂ M₂ 
+                 × ( (N N' : TyCons) → (N , N') ∈ F → B[ N , N' ] pm ▷ M̂ ) )
+    helpPrinc4 F M₁ M₂ pairIn1 morph₁ morph₂ (inj₁ IdentTC , N' , NN∈F , ¬N≡Id , ¬N'≡Id) 
+      = ⊥-elim (¬N≡Id refl)
+    helpPrinc4 F M₁ M₂ pairIn1 morph₁ morph₂ (inj₂ N , inj₁ IdentTC , NN∈F , ¬N≡Id , ¬N'≡Id) 
+      = ⊥-elim (¬N'≡Id refl)
+    helpPrinc4 F M₁ M₂ pairIn1 morph₁ morph₂ (inj₂ (inj₁ N) , inj₂ (inj₁ N') , NN∈F , ¬N≡Id , ¬N'≡Id) 
+      = ⊥-elim (composition→¬[M₁,N]▷M₂ cpm {M₁ = N} {N = mTC₁ N'} {M₂ = M₂} (morph₂ (mTC₁ N) (mTC₁ N') NN∈F))
+    helpPrinc4 F M₁ M₂ pairIn1 morph₁ morph₂ (inj₂ (inj₁ N) , inj₂ (inj₂ N') , NN∈F , ¬N≡Id , ¬N'≡Id)
+      = ⊥-elim (composition→¬[M₁,N]▷M₂ cpm {M₁ = N} {N = mTC₂ N'} {M₂ = M₂} (morph₂ (mTC₁ N) (mTC₂ N') NN∈F))
+    helpPrinc4 F M₁ M₂ pairIn1 morph₁ morph₂ (inj₂ (inj₂ N) , inj₂ (inj₁ N') , NN∈F , ¬N≡Id , ¬N'≡Id) 
+      = ⊥-elim (composition→¬[N,M₁]▷M₂ cpm {N = mTC₂ N} {M₁ = N'} {M₂ = M₂} (morph₂ (mTC₂ N) (mTC₁ N') NN∈F))
+    helpPrinc4 F M₁ M₂ pairIn1 morph₁ morph₂ (inj₂ (inj₂ N) , inj₂ (inj₂ N') , NN∈F , ¬N≡Id , ¬N'≡Id) 
+      = ⊥-elim (pairIn1→⊥ F pairIn1 (mTC₂ N) (mTC₂ N') NN∈F (N , inj₁ refl))
+    
+    princ : PrincipalPM pm
+    princ F (M , M' , MM'∈F) M₁ M₂ morph₁ morph₂ with onlyIdPair F
+    princ F (M , M' , MM'∈F) M₁ M₂ morph₁ morph₂ | inj₁ FmoreThenId with partition F
+    
+    princ F (M , M' , MM'∈F) (inj₁ IdentTC) (inj₁ IdentTC) morph₁ morph₂ | inj₁ (inj₁ IdentTC , N' , NN∈F , ¬N≡Id , ¬N'≡Id) 
+      | inj₁ pairIn1 = ⊥-elim (¬N≡Id refl)
+    princ F (M , M' , MM'∈F) (inj₁ IdentTC) (inj₁ IdentTC) morph₁ morph₂ | inj₁ (inj₂ N , inj₁ IdentTC , NN∈F , ¬N≡Id , ¬N'≡Id) 
+      | inj₁ pairIn1 = ⊥-elim (¬N'≡Id refl)
+    princ F (M , M' , MM'∈F) (inj₁ IdentTC) (inj₁ IdentTC) morph₁ morph₂ | inj₁ (inj₂ (inj₁ N) , inj₂ (inj₁ N') , NN∈F , ¬N≡Id , ¬N'≡Id) 
+      | inj₁ pairIn1 = ⊥-elim (idMorph¬∃ {M = mTC₁ N} {N = mTC₁ N'} (inj₁ (inj₁ N , refl)) (morph₁ (mTC₁ N) (mTC₁ N') NN∈F))
+    princ F (M , M' , MM'∈F) (inj₁ IdentTC) (inj₁ IdentTC) morph₁ morph₂ | inj₁ (inj₂ (inj₁ N) , inj₂ (inj₂ N') , NN∈F , ¬N≡Id , ¬N'≡Id) 
+      | inj₁ pairIn1 = ⊥-elim (pairIn1→⊥ F pairIn1 (mTC₁ N) (mTC₂ N') NN∈F (N' , (inj₂ refl)))
+    princ F (M , M' , MM'∈F) (inj₁ IdentTC) (inj₁ IdentTC) morph₁ morph₂ | inj₁ (inj₂ (inj₂ N) , inj₂ N' , NN∈F , ¬N≡Id , ¬N'≡Id) 
+      | inj₁ pairIn1 = ⊥-elim (pairIn1→⊥ F pairIn1 (mTC₂ N) (inj₂ N') NN∈F (N , (inj₁ refl)))
+    
+    princ F (M , M' , MM'∈F) (inj₁ IdentTC) (inj₂ (inj₁ M₂)) morph₁ morph₂ | inj₁ FmoreThenId | inj₁ pairIn1 
+      = princ₁→princ cpm₁ cpm₂ F pairIn1 idTC (inj₂ M₂) 
+                     (princ₁ (F→F₁ F) (NN∈F→NN∈F₁ F pairIn1 M M' MM'∈F) idTC (inj₂ M₂) 
+                             (morph→morph₁ cpm₁ cpm₂ F idTC morph₁) 
+                             (morph→morph₁ cpm₁ cpm₂ F (inj₂ M₂) morph₂))
+    princ F (M , M' , MM'∈F) (inj₁ IdentTC) (inj₂ (inj₂ M₂)) morph₁ morph₂ | inj₁ FmoreThenId | inj₁ pairIn1 
+      = helpPrinc4 F idTC M₂ pairIn1 morph₁ morph₂ FmoreThenId
+    princ F (M , M' , MM'∈F) (inj₂ (inj₁ M₁)) (inj₁ IdentTC) morph₁ morph₂ | inj₁ FmoreThenId | inj₁ pairIn1 
+      = princ₁→princ cpm₁ cpm₂ F pairIn1 (inj₂ M₁) idTC 
+                     (princ₁ (F→F₁ F) (NN∈F→NN∈F₁ F pairIn1 M M' MM'∈F) (inj₂ M₁) idTC 
+                             (morph→morph₁ cpm₁ cpm₂ F (inj₂ M₁) morph₁) 
+                             (morph→morph₁ cpm₁ cpm₂ F idTC morph₂))
+    princ F (M , M' , MM'∈F) (inj₂ (inj₁ M₁)) (inj₂ (inj₁ M₂)) morph₁ morph₂ | inj₁ FmoreThenId | inj₁ pairIn1 
+      = princ₁→princ cpm₁ cpm₂ F pairIn1 (inj₂ M₁) (inj₂ M₂) 
+                     (princ₁ (F→F₁ F) (NN∈F→NN∈F₁ F pairIn1 M M' MM'∈F) (inj₂ M₁) (inj₂ M₂) 
+                             (morph→morph₁ cpm₁ cpm₂ F (inj₂ M₁) morph₁) 
+                             (morph→morph₁ cpm₁ cpm₂ F (inj₂ M₂) morph₂))
+    princ F (M , M' , MM'∈F) (inj₂ (inj₁ M₁)) (inj₂ (inj₂ M₂)) morph₁ morph₂ | inj₁ FmoreThenId | inj₁ pairIn1
+      = helpPrinc4 F (mTC₁ M₁) M₂ pairIn1 morph₁ morph₂ FmoreThenId
+    princ F (M , M' , MM'∈F) (inj₂ (inj₂ M₁)) M₂ morph₁ morph₂ | inj₁ FmoreThenId | inj₁ pairIn1 
+      = helpPrinc3 F M₁ M₂ pairIn1 morph₁ morph₂ FmoreThenId
+    
+    princ F (M , M' , MM'∈F) (inj₁ IdentTC) (inj₁ IdentTC) morph₁ morph₂ | inj₁ (inj₁ IdentTC , N' , NN∈F , ¬N≡Id , ¬N'≡Id) 
+      | inj₂ (inj₁ pairIn2) = ⊥-elim (¬N≡Id refl)
+    princ F (M , M' , MM'∈F) (inj₁ IdentTC) (inj₁ IdentTC) morph₁ morph₂ | inj₁ (inj₂ N , inj₁ IdentTC , NN∈F , ¬N≡Id , ¬N'≡Id) 
+      | inj₂ (inj₁ pairIn2) = ⊥-elim (¬N'≡Id refl)
+    princ F (M , M' , MM'∈F) (inj₁ IdentTC) (inj₁ IdentTC) morph₁ morph₂ | inj₁ (inj₂ (inj₁ N) , inj₂ N' , NN∈F , ¬N≡Id , ¬N'≡Id) 
+      | inj₂ (inj₁ pairIn2) = ⊥-elim (pairIn2→⊥ F pairIn2 (mTC₁ N) (inj₂ N') NN∈F (N , inj₁ refl))
+    princ F (M , M' , MM'∈F) (inj₁ IdentTC) (inj₁ IdentTC) morph₁ morph₂ | inj₁ (inj₂ (inj₂ N) , inj₂ (inj₁ N') , NN∈F , ¬N≡Id , ¬N'≡Id) 
+      | inj₂ (inj₁ pairIn2) = ⊥-elim (pairIn2→⊥ F pairIn2 (mTC₂ N) (mTC₁ N') NN∈F (N' , inj₂ refl))
+    princ F (M , M' , MM'∈F) (inj₁ IdentTC) (inj₁ IdentTC) morph₁ morph₂ | inj₁ (inj₂ (inj₂ N) , inj₂ (inj₂ N') , NN∈F , ¬N≡Id , ¬N'≡Id) 
+      | inj₂ (inj₁ pairIn2) = ⊥-elim (idMorph¬∃ {M = mTC₂ N} {N = mTC₂ N'} (inj₁ (inj₂ N , refl)) (morph₁ (mTC₂ N) (mTC₂ N') NN∈F))
+    
+    princ F (M , M' , MM'∈F) (inj₁ IdentTC) (inj₂ (inj₁ M₂)) morph₁ morph₂ | inj₁ FmoreThenId | inj₂ (inj₁ pairIn2) 
+      = helpPrinc2 F idTC M₂ pairIn2 morph₁ morph₂ FmoreThenId
+    princ F (M , M' , MM'∈F) (inj₁ IdentTC) (inj₂ (inj₂ M₂)) morph₁ morph₂ | inj₁ FmoreThenId | inj₂ (inj₁ pairIn2) 
       = princ₂→princ cpm₁ cpm₂ F pairIn2 idTC (inj₂ M₂)  
                      (princ₂ (F→F₂ F) (NN∈F→NN∈F₂ F pairIn2 M M' MM'∈F) idTC (inj₂ M₂) 
-                             (morph→morph₂ cpm₁ cpm₂ F idTC morph₁) 
+                             (morph→morph₂ cpm₁ cpm₂ F idTC morph₁)
                              (morph→morph₂ cpm₁ cpm₂ F (inj₂ M₂) morph₂))
-    princ F (M , M' , MM'∈F) (inj₂ (inj₁ M₁)) (inj₁ IdentTC) morph₁ morph₂ | inj₂ (inj₁ pairIn2) = {!!}
-    princ F (M , M' , MM'∈F) (inj₂ (inj₁ M₁)) (inj₂ (inj₁ M₂)) morph₁ morph₂ | inj₂ (inj₁ pairIn2) = {!!}
-    princ F (M , M' , MM'∈F) (inj₂ (inj₁ M₁)) (inj₂ (inj₂ M₂)) morph₁ morph₂ | inj₂ (inj₁ pairIn2) with onlyIdPair F
-    princ F (M , M' , MM'∈F) (inj₂ (inj₁ M₁)) (inj₂ (inj₂ M₂)) morph₁ morph₂ | inj₂ (inj₁ pairIn2) | inj₁ x = {!x!}
-    princ F (M , M' , MM'∈F) (inj₂ (inj₁ M₁)) (inj₂ (inj₂ M₂)) morph₁ morph₂ | inj₂ (inj₁ pairIn2) | inj₂ (IdId∈F , F≡IdId)
-      = idTC , morph₁ idTC idTC IdId∈F , morph₂ idTC idTC IdId∈F , {!!}
-      where newMorph : (N N' : TyCons) → (N , N') ∈ F → B[ N , N' ] pm ▷ idTC
-            newMorph (inj₁ IdentTC) (inj₁ IdentTC) NN∈F = lawFunctor1 pm₁ (inj₁ IdentTC)
-            newMorph (inj₁ IdentTC) (inj₂ (inj₁ N')) NN∈F = ⊥-elim (F≡IdId idTC (mTC₁ N') (inj₂ (λ ())) {!NN∈F!})
-            newMorph (inj₁ IdentTC) (inj₂ (inj₂ N')) NN∈F = {!!}
-            newMorph (inj₂ N) N' NN∈F = {!!}
-      {- -- p (M , M' , MM'∈F)
-      where newMorph : (idTC , idTC) ∈ F → (N N' : TyCons) → (N , N') ∈ F → B[ N , N' ] pm ▷ idTC
-            newMorph IdId∈F (inj₁ IdentTC) (inj₁ IdentTC) NN∈F = lawFunctor1 pm₁ (inj₁ IdentTC)
-            newMorph IdId∈F (inj₁ IdentTC) (inj₂ (inj₁ N')) NN∈F with pairIn2 idTC (mTC₁ N') NN∈F 
-            newMorph IdId∈F (inj₁ IdentTC) (inj₂ (inj₁ N')) NN∈F | P , inj₁ IdentTC , eq , ()
-            newMorph IdId∈F (inj₁ IdentTC) (inj₂ (inj₁ N')) NN∈F | P , inj₂ P' , eq , ()
-            newMorph IdId∈F (inj₁ IdentTC) (inj₂ (inj₂ N')) NN∈F = {!!}
-            newMorph IdId∈F (inj₂ N) N' NN∈F = {!!}
-            
-            p : (∃ λ(M : TyCons) → ∃ λ(M' : TyCons) → (M , M') ∈ F) → ∃ λ(M̂ : TyCons) → B[ M̂ , idTC ] pm ▷ mTC₁ M₁ 
-                                                                                      × B[ M̂ , idTC ] pm ▷ mTC₂ M₂
-                                                                                      × ( (N N' : TyCons) → (N , N') ∈ F → B[ N , N' ] pm ▷ M̂ )
-            p (N , N' , NN'∈F) with pairIn2 N N' NN'∈F
-            p (.idTC , .idTC , NN'∈F) | inj₁ IdentTC , inj₁ IdentTC , refl , refl = idTC , morph₁ idTC idTC NN'∈F , morph₂ idTC idTC NN'∈F , newMorph NN'∈F
-            p (.idTC , .(mTC₂ P') , NN'∈F) | inj₁ IdentTC , inj₂ P' , refl , refl = {!!} --  ⊥-elim (morph₁ idTC (mTC₂ P') NN'∈F)
-            p (.(mTC₂ P) , .idTC , NN'∈F) | inj₂ P , inj₁ IdentTC , refl , refl = ⊥-elim (morph₁ (mTC₂ P) idTC NN'∈F)
-            p (.(mTC₂ P) , .(mTC₂ P') , NN'∈F) | inj₂ P , inj₂ P' , refl , refl = ⊥-elim (morph₁ (mTC₂ P) (mTC₂ P') NN'∈F)
--}
-    princ F (M , M' , MM'∈F) (inj₂ (inj₂ M₁)) (inj₁ IdentTC) morph₁ morph₂ | inj₂ (inj₁ pairIn2) 
+    princ F (M , M' , MM'∈F) (inj₂ (inj₁ M₁)) M₂   morph₁ morph₂ | inj₁ FmoreThenId | inj₂ (inj₁ pairIn2) 
+      = helpPrinc1 F M₁ M₂ pairIn2 morph₁ morph₂ FmoreThenId
+    princ F (M , M' , MM'∈F) (inj₂ (inj₂ M₁)) (inj₁ IdentTC)   morph₁ morph₂ | inj₁ FmoreThenId | inj₂ (inj₁ pairIn2) 
       = princ₂→princ cpm₁ cpm₂ F pairIn2 (inj₂ M₁) idTC 
                      (princ₂ (F→F₂ F) (NN∈F→NN∈F₂ F pairIn2 M M' MM'∈F) (inj₂ M₁) idTC 
                              (morph→morph₂ cpm₁ cpm₂ F (inj₂ M₁) morph₁) 
                              (morph→morph₂ cpm₁ cpm₂ F idTC morph₂))
-    princ F (M , M' , MM'∈F) (inj₂ (inj₂ M₁)) (inj₂ (inj₁ M₂)) morph₁ morph₂ | inj₂ (inj₁ pairIn2) = {!!}
-    princ F (M , M' , MM'∈F) (inj₂ (inj₂ M₁)) (inj₂ (inj₂ M₂)) morph₁ morph₂ | inj₂ (inj₁ pairIn2) 
+    princ F (M , M' , MM'∈F) (inj₂ (inj₂ M₁)) (inj₂ (inj₁ M₂)) morph₁ morph₂ | inj₁ FmoreThenId | inj₂ (inj₁ pairIn2) 
+      = helpPrinc2 F (mTC₂ M₁) M₂ pairIn2 morph₁ morph₂ FmoreThenId
+    princ F (M , M' , MM'∈F) (inj₂ (inj₂ M₁)) (inj₂ (inj₂ M₂)) morph₁ morph₂ | inj₁ FmoreThenId | inj₂ (inj₁ pairIn2) 
       = princ₂→princ cpm₁ cpm₂ F pairIn2 (inj₂ M₁) (inj₂ M₂) 
                      (princ₂ (F→F₂ F) (NN∈F→NN∈F₂ F pairIn2 M M' MM'∈F) (inj₂ M₁) (inj₂ M₂) 
                              (morph→morph₂ cpm₁ cpm₂ F (inj₂ M₁) morph₁) 
                              (morph→morph₂ cpm₁ cpm₂ F (inj₂ M₂) morph₂))
-    princ F (M , M' , MM'∈F) (inj₁ IdentTC) M₂ morph₁ morph₂ | inj₂ (inj₂ (N₁ , N₂ , N , N' , inj₁ N₁N∈F , inj₁ N₂N'∈F))
+    
+    princ F (M , M' , MM'∈F) (inj₁ IdentTC) M₂ morph₁ morph₂ | inj₁ FmoreThenId | inj₂ (inj₂ (N₁ , N₂ , N , N' , inj₁ N₁N∈F , inj₁ N₂N'∈F))
       = ⊥-elim (idMorph¬∃ {M = mTC₁ N₁} {N = N} (inj₁ ((inj₁ N₁) , refl)) (morph₁ (mTC₁ N₁) N N₁N∈F))
-    princ F (M , M' , MM'∈F) (inj₂ (inj₁ M₁)) M₂ morph₁ morph₂ | inj₂ (inj₂ (N₁ , N₂ , N , N' , inj₁ N₁N∈F , inj₁ N₂N'∈F)) 
+    princ F (M , M' , MM'∈F) (inj₂ (inj₁ M₁)) M₂ morph₁ morph₂ | inj₁ FmoreThenId | inj₂ (inj₂ (N₁ , N₂ , N , N' , inj₁ N₁N∈F , inj₁ N₂N'∈F)) 
       = ⊥-elim (composition→¬[M₂,N]▷M₁ cpm {M₂ = N₂} {N = N'} {M₁ = M₁} (morph₁ (mTC₂ N₂) N' N₂N'∈F))
-    princ F (M , M' , MM'∈F) (inj₂ (inj₂ M₁)) M₂ morph₁ morph₂ | inj₂ (inj₂ (N₁ , N₂ , N , N' , inj₁ N₁N∈F , inj₁ N₂N'∈F)) 
+    princ F (M , M' , MM'∈F) (inj₂ (inj₂ M₁)) M₂ morph₁ morph₂ | inj₁ FmoreThenId | inj₂ (inj₂ (N₁ , N₂ , N , N' , inj₁ N₁N∈F , inj₁ N₂N'∈F)) 
       = ⊥-elim (composition→¬[M₁,N]▷M₂ cpm {M₁ = N₁} {N = N} {M₂ = M₁} (morph₁ (mTC₁ N₁) N N₁N∈F))
-    princ F (M , M' , MM'∈F) (inj₁ IdentTC) M₂ morph₁ morph₂ | inj₂ (inj₂ (N₁ , N₂ , N , N' , inj₁ N₁N∈F , inj₂ N'N₂∈F)) 
+    princ F (M , M' , MM'∈F) (inj₁ IdentTC) M₂ morph₁ morph₂ | inj₁ FmoreThenId | inj₂ (inj₂ (N₁ , N₂ , N , N' , inj₁ N₁N∈F , inj₂ N'N₂∈F)) 
       = ⊥-elim (idMorph¬∃ {M = mTC₁ N₁} {N = N} (inj₁ ((inj₁ N₁) , refl)) (morph₁ (mTC₁ N₁) N N₁N∈F))
-    princ F (M , M' , MM'∈F) (inj₂ (inj₁ M₁)) M₂ morph₁ morph₂ | inj₂ (inj₂ (N₁ , N₂ , N , N' , inj₁ N₁N∈F , inj₂ N'N₂∈F)) 
+    princ F (M , M' , MM'∈F) (inj₂ (inj₁ M₁)) M₂ morph₁ morph₂ | inj₁ FmoreThenId | inj₂ (inj₂ (N₁ , N₂ , N , N' , inj₁ N₁N∈F , inj₂ N'N₂∈F)) 
       = ⊥-elim (composition→¬[N,M₂]▷M₁ cpm {N = N'} {M₂ = N₂} {M₁ = M₁} (morph₁ N' (mTC₂ N₂) N'N₂∈F))
-    princ F (M , M' , MM'∈F) (inj₂ (inj₂ M₁)) M₂ morph₁ morph₂ | inj₂ (inj₂ (N₁ , N₂ , N , N' , inj₁ N₁N∈F , inj₂ N'N₂∈F)) 
+    princ F (M , M' , MM'∈F) (inj₂ (inj₂ M₁)) M₂ morph₁ morph₂ | inj₁ FmoreThenId | inj₂ (inj₂ (N₁ , N₂ , N , N' , inj₁ N₁N∈F , inj₂ N'N₂∈F)) 
       = ⊥-elim (composition→¬[M₁,N]▷M₂ cpm {M₁ = N₁} {N = N} {M₂ = M₁} (morph₁ (mTC₁ N₁) N N₁N∈F))
-    princ F (M , M' , MM'∈F) (inj₁ IdentTC) M₂ morph₁ morph₂ | inj₂ (inj₂ (N₁ , N₂ , N , N' , inj₂ NN₁∈F , inj₁ N₂N'∈F)) 
+    princ F (M , M' , MM'∈F) (inj₁ IdentTC) M₂ morph₁ morph₂ | inj₁ FmoreThenId | inj₂ (inj₂ (N₁ , N₂ , N , N' , inj₂ NN₁∈F , inj₁ N₂N'∈F)) 
       = ⊥-elim (idMorph¬∃ {M = N} {N = mTC₁ N₁} (inj₂ ((inj₁ N₁) , refl)) (morph₁ N (mTC₁ N₁) NN₁∈F))
-    princ F (M , M' , MM'∈F) (inj₂ (inj₁ M₁)) M₂ morph₁ morph₂ | inj₂ (inj₂ (N₁ , N₂ , N , N' , inj₂ NN₁∈F , inj₁ N₂N'∈F)) 
+    princ F (M , M' , MM'∈F) (inj₂ (inj₁ M₁)) M₂ morph₁ morph₂ | inj₁ FmoreThenId | inj₂ (inj₂ (N₁ , N₂ , N , N' , inj₂ NN₁∈F , inj₁ N₂N'∈F)) 
       = ⊥-elim (composition→¬[M₂,N]▷M₁ cpm {M₂ = N₂} {N = N'} {M₁ = M₁} (morph₁ (mTC₂ N₂) N' N₂N'∈F))
-    princ F (M , M' , MM'∈F) (inj₂ (inj₂ M₁)) M₂ morph₁ morph₂ | inj₂ (inj₂ (N₁ , N₂ , N , N' , inj₂ NN₁∈F , inj₁ N₂N'∈F)) 
+    princ F (M , M' , MM'∈F) (inj₂ (inj₂ M₁)) M₂ morph₁ morph₂ | inj₁ FmoreThenId | inj₂ (inj₂ (N₁ , N₂ , N , N' , inj₂ NN₁∈F , inj₁ N₂N'∈F)) 
       = ⊥-elim (composition→¬[N,M₁]▷M₂ cpm {N = N} {M₁ = N₁} {M₂ = M₁} (morph₁ N (mTC₁ N₁) NN₁∈F))
-    princ F (M , M' , MM'∈F) (inj₁ IdentTC) M₂ morph₁ morph₂ | inj₂ (inj₂ (N₁ , N₂ , N , N' , inj₂ NN₁∈F , inj₂ N'N₂∈F)) 
+    princ F (M , M' , MM'∈F) (inj₁ IdentTC) M₂ morph₁ morph₂ | inj₁ FmoreThenId | inj₂ (inj₂ (N₁ , N₂ , N , N' , inj₂ NN₁∈F , inj₂ N'N₂∈F)) 
       = ⊥-elim (idMorph¬∃ {M = N} {N = mTC₁ N₁} (inj₂ ((inj₁ N₁) , refl)) (morph₁ N (mTC₁ N₁) NN₁∈F))
-    princ F (M , M' , MM'∈F) (inj₂ (inj₁ M₁)) M₂ morph₁ morph₂ | inj₂ (inj₂ (N₁ , N₂ , N , N' , inj₂ NN₁∈F , inj₂ N'N₂∈F)) 
+    princ F (M , M' , MM'∈F) (inj₂ (inj₁ M₁)) M₂ morph₁ morph₂ | inj₁ FmoreThenId | inj₂ (inj₂ (N₁ , N₂ , N , N' , inj₂ NN₁∈F , inj₂ N'N₂∈F)) 
       = ⊥-elim (composition→¬[N,M₂]▷M₁ cpm {N = N'} {M₂ = N₂} {M₁ = M₁} (morph₁ N' (mTC₂ N₂) N'N₂∈F))
-    princ F (M , M' , MM'∈F) (inj₂ (inj₂ M₁)) M₂ morph₁ morph₂ | inj₂ (inj₂ (N₁ , N₂ , N , N' , inj₂ NN₁∈F , inj₂ N'N₂∈F))
+    princ F (M , M' , MM'∈F) (inj₂ (inj₂ M₁)) M₂ morph₁ morph₂ | inj₁ FmoreThenId | inj₂ (inj₂ (N₁ , N₂ , N , N' , inj₂ NN₁∈F , inj₂ N'N₂∈F))
       = ⊥-elim (composition→¬[N,M₁]▷M₂ cpm {N = N} {M₁ = N₁} {M₂ = M₁} (morph₁ N (mTC₁ N₁) NN₁∈F))
-{-
-    princ F (inj₁ IdentTC , inj₂ M' , MM'∈F) M₁ M₂ morph₁ morph₂ = {!!}
-    princ F (inj₂ (inj₁ M) , inj₁ IdentTC , MM'∈F) N₁ N₂ morph₁ morph₂ = {!!}
-    princ F (inj₂ (inj₁ M) , inj₂ (inj₁ M') , MM'∈F) N₁ N₂ morph₁ morph₂ = {!!}
-    princ F (inj₂ (inj₁ M) , inj₂ (inj₂ M') , MM'∈F) (inj₁ IdentTC) N₂ morph₁ morph₂ 
-      = ⊥-elim (idMorph¬∃ {M = mTC₁ M} {N = mTC₂ M'} (inj₁ ((inj₁ M) , refl)) (morph₁ (mTC₁ M) (mTC₂ M') MM'∈F))
-    princ F (inj₂ (inj₁ M) , inj₂ (inj₂ M') , MM'∈F) (inj₂ (inj₁ N₁)) N₂ morph₁ morph₂
-      = ⊥-elim (composition→¬[N,M₂]▷M₁ cpm {N = mTC₁ M} {M₂ = M'} {M₁ = N₁} (morph₁ (mTC₁ M) (mTC₂ M') MM'∈F))
-    princ F (inj₂ (inj₁ M) , inj₂ (inj₂ M') , MM'∈F) (inj₂ (inj₂ N₁)) N₂ morph₁ morph₂ 
-      = ⊥-elim (composition→¬[M₁,N]▷M₂ cpm {M₁ = M} {N = mTC₂ M'} {M₂ = N₁} (morph₁ (mTC₁ M) (mTC₂ M') MM'∈F))
-    princ F (inj₂ (inj₂ M) , inj₁ IdentTC , MM'∈F) N₁ N₂ morph₁ morph₂ = {!!}
-    princ F (inj₂ (inj₂ M) , inj₂ (inj₁ M') , MM'∈F) (inj₁ IdentTC) N₂ morph₁ morph₂ 
-      = ⊥-elim (idMorph¬∃ {M = mTC₂ M} {N = mTC₁ M'} (inj₁ (inj₂ M , refl)) (morph₁ (mTC₂ M) (mTC₁ M') MM'∈F))
-    princ F (inj₂ (inj₂ M) , inj₂ (inj₁ M') , MM'∈F) (inj₂ (inj₁ N₁)) N₂ morph₁ morph₂ 
-      = ⊥-elim (composition→¬[M₂,N]▷M₁ cpm {M₂ = M} {N = mTC₁ M'} {M₁ = N₁} (morph₁ (mTC₂ M) (mTC₁ M') MM'∈F))
-    princ F (inj₂ (inj₂ M) , inj₂ (inj₁ M') , MM'∈F) (inj₂ (inj₂ N₁)) N₂ morph₁ morph₂ 
-      = ⊥-elim (composition→¬[N,M₁]▷M₂ cpm {N = mTC₂ M} {M₁ = M'} {M₂ = N₁} (morph₁ (mTC₂ M) (mTC₁ M') MM'∈F))
-    princ F (inj₂ (inj₂ M) , inj₂ (inj₂ M') , MM'∈F) (inj₁ IdentTC) N' morph₁ morph₂ = {!!}
-    princ F (inj₂ (inj₂ M) , inj₂ (inj₂ M') , MM'∈F) (inj₂ (inj₁ N)) N' morph₁ morph₂ = {!!}
-    princ F (inj₂ (inj₂ M) , inj₂ (inj₂ M') , MM'∈F) (inj₂ (inj₂ N)) (inj₁ IdentTC) morph₁ morph₂ = {!!}
-    princ F (inj₂ (inj₂ M) , inj₂ (inj₂ M') , MM'∈F) (inj₂ (inj₂ N)) (inj₂ (inj₁ N')) morph₁ morph₂ = {!!}
-    princ F (inj₂ (inj₂ M) , inj₂ (inj₂ M') , MM'∈F) (inj₂ (inj₂ N)) (inj₂ (inj₂ N')) morph₁ morph₂ = mTC₂ N , mkFunctor (inj₂ N) , {!!} , morph₁
--}
---  idMorph¬∃ : ∀ {M N : IdTyCons ⊎ TyCons} → (∃ λ(M' : TyCons) → M ≡ inj₂ M') ⊎ (∃ λ(N' : TyCons) → N ≡ inj₂ N') → ¬ (B[ M , N ] pm ▷ idTC)
+    princ F (M , M' , MM'∈F) M₁ M₂ morph₁ morph₂ | inj₂ (IdId∈F , F≡IdId) 
+      = idTC , morph₁ idTC idTC IdId∈F , morph₂ idTC idTC IdId∈F , morphId F F≡IdId
 
-    {-
-    contradiction : ∀ {l} {P : Set l} → P → ¬ P → ⊥
-    contradiction P ¬P = ¬P P
-    
-    mixedPrinc : (M₁ : TyCons₁) → (M₂ : TyCons₂)
-               → (F : SubsetOf (TyCons × TyCons)) 
-               → ((M M' : TyCons) → (M , M') ∈ F → B[ M , M' ] pm ▷ mTC₁ M₁)
-               → ((M M' : TyCons) → (M , M') ∈ F → B[ M , M' ] pm ▷ mTC₂ M₂)
-               → Dec ((mTC₁ M₁ , idTC   ) ∈ F)
-               → Dec ((idTC    , mTC₁ M₁) ∈ F)
-               → Dec ((mTC₂ M₂ , idTC   ) ∈ F)
-               → Dec ((idTC    , mTC₂ M₂) ∈ F)
-               → Dec ((mTC₁ M₁ , mTC₂ M₂) ∈ F)
-               → Dec ((mTC₂ M₂ , mTC₁ M₁) ∈ F)
-               → Dec ((mTC₁ M₁ , mTC₁ M₁) ∈ F)
-               → Dec ((mTC₂ M₂ , mTC₂ M₂) ∈ F)
-               → ( B[ idTC , idTC ] pm ▷ mTC₁ M₁
-                 × B[ idTC , idTC ] pm ▷ mTC₂ M₂
-                 × ((M M' : TyCons) → (M , M') ∈ F → B[ M , M' ] pm ▷ idTC))
-    mixedPrinc M₁ M₂ F morph₁ morph₂ (yes M₁I∈F) IM₁∈?F M₂I∈?F IM₂∈?F M₁M₂∈?F M₂M₁∈?F M₁M₁∈?F M₂M₂∈?F = ⊥-elim (morph₂ (mTC₁ M₁) idTC M₁I∈F)
-    mixedPrinc M₁ M₂ F morph₁ morph₂ (no ¬M₁I∈F) (yes IM₁∈F) M₂I∈?F IM₂∈?F M₁M₂∈?F M₂M₁∈?F M₁M₁∈?F M₂M₂∈?F = ⊥-elim (morph₂ idTC (mTC₁ M₁) IM₁∈F)
-    mixedPrinc M₁ M₂ F morph₁ morph₂ (no ¬M₁I∈F) (no ¬IM₁∈F) (yes M₂I∈F) IM₂∈?F M₁M₂∈?F M₂M₁∈?F M₁M₁∈?F M₂M₂∈?F = ⊥-elim (morph₁ (mTC₂ M₂) idTC M₂I∈F)
-    mixedPrinc M₁ M₂ F morph₁ morph₂ (no ¬M₁I∈F) (no ¬IM₁∈F) (no ¬M₂I∈F) (yes IM₂∈F) M₁M₂∈?F M₂M₁∈?F M₁M₁∈?F M₂M₂∈?F = ⊥-elim (morph₁ idTC (mTC₂ M₂) IM₂∈F)
-    mixedPrinc M₁ M₂ F morph₁ morph₂ (no ¬M₁I∈F) (no ¬IM₁∈F) (no ¬M₂I∈F) (no ¬IM₂∈F) (yes M₁M₂∈F) M₂M₁∈?F M₁M₁∈?F M₂M₂∈?F = ⊥-elim (morph₂ (mTC₁ M₁) (mTC₂ M₂) M₁M₂∈F)
-    mixedPrinc M₁ M₂ F morph₁ morph₂ (no ¬M₁I∈F) (no ¬IM₁∈F) (no ¬M₂I∈F) (no ¬IM₂∈F) (no ¬M₁M₂∈F) (yes M₂M₁∈F) M₁M₁∈?F M₂M₂∈?F = ⊥-elim (morph₁ (mTC₂ M₂) (mTC₁ M₁) M₂M₁∈F)
-    mixedPrinc M₁ M₂ F morph₁ morph₂ (no ¬M₁I∈F) (no ¬IM₁∈F) (no ¬M₂I∈F) (no ¬IM₂∈F) (no ¬M₁M₂∈F) (no ¬M₂M₁∈F) (yes M₁M₁∈F) M₂M₂∈?F = ⊥-elim (morph₂ (mTC₁ M₁) (mTC₁ M₁) M₁M₁∈F)
-    mixedPrinc M₁ M₂ F morph₁ morph₂ (no ¬M₁I∈F) (no ¬IM₁∈F) (no ¬M₂I∈F) (no ¬IM₂∈F) (no ¬M₁M₂∈F) (no ¬M₂M₁∈F) (no ¬M₁M₁∈F) (yes M₂M₂∈F) = ⊥-elim (morph₁ (mTC₂ M₂) (mTC₂ M₂) M₂M₂∈F)
-    mixedPrinc M₁ M₂ F morph₁ morph₂ (no ¬M₁I∈F) (no ¬IM₁∈F) (no ¬M₂I∈F) (no ¬IM₂∈F) (no ¬M₁M₂∈F) (no ¬M₂M₁∈F) (no ¬M₁M₁∈F) (no ¬M₂M₂∈F) = solution
-      where
-        newMorph : (M M' : TyCons) → (M , M') ∈ F → B[ M , M' ] pm ▷ idTC
-        newMorph (inj₁ IdentTC) (inj₁ IdentTC) II∈F = mkBindId
-        newMorph (inj₁ IdentTC) (inj₂ (inj₁ N₁)) IM₁∈F = {!!}
-        newMorph (inj₁ IdentTC) (inj₂ (inj₂ N₂)) IM₂∈F = ⊥-elim (contradiction IM₂∈F {!!})
-        newMorph (inj₂ (inj₁ M₁)) (inj₁ IdentTC) M₁I∈F = ⊥-elim (contradiction M₁I∈F {!!})
-        newMorph (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) M₁M₁∈F = ⊥-elim (contradiction M₁M₁∈F {!!})
-        newMorph (inj₂ (inj₁ M₁)) (inj₂ (inj₂ N₂)) M₁M₂∈F = {!!}
-        newMorph (inj₂ (inj₂ M₂)) (inj₁ IdentTC) M₂I∈F = ⊥-elim (contradiction M₂I∈F {!!})
-        newMorph (inj₂ (inj₂ M₂)) (inj₂ (inj₁ N₁)) M₂M₁∈F = ⊥-elim (contradiction M₂M₁∈F {!!})
-        newMorph (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) M₂M₂∈F = ⊥-elim (contradiction M₂M₂∈F {!!})
-        
-        solution : B[ idTC , idTC ] pm ▷ mTC₁ M₁ 
-                 × B[ idTC , idTC ] pm ▷ mTC₂ M₂
-                 × ((M M' : TyCons) → (M , M') ∈ F → B[ M , M' ] pm ▷ idTC)
-        solution = {!!} , {!!} , newMorph
-    
-    princ : PrincipalPM pm
-    princ F (M , M' , MM'∈F) (inj₁ IdentTC) (inj₁ IdentTC) morph₁ morph₂ = idTC , mkBindId , mkBindId , morph₂
-    princ F (M , M' , MM'∈F) (inj₁ IdentTC) (inj₂ (inj₁ N₁)) morph₁ morph₂ = idTC , {!!} , {!!} , {!!}
-    princ F (M , M' , MM'∈F) (inj₁ IdentTC) (inj₂ (inj₂ N₂)) morph₁ morph₂ = {!!}
-    princ F (M , M' , MM'∈F) (inj₂ (inj₁ M₁)) (inj₁ IdentTC) morph₁ morph₂ = {!!}
-    princ F (M , M' , MM'∈F) (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) morph₁ morph₂ = {!!}
-    princ F (M , M' , MM'∈F) (inj₂ (inj₁ M₁)) (inj₂ (inj₂ N₂)) morph₁ morph₂ = 
-      idTC , (mixedPrinc M₁ N₂ F morph₁ morph₂ 
-               ((mTC₁ M₁ , idTC') ∈? F) ((idTC , mTC₁ M₁) ∈? F) 
-               ((mTC₂ N₂ , idTC) ∈? F) ((idTC , mTC₂ N₂) ∈? F)
-               ((mTC₁ M₁ , mTC₂ N₂) ∈? F) ((mTC₂ N₂ , mTC₁ M₁) ∈? F)
-               ((mTC₁ M₁ , mTC₁ M₁) ∈? F) ((mTC₂ N₂ , mTC₂ N₂) ∈? F)
-             )
-    princ F (M , M' , MM'∈F) (inj₂ (inj₂ M₂)) N morph₁ morph₂ = {!!}
--}
-   
-    {-
-    TC₁→TC : IdTyCons ⊎ TyCons₁ → TyCons
-    TC₁→TC (inj₁ IdentTC) = inj₁ IdentTC
-    TC₁→TC (inj₂ M) = inj₂ (inj₁ M)
-    
-    TC₂→TC : IdTyCons ⊎ TyCons₂ → TyCons
-    TC₂→TC (inj₁ IdentTC) = inj₁ IdentTC
-    TC₂→TC (inj₂ M) = inj₂ (inj₂ M)
-    
-    B[M₁N₂]▷P≡⊥ : (M : TyCons₁) → (N : TyCons₂) → (P : TyCons) → B[ TC₁→TC (inj₂ M) , TC₂→TC (inj₂ N) ] pm ▷ P ≡ ⊥
-    B[M₁N₂]▷P≡⊥ M₁ N₂ (inj₁ IdentTC) = refl
-    B[M₁N₂]▷P≡⊥ M₁ N₂ (inj₂ (inj₁ P₁)) = refl
-    B[M₁N₂]▷P≡⊥ M₁ N₂ (inj₂ (inj₂ P₂)) = refl
-    
-    B[M₂N₁]▷P≡⊥ : (M : TyCons₂) → (N : TyCons₁) → (P : TyCons) → B[ TC₂→TC (inj₂ M) , TC₁→TC (inj₂ N) ] pm ▷ P ≡ ⊥
-    B[M₂N₁]▷P≡⊥ M₂ N₁ (inj₁ IdentTC) = refl
-    B[M₂N₁]▷P≡⊥ M₂ N₁ (inj₂ (inj₁ P₁)) = refl
-    B[M₂N₁]▷P≡⊥ M₂ N₁ (inj₂ (inj₂ P₂)) = refl
-    
-    eqBindT₁ : (M N P : IdTyCons ⊎ TyCons₁) → B[ M , N ] pm₁ ▷ P ≡ B[ TC₁→TC M , TC₁→TC N ] pm ▷ TC₁→TC P
-    eqBindT₁ (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) = refl
-    eqBindT₁ (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ P      ) = refl
-    eqBindT₁ (inj₁ IdentTC) (inj₂ N      ) (inj₁ IdentTC) = refl
-    eqBindT₁ (inj₁ IdentTC) (inj₂ N      ) (inj₂ P      ) = refl
-    eqBindT₁ (inj₂ M      ) (inj₁ IdentTC) (inj₁ IdentTC) = refl
-    eqBindT₁ (inj₂ M      ) (inj₁ IdentTC) (inj₂ P      ) = refl
-    eqBindT₁ (inj₂ M      ) (inj₂ N      ) (inj₁ IdentTC) = refl
-    eqBindT₁ (inj₂ M      ) (inj₂ N      ) (inj₂ P      ) = refl
-    
-    eqBindT₂ : (M N P : IdTyCons ⊎ TyCons₂) → B[ M , N ] pm₂ ▷ P ≡ B[ TC₂→TC M , TC₂→TC N ] pm ▷ TC₂→TC P
-    eqBindT₂ (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) = trans (cpmLawEqIdBinds cpm₂) (sym (cpmLawEqIdBinds cpm₁))
-    eqBindT₂ (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ P      ) = refl
-    eqBindT₂ (inj₁ IdentTC) (inj₂ N      ) (inj₁ IdentTC) = refl
-    eqBindT₂ (inj₁ IdentTC) (inj₂ N      ) (inj₂ P      ) = refl
-    eqBindT₂ (inj₂ M      ) (inj₁ IdentTC) (inj₁ IdentTC) = refl
-    eqBindT₂ (inj₂ M      ) (inj₁ IdentTC) (inj₂ P      ) = refl
-    eqBindT₂ (inj₂ M      ) (inj₂ N      ) (inj₁ IdentTC) = refl
-    eqBindT₂ (inj₂ M      ) (inj₂ N      ) (inj₂ P      ) = refl
-    
-    F₁→F : SubsetOf ((IdTyCons ⊎ TyCons₁) × (IdTyCons ⊎ TyCons₁))
-         → SubsetOf (TyCons × TyCons)
-    F₁→F F₁ (inj₁ IdentTC   , inj₁ IdentTC   ) = F₁ (idTC , idTC)
-    F₁→F F₁ (inj₁ IdentTC   , inj₂ (inj₁ M₁')) = F₁ (idTC , inj₂ M₁')
-    F₁→F F₁ (inj₁ IdentTC   , inj₂ (inj₂ M₂')) = false
-    F₁→F F₁ (inj₂ (inj₁ M₁) , inj₁ IdentTC   ) = F₁ (inj₂ M₁ , idTC)
-    F₁→F F₁ (inj₂ (inj₁ M₁) , inj₂ (inj₁ M₁')) = F₁ (inj₂ M₁ , inj₂ M₁')
-    F₁→F F₁ (inj₂ (inj₁ M₁) , inj₂ (inj₂ M₂')) = false
-    F₁→F F₁ (inj₂ (inj₂ M₂) , inj₁ IdentTC   ) = false
-    F₁→F F₁ (inj₂ (inj₂ M₂) , inj₂ (inj₁ M₁')) = false
-    F₁→F F₁ (inj₂ (inj₂ M₂) , inj₂ (inj₂ M₂')) = false
-
-    F₂→F : SubsetOf ((IdTyCons ⊎ TyCons₂) × (IdTyCons ⊎ TyCons₂))
-         → SubsetOf (TyCons × TyCons)
-    F₂→F F₂ (inj₁ IdentTC   , inj₁ IdentTC   ) = F₂ (idTC , idTC)
-    F₂→F F₂ (inj₁ IdentTC   , inj₂ (inj₁ M₁')) = false
-    F₂→F F₂ (inj₁ IdentTC   , inj₂ (inj₂ M₂')) = F₂ (idTC , inj₂ M₂')
-    F₂→F F₂ (inj₂ (inj₁ M₁) , inj₁ IdentTC   ) = false
-    F₂→F F₂ (inj₂ (inj₁ M₁) , inj₂ (inj₁ M₁')) = false
-    F₂→F F₂ (inj₂ (inj₁ M₁) , inj₂ (inj₂ M₂')) = false
-    F₂→F F₂ (inj₂ (inj₂ M₂) , inj₁ IdentTC   ) = F₂ (inj₂ M₂ , idTC)
-    F₂→F F₂ (inj₂ (inj₂ M₂) , inj₂ (inj₁ M₁')) = false
-    F₂→F F₂ (inj₂ (inj₂ M₂) , inj₂ (inj₂ M₂')) = F₂ ((inj₂ M₂) , (inj₂ M₂'))
-
-    F→F₁ : SubsetOf (TyCons × TyCons) 
-         → SubsetOf ((IdTyCons ⊎ TyCons₁) × (IdTyCons ⊎ TyCons₁))
-    F→F₁ F (M , M') = F (TC₁→TC M , TC₁→TC M')
-    
-    F→F₂ : SubsetOf (TyCons × TyCons) 
-         → SubsetOf ((IdTyCons ⊎ TyCons₂) × (IdTyCons ⊎ TyCons₂))
-    F→F₂ F (M , M') = F (TC₂→TC M , TC₂→TC M')
-         
-    
-    mkFunctor : (M : TyCons₁ ⊎ TyCons₂) → B[ inj₂ M , idTC ] pm ▷ inj₂ M
-    mkFunctor M = pmLawFunctor1 pm (inj₂ M)
-    
-    mkBindId : B[ idTC , idTC ] pm ▷ idTC
-    mkBindId = pmLawFunctor1 pm idTC
-    
-    mkReturn : {N : TyCons₁ ⊎ TyCons₂}
-             → (F : SubsetOf (TyCons × TyCons))
-             → (idTC , idTC) ∈ F
-             → ((M M' : TyCons) → (M , M') ∈ F → B[ M , M' ] polymonadCompose cpm₁ cpm₂ ▷ inj₂ N) 
-             → B[ idTC , idTC ] polymonadCompose cpm₁ cpm₂ ▷ inj₂ N
-    mkReturn F IdId∈F morph = morph idTC idTC IdId∈F
-    
-    mkMorph : {P : TyCons₁ ⊎ TyCons₂}
-            → (N : TyCons₁ ⊎ TyCons₂)
-            → (F : SubsetOf (TyCons × TyCons))
-            → (inj₂ N , idTC) ∈ F
-            → ((M M' : TyCons) → (M , M') ∈ F → B[ M , M' ] polymonadCompose cpm₁ cpm₂ ▷ (inj₂ P)) 
-            → B[ (inj₂ N) , idTC ] polymonadCompose cpm₁ cpm₂ ▷ (inj₂ P)
-    mkMorph N F NId∈F morph = morph (inj₂ N) idTC NId∈F
-    
-    morph→morph₁ : {M̂ : IdTyCons ⊎ TyCons₁}
-                 → (F : SubsetOf (TyCons × TyCons)) 
-                 → (∀ (M M' : TyCons) → (M , M') ∈ F → B[ M , M' ] pm ▷ TC₁→TC M̂)
-                 → (∀ (M M' : IdTyCons ⊎ TyCons₁) → (M , M') ∈ F→F₁ F → B[ M , M' ] pm₁ ▷ M̂) 
-    morph→morph₁ {M̂} F morph M M' MM'∈F₁ = subst (λ X → X) (sym (eqBindT₁ M M' M̂)) (morph (TC₁→TC M) (TC₁→TC M') MM'∈F₁)
-    
-    morph→morph₂ : {M̂ : IdTyCons ⊎ TyCons₂}
-                 → (F : SubsetOf (TyCons × TyCons)) 
-                 → (∀ (M M' : TyCons) → (M , M') ∈ F → B[ M , M' ] pm ▷ TC₂→TC M̂)
-                 → (∀ (M M' : IdTyCons ⊎ TyCons₂) → (M , M') ∈ F→F₂ F → B[ M , M' ] pm₂ ▷ M̂) 
-    morph→morph₂ {M̂} F morph M M' MM'∈F₂ = subst (λ X → X) (sym (eqBindT₂ M M' M̂)) (morph (TC₂→TC M) (TC₂→TC M') MM'∈F₂)
-    
-    -- B[M₁N₂]▷P≡⊥ : (M : TyCons₁) → (N : TyCons₂) → (P : TyCons) → B[ TC₁→TC (inj₂ M) , TC₂→TC (inj₂ N) ] pm ▷ P ≡ ⊥
-
-    princRes₁→princRes : (F : SubsetOf (TyCons × TyCons))
-                       → (M₁ M₂ : IdTyCons ⊎ TyCons₁)
-                       → ( ∃ λ(M̂ : IdTyCons ⊎ TyCons₁) 
-                         → B[ M̂ , idTC ] pm₁ ▷ M₁ 
-                         × B[ M̂ , idTC ] pm₁ ▷ M₂ 
-                         × (∀ (M M' : IdTyCons ⊎ TyCons₁) → (M , M') ∈ F→F₁ F → B[ M , M' ] pm₁ ▷ M̂))
-                       → ( ∃ λ(M̂ : TyCons) 
-                         → B[ M̂ , idTC ] pm ▷ TC₁→TC M₁ 
-                         × B[ M̂ , idTC ] pm ▷ TC₁→TC M₂ 
-                         × (∀ (M M' : TyCons) → (M , M') ∈ F → B[ M , M' ] pm ▷ M̂))
-    princRes₁→princRes F M₁ M₂ (M̂ , b₁ , b₂ , morph) = TC₁→TC M̂ 
-                                                     , subst (λ X → X) (eqBindT₁ M̂ idTC M₁) b₁ 
-                                                     , subst (λ X → X) (eqBindT₁ M̂ idTC M₂) b₂ 
-                                                     , {!!}
-    
-    
-    princRes₂→princRes : (F : SubsetOf (TyCons × TyCons))
-                       → (M₁ M₂ : IdTyCons ⊎ TyCons₂)
-                       → ( ∃ λ(M̂ : IdTyCons ⊎ TyCons₂) 
-                         → B[ M̂ , idTC ] pm₂ ▷ M₁ 
-                         × B[ M̂ , idTC ] pm₂ ▷ M₂ 
-                         × (∀ (M M' : IdTyCons ⊎ TyCons₂) → (M , M') ∈ F→F₂ F → B[ M , M' ] pm₂ ▷ M̂))
-                       → ( ∃ λ(M̂ : TyCons) 
-                         → B[ M̂ , idTC ] pm ▷ TC₂→TC M₁ 
-                         × B[ M̂ , idTC ] pm ▷ TC₂→TC M₂ 
-                         × (∀ (M M' : TyCons) → (M , M') ∈ F → B[ M , M' ] pm ▷ M̂))
-    princRes₂→princRes F M₁ M₂ (M̂ , b₁ , b₂ , morph) = TC₂→TC M̂ 
-                                                     , subst (λ X → X) (eqBindT₂ M̂ idTC M₁) b₁ 
-                                                     , subst (λ X → X) (eqBindT₂ M̂ idTC M₂) b₂ 
-                                                     , {!!}
-
-    morph₂¬∃ : (F : SubsetOf (TyCons × TyCons))
-            → (M₁ : TyCons₁) → (N₂ : TyCons₂) → (N : TyCons)
-            → ((inj₂ (inj₁ M₁) , N) ∈ F ⊎ (N , inj₂ (inj₁ M₁)) ∈ F) 
-            → ¬ ((M M' : TyCons) → (M , M') ∈ F → B[ M , M' ] pm ▷ inj₂ (inj₂ N₂))
-    morph₂¬∃ F M₁ N₂ (inj₁ IdentTC) (inj₁ MN∈F) morph = morph (inj₂ (inj₁ M₁)) idTC MN∈F
-    morph₂¬∃ F M₁ N₂ (inj₁ IdentTC) (inj₂ NM∈F) morph = morph idTC (inj₂ (inj₁ M₁)) NM∈F
-    morph₂¬∃ F M₁ N₂ (inj₂ (inj₁ N)) (inj₁ MN∈F) morph = morph (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N)) MN∈F
-    morph₂¬∃ F M₁ N₂ (inj₂ (inj₁ N)) (inj₂ NM∈F) morph = morph (inj₂ (inj₁ N)) (inj₂ (inj₁ M₁)) NM∈F
-    morph₂¬∃ F M₁ N₂ (inj₂ (inj₂ N)) (inj₁ MN∈F) morph = morph (inj₂ (inj₁ M₁)) (inj₂ (inj₂ N)) MN∈F
-    morph₂¬∃ F M₁ N₂ (inj₂ (inj₂ N)) (inj₂ NM∈F) morph = morph (inj₂ (inj₂ N)) (inj₂ (inj₁ M₁)) NM∈F
-
-    princ : PrincipalPM (polymonadCompose cpm₁ cpm₂)
-    princ F (inj₁ IdentTC  ) (inj₁ IdentTC  ) morph₁ morph₂ = idTC , mkBindId , mkBindId , morph₂
-    princ F (inj₁ IdentTC  ) (inj₂ (inj₁ N₁)) morph₁ morph₂ = princRes₁→princRes F (idTC   ) (inj₂ N₁) (princ₁ (F→F₁ F) (idTC   ) (inj₂ N₁) (morph→morph₁ F morph₁) (morph→morph₁ F morph₂))
-    princ F (inj₁ IdentTC  ) (inj₂ (inj₂ N₂)) morph₁ morph₂ = princRes₂→princRes F (idTC   ) (inj₂ N₂) (princ₂ (F→F₂ F) (idTC   ) (inj₂ N₂) (morph→morph₂ F morph₁) (morph→morph₂ F morph₂))
-    princ F (inj₂ (inj₁ M₁)) (inj₁ IdentTC  ) morph₁ morph₂ = princRes₁→princRes F (inj₂ M₁) (idTC   ) (princ₁ (F→F₁ F) (inj₂ M₁) (idTC   ) (morph→morph₁ F morph₁) (morph→morph₁ F morph₂))
-    princ F (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) morph₁ morph₂ = princRes₁→princRes F (inj₂ M₁) (inj₂ N₁) (princ₁ (F→F₁ F) (inj₂ M₁) (inj₂ N₁) (morph→morph₁ F morph₁) (morph→morph₁ F morph₂))
-    princ F (inj₂ (inj₁ M₁)) (inj₂ (inj₂ N₂)) morph₁ morph₂ with (inj₂ (inj₁ M₁) , inj₂ (inj₂ N₂)) ∈? F
-    princ F (inj₂ (inj₁ M₁)) (inj₂ (inj₂ N₂)) morph₁ morph₂ | yes MN∈F = ⊥-elim (morph₂¬∃ F M₁ N₂ (inj₂ (inj₂ N₂)) (inj₁ MN∈F) morph₂)
-    princ F (inj₂ (inj₁ M₁)) (inj₂ (inj₂ N₂)) morph₁ morph₂ | no ¬MN∈F = {!!}
-    -- inj₂ (inj₁ M₁) , mkFunctor (inj₁ M₁) , mkMorph (inj₁ M₁) F morph₂ , morph₁
-    princ F (inj₂ (inj₂ M₂)) (inj₁ IdentTC  ) morph₁ morph₂ = princRes₂→princRes F (inj₂ M₂) (idTC   ) (princ₂ (F→F₂ F) (inj₂ M₂) (idTC   ) (morph→morph₂ F morph₁) (morph→morph₂ F morph₂))
-    princ F (inj₂ (inj₂ M₂)) (inj₂ (inj₁ N₁)) morph₁ morph₂ = {!!}
-    -- inj₂ (inj₂ M₂) , mkFunctor (inj₂ M₂) , mkMorph (inj₁ N₁) F morph₁ , morph₁
-    princ F (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) morph₁ morph₂ = princRes₂→princRes F (inj₂ M₂) (inj₂ N₂) (princ₂ (F→F₂ F) (inj₂ M₂) (inj₂ N₂) (morph→morph₂ F morph₁) (morph→morph₂ F morph₂))
-
-    p : (M₁ : TyCons₁) → (M₂ : TyCons₂) 
-      → (F : SubsetOf (TyCons × TyCons)) 
-      → ¬ ((inj₂ (inj₁ M₁) , inj₂ (inj₂ M₂)) ∈ F)
-      → ¬ ((inj₂ (inj₂ M₂) , inj₂ (inj₁ M₁)) ∈ F)
-      → ¬ ((inj₂ (inj₁ M₁) , inj₁ IdentTC  ) ∈ F)
-      → ¬ ((inj₁ IdentTC   , inj₂ (inj₁ M₁)) ∈ F)
-      → ¬ ((inj₂ (inj₂ M₂) , inj₁ IdentTC  ) ∈ F)
-      → ¬ ((inj₁ IdentTC   , inj₂ (inj₂ M₂)) ∈ F)
-      → (∀ (M M' : TyCons) → F (M , M') ≡ false)
-    p = {!!}
--}

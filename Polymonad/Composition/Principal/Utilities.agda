@@ -130,17 +130,21 @@ morph→morph₁ : ∀ {TyCons₁ TyCons₂ : Set}
              → (cpm₁ : ComposablePolymonad pm₁)
              → (cpm₂ : ComposablePolymonad pm₂)
              → (F : SubsetOf ( (IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) × (IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) ))
-             → (P : TyCons₁)
+             → (P : IdTyCons ⊎ TyCons₁)
              → ( (N N' : IdTyCons ⊎ TyCons₁ ⊎ TyCons₂) 
                → (N , N') ∈ F
-               → B[ N , N' ] polymonadCompose cpm₁ cpm₂ ▷ i₂i₁ P )
+               → B[ N , N' ] polymonadCompose cpm₁ cpm₂ ▷ mTyCon₁ P )
              → ( (N N' : IdTyCons ⊎ TyCons₁) 
                → (N , N') ∈ F→F₁ F
-               → B[ N , N' ] pm₁ ▷ inj₂ P )
-morph→morph₁ cpm₁ cpm₂ F P morph₁ (inj₁ IdentTC) (inj₁ IdentTC) NN'∈F₁ = morph₁ idTC idTC NN'∈F₁
-morph→morph₁ cpm₁ cpm₂ F P morph₁ (inj₁ IdentTC) (inj₂ N') NN'∈F₁ = morph₁ idTC (i₂i₁ N') NN'∈F₁
-morph→morph₁ cpm₁ cpm₂ F P morph₁ (inj₂ N) (inj₁ IdentTC) NN'∈F₁ = morph₁ (i₂i₁ N) idTC NN'∈F₁
-morph→morph₁ cpm₁ cpm₂ F P morph₁ (inj₂ N) (inj₂ N') NN'∈F₁ = morph₁ (i₂i₁ N) (i₂i₁ N') NN'∈F₁
+               → B[ N , N' ] pm₁ ▷ P )
+morph→morph₁ cpm₁ cpm₂ F (inj₁ IdentTC) morph₁ (inj₁ IdentTC) (inj₁ IdentTC) NN'∈F₁ = morph₁ idTC idTC NN'∈F₁
+morph→morph₁ cpm₁ cpm₂ F (inj₂ P) morph₁ (inj₁ IdentTC) (inj₁ IdentTC) NN'∈F₁ = morph₁ idTC idTC NN'∈F₁
+morph→morph₁ cpm₁ cpm₂ F (inj₁ IdentTC) morph₁ (inj₁ IdentTC) (inj₂ N') NN'∈F₁ = morph₁ idTC (i₂i₁ N') NN'∈F₁
+morph→morph₁ cpm₁ cpm₂ F (inj₂ P) morph₁ (inj₁ IdentTC) (inj₂ N') NN'∈F₁ = morph₁ idTC (i₂i₁ N') NN'∈F₁
+morph→morph₁ cpm₁ cpm₂ F (inj₁ IdentTC) morph₁ (inj₂ N) (inj₁ IdentTC) NN'∈F₁ = morph₁ (i₂i₁ N) idTC NN'∈F₁
+morph→morph₁ cpm₁ cpm₂ F (inj₂ P) morph₁ (inj₂ N) (inj₁ IdentTC) NN'∈F₁ = morph₁ (i₂i₁ N) idTC NN'∈F₁
+morph→morph₁ cpm₁ cpm₂ F (inj₁ IdentTC) morph₁ (inj₂ N) (inj₂ N') NN'∈F₁ = morph₁ (i₂i₁ N) (i₂i₁ N') NN'∈F₁
+morph→morph₁ cpm₁ cpm₂ F (inj₂ P) morph₁ (inj₂ N) (inj₂ N') NN'∈F₁ = morph₁ (i₂i₁ N) (i₂i₁ N') NN'∈F₁
 
 morph→morph₂ : ∀ {TyCons₁ TyCons₂ : Set}
              → {pm₁ : Polymonad (IdTyCons ⊎ TyCons₁) idTC}
