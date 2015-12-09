@@ -33,7 +33,9 @@ type-check:
 	# Composition of polymonads
 	$(AGDA_TC) Polymonad/Composition.agda
 	$(AGDA_TC) Polymonad/Composition/Composable.agda
-	# $(AGDA_TC) Polymonad/Composition/Principal.agda
+	$(AGDA_TC) Polymonad/Composition/Properties.agda
+	$(AGDA_TC) Polymonad/Composition/Principal.agda
+	$(AGDA_TC) Polymonad/Composition/Principal/Utilities.agda
 	$(AGDA_TC) Polymonad/Composition/Principal/Examples.agda
 	
 	# Composition of polymonads via morphisms between them
@@ -61,7 +63,7 @@ type-check:
 	# $(AGDA_TC) Parameterized/IndexedMonad/Principal.agda
 	# $(AGDA_TC) Parameterized/IndexedMonad/SessionTypes.agda
 	$(AGDA_TC) Parameterized/EffectMonad.agda
-	$(AGDA_TC) Parameterized/EffectMonad/Polymonad.agda
+	# $(AGDA_TC) Parameterized/EffectMonad/Polymonad.agda
 
 
 clean:
@@ -72,3 +74,5 @@ clean:
 	$(REMOVE) Parameterized/EffectMonad/*.agdai
 	$(REMOVE) Polymonad/*.agdai
 	$(REMOVE) Polymonad/MorphMonad/*.agdai
+
+
