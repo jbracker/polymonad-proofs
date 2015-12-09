@@ -32,10 +32,6 @@ principalPolymonadCompose : ∀ {TyCons₁ TyCons₂ : Set}
                           → {pm₂ : Polymonad (IdTyCons ⊎ TyCons₂) idTC}
                           → (cpm₁ : ComposablePolymonad pm₁)
                           → (cpm₂ : ComposablePolymonad pm₂)
-                          -- It is decidable wether an element it in F or not.
-                          → ( (x : ((IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) × (IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)))) 
-                            → (F : SubsetOf ((IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) × (IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)))) 
-                            → Dec (x ∈ F))
                           -- We know that F falls in either of three categories:
                           --  - F is a subset of (IdTyCons ⊎ TyCons₁)²
                           --  - F is a subset of (IdTyCons ⊎ TyCons₂)²
@@ -61,33 +57,23 @@ principalPolymonadCompose : ∀ {TyCons₁ TyCons₂ : Set}
                             )
                           → PrincipalPM pm₁
                           → PrincipalPM pm₂
-                          → ((M : TyCons₁) → (N : TyCons₁) → Dec (M ≡ N))
                           → PrincipalPM (polymonadCompose cpm₁ cpm₂)
-principalPolymonadCompose {TyCons₁} {TyCons₂} {pm₁} {pm₂} cpm₁ cpm₂ _∈?_ partition onlyIdPair princ₁ princ₂ _≡TC₁_ = princ
+principalPolymonadCompose {TyCons₁} {TyCons₂} {pm₁} {pm₂} cpm₁ cpm₂ partition onlyIdPair princ₁ princ₂ = princ
   where
     open Polymonad.Polymonad
 
     pm = polymonadCompose cpm₁ cpm₂
     cpm = polymonadComposableCompose cpm₁ cpm₂
+    
     TyCons = IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)
 
     idMorph¬∃ = cpmIdMorph¬∃ cpm
-    idMorph¬∃₁ = cpmIdMorph¬∃ cpm₁
-    
-    mkBindId : B[ idTC , idTC ] pm ▷ idTC
-    mkBindId = lawFunctor1 pm idTC
 
     mTC₁ : TyCons₁ → TyCons
     mTC₁ M = inj₂ (inj₁ M)
 
     mTC₂ : TyCons₂ → TyCons
     mTC₂ M = inj₂ (inj₂ M)
-
-    idTC' : TyCons
-    idTC' = idTC
-
-    mkFunctor : (M : TyCons₁ ⊎ TyCons₂) → B[ inj₂ M , idTC ] pm ▷ inj₂ M
-    mkFunctor M = pmLawFunctor1 pm (inj₂ M)
 
     morphId : (F : SubsetOf (TyCons × TyCons))
             → (∀ (M M' : TyCons) → (¬ (M ≡ idTC) ⊎ ¬ (M' ≡ idTC)) → ¬ ((M , M') ∈ F))
