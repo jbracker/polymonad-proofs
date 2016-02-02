@@ -1,5 +1,5 @@
  
-module Polymonad.MorphMonad where
+module MorphMonad.MorphMonad where
 
 -- Stdlib
 open import Data.Product
@@ -21,10 +21,10 @@ open import Monad.Polymonad
 open import Monad.Unionable
 open import Monad.Principal
 
-open import Polymonad.MorphMonad.Types
-open import Polymonad.MorphMonad.Diamond1
-open import Polymonad.MorphMonad.Diamond2
-open import Polymonad.MorphMonad.Closure
+open import MorphMonad.Types
+open import MorphMonad.Diamond1
+open import MorphMonad.Diamond2
+open import MorphMonad.Closure
 
 -- -----------------------------------------------------------------------------
 -- Morph combination of two monads into a polymonad

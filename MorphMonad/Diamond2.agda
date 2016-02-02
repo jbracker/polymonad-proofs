@@ -1,5 +1,5 @@
  
-module Polymonad.MorphMonad.Diamond2 where
+module MorphMonad.Diamond2 where
 
 -- Stdlib
 open import Data.Product
@@ -16,7 +16,7 @@ open import Identity
 open import Polymonad
 open import Monad.Polymonad
 
-open import Polymonad.MorphMonad.Types
+open import MorphMonad.Types
 
 lawDiamond2 : ∀ (M N R T : MonadMorphTyCons)
             → (∃ λ(S : MonadMorphTyCons) → Morph[ N , R ]▷ S × Morph[ M , S ]▷ T)

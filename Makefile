@@ -39,12 +39,12 @@ type-check:
 	$(AGDA_TC) Polymonad/Union/Principal/Examples.agda
 	
 	# Union of polymonads via morphisms between them
-	# $(AGDA_TC) Polymonad/MorphMonad.agda
-	# $(AGDA_TC) Polymonad/MaybeList.agda
-	# $(AGDA_TC) Polymonad/MorphMonad/Types.agda
-	# $(AGDA_TC) Polymonad/MorphMonad/Closure.agda
-	# $(AGDA_TC) Polymonad/MorphMonad/Diamond1.agda
-	# $(AGDA_TC) Polymonad/MorphMonad/Diamond2.agda
+	# $(AGDA_TC) MorphMonad/MorphMonad.agda
+	# $(AGDA_TC) MorphMonad/MaybeList.agda
+	# $(AGDA_TC) MorphMonad/Types.agda
+	# $(AGDA_TC) MorphMonad/Closure.agda
+	# $(AGDA_TC) MorphMonad/Diamond1.agda
+	# $(AGDA_TC) MorphMonad/Diamond2.agda
 	
 	# Standard Monads
 	$(AGDA_TC) Monad/Identity.agda
@@ -73,6 +73,7 @@ clean:
 	$(REMOVE) Parameterized/IndexedMonad/*.agdai
 	$(REMOVE) Parameterized/EffectMonad/*.agdai
 	$(REMOVE) Polymonad/*.agdai
-	$(REMOVE) Polymonad/MorphMonad/*.agdai
+	$(REMOVE) Polymonad/Union/*.agdai
+	$(REMOVE) MorphMonad/*.agdai
 
 

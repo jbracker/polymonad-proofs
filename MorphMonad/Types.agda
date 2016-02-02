@@ -1,5 +1,5 @@
  
-module Polymonad.MorphMonad.Types where
+module MorphMonad.Types where
 
 -- Stdlib
 open import Data.Product

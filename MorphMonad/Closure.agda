@@ -1,5 +1,5 @@
  
-module Polymonad.MorphMonad.Closure where
+module MorphMonad.Closure where
 
 -- Stdlib
 open import Data.Product
@@ -16,7 +16,7 @@ open import Identity
 open import Polymonad
 open import Monad.Polymonad
 
-open import Polymonad.MorphMonad.Types
+open import MorphMonad.Types
 
 lawClosure : ∀ (M N P S T U : MonadMorphTyCons)
            → ( Morph[ M , N ]▷ P × Morph[ S , idTC ]▷ M × Morph[ T , idTC ]▷ N × Morph[ P , idTC ]▷ U )

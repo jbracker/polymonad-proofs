@@ -1,5 +1,5 @@
  
-module Polymonad.MaybeList where
+module MorphMonad.MaybeList where
 
 -- Stdlib
 open import Data.Product

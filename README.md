@@ -46,10 +46,6 @@ me.
   * `Polymonad.UniqueBinds`: 
     Proof that bind-operations on the same type 
     are unique, i.e., bind-operations with the same type have the same semantics.
-  * `Polymonad.MaybeList` and `Polymonad.MorphMonad`: 
-    These and the submodules contain
-    ideas about the union of standard monads to polymonads by providing lifting
-    functions between them (*WIP*).
 * **`Parameterized`**:
   Formalizations of different parameterized monads.
   * `Parameterized.IndexedMonad`: 
@@ -61,3 +57,6 @@ me.
   my alteration. 
   * `Hicks.Equivalency` shows that both formulations are equivalent.
   * `Hicks.UniqueBinds` shows that bind-operations are unique in this formalization of polymonad as well.
+* **`MorphMonad`**: 
+  These modules contain ideas about the union of standard monads to polymonads by providing lifting
+  functions between them (*WIP*).
