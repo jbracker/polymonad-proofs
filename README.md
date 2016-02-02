@@ -5,6 +5,10 @@ This repository contains a formalization of polymonads in Agda as
 presented in the paper 
 ["Polymonadic Programming" by Hicks et al. (MSFP 2014)](http://www.cs.bham.ac.uk/~pbl/msfp2014/polymonad.pdf).
 
+The formalization is targeted to provides proofs that are useful for
+the Haskell implementation of polymonads. Therefore, some of the
+formalizations assume we are working in a "Haskell World".
+
 ## Type Checking and Versions
 
 Calling `make` should type check all files that don't contain 
@@ -41,8 +45,9 @@ me.
     The formalization of what is required to 
     union two polymonads that do not have morphism between them.
   * `Polymonad.Union`: 
-    The proof that `UnionablePolymonad`s actually
-    form a polymonad again. The submodules prove further properties (Principality is *WIP*).
+    The proof that `UnionablePolymonad`s actually form a polymonad again.
+  * `Polymonad.Union.Principal`: 
+    Proof that union preserves principality (under some preconditions).
   * `Polymonad.Principal`: 
     The formalization of principal polymonads.
   * `Polymonad.UniqueBinds`: 
