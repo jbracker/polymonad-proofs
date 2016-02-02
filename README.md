@@ -5,7 +5,7 @@ This repository contains a formalization of polymonads in Agda as
 presented in the paper 
 ["Polymonadic Programming" by Hicks et al. (MSFP 2014)](http://www.cs.bham.ac.uk/~pbl/msfp2014/polymonad.pdf).
 
-The formalization is targeted to provides proofs that are useful for
+The formalization is targeted to provide proofs that are useful for
 the Haskell implementation of polymonads. Therefore, some of the
 formalizations assume we are working in a "Haskell World".
 
@@ -14,7 +14,7 @@ formalizations assume we are working in a "Haskell World".
 Calling `make` should type check all files that don't contain 
 unsolved holes.
 
-This is tested with Agda in version `2.4.2.5` and the Adga standard library 
+This was tested with Agda in version `2.4.2.5` and the Adga standard library 
 in version `0.11`. If you have problems type checking the code, please contact
 me.
 
@@ -26,7 +26,7 @@ me.
   module.
 * **`Identity`**:
   Contains some basic stuff about the identity and the identity type function.
-  Provides a identity Kleisli-arrow that is polymorphic over the identity type
+  Provides an identity Kleisli-arrow that is polymorphic over the identity type
   constructor; this is central to the formalization of polymonads.
 * **`Monad`**:
   Formalization of monads as they are represented in Haskell.
@@ -38,12 +38,12 @@ me.
     The `Identity`, `List`, and `Maybe` monad.
 * **`Polymonad`**:
   Formalization of polymonads (slightly altered from the version in Hicks paper).
-  The submodules contains proofs and formalization of ther polymonad concepts.
+  The submodules contain proofs and formalizations of other polymonad concepts.
   * `Polymonad.Identity`: 
     The identity polymonad.
   * `Polymonad.Unionable`: 
     The formalization of what is required to 
-    union two polymonads that do not have morphism between them.
+    union two polymonads that do not have morphisms between them.
   * `Polymonad.Union`: 
     The proof that `UnionablePolymonad`s actually form a polymonad again.
   * `Polymonad.Union.Principal`: 
@@ -56,14 +56,14 @@ me.
 * **`Parameterized`**:
   Formalizations of different parameterized monads.
   * `Parameterized.IndexedMonad`: 
-    Formalization and proofs for indexed monads that model pre- and poststate (Hoare triples).
+    Formalization and proofs for indexed monads that model pre- and post-state (Hoare triples).
   * `Parameterized.EffectMonad`:
     Formalization of effect monads that are parameterized by a monoid (*WIP*).
 * **`Hicks`**:
   Contains a formalization of Hicks polymonads without 
   my alteration. 
   * `Hicks.Equivalency` shows that both formulations are equivalent.
-  * `Hicks.UniqueBinds` shows that bind-operations are unique in this formalization of polymonad as well.
+  * `Hicks.UniqueBinds` shows that bind-operations are unique in this formalization of polymonads as well.
 * **`MorphMonad`**: 
   These modules contain ideas about the union of standard monads to polymonads by providing lifting
-  functions between them (*WIP*).
+  functions (morphisms) between them (*WIP*).
