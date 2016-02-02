@@ -28,6 +28,8 @@ me.
   Formalization of monads as they are represented in Haskell.
   * `Monad.Polymonad`, `Monad.Unionable` and `Monad.Principal`:
     Monads form polymonads, are unionable, and principal.
+  * `Monad.PrincipalUnion`:
+    A specialised proof that the union of monads forms a principal polymonad.
   * `Monad.Identity`, `Monad.List` and `Monad.Maybe`:
     The `Identity`, `List`, and `Maybe` monad.
 * **`Polymonad`**:

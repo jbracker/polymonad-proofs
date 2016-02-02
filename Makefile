@@ -36,7 +36,6 @@ type-check:
 	$(AGDA_TC) Polymonad/Union/Properties.agda
 	$(AGDA_TC) Polymonad/Union/Principal.agda
 	$(AGDA_TC) Polymonad/Union/Principal/Utilities.agda
-	$(AGDA_TC) Polymonad/Union/Principal/Examples.agda
 	
 	# Union of polymonads via morphisms between them
 	# $(AGDA_TC) MorphMonad/MorphMonad.agda
@@ -53,6 +52,7 @@ type-check:
 	$(AGDA_TC) Monad/Polymonad.agda
 	$(AGDA_TC) Monad/Unionable.agda
 	$(AGDA_TC) Monad/Principal.agda
+	$(AGDA_TC) Monad/PrincipalUnion.agda
 	
 	# Parameterized Monads
 	$(AGDA_TC) Parameterized/PhantomIndices.agda

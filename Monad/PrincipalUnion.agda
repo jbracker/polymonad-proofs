@@ -1,5 +1,5 @@
  
-module Polymonad.Union.Principal.Examples where
+module Monad.PrincipalUnion where
 
 -- Stdlib
 open import Data.Product
@@ -32,13 +32,13 @@ open import Monad.Unionable
 -- Union of two standard monads is principal
 -- -----------------------------------------------------------------------------
 
-principalPolymonadMonadUnion : ∀ {M₁ M₂ : TyCon} 
+principalMonadUnion : ∀ {M₁ M₂ : TyCon} 
                           → (monad₁ : Monad M₁) → (monad₂ : Monad M₂)
                           → ( (x : ((IdTyCons ⊎ (MonadTyCons ⊎ MonadTyCons)) × (IdTyCons ⊎ (MonadTyCons ⊎ MonadTyCons)))) 
                             → (F : SubsetOf ((IdTyCons ⊎ (MonadTyCons ⊎ MonadTyCons)) × (IdTyCons ⊎ (MonadTyCons ⊎ MonadTyCons)))) 
                             → Dec (x ∈ F))
                           → PrincipalPM (polymonadUnion (Monad→UnionablePolymonad monad₁) (Monad→UnionablePolymonad monad₂))
-principalPolymonadMonadUnion monad₁ monad₂ _∈?_ = princ
+principalMonadUnion monad₁ monad₂ _∈?_ = princ
   where
     TyCons = IdTyCons ⊎ (MonadTyCons ⊎ MonadTyCons)
     
