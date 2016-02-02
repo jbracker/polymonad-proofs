@@ -5,7 +5,7 @@ module Polymonad.Principal where
 open import Data.Product
 open import Data.Sum
 open import Data.Bool
-open import Relation.Nullary.Core
+open import Relation.Nullary
 open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning
 

@@ -4,7 +4,7 @@ module Polymonad.Composable where
 -- Stdlib
 open import Data.Product
 open import Data.Sum
-open import Relation.Nullary.Core -- ¬
+open import Relation.Nullary -- ¬
 open import Relation.Binary.PropositionalEquality -- ≡
 open ≡-Reasoning -- begin ≡⟨⟩ ∎
 

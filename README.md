@@ -5,8 +5,14 @@ This repository contains a formalization of polymonads in Agda as
 presented in the paper 
 ["Polymonadic Programming" by Hicks et al. (MSFP 2014)](http://www.cs.bham.ac.uk/~pbl/msfp2014/polymonad.pdf).
 
+## Type Checking and Versions
+
 Calling `make` should type check all files that don't contain 
 unsolved holes.
+
+This is tested with Agda in version `2.4.2.5` and the Adga standard library 
+in version `0.11`. If you have problems type checking the code, please contact
+me.
 
 ## Module Structure and Guide
 

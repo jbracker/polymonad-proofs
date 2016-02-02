@@ -8,7 +8,7 @@ open import Data.Unit hiding ( _≟_ )
 open import Data.Empty
 open import Data.Bool
 open import Data.Nat
-open import Relation.Nullary.Core
+open import Relation.Nullary
 open import Relation.Binary.Core using ( Decidable )
 open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning
