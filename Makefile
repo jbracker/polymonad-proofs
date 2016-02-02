@@ -4,7 +4,7 @@ REMOVE = rm -f
 
 AGDA = agda
 
-# Especially the composition proof runs out of stack space quickly.
+# Especially the Polymonad.Union proof runs out of stack space quickly.
 AGDA_TC = $(AGDA) -v 0 +RTS -K40m -RTS
 
 all: type-check
@@ -25,20 +25,20 @@ type-check:
 	$(AGDA_TC) Hicks/UniqueBinds.agda
 	
 	# General polymonad proofs
-	$(AGDA_TC) Polymonad/Composable.agda
+	$(AGDA_TC) Polymonad/Unionable.agda
 	$(AGDA_TC) Polymonad/Principal.agda
 	$(AGDA_TC) Polymonad/Identity.agda
 	$(AGDA_TC) Polymonad/UniqueBinds.agda
 	
-	# Composition of polymonads
-	$(AGDA_TC) Polymonad/Composition.agda
-	$(AGDA_TC) Polymonad/Composition/Composable.agda
-	$(AGDA_TC) Polymonad/Composition/Properties.agda
-	$(AGDA_TC) Polymonad/Composition/Principal.agda
-	$(AGDA_TC) Polymonad/Composition/Principal/Utilities.agda
-	$(AGDA_TC) Polymonad/Composition/Principal/Examples.agda
+	# Union of polymonads
+	$(AGDA_TC) Polymonad/Union.agda
+	$(AGDA_TC) Polymonad/Union/Unionable.agda
+	$(AGDA_TC) Polymonad/Union/Properties.agda
+	$(AGDA_TC) Polymonad/Union/Principal.agda
+	$(AGDA_TC) Polymonad/Union/Principal/Utilities.agda
+	$(AGDA_TC) Polymonad/Union/Principal/Examples.agda
 	
-	# Composition of polymonads via morphisms between them
+	# Union of polymonads via morphisms between them
 	# $(AGDA_TC) Polymonad/MorphMonad.agda
 	# $(AGDA_TC) Polymonad/MaybeList.agda
 	# $(AGDA_TC) Polymonad/MorphMonad/Types.agda
@@ -51,14 +51,14 @@ type-check:
 	$(AGDA_TC) Monad/List.agda
 	$(AGDA_TC) Monad/Maybe.agda
 	$(AGDA_TC) Monad/Polymonad.agda
-	$(AGDA_TC) Monad/Composable.agda
+	$(AGDA_TC) Monad/Unionable.agda
 	$(AGDA_TC) Monad/Principal.agda
 	
 	# Parameterized Monads
 	$(AGDA_TC) Parameterized/PhantomIndices.agda
 	$(AGDA_TC) Parameterized/IndexedMonad.agda
 	$(AGDA_TC) Parameterized/IndexedMonad/Polymonad.agda
-	$(AGDA_TC) Parameterized/IndexedMonad/Composable.agda
+	$(AGDA_TC) Parameterized/IndexedMonad/Unionable.agda
 	$(AGDA_TC) Parameterized/IndexedMonad/PhantomMonad.agda
 	# $(AGDA_TC) Parameterized/IndexedMonad/Principal.agda
 	# $(AGDA_TC) Parameterized/IndexedMonad/SessionTypes.agda

@@ -14,13 +14,13 @@ open import Utilities
 open import Haskell
 open import Identity
 open import Polymonad
-open import Polymonad.Composable
+open import Polymonad.Unionable
 open import Polymonad.Principal
 open import Monad
 open import Monad.Maybe
 open import Monad.List
 open import Monad.Polymonad
-open import Monad.Composable
+open import Monad.Unionable
 open import Monad.Principal
 
 -- -----------------------------------------------------------------------------
@@ -33,8 +33,8 @@ MaybeBinds  = MonadBinds
 polymonadMaybe : Polymonad (IdTyCons ⊎ MaybeTyCons) idTC
 polymonadMaybe = Monad→Polymonad monadMaybe
 
-composablePolymonadMaybe : ComposablePolymonad polymonadMaybe
-composablePolymonadMaybe = Monad→ComposablePolymonad monadMaybe
+unionablePolymonadMaybe : UnionablePolymonad polymonadMaybe
+unionablePolymonadMaybe = Monad→UnionablePolymonad monadMaybe
 
 principalPolymonadMaybe : PrincipalPM polymonadMaybe
 principalPolymonadMaybe = Monad→PrincipalPolymonad monadMaybe
@@ -49,8 +49,8 @@ ListBinds  = MonadBinds
 polymonadList : Polymonad (IdTyCons ⊎ ListTyCons) idTC
 polymonadList = Monad→Polymonad monadList
 
-composablePolymonadList : ComposablePolymonad polymonadList
-composablePolymonadList = Monad→ComposablePolymonad monadList
+unionablePolymonadList : UnionablePolymonad polymonadList
+unionablePolymonadList = Monad→UnionablePolymonad monadList
 
 principalPolymonadList : PrincipalPM polymonadList
 principalPolymonadList = Monad→PrincipalPolymonad monadList

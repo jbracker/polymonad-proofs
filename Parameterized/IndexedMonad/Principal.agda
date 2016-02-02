@@ -235,25 +235,25 @@ IxMonad→¬PrincipalPolymonad {Ixs = Ixs} (i , j , ¬i≡j) monad princ = botto
 -- -----------------------------------------------------------------------------
 
 {-
-principalPolymonadMonadIxMonadCompose : ∀ {Ixs : Set} {M₁ : TyCon} {M₂ : Ixs → Ixs → TyCon} 
+principalPolymonadMonadIxMonadUnion : ∀ {Ixs : Set} {M₁ : TyCon} {M₂ : Ixs → Ixs → TyCon} 
                           → (monad₁ : Monad M₁) → (monad₂ : IxMonad Ixs M₂) 
-                          → PrincipalPM (polymonadCompose (Monad→ComposablePolymonad monad₁) (IxMonad→ComposablePolymonad monad₂))
-principalPolymonadMonadIxMonadCompose {Ixs = Ixs} monad₁ monad₂ = princ
+                          → PrincipalPM (polymonadUnion (Monad→UnionablePolymonad monad₁) (IxMonad→UnionablePolymonad monad₂))
+principalPolymonadMonadIxMonadUnion {Ixs = Ixs} monad₁ monad₂ = princ
   where
     
     TyCons = IdTyCons ⊎ (MonadTyCons ⊎ IxMonadTyCons Ixs)
     
-    cpm₁ = Monad→ComposablePolymonad monad₁
-    cpm₂ = IxMonad→ComposablePolymonad monad₂
+    upm₁ = Monad→UnionablePolymonad monad₁
+    upm₂ = IxMonad→UnionablePolymonad monad₂
 
     pm₁ : Polymonad (IdTyCons ⊎ MonadTyCons) idTC
-    pm₁ = cpmPolymonad cpm₁
+    pm₁ = upmPolymonad upm₁
 
     pm₂ : Polymonad (IdTyCons ⊎ IxMonadTyCons Ixs) idTC
-    pm₂ = cpmPolymonad cpm₂
+    pm₂ = upmPolymonad upm₂
     
     pm : Polymonad TyCons idTC
-    pm = polymonadCompose cpm₁ cpm₂
+    pm = polymonadUnion upm₁ upm₂
 
     mTC₁ : TyCons
     mTC₁ = inj₂ (inj₁ MonadTC)

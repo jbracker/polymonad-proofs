@@ -14,11 +14,11 @@ open import Utilities
 open import Haskell
 open import Identity
 open import Polymonad
-open import Polymonad.Composable
+open import Polymonad.Unionable
 open import Polymonad.Principal
 open import Monad
 open import Monad.Polymonad
-open import Monad.Composable
+open import Monad.Unionable
 open import Monad.Principal
 
 open import Polymonad.MorphMonad.Types

@@ -1,5 +1,5 @@
 
-module Monad.Composable where
+module Monad.Unionable where
 
 -- Stdlib
 open import Data.Product
@@ -15,14 +15,14 @@ open import Utilities
 open import Haskell
 open import Identity
 open import Polymonad
-open import Polymonad.Composable
+open import Polymonad.Unionable
 open import Monad
 open import Monad.Polymonad
 
-Monad→ComposablePolymonad : ∀ {M : TyCon} 
+Monad→UnionablePolymonad : ∀ {M : TyCon} 
                           → (monad : Monad M)
-                          → ComposablePolymonad (Monad→Polymonad monad)
-Monad→ComposablePolymonad {M = M'} monad = record 
+                          → UnionablePolymonad (Monad→Polymonad monad)
+Monad→UnionablePolymonad {M = M'} monad = record 
   { lawEqBindId = lawEqBindId 
   ; lawEqIdBinds = lawEqIdBinds 
   ; idMorph¬∃ = idMorph¬∃ 

@@ -1,5 +1,5 @@
  
-module Parameterized.IndexedMonad.Composable where
+module Parameterized.IndexedMonad.Unionable where
 
 -- Stdlib
 open import Agda.Primitive
@@ -16,17 +16,17 @@ open import Utilities
 open import Haskell
 open import Identity
 open import Polymonad
-open import Polymonad.Composable
+open import Polymonad.Unionable
 open import Parameterized.IndexedMonad
 open import Parameterized.IndexedMonad.Polymonad
 
 open IxMonad renaming (bind to mBind; return to mReturn; lawAssoc to mLawAssoc)
 open Polymonad.Polymonad
 
-IxMonad→ComposablePolymonad : ∀ {Ixs : Set} {M : Ixs → Ixs → TyCon} 
+IxMonad→UnionablePolymonad : ∀ {Ixs : Set} {M : Ixs → Ixs → TyCon} 
                             → (monad : IxMonad Ixs M)
-                            → ComposablePolymonad (IxMonad→Polymonad monad)
-IxMonad→ComposablePolymonad {Ixs = Ixs} {M = M'} monad = record 
+                            → UnionablePolymonad (IxMonad→Polymonad monad)
+IxMonad→UnionablePolymonad {Ixs = Ixs} {M = M'} monad = record 
   { lawEqBindId = lawEqBindId 
   ; lawEqIdBinds = refl 
   ; idMorph¬∃ = idMorph¬∃ 

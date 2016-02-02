@@ -26,8 +26,8 @@ me.
   constructor; this is central to the formalization of polymonads.
 * **`Monad`**:
   Formalization of monads as they are represented in Haskell.
-  * `Monad.Polymonad`, `Monad.Composable` and `Monad.Principal`:
-    Monads form polymonads, are composable, and principal.
+  * `Monad.Polymonad`, `Monad.Unionable` and `Monad.Principal`:
+    Monads form polymonads, are unionable, and principal.
   * `Monad.Identity`, `Monad.List` and `Monad.Maybe`:
     The `Identity`, `List`, and `Maybe` monad.
 * **`Polymonad`**:
@@ -35,11 +35,11 @@ me.
   The submodules contains proofs and formalization of ther polymonad concepts.
   * `Polymonad.Identity`: 
     The identity polymonad.
-  * `Polymonad.Composable`: 
+  * `Polymonad.Unionable`: 
     The formalization of what is required to 
-    compose two polymonads that do not have morphism between them.
-  * `Polymonad.Composition`: 
-    The proof that `ComposablePolymonad`s actually
+    union two polymonads that do not have morphism between them.
+  * `Polymonad.Union`: 
+    The proof that `UnionablePolymonad`s actually
     form a polymonad again. The submodules prove further properties (Principality is *WIP*).
   * `Polymonad.Principal`: 
     The formalization of principal polymonads.
@@ -48,7 +48,7 @@ me.
     are unique, i.e., bind-operations with the same type have the same semantics.
   * `Polymonad.MaybeList` and `Polymonad.MorphMonad`: 
     These and the submodules contain
-    ideas about composing standard monads to polymonads by providing lifting
+    ideas about the union of standard monads to polymonads by providing lifting
     functions between them (*WIP*).
 * **`Parameterized`**:
   Formalizations of different parameterized monads.

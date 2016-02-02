@@ -1,5 +1,5 @@
  
-module Polymonad.Composition.Principal.Examples where
+module Polymonad.Union.Principal.Examples where
 
 -- Stdlib
 open import Data.Product
@@ -17,42 +17,42 @@ open ≡-Reasoning
 open import Haskell
 open import Identity
 open import Polymonad
-open import Polymonad.Composable
+open import Polymonad.Unionable
 open import Polymonad.Principal
-open import Polymonad.Composition
+open import Polymonad.Union
 open import Parameterized.IndexedMonad
 open import Parameterized.IndexedMonad.Polymonad
-open import Parameterized.IndexedMonad.Composable
+open import Parameterized.IndexedMonad.Unionable
 open import Monad
 open import Monad.Polymonad
-open import Monad.Composable
+open import Monad.Unionable
 
 -- -----------------------------------------------------------------------------
--- EXAMPLE for principality of polymonad composition
--- Composition of two standard monads is principal
+-- EXAMPLE for principality of polymonad union
+-- Union of two standard monads is principal
 -- -----------------------------------------------------------------------------
 
-principalPolymonadMonadCompose : ∀ {M₁ M₂ : TyCon} 
+principalPolymonadMonadUnion : ∀ {M₁ M₂ : TyCon} 
                           → (monad₁ : Monad M₁) → (monad₂ : Monad M₂)
                           → ( (x : ((IdTyCons ⊎ (MonadTyCons ⊎ MonadTyCons)) × (IdTyCons ⊎ (MonadTyCons ⊎ MonadTyCons)))) 
                             → (F : SubsetOf ((IdTyCons ⊎ (MonadTyCons ⊎ MonadTyCons)) × (IdTyCons ⊎ (MonadTyCons ⊎ MonadTyCons)))) 
                             → Dec (x ∈ F))
-                          → PrincipalPM (polymonadCompose (Monad→ComposablePolymonad monad₁) (Monad→ComposablePolymonad monad₂))
-principalPolymonadMonadCompose monad₁ monad₂ _∈?_ = princ
+                          → PrincipalPM (polymonadUnion (Monad→UnionablePolymonad monad₁) (Monad→UnionablePolymonad monad₂))
+principalPolymonadMonadUnion monad₁ monad₂ _∈?_ = princ
   where
     TyCons = IdTyCons ⊎ (MonadTyCons ⊎ MonadTyCons)
     
-    cpm₁ = Monad→ComposablePolymonad monad₁
-    cpm₂ = Monad→ComposablePolymonad monad₂
+    upm₁ = Monad→UnionablePolymonad monad₁
+    upm₂ = Monad→UnionablePolymonad monad₂
 
     pm₁ : Polymonad (IdTyCons ⊎ MonadTyCons) idTC
-    pm₁ = cpmPolymonad cpm₁
+    pm₁ = upmPolymonad upm₁
 
     pm₂ : Polymonad (IdTyCons ⊎ MonadTyCons) idTC
-    pm₂ = cpmPolymonad cpm₂
+    pm₂ = upmPolymonad upm₂
     
     pm : Polymonad TyCons idTC
-    pm = polymonadCompose cpm₁ cpm₂
+    pm = polymonadUnion upm₁ upm₂
 
     mTC₁ : TyCons
     mTC₁ = inj₂ (inj₁ MonadTC)
@@ -124,52 +124,3 @@ principalPolymonadMonadCompose monad₁ monad₂ _∈?_ = princ
                                   ((mTC₁ , mTC₁) ∈? F) ((mTC₂ , mTC₂) ∈? F)
       in M , b₂ , b₁ , morph
     princ F (M , M' , MM'∈F) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) morph₁ morph₂ = mTC₂ , FunctorB , FunctorB , morph₂
-
--- -----------------------------------------------------------------------------
--- COUNTEREXAMPLE for principality of polymonad composition
--- Composition of a standard and an indexed monad is not principal,
--- if there exist two different indices.
--- 
--- Does not work anymore because F needs to be non-empty now.
--- -----------------------------------------------------------------------------
-{-
-¬principalPolymonadMonadIxMonadCompose : ∀ {Ixs : Set} {M₁ : TyCon} {M₂ : Ixs → Ixs → TyCon}
-                                       → (k l : Ixs) → ¬ k ≡ l
-                                       → (monad₁ : Monad M₁) → (monad₂ : IxMonad Ixs M₂)
-                                       → ¬ (PrincipalPM (polymonadCompose (Monad→ComposablePolymonad monad₁) (IxMonad→ComposablePolymonad monad₂)))
-¬principalPolymonadMonadIxMonadCompose {Ixs = Ixs} k l ¬k≡l monad₁ monad₂ princ = bottom
-  where
-    TyCons = IdTyCons ⊎ (MonadTyCons ⊎ IxMonadTyCons Ixs)
-    
-    cpm₁ = Monad→ComposablePolymonad monad₁
-    cpm₂ = IxMonad→ComposablePolymonad monad₂
-
-    pm₁ : Polymonad (IdTyCons ⊎ MonadTyCons) idTC
-    pm₁ = cpmPolymonad cpm₁
-
-    pm₂ : Polymonad (IdTyCons ⊎ IxMonadTyCons Ixs) idTC
-    pm₂ = cpmPolymonad cpm₂
-    
-    pm : Polymonad TyCons idTC
-    pm = polymonadCompose cpm₁ cpm₂
-
-    mTC₁ : TyCons
-    mTC₁ = inj₂ (inj₁ MonadTC)
-    
-    mTC₂ : Ixs → Ixs → TyCons
-    mTC₂ i j = inj₂ (inj₂ (IxMonadTC i j))
-    
-    ¬returnB₂ : (k l : Ixs)
-              → ¬ k ≡ l 
-              → ¬ B[ idTC , idTC ] pm₂ ▷ (inj₂ (IxMonadTC k l))
-    ¬returnB₂ k .k ¬k≡l ReturnB = ¬k≡l refl
-    
-    emptySubset : ∀ {S : Set} → SubsetOf S
-    emptySubset s = ⊥
-    
-    bottom : ⊥
-    bottom with princ emptySubset mTC₁ (mTC₂ k l) (λ M N ()) (λ M N ()) 
-    bottom | inj₁ IdentTC , b₁ , b₂ , morph = ¬returnB₂ k l ¬k≡l b₂
-    bottom | inj₂ (inj₁ MonadTC) , b₁ , () , morph
-    bottom | inj₂ (inj₂ (IxMonadTC i j)) , () , b₂ , morph
--}

@@ -1,5 +1,5 @@
 
-module Polymonad.Composition where
+module Polymonad.Union where
 
 -- Stdlib
 open import Data.Product
@@ -16,19 +16,19 @@ open import Haskell
 open import Polymonad
 open import Identity
 open import Polymonad.Identity
-open import Polymonad.Composable
+open import Polymonad.Unionable
 
 --------------------------------------------------------------------------------
--- Polymonad Composition
+-- Polymonad Union
 --------------------------------------------------------------------------------
 
-polymonadCompose : ∀ {TyCons₁ TyCons₂ : Set}
+polymonadUnion : ∀ {TyCons₁ TyCons₂ : Set}
                  → {pm₁ : Polymonad (IdTyCons ⊎ TyCons₁) idTC}
                  → {pm₂ : Polymonad (IdTyCons ⊎ TyCons₂) idTC}
-                 → ComposablePolymonad pm₁
-                 → ComposablePolymonad pm₂
+                 → UnionablePolymonad pm₁
+                 → UnionablePolymonad pm₂
                  → Polymonad (IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) idTC
-polymonadCompose {TyCons₁} {TyCons₂} {pm₁} {pm₂} cpm₁ cpm₂ = record 
+polymonadUnion {TyCons₁} {TyCons₂} {pm₁} {pm₂} upm₁ upm₂ = record 
   { B[_,_]▷_ = B[_,_]▷_
   ; ⟨_⟩ = ⟨_⟩
   ; bind = λ {M} {N} {P} → bind {M} {N} {P}
@@ -48,17 +48,17 @@ polymonadCompose {TyCons₁} {TyCons₂} {pm₁} {pm₂} cpm₁ cpm₂ = record
       Id : TyCons
       Id = inj₁ IdentTC
       
-      eqId₁ = cpmLawEqId cpm₁
-      eqId₂ = cpmLawEqId cpm₂
+      eqId₁ = upmLawEqId upm₁
+      eqId₂ = upmLawEqId upm₂
 
       eqIdBind : B[ idTC , idTC ] pm₁ ▷ idTC ≡ B[ idTC , idTC ] pm₂ ▷ idTC
-      eqIdBind = trans (cpmLawEqIdBinds cpm₁) (sym (cpmLawEqIdBinds cpm₂))
+      eqIdBind = trans (upmLawEqIdBinds upm₁) (sym (upmLawEqIdBinds upm₂))
 
-      eqBindId₁ = cpmLawEqBindId cpm₁
-      eqBindId₂ = cpmLawEqBindId cpm₂
+      eqBindId₁ = upmLawEqBindId upm₁
+      eqBindId₂ = upmLawEqBindId upm₂
       
-      idMorph¬∃₁ = cpmIdMorph¬∃ cpm₁
-      idMorph¬∃₂ = cpmIdMorph¬∃ cpm₂
+      idMorph¬∃₁ = upmIdMorph¬∃ upm₁
+      idMorph¬∃₂ = upmIdMorph¬∃ upm₂
       
       lawId₁ = pmLawId pm₁
       lawId₂ = pmLawId pm₂

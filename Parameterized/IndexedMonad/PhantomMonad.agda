@@ -19,10 +19,10 @@ open import Identity
 open import Monad renaming ( mBind to monadBind ; mReturn to monadReturn )
 open import Monad.Polymonad
 open import Monad.Principal
-open import Monad.Composable
+open import Monad.Unionable
 open import Polymonad
 open import Polymonad.Principal
-open import Polymonad.Composable
+open import Polymonad.Unionable
 open import Parameterized.IndexedMonad
 open import Parameterized.PhantomIndices
 
@@ -207,17 +207,11 @@ PhantomIxMonad→PrincipalPolymonad
   → PrincipalPM (PhantomIxMonad→Polymonad i K ixMonad)
 PhantomIxMonad→PrincipalPolymonad i K ixMonad = Monad→PrincipalPolymonad (PhantomIxMonad→Monad i K ixMonad)
 
-PhantomIxMonad→ComposablePolymonad 
+PhantomIxMonad→UnionablePolymonad 
   : ∀ {Ixs : Set} {M : Ixs → Ixs → TyCon}
   → (i : Ixs)
   → (K : PhantomIndices (Ixs ∷ Ixs ∷ []) M)
   → (ixMonad : IxMonad Ixs M)
-  → ComposablePolymonad (PhantomIxMonad→Polymonad i K ixMonad)
-PhantomIxMonad→ComposablePolymonad i K ixMonad = Monad→ComposablePolymonad (PhantomIxMonad→Monad i K ixMonad)
+  → UnionablePolymonad (PhantomIxMonad→Polymonad i K ixMonad)
+PhantomIxMonad→UnionablePolymonad i K ixMonad = Monad→UnionablePolymonad (PhantomIxMonad→Monad i K ixMonad)
 
--- -----------------------------------------------------------------------------
--- Indexed monads preserve principality when composed with other indexed monads or normal monads.
--- -----------------------------------------------------------------------------
-
--- Using the example from Polymonad.Principal.Examples we can not compose indexed monads with phantom indices 
--- with each other and with monads.

@@ -1,5 +1,5 @@
  
-module Polymonad.Composable where
+module Polymonad.Unionable where
 
 -- Stdlib
 open import Data.Product
@@ -14,13 +14,13 @@ open import Identity
 open import Polymonad
 
 -- -----------------------------------------------------------------------------
--- Composable Polymonad
+-- Unionable Polymonad
 -- -----------------------------------------------------------------------------
 
 open Polymonad.Polymonad
 
--- Set of laws that need to hold in order for composition of polymonads to work.
-record ComposablePolymonad {TyCons : Set} (pm : Polymonad (IdTyCons ⊎ TyCons) idTC) : Set₁ where
+-- Set of laws that need to hold in order for union of polymonads to work.
+record UnionablePolymonad {TyCons : Set} (pm : Polymonad (IdTyCons ⊎ TyCons) idTC) : Set₁ where
   field
     -- Every bind operator that only involves the identity is equivalent to the identity bind operator.
     lawEqBindId : ∀ {α β : Type} → (b : B[ idTC , idTC ] pm ▷ idTC) → substBind (lawId pm) (lawId pm) (lawId pm) (pmBind pm b) {α} {β} ≡ bindId {α} {β}
@@ -32,16 +32,16 @@ record ComposablePolymonad {TyCons : Set} (pm : Polymonad (IdTyCons ⊎ TyCons) 
     idMorph¬∃ : ∀ {M N : IdTyCons ⊎ TyCons} → (∃ λ(M' : TyCons) → M ≡ inj₂ M') ⊎ (∃ λ(N' : TyCons) → N ≡ inj₂ N') → ¬ (B[ M , N ] pm ▷ idTC)
 
 -- -----------------------------------------------------------------------------
--- Composable Polymonad Accessor Functions
+-- Unionable Polymonad Accessor Functions
 -- -----------------------------------------------------------------------------
 
-cpmPolymonad : ∀ {TyCons : Set} {pm : Polymonad (IdTyCons ⊎ TyCons) idTC} → ComposablePolymonad pm → Polymonad (IdTyCons ⊎ TyCons) idTC
-cpmPolymonad {pm = pm} cpm = pm
+upmPolymonad : ∀ {TyCons : Set} {pm : Polymonad (IdTyCons ⊎ TyCons) idTC} → UnionablePolymonad pm → Polymonad (IdTyCons ⊎ TyCons) idTC
+upmPolymonad {pm = pm} upm = pm
 
-cpmLawEqId : ∀ {TyCons : Set} {pm : Polymonad (IdTyCons ⊎ TyCons) idTC} → ComposablePolymonad pm → ⟨ pm ▷ idTC ⟩ ≡ Identity
-cpmLawEqId {pm = pm} cpm = lawId pm
+upmLawEqId : ∀ {TyCons : Set} {pm : Polymonad (IdTyCons ⊎ TyCons) idTC} → UnionablePolymonad pm → ⟨ pm ▷ idTC ⟩ ≡ Identity
+upmLawEqId {pm = pm} upm = lawId pm
 
-cpmLawEqBindId = ComposablePolymonad.lawEqBindId
-cpmLawEqIdBinds = ComposablePolymonad.lawEqIdBinds
-cpmIdMorph¬∃ = ComposablePolymonad.idMorph¬∃
+upmLawEqBindId = UnionablePolymonad.lawEqBindId
+upmLawEqIdBinds = UnionablePolymonad.lawEqIdBinds
+upmIdMorph¬∃ = UnionablePolymonad.idMorph¬∃
 

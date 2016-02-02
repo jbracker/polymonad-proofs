@@ -1,5 +1,5 @@
  
-module Polymonad.Composition.Principal where
+module Polymonad.Union.Principal where
 
 -- Stdlib
 open import Data.Product
@@ -16,58 +16,58 @@ open ≡-Reasoning
 open import Haskell
 open import Identity
 open import Polymonad
-open import Polymonad.Composable
+open import Polymonad.Unionable
 open import Polymonad.Principal
-open import Polymonad.Composition
-open import Polymonad.Composition.Composable
-open import Polymonad.Composition.Properties
-open import Polymonad.Composition.Principal.Utilities
+open import Polymonad.Union
+open import Polymonad.Union.Unionable
+open import Polymonad.Union.Properties
+open import Polymonad.Union.Principal.Utilities
 open import Monad.Polymonad
-open import Monad.Composable
+open import Monad.Unionable
 open import Monad.List
 open import Monad.Maybe
 
-principalPolymonadCompose : ∀ {TyCons₁ TyCons₂ : Set}
-                          → {pm₁ : Polymonad (IdTyCons ⊎ TyCons₁) idTC}
-                          → {pm₂ : Polymonad (IdTyCons ⊎ TyCons₂) idTC}
-                          → (cpm₁ : ComposablePolymonad pm₁)
-                          → (cpm₂ : ComposablePolymonad pm₂)
-                          -- We know that F falls in either of three categories:
-                          --  - F is a subset of (IdTyCons ⊎ TyCons₁)²
-                          --  - F is a subset of (IdTyCons ⊎ TyCons₂)²
-                          --  - F contains a pair with a tycon from TyCons₁ and a pair with a tycon from TyCons₂ (could be the same pair).
-                          → ( (F : SubsetOf ((IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) × (IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)))) 
-                            → ( ∀ (M M' : IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) 
-                              → (M , M') ∈ F 
-                              → ∃ λ(M₁ : IdTyCons ⊎ TyCons₁) → ∃ λ(M₁' : IdTyCons ⊎ TyCons₁) 
-                              → (M ≡ mTyCon₁ M₁) × (M' ≡ mTyCon₁ M₁') )
-                            ⊎ ( ∀ (M M' : IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) 
-                              → (M , M') ∈ F 
-                              → ∃ λ(M₂ : IdTyCons ⊎ TyCons₂) → ∃ λ(M₂' : IdTyCons ⊎ TyCons₂) 
-                              → (M ≡ mTyCon₂ M₂) × (M' ≡ mTyCon₂ M₂') )
-                            ⊎ ( ∃ λ(M₁ : TyCons₁) → ∃ λ(M₂ : TyCons₂) 
-                              → ∃ λ(M : IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) → ∃ λ(M' : IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) 
-                              → ( (inj₂ (inj₁ M₁) , M) ∈ F ⊎ (M , inj₂ (inj₁ M₁)) ∈ F) × ( (inj₂ (inj₂ M₂) , M') ∈ F ⊎ (M' , inj₂ (inj₂ M₂)) ∈ F )  ) )
-                          -- We know if either:
-                          --  - F contains at least one element aside of (Id,Id) or
-                          --  - F = { (Id,Id) }
-                          → ( (F : SubsetOf ((IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) × (IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)))) 
-                            → ( (∃ λ(M : IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) → ∃ λ(M' : IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) → (M , M') ∈ F × ¬ (M ≡ idTC) × ¬ (M' ≡ idTC))
-                              ⊎ ((idTC , idTC) ∈ F × (∀ (M M' : IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) → (¬ (M ≡ idTC) ⊎ ¬ (M' ≡ idTC)) → ¬ ((M , M') ∈ F))) )
-                            )
-                          → PrincipalPM pm₁
-                          → PrincipalPM pm₂
-                          → PrincipalPM (polymonadCompose cpm₁ cpm₂)
-principalPolymonadCompose {TyCons₁} {TyCons₂} {pm₁} {pm₂} cpm₁ cpm₂ partition onlyIdPair princ₁ princ₂ = princ
+principalPolymonadUnion : ∀ {TyCons₁ TyCons₂ : Set}
+                        → {pm₁ : Polymonad (IdTyCons ⊎ TyCons₁) idTC}
+                        → {pm₂ : Polymonad (IdTyCons ⊎ TyCons₂) idTC}
+                        → (upm₁ : UnionablePolymonad pm₁)
+                        → (upm₂ : UnionablePolymonad pm₂)
+                        -- We know that F falls in either of three categories:
+                        --  - F is a subset of (IdTyCons ⊎ TyCons₁)²
+                        --  - F is a subset of (IdTyCons ⊎ TyCons₂)²
+                        --  - F contains a pair with a tycon from TyCons₁ and a pair with a tycon from TyCons₂ (could be the same pair).
+                        → ( (F : SubsetOf ((IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) × (IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)))) 
+                          → ( ∀ (M M' : IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) 
+                            → (M , M') ∈ F 
+                            → ∃ λ(M₁ : IdTyCons ⊎ TyCons₁) → ∃ λ(M₁' : IdTyCons ⊎ TyCons₁) 
+                            → (M ≡ mTyCon₁ M₁) × (M' ≡ mTyCon₁ M₁') )
+                          ⊎ ( ∀ (M M' : IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) 
+                            → (M , M') ∈ F 
+                            → ∃ λ(M₂ : IdTyCons ⊎ TyCons₂) → ∃ λ(M₂' : IdTyCons ⊎ TyCons₂) 
+                            → (M ≡ mTyCon₂ M₂) × (M' ≡ mTyCon₂ M₂') )
+                          ⊎ ( ∃ λ(M₁ : TyCons₁) → ∃ λ(M₂ : TyCons₂) 
+                            → ∃ λ(M : IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) → ∃ λ(M' : IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) 
+                            → ( (inj₂ (inj₁ M₁) , M) ∈ F ⊎ (M , inj₂ (inj₁ M₁)) ∈ F) × ( (inj₂ (inj₂ M₂) , M') ∈ F ⊎ (M' , inj₂ (inj₂ M₂)) ∈ F )  ) )
+                        -- We know if either:
+                        --  - F contains at least one element aside of (Id,Id) or
+                        --  - F = { (Id,Id) }
+                        → ( (F : SubsetOf ((IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) × (IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)))) 
+                          → ( (∃ λ(M : IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) → ∃ λ(M' : IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) → (M , M') ∈ F × ¬ (M ≡ idTC) × ¬ (M' ≡ idTC))
+                            ⊎ ((idTC , idTC) ∈ F × (∀ (M M' : IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) → (¬ (M ≡ idTC) ⊎ ¬ (M' ≡ idTC)) → ¬ ((M , M') ∈ F))) )
+                          )
+                        → PrincipalPM pm₁
+                        → PrincipalPM pm₂
+                        → PrincipalPM (polymonadUnion upm₁ upm₂)
+principalPolymonadUnion {TyCons₁} {TyCons₂} {pm₁} {pm₂} upm₁ upm₂ partition onlyIdPair princ₁ princ₂ = princ
   where
     open Polymonad.Polymonad
 
-    pm = polymonadCompose cpm₁ cpm₂
-    cpm = polymonadComposableCompose cpm₁ cpm₂
+    pm = polymonadUnion upm₁ upm₂
+    upm = polymonadUnionableUnion upm₁ upm₂
     
     TyCons = IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)
 
-    idMorph¬∃ = cpmIdMorph¬∃ cpm
+    idMorph¬∃ = upmIdMorph¬∃ upm
 
     mTC₁ : TyCons₁ → TyCons
     mTC₁ M = inj₂ (inj₁ M)
@@ -105,11 +105,11 @@ principalPolymonadCompose {TyCons₁} {TyCons₂} {pm₁} {pm₂} cpm₁ cpm₂ 
     helpPrinc1 F M₁ M₂ pairIn2 morph₁ morph₂ (inj₂ (inj₁ N) , inj₂ (inj₁ N') , NN∈F , ¬N≡Id , ¬N'≡Id) 
       = ⊥-elim (pairIn2→⊥ F pairIn2 (mTC₁ N) (mTC₁ N') NN∈F (N , inj₁ refl))
     helpPrinc1 F M₁ M₂ pairIn2 morph₁ morph₂ (inj₂ (inj₁ N) , inj₂ (inj₂ N') , NN∈F , ¬N≡Id , ¬N'≡Id)
-      = ⊥-elim (composition→¬[N,M₂]▷M₁ cpm {N = mTC₁ N} {M₂ = N'} {M₁ = M₁} (morph₁ (mTC₁ N) (mTC₂ N') NN∈F))
+      = ⊥-elim (union→¬[N,M₂]▷M₁ upm {N = mTC₁ N} {M₂ = N'} {M₁ = M₁} (morph₁ (mTC₁ N) (mTC₂ N') NN∈F))
     helpPrinc1 F M₁ M₂ pairIn2 morph₁ morph₂ (inj₂ (inj₂ N) , inj₂ (inj₁ N') , NN∈F , ¬N≡Id , ¬N'≡Id) 
-      = ⊥-elim (composition→¬[M₂,N]▷M₁ cpm {M₂ = N} {N = mTC₁ N'} {M₁ = M₁} (morph₁ (mTC₂ N) (mTC₁ N') NN∈F))
+      = ⊥-elim (union→¬[M₂,N]▷M₁ upm {M₂ = N} {N = mTC₁ N'} {M₁ = M₁} (morph₁ (mTC₂ N) (mTC₁ N') NN∈F))
     helpPrinc1 F M₁ M₂ pairIn2 morph₁ morph₂ (inj₂ (inj₂ N) , inj₂ (inj₂ N') , NN∈F , ¬N≡Id , ¬N'≡Id) 
-      = ⊥-elim (composition→¬[M₂,N]▷M₁ cpm {M₂ = N} {N = mTC₂ N'} {M₁ = M₁} (morph₁ (mTC₂ N) (mTC₂ N') NN∈F))
+      = ⊥-elim (union→¬[M₂,N]▷M₁ upm {M₂ = N} {N = mTC₂ N'} {M₁ = M₁} (morph₁ (mTC₂ N) (mTC₂ N') NN∈F))
     
     helpPrinc2 : (F : SubsetOf ( TyCons × TyCons ))
                → (M₁ : TyCons) → (M₂ : TyCons₁)
@@ -133,11 +133,11 @@ principalPolymonadCompose {TyCons₁} {TyCons₂} {pm₁} {pm₂} cpm₁ cpm₂ 
     helpPrinc2 F M₁ M₂ pairIn2 morph₁ morph₂ (inj₂ (inj₁ N) , inj₂ (inj₁ N') , NN∈F , ¬N≡Id , ¬N'≡Id) 
       = ⊥-elim (pairIn2→⊥ F pairIn2 (mTC₁ N) (mTC₁ N') NN∈F (N , inj₁ refl))
     helpPrinc2 F M₁ M₂ pairIn2 morph₁ morph₂ (inj₂ (inj₁ N) , inj₂ (inj₂ N') , NN∈F , ¬N≡Id , ¬N'≡Id)
-      = ⊥-elim (composition→¬[N,M₂]▷M₁ cpm {N = mTC₁ N} {M₂ = N'} {M₁ = M₂} (morph₂ (mTC₁ N) (mTC₂ N') NN∈F))
+      = ⊥-elim (union→¬[N,M₂]▷M₁ upm {N = mTC₁ N} {M₂ = N'} {M₁ = M₂} (morph₂ (mTC₁ N) (mTC₂ N') NN∈F))
     helpPrinc2 F M₁ M₂ pairIn2 morph₁ morph₂ (inj₂ (inj₂ N) , inj₂ (inj₁ N') , NN∈F , ¬N≡Id , ¬N'≡Id) 
-      = ⊥-elim (composition→¬[M₂,N]▷M₁ cpm {M₂ = N} {N = mTC₁ N'} {M₁ = M₂} (morph₂ (mTC₂ N) (mTC₁ N') NN∈F))
+      = ⊥-elim (union→¬[M₂,N]▷M₁ upm {M₂ = N} {N = mTC₁ N'} {M₁ = M₂} (morph₂ (mTC₂ N) (mTC₁ N') NN∈F))
     helpPrinc2 F M₁ M₂ pairIn2 morph₁ morph₂ (inj₂ (inj₂ N) , inj₂ (inj₂ N') , NN∈F , ¬N≡Id , ¬N'≡Id) 
-      = ⊥-elim (composition→¬[M₂,N]▷M₁ cpm {M₂ = N} {N = mTC₂ N'} {M₁ = M₂} (morph₂ (mTC₂ N) (mTC₂ N') NN∈F))
+      = ⊥-elim (union→¬[M₂,N]▷M₁ upm {M₂ = N} {N = mTC₂ N'} {M₁ = M₂} (morph₂ (mTC₂ N) (mTC₂ N') NN∈F))
 
     helpPrinc3 : (F : SubsetOf ( TyCons × TyCons ))
                 → (M₁ : TyCons₂) → (M₂ : TyCons)
@@ -159,11 +159,11 @@ principalPolymonadCompose {TyCons₁} {TyCons₂} {pm₁} {pm₂} cpm₁ cpm₂ 
     helpPrinc3 F M₁ M₂ pairIn1 morph₁ morph₂ (inj₂ N , inj₁ IdentTC , NN∈F , ¬N≡Id , ¬N'≡Id) 
       = ⊥-elim (¬N'≡Id refl)
     helpPrinc3 F M₁ M₂ pairIn1 morph₁ morph₂ (inj₂ (inj₁ N) , inj₂ (inj₁ N') , NN∈F , ¬N≡Id , ¬N'≡Id) 
-      = ⊥-elim (composition→¬[M₁,N]▷M₂ cpm {M₁ = N} {N = mTC₁ N'} {M₂ = M₁} (morph₁ (mTC₁ N) (mTC₁ N') NN∈F))
+      = ⊥-elim (union→¬[M₁,N]▷M₂ upm {M₁ = N} {N = mTC₁ N'} {M₂ = M₁} (morph₁ (mTC₁ N) (mTC₁ N') NN∈F))
     helpPrinc3 F M₁ M₂ pairIn1 morph₁ morph₂ (inj₂ (inj₁ N) , inj₂ (inj₂ N') , NN∈F , ¬N≡Id , ¬N'≡Id)
-      = ⊥-elim (composition→¬[M₁,N]▷M₂ cpm {M₁ = N} {N = mTC₂ N'} {M₂ = M₁} (morph₁ (mTC₁ N) (mTC₂ N') NN∈F))
+      = ⊥-elim (union→¬[M₁,N]▷M₂ upm {M₁ = N} {N = mTC₂ N'} {M₂ = M₁} (morph₁ (mTC₁ N) (mTC₂ N') NN∈F))
     helpPrinc3 F M₁ M₂ pairIn1 morph₁ morph₂ (inj₂ (inj₂ N) , inj₂ (inj₁ N') , NN∈F , ¬N≡Id , ¬N'≡Id) 
-      = ⊥-elim (composition→¬[N,M₁]▷M₂ cpm {N = mTC₂ N} {M₁ = N'} {M₂ = M₁} (morph₁ (mTC₂ N) (mTC₁ N') NN∈F))
+      = ⊥-elim (union→¬[N,M₁]▷M₂ upm {N = mTC₂ N} {M₁ = N'} {M₂ = M₁} (morph₁ (mTC₂ N) (mTC₁ N') NN∈F))
     helpPrinc3 F M₁ M₂ pairIn1 morph₁ morph₂ (inj₂ (inj₂ N) , inj₂ (inj₂ N') , NN∈F , ¬N≡Id , ¬N'≡Id) 
       = ⊥-elim (pairIn1→⊥ F pairIn1 (mTC₂ N) (mTC₂ N') NN∈F (N , (inj₁ refl)))
     
@@ -187,11 +187,11 @@ principalPolymonadCompose {TyCons₁} {TyCons₂} {pm₁} {pm₂} cpm₁ cpm₂ 
     helpPrinc4 F M₁ M₂ pairIn1 morph₁ morph₂ (inj₂ N , inj₁ IdentTC , NN∈F , ¬N≡Id , ¬N'≡Id) 
       = ⊥-elim (¬N'≡Id refl)
     helpPrinc4 F M₁ M₂ pairIn1 morph₁ morph₂ (inj₂ (inj₁ N) , inj₂ (inj₁ N') , NN∈F , ¬N≡Id , ¬N'≡Id) 
-      = ⊥-elim (composition→¬[M₁,N]▷M₂ cpm {M₁ = N} {N = mTC₁ N'} {M₂ = M₂} (morph₂ (mTC₁ N) (mTC₁ N') NN∈F))
+      = ⊥-elim (union→¬[M₁,N]▷M₂ upm {M₁ = N} {N = mTC₁ N'} {M₂ = M₂} (morph₂ (mTC₁ N) (mTC₁ N') NN∈F))
     helpPrinc4 F M₁ M₂ pairIn1 morph₁ morph₂ (inj₂ (inj₁ N) , inj₂ (inj₂ N') , NN∈F , ¬N≡Id , ¬N'≡Id)
-      = ⊥-elim (composition→¬[M₁,N]▷M₂ cpm {M₁ = N} {N = mTC₂ N'} {M₂ = M₂} (morph₂ (mTC₁ N) (mTC₂ N') NN∈F))
+      = ⊥-elim (union→¬[M₁,N]▷M₂ upm {M₁ = N} {N = mTC₂ N'} {M₂ = M₂} (morph₂ (mTC₁ N) (mTC₂ N') NN∈F))
     helpPrinc4 F M₁ M₂ pairIn1 morph₁ morph₂ (inj₂ (inj₂ N) , inj₂ (inj₁ N') , NN∈F , ¬N≡Id , ¬N'≡Id) 
-      = ⊥-elim (composition→¬[N,M₁]▷M₂ cpm {N = mTC₂ N} {M₁ = N'} {M₂ = M₂} (morph₂ (mTC₂ N) (mTC₁ N') NN∈F))
+      = ⊥-elim (union→¬[N,M₁]▷M₂ upm {N = mTC₂ N} {M₁ = N'} {M₂ = M₂} (morph₂ (mTC₂ N) (mTC₁ N') NN∈F))
     helpPrinc4 F M₁ M₂ pairIn1 morph₁ morph₂ (inj₂ (inj₂ N) , inj₂ (inj₂ N') , NN∈F , ¬N≡Id , ¬N'≡Id) 
       = ⊥-elim (pairIn1→⊥ F pairIn1 (mTC₂ N) (mTC₂ N') NN∈F (N , inj₁ refl))
     
@@ -211,22 +211,22 @@ principalPolymonadCompose {TyCons₁} {TyCons₂} {pm₁} {pm₂} cpm₁ cpm₂ 
       | inj₁ pairIn1 = ⊥-elim (pairIn1→⊥ F pairIn1 (mTC₂ N) (inj₂ N') NN∈F (N , (inj₁ refl)))
     
     princ F (M , M' , MM'∈F) (inj₁ IdentTC) (inj₂ (inj₁ M₂)) morph₁ morph₂ | inj₁ FmoreThenId | inj₁ pairIn1 
-      = princ₁→princ cpm₁ cpm₂ F pairIn1 idTC (inj₂ M₂) 
+      = princ₁→princ upm₁ upm₂ F pairIn1 idTC (inj₂ M₂) 
                      (princ₁ (F→F₁ F) (NN∈F→NN∈F₁ F pairIn1 M M' MM'∈F) idTC (inj₂ M₂) 
-                             (morph→morph₁ cpm₁ cpm₂ F idTC morph₁) 
-                             (morph→morph₁ cpm₁ cpm₂ F (inj₂ M₂) morph₂))
+                             (morph→morph₁ upm₁ upm₂ F idTC morph₁) 
+                             (morph→morph₁ upm₁ upm₂ F (inj₂ M₂) morph₂))
     princ F (M , M' , MM'∈F) (inj₁ IdentTC) (inj₂ (inj₂ M₂)) morph₁ morph₂ | inj₁ FmoreThenId | inj₁ pairIn1 
       = helpPrinc4 F idTC M₂ pairIn1 morph₁ morph₂ FmoreThenId
     princ F (M , M' , MM'∈F) (inj₂ (inj₁ M₁)) (inj₁ IdentTC) morph₁ morph₂ | inj₁ FmoreThenId | inj₁ pairIn1 
-      = princ₁→princ cpm₁ cpm₂ F pairIn1 (inj₂ M₁) idTC 
+      = princ₁→princ upm₁ upm₂ F pairIn1 (inj₂ M₁) idTC 
                      (princ₁ (F→F₁ F) (NN∈F→NN∈F₁ F pairIn1 M M' MM'∈F) (inj₂ M₁) idTC 
-                             (morph→morph₁ cpm₁ cpm₂ F (inj₂ M₁) morph₁) 
-                             (morph→morph₁ cpm₁ cpm₂ F idTC morph₂))
+                             (morph→morph₁ upm₁ upm₂ F (inj₂ M₁) morph₁) 
+                             (morph→morph₁ upm₁ upm₂ F idTC morph₂))
     princ F (M , M' , MM'∈F) (inj₂ (inj₁ M₁)) (inj₂ (inj₁ M₂)) morph₁ morph₂ | inj₁ FmoreThenId | inj₁ pairIn1 
-      = princ₁→princ cpm₁ cpm₂ F pairIn1 (inj₂ M₁) (inj₂ M₂) 
+      = princ₁→princ upm₁ upm₂ F pairIn1 (inj₂ M₁) (inj₂ M₂) 
                      (princ₁ (F→F₁ F) (NN∈F→NN∈F₁ F pairIn1 M M' MM'∈F) (inj₂ M₁) (inj₂ M₂) 
-                             (morph→morph₁ cpm₁ cpm₂ F (inj₂ M₁) morph₁) 
-                             (morph→morph₁ cpm₁ cpm₂ F (inj₂ M₂) morph₂))
+                             (morph→morph₁ upm₁ upm₂ F (inj₂ M₁) morph₁) 
+                             (morph→morph₁ upm₁ upm₂ F (inj₂ M₂) morph₂))
     princ F (M , M' , MM'∈F) (inj₂ (inj₁ M₁)) (inj₂ (inj₂ M₂)) morph₁ morph₂ | inj₁ FmoreThenId | inj₁ pairIn1
       = helpPrinc4 F (mTC₁ M₁) M₂ pairIn1 morph₁ morph₂ FmoreThenId
     princ F (M , M' , MM'∈F) (inj₂ (inj₂ M₁)) M₂ morph₁ morph₂ | inj₁ FmoreThenId | inj₁ pairIn1 
@@ -246,49 +246,49 @@ principalPolymonadCompose {TyCons₁} {TyCons₂} {pm₁} {pm₂} cpm₁ cpm₂ 
     princ F (M , M' , MM'∈F) (inj₁ IdentTC) (inj₂ (inj₁ M₂)) morph₁ morph₂ | inj₁ FmoreThenId | inj₂ (inj₁ pairIn2) 
       = helpPrinc2 F idTC M₂ pairIn2 morph₁ morph₂ FmoreThenId
     princ F (M , M' , MM'∈F) (inj₁ IdentTC) (inj₂ (inj₂ M₂)) morph₁ morph₂ | inj₁ FmoreThenId | inj₂ (inj₁ pairIn2) 
-      = princ₂→princ cpm₁ cpm₂ F pairIn2 idTC (inj₂ M₂)  
+      = princ₂→princ upm₁ upm₂ F pairIn2 idTC (inj₂ M₂)  
                      (princ₂ (F→F₂ F) (NN∈F→NN∈F₂ F pairIn2 M M' MM'∈F) idTC (inj₂ M₂) 
-                             (morph→morph₂ cpm₁ cpm₂ F idTC morph₁)
-                             (morph→morph₂ cpm₁ cpm₂ F (inj₂ M₂) morph₂))
+                             (morph→morph₂ upm₁ upm₂ F idTC morph₁)
+                             (morph→morph₂ upm₁ upm₂ F (inj₂ M₂) morph₂))
     princ F (M , M' , MM'∈F) (inj₂ (inj₁ M₁)) M₂   morph₁ morph₂ | inj₁ FmoreThenId | inj₂ (inj₁ pairIn2) 
       = helpPrinc1 F M₁ M₂ pairIn2 morph₁ morph₂ FmoreThenId
     princ F (M , M' , MM'∈F) (inj₂ (inj₂ M₁)) (inj₁ IdentTC)   morph₁ morph₂ | inj₁ FmoreThenId | inj₂ (inj₁ pairIn2) 
-      = princ₂→princ cpm₁ cpm₂ F pairIn2 (inj₂ M₁) idTC 
+      = princ₂→princ upm₁ upm₂ F pairIn2 (inj₂ M₁) idTC 
                      (princ₂ (F→F₂ F) (NN∈F→NN∈F₂ F pairIn2 M M' MM'∈F) (inj₂ M₁) idTC 
-                             (morph→morph₂ cpm₁ cpm₂ F (inj₂ M₁) morph₁) 
-                             (morph→morph₂ cpm₁ cpm₂ F idTC morph₂))
+                             (morph→morph₂ upm₁ upm₂ F (inj₂ M₁) morph₁) 
+                             (morph→morph₂ upm₁ upm₂ F idTC morph₂))
     princ F (M , M' , MM'∈F) (inj₂ (inj₂ M₁)) (inj₂ (inj₁ M₂)) morph₁ morph₂ | inj₁ FmoreThenId | inj₂ (inj₁ pairIn2) 
       = helpPrinc2 F (mTC₂ M₁) M₂ pairIn2 morph₁ morph₂ FmoreThenId
     princ F (M , M' , MM'∈F) (inj₂ (inj₂ M₁)) (inj₂ (inj₂ M₂)) morph₁ morph₂ | inj₁ FmoreThenId | inj₂ (inj₁ pairIn2) 
-      = princ₂→princ cpm₁ cpm₂ F pairIn2 (inj₂ M₁) (inj₂ M₂) 
+      = princ₂→princ upm₁ upm₂ F pairIn2 (inj₂ M₁) (inj₂ M₂) 
                      (princ₂ (F→F₂ F) (NN∈F→NN∈F₂ F pairIn2 M M' MM'∈F) (inj₂ M₁) (inj₂ M₂) 
-                             (morph→morph₂ cpm₁ cpm₂ F (inj₂ M₁) morph₁) 
-                             (morph→morph₂ cpm₁ cpm₂ F (inj₂ M₂) morph₂))
+                             (morph→morph₂ upm₁ upm₂ F (inj₂ M₁) morph₁) 
+                             (morph→morph₂ upm₁ upm₂ F (inj₂ M₂) morph₂))
     
     princ F (M , M' , MM'∈F) (inj₁ IdentTC) M₂ morph₁ morph₂ | inj₁ FmoreThenId | inj₂ (inj₂ (N₁ , N₂ , N , N' , inj₁ N₁N∈F , inj₁ N₂N'∈F))
       = ⊥-elim (idMorph¬∃ {M = mTC₁ N₁} {N = N} (inj₁ ((inj₁ N₁) , refl)) (morph₁ (mTC₁ N₁) N N₁N∈F))
     princ F (M , M' , MM'∈F) (inj₂ (inj₁ M₁)) M₂ morph₁ morph₂ | inj₁ FmoreThenId | inj₂ (inj₂ (N₁ , N₂ , N , N' , inj₁ N₁N∈F , inj₁ N₂N'∈F)) 
-      = ⊥-elim (composition→¬[M₂,N]▷M₁ cpm {M₂ = N₂} {N = N'} {M₁ = M₁} (morph₁ (mTC₂ N₂) N' N₂N'∈F))
+      = ⊥-elim (union→¬[M₂,N]▷M₁ upm {M₂ = N₂} {N = N'} {M₁ = M₁} (morph₁ (mTC₂ N₂) N' N₂N'∈F))
     princ F (M , M' , MM'∈F) (inj₂ (inj₂ M₁)) M₂ morph₁ morph₂ | inj₁ FmoreThenId | inj₂ (inj₂ (N₁ , N₂ , N , N' , inj₁ N₁N∈F , inj₁ N₂N'∈F)) 
-      = ⊥-elim (composition→¬[M₁,N]▷M₂ cpm {M₁ = N₁} {N = N} {M₂ = M₁} (morph₁ (mTC₁ N₁) N N₁N∈F))
+      = ⊥-elim (union→¬[M₁,N]▷M₂ upm {M₁ = N₁} {N = N} {M₂ = M₁} (morph₁ (mTC₁ N₁) N N₁N∈F))
     princ F (M , M' , MM'∈F) (inj₁ IdentTC) M₂ morph₁ morph₂ | inj₁ FmoreThenId | inj₂ (inj₂ (N₁ , N₂ , N , N' , inj₁ N₁N∈F , inj₂ N'N₂∈F)) 
       = ⊥-elim (idMorph¬∃ {M = mTC₁ N₁} {N = N} (inj₁ ((inj₁ N₁) , refl)) (morph₁ (mTC₁ N₁) N N₁N∈F))
     princ F (M , M' , MM'∈F) (inj₂ (inj₁ M₁)) M₂ morph₁ morph₂ | inj₁ FmoreThenId | inj₂ (inj₂ (N₁ , N₂ , N , N' , inj₁ N₁N∈F , inj₂ N'N₂∈F)) 
-      = ⊥-elim (composition→¬[N,M₂]▷M₁ cpm {N = N'} {M₂ = N₂} {M₁ = M₁} (morph₁ N' (mTC₂ N₂) N'N₂∈F))
+      = ⊥-elim (union→¬[N,M₂]▷M₁ upm {N = N'} {M₂ = N₂} {M₁ = M₁} (morph₁ N' (mTC₂ N₂) N'N₂∈F))
     princ F (M , M' , MM'∈F) (inj₂ (inj₂ M₁)) M₂ morph₁ morph₂ | inj₁ FmoreThenId | inj₂ (inj₂ (N₁ , N₂ , N , N' , inj₁ N₁N∈F , inj₂ N'N₂∈F)) 
-      = ⊥-elim (composition→¬[M₁,N]▷M₂ cpm {M₁ = N₁} {N = N} {M₂ = M₁} (morph₁ (mTC₁ N₁) N N₁N∈F))
+      = ⊥-elim (union→¬[M₁,N]▷M₂ upm {M₁ = N₁} {N = N} {M₂ = M₁} (morph₁ (mTC₁ N₁) N N₁N∈F))
     princ F (M , M' , MM'∈F) (inj₁ IdentTC) M₂ morph₁ morph₂ | inj₁ FmoreThenId | inj₂ (inj₂ (N₁ , N₂ , N , N' , inj₂ NN₁∈F , inj₁ N₂N'∈F)) 
       = ⊥-elim (idMorph¬∃ {M = N} {N = mTC₁ N₁} (inj₂ ((inj₁ N₁) , refl)) (morph₁ N (mTC₁ N₁) NN₁∈F))
     princ F (M , M' , MM'∈F) (inj₂ (inj₁ M₁)) M₂ morph₁ morph₂ | inj₁ FmoreThenId | inj₂ (inj₂ (N₁ , N₂ , N , N' , inj₂ NN₁∈F , inj₁ N₂N'∈F)) 
-      = ⊥-elim (composition→¬[M₂,N]▷M₁ cpm {M₂ = N₂} {N = N'} {M₁ = M₁} (morph₁ (mTC₂ N₂) N' N₂N'∈F))
+      = ⊥-elim (union→¬[M₂,N]▷M₁ upm {M₂ = N₂} {N = N'} {M₁ = M₁} (morph₁ (mTC₂ N₂) N' N₂N'∈F))
     princ F (M , M' , MM'∈F) (inj₂ (inj₂ M₁)) M₂ morph₁ morph₂ | inj₁ FmoreThenId | inj₂ (inj₂ (N₁ , N₂ , N , N' , inj₂ NN₁∈F , inj₁ N₂N'∈F)) 
-      = ⊥-elim (composition→¬[N,M₁]▷M₂ cpm {N = N} {M₁ = N₁} {M₂ = M₁} (morph₁ N (mTC₁ N₁) NN₁∈F))
+      = ⊥-elim (union→¬[N,M₁]▷M₂ upm {N = N} {M₁ = N₁} {M₂ = M₁} (morph₁ N (mTC₁ N₁) NN₁∈F))
     princ F (M , M' , MM'∈F) (inj₁ IdentTC) M₂ morph₁ morph₂ | inj₁ FmoreThenId | inj₂ (inj₂ (N₁ , N₂ , N , N' , inj₂ NN₁∈F , inj₂ N'N₂∈F)) 
       = ⊥-elim (idMorph¬∃ {M = N} {N = mTC₁ N₁} (inj₂ ((inj₁ N₁) , refl)) (morph₁ N (mTC₁ N₁) NN₁∈F))
     princ F (M , M' , MM'∈F) (inj₂ (inj₁ M₁)) M₂ morph₁ morph₂ | inj₁ FmoreThenId | inj₂ (inj₂ (N₁ , N₂ , N , N' , inj₂ NN₁∈F , inj₂ N'N₂∈F)) 
-      = ⊥-elim (composition→¬[N,M₂]▷M₁ cpm {N = N'} {M₂ = N₂} {M₁ = M₁} (morph₁ N' (mTC₂ N₂) N'N₂∈F))
+      = ⊥-elim (union→¬[N,M₂]▷M₁ upm {N = N'} {M₂ = N₂} {M₁ = M₁} (morph₁ N' (mTC₂ N₂) N'N₂∈F))
     princ F (M , M' , MM'∈F) (inj₂ (inj₂ M₁)) M₂ morph₁ morph₂ | inj₁ FmoreThenId | inj₂ (inj₂ (N₁ , N₂ , N , N' , inj₂ NN₁∈F , inj₂ N'N₂∈F))
-      = ⊥-elim (composition→¬[N,M₁]▷M₂ cpm {N = N} {M₁ = N₁} {M₂ = M₁} (morph₁ N (mTC₁ N₁) NN₁∈F))
+      = ⊥-elim (union→¬[N,M₁]▷M₂ upm {N = N} {M₁ = N₁} {M₂ = M₁} (morph₁ N (mTC₁ N₁) NN₁∈F))
     princ F (M , M' , MM'∈F) M₁ M₂ morph₁ morph₂ | inj₂ (IdId∈F , F≡IdId) 
       = idTC , morph₁ idTC idTC IdId∈F , morph₂ idTC idTC IdId∈F , morphId F F≡IdId
 
