@@ -18,6 +18,9 @@ This was tested with Agda in version `2.4.2.5` and the Adga standard library
 in version `0.11`. If you have problems type checking the code, please contact
 me.
 
+Type checking the proof in `Polymonad.Union` is very memory hungry. Make sure you have 
+few gigabytes of free RAM when type checking!
+
 ## Module Structure and Guide
 
 * **`Haskell` and `Utilities`**:
