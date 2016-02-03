@@ -54,14 +54,14 @@ identityBijection = record
 data IdTyCons : Set where
   IdentTC : IdTyCons
 
-data IdBinds : Set where
+data IdBinds {n} : Set n where
   IdentB : IdBinds
 
 -- Bind operator for pure identity polymonad.
 bindId : [ Identity , Identity ]▷ Identity
 bindId x f = f x
 
-idTC : {A : Type} → IdTyCons ⊎ A
+idTC : ∀ {n} {A : Set n} → IdTyCons ⊎ A
 idTC = inj₁ IdentTC
 
 --------------------------------------------------------------------------------

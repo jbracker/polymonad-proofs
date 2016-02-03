@@ -2,6 +2,7 @@
 module Parameterized.IndexedMonad.Unionable where
 
 -- Stdlib
+open import Level
 open import Agda.Primitive
 open import Data.Product
 open import Data.Sum
@@ -45,6 +46,6 @@ IxMonad→UnionablePolymonad {Ixs = Ixs} {M = M'} monad = record
               → ¬ B[ M , N ] pm ▷ idTC
     idMorph¬∃ {inj₁ IdentTC} {inj₁ IdentTC} (inj₁ (M' , ())) IdentB
     idMorph¬∃ {inj₁ IdentTC} {inj₁ IdentTC} (inj₂ (N' , ())) IdentB
-    idMorph¬∃ {inj₁ IdentTC} {inj₂ (IxMonadTC i j)} p ()
-    idMorph¬∃ {inj₂ (IxMonadTC i j)} {inj₁ IdentTC} p ()
-    idMorph¬∃ {inj₂ (IxMonadTC i j)} {inj₂ (IxMonadTC k l)} p ()
+    idMorph¬∃ {inj₁ IdentTC} {inj₂ (IxMonadTC i j)} p (lift ())
+    idMorph¬∃ {inj₂ (IxMonadTC i j)} {inj₁ IdentTC} p (lift ())
+    idMorph¬∃ {inj₂ (IxMonadTC i j)} {inj₂ (IxMonadTC k l)} p (lift ())

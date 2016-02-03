@@ -17,7 +17,7 @@ open import Haskell
 open import Identity
 open import Monad renaming ( mBind to monadBind ; mReturn to monadReturn )
 
-record IxMonad (Ixs : Set) (M : Ixs → Ixs → TyCon) : Set₁ where
+record IxMonad {n} (Ixs : Set n) (M : Ixs → Ixs → TyCon) : Set (n ⊔ lsuc lzero) where
   field
     _>>=_ : ∀ {α β : Type} {i j k : Ixs} → M i j α → (α → M j k β) → M i k β
     return : ∀ {α : Type} {i : Ixs} → α → M i i α
@@ -37,10 +37,10 @@ record IxMonad (Ixs : Set) (M : Ixs → Ixs → TyCon) : Set₁ where
 
   bind = _>>=_
 
-data IxMonadTyCons (Ixs : Set) : Set where
+data IxMonadTyCons {n} (Ixs : Set n) : Set n where
   IxMonadTC : Ixs → Ixs → IxMonadTyCons Ixs
 
-data IxMonadBinds (Ixs : Set) : (M N P : IdTyCons ⊎ IxMonadTyCons Ixs) → Set where
+data IxMonadBinds {n} (Ixs : Set n) : (M N P : IdTyCons ⊎ IxMonadTyCons Ixs) → Set n where
   MonadB   : ∀ {i j k} → IxMonadBinds Ixs (inj₂ (IxMonadTC i j)) (inj₂ (IxMonadTC j k)) (inj₂ (IxMonadTC i k))
   FunctorB : ∀ {i j} → IxMonadBinds Ixs (inj₂ (IxMonadTC i j)) idTC (inj₂ (IxMonadTC i j))
   ApplyB   : ∀ {i j} → IxMonadBinds Ixs idTC (inj₂ (IxMonadTC i j)) (inj₂ (IxMonadTC i j))
@@ -48,19 +48,19 @@ data IxMonadBinds (Ixs : Set) : (M N P : IdTyCons ⊎ IxMonadTyCons Ixs) → Set
 
 open IxMonad renaming (bind to mBind; return to mReturn; lawIdR to mLawIdR ; lawIdL to mLawIdL ; lawAssoc to mLawAssoc ) hiding (_>>=_)
 
-bindMonad : ∀ {Ixs : Set} {M : Ixs → Ixs → TyCon} {i j k} → (m : IxMonad Ixs M)
+bindMonad : ∀ {n} {Ixs : Set n} {M : Ixs → Ixs → TyCon} {i j k} → (m : IxMonad Ixs M)
           → [ M i j , M j k ]▷ M i k
 bindMonad m = mBind m
 
-bindFunctor : ∀ {Ixs : Set} {M : Ixs → Ixs → TyCon} {i j} → (m : IxMonad Ixs M)
+bindFunctor : ∀ {n} {Ixs : Set n} {M : Ixs → Ixs → TyCon} {i j} → (m : IxMonad Ixs M)
             → [ M i j , Identity ]▷ M i j
 bindFunctor m ma f = mBind m ma (λ a → mReturn m (f a))
 
-bindApply : ∀ {Ixs : Set} {M : Ixs → Ixs → TyCon} {i j} → (m : IxMonad Ixs M)
+bindApply : ∀ {n} {Ixs : Set n} {M : Ixs → Ixs → TyCon} {i j} → (m : IxMonad Ixs M)
           → [ Identity , M i j ]▷ M i j
 bindApply m ma f = mBind m (mReturn m ma) f
 
-bindReturn : ∀ {Ixs : Set} {M : Ixs → Ixs → TyCon} {i} → (m : IxMonad Ixs M)
+bindReturn : ∀ {n} {Ixs : Set n} {M : Ixs → Ixs → TyCon} {i} → (m : IxMonad Ixs M)
            → [ Identity , Identity ]▷ M i i
 bindReturn m ma f = mReturn m (f ma)
 

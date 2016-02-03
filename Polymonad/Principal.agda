@@ -2,6 +2,7 @@
 module Polymonad.Principal where
 
 -- Stdlib
+open import Level renaming ( suc to lsuc )
 open import Data.Product
 open import Data.Sum
 open import Data.Bool
@@ -15,19 +16,19 @@ open import Polymonad
 open import Identity
 
 -- Formalization of a subsets for a given set.
-SubsetOf : Type → Set₁
-SubsetOf X = X → Set
+SubsetOf : ∀ {n} → Set n → Set (lsuc n)
+SubsetOf {n = n} X = X → Set n
 
 -- An element is in the subset, if the subset predicate is true.
-_∈_ : ∀ {X : Type} → (x : X) → (S : SubsetOf X) → Set
+_∈_ : ∀ {n} {X : Set n} → (x : X) → (S : SubsetOf X) → Set n
 x ∈ S = S x
 
 -- Predicate describing a principal polymonad.
 -- This deviates from Hicks original definition in that F may not be empty.
 -- This is an important restriction, because otherwise every two elements in 
 -- the set of type constructors would have a common lower-bound.
-PrincipalPM : ∀ {TyCons : Set} {Id : TyCons} →  Polymonad TyCons Id → Set₁
-PrincipalPM {TyCons} {Id} pm 
+PrincipalPM : ∀ {n} {TyCons : Set n} {Id : TyCons} → Polymonad TyCons Id → Set (lsuc n)
+PrincipalPM {n} {TyCons} {Id} pm 
   = (F : SubsetOf (TyCons × TyCons))
   → (∃ λ(M : TyCons) → ∃ λ(M' : TyCons) → (M , M') ∈ F)
   → (M₁ M₂ : TyCons)
