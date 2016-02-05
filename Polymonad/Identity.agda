@@ -6,6 +6,8 @@ open import Data.Product
 open import Data.Sum
 open import Data.Unit
 open import Data.Empty
+
+open import Relation.Nullary
 open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning
 
@@ -18,6 +20,7 @@ open import Monad.Polymonad
 open import Monad.Principal
 open import Polymonad
 open import Polymonad.Principal
+open import Polymonad.Unionable
 
 -- -----------------------------------------------------------------------------
 -- Custom Identity Polymonad
@@ -147,6 +150,24 @@ principalPolymonadId : PrincipalPM polymonadId
 principalPolymonadId F (M , M' , MM'∈F) (inj₁ IdentTC) (inj₁ IdentTC) morph₁ morph₂ = (inj₁ IdentTC) , IdentB , IdentB , morph₁
 principalPolymonadId F (M , M' , MM'∈F) (inj₁ IdentTC) (inj₂ ()) morph₁ morph₂
 principalPolymonadId F (M , M' , MM'∈F) (inj₂ ()) M₂ morph₁ morph₂
+
+unionablePolymonadId : UnionablePolymonad polymonadId
+unionablePolymonadId = record 
+  { lawEqBindId = lawEqBindId
+  ; lawEqIdBinds = lawEqIdBinds
+  ; idMorph¬∃ = idMorph¬∃
+  } 
+  where
+    lawEqBindId : ∀ {α β : Type} → (b : B[ idTC , idTC ] polymonadId ▷ idTC) 
+                → substBind {P₂ = Identity} refl refl refl (pmBind polymonadId b) ≡ bindId {α} {β}
+    lawEqBindId IdentB = refl
+    
+    lawEqIdBinds : B[ idTC , idTC ] polymonadId ▷ idTC ≡ IdBinds
+    lawEqIdBinds = refl
+    
+    idMorph¬∃ : ∀ {M N : IdTyCons ⊎ ⊥} → (∃ λ(M' : ⊥) → M ≡ inj₂ M') ⊎ (∃ λ(N' : ⊥) → N ≡ inj₂ N') → ¬ (B[ M , N ] polymonadId ▷ idTC)
+    idMorph¬∃ (inj₁ (() , refl)) b
+    idMorph¬∃ (inj₂ (() , refl)) b
 
 -- -----------------------------------------------------------------------------
 -- Monad Identity Polymonad
