@@ -1,10 +1,13 @@
  
 module Parameterized.PhantomIndices where
 
+open import Level
+
 open import Data.Nat
 open import Data.Vec
 open import Data.Product
 
+open import Relation.Nullary
 open import Relation.Binary.PropositionalEquality
 
 open import Haskell
@@ -29,10 +32,48 @@ ParamTyCon (T ∷ ts) = T → ParamTyCon ts
              → ∀Indices ts M Result
 ∀IndicesImpl [] M assum impl = impl M assum
 ∀IndicesImpl (I ∷ ts) M accum impl = λ {i : I} → ∀IndicesImpl ts (M i) (accum {i}) impl
+{-
+∃IndicesImpl : ∀ {n} {Accum : TyCon → Set₁} {Result : TyCon → Set₁} 
+             → (ts : Vec Set n) 
+             → (M : ParamTyCon ts) 
+             → ∃Indices ts M Accum 
+             → ((X : TyCon) → Accum X → Result X) 
+             → ∃Indices ts M Result
+∃IndicesImpl [] M assum impl = impl M assum
+∃IndicesImpl (I ∷ ts) M (i , accum) impl = i , ∃IndicesImpl ts (M i) accum impl
+-}
+∃∀Apply : ∀ {n} {R1 : TyCon → Set₁} {R2 : TyCon → Set₁} 
+        → (ts : Vec Set n) 
+        → (M : ParamTyCon ts) 
+        → ∃Indices ts M R1
+        → ∀Indices ts M R2
+        → ∃ λ X → R1 X × R2 X
+∃∀Apply [] M ∃Ix ∀Ix = M , ∃Ix , ∀Ix
+∃∀Apply (I ∷ ts) M (i , ∃Ix) ∀Ix = ∃∀Apply ts (M i) ∃Ix (∀Ix {i})
 
 PhantomIndices : ∀ {n} (ts : Vec Set n) → (M : ParamTyCon ts) → Set₁
 PhantomIndices ts M = ∃ λ(K : TyCon) → ∀Indices ts M (λ X → X ≡ K)
 
+NonPhantomIndices : ∀ {n} (ts : Vec Set n) → (M : ParamTyCon ts) → Set₁
+NonPhantomIndices ts M = ∃Indices ts M (λ X → ∃Indices ts M (λ Y → ¬ X ≡ Y))
+
+PI→¬NPI : ∀ {n} (ts : Vec Set n) → (M : ParamTyCon ts) → PhantomIndices ts M → ¬ NonPhantomIndices ts M
+PI→¬NPI ts M (K , PI) NPI = 
+  let
+     X , ∃Y→¬X≡Y , X≡K = ∃∀Apply ts M NPI PI
+     Y , ¬X≡Y    , Y≡K = ∃∀Apply ts M ∃Y→¬X≡Y PI
+  in ¬X≡Y (trans X≡K (sym Y≡K))
+   
+
+NPI→¬PI : ∀ {n} (ts : Vec Set n) → (M : ParamTyCon ts) → NonPhantomIndices ts M → ¬ PhantomIndices ts M
+NPI→¬PI ts M NPI PI = PI→¬NPI ts M PI NPI
+{-
+¬PI→NPI : ∀ {n} (ts : Vec Set n) → (M : ParamTyCon ts) → ¬ PhantomIndices ts M → NonPhantomIndices ts M 
+¬PI→NPI ts M ¬PI = {!!}
+
+¬NPI→PI : ∀ {n} (ts : Vec Set n) → (M : ParamTyCon ts) → ¬ NonPhantomIndices ts M → PhantomIndices ts M
+¬NPI→PI ts M ¬NPI = {!!}
+-}
 -- We can type case any applied parameterized type constructor into 
 -- its representing type constructor.
 IxM→K : ∀ {n} 
