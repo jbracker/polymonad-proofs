@@ -2,6 +2,7 @@
 module Parameterized.IndexedMonad.Principal where
 
 -- Stdlib
+open import Level
 open import Agda.Primitive
 open import Data.Product
 open import Data.Sum
@@ -45,10 +46,10 @@ IxMonad→PrincipalPolymonad {Ixs = Ixs} _∼_ monad _∈?_ = princ
     ¬MN∈F : (F : SubsetOf (TyCons × TyCons)) 
           → ((M N : TyCons) → (M , N) ∈ F → B[ M , N ] pm ▷ idTC)
           → (M N : TyCons) → (∃ λ(P : IxMonadTyCons Ixs) → (M ≡ inj₂ P ⊎ N ≡ inj₂ P)) → ¬ ((M , N) ∈ F)
-    ¬MN∈F F morphId .(inj₂ (IxMonadTC i j)) (inj₁ IdentTC) (IxMonadTC i j , inj₁ refl) MN∈F = morphId (mTC i j) idTC MN∈F
-    ¬MN∈F F morphId .(inj₂ (IxMonadTC i j)) (inj₂ (IxMonadTC k l)) (IxMonadTC i j , inj₁ refl) MN∈F = morphId (mTC i j) (mTC k l) MN∈F
-    ¬MN∈F F morphId (inj₁ IdentTC) .(inj₂ (IxMonadTC i j)) (IxMonadTC i j , inj₂ refl) MN∈F = morphId idTC (mTC i j) MN∈F
-    ¬MN∈F F morphId (inj₂ (IxMonadTC i j)) .(inj₂ (IxMonadTC k l)) (IxMonadTC k l , inj₂ refl) MN∈F = morphId (mTC i j) (mTC k l) MN∈F
+    ¬MN∈F F morphId .(inj₂ (IxMonadTC i j)) (inj₁ IdentTC) (IxMonadTC i j , inj₁ refl) MN∈F = lower (morphId (mTC i j) idTC MN∈F)
+    ¬MN∈F F morphId .(inj₂ (IxMonadTC i j)) (inj₂ (IxMonadTC k l)) (IxMonadTC i j , inj₁ refl) MN∈F = lower (morphId (mTC i j) (mTC k l) MN∈F)
+    ¬MN∈F F morphId (inj₁ IdentTC) .(inj₂ (IxMonadTC i j)) (IxMonadTC i j , inj₂ refl) MN∈F = lower (morphId idTC (mTC i j) MN∈F)
+    ¬MN∈F F morphId (inj₂ (IxMonadTC i j)) .(inj₂ (IxMonadTC k l)) (IxMonadTC k l , inj₂ refl) MN∈F = lower (morphId (mTC i j) (mTC k l) MN∈F)
 
     ¬returnB : (k l : Ixs)
               → ¬ k ≡ l 
@@ -139,10 +140,10 @@ IxMonad→PrincipalPolymonad {Ixs = Ixs} _∼_ monad _∈?_ = princ
              → (∃ λ(P : TyCons) → ¬ P ≡ idTC × ∃ λ(S : TyCons) → (P , S) ∈ F ⊎ (S , P) ∈ F) 
              → ¬ ((M M' : TyCons) → (M , M') ∈ F → B[ M , M' ] pm ▷ idTC)
     ¬morphId F (inj₁ IdentTC         , ¬P≡Id , S , inj₁ PS∈F) morphId = ¬P≡Id refl
-    ¬morphId F (inj₂ (IxMonadTC i j) , ¬P≡Id , S , inj₁ PS∈F) morphId = ⊥-elim (morphId (mTC i j) S PS∈F)
+    ¬morphId F (inj₂ (IxMonadTC i j) , ¬P≡Id , S , inj₁ PS∈F) morphId = ⊥-elim (lower (morphId (mTC i j) S PS∈F))
     ¬morphId F (inj₁ IdentTC         , ¬P≡Id , S , inj₂ SP∈F) morphId = ¬P≡Id refl
-    ¬morphId F (inj₂ (IxMonadTC i j) , ¬P≡Id , inj₁ IdentTC         , inj₂ SP∈F) morphId = morphId idTC (mTC i j) SP∈F
-    ¬morphId F (inj₂ (IxMonadTC i j) , ¬P≡Id , inj₂ (IxMonadTC k l) , inj₂ SP∈F) morphId = morphId (mTC k l) (mTC i j) SP∈F
+    ¬morphId F (inj₂ (IxMonadTC i j) , ¬P≡Id , inj₁ IdentTC         , inj₂ SP∈F) morphId = lower (morphId idTC (mTC i j) SP∈F)
+    ¬morphId F (inj₂ (IxMonadTC i j) , ¬P≡Id , inj₂ (IxMonadTC k l) , inj₂ SP∈F) morphId = lower (morphId (mTC k l) (mTC i j) SP∈F)
     
     princ : PrincipalPM pm
     princ F PS∈F (inj₁ IdentTC) (inj₁ IdentTC) morph₁ morph₂ = idTC , IdentB , IdentB , morph₁
@@ -229,7 +230,7 @@ IxMonad→¬PrincipalPolymonad {Ixs = Ixs} (i , j , ¬i≡j) monad princ = botto
     bottom : ⊥
     bottom with princ idF (idTC , idTC , tt) (mTC i j) idTC morphIJ morphId
     bottom | inj₁ IdentTC , b₁ , IdentB , morph = ¬returnB i j ¬i≡j b₁
-    bottom | inj₂ (IxMonadTC k l) , b₁ , () , morph
+    bottom | inj₂ (IxMonadTC k l) , b₁ , lift () , morph
 
 -- -----------------------------------------------------------------------------
 -- -----------------------------------------------------------------------------
