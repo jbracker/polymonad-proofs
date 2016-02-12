@@ -2,14 +2,14 @@
 module Parameterized.IndexedMonad.NonPhantomNonPrincipal where
 
 -- Stdlib
-open import Level
+open import Level renaming ( suc to lsuc ; zero to lzero)
 open import Function
 open import Agda.Primitive
 open import Data.Product
 open import Data.Sum
 open import Data.Unit
 open import Data.Empty
---open import Data.Vec hiding ( _>>=_ )
+open import Data.Vec hiding ( _>>=_ ; _∈_ )
 open import Relation.Nullary
 open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning
@@ -78,49 +78,79 @@ DynStateMonad = record
   ; lawAssoc = λ m f g → refl 
   }
 
+LiftDState : ∀ {ℓ} → Type → Type → Lift {ℓ = ℓ} TyCon
+LiftDState I J = lift (DState I J)
+
+liftShift : ∀ {ℓ} {I J : Type} → lower {ℓ = ℓ} (LiftDState {ℓ = ℓ} I J) ≡ DState I J
+liftShift = refl
+
+liftShiftEq : ∀ {ℓ} {I J K L : Type} → lower {ℓ = ℓ} (LiftDState {ℓ = ℓ} I J) ≡ lower {ℓ = ℓ} (LiftDState {ℓ = ℓ} K L) → DState I J ≡ DState K L
+liftShiftEq eq = eq
+
+liftShiftEq' : ∀ {ℓ} {I J K L : Type} → DState I J ≡ DState K L → lower {ℓ = ℓ} (LiftDState {ℓ = ℓ} I J) ≡ lower {ℓ = ℓ} (LiftDState {ℓ = ℓ} K L)
+liftShiftEq' eq = eq
+
+negMap : ∀ {ℓ₁ ℓ₂} {P : Set ℓ₁} {Q : Set ℓ₂} → (Q → P) → ¬ P → ¬ Q
+negMap f ¬P Q = ¬P (f Q)
+
 DynStateMonad→Principal : PrincipalPM (IxMonad→Polymonad DynStateMonad)
 DynStateMonad→Principal F (M , M' , MM∈F) (inj₁ IdentTC) (inj₁ IdentTC) morph₁ morph₂ = idTC , IdentB , IdentB , morph₁
 DynStateMonad→Principal F (M , M' , MM∈F) (inj₁ IdentTC) (inj₂ (IxMonadTC i j)) morph₁ morph₂ = idTC , IdentB , {!!} , morph₁
 DynStateMonad→Principal F (M , M' , MM∈F) (inj₂ (IxMonadTC i j)) (inj₁ IdentTC) morph₁ morph₂ = {!!}
 DynStateMonad→Principal F (M , M' , MM∈F) (inj₂ (IxMonadTC i j)) (inj₂ (IxMonadTC k l)) morph₁ morph₂ = {!!} , {!!} , {!!} , {!!}
 
-DynStateMonad→¬Principal : (∃ λ(i : Type) → ∃ λ(j : Type) → ¬ i ≡ j ) → ¬ PrincipalPM (IxMonad→Polymonad DynStateMonad)
-DynStateMonad→¬Principal (i , j , ¬i≡j) princ = bottom
+DynStateMonad→¬Principal : (NPI : NonPhantomIndices (Type ∷ Type ∷ []) LiftDState)
+                         → ¬ ( proj₁ NPI ≡ proj₁ (proj₂ NPI) )
+                         → ¬ PrincipalPM (IxMonad→Polymonad DynStateMonad)
+DynStateMonad→¬Principal (I , J , K , L , (lift NPI')) ¬I≡J princ = {!!}
   where
+    NPI : ¬ DState I J ≡ DState K L
+    NPI = negMap (liftShiftEq' {ℓ = lsuc lzero}) NPI'
+    
     TyCons = IdTyCons ⊎ IxMonadTyCons Type
     
     pm = IxMonad→Polymonad DynStateMonad
     
     F : SubsetOf (TyCons × TyCons)
     F (inj₁ IdentTC , inj₁ IdentTC) = Lift ⊤
-    F (inj₁ IdentTC , inj₂ M') = Lift ⊥
+    F (inj₁ IdentTC , inj₂ M') = Lift ⊤
     F (inj₂ M , M') = Lift ⊥
-
-    morph₁ : (M M' : TyCons) 
-           → (M , M') ∈ F
-           → B[ M , M' ] pm ▷ idTC
-    morph₁ (inj₁ IdentTC) (inj₁ IdentTC) (lift tt) = IdentB
-    morph₁ (inj₁ IdentTC) (inj₂ M') (lift ())
-    morph₁ (inj₂ M) M' (lift ())
-
-    morph₂ : (M M' : TyCons) 
-           → (M , M') ∈ F
-           → B[ M , M' ] pm ▷ (inj₂ (IxMonadTC i j))
-    morph₂ (inj₁ IdentTC) (inj₁ IdentTC) (lift tt) = {!!}
-    morph₂ (inj₁ IdentTC) (inj₂ M') (lift ())
-    morph₂ (inj₂ M) M' (lift ())
     
     p : {k l : Type} → B[ idTC , idTC ] pm ▷ inj₂ (IxMonadTC k l) → k ≡ l
     p {k = k} {l = .k} ReturnB = refl
     
     q : (k l : Type) → k ≡ l → B[ idTC , idTC ] pm ▷ inj₂ (IxMonadTC k l)
     q k .k refl = ReturnB
-    
-    bottom : ⊥
-    bottom with princ F (idTC , idTC , lift tt) idTC (inj₂ (IxMonadTC i j)) morph₁ morph₂
-    bottom | inj₁ IdentTC , IdentB , b , morph = ¬i≡j (p b)
-    bottom | inj₂ (IxMonadTC .i .j) , lift () , FunctorB , morph
 
+    p2 : {k l s t : Type} → B[ inj₂ (IxMonadTC s t) , idTC ] pm ▷ inj₂ (IxMonadTC k l) → s ≡ k × t ≡ l
+    p2 FunctorB = refl , refl
+
+    morph₁ : (M M' : TyCons) 
+           → (M , M') ∈ F
+           → B[ M , M' ] pm ▷ idTC
+    morph₁ (inj₁ IdentTC) (inj₁ IdentTC) (lift tt) = IdentB
+    morph₁ (inj₁ IdentTC) (inj₂ (IxMonadTC S T)) (lift tt) = {!!}
+    morph₁ (inj₂ M) M' (lift ())
+    {-
+    morph₂ : (M M' : TyCons) 
+           → (M , M') ∈ F
+           → B[ M , M' ] pm ▷ (inj₂ (IxMonadTC I J))
+    morph₂ (inj₁ IdentTC) (inj₁ IdentTC) (lift tt) = q I J {!!}
+    morph₂ (inj₁ IdentTC) (inj₂ M') (lift ())
+    morph₂ (inj₂ M) M' (lift ())
+    -}
+    bottom : ⊥
+    bottom with princ F (idTC , idTC , lift tt) idTC idTC morph₁ morph₁
+    bottom | inj₁ IdentTC , IdentB , IdentB , morph = {!!}
+    bottom | inj₂ (IxMonadTC S T) , lift () , lift () , morph
+
+    {-
+    bottom : ⊥
+    bottom with princ F (idTC , idTC , lift tt) (inj₂ (IxMonadTC I J)) (inj₂ (IxMonadTC I J)) morph₂ morph₂
+    bottom | inj₁ IdentTC , b₁ , b₂ , morph = ¬I≡J (p b₂)
+    bottom | inj₂ (IxMonadTC S T) , b₁ , b₂ , morph with p2 b₁
+    bottom | inj₂ (IxMonadTC .I .J) , FunctorB , FunctorB , morph | refl , refl = ¬I≡J (p (morph idTC idTC (lift tt)))
+    -}
     
 {-
 PrincipalPM : ∀ {TyCons : Set} {Id : TyCons} →  Polymonad TyCons Id → Set₁
