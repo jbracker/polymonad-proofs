@@ -2,6 +2,7 @@
 module Parameterized.IndexedMonad.PhantomMonad where
 
 -- Stdlib
+open import Level
 open import Agda.Primitive
 open import Data.Product
 open import Data.Sum
@@ -27,33 +28,36 @@ open import Parameterized.IndexedMonad
 open import Parameterized.PhantomIndices
 
 open IxMonad renaming (bind to mBind; return to mReturn; lawIdR to mLawIdR ; lawIdL to mLawIdL ; lawAssoc to mLawAssoc ) hiding (_>>=_)
-    
-castPhantomBind : ∀ {Ixs} {i j k : Ixs} {M : Ixs → Ixs → TyCon} 
-                → (K : PhantomIndices (Ixs ∷ Ixs ∷ []) M) 
-                → [ M i j , M j k ]▷ M i k → [ proj₁ K , proj₁ K ]▷ proj₁ K
-castPhantomBind (_ , Mij≡K) b {α} {β} = substBind Mij≡K Mij≡K Mij≡K b {α} {β}
 
-castPhantomReturn : ∀ {Ixs} {i : Ixs} {M : Ixs → Ixs → TyCon} 
-                  → (K : PhantomIndices (Ixs ∷ Ixs ∷ []) M) → {α : Type} 
+LiftM : ∀ {ℓ} {Ixs : Set ℓ} → (M : Ixs → Ixs → TyCon) → (Ixs → Ixs → Lift {ℓ = suc ℓ} TyCon)
+LiftM M I J = lift (M I J)
+
+castPhantomBind : ∀ {ℓ} {Ixs : Set ℓ} {i j k : Ixs} {M : Ixs → Ixs → TyCon} 
+                → (K : PhantomIndices (Ixs ∷ Ixs ∷ []) (LiftM {ℓ = ℓ} M)) 
+                → [ M i j , M j k ]▷ M i k → [ proj₁ K , proj₁ K ]▷ proj₁ K
+castPhantomBind (_ , Mij≡K) b {α} {β} = substBind (lower Mij≡K) (lower Mij≡K) (lower Mij≡K) b {α} {β}
+
+castPhantomReturn : ∀ {ℓ} {Ixs : Set ℓ} {i : Ixs} {M : Ixs → Ixs → TyCon} 
+                  → (K : PhantomIndices (Ixs ∷ Ixs ∷ []) (LiftM M)) → {α : Type} 
                   → (α → M i i α) → (α → proj₁ K α)
-castPhantomReturn (_ , Mij≡K) {α = α} r = subst (\X → (α → X α)) Mij≡K r
+castPhantomReturn (_ , Mij≡K) {α = α} r = subst (\X → (α → X α)) (lower Mij≡K) r
 
 id≡K→Mij∘Mij→K : {Ixs : Set} → {M : Ixs → Ixs → TyCon} 
-               → (K : PhantomIndices (Ixs ∷ Ixs ∷ []) M)
+               → (K : PhantomIndices (Ixs ∷ Ixs ∷ []) (LiftM M))
                → ∀ {i j} → ∀ {α} → {mij : M i j α} 
                → mij ≡ (K→IxM (Ixs ∷ Ixs ∷ []) K (IxM→K (Ixs ∷ Ixs ∷ []) K mij))
-id≡K→Mij∘Mij→K K = x≡subst²x (proj₂ K)
+id≡K→Mij∘Mij→K K = x≡subst²x (lower (proj₂ K))
 
 id≡Mij→K∘K→Mij : {Ixs : Set} → {M : Ixs → Ixs → TyCon} 
-               → (K : PhantomIndices (Ixs ∷ Ixs ∷ []) M)
+               → (K : PhantomIndices (Ixs ∷ Ixs ∷ []) (LiftM M))
                → ∀ {i j} → ∀ {α} → {k : (proj₁ K) α} 
                → k ≡ (IxM→K (Ixs ∷ Ixs ∷ []) K (K→IxM (Ixs ∷ Ixs ∷ []) K {i} {j} k))
-id≡Mij→K∘K→Mij K = x≡subst²x' (proj₂ K)
+id≡Mij→K∘K→Mij K = x≡subst²x' (lower (proj₂ K))
 
 -- -----------------------------------------------------------------------------
 -- A indexed monad with phantom indices is basically equivalent to a normal monad.
 -- -----------------------------------------------------------------------------
-PhantomIxMonad→Monad : ∀ {Ixs} {M} → Ixs → (K : PhantomIndices (Ixs ∷ Ixs ∷ []) M) → IxMonad Ixs M → Monad (proj₁ K)
+PhantomIxMonad→Monad : ∀ {Ixs} {M : Ixs → Ixs → TyCon} → Ixs → (K : PhantomIndices (Ixs ∷ Ixs ∷ []) (LiftM M)) → IxMonad Ixs M → Monad (proj₁ K)
 PhantomIxMonad→Monad {Ixs = Ixs} {M = IxM} i K ixMonad = record
   { _>>=_ = _>>=_
   ; return = return
@@ -70,7 +74,7 @@ PhantomIxMonad→Monad {Ixs = Ixs} {M = IxM} i K ixMonad = record
       M : TyCon
       M = proj₁ K
       Mij≡K : IxM i i ≡ proj₁ K
-      Mij≡K = proj₂ K
+      Mij≡K = lower (proj₂ K)
       
       _>>=_ : [ M , M ]▷ M
       _>>=_ = castPhantomBind K (_>>=ix_)
@@ -194,7 +198,7 @@ PhantomIxMonad→Monad {Ixs = Ixs} {M = IxM} i K ixMonad = record
 PhantomIxMonad→Polymonad 
   : ∀ {Ixs : Set} {M : Ixs → Ixs → TyCon}
   → Ixs
-  → (K : PhantomIndices (Ixs ∷ Ixs ∷ []) M)
+  → (K : PhantomIndices (Ixs ∷ Ixs ∷ []) (LiftM M))
   → (ixMonad : IxMonad Ixs M)
   → Polymonad (IdTyCons ⊎ MonadTyCons) idTC
 PhantomIxMonad→Polymonad i K ixMonad = Monad→Polymonad (PhantomIxMonad→Monad i K ixMonad)
@@ -202,7 +206,7 @@ PhantomIxMonad→Polymonad i K ixMonad = Monad→Polymonad (PhantomIxMonad→Mon
 PhantomIxMonad→PrincipalPolymonad 
   : ∀ {Ixs : Set} {M : Ixs → Ixs → TyCon}
   → (i : Ixs)
-  → (K : PhantomIndices (Ixs ∷ Ixs ∷ []) M)
+  → (K : PhantomIndices (Ixs ∷ Ixs ∷ []) (LiftM M))
   → (ixMonad : IxMonad Ixs M)
   → PrincipalPM (PhantomIxMonad→Polymonad i K ixMonad)
 PhantomIxMonad→PrincipalPolymonad i K ixMonad = Monad→PrincipalPolymonad (PhantomIxMonad→Monad i K ixMonad)
@@ -210,7 +214,7 @@ PhantomIxMonad→PrincipalPolymonad i K ixMonad = Monad→PrincipalPolymonad (Ph
 PhantomIxMonad→UnionablePolymonad 
   : ∀ {Ixs : Set} {M : Ixs → Ixs → TyCon}
   → (i : Ixs)
-  → (K : PhantomIndices (Ixs ∷ Ixs ∷ []) M)
+  → (K : PhantomIndices (Ixs ∷ Ixs ∷ []) (LiftM M))
   → (ixMonad : IxMonad Ixs M)
   → UnionablePolymonad (PhantomIxMonad→Polymonad i K ixMonad)
 PhantomIxMonad→UnionablePolymonad i K ixMonad = Monad→UnionablePolymonad (PhantomIxMonad→Monad i K ixMonad)
