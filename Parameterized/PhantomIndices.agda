@@ -3,6 +3,7 @@ module Parameterized.PhantomIndices where
 
 open import Level
 
+open import Data.Empty
 open import Data.Nat
 open import Data.Vec
 open import Data.Product
@@ -32,7 +33,7 @@ ParamTyCon (T ∷ ts) = T → ParamTyCon ts
              → ∀Indices ts M Result
 ∀IndicesImpl [] M assum impl = impl M assum
 ∀IndicesImpl (I ∷ ts) M accum impl = λ {i : I} → ∀IndicesImpl ts (M i) (accum {i}) impl
-{-
+
 ∃IndicesImpl : ∀ {n} {Accum : TyCon → Set₁} {Result : TyCon → Set₁} 
              → (ts : Vec Set n) 
              → (M : ParamTyCon ts) 
@@ -41,7 +42,7 @@ ParamTyCon (T ∷ ts) = T → ParamTyCon ts
              → ∃Indices ts M Result
 ∃IndicesImpl [] M assum impl = impl M assum
 ∃IndicesImpl (I ∷ ts) M (i , accum) impl = i , ∃IndicesImpl ts (M i) accum impl
--}
+
 ∃∀Apply : ∀ {n} {R1 : TyCon → Set₁} {R2 : TyCon → Set₁} 
         → (ts : Vec Set n) 
         → (M : ParamTyCon ts) 
@@ -67,6 +68,9 @@ PI→¬NPI ts M (K , PI) NPI =
 
 NPI→¬PI : ∀ {n} (ts : Vec Set n) → (M : ParamTyCon ts) → NonPhantomIndices ts M → ¬ PhantomIndices ts M
 NPI→¬PI ts M NPI PI = PI→¬NPI ts M PI NPI
+
+¬¬PI→¬NPI : ∀ {n} (ts : Vec Set n) → (M : ParamTyCon ts) → ¬ ¬ PhantomIndices ts M → ¬ NonPhantomIndices ts M
+¬¬PI→¬NPI ts M ¬¬PI NPI = ¬¬PI (λ PI → PI→¬NPI ts M PI NPI)
 {-
 ¬PI→NPI : ∀ {n} (ts : Vec Set n) → (M : ParamTyCon ts) → ¬ PhantomIndices ts M → NonPhantomIndices ts M 
 ¬PI→NPI ts M ¬PI = {!!}
