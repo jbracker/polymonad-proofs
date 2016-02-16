@@ -31,6 +31,10 @@ record Applicative (F : TyCon) : Set₁ where
     lawInterchange : ∀ {α β : Type} 
                    → (u : F (α → β)) → (x : α) 
                    → u <*> pure x ≡ pure (λ f → f $ x) <*> u
+    
+    lawApplicativeFmap : ∀ {α β : Type} 
+                       → (f : α → β) → (x : F α) 
+                       → (Functor.fmap functor) f x ≡ pure f <*> x
   
   _*>_ : ∀ {α β : Type} → F α → F β → F β
   u *> v = pure (const (id refl)) <*> u <*> v
