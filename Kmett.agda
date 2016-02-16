@@ -17,19 +17,22 @@ open import Utilities
 open import Haskell
 open import Identity
 open import Polymonad
-open import Parameterized.IndexedMonad hiding ( bindMonad )
+open import Parameterized.IndexedMonad hiding ( bindMonad ; bindFunctor ; bindApply ; bindReturn )
 
+-- -----------------------------------------------------------------------------
+-- Definition of KmettMonads
+-- -----------------------------------------------------------------------------
 
-record KmettMonad {n ℓ₁ ℓ₂} (TyCons : Set n) : Set (lsuc (n ⊔ ℓ₁ ⊔ ℓ₂)) where
+record KmettMonad {n} (TyCons : Set n) : Set (lsuc n) where
   field
     ⟨_⟩ : TyCons → TyCon
     
-    BindCompat : TyCons → TyCons → Set ℓ₁
-    ReturnCompat : TyCons → Set ℓ₂
+    BindCompat : TyCons → TyCons → Set n
+    ReturnCompat : TyCons → Set n
 
     _◆_ : TyCons → TyCons → TyCons
     
-    bind⟨_,_,_⟩ : ∀ {α β : Type} → (M N : TyCons) → BindCompat M N → ⟨ M ⟩ α → (α → ⟨ N ⟩ β) → ⟨ M ◆ N ⟩ β
+    bind⟨_,_,_⟩ : (M N : TyCons) → BindCompat M N → [ ⟨ M ⟩ , ⟨ N ⟩ ]▷ ⟨ M ◆ N ⟩
     return⟨_,_⟩ : ∀ {α : Type} → (M : TyCons) → ReturnCompat M → α → ⟨ M ⟩ α
 
     lawIdR : ∀ {α β : Type} 
@@ -53,35 +56,78 @@ record KmettMonad {n ℓ₁ ℓ₂} (TyCons : Set n) : Set (lsuc (n ⊔ ℓ₁ �
              → subst (λ X → ⟨ X ⟩ γ) assoc (bind⟨ M , N ◆ P , comp1 ⟩ m (λ x → bind⟨ N , P , comp2 ⟩ (f x) g)) 
                ≡ bind⟨ M ◆ N , P , comp3 ⟩ (bind⟨ M , N , comp4 ⟩ m f) g
     
+    -- Idempotence is required to implement a functor ("fmap") based on the bind and return operation 
+    -- provided by the Kmett monad.
+    lawIdempotence : ∀ (M : TyCons) → ReturnCompat M → M ◆ M ≡ M
+    
   sequence⟨_,_,_⟩ : ∀ {α β : Type} → (M N : TyCons) → BindCompat M N → ⟨ M ⟩ α → ⟨ N ⟩ β → ⟨ M ◆ N ⟩ β
   sequence⟨ M , N , comp ⟩ ma mb = bind⟨ M , N , comp ⟩ ma (λ _ → mb)
   
   funcDep = _◆_
 
-K⟨_▷_⟩ : ∀ {n ℓ₁ ℓ₂} {TyCons : Set n} → KmettMonad {ℓ₁ = ℓ₁} {ℓ₂ = ℓ₂} TyCons → TyCons → TyCon
+K⟨_▷_⟩ : ∀ {n} {TyCons : Set n} → KmettMonad TyCons → TyCons → TyCon
 K⟨ monad ▷ M ⟩ = KmettMonad.⟨ monad ⟩ M
 
-_◆⟨_⟩_ : ∀ {n ℓ₁ ℓ₂} {TyCons : Set n} → TyCons → KmettMonad {ℓ₁ = ℓ₁} {ℓ₂ = ℓ₂} TyCons → TyCons → TyCons  
-_◆⟨_⟩_ M monad N = KmettMonad._◆_ monad N M
+_◆⟨_⟩_ : ∀ {n} {TyCons : Set n} → TyCons → KmettMonad TyCons → TyCons → TyCons  
+_◆⟨_⟩_ M monad N = KmettMonad._◆_ monad M N
 
-bindMonad : ∀ {n ℓ₁ ℓ₂} {TyCons : Set n} 
+-- -----------------------------------------------------------------------------
+-- Set to represent bind operations of Kmett Polymonad
+-- -----------------------------------------------------------------------------
+
+data KmettBinds {n} {TyCons : Set n} (m : KmettMonad TyCons) : (M N P : IdTyCons ⊎ TyCons) → Set n where
+  MonadB   : (M N : TyCons) 
+           → KmettMonad.BindCompat m M N 
+           → KmettBinds m (inj₂ M) (inj₂ N) (inj₂ (M ◆⟨ m ⟩ N))
+  FunctorB : (M : TyCons) 
+           → KmettMonad.BindCompat m M M → KmettMonad.ReturnCompat m M
+           → KmettBinds m (inj₂ M) idTC (inj₂ M)
+  ApplyB   : (M : TyCons) 
+           → KmettBinds m idTC (inj₂ M) (inj₂ M)
+  ReturnB  : (M : TyCons) 
+           → KmettMonad.ReturnCompat m M 
+           → KmettBinds m idTC idTC (inj₂ M) 
+
+-- -----------------------------------------------------------------------------
+-- Kmett Polymonad Bind Operations Implementation
+-- -----------------------------------------------------------------------------
+
+bindMonad : ∀ {n} {TyCons : Set n} 
           → (M N : TyCons)
-          → (m : KmettMonad {ℓ₁ = ℓ₁} {ℓ₂ = ℓ₂} TyCons)
+          → (m : KmettMonad TyCons)
+          → KmettMonad.BindCompat m M N
           → [ K⟨ m ▷ M ⟩ , K⟨ m ▷ N ⟩ ]▷ K⟨ m ▷ M ◆⟨ m ⟩ N ⟩
-bindMonad M N monad ma f = {!!} -- KmettMonad.bind⟨_,_,_⟩ monad M N {!!} {!ma!} {!f!}
-{-
-bindFunctor : ∀ {n} {Ixs : Set n} {M : Ixs → Ixs → TyCon} {i j} → (m : IxMonad Ixs M)
-            → [ M i j , Identity ]▷ M i j
-bindFunctor m ma f = mBind m ma (λ a → mReturn m (f a))
+bindMonad M N monad compat {α} {β} ma f = KmettMonad.bind⟨_,_,_⟩ monad M N compat {α} {β} ma f
 
-bindApply : ∀ {n} {Ixs : Set n} {M : Ixs → Ixs → TyCon} {i j} → (m : IxMonad Ixs M)
-          → [ Identity , M i j ]▷ M i j
-bindApply m ma f = mBind m (mReturn m ma) f
+bindFunctor : ∀ {n} {TyCons : Set n}
+            → (M : TyCons)
+            → (m : KmettMonad TyCons)
+            → KmettMonad.BindCompat m M M → KmettMonad.ReturnCompat m M
+            → [ K⟨ m ▷ M ⟩ , Identity ]▷ K⟨ m ▷ M ⟩
+bindFunctor {TyCons = TyCons} M monad bCompat rCompat {α = α} {β = β} ma f 
+  = subst (λ X → K⟨ monad ▷ X ⟩ β) (KmettMonad.lawIdempotence monad M rCompat)
+          ( KmettMonad.bind⟨_,_,_⟩ monad M M bCompat {α} {β} ma (λ a → KmettMonad.return⟨_,_⟩ monad M rCompat (f a)) )
+          -- ma >>= (λ a → return (f a))
 
-bindReturn : ∀ {n} {Ixs : Set n} {M : Ixs → Ixs → TyCon} {i} → (m : IxMonad Ixs M)
-           → [ Identity , Identity ]▷ M i i
-bindReturn m ma f = mReturn m (f ma)
--}
+bindApply : ∀ {n} {TyCons : Set n} 
+          → (M : TyCons) 
+          → (m : KmettMonad TyCons)
+          → [ Identity , K⟨ m ▷ M ⟩ ]▷ K⟨ m ▷ M ⟩
+bindApply M monad ma f = f ma 
+  -- subst (λ X → K⟨ monad ▷ X ⟩ β) M◆M≡M (KmettMonad.bind⟨_,_,_⟩ monad M M bCompat (KmettMonad.return⟨_,_⟩ monad M rCompat ma) f)
+  -- (return ma) >>= f
+
+bindReturn : ∀ {n} {TyCons : Set n} 
+           → (M : TyCons) 
+           → (m : KmettMonad TyCons)
+           → KmettMonad.ReturnCompat m M
+           → [ Identity , Identity ]▷ K⟨ m ▷ M ⟩
+bindReturn M monad rCompat ma f = KmettMonad.return⟨_,_⟩ monad M rCompat (f ma)
+
+-- -----------------------------------------------------------------------------
+-- Indexed Monads are Kmett Monads
+-- -----------------------------------------------------------------------------
+
 IxMonad→KmettMonad : ∀ {n}
                    → (Ixs : Set n)
                    → (M : Ixs → Ixs → TyCon)
@@ -96,6 +142,7 @@ IxMonad→KmettMonad {n = n} Ixs M monad = record
   ; lawIdR = lawIdR
   ; lawIdL = lawIdL
   ; lawAssoc = lawAssoc
+  ; lawIdempotence = {!!}
   } where
     TyCons = IxMonadTyCons Ixs
     
@@ -114,7 +161,7 @@ IxMonad→KmettMonad {n = n} Ixs M monad = record
     _>>=_ = IxMonad._>>=_ monad
     return = IxMonad.return monad
 
-    bind⟨_,_,_⟩ : ∀ {α β : Type} → (M N : TyCons) → BindCompat M N → ⟨ M ⟩ α → (α → ⟨ N ⟩ β) → ⟨ M ◆ N ⟩ β
+    bind⟨_,_,_⟩ : (M N : TyCons) → BindCompat M N → [ ⟨ M ⟩ , ⟨ N ⟩ ]▷ ⟨ M ◆ N ⟩
     bind⟨_,_,_⟩ (IxMonadTC i j) (IxMonadTC .j l) refl ma f = ma >>= f
     
     return⟨_,_⟩ : ∀ {α : Type} → (M : TyCons) → ReturnCompat M → α → ⟨ M ⟩ α
@@ -146,16 +193,21 @@ IxMonad→KmettMonad {n = n} Ixs M monad = record
                ≡ bind⟨ M ◆ N , P , comp3 ⟩ (bind⟨ M , N , comp4 ⟩ m f) g
     lawAssoc (IxMonadTC i j) (IxMonadTC .j k) (IxMonadTC .k l) refl refl refl refl refl m f g = IxMonad.lawAssoc monad m f g
 
+    lawIdempotence : ∀ (M : TyCons) → ReturnCompat M → M ◆ M ≡ M
+    lawIdempotence (IxMonadTC i .i) refl = refl
 
+-- -----------------------------------------------------------------------------
+-- Every Kmett Monad is a Polymonad
+-- -----------------------------------------------------------------------------
 
-KmettMonad→Polymonad : ∀ {n ℓ₁ ℓ₂}
+KmettMonad→Polymonad : ∀ {n}
                      → (TyCons : Set n)
-                     → KmettMonad {ℓ₁ = ℓ₁} {ℓ₂ = ℓ₂} TyCons → Polymonad (IdTyCons ⊎ TyCons) idTC
-KmettMonad→Polymonad TyCons monad = record
-  { B[_,_]▷_ = {!!}
-  ; ⟨_⟩ = {!!}
-  ; bind = {!!}
-  ; lawId = {!!}
+                     → KmettMonad TyCons → Polymonad (IdTyCons ⊎ TyCons) idTC
+KmettMonad→Polymonad {n = n} KmettTyCons monad = record
+  { B[_,_]▷_ = B[_,_]▷_
+  ; ⟨_⟩ = ⟨_⟩
+  ; bind = λ {M} {N} {P} b → bind M N P b
+  ; lawId = lawId
   ; lawFunctor1 = {!!}
   ; lawFunctor2 = {!!}
   ; lawMorph1 = {!!}
@@ -165,22 +217,42 @@ KmettMonad→Polymonad TyCons monad = record
   ; lawDiamond2 = {!!}
   ; lawAssoc = {!!}
   ; lawClosure = {!!}
-  }
-{-
-record Polymonad {l : Level} (TyCons : Set l) (Id : TyCons) : Set (lsuc l) where
-  field
-    -- Set of bind-operation names for each combination of type constructors.
-    B[_,_]▷_ : (M N P : TyCons) → Set l
-
-    -- Interpretation of type constructor names into actual type constructors.
+  } where
+    TyCons = IdTyCons ⊎ KmettTyCons
+    Id = idTC
+    
+    B[_,_]▷_ : (M N P : TyCons) → Set n
+    B[ inj₁ IdentTC , inj₁ IdentTC ]▷ inj₁ IdentTC = IdBinds
+    B[ inj₁ IdentTC , inj₁ IdentTC ]▷ inj₂ P       = KmettBinds monad idTC idTC (inj₂ P)
+    B[ inj₁ IdentTC , inj₂ N       ]▷ inj₁ IdentTC = Lift ⊥
+    B[ inj₁ IdentTC , inj₂ N       ]▷ inj₂ P       = KmettBinds monad idTC (inj₂ N) (inj₂ P)
+    B[ inj₂ M       , inj₁ IdentTC ]▷ inj₁ IdentTC = Lift ⊥
+    B[ inj₂ M       , inj₁ IdentTC ]▷ inj₂ P       = KmettBinds monad (inj₂ M) idTC (inj₂ P)
+    B[ inj₂ M       , inj₂ N       ]▷ inj₁ IdentTC = Lift ⊥
+    B[ inj₂ M       , inj₂ N       ]▷ inj₂ P       = KmettBinds monad (inj₂ M) (inj₂ N) (inj₂ P)
+    
     ⟨_⟩ : TyCons → TyCon
+    ⟨_⟩ (inj₁ IdentTC) = Identity
+    ⟨_⟩ (inj₂ M) = K⟨ monad ▷ M ⟩
     
-    -- Interpretation of bind-operation names into actual bind-operations.
-    bind : {M N P : TyCons} → B[ M , N ]▷ P → [ ⟨ M ⟩ , ⟨ N ⟩ ]▷ ⟨ P ⟩
-    
-    -- Law of the Id type constructor: Id τ = τ
+    bind : (M N P : TyCons) → B[ M , N ]▷ P → [ ⟨ M ⟩ , ⟨ N ⟩ ]▷ ⟨ P ⟩
+    bind (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) IdentB = bindId
+    bind (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ M) (ReturnB .M rCompat) = bindReturn M monad rCompat
+    bind (inj₁ IdentTC) (inj₂ N) (inj₁ IdentTC) (lift ())
+    bind (inj₁ IdentTC) (inj₂ N) (inj₂ .N) (ApplyB .N) = bindApply N monad
+    bind (inj₂ M) (inj₁ IdentTC) (inj₁ IdentTC) (lift ())
+    bind (inj₂ M) (inj₁ IdentTC) (inj₂ .M) (FunctorB .M bCompat rCompat) = bindFunctor M monad bCompat rCompat
+    bind (inj₂ M) (inj₂ N) (inj₁ IdentTC) (lift ())
+    bind (inj₂ M) (inj₂ N) (inj₂ ._) (MonadB .M .N bCompat) = bindMonad M N monad bCompat
+
     lawId : ⟨ Id ⟩ ≡ Identity
+    lawId = refl
     
+    lawFunctor1 : ∀ (M : TyCons) → B[ M , Id ]▷ M
+    lawFunctor1 (inj₁ IdentTC) = IdentB
+    lawFunctor1 (inj₂ M) = FunctorB M {!!} {!!}
+
+{-
     -- Functor law from the definition:
     -- There exists a functor bind-operation for each type constructor:
     lawFunctor1 : ∀ (M : TyCons) → B[ M , Id ]▷ M 
