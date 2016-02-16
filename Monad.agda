@@ -7,6 +7,7 @@ open ≡-Reasoning
 open import Utilities
 open import Polymonad
 open import Haskell
+open import Functor
 
 record Monad (M : TyCon) : Set₁ where
   field
@@ -22,7 +23,7 @@ record Monad (M : TyCon) : Set₁ where
     lawAssoc : ∀ {α β γ : Type} 
              → (m : M α) → (k : α → M β) → (h : β → M γ) 
              → m >>= (λ x → k x >>= h) ≡ (m >>= k) >>= h
-  
+    
   _>>_ : ∀ {α β : Type} → M α → M β → M β
   ma >> mb = ma >>= λ a → mb
 

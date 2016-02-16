@@ -16,6 +16,8 @@ type-check:
 	$(AGDA_TC) Utilities.agda
 	$(AGDA_TC) Haskell.agda
 	$(AGDA_TC) Identity.agda
+	$(AGDA_TC) Functor.agda
+	$(AGDA_TC) Applicative.agda
 	$(AGDA_TC) Monad.agda
 	$(AGDA_TC) Polymonad.agda
 	
