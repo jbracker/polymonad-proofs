@@ -65,6 +65,10 @@ type-check:
 	$(AGDA_TC) Parameterized/EffectMonad.agda
 	# $(AGDA_TC) Parameterized/EffectMonad/Polymonad.agda
 
+	
+	$(AGDA_TC) KmettMonad/Definition.agda
+	$(AGDA_TC) KmettMonad/IxMonad.agda
+	# $(AGDA_TC) KmettMonad/Polymonad.agda
 
 clean:
 	$(REMOVE) *.agdai
