@@ -1,5 +1,5 @@
 
-module Kmett.Polymonad where
+module KmettMonad.Polymonad where
 
 -- Stdlib
 open import Level
@@ -17,7 +17,7 @@ open import Utilities
 open import Haskell
 open import Identity
 open import Polymonad
-open import Kmett
+open import KmettMonad.Definition
 
 -- -----------------------------------------------------------------------------
 -- Every Kmett Monad is a Polymonad
@@ -64,7 +64,7 @@ KmettMonad→Polymonad {n = n} KmettTyCons monad = record
     bind (inj₁ IdentTC) (inj₂ N) (inj₁ IdentTC) (lift ())
     bind (inj₁ IdentTC) (inj₂ N) (inj₂ .N) (ApplyB .N) = bindApply N monad
     bind (inj₂ M) (inj₁ IdentTC) (inj₁ IdentTC) (lift ())
-    bind (inj₂ M) (inj₁ IdentTC) (inj₂ .M) (FunctorB .M bCompat rCompat) = bindFunctor M monad bCompat rCompat
+    bind (inj₂ M) (inj₁ IdentTC) (inj₂ .M) (FunctorB .M) = bindFunctor M monad
     bind (inj₂ M) (inj₂ N) (inj₁ IdentTC) (lift ())
     bind (inj₂ M) (inj₂ N) (inj₂ ._) (MonadB .M .N bCompat) = bindMonad M N monad bCompat
 
@@ -73,11 +73,17 @@ KmettMonad→Polymonad {n = n} KmettTyCons monad = record
     
     lawFunctor1 : ∀ (M : TyCons) → B[ M , Id ]▷ M
     lawFunctor1 (inj₁ IdentTC) = IdentB
-    lawFunctor1 (inj₂ M) = FunctorB M {!!} {!!}
+    lawFunctor1 (inj₂ M) = FunctorB M
 
     lawFunctor2 : ∀ (M : TyCons) → ∀ (b : B[ M , Id ]▷ M)
                 → ∀ {α : Type} (m : ⟨ M ⟩ α) → (bind M Id M b) m (id lawId) ≡ m
-    lawFunctor2 M b m = {!!}
+    lawFunctor2 (inj₁ IdentTC) IdentB m = refl
+    lawFunctor2 (inj₂ M) (FunctorB .M) m = begin
+      (bind (inj₂ M) Id (inj₂ M) (FunctorB M)) m (id lawId)
+        ≡⟨ refl ⟩
+      (bindFunctor M monad) m (id lawId)
+        ≡⟨ KmettMonad.lawIdL monad M M {!!} {!!} {!!} m ⟩
+      m ∎
 {-
     -- Paired morphism law from the definition:
     -- ∃ b₁:(M,Id)▷N ∈ Σ ⇔ ∃ b₂:(Id,M)▷N ∈ Σ
