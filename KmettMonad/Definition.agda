@@ -17,6 +17,7 @@ open import Utilities
 open import Haskell
 open import Identity
 open import Polymonad
+open import Functor
 
 -- -----------------------------------------------------------------------------
 -- Definition of KmettMonads
@@ -28,6 +29,8 @@ record KmettMonad {n} (TyCons : Set n) : Set (lsuc n) where
     
     BindCompat : TyCons → TyCons → Set n
     ReturnCompat : TyCons → Set n
+
+    functor : (M : TyCons) → Functor ⟨ M ⟩
 
     _◆_ : TyCons → TyCons → TyCons
     
@@ -55,10 +58,6 @@ record KmettMonad {n} (TyCons : Set n) : Set (lsuc n) where
              → subst (λ X → ⟨ X ⟩ γ) assoc (bind⟨ M , N ◆ P , comp1 ⟩ m (λ x → bind⟨ N , P , comp2 ⟩ (f x) g)) 
                ≡ bind⟨ M ◆ N , P , comp3 ⟩ (bind⟨ M , N , comp4 ⟩ m f) g
     
-    -- Idempotence is required to implement a functor ("fmap") based on the bind and return operation 
-    -- provided by the Kmett monad.
-    lawIdempotence : ∀ (M : TyCons) → ReturnCompat M → M ◆ M ≡ M
-    
   sequence⟨_,_,_⟩ : ∀ {α β : Type} → (M N : TyCons) → BindCompat M N → ⟨ M ⟩ α → ⟨ N ⟩ β → ⟨ M ◆ N ⟩ β
   sequence⟨ M , N , comp ⟩ ma mb = bind⟨ M , N , comp ⟩ ma (λ _ → mb)
   
@@ -81,7 +80,6 @@ data KmettBinds {n} {TyCons : Set n} (m : KmettMonad TyCons) : (M N P : IdTyCons
            → BindCompat m M N 
            → KmettBinds m (inj₂ M) (inj₂ N) (inj₂ (M ◆⟨ m ⟩ N))
   FunctorB : (M : TyCons) 
-           → BindCompat m M M → ReturnCompat m M
            → KmettBinds m (inj₂ M) idTC (inj₂ M)
   ApplyB   : (M : TyCons) 
            → KmettBinds m idTC (inj₂ M) (inj₂ M)
@@ -103,12 +101,9 @@ bindMonad M N monad compat {α} {β} ma f = bind⟨_,_,_⟩ monad M N compat {α
 bindFunctor : ∀ {n} {TyCons : Set n}
             → (M : TyCons)
             → (m : KmettMonad TyCons)
-            → BindCompat m M M → ReturnCompat m M
             → [ K⟨ m ▷ M ⟩ , Identity ]▷ K⟨ m ▷ M ⟩
-bindFunctor {TyCons = TyCons} M monad bCompat rCompat {α = α} {β = β} ma f 
-  = subst (λ X → K⟨ monad ▷ X ⟩ β) (lawIdempotence monad M rCompat)
-          ( bind⟨_,_,_⟩ monad M M bCompat {α} {β} ma (λ a → return⟨_,_⟩ monad M rCompat (f a)) )
-          -- ma >>= (λ a → return (f a))
+bindFunctor {TyCons = TyCons} M monad {α = α} {β = β} ma f 
+  = Functor.fmap (KmettMonad.functor monad M) f ma
 
 bindApply : ∀ {n} {TyCons : Set n} 
           → (M : TyCons) 
