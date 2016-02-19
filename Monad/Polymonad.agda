@@ -2,6 +2,7 @@
 module Monad.Polymonad where
 
 -- Stdlib
+open import Function hiding ( id ; _∘_ ) renaming ( _∘′_ to _∘_ )
 open import Data.Product
 open import Data.Sum
 open import Data.Unit
@@ -13,6 +14,7 @@ open ≡-Reasoning
 open import Utilities
 open import Haskell
 open import Polymonad
+open import Applicative
 open import Monad
 open import Identity
 
@@ -339,9 +341,11 @@ Polymonad→Monad : ∀ {TyCons : Set} {Id : TyCons}
 Polymonad→Monad {TyCons = TyCons} {Id = Id} pm (mTC , bindB , returnB) = mTC , (record
   { _>>=_ = _>>=_
   ; return = return
+  ; applicative = applicativeFromMonad _>>=_ return lawIdL lawIdR lawAssocM
   ; lawIdR = lawIdR
   ; lawIdL = lawIdL
   ; lawAssoc = lawAssocM
+  ; lawMonadFmap = λ f x → refl
   }) where
     M = ⟨ pm ▷ mTC ⟩
     
@@ -400,3 +404,4 @@ Polymonad→Monad {TyCons = TyCons} {Id = Id} pm (mTC , bindB , returnB) = mTC ,
       m >>= (λ x → k x >>= h) 
         ≡⟨ sym (lawAssoc pm mTC mTC mTC mTC mTC mTC bindB bindB bindB bindB m k h) ⟩ -- Assoc
       (m >>= k) >>= h ∎
+    

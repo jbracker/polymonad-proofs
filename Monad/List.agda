@@ -12,6 +12,7 @@ open ≡-Reasoning
 -- Local
 open import Utilities
 open import Haskell
+open import Applicative
 open import Monad
 open import Identity 
 
@@ -57,9 +58,11 @@ monadList : Monad List
 monadList = record
   { _>>=_ = _>>=_
   ; return = return
+  ; applicative = applicativeFromMonad _>>=_ return lawIdL lawIdR lawAssoc
   ; lawIdR = lawIdR
   ; lawIdL = lawIdL
   ; lawAssoc = lawAssoc
+  ; lawMonadFmap = λ f a → refl
   } where
     _>>=_ : ∀ {α β : Type} → List α → (α → List β) → List β
     _>>=_ = bindList
@@ -97,3 +100,4 @@ monadList = record
         ≡⟨ refl ⟩
       ((x ∷ xs) >>= k) >>= h ∎
     lawAssoc Nil k h = refl
+    

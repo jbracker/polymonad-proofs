@@ -17,6 +17,7 @@ open ≡-Reasoning
 open import Utilities
 open import Haskell
 open import Identity
+open import Applicative
 open import Monad renaming ( mBind to monadBind ; mReturn to monadReturn )
 open import Monad.Polymonad
 open import Monad.Principal
@@ -61,9 +62,11 @@ PhantomIxMonad→Monad : ∀ {Ixs} {M : Ixs → Ixs → TyCon} → Ixs → (K : 
 PhantomIxMonad→Monad {Ixs = Ixs} {M = IxM} i K ixMonad = record
   { _>>=_ = _>>=_
   ; return = return
+  ; applicative = applicativeFromMonad _>>=_ return lawIdL lawIdR lawAssoc
   ; lawIdR = lawIdR
   ; lawIdL = lawIdL
   ; lawAssoc = lawAssoc
+  ; lawMonadFmap = λ f x → refl
   } where
       ixReturn : ∀ {α} → α → IxM i i α
       ixReturn = IxMonad.return ixMonad

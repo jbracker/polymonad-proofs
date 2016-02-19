@@ -12,6 +12,7 @@ open ≡-Reasoning
 -- Local
 open import Utilities
 open import Haskell
+open import Applicative
 open import Monad
 open import Identity
 
@@ -28,9 +29,11 @@ monadMaybe : Monad Maybe
 monadMaybe = record
   { _>>=_ = _>>=_
   ; return = return
+  ; applicative = applicativeFromMonad _>>=_ return lawIdL lawIdR lawAssoc
   ; lawIdR = lawIdR
   ; lawIdL = lawIdL
   ; lawAssoc = lawAssoc
+  ; lawMonadFmap = λ f x → refl
   } where
     _>>=_ : ∀ {α β : Type} → Maybe α → (α → Maybe β) → Maybe β
     _>>=_ = bindMaybe
