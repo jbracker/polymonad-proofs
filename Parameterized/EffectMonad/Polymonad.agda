@@ -408,8 +408,13 @@ EffectMonad→Polymonad {Effect = Effect} {M = M'} {{effMonoid = mon}} monad = r
         mBind monad m (λ a → subst₂ M' (monLawIdR y) refl (mBind monad (f a) (λ b → mReturn monad (g b))))
           ≡⟨ refl ⟩
         bindMonad monad m (λ x₁ → bindFunctor monad (f x₁) g) ∎-} {!!}
-    lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (EffMonadTC ._)) (inj₂ (EffMonadTC x₂)) (inj₂ (EffMonadTC ._)) (inj₂ (EffMonadTC ._)) ReturnB MonadB b₃ ApplyB m f g
-      = {!!}
+    lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (EffMonadTC ._)) (inj₂ (EffMonadTC x)) (inj₂ (EffMonadTC ._)) (inj₂ (EffMonadTC ._)) ReturnB MonadB b₃ ApplyB m f g
+      = begin
+        bindMonad monad (bindReturn monad m f) g 
+          ≡⟨ refl ⟩
+        mBind monad (mReturn monad (f m)) g 
+          ≡⟨ {!!} ⟩
+        bindApply monad m (λ a → bind (inj₁ IdentTC) (inj₂ (EffMonadTC x)) (inj₂ (EffMonadTC (ε ∙ x))) b₃ (f a) g) ∎
     lawAssoc (inj₁ IdentTC) (inj₂ (EffMonadTC x)) (inj₂ (EffMonadTC .x)) (inj₂ (EffMonadTC y)) (inj₂ (EffMonadTC ._)) (inj₂ (EffMonadTC ._)) ApplyB MonadB MonadB ApplyB m f g 
       = {-begin
         bindMonad monad (bindApply monad m f) g 
@@ -454,7 +459,7 @@ EffectMonad→Polymonad {Effect = Effect} {M = M'} {{effMonoid = mon}} monad = r
     lawAssoc (inj₂ (EffMonadTC x)) (inj₂ (EffMonadTC y)) (inj₂ (EffMonadTC ._)) (inj₂ (EffMonadTC z)) (inj₂ (EffMonadTC ._)) (inj₂ (EffMonadTC ._)) MonadB MonadB MonadB b₄ m f g 
       with castMonadB x (y ∙ z) (monLawAssoc x y z) b₄
     lawAssoc (inj₂ (EffMonadTC x)) (inj₂ (EffMonadTC y)) (inj₂ (EffMonadTC ._)) (inj₂ (EffMonadTC z)) (inj₂ (EffMonadTC ._)) (inj₂ (EffMonadTC ._)) MonadB MonadB MonadB b₄ {γ = γ} m f g | MonadB
-      = let b = bind (inj₂ (EffMonadTC x)) (inj₂ (EffMonadTC (y ∙ z))) (inj₂ (EffMonadTC ((x ∙ y) ∙ z))) b₄
+      = {-let b = bind (inj₂ (EffMonadTC x)) (inj₂ (EffMonadTC (y ∙ z))) (inj₂ (EffMonadTC ((x ∙ y) ∙ z))) b₄
         in begin
           bindMonad monad (bindMonad monad m f) g 
             ≡⟨ refl ⟩
@@ -478,7 +483,7 @@ EffectMonad→Polymonad {Effect = Effect} {M = M'} {{effMonoid = mon}} monad = r
                     (sym (proof3 x (y ∙ z) (monLawAssoc x y z) b₄)) ⟩
           b m (λ x₂ → mBind monad (f x₂) g)
             ≡⟨ refl ⟩
-          b m (λ x₂ → bindMonad monad (f x₂) g) ∎
+          b m (λ x₂ → bindMonad monad (f x₂) g) ∎-} {!!}
 
 {-
 proof3 : (x y : monCarrier) → {k z : monCarrier} → (k≡z : k ≡ z) 
