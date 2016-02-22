@@ -71,7 +71,7 @@ type-check:
 	$(AGDA_TC) KmettMonad/Definition.agda
 	$(AGDA_TC) KmettMonad/Monad.agda
 	$(AGDA_TC) KmettMonad/IxMonad.agda
-	#$(AGDA_TC) KmettMonad/EffectMonad.agda
+	$(AGDA_TC) KmettMonad/EffectMonad.agda
 	# $(AGDA_TC) KmettMonad/Polymonad.agda
 
 clean:

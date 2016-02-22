@@ -204,6 +204,9 @@ EffectMonad→KmettMonad {n = n} Effect monoid M monad = record
         Meεε≡Meε : EffMonadTC (m ∙ (ε ∙ ε)) ≡ EffMonadTC (m ∙ ε)
         Meεε≡Meε = cong (λ X → EffMonadTC (m ∙ X)) (Monoid.lawIdL monoid ε)
         
+        eεε≡eε : (m ∙ ε) ∙ ε ≡ m ∙ ε
+        eεε≡eε = cong (λ X → X ∙ ε) (Monoid.lawIdR monoid m)
+        
         assoc : EffMonadTC (m ∙ (ε ∙ ε)) ≡ EffMonadTC ((m ∙ ε) ∙ ε)
         assoc = cong (λ X → EffMonadTC X) ((begin
           m ∙ (ε ∙ ε) 
@@ -212,13 +215,35 @@ EffectMonad→KmettMonad {n = n} Effect monoid M monad = record
             ≡⟨ cong (λ X → X ∙ ε) (sym (Monoid.lawIdR monoid m)) ⟩
           (m ∙ ε) ∙ ε ∎))
         
-        shiftSubstHelp : ∀ {α β : Type} {e e₁ e₂ m : Monoid.carrier monoid}
+        shiftSubstHelp1 : ∀ {α β : Type} {e e₁ e₂ m : Monoid.carrier monoid}
                        → (eqInner : EffMonadTC (e₁ ∙ e₂) ≡ EffMonadTC m)
                        → (eqOuter : EffMonadTC (e ∙ (e₁ ∙ e₂)) ≡ EffMonadTC (e ∙ m) )
                        → (ma : ⟨ EffMonadTC e ⟩ α) → (f : α → ⟨ EffMonadTC (e₁ ∙ e₂) ⟩ β)
                        → ma >>= (λ x → subst (λ X → ⟨ X ⟩ β) eqInner (f x)) ≡ subst (λ X → ⟨ X ⟩ β) eqOuter (ma >>= f)
-        shiftSubstHelp refl refl ma f = refl
+        shiftSubstHelp1 refl refl ma f = refl
         
+        shiftSubstHelp2 : ∀ {α β : Type} {e e₁ e₂ m : Monoid.carrier monoid}
+                       → (eqInner : e₁ ∙ e₂ ≡ m)
+                       → (eqOuter : (e₁ ∙ e₂) ∙ e ≡ m ∙ e)
+                       → (ma : ⟨ EffMonadTC (e₁ ∙ e₂) ⟩ α) → (f : α → ⟨ EffMonadTC e ⟩ β)
+                       → subst₂ M eqOuter refl (ma >>= f) ≡ (subst₂ M eqInner refl ma) >>= f
+        shiftSubstHelp2 refl refl ma f = refl
+        
+        shiftSubstHelp3 : ∀ {γ : Type} {e₁ e₂ : Monoid.carrier monoid}
+                        → (ma : ⟨ EffMonadTC e₁ ⟩ γ)
+                        → (eq1 : EffMonadTC e₁ ≡ EffMonadTC e₂ )
+                        → (eq2 : e₁ ≡ e₂)
+                        → subst (λ X → ⟨ X ⟩ γ) eq1 ma ≡ subst₂ M eq2 refl ma
+        shiftSubstHelp3 ma refl refl = refl
+
+        shiftSubstHelp4 : ∀ {γ : Type} {e e₁ e₂ m : Monoid.carrier monoid}
+                        → (ma : ⟨ EffMonadTC ((m ∙ e₁) ∙ e₂) ⟩ γ)
+                        → (eq1 : EffMonadTC (m ∙ (e₁ ∙ e₂)) ≡ EffMonadTC e )
+                        → (eq2 : EffMonadTC ((m ∙ e₁) ∙ e₂) ≡ EffMonadTC (m ∙ (e₁ ∙ e₂)))
+                        → subst (λ X → ⟨ X ⟩ γ) eq1 (subst (λ X → ⟨ X ⟩ γ) eq2 ma) ≡ subst (λ X → ⟨ X ⟩ γ) (trans eq2 eq1) ma
+        shiftSubstHelp4 {e₁ = e₁} {e₂ = e₂} {m = m} ma refl eq2 with (m ∙ e₁) ∙ e₂
+        shiftSubstHelp4 ma refl refl | ._ = refl
+
         lawDist : ∀ {α β γ : Type} 
                 → (f : β → γ) → (g : α → β) 
                 → fmap (f ∘ g) ≡ fmap f ∘ fmap g
@@ -228,34 +253,19 @@ EffectMonad→KmettMonad {n = n} Effect monoid M monad = record
           subst₂ M (Monoid.lawIdR monoid m) refl (ma >>= (λ x → return (f (g x))))
             ≡⟨ cong (λ X → subst₂ M (Monoid.lawIdR monoid m) refl (ma >>= X)) (funExt (λ x → sym (lawIdR (EffMonadTC ε) (EffMonadTC ε) (Mε◆Me≡Me ε) (lift tt) refl (g x) (return ∘ f)))) ⟩
           subst₂ M (Monoid.lawIdR monoid m) refl (ma >>= (λ x → subst (λ X → ⟨ X ⟩ γ) (Mε◆Me≡Me ε) (return (g x) >>= (return ∘ f))))
-            ≡⟨ cong (λ X → subst₂ M (Monoid.lawIdR monoid m) refl X) (shiftSubstHelp (Mε◆Me≡Me ε) Meεε≡Meε ma (λ x → return (g x) >>= (return ∘ f))) ⟩
+            ≡⟨ cong (λ X → subst₂ M (Monoid.lawIdR monoid m) refl X) (shiftSubstHelp1 (Mε◆Me≡Me ε) Meεε≡Meε ma (λ x → return (g x) >>= (return ∘ f))) ⟩
           subst₂ M (Monoid.lawIdR monoid m) refl (subst (λ X → ⟨ X ⟩ γ) Meεε≡Meε (ma >>= (λ x → return (g x) >>= (return ∘ f))))
             ≡⟨ cong (λ X → subst₂ M (Monoid.lawIdR monoid m) refl (subst (λ X → ⟨ X ⟩ γ) Meεε≡Meε X)) (helpSubst²' assoc (ma >>= (λ x → return (g x) >>= (return ∘ f)))) ⟩
           subst₂ M (Monoid.lawIdR monoid m) refl (subst (λ X → ⟨ X ⟩ γ) Meεε≡Meε (subst (λ X → ⟨ X ⟩ γ) (sym assoc) (subst (λ X → ⟨ X ⟩ γ) assoc (ma >>= (λ x → return (g x) >>= (return ∘ f))))))
             ≡⟨ cong (λ X → subst₂ M (Monoid.lawIdR monoid m) refl (subst (λ X → ⟨ X ⟩ γ) Meεε≡Meε (subst (λ X → ⟨ X ⟩ γ) (sym assoc) X))) 
                     (lawAssoc (EffMonadTC m) (EffMonadTC ε) (EffMonadTC ε) assoc (lift tt) (lift tt) (lift tt) (lift tt) ma (return ∘ g) (return ∘ f)) ⟩
           subst₂ M (Monoid.lawIdR monoid m) refl (subst (λ X → ⟨ X ⟩ γ) Meεε≡Meε (subst (λ X → ⟨ X ⟩ γ) (sym assoc) ((ma >>= (return ∘ g)) >>= (return ∘ f))) )
-            ≡⟨ {!!} ⟩
-          {-
-          ma >>= (λ x → return (g x) >>= (return ∘ f))
-            ≡⟨ lawAssoc ma (return ∘ g) (return ∘ f) ⟩
-          (ma >>= (return ∘ g)) >>= (return ∘ f)
-          -}
+            ≡⟨ cong (λ X → subst₂ M (Monoid.lawIdR monoid m) refl X) (shiftSubstHelp4 ((ma >>= (return ∘ g)) >>= (return ∘ f)) Meεε≡Meε (sym assoc)) ⟩
+          subst₂ M (Monoid.lawIdR monoid m) refl (subst (λ X → ⟨ X ⟩ γ) (trans (sym assoc) Meεε≡Meε) ((ma >>= (return ∘ g)) >>= (return ∘ f)) )
+            ≡⟨ cong (λ X → subst₂ M (Monoid.lawIdR monoid m) refl X) (shiftSubstHelp3 ((ma >>= (return ∘ g)) >>= (return ∘ f)) ((trans (sym assoc) Meεε≡Meε)) eεε≡eε) ⟩
+          subst₂ M (Monoid.lawIdR monoid m) refl (subst₂ M eεε≡eε refl ((ma >>= (return ∘ g)) >>= (return ∘ f)))
+            ≡⟨ cong (λ X → subst₂ M (Monoid.lawIdR monoid m) refl X) (shiftSubstHelp2 (Monoid.lawIdR monoid m) eεε≡eε (ma >>= (return ∘ g)) (return ∘ f)) ⟩
+          subst₂ M (Monoid.lawIdR monoid m) refl ((subst₂ M (Monoid.lawIdR monoid m) refl (ma >>= (return ∘ g))) >>= (return ∘ f))
+            ≡⟨ refl ⟩
           (fmap f ∘ fmap g) ma ∎)
 
-{-
-helpSubst² : ∀ {M M' : TyCons} 
-          → (eqM : M' ≡ M)
-          → ∀ {α : Type}
-          → (x : ⟨ M ⟩ α)
-          → x ≡ subst (λ X → ⟨ X ⟩ α) eqM (subst (λ X → ⟨ X ⟩ α) (sym eqM) x)
-
-lawAssoc : ∀ {α β γ : Type} 
-             → (M N P : TyCons)
-             → (assoc : M ◆ (N ◆ P) ≡ (M ◆ N) ◆ P) 
-             → (comp1 : BindCompat M (N ◆ P)) → (comp2 : BindCompat N P)
-             → (comp3 : BindCompat (M ◆ N) P) → (comp4 : BindCompat M N)
-             → (m : ⟨ M ⟩ α) → (f : α → ⟨ N ⟩ β) → (g : β → ⟨ P ⟩ γ)
-             → subst (λ X → ⟨ X ⟩ γ) assoc (bind⟨ M , N ◆ P , comp1 ⟩ m (λ x → bind⟨ N , P , comp2 ⟩ (f x) g)) 
-               ≡ bind⟨ M ◆ N , P , comp3 ⟩ (bind⟨ M , N , comp4 ⟩ m f) g
--}
