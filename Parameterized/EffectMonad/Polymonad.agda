@@ -56,15 +56,15 @@ EffectMonad→Polymonad {Effect = Effect} {M = M'} {{effMonoid = mon}} monad = r
   ; ⟨_⟩ = ⟨_⟩
   ; bind = λ {m} {n} {p} b → bind m n p b
   ; lawId = lawId
-  ; lawFunctor1 = {!!} --lawFunctor1
-  ; lawFunctor2 = {!!} --lawFunctor2
-  ; lawMorph1 = {!!} --lawMorph1 
-  ; lawMorph2 = {!!} --lawMorph2
-  ; lawMorph3 = {!!} --lawMorph3
-  ; lawDiamond1 = {!!} --lawDiamond1 
-  ; lawDiamond2 = {!!} --lawDiamond2
-  ; lawAssoc = {!!} --lawAssoc
-  ; lawClosure = {!!} --lawClosure
+  ; lawFunctor1 = lawFunctor1
+  ; lawFunctor2 = lawFunctor2
+  ; lawMorph1 = lawMorph1 
+  ; lawMorph2 = lawMorph2
+  ; lawMorph3 = lawMorph3
+  ; lawDiamond1 = lawDiamond1 
+  ; lawDiamond2 = lawDiamond2
+  ; lawAssoc = lawAssoc
+  ; lawClosure = lawClosure
   } where
     TyCons = IdTyCons ⊎ EffMonadTyCons Effect
     
@@ -94,7 +94,7 @@ EffectMonad→Polymonad {Effect = Effect} {M = M'} {{effMonoid = mon}} monad = r
     
     lawId : ⟨ Id ⟩ ≡ Identity
     lawId = refl
-    {-
+    
     lawFunctor1 : ∀ (M : TyCons) → B[ M , Id ]▷ M
     lawFunctor1 (inj₁ IdentTC)        = IdentB
     lawFunctor1 (inj₂ (EffMonadTC i)) = FunctorB
@@ -148,7 +148,7 @@ EffectMonad→Polymonad {Effect = Effect} {M = M'} {{effMonoid = mon}} monad = r
       subst₂ M' (monLawIdL i) refl (mBind monad (mReturn monad v) f)
         ≡⟨ refl ⟩
       bindApply monad (id lawId v) f ∎
--}
+
     castMonadB : (x y : monCarrier) {k z : monCarrier}
                → k ≡ z
                → B[ inj₂ (EffMonadTC x) , inj₂ (EffMonadTC y) ]▷ inj₂ (EffMonadTC k)
@@ -159,7 +159,6 @@ EffectMonad→Polymonad {Effect = Effect} {M = M'} {{effMonoid = mon}} monad = r
     monEq≡monEq : ∀ {x y : monCarrier} → (p : x ≡ y) → (q : x ≡ y) → p ≡ q
     monEq≡monEq refl refl = refl
 
-    {-
     lawDiamond1 : ∀ (M N R T : TyCons)
                 → (∃ λ(P : TyCons) → B[ M , N ]▷ P × B[ P , R ]▷ T)
                 → (∃ λ(S : TyCons) → B[ N , R ]▷ S × B[ M , S ]▷ T)
@@ -228,7 +227,7 @@ EffectMonad→Polymonad {Effect = Effect} {M = M'} {{effMonoid = mon}} monad = r
       = inj₂ (EffMonadTC x) , ApplyB , MonadB
     lawDiamond2 (inj₂ (EffMonadTC x)) (inj₂ (EffMonadTC y)) (inj₂ (EffMonadTC z)) (inj₂ (EffMonadTC ._)) (inj₂ (EffMonadTC ._) , MonadB , MonadB) 
       = inj₂ (EffMonadTC (x ∙ y)) , MonadB , (castMonadB (x ∙ y) z (monLawAssoc x y z) MonadB)
--}
+
     contractSubst₂ : ∀ {α : Type} {x y z : monCarrier} {X : M' z α} 
                    → (p : x ≡ y) → (q : z ≡ x) 
                    → subst₂ M' p refl (subst₂ M' q refl X) ≡ subst₂ M' (trans q p) refl X
@@ -286,7 +285,7 @@ EffectMonad→Polymonad {Effect = Effect} {M = M'} {{effMonoid = mon}} monad = r
     lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (EffMonadTC ._)) (inj₁ IdentTC) IdentB ReturnB IdentB ReturnB m f g = refl
     lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ y) (inj₂ (EffMonadTC ._)) (inj₁ IdentTC) IdentB b₂ () ReturnB m f g
     lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (EffMonadTC ._)) (inj₂ (EffMonadTC ._)) IdentB ReturnB ReturnB ApplyB m f g 
-      = {-begin
+      = begin
         bindReturn monad (bindId m f) g
           ≡⟨ refl ⟩
         mReturn monad (g (f m))
@@ -295,9 +294,9 @@ EffectMonad→Polymonad {Effect = Effect} {M = M'} {{effMonoid = mon}} monad = r
           ≡⟨ cong (\X → subst₂ M' (monLawIdL ε) refl X) (sym (lawIdL monad m (λ x → mReturn monad (g (f x))))) ⟩
         subst₂ M' (monLawIdL ε) refl (mBind monad (mReturn monad m) (λ x → mReturn monad (g (f x))))
           ≡⟨ refl ⟩
-        bindApply monad m (λ x → bindReturn monad (f x) g) ∎-} {!!}
+        bindApply monad m (λ x → bindReturn monad (f x) g) ∎
     lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (EffMonadTC x)) (inj₂ (EffMonadTC .x)) (inj₂ (EffMonadTC .x)) IdentB ApplyB ApplyB ApplyB m f g 
-      = {-begin
+      = begin
         bindApply monad (bindId m f) g
           ≡⟨ refl ⟩
         subst₂ M' (monLawIdL x) refl (mBind monad (mReturn monad (f m)) g)
@@ -306,13 +305,13 @@ EffectMonad→Polymonad {Effect = Effect} {M = M'} {{effMonoid = mon}} monad = r
           ≡⟨ cong (\X → subst₂ M' (monLawIdL x) refl X) (sym (lawIdL monad m ((λ y → subst₂ M' (monLawIdL x) refl (mBind monad (mReturn monad (f y)) g))))) ⟩
         subst₂ M' (monLawIdL x) refl (mBind monad (mReturn monad m) (λ y → subst₂ M' (monLawIdL x) refl (mBind monad (mReturn monad (f y)) g)))
           ≡⟨ refl ⟩
-        bindApply monad m (λ x₁ → bindApply monad (f x₁) g) ∎-} {!!}
+        bindApply monad m (λ x₁ → bindApply monad (f x₁) g) ∎
     lawAssoc (inj₁ IdentTC) (inj₂ (EffMonadTC x)) (inj₁ IdentTC) R T S () b₂ b₃ b₄ m f g
     lawAssoc (inj₂ (EffMonadTC x)) (inj₁ IdentTC) (inj₁ IdentTC) R T S () b₂ b₃ b₄ m f g
     lawAssoc (inj₂ (EffMonadTC x)) (inj₂ (EffMonadTC y)) (inj₁ IdentTC) R T S () b₂ b₃ b₄ m f g
     lawAssoc M N (inj₂ (EffMonadTC x)) R (inj₁ IdentTC) S b₁ () b₃ b₄ m f g
     lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (EffMonadTC ._)) (inj₁ IdentTC) (inj₂ (EffMonadTC ._)) (inj₁ IdentTC) ReturnB FunctorB IdentB ReturnB m f g 
-      = {-begin
+      = begin
           bindFunctor monad (bindReturn monad m f) g 
             ≡⟨ refl ⟩
           subst₂ M' (monLawIdR ε) refl (mBind monad (mReturn monad (f m)) (λ a → mReturn monad (g a)))
@@ -323,9 +322,9 @@ EffectMonad→Polymonad {Effect = Effect} {M = M'} {{effMonoid = mon}} monad = r
             ≡⟨ sym (subst₂²≡id M' (monLawIdL ε) refl) ⟩
           mReturn monad (g (f m))
             ≡⟨ refl ⟩
-          bindReturn monad m (λ x → bindId (f x) g) ∎-} {!!}
+          bindReturn monad m (λ x → bindId (f x) g) ∎
     lawAssoc (inj₂ (EffMonadTC x)) (inj₁ IdentTC) (inj₂ (EffMonadTC .x)) (inj₁ IdentTC) (inj₂ (EffMonadTC .x)) (inj₁ IdentTC) FunctorB FunctorB IdentB FunctorB m f g 
-      = {-begin 
+      = begin 
         bindFunctor monad (bindFunctor monad m f) g 
           ≡⟨ refl ⟩
         subst₂ M' (monLawIdR x) refl (mBind monad (subst₂ M' (monLawIdR x) refl (mBind monad m (λ a → mReturn monad (f a)))) (λ a → mReturn monad (g a)))
@@ -359,11 +358,11 @@ EffectMonad→Polymonad {Effect = Effect} {M = M'} {{effMonoid = mon}} monad = r
                                (monLawIdR x)) ⟩
         subst₂ M' (monLawIdR x) refl (mBind monad m (λ a → mReturn monad (g (f a))))
           ≡⟨ refl ⟩
-        bindFunctor monad m (λ y → bindId (f y) g) ∎-} {!!}
+        bindFunctor monad m (λ y → bindId (f y) g) ∎
     lawAssoc M (inj₁ IdentTC) (inj₂ (EffMonadTC x₁)) (inj₂ (EffMonadTC x)) (inj₂ (EffMonadTC x₂)) (inj₁ IdentTC) b₁ b₂ () b₄ m f g
     lawAssoc M (inj₂ (EffMonadTC x)) (inj₂ (EffMonadTC x₁)) R (inj₂ (EffMonadTC x₂)) (inj₁ IdentTC) b₁ b₂ () b₄ m f g
     lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (EffMonadTC ._)) (inj₁ IdentTC) (inj₂ (EffMonadTC ._)) (inj₂ (EffMonadTC ._)) ReturnB FunctorB ReturnB ApplyB m f g 
-      = {-begin
+      = begin
         bindFunctor monad (bindReturn monad m f) g
           ≡⟨ refl ⟩
         subst₂ M' (monLawIdR ε) refl (mBind monad (mReturn monad (f m)) (λ a → mReturn monad (g a)))
@@ -374,9 +373,9 @@ EffectMonad→Polymonad {Effect = Effect} {M = M'} {{effMonoid = mon}} monad = r
           ≡⟨ cong (subst₂ M' (monLawIdL ε) refl) (sym (lawIdL monad m (λ a → mReturn monad (g (f a))))) ⟩
         subst₂ M' (monLawIdL ε) refl (mBind monad (mReturn monad m) (λ a → mReturn monad (g (f a))))
           ≡⟨ refl ⟩
-        bindApply monad m (λ a → bindReturn monad (f a) g) ∎-} {!!}
+        bindApply monad m (λ a → bindReturn monad (f a) g) ∎
     lawAssoc (inj₁ IdentTC) (inj₂ (EffMonadTC x)) (inj₂ (EffMonadTC .x)) (inj₁ IdentTC) (inj₂ (EffMonadTC .x)) (inj₂ (EffMonadTC .x)) ApplyB FunctorB FunctorB ApplyB m f g 
-      = {-begin
+      = begin
         bindFunctor monad (bindApply monad m f) g
           ≡⟨ refl ⟩
         subst₂ M' (monLawIdR x) refl (mBind monad (subst₂ M' (monLawIdL x) refl (mBind monad (mReturn monad m) f)) (λ a → mReturn monad (g a)))
@@ -389,11 +388,56 @@ EffectMonad→Polymonad {Effect = Effect} {M = M'} {{effMonoid = mon}} monad = r
           ≡⟨ cong (subst₂ M' (monLawIdL x) refl) (sym (lawIdL monad m (λ y → subst₂ M' (monLawIdR x) refl (mBind monad (f y) (λ a → mReturn monad (g a)))))) ⟩
         subst₂ M' (monLawIdL x) refl (mBind monad (mReturn monad m) (λ y → subst₂ M' (monLawIdR x) refl (mBind monad (f y) (λ a → mReturn monad (g a)))))
           ≡⟨ refl ⟩
-        bindApply monad m (λ y → bindFunctor monad (f y) g) ∎-} {!!}
+        bindApply monad m (λ y → bindFunctor monad (f y) g) ∎
     lawAssoc (inj₂ (EffMonadTC x)) (inj₁ IdentTC) (inj₂ (EffMonadTC .x)) (inj₁ IdentTC) (inj₂ (EffMonadTC .x)) (inj₂ (EffMonadTC ._)) FunctorB FunctorB ReturnB b₄ m f g
-      = {!!}
+      = begin
+        bindFunctor monad (bindFunctor monad m f) g
+          ≡⟨ refl ⟩
+        subst₂ M' (monLawIdR x) refl (mBind monad (subst₂ M' (monLawIdR x) refl (mBind monad m (λ a → mReturn monad (f a)))) (λ a → mReturn monad (g a)))
+          ≡⟨ cong (λ X → subst₂ M' (monLawIdR x) refl X) (shiftSubst (monLawIdR x) (mBind monad m (λ a → mReturn monad (f a))) (λ a → mReturn monad (g a))) ⟩
+        subst₂ M' (monLawIdR x) refl (subst₂ M' (cong (λ X → X ∙ ε) (monLawIdR x)) refl (mBind monad (mBind monad m (λ a → mReturn monad (f a))) (λ a → mReturn monad (g a))))
+          ≡⟨ cong (λ X → subst₂ M' (monLawIdR x) refl (subst₂ M' (cong (λ X → X ∙ ε) (monLawIdR x)) refl X)) (sym (mSymLawAssoc monad m (λ a → mReturn monad (f a)) (λ a → mReturn monad (g a)))) ⟩
+        subst₂ M' (monLawIdR x) refl (subst₂ M' (cong (λ X → X ∙ ε) (monLawIdR x)) refl 
+                                             (subst₂ M' (sym (monLawAssoc x ε ε)) refl (mBind monad m (λ x → mBind monad (mReturn monad (f x)) (λ a → mReturn monad (g a))))))
+          ≡⟨ cong (λ X → subst₂ M' (monLawIdR x) refl (subst₂ M' (cong (λ X → X ∙ ε) (monLawIdR x)) refl (subst₂ M' (sym (monLawAssoc x ε ε)) refl (mBind monad m X)))) 
+                  (funExt (λ x → lawIdL monad (f x) (λ a → mReturn monad (g a)))) ⟩
+        subst₂ M' (monLawIdR x) refl (subst₂ M' (cong (λ X → X ∙ ε) (monLawIdR x)) refl 
+                                             (subst₂ M' (sym (monLawAssoc x ε ε)) refl (mBind monad m (λ a → subst₂ M' (sym (monLawIdL ε)) refl (mReturn monad (g (f a)))))))
+          ≡⟨ cong (λ X → subst₂ M' (monLawIdR x) refl (subst₂ M' (cong (λ X → X ∙ ε) (monLawIdR x)) refl (subst₂ M' (sym (monLawAssoc x ε ε)) refl X))) 
+                  (proof2 m (λ a → mReturn monad (g (f a))) (sym (monLawIdL ε))) ⟩
+        subst₂ M' (monLawIdR x) refl (subst₂ M' (cong (λ X → X ∙ ε) (monLawIdR x)) refl (subst₂ M' (sym (monLawAssoc x ε ε)) refl 
+               (subst₂ M' (cong (λ X → x ∙ X) (sym (monLawIdL ε))) refl (mBind monad m (λ a → mReturn monad (g (f a)))) ) )  )
+          ≡⟨ contractSubst₂ (monLawIdR x) (cong (λ X → X ∙ ε) (monLawIdR x)) ⟩
+        subst₂ M' (trans (cong (λ X → X ∙ ε) (monLawIdR x)) (monLawIdR x)) refl (subst₂ M' (sym (monLawAssoc x ε ε)) refl 
+                  (subst₂ M' (cong (λ X → x ∙ X) (sym (monLawIdL ε))) refl (mBind monad m (λ a → mReturn monad (g (f a)))) ) )  
+          ≡⟨ contractSubst₂ (trans (cong (λ X → X ∙ ε) (monLawIdR x)) (monLawIdR x)) (sym (monLawAssoc x ε ε)) ⟩
+        subst₂ M' (trans (sym (monLawAssoc x ε ε)) (trans (cong (λ X → X ∙ ε) (monLawIdR x)) (monLawIdR x))) refl
+                  (subst₂ M' (cong (λ X → x ∙ X) (sym (monLawIdL ε))) refl (mBind monad m (λ a → mReturn monad (g (f a)))) )  
+          ≡⟨ contractSubst₂ (trans (sym (monLawAssoc x ε ε)) (trans (cong (λ X → X ∙ ε) (monLawIdR x)) (monLawIdR x))) (cong (λ X → x ∙ X) (sym (monLawIdL ε))) ⟩
+        subst₂ M' (trans (cong (λ X → x ∙ X) (sym (monLawIdL ε))) (trans (sym (monLawAssoc x ε ε)) (trans (cong (λ X → X ∙ ε) (monLawIdR x)) (monLawIdR x)))) refl
+                  (mBind monad m (λ a → mReturn monad (g (f a)))) 
+          ≡⟨ cong (λ X → subst₂ M' X refl (mBind monad m (λ a → mReturn monad (g (f a))))) 
+                  (monEq≡monEq (trans (cong (λ X → x ∙ X) (sym (monLawIdL ε))) (trans (sym (monLawAssoc x ε ε)) (trans (cong (λ X → X ∙ ε) (monLawIdR x)) (monLawIdR x)))) (monLawIdR x)) ⟩
+        subst₂ M' (monLawIdR x) refl (mBind monad m (λ a → mReturn monad (g (f a))))
+          ≡⟨ refl ⟩
+        subst₂ M' (monLawIdR x) refl (bindMonad monad m (λ a → bindReturn monad (f a) g))
+          ≡⟨ sym (substB₄ (monLawIdR x) b₄ m (λ a → bindReturn monad (f a) g)) ⟩
+        bind (inj₂ (EffMonadTC x)) (inj₂ (EffMonadTC ε)) (inj₂ (EffMonadTC x)) b₄ m (λ a → bindReturn monad (f a) g) ∎
+        where
+          substB₄ : ∀ {x y z : Effect} {α β : Type}
+                  → (z≡xy : x ∙ y ≡ z)
+                  → (b : B[ inj₂ (EffMonadTC x) , inj₂ (EffMonadTC y) ]▷ inj₂ (EffMonadTC z))
+                  → (m : M' x α) → (g : α → M' y β )
+                  → bind (inj₂ (EffMonadTC x)) (inj₂ (EffMonadTC y)) (inj₂ (EffMonadTC z)) b m g ≡ subst₂ M' z≡xy refl (bindMonad monad m g)
+          substB₄ refl MonadB m₁ g₁ = refl
+          
+          shiftSubst : ∀ {x y z : Effect} {α β : Type}
+                     → (x≡y : x ≡ y) 
+                     → (m : M' x α) → (f : α → M' z β)
+                     → (mBind monad (subst₂ M' x≡y refl m) f) ≡ subst₂ M' (cong (λ X → X ∙ z) x≡y) refl (mBind monad m f)
+          shiftSubst refl m₁ f₁ = refl
     lawAssoc (inj₂ (EffMonadTC x)) (inj₂ (EffMonadTC y)) (inj₂ (EffMonadTC ._)) (inj₁ IdentTC) (inj₂ (EffMonadTC ._)) (inj₂ (EffMonadTC .y)) MonadB FunctorB FunctorB MonadB m f g 
-      = {-begin
+      = begin
         bindFunctor monad (bindMonad monad m f) g 
           ≡⟨ refl ⟩
         subst₂ M' (monLawIdR (x ∙ y)) refl (mBind monad (mBind monad m f) (λ a → mReturn monad (g a)))
@@ -407,16 +451,33 @@ EffectMonad→Polymonad {Effect = Effect} {M = M'} {{effMonoid = mon}} monad = r
           ≡⟨ sym (proof2 m (λ a → (mBind monad (f a) (λ b → mReturn monad (g b)))) (monLawIdR y)) ⟩
         mBind monad m (λ a → subst₂ M' (monLawIdR y) refl (mBind monad (f a) (λ b → mReturn monad (g b))))
           ≡⟨ refl ⟩
-        bindMonad monad m (λ x₁ → bindFunctor monad (f x₁) g) ∎-} {!!}
+        bindMonad monad m (λ x₁ → bindFunctor monad (f x₁) g) ∎
     lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (EffMonadTC ._)) (inj₂ (EffMonadTC x)) (inj₂ (EffMonadTC ._)) (inj₂ (EffMonadTC ._)) ReturnB MonadB b₃ ApplyB m f g
       = begin
         bindMonad monad (bindReturn monad m f) g 
           ≡⟨ refl ⟩
         mBind monad (mReturn monad (f m)) g 
-          ≡⟨ {!!} ⟩
+          ≡⟨ subst₂²≡id' M' (monLawIdL x) refl ⟩
+        subst₂ M' (sym (monLawIdL x)) refl (subst₂ M' (monLawIdL x) refl (mBind monad (mReturn monad (f m)) g))
+          ≡⟨ subst₂²≡id M' (monLawIdL (ε ∙ x)) refl ⟩
+        subst₂ M' (monLawIdL (ε ∙ x)) refl (subst₂ M' (sym (monLawIdL (ε ∙ x))) refl (subst₂ M' (sym (monLawIdL x)) refl (subst₂ M' (monLawIdL x) refl (mBind monad (mReturn monad (f m)) g))))
+          ≡⟨ refl ⟩
+        subst₂ M' (monLawIdL (ε ∙ x)) refl (subst₂ M' (sym (monLawIdL (ε ∙ x))) refl (subst₂ M' (sym (monLawIdL x)) refl (bindApply monad (f m) g)))
+          ≡⟨ cong (λ X → subst₂ M' (monLawIdL (ε ∙ x)) refl (subst₂ M' (sym (monLawIdL (ε ∙ x))) refl X)) (sym (substB₃ (monLawIdL x) b₃ (f m) g)) ⟩
+        subst₂ M' (monLawIdL (ε ∙ x)) refl (subst₂ M' (sym (monLawIdL (ε ∙ x))) refl (bind (inj₁ IdentTC) (inj₂ (EffMonadTC x)) (inj₂ (EffMonadTC (ε ∙ x))) b₃ (f m) g))
+          ≡⟨ cong (λ X → subst₂ M' (monLawIdL (ε ∙ x)) refl X) (sym (lawIdL monad m (λ a → bind (inj₁ IdentTC) (inj₂ (EffMonadTC x)) (inj₂ (EffMonadTC (ε ∙ x))) b₃ (f a) g))) ⟩
+        subst₂ M' (monLawIdL (ε ∙ x)) refl (mBind monad (mReturn monad m) (λ a → bind (inj₁ IdentTC) (inj₂ (EffMonadTC x)) (inj₂ (EffMonadTC (ε ∙ x))) b₃ (f a) g))
+          ≡⟨ refl ⟩
         bindApply monad m (λ a → bind (inj₁ IdentTC) (inj₂ (EffMonadTC x)) (inj₂ (EffMonadTC (ε ∙ x))) b₃ (f a) g) ∎
+        where
+          substB₃ : ∀ {x y : Effect} {α β : Type}
+                  → (y≡x : y ≡ x)
+                  → (b : B[ idTC , inj₂ (EffMonadTC x) ]▷ inj₂ (EffMonadTC y))
+                  → (m : α) → (g : α → M' x β )
+                  → (bind (inj₁ IdentTC) (inj₂ (EffMonadTC x)) (inj₂ (EffMonadTC y)) b) m g ≡ subst₂ M' (sym y≡x) refl (bindApply monad m g)
+          substB₃ refl ApplyB m₁ g₁ = refl
     lawAssoc (inj₁ IdentTC) (inj₂ (EffMonadTC x)) (inj₂ (EffMonadTC .x)) (inj₂ (EffMonadTC y)) (inj₂ (EffMonadTC ._)) (inj₂ (EffMonadTC ._)) ApplyB MonadB MonadB ApplyB m f g 
-      = {-begin
+      = begin
         bindMonad monad (bindApply monad m f) g 
           ≡⟨ refl ⟩
         mBind monad (subst₂ M' (monLawIdL x) refl (mBind monad (mReturn monad m) f)) g 
@@ -437,9 +498,9 @@ EffectMonad→Polymonad {Effect = Effect} {M = M'} {{effMonoid = mon}} monad = r
           ≡⟨ cong (λ X → subst₂ M' (monLawIdL (x ∙ y)) refl X) (sym (lawIdL monad m (λ a → mBind monad (f a) g))) ⟩
         subst₂ M' (monLawIdL (x ∙ y)) refl (mBind monad (mReturn monad m) (λ a → mBind monad (f a) g))
           ≡⟨ refl ⟩
-        bindApply monad m (λ a → bindMonad monad (f a) g) ∎ -} {!!}
+        bindApply monad m (λ a → bindMonad monad (f a) g) ∎
     lawAssoc (inj₂ (EffMonadTC x)) (inj₁ IdentTC) (inj₂ (EffMonadTC .x)) (inj₂ (EffMonadTC y)) (inj₂ (EffMonadTC ._)) (inj₂ (EffMonadTC .y)) FunctorB MonadB ApplyB MonadB m f g
-      = {-begin
+      = begin
         bindMonad monad (bindFunctor monad m f) g
           ≡⟨ refl ⟩
         mBind monad (subst₂ M' (monLawIdR x) refl (mBind monad m (λ a → mReturn monad (f a)))) g
@@ -455,11 +516,11 @@ EffectMonad→Polymonad {Effect = Effect} {M = M'} {{effMonoid = mon}} monad = r
           ≡⟨ sym (proof2 m (λ a → mBind monad (mReturn monad (f a)) g) (monLawIdL y)) ⟩
         mBind monad m (λ a → subst₂ M' (monLawIdL y) refl (mBind monad (mReturn monad (f a)) g))
           ≡⟨ refl ⟩
-        bindMonad monad m (λ a → bindApply monad (f a) g) ∎ -} {!!}
+        bindMonad monad m (λ a → bindApply monad (f a) g) ∎
     lawAssoc (inj₂ (EffMonadTC x)) (inj₂ (EffMonadTC y)) (inj₂ (EffMonadTC ._)) (inj₂ (EffMonadTC z)) (inj₂ (EffMonadTC ._)) (inj₂ (EffMonadTC ._)) MonadB MonadB MonadB b₄ m f g 
       with castMonadB x (y ∙ z) (monLawAssoc x y z) b₄
     lawAssoc (inj₂ (EffMonadTC x)) (inj₂ (EffMonadTC y)) (inj₂ (EffMonadTC ._)) (inj₂ (EffMonadTC z)) (inj₂ (EffMonadTC ._)) (inj₂ (EffMonadTC ._)) MonadB MonadB MonadB b₄ {γ = γ} m f g | MonadB
-      = {-let b = bind (inj₂ (EffMonadTC x)) (inj₂ (EffMonadTC (y ∙ z))) (inj₂ (EffMonadTC ((x ∙ y) ∙ z))) b₄
+      = let b = bind (inj₂ (EffMonadTC x)) (inj₂ (EffMonadTC (y ∙ z))) (inj₂ (EffMonadTC ((x ∙ y) ∙ z))) b₄
         in begin
           bindMonad monad (bindMonad monad m f) g 
             ≡⟨ refl ⟩
@@ -483,55 +544,8 @@ EffectMonad→Polymonad {Effect = Effect} {M = M'} {{effMonoid = mon}} monad = r
                     (sym (proof3 x (y ∙ z) (monLawAssoc x y z) b₄)) ⟩
           b m (λ x₂ → mBind monad (f x₂) g)
             ≡⟨ refl ⟩
-          b m (λ x₂ → bindMonad monad (f x₂) g) ∎-} {!!}
+          b m (λ x₂ → bindMonad monad (f x₂) g) ∎
 
-{-
-proof3 : (x y : monCarrier) → {k z : monCarrier} → (k≡z : k ≡ z) 
-           → (b : B[ inj₂ (EffMonadTC x) , inj₂ (EffMonadTC y) ]▷ inj₂ (EffMonadTC k)) 
-           → b ≡ subst (λ X → B[ inj₂ (EffMonadTC x) , inj₂ (EffMonadTC y) ]▷ inj₂ (EffMonadTC X)) (sym k≡z) (castMonadB x y k≡z b)
--}
-{-
-castMonadB : (x y : monCarrier) {k z : monCarrier}
-               → k ≡ z
-               → B[ inj₂ (EffMonadTC x) , inj₂ (EffMonadTC y) ]▷ inj₂ (EffMonadTC k)
-               → B[ inj₂ (EffMonadTC x) , inj₂ (EffMonadTC y) ]▷ inj₂ (EffMonadTC z)
--}
-{-
-lawIdR : ∀ {α : Type} {i : Effect}
-           → (m : M i α)
-           → m >>= return ≡ subst₂ M (sym (monLawIdR i)) refl m
-
-lawIdL : ∀ {α β : Type} {i : Effect}
-           → (a : α) → (k : α → M i β) 
-           → return a >>= k ≡ subst₂ M (sym (monLawIdL i)) refl (k a)
-
-lawAssoc : ∀ {α β γ : Type} {i j k : Effect}
-             → (m : M i α) → (f : α → M j β) → (g : β → M k γ)
-             → m >>= (λ x → f x >>= g) ≡ subst₂ M (monLawAssoc i j k) refl ((m >>= f) >>= g)
--}
-{-
-proof1 : ∀ {α β : Type} {x z : Effect} 
-           → (m : M' z α) → (g : α → M' ε β) 
-           → (eqA : z ≡ x)
-           → mBind monad (subst₂ M' eqA refl m) g ≡ subst₂ M' (cong (λ X → X ∙ ε) eqA) refl (mBind monad m g)
-proof2 :  ∀ {α β : Type} {x y z : Effect} 
-           → (m : M' x α) → (g : α → M' y β)
-           → (eqA : y ≡ z)
-           → mBind monad m (λ y → subst₂ M' eqA refl (g y))
-           ≡ subst₂ M' (cong (λ X → x ∙ X) eqA) refl (mBind monad m (λ y → g y))
--}
--- bindReturn m ma f = mReturn m (f ma)
--- bindApply {M = M} {i = i} m ma f = subst₂ M (monLawIdL i) refl (mBind m (mReturn m ma) f)
--- bindFunctor {M = M} {i = i} m ma f = subst₂ M (monLawIdR i) refl (mBind m ma (λ a → mReturn m (f a)))
-{-
-subst₂²≡id : ∀ {a b k} {A : Set a} {B : Set b} {X₁ X₂ : A} {Y₁ Y₂ : B}
-          → (P : A → B → Set k)
-          → (eqA : X₁ ≡ X₂) (eqB : Y₁ ≡ Y₂)
-          → ∀ {z : P X₂ Y₂}
-          → z ≡ subst₂ P eqA eqB (subst₂ P (sym eqA) (sym eqB) z)
--}
-
-{-
     lawClosure : ∀ (M N P S T U : TyCons)
                → ( B[ M , N ]▷ P × B[ S , Id ]▷ M × B[ T , Id ]▷ N × B[ P , Id ]▷ U )
                → B[ S , T ]▷ U
@@ -558,4 +572,4 @@ subst₂²≡id : ∀ {a b k} {A : Set a} {B : Set b} {X₁ X₂ : A} {Y₁ Y₂
       = subst (λ X → EffMonadBinds Effect Id (inj₂ (EffMonadTC x₁)) (inj₂ (EffMonadTC X))) (sym (monLawIdL x₁)) ApplyB
     lawClosure (inj₂ (EffMonadTC x)) (inj₂ (EffMonadTC x₁)) (inj₂ (EffMonadTC ._)) (inj₂ (EffMonadTC .x)) (inj₂ (EffMonadTC .x₁)) (inj₂ (EffMonadTC ._)) (MonadB , FunctorB , FunctorB , FunctorB) 
       = MonadB
--}
+
