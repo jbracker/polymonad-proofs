@@ -21,7 +21,7 @@ open import Parameterized.EffectMonad
 
 open Monoid.Monoid {{...}} renaming ( lawIdR to monLawIdR ; lawIdL to monLawIdL ; lawAssoc to monLawAssoc ; carrier to monCarrier )
 open Monoid
-open EffectMonad renaming (_>>=_ to mBind; return to mReturn; lawAssoc to mLawAssoc)
+open EffectMonad renaming (_>>=_ to mBind; return to mReturn; lawAssoc to mLawAssoc; symLawAssoc to mSymLawAssoc)
 
 subst₂²≡id : ∀ {a b k} {A : Set a} {B : Set b} {X₁ X₂ : A} {Y₁ Y₂ : B}
            → (P : A → B → Set k)
@@ -259,6 +259,22 @@ EffectMonad→Polymonad {Effect = Effect} {M = M'} {{effMonoid = mon}} monad = r
     proof4 {x = x} {y = y} {z = z} b with castMonadB x (y ∙ z) (monLawAssoc x y z) b
     proof4 b | MonadB = refl
 
+    switchSubst : ∀ {i j : Effect} {α : Type} 
+                → (i≡j : i ≡ j)
+                → (m : M' i α)
+                → subst₂ M' i≡j refl m
+                  ≡ subst (λ X → ⟨ inj₂ (EffMonadTC X) ⟩ α ) i≡j m
+    switchSubst refl m = refl
+    
+    proof5 : ∀ {x u v : Effect} {α β : Type}
+           → (eqAssoc : x ∙ u ≡ v)
+           → (m : M' x α ) → (f : α → M' u β)
+           → subst (λ X → ⟨ inj₂ (EffMonadTC X) ⟩ β ) eqAssoc (mBind monad m f)
+             ≡ bind (inj₂ (EffMonadTC x)) (inj₂ (EffMonadTC u)) (inj₂ (EffMonadTC v)) 
+                    (subst (λ X → B[ inj₂ (EffMonadTC x) , inj₂ (EffMonadTC u) ]▷ inj₂ (EffMonadTC X)) eqAssoc MonadB) 
+                    m f
+    proof5 refl m f = refl
+
     lawAssoc : ∀ (M N P R T S : TyCons) 
                (b₁ : B[ M , N ]▷ P) (b₂ : B[ P , R ]▷ T) 
                (b₃ : B[ N , R ]▷ S) (b₄ : B[ M , S ]▷ T)
@@ -437,13 +453,17 @@ EffectMonad→Polymonad {Effect = Effect} {M = M'} {{effMonoid = mon}} monad = r
         bindMonad monad m (λ a → bindApply monad (f a) g) ∎ -} {!!}
     lawAssoc (inj₂ (EffMonadTC x)) (inj₂ (EffMonadTC y)) (inj₂ (EffMonadTC ._)) (inj₂ (EffMonadTC z)) (inj₂ (EffMonadTC ._)) (inj₂ (EffMonadTC ._)) MonadB MonadB MonadB b₄ m f g 
       with castMonadB x (y ∙ z) (monLawAssoc x y z) b₄
-    lawAssoc (inj₂ (EffMonadTC x)) (inj₂ (EffMonadTC y)) (inj₂ (EffMonadTC ._)) (inj₂ (EffMonadTC z)) (inj₂ (EffMonadTC ._)) (inj₂ (EffMonadTC ._)) MonadB MonadB MonadB b₄ m f g | MonadB
+    lawAssoc (inj₂ (EffMonadTC x)) (inj₂ (EffMonadTC y)) (inj₂ (EffMonadTC ._)) (inj₂ (EffMonadTC z)) (inj₂ (EffMonadTC ._)) (inj₂ (EffMonadTC ._)) MonadB MonadB MonadB b₄ {γ = γ} m f g | MonadB
       = let b = bind (inj₂ (EffMonadTC x)) (inj₂ (EffMonadTC (y ∙ z))) (inj₂ (EffMonadTC ((x ∙ y) ∙ z))) b₄
         in begin
           bindMonad monad (bindMonad monad m f) g 
             ≡⟨ refl ⟩
           mBind monad (mBind monad m f) g 
-            ≡⟨ {!!} ⟩
+            ≡⟨ sym (mSymLawAssoc monad m f g) ⟩
+          subst₂ M' (sym (monLawAssoc x y z)) refl (mBind monad m (λ x → mBind monad (f x) g))
+            ≡⟨ switchSubst (sym (monLawAssoc x y z)) (mBind monad m (λ x → mBind monad (f x) g)) ⟩
+          subst (λ X → ⟨ inj₂ (EffMonadTC X) ⟩ γ ) (sym (monLawAssoc x y z)) (mBind monad m (λ x → mBind monad (f x) g))
+            ≡⟨ proof5 (sym (monLawAssoc x y z)) m ((λ x → mBind monad (f x) g)) ⟩
           bind (inj₂ (EffMonadTC x)) (inj₂ (EffMonadTC (y ∙ z))) (inj₂ (EffMonadTC ((x ∙ y) ∙ z))) 
                (subst (λ X → B[ inj₂ (EffMonadTC x) , inj₂ (EffMonadTC (y ∙ z)) ]▷ inj₂ (EffMonadTC X)) (sym (monLawAssoc x y z)) MonadB) 
                m (λ x₂ → mBind monad (f x₂) g)
