@@ -54,6 +54,22 @@ record EffectMonad {n} (Effect : Set n) {{effectMonoid : Monoid Effect}} (M : Ef
   _>>_ : ∀ {α β : Type} {i j : Effect} → M i α → M j β → M (i ∙ j) β
   ma >> mb = ma >>= λ a → mb
 
+  symLawAssoc : ∀ {α β γ : Type} {i j k : Effect}
+              → (m : M i α) → (f : α → M j β) → (g : β → M k γ)
+              → subst₂ M (sym (monLawAssoc i j k)) refl (m >>= (λ x → f x >>= g)) ≡ (m >>= f) >>= g
+  symLawAssoc {i = i} {j = j} {k = k} m f g = begin
+    subst₂ M (sym (Monoid.lawAssoc effectMonoid i j k)) refl (m >>= (λ x → f x >>= g))
+      ≡⟨ cong (λ X → subst₂ M (sym (Monoid.lawAssoc effectMonoid i j k)) refl X) (lawAssoc m f g) ⟩
+    subst₂ M (sym (Monoid.lawAssoc effectMonoid i j k)) refl (subst₂ M (Monoid.lawAssoc effectMonoid i j k) refl ((m >>= f) >>= g))
+      ≡⟨ sym (substInsert (Monoid.lawAssoc effectMonoid i j k)) ⟩
+    (m >>= f) >>= g ∎
+    where
+      substInsert : ∀ {i j : Effect} 
+                  → (i≡j : i ≡ j)
+                  → ∀ {α : Type} {x : M i α}
+                  → x ≡ subst₂ M (sym i≡j) refl (subst₂ M i≡j refl x)
+      substInsert refl = refl
+
 data EffMonadTyCons {n} (Effect : Set n) : Set n where
   EffMonadTC : Effect → EffMonadTyCons Effect
 
