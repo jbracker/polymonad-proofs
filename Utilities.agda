@@ -2,6 +2,7 @@
 module Utilities where
 
 -- Stdlib
+open import Level
 open import Data.Product
 open import Data.Sum
 open import Data.Unit
@@ -80,10 +81,13 @@ curry-∃∃← (a , b) = (a , (b , tt))
 --------------------------------------------------------------------------------
 
 -- Bijections
-record _↔_ (A : Set) (B : Set) : Set where
+record _↔_ {ℓ₁ ℓ₂} (α : Set ℓ₁) (β : Set ℓ₂) : Set (ℓ₁ ⊔ ℓ₂) where
   field
-    f   : A → B
-    f⁻¹ : B → A
-    lawf⁻¹f : ∀ {x : A} → f⁻¹ (f x) ≡ x
-    lawff⁻¹ : ∀ {x : B} → f (f⁻¹ x) ≡ x
-
+    f : α → β
+    f⁻¹ : β → α
+    
+    lawInjective  : (a₁ a₂ : α) → f a₁ ≡ f a₂ → a₁ ≡ a₂
+    lawSurjective : (b : β) → f (f⁻¹ b) ≡ b
+    
+    lawInjective⁻¹  : (b₁ b₂ : β) → f⁻¹ b₁ ≡ f⁻¹ b₂ → b₁ ≡ b₂
+    lawSurjective⁻¹ : (a : α) → f⁻¹ (f a) ≡ a

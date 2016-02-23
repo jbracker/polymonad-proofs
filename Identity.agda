@@ -32,7 +32,7 @@ data IdentityC (A : Set) : Set where
 
 -- Conversion from pure identity to identity data type.
 id→idC : ∀ {A} → Identity A → IdentityC A
-id→idC = identityC
+id→idC x = identityC x
 
 -- Conversion from identity data type to pure identity.
 idC→id : ∀ {A} → IdentityC A → Identity A
@@ -40,15 +40,29 @@ idC→id (identityC x) = x
 
 -- Show that the relationship between both identities is indeed an isomorphism,
 -- i.e., both representations are interchangable.
-identityBijection : ∀ {A} → Identity A ↔ IdentityC A
-identityBijection = record 
+identityBijection : ∀ {α} → Identity α ↔ IdentityC α
+identityBijection {α = α} = record
   { f   = id→idC
   ; f⁻¹ = idC→id
-  ; lawf⁻¹f = refl
-  ; lawff⁻¹ = prf
+  ; lawInjective    = λ a₁ a₂ prf → cong (λ X → idC→id X) prf
+  ; lawSurjective   = surjective
+  ; lawInjective⁻¹  = injective⁻¹
+  ; lawSurjective⁻¹ = λ a → refl
   } where
-      prf : ∀ {A} {y : IdentityC A} → id→idC (idC→id y) ≡ y
-      prf {_} {identityC y} = refl
+      surjective : ∀ (a : IdentityC α) → id→idC (idC→id a) ≡ a
+      surjective (identityC a) = refl
+      
+      injective⁻¹ : (b₁ b₂ : IdentityC α) → idC→id b₁ ≡ idC→id b₂ → b₁ ≡ b₂
+      injective⁻¹ (identityC b₁) (identityC b₂) prf = begin
+        identityC b₁ 
+          ≡⟨ refl ⟩
+        id→idC (idC→id (identityC b₁))
+          ≡⟨ cong (λ X → id→idC X) prf ⟩
+        id→idC (idC→id (identityC b₂))
+          ≡⟨ refl ⟩
+        identityC b₂ ∎
+
+
 
 -- Enumeration of identity type constructors for the pure identity polymonad.
 data IdTyCons : Set where
