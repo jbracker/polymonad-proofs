@@ -64,6 +64,7 @@ type-check:
 	$(AGDA_TC) Parameterized/IndexedMonad/PhantomMonad.agda
 	# $(AGDA_TC) Parameterized/IndexedMonad/Principal.agda
 	# $(AGDA_TC) Parameterized/IndexedMonad/SessionTypes.agda
+	$(AGDA_TC) Parameterized/IndexedMonad/DynState.agda
 	$(AGDA_TC) Parameterized/EffectMonad.agda
 	$(AGDA_TC) Parameterized/EffectMonad/Polymonad.agda
 

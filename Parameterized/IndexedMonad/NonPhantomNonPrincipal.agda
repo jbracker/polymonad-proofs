@@ -26,6 +26,7 @@ open import Polymonad
 open import Polymonad.Principal
 open import Polymonad.Unionable
 open import Parameterized.IndexedMonad
+open import Parameterized.IndexedMonad.DynState
 open import Parameterized.IndexedMonad.Polymonad
 open import Parameterized.PhantomIndices 
 
@@ -54,42 +55,6 @@ PrincipalPM {TyCons} {Id} pm
   × (∀ (M M' : TyCons) → (M , M') ∈ F → B[ M , M' ] pm ▷ M̂)
 -}
 
-
-record DState (i : Type) (j : Type) (α : Type) : Type where
-  constructor DStateCon
-  field
-    stateFun : i → j × α
-
-runDState : {i j α : Type} → DState i j α → i → j × α
-runDState (DStateCon sf) i = sf i
-
-execDState : {i j α : Type} → DState i j α → i → j
-execDState ma i = proj₁ (runDState ma i)
-
-evalDState : {i j α : Type} → DState i j α → i → α
-evalDState ma i = proj₂ (runDState ma i)
-
-DynStateMonad : IxMonad Type DState
-DynStateMonad = record
-  { _>>=_ = λ ma f → DStateCon (λ i → let j , a = runDState ma i in runDState (f a) j)
-  ; return = λ a → DStateCon (λ s → s , a)
-  ; lawIdR = λ a k → refl
-  ; lawIdL = λ m → refl
-  ; lawAssoc = λ m f g → refl 
-  }
-
-LiftDState : ∀ {ℓ} → Type → Type → Lift {ℓ = ℓ} TyCon
-LiftDState I J = lift (DState I J)
-
-liftShift : ∀ {ℓ} {I J : Type} → lower {ℓ = ℓ} (LiftDState {ℓ = ℓ} I J) ≡ DState I J
-liftShift = refl
-
-liftShiftEq : ∀ {ℓ} {I J K L : Type} → lower {ℓ = ℓ} (LiftDState {ℓ = ℓ} I J) ≡ lower {ℓ = ℓ} (LiftDState {ℓ = ℓ} K L) → DState I J ≡ DState K L
-liftShiftEq eq = eq
-
-liftShiftEq' : ∀ {ℓ} {I J K L : Type} → DState I J ≡ DState K L → lower {ℓ = ℓ} (LiftDState {ℓ = ℓ} I J) ≡ lower {ℓ = ℓ} (LiftDState {ℓ = ℓ} K L)
-liftShiftEq' eq = eq
-
 negMap : ∀ {ℓ₁ ℓ₂} {P : Set ℓ₁} {Q : Set ℓ₂} → (Q → P) → ¬ P → ¬ Q
 negMap f ¬P Q = ¬P (f Q)
 
@@ -99,13 +64,13 @@ DynStateMonad→Principal F (M , M' , MM∈F) (inj₁ IdentTC) (inj₂ (IxMonadT
 DynStateMonad→Principal F (M , M' , MM∈F) (inj₂ (IxMonadTC i j)) (inj₁ IdentTC) morph₁ morph₂ = {!!}
 DynStateMonad→Principal F (M , M' , MM∈F) (inj₂ (IxMonadTC i j)) (inj₂ (IxMonadTC k l)) morph₁ morph₂ = {!!} , {!!} , {!!} , {!!}
 
-DynStateMonad→¬Principal : (NPI : NonPhantomIndices (Type ∷ Type ∷ []) LiftDState)
+DynStateMonad→¬Principal : (NPI : NonPhantomIndices (Type ∷ Type ∷ []) LiftDynState)
                          → ¬ ( proj₁ NPI ≡ proj₁ (proj₂ NPI) )
                          → ¬ PrincipalPM (IxMonad→Polymonad DynStateMonad)
 DynStateMonad→¬Principal (I , J , K , L , (lift NPI')) ¬I≡J princ = {!!}
   where
-    NPI : ¬ DState I J ≡ DState K L
-    NPI = negMap (liftShiftEq' {ℓ = lsuc lzero}) NPI'
+    NPI : ¬ DynState I J ≡ DynState K L
+    NPI = negMap (liftDynStateShiftEq' {ℓ = lsuc lzero}) NPI'
     
     TyCons = IdTyCons ⊎ IxMonadTyCons Type
     
