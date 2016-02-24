@@ -26,8 +26,11 @@ open import KmettMonad.Definition
 
 KmettMonad→Polymonad : ∀ {n}
                      → (TyCons : Set n)
-                     → KmettMonad TyCons → Polymonad (IdTyCons ⊎ TyCons) idTC
-KmettMonad→Polymonad {n = n} KmettTyCons monad = record
+                     → (monad : KmettMonad TyCons) 
+                     → ((M N : TyCons) → Dec (KmettMonad.BindCompat monad M N))
+                     → ((M : TyCons) → Dec (KmettMonad.ReturnCompat monad M))
+                     → Polymonad (IdTyCons ⊎ TyCons) idTC
+KmettMonad→Polymonad {n = n} KmettTyCons monad decB decR = record
   { B[_,_]▷_ = B[_,_]▷_
   ; ⟨_⟩ = ⟨_⟩
   ; bind = λ {M} {N} {P} b → bind M N P b
@@ -37,23 +40,27 @@ KmettMonad→Polymonad {n = n} KmettTyCons monad = record
   ; lawMorph1 = lawMorph1
   ; lawMorph2 = lawMorph2
   ; lawMorph3 = lawMorph3
-  ; lawDiamond1 = lawDiamond1
-  ; lawDiamond2 = lawDiamond2
-  ; lawAssoc = lawAssoc
-  ; lawClosure = lawClosure
+  ; lawDiamond1 = {!!} -- lawDiamond1
+  ; lawDiamond2 = {!!} -- lawDiamond2
+  ; lawAssoc = {!!} -- lawAssoc
+  ; lawClosure = {!!} -- lawClosure
   } where
     TyCons = IdTyCons ⊎ KmettTyCons
     Id = idTC
     
     B[_,_]▷_ : (M N P : TyCons) → Set n
     B[ inj₁ IdentTC , inj₁ IdentTC ]▷ inj₁ IdentTC = IdBinds
-    B[ inj₁ IdentTC , inj₁ IdentTC ]▷ inj₂ P       = KmettBinds monad idTC idTC (inj₂ P)
+    B[ inj₁ IdentTC , inj₁ IdentTC ]▷ inj₂ P       with decR P
+    B[ inj₁ IdentTC , inj₁ IdentTC ]▷ inj₂ P       | yes p = KmettBinds monad idTC idTC (inj₂ P)
+    B[ inj₁ IdentTC , inj₁ IdentTC ]▷ inj₂ P       | no ¬p = Lift ⊥ 
     B[ inj₁ IdentTC , inj₂ N       ]▷ inj₁ IdentTC = Lift ⊥
     B[ inj₁ IdentTC , inj₂ N       ]▷ inj₂ P       = KmettBinds monad idTC (inj₂ N) (inj₂ P)
     B[ inj₂ M       , inj₁ IdentTC ]▷ inj₁ IdentTC = Lift ⊥
     B[ inj₂ M       , inj₁ IdentTC ]▷ inj₂ P       = KmettBinds monad (inj₂ M) idTC (inj₂ P)
     B[ inj₂ M       , inj₂ N       ]▷ inj₁ IdentTC = Lift ⊥
-    B[ inj₂ M       , inj₂ N       ]▷ inj₂ P       = KmettBinds monad (inj₂ M) (inj₂ N) (inj₂ P)
+    B[ inj₂ M       , inj₂ N       ]▷ inj₂ P       with decB M N
+    B[ inj₂ M       , inj₂ N       ]▷ inj₂ P       | yes p = KmettBinds monad (inj₂ M) (inj₂ N) (inj₂ P)
+    B[ inj₂ M       , inj₂ N       ]▷ inj₂ P       | no ¬p = Lift ⊥
     
     ⟨_⟩ : TyCons → TyCon
     ⟨_⟩ (inj₁ IdentTC) = Identity
@@ -61,13 +68,17 @@ KmettMonad→Polymonad {n = n} KmettTyCons monad = record
     
     bind : (M N P : TyCons) → B[ M , N ]▷ P → [ ⟨ M ⟩ , ⟨ N ⟩ ]▷ ⟨ P ⟩
     bind (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) IdentB = bindId
-    bind (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ M) (ReturnB .M rCompat) = bindReturn M monad rCompat
+    bind (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ M) b with decR M
+    bind (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ M) (ReturnB .M rCompat) | yes rCompat' = bindReturn M monad rCompat
+    bind (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ M) (lift ()) | no ¬rCompat 
     bind (inj₁ IdentTC) (inj₂ N) (inj₁ IdentTC) (lift ())
     bind (inj₁ IdentTC) (inj₂ N) (inj₂ .N) (ApplyB .N) = bindApply N monad
     bind (inj₂ M) (inj₁ IdentTC) (inj₁ IdentTC) (lift ())
     bind (inj₂ M) (inj₁ IdentTC) (inj₂ .M) (FunctorB .M) = bindFunctor M monad
     bind (inj₂ M) (inj₂ N) (inj₁ IdentTC) (lift ())
-    bind (inj₂ M) (inj₂ N) (inj₂ ._) (MonadB .M .N bCompat) = bindMonad M N monad bCompat
+    bind (inj₂ M) (inj₂ N) (inj₂ P) b with decB M N
+    bind (inj₂ M) (inj₂ N) (inj₂ ._) (MonadB .M .N bCompat) | yes bCompat' = bindMonad M N monad bCompat
+    bind (inj₂ M) (inj₂ N) (inj₂ P) (lift ()) | no ¬bCompat
 
     lawId : ⟨ Id ⟩ ≡ Identity
     lawId = refl
@@ -83,20 +94,26 @@ KmettMonad→Polymonad {n = n} KmettTyCons monad = record
       (bind (inj₂ M) Id (inj₂ M) (FunctorB M)) m (id lawId)
         ≡⟨ refl ⟩
       (bindFunctor M monad) m (id lawId)
-        ≡⟨ KmettMonad.lawIdL monad M M {!!} {!!} {!!} m ⟩
+        ≡⟨ refl ⟩
+      Functor.fmap (KmettMonad.functor monad M) (id lawId) m
+        ≡⟨ cong (λ X → X m) (Functor.lawId (KmettMonad.functor monad M)) ⟩
       m ∎
 
     lawMorph1 : ∀ (M N : TyCons) 
               → (B[ M , Id ]▷ N → B[ Id , M ]▷ N)
     lawMorph1 (inj₁ IdentTC) (inj₁ IdentTC) IdentB = IdentB
-    lawMorph1 (inj₁ IdentTC) (inj₂ M) (ReturnB .M rComp) = ReturnB M rComp
+    lawMorph1 (inj₁ IdentTC) (inj₂ M) b with decR M
+    lawMorph1 (inj₁ IdentTC) (inj₂ M) (ReturnB .M rCompat) | yes rCompat' = ReturnB M rCompat
+    lawMorph1 (inj₁ IdentTC) (inj₂ M) (lift ()) | no ¬rCompat
     lawMorph1 (inj₂ M) (inj₁ IdentTC) (lift ())
     lawMorph1 (inj₂ M) (inj₂ .M) (FunctorB .M) = ApplyB M
     
     lawMorph2 : ∀ (M N : TyCons) 
               → (B[ Id , M ]▷ N → B[ M , Id ]▷ N)
     lawMorph2 (inj₁ IdentTC) (inj₁ IdentTC) IdentB = IdentB
-    lawMorph2 (inj₁ IdentTC) (inj₂ M) (ReturnB .M rComp) = ReturnB M rComp
+    lawMorph2 (inj₁ IdentTC) (inj₂ M) b with decR M
+    lawMorph2 (inj₁ IdentTC) (inj₂ M) (ReturnB .M rCompat) | yes rCompat' = ReturnB M rCompat
+    lawMorph2 (inj₁ IdentTC) (inj₂ M) (lift ()) | no ¬rCompat --  
     lawMorph2 (inj₂ M) (inj₁ IdentTC) (lift ())
     lawMorph2 (inj₂ M) (inj₂ .M) (ApplyB .M) = FunctorB M
     
@@ -104,7 +121,8 @@ KmettMonad→Polymonad {n = n} KmettTyCons monad = record
               → ∀ {α β : Type} (v : α) (f : α → ⟨ M ⟩ β) 
               → (bind M Id N b₁) (f v) (id lawId) ≡ (bind Id M N b₂) ((id lawId) v) f
     lawMorph3 (inj₁ IdentTC) (inj₁ IdentTC) IdentB IdentB v f = refl
-    lawMorph3 (inj₁ IdentTC) (inj₂ M) (ReturnB .M rCompat₁) (ReturnB .M rCompat₂) v f = begin
+    lawMorph3 (inj₁ IdentTC) (inj₂ M) b₁ b₂ v f with decR M
+    lawMorph3 (inj₁ IdentTC) (inj₂ M) (ReturnB .M rCompat₁) (ReturnB .M rCompat₂) v f | yes rCompat = begin
       bindReturn M monad rCompat₁ (f v) (id lawId)
         ≡⟨ refl ⟩
       KmettMonad.return⟨_,_⟩ monad M rCompat₁ (f v)
@@ -112,6 +130,7 @@ KmettMonad→Polymonad {n = n} KmettTyCons monad = record
       KmettMonad.return⟨_,_⟩ monad M rCompat₂ (f v)
         ≡⟨ refl ⟩
       bindReturn M monad rCompat₂ (id lawId v) f ∎
+    lawMorph3 (inj₁ IdentTC) (inj₂ M) (lift ()) (lift ()) v f | no ¬rCompat
     lawMorph3 (inj₂ M) (inj₁ IdentTC) (lift ()) (lift ()) v f
     lawMorph3 (inj₂ M) (inj₂ .M) (FunctorB .M) (ApplyB .M) v f = begin
       bindFunctor M monad (f v) (id lawId) 
@@ -127,22 +146,22 @@ KmettMonad→Polymonad {n = n} KmettTyCons monad = record
                 → (∃ λ(S : TyCons) → B[ N , R ]▷ S × B[ M , S ]▷ T)
     lawDiamond1 (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC , IdentB , IdentB) = idTC , IdentB , IdentB
     lawDiamond1 (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ R) (inj₁ IdentTC) (inj₁ IdentTC , IdentB , lift ())
-    lawDiamond1 (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ M) (inj₁ IdentTC , IdentB , ReturnB .M rCompat) = idTC , IdentB , ReturnB M rCompat
+    lawDiamond1 (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ M) (inj₁ IdentTC , IdentB , b) = idTC , IdentB , b
     lawDiamond1 (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ R) (inj₂ .R) (inj₁ IdentTC , IdentB , ApplyB .R) = inj₂ R , ApplyB R , ApplyB R
     lawDiamond1 (inj₁ IdentTC) (inj₂ N) R T (inj₁ IdentTC , lift () , b₂)
     lawDiamond1 (inj₂ M) (inj₁ IdentTC) R T (inj₁ IdentTC , lift () , b₂)
     lawDiamond1 (inj₂ M) (inj₂ N) R T (inj₁ IdentTC , lift () , b₂)
     lawDiamond1 M N (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ P , b₁ , lift ())
     lawDiamond1 M N (inj₂ R) (inj₁ IdentTC) (inj₂ P , b₁ , lift ())
-    lawDiamond1 (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ M) (inj₂ .M , ReturnB .M rCompat , FunctorB .M) = idTC , IdentB , ReturnB M rCompat
+    lawDiamond1 (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ M) (inj₂ .M , b , FunctorB .M) = idTC , IdentB , b
     lawDiamond1 (inj₁ IdentTC) (inj₂ N) (inj₁ IdentTC) (inj₂ .N) (inj₂ .N , ApplyB .N , FunctorB .N) = inj₂ N , FunctorB N , ApplyB N
     lawDiamond1 (inj₂ M) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ .M) (inj₂ .M , FunctorB .M , FunctorB .M) = idTC , IdentB , FunctorB M
-    lawDiamond1 (inj₂ M) (inj₂ N) (inj₁ IdentTC) (inj₂ ._) (inj₂ ._ , MonadB .M .N bCompat , FunctorB ._) = inj₂ N , FunctorB N , MonadB M N bCompat
-    lawDiamond1 (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ R) (inj₂ .(M ◆⟨ monad ⟩ R)) (inj₂ M , ReturnB .M rCompat , MonadB .M .R bCompat) = {!!}
-    lawDiamond1 (inj₁ IdentTC) (inj₂ N) (inj₂ R) (inj₂ .(N ◆⟨ monad ⟩ R)) (inj₂ .N , ApplyB .N , MonadB .N .R bCompat) = {!!}
-    lawDiamond1 (inj₂ M) (inj₁ IdentTC) (inj₂ R) (inj₂ .(M ◆⟨ monad ⟩ R)) (inj₂ .M , FunctorB .M , MonadB .M .R bCompat) = {!!}
-    lawDiamond1 (inj₂ M) (inj₂ N) (inj₂ R) (inj₂ .((M ◆⟨ monad ⟩ N) ◆⟨ monad ⟩ R)) (inj₂ ._ , MonadB .M .N bCompat₁ , MonadB ._ .R bCompat₂) = {!!}
-    
+    lawDiamond1 (inj₂ M) (inj₂ N) (inj₁ IdentTC) (inj₂ T) (inj₂ ._ , b , FunctorB ._) = inj₂ N , FunctorB N , b
+    lawDiamond1 (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ R) (inj₂ T) (inj₂ M , br , bm) = inj₂ R , ApplyB R , {!!}
+    lawDiamond1 (inj₁ IdentTC) (inj₂ N) (inj₂ R) (inj₂ T) (inj₂ .N , ApplyB .N , bm) = {!!}
+    lawDiamond1 (inj₂ M) (inj₁ IdentTC) (inj₂ R) (inj₂ T) (inj₂ .M , FunctorB .M , bm) = {!!}
+    lawDiamond1 (inj₂ M) (inj₂ N) (inj₂ R) (inj₂ T) (inj₂ P , bm1 , bm2) = {!!}
+    {-
     lawDiamond2 : ∀ (M N R T : TyCons)
                 → (∃ λ(S : TyCons) → B[ N , R ]▷ S × B[ M , S ]▷ T)
                 → (∃ λ(P : TyCons) → B[ M , N ]▷ P × B[ P , R ]▷ T)
@@ -210,7 +229,7 @@ KmettMonad→Polymonad {n = n} KmettTyCons monad = record
       = {!!}
     lawAssoc (inj₂ M) (inj₂ N) (inj₂ ._) (inj₂ R) (inj₂ ._) (inj₂ ._) (MonadB .M .N bCompat₁) (MonadB ._ .R bCompat₂) (MonadB .N .R bCompat₃) b₄ m f g
       = {!!}
-
+-}
    
     lawClosure : ∀ (M N P S T U : TyCons)
                → ( B[ M , N ]▷ P × B[ S , Id ]▷ M × B[ T , Id ]▷ N × B[ P , Id ]▷ U )
@@ -221,24 +240,30 @@ KmettMonad→Polymonad {n = n} KmettTyCons monad = record
     lawClosure (inj₁ IdentTC) (inj₂ N) (inj₁ IdentTC) S T (inj₁ IdentTC) (lift () , b₂ , b₃ , IdentB)
     lawClosure (inj₂ M) (inj₁ IdentTC) (inj₁ IdentTC) S T (inj₁ IdentTC) (lift () , b₂ , b₃ , IdentB)
     lawClosure (inj₂ M) (inj₂ N) (inj₁ IdentTC) S T (inj₁ IdentTC) (lift () , b₂ , b₃ , IdentB)
-    lawClosure (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ U) (IdentB , IdentB , IdentB , ReturnB .U rCompat) = ReturnB U rCompat
-    lawClosure (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ S) (inj₁ IdentTC) (inj₂ U) (IdentB , lift () , IdentB , ReturnB .U rCompat)
-    lawClosure (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ T) (inj₂ U) (IdentB , IdentB , lift () , ReturnB .U rCompat)
-    lawClosure (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ S) (inj₂ T) (inj₂ U) (IdentB , lift () , lift () , ReturnB .U rCompat)
-    lawClosure (inj₁ IdentTC) (inj₂ N) (inj₁ IdentTC) S T (inj₂ U) (lift () , b₂ , b₃ , ReturnB .U rCompat)
-    lawClosure (inj₂ M) (inj₁ IdentTC) (inj₁ IdentTC) S T (inj₂ U) (lift () , b₂ , b₃ , ReturnB .U rCompat)
-    lawClosure (inj₂ M) (inj₂ N) (inj₁ IdentTC) S T (inj₂ U) (lift () , b₂ , b₃ , ReturnB .U rCompat)
+    lawClosure (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ U) (IdentB , IdentB , IdentB , bRet) = bRet
+    lawClosure (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ S) (inj₁ IdentTC) (inj₂ U) (IdentB , lift () , IdentB , bRet)
+    lawClosure (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ T) (inj₂ U) (IdentB , IdentB , lift () , bRet)
+    lawClosure (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ S) (inj₂ T) (inj₂ U) (IdentB , lift () , lift () , bRet)
+    lawClosure (inj₁ IdentTC) (inj₂ N) (inj₁ IdentTC) S T (inj₂ U) (lift () , b₂ , b₃ , bRet)
+    lawClosure (inj₂ M) (inj₁ IdentTC) (inj₁ IdentTC) S T (inj₂ U) (lift () , b₂ , b₃ , bRet)
+    lawClosure (inj₂ M) (inj₂ N) (inj₁ IdentTC) S T (inj₂ U) (lift () , b₂ , b₃ , bRet)
     lawClosure M N (inj₂ P) S T (inj₁ IdentTC) (b₁ , b₂ , b₃ , lift ())
-    lawClosure (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ M) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ .M) (ReturnB .M rCompat , IdentB , IdentB , FunctorB .M) = ReturnB M rCompat
-    lawClosure (inj₁ IdentTC) (inj₂ M) (inj₂ .M) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ .M) (ApplyB .M , IdentB , ReturnB .M rCompat , FunctorB .M) = ReturnB M rCompat
-    lawClosure (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ P) (inj₁ IdentTC) (inj₂ T) (inj₂ .P) (ReturnB .P rCompat , IdentB , lift () , FunctorB .P)
+    lawClosure (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ M) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ .M) (bRet , IdentB , IdentB , FunctorB .M) = bRet
+    lawClosure (inj₁ IdentTC) (inj₂ M) (inj₂ .M) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ .M) (ApplyB .M , IdentB , bRet , FunctorB .M) = bRet
+    lawClosure (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ P) (inj₁ IdentTC) (inj₂ T) (inj₂ .P) (bRet , IdentB , lift () , FunctorB .P)
     lawClosure (inj₁ IdentTC) (inj₂ N) (inj₂ .N) (inj₁ IdentTC) (inj₂ .N) (inj₂ .N) (ApplyB .N , IdentB , FunctorB .N , FunctorB .N) = ApplyB N
     lawClosure (inj₁ IdentTC) N (inj₂ P) (inj₂ S) T (inj₂ .P) (b₁ , lift () , b₃ , FunctorB .P)
-    lawClosure (inj₂ M) (inj₁ IdentTC) (inj₂ .M) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ .M) (FunctorB .M , ReturnB .M rCompat , IdentB , FunctorB .M) = ReturnB M rCompat
-    lawClosure (inj₂ M) (inj₂ N) (inj₂ ._) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ ._) (MonadB .M .N bCompat , ReturnB .M rCompat₁ , ReturnB .N rCompat₂ , FunctorB ._) = {!!}
-    lawClosure (inj₂ M) (inj₁ IdentTC) (inj₂ .M) (inj₁ IdentTC) (inj₂ T) (inj₂ .M) (FunctorB .M , ReturnB .M rCompat , lift () , FunctorB .M)
-    lawClosure (inj₂ M) (inj₂ N) (inj₂ ._) (inj₁ IdentTC) (inj₂ .N) (inj₂ ._) (MonadB .M .N bCompat , ReturnB .M rCompat , FunctorB .N , FunctorB ._) = {!!}
+    lawClosure (inj₂ M) (inj₁ IdentTC) (inj₂ .M) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ .M) (FunctorB .M , bRet , IdentB , FunctorB .M) = bRet
+    lawClosure (inj₂ M) (inj₂ N) (inj₂ P) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ ._) (bMon , bRet₁ , bRet₂ , FunctorB ._) with decR P
+    lawClosure (inj₂ M) (inj₂ N) (inj₂ P) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ .P) (bMon , bRet₁ , bRet₂ , FunctorB .P) | yes rCompat = ReturnB P rCompat
+    lawClosure (inj₂ M) (inj₂ N) (inj₂ P) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ .P) (bMon , bRet₁ , bRet₂ , FunctorB .P) | no ¬p = lift {!!}
+    lawClosure (inj₂ M) (inj₁ IdentTC) (inj₂ .M) (inj₁ IdentTC) (inj₂ T) (inj₂ .M) (FunctorB .M , bRet , lift () , FunctorB .M)
+    lawClosure (inj₂ M) (inj₂ N) (inj₂ P) (inj₁ IdentTC) (inj₂ .N) (inj₂ .P) (bMon , bRet , FunctorB .N , FunctorB .P) with decR M
+    lawClosure (inj₂ M) (inj₂ N) (inj₂ P) (inj₁ IdentTC) (inj₂ .N) (inj₂ .P) (bMon , ReturnB .M rCompat , FunctorB .N , FunctorB .P) | yes rCompat' with decB M N
+    lawClosure (inj₂ M) (inj₂ N) (inj₂ P) (inj₁ IdentTC) (inj₂ .N) (inj₂ .P) (bMon , ReturnB .M rCompat , FunctorB .N , FunctorB .P) | yes rCompat' | yes bCompat' = {!!}
+    lawClosure (inj₂ M) (inj₂ N) (inj₂ P) (inj₁ IdentTC) (inj₂ .N) (inj₂ .P) (lift () , ReturnB .M rCompat , FunctorB .N , FunctorB .P) | yes rCompat' | no ¬bCompat
+    lawClosure (inj₂ M) (inj₂ N) (inj₂ P) (inj₁ IdentTC) (inj₂ .N) (inj₂ .P) (bMon , lift () , FunctorB .N , FunctorB .P) | no ¬rCompat
     lawClosure (inj₂ M) (inj₁ IdentTC) (inj₂ .M) (inj₂ .M) (inj₁ IdentTC) (inj₂ .M) (FunctorB .M , FunctorB .M , IdentB , FunctorB .M) = FunctorB M
     lawClosure (inj₂ M) (inj₁ IdentTC) (inj₂ .M) (inj₂ .M) (inj₂ T) (inj₂ .M) (FunctorB .M , FunctorB .M , lift () , FunctorB .M)
-    lawClosure (inj₂ M) (inj₂ N) (inj₂ ._) (inj₂ .M) (inj₁ IdentTC) (inj₂ ._) (MonadB .M .N bCompat , FunctorB .M , ReturnB .N rCompat , FunctorB ._) = {!!}
-    lawClosure (inj₂ M) (inj₂ N) (inj₂ ._) (inj₂ .M) (inj₂ .N) (inj₂ ._) (MonadB .M .N bCompat , FunctorB .M , FunctorB .N , FunctorB ._) = MonadB M N bCompat
+    lawClosure (inj₂ M) (inj₂ N) (inj₂ P) (inj₂ .M) (inj₁ IdentTC) (inj₂ ._) (bMon , FunctorB .M , bRet , FunctorB ._) = {!!}
+    lawClosure (inj₂ M) (inj₂ N) (inj₂ P) (inj₂ .M) (inj₂ .N) (inj₂ ._) (bMon , FunctorB .M , FunctorB .N , FunctorB ._) = bMon
