@@ -1,5 +1,5 @@
 
-module KmettMonad.Monad where
+module SuperMonad.Monad where
 
 -- Stdlib
 open import Level
@@ -22,15 +22,15 @@ open import Applicative
 open import Monad
 open import Monad.Polymonad
 open import Polymonad
-open import KmettMonad.Definition 
+open import SuperMonad.Definition 
 
 -- -----------------------------------------------------------------------------
--- Standard Monads are Kmett Monads
+-- Standard Monads are Super Monads
 -- -----------------------------------------------------------------------------
 
-Monad→KmettMonad : (M : TyCon)
-                 → Monad M → KmettMonad MonadTyCons
-Monad→KmettMonad M monad = record
+Monad→SuperMonad : (M : TyCon)
+                 → Monad M → SuperMonad MonadTyCons
+Monad→SuperMonad M monad = record
   { ⟨_⟩ = ⟨_⟩
   ; BindCompat = BindCompat
   ; ReturnCompat = ReturnCompat

@@ -1,5 +1,5 @@
 
-module KmettMonad.MaybeListMonad where
+module SuperMonad.MaybeListMonad where
 
 -- Stdlib
 open import Level
@@ -23,7 +23,7 @@ open import Monad
 open import Monad.Maybe
 open import Monad.List
 open import Monad.Polymonad
-open import KmettMonad.Definition 
+open import SuperMonad.Definition 
 
 -- This has natural and clear semantics
 bindMaybeListList : [ Maybe , List ]▷ List
@@ -53,8 +53,8 @@ bindListMaybeListAbort Nil f = Nil -- This is clear
 data MaybeListBinds : Set where
   MaybeListBind : MaybeListBinds
 
-MaybeListKmettMonad : KmettMonad (MonadTyCons ⊎ MonadTyCons)
-MaybeListKmettMonad = record
+MaybeListSuperMonad : SuperMonad (MonadTyCons ⊎ MonadTyCons)
+MaybeListSuperMonad = record
   { ⟨_⟩ = ⟨_⟩
   ; BindCompat = BindCompat
   ; ReturnCompat = ReturnCompat
@@ -165,8 +165,8 @@ data MaybeListBindsFilter : TyCon → TyCon → Set where
   MaybeListListBind : MaybeListBindsFilter Maybe List
   ListMaybeListBind : MaybeListBindsFilter List Maybe
 
-MaybeListKmettMonadFilter : KmettMonad (MonadTyCons ⊎ MonadTyCons)
-MaybeListKmettMonadFilter = record
+MaybeListSuperMonadFilter : SuperMonad (MonadTyCons ⊎ MonadTyCons)
+MaybeListSuperMonadFilter = record
   { ⟨_⟩ = ⟨_⟩
   ; BindCompat = BindCompat
   ; ReturnCompat = ReturnCompat

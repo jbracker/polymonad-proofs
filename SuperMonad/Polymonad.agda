@@ -1,5 +1,5 @@
 
-module KmettMonad.Polymonad where
+module SuperMonad.Polymonad where
 
 -- Stdlib
 open import Level
@@ -18,19 +18,19 @@ open import Haskell
 open import Identity
 open import Functor
 open import Polymonad
-open import KmettMonad.Definition
+open import SuperMonad.Definition
 
 -- -----------------------------------------------------------------------------
--- Every Kmett Monad is a Polymonad
+-- Every Super Monad is a Polymonad
 -- -----------------------------------------------------------------------------
 
-KmettMonad→Polymonad : ∀ {n}
+SuperMonad→Polymonad : ∀ {n}
                      → (TyCons : Set n)
-                     → (monad : KmettMonad TyCons) 
-                     → ((M N : TyCons) → Dec (KmettMonad.BindCompat monad M N))
-                     → ((M : TyCons) → Dec (KmettMonad.ReturnCompat monad M))
+                     → (monad : SuperMonad TyCons) 
+                     → ((M N : TyCons) → Dec (SuperMonad.BindCompat monad M N))
+                     → ((M : TyCons) → Dec (SuperMonad.ReturnCompat monad M))
                      → Polymonad (IdTyCons ⊎ TyCons) idTC
-KmettMonad→Polymonad {n = n} KmettTyCons monad decB decR = record
+SuperMonad→Polymonad {n = n} SuperTyCons monad decB decR = record
   { B[_,_]▷_ = B[_,_]▷_
   ; ⟨_⟩ = ⟨_⟩
   ; bind = λ {M} {N} {P} b → bind M N P b
@@ -45,21 +45,21 @@ KmettMonad→Polymonad {n = n} KmettTyCons monad decB decR = record
   ; lawAssoc = {!!} -- lawAssoc
   ; lawClosure = {!!} -- lawClosure
   } where
-    TyCons = IdTyCons ⊎ KmettTyCons
+    TyCons = IdTyCons ⊎ SuperTyCons
     Id = idTC
     
     B[_,_]▷_ : (M N P : TyCons) → Set n
     B[ inj₁ IdentTC , inj₁ IdentTC ]▷ inj₁ IdentTC = IdBinds
     B[ inj₁ IdentTC , inj₁ IdentTC ]▷ inj₂ P       with decR P
-    B[ inj₁ IdentTC , inj₁ IdentTC ]▷ inj₂ P       | yes p = KmettBinds monad idTC idTC (inj₂ P)
+    B[ inj₁ IdentTC , inj₁ IdentTC ]▷ inj₂ P       | yes p = SuperBinds monad idTC idTC (inj₂ P)
     B[ inj₁ IdentTC , inj₁ IdentTC ]▷ inj₂ P       | no ¬p = Lift ⊥ 
     B[ inj₁ IdentTC , inj₂ N       ]▷ inj₁ IdentTC = Lift ⊥
-    B[ inj₁ IdentTC , inj₂ N       ]▷ inj₂ P       = KmettBinds monad idTC (inj₂ N) (inj₂ P)
+    B[ inj₁ IdentTC , inj₂ N       ]▷ inj₂ P       = SuperBinds monad idTC (inj₂ N) (inj₂ P)
     B[ inj₂ M       , inj₁ IdentTC ]▷ inj₁ IdentTC = Lift ⊥
-    B[ inj₂ M       , inj₁ IdentTC ]▷ inj₂ P       = KmettBinds monad (inj₂ M) idTC (inj₂ P)
+    B[ inj₂ M       , inj₁ IdentTC ]▷ inj₂ P       = SuperBinds monad (inj₂ M) idTC (inj₂ P)
     B[ inj₂ M       , inj₂ N       ]▷ inj₁ IdentTC = Lift ⊥
     B[ inj₂ M       , inj₂ N       ]▷ inj₂ P       with decB M N
-    B[ inj₂ M       , inj₂ N       ]▷ inj₂ P       | yes p = KmettBinds monad (inj₂ M) (inj₂ N) (inj₂ P)
+    B[ inj₂ M       , inj₂ N       ]▷ inj₂ P       | yes p = SuperBinds monad (inj₂ M) (inj₂ N) (inj₂ P)
     B[ inj₂ M       , inj₂ N       ]▷ inj₂ P       | no ¬p = Lift ⊥
     
     ⟨_⟩ : TyCons → TyCon
@@ -95,8 +95,8 @@ KmettMonad→Polymonad {n = n} KmettTyCons monad decB decR = record
         ≡⟨ refl ⟩
       (bindFunctor M monad) m (id lawId)
         ≡⟨ refl ⟩
-      Functor.fmap (KmettMonad.functor monad M) (id lawId) m
-        ≡⟨ cong (λ X → X m) (Functor.lawId (KmettMonad.functor monad M)) ⟩
+      Functor.fmap (SuperMonad.functor monad M) (id lawId) m
+        ≡⟨ cong (λ X → X m) (Functor.lawId (SuperMonad.functor monad M)) ⟩
       m ∎
 
     lawMorph1 : ∀ (M N : TyCons) 
@@ -125,9 +125,9 @@ KmettMonad→Polymonad {n = n} KmettTyCons monad decB decR = record
     lawMorph3 (inj₁ IdentTC) (inj₂ M) (ReturnB .M rCompat₁) (ReturnB .M rCompat₂) v f | yes rCompat = begin
       bindReturn M monad rCompat₁ (f v) (id lawId)
         ≡⟨ refl ⟩
-      KmettMonad.return⟨_,_⟩ monad M rCompat₁ (f v)
-        ≡⟨ cong (λ X → KmettMonad.return⟨_,_⟩ monad M X (f v)) {!!} ⟩
-      KmettMonad.return⟨_,_⟩ monad M rCompat₂ (f v)
+      SuperMonad.return⟨_,_⟩ monad M rCompat₁ (f v)
+        ≡⟨ cong (λ X → SuperMonad.return⟨_,_⟩ monad M X (f v)) {!!} ⟩
+      SuperMonad.return⟨_,_⟩ monad M rCompat₂ (f v)
         ≡⟨ refl ⟩
       bindReturn M monad rCompat₂ (id lawId v) f ∎
     lawMorph3 (inj₁ IdentTC) (inj₂ M) (lift ()) (lift ()) v f | no ¬rCompat
@@ -135,8 +135,8 @@ KmettMonad→Polymonad {n = n} KmettTyCons monad decB decR = record
     lawMorph3 (inj₂ M) (inj₂ .M) (FunctorB .M) (ApplyB .M) v f = begin
       bindFunctor M monad (f v) (id lawId) 
         ≡⟨ refl ⟩
-      Functor.fmap (KmettMonad.functor monad M) (id lawId) (f v)
-        ≡⟨ cong (λ X → X (f v)) (Functor.lawId (KmettMonad.functor monad M)) ⟩
+      Functor.fmap (SuperMonad.functor monad M) (id lawId) (f v)
+        ≡⟨ cong (λ X → X (f v)) (Functor.lawId (SuperMonad.functor monad M)) ⟩
       f v
         ≡⟨ refl ⟩
       bindApply M monad (id lawId v) f ∎

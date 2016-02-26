@@ -1,5 +1,5 @@
 
-module KmettMonad.IxMonad where
+module SuperMonad.IxMonad where
 
 -- Stdlib
 open import Level
@@ -20,17 +20,17 @@ open import Identity
 open import Functor
 open import Polymonad
 open import Parameterized.IndexedMonad
-open import KmettMonad.Definition
+open import SuperMonad.Definition
 
 -- -----------------------------------------------------------------------------
--- Indexed Monads are Kmett Monads
+-- Indexed Monads are Super Monads
 -- -----------------------------------------------------------------------------
 
-IxMonad→KmettMonad : ∀ {n}
+IxMonad→SuperMonad : ∀ {n}
                    → (Ixs : Set n)
                    → (M : Ixs → Ixs → TyCon)
-                   → IxMonad Ixs M → KmettMonad (IxMonadTyCons Ixs)
-IxMonad→KmettMonad {n = n} Ixs M monad = record
+                   → IxMonad Ixs M → SuperMonad (IxMonadTyCons Ixs)
+IxMonad→SuperMonad {n = n} Ixs M monad = record
   { ⟨_⟩ = ⟨_⟩
   ; BindCompat = BindCompat
   ; ReturnCompat = ReturnCompat

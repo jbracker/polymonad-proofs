@@ -1,5 +1,5 @@
 
-module KmettMonad.EffectMonad where
+module SuperMonad.EffectMonad where
 
 -- Stdlib
 open import Level
@@ -20,20 +20,20 @@ open import Identity
 open import Functor
 open import Polymonad
 open import Parameterized.EffectMonad
-open import KmettMonad.Definition
+open import SuperMonad.Definition
 
 open Parameterized.EffectMonad.Monoid
 
 -- -----------------------------------------------------------------------------
--- Indexed Monads are Kmett Monads
+-- Indexed Monads are Super Monads
 -- -----------------------------------------------------------------------------
 
-EffectMonad→KmettMonad : ∀ {n}
+EffectMonad→SuperMonad : ∀ {n}
                    → (Effect : Set n)
                    → (EffectMonoid : Monoid Effect)
                    → (M : Effect → TyCon)
-                   → EffectMonad Effect {{EffectMonoid}} M → KmettMonad (EffMonadTyCons Effect)
-EffectMonad→KmettMonad {n = n} Effect monoid M monad = record
+                   → EffectMonad Effect {{EffectMonoid}} M → SuperMonad (EffMonadTyCons Effect)
+EffectMonad→SuperMonad {n = n} Effect monoid M monad = record
   { ⟨_⟩ = ⟨_⟩
   ; BindCompat = BindCompat
   ; ReturnCompat = ReturnCompat

@@ -1,5 +1,5 @@
 
-module KmettMonad.Definition where
+module SuperMonad.Definition where
 
 -- Stdlib
 open import Level
@@ -20,10 +20,10 @@ open import Polymonad
 open import Functor
 
 -- -----------------------------------------------------------------------------
--- Definition of KmettMonads
+-- Definition of SuperMonads
 -- -----------------------------------------------------------------------------
 
-record KmettMonad {n} (TyCons : Set n) : Set (lsuc n) where
+record SuperMonad {n} (TyCons : Set n) : Set (lsuc n) where
   field
     ⟨_⟩ : TyCons → TyCon
     
@@ -63,51 +63,51 @@ record KmettMonad {n} (TyCons : Set n) : Set (lsuc n) where
   
   funcDep = _◆_
 
-open KmettMonad
+open SuperMonad
 
-K⟨_▷_⟩ : ∀ {n} {TyCons : Set n} → KmettMonad TyCons → TyCons → TyCon
+K⟨_▷_⟩ : ∀ {n} {TyCons : Set n} → SuperMonad TyCons → TyCons → TyCon
 K⟨ monad ▷ M ⟩ = ⟨ monad ⟩ M
 
-_◆⟨_⟩_ : ∀ {n} {TyCons : Set n} → TyCons → KmettMonad TyCons → TyCons → TyCons  
+_◆⟨_⟩_ : ∀ {n} {TyCons : Set n} → TyCons → SuperMonad TyCons → TyCons → TyCons  
 _◆⟨_⟩_ M monad N = _◆_ monad M N
 
 -- -----------------------------------------------------------------------------
--- Set to represent bind operations of Kmett Polymonad
+-- Set to represent bind operations of Super Polymonad
 -- -----------------------------------------------------------------------------
 
-data KmettBinds {n} {TyCons : Set n} (m : KmettMonad TyCons) : (M N P : IdTyCons ⊎ TyCons) → Set n where
+data SuperBinds {n} {TyCons : Set n} (m : SuperMonad TyCons) : (M N P : IdTyCons ⊎ TyCons) → Set n where
   MonadB   : (M N : TyCons) 
            → BindCompat m M N 
-           → KmettBinds m (inj₂ M) (inj₂ N) (inj₂ (M ◆⟨ m ⟩ N))
+           → SuperBinds m (inj₂ M) (inj₂ N) (inj₂ (M ◆⟨ m ⟩ N))
   FunctorB : (M : TyCons) 
-           → KmettBinds m (inj₂ M) idTC (inj₂ M)
+           → SuperBinds m (inj₂ M) idTC (inj₂ M)
   ApplyB   : (M : TyCons) 
-           → KmettBinds m idTC (inj₂ M) (inj₂ M)
+           → SuperBinds m idTC (inj₂ M) (inj₂ M)
   ReturnB  : (M : TyCons) 
            → ReturnCompat m M 
-           → KmettBinds m idTC idTC (inj₂ M) 
+           → SuperBinds m idTC idTC (inj₂ M) 
 
 -- -----------------------------------------------------------------------------
--- Bind operations required to implement a Kmett Polymonad
+-- Bind operations required to implement a Super Polymonad
 -- -----------------------------------------------------------------------------
 
 bindMonad : ∀ {n} {TyCons : Set n} 
           → (M N : TyCons)
-          → (m : KmettMonad TyCons)
+          → (m : SuperMonad TyCons)
           → BindCompat m M N
           → [ K⟨ m ▷ M ⟩ , K⟨ m ▷ N ⟩ ]▷ K⟨ m ▷ M ◆⟨ m ⟩ N ⟩
 bindMonad M N monad compat {α} {β} ma f = bind⟨_,_,_⟩ monad M N compat {α} {β} ma f
 
 bindFunctor : ∀ {n} {TyCons : Set n}
             → (M : TyCons)
-            → (m : KmettMonad TyCons)
+            → (m : SuperMonad TyCons)
             → [ K⟨ m ▷ M ⟩ , Identity ]▷ K⟨ m ▷ M ⟩
 bindFunctor {TyCons = TyCons} M monad {α = α} {β = β} ma f 
-  = Functor.fmap (KmettMonad.functor monad M) f ma
+  = Functor.fmap (SuperMonad.functor monad M) f ma
 
 bindApply : ∀ {n} {TyCons : Set n} 
           → (M : TyCons) 
-          → (m : KmettMonad TyCons)
+          → (m : SuperMonad TyCons)
           → [ Identity , K⟨ m ▷ M ⟩ ]▷ K⟨ m ▷ M ⟩
 bindApply M monad ma f = f ma 
   -- subst (λ X → K⟨ monad ▷ X ⟩ β) M◆M≡M (bind⟨_,_,_⟩ monad M M bCompat (return⟨_,_⟩ monad M rCompat ma) f)
@@ -115,7 +115,7 @@ bindApply M monad ma f = f ma
 
 bindReturn : ∀ {n} {TyCons : Set n} 
            → (M : TyCons) 
-           → (m : KmettMonad TyCons)
+           → (m : SuperMonad TyCons)
            → ReturnCompat m M
            → [ Identity , Identity ]▷ K⟨ m ▷ M ⟩
 bindReturn M monad rCompat ma f = return⟨_,_⟩ monad M rCompat (f ma)
