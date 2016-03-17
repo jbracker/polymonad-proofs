@@ -50,6 +50,7 @@ postulate
 funExt₂ : ∀ {l k n} {A : Set l} {B : A → Set k} {C : (a : A) → B a → Set n} {f g : (a : A) → (b : B a) → C a b} → ((a : A) → (b : B a) → f a b ≡ g a b) → f ≡ g
 funExt₂ {f = f} {g = g} p = funExt (λ a → funExt (p a))
 
+-- Two substitutions next to each other that reverse their effect, can be removed.
 subst²≡id : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {p q : A}
           → (eq : p ≡ q)
           → (F : A → Set ℓ₂)
