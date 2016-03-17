@@ -54,14 +54,14 @@ subst²≡id : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {p q : A}
           → (eq : p ≡ q)
           → (F : A → Set ℓ₂)
           → (x : F q)
-          → x ≡ subst F eq (subst F (sym eq) x)
+          → subst F eq (subst F (sym eq) x) ≡ x 
 subst²≡id refl F x = refl
 
 subst²≡id' : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {p q : A}
            → (eq : q ≡ p)
            → (F : A → Set ℓ₂)
            → (x : F q)
-           → x ≡ subst F (sym eq) (subst F eq x)
+           → subst F (sym eq) (subst F eq x) ≡ x
 subst²≡id' refl F x = refl
 
 -- The laws involving the existance of certains bind operators 
