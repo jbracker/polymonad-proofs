@@ -68,7 +68,7 @@ type-check:
 	$(AGDA_TC) Parameterized/EffectMonad.agda
 	$(AGDA_TC) Parameterized/EffectMonad/Polymonad.agda
 
-	
+	# Super Monads
 	$(AGDA_TC) SuperMonad/Definition.agda
 	$(AGDA_TC) SuperMonad/Monad.agda
 	$(AGDA_TC) SuperMonad/MaybeListMonad.agda

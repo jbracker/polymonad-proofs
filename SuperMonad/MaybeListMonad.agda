@@ -56,12 +56,12 @@ data MaybeListBinds : Set where
 MaybeListSuperMonad : SuperMonad (MonadTyCons ⊎ MonadTyCons)
 MaybeListSuperMonad = record
   { ⟨_⟩ = ⟨_⟩
-  ; BindCompat = BindCompat
-  ; ReturnCompat = ReturnCompat
+  ; Binds = Binds
+  ; Returns = Returns
   ; functor = functor
   ; _◆_ = _◆_
-  ; bind⟨_,_,_⟩ = bind⟨_,_,_⟩
-  ; return⟨_,_⟩ = return⟨_,_⟩
+  ; bind = bind
+  ; return = return
   ; lawIdR = lawIdR
   ; lawIdL = lawIdL
   ; lawAssoc = lawAssoc
@@ -78,14 +78,14 @@ MaybeListSuperMonad = record
     ⟨_⟩ (inj₁ MonadTC) = Maybe
     ⟨_⟩ (inj₂ MonadTC) = List
     
-    BindCompat : TyCons → TyCons → Set
-    BindCompat (inj₁ MonadTC) (inj₁ MonadTC) = ⊤
-    BindCompat (inj₁ MonadTC) (inj₂ MonadTC) = ⊤
-    BindCompat (inj₂ MonadTC) (inj₁ MonadTC) = ⊥
-    BindCompat (inj₂ MonadTC) (inj₂ MonadTC) = ⊤
+    Binds : TyCons → TyCons → Set
+    Binds (inj₁ MonadTC) (inj₁ MonadTC) = ⊤
+    Binds (inj₁ MonadTC) (inj₂ MonadTC) = ⊤
+    Binds (inj₂ MonadTC) (inj₁ MonadTC) = ⊥
+    Binds (inj₂ MonadTC) (inj₂ MonadTC) = ⊤
     
-    ReturnCompat : TyCons → Set
-    ReturnCompat M = ⊤
+    Returns : TyCons → Set
+    Returns M = ⊤
 
     _◆_ : TyCons → TyCons → TyCons
     inj₁ MonadTC ◆ inj₁ MonadTC = MaybeTC
@@ -99,15 +99,15 @@ MaybeListSuperMonad = record
     _>>=M_ = Monad._>>=_ monadMaybe
     returnM = Monad.return monadMaybe
 
-    bind⟨_,_,_⟩ : (M N : TyCons) → BindCompat M N → [ ⟨ M ⟩ , ⟨ N ⟩ ]▷ ⟨ M ◆ N ⟩
-    bind⟨_,_,_⟩ (inj₁ MonadTC) (inj₁ MonadTC) tt ma f = ma >>=M f
-    bind⟨_,_,_⟩ (inj₁ MonadTC) (inj₂ MonadTC) tt ma f = bindMaybeListList ma f
-    bind⟨_,_,_⟩ (inj₂ MonadTC) (inj₁ MonadTC) () ma f
-    bind⟨_,_,_⟩ (inj₂ MonadTC) (inj₂ MonadTC) tt ma f = ma >>=L f
+    bind : {M N : TyCons} → Binds M N → [ ⟨ M ⟩ , ⟨ N ⟩ ]▷ ⟨ M ◆ N ⟩
+    bind {M = inj₁ MonadTC} {N = inj₁ MonadTC} tt ma f = ma >>=M f
+    bind {M = inj₁ MonadTC} {N = inj₂ MonadTC} tt ma f = bindMaybeListList ma f
+    bind {M = inj₂ MonadTC} {N = inj₁ MonadTC} () ma f
+    bind {M = inj₂ MonadTC} {N = inj₂ MonadTC} tt ma f = ma >>=L f
    
-    return⟨_,_⟩ : ∀ {α : Type} → (M : TyCons) → ReturnCompat M → α → ⟨ M ⟩ α
-    return⟨_,_⟩ (inj₁ MonadTC) tt = returnM
-    return⟨_,_⟩ (inj₂ MonadTC) tt = returnL
+    return : ∀ {α : Type} → {M : TyCons} → Returns M → α → ⟨ M ⟩ α
+    return {M = inj₁ MonadTC} tt = returnM
+    return {M = inj₂ MonadTC} tt = returnL
    
     fmap⟨_⟩ : (M : TyCons) → ∀ {α β : Type} → (α → β) → ⟨ M ⟩ α → ⟨ M ⟩ β
     fmap⟨_⟩ (inj₁ MonadTC) f ma = ma >>=M (returnM ∘ f)
@@ -116,9 +116,9 @@ MaybeListSuperMonad = record
     lawIdR : ∀ {α β : Type} 
            → (M N : TyCons)
            → (N◆M≡M : N ◆ M ≡ M )
-           → (comp : BindCompat N M) → (compR : ReturnCompat N)
+           → (b : Binds N M) → (r : Returns N)
            → (a : α) → (k : α → ⟨ M ⟩ β)
-           → subst (λ X → ⟨ X ⟩ β) N◆M≡M (bind⟨ N , M , comp ⟩ (return⟨ N , compR ⟩ a) k) ≡ k a
+           → subst (λ X → ⟨ X ⟩ β) N◆M≡M (bind {M = N} {N = M} b (return r a) k) ≡ k a
     lawIdR (inj₁ MonadTC) (inj₁ MonadTC) refl tt tt a f = Monad.lawIdR monadMaybe a f
     lawIdR (inj₁ MonadTC) (inj₂ MonadTC) () () tt a f
     lawIdR (inj₂ MonadTC) (inj₁ MonadTC) refl tt tt a f = refl
@@ -127,9 +127,9 @@ MaybeListSuperMonad = record
     lawIdL : ∀ {α : Type} 
            → (M N : TyCons)
            → (M◆N≡M : M ◆ N ≡ M)
-           → (comp : BindCompat M N) → (compR : ReturnCompat N)
+           → (b : Binds M N) → (r : Returns N)
            → (m : ⟨ M ⟩ α)
-           → subst (λ X → ⟨ X ⟩ α) M◆N≡M (bind⟨ M , N , comp ⟩ m return⟨ N , compR ⟩) ≡ m
+           → subst (λ X → ⟨ X ⟩ α) M◆N≡M (bind b m (return r)) ≡ m
     lawIdL (inj₁ MonadTC) (inj₁ MonadTC) refl tt tt m = Monad.lawIdL monadMaybe m
     lawIdL (inj₁ MonadTC) (inj₂ MonadTC) () tt tt m
     lawIdL (inj₂ MonadTC) (inj₁ MonadTC) refl () tt m
@@ -138,11 +138,11 @@ MaybeListSuperMonad = record
     lawAssoc : ∀ {α β γ : Type} 
              → (M N P : TyCons)
              → (assoc : M ◆ (N ◆ P) ≡ (M ◆ N) ◆ P) 
-             → (comp1 : BindCompat M (N ◆ P)) → (comp2 : BindCompat N P)
-             → (comp3 : BindCompat (M ◆ N) P) → (comp4 : BindCompat M N)
+             → (b₁ : Binds M (N ◆ P)) → (b₂ : Binds N P)
+             → (b₃ : Binds (M ◆ N) P) → (b₄ : Binds M N)
              → (m : ⟨ M ⟩ α) → (f : α → ⟨ N ⟩ β) → (g : β → ⟨ P ⟩ γ)
-             → subst (λ X → ⟨ X ⟩ γ) assoc (bind⟨ M , N ◆ P , comp1 ⟩ m (λ x → bind⟨ N , P , comp2 ⟩ (f x) g)) 
-               ≡ bind⟨ M ◆ N , P , comp3 ⟩ (bind⟨ M , N , comp4 ⟩ m f) g
+             → subst (λ X → ⟨ X ⟩ γ) assoc (bind b₁ m (λ x → bind b₂ (f x) g)) 
+               ≡ bind b₃ (bind b₄ m f) g
     lawAssoc (inj₁ MonadTC) (inj₁ MonadTC) (inj₁ MonadTC) refl tt tt tt tt m f g = Monad.lawAssoc monadMaybe m f g
     lawAssoc (inj₁ MonadTC) (inj₁ MonadTC) (inj₂ MonadTC) refl tt tt tt tt (Just x) f g = refl
     lawAssoc (inj₁ MonadTC) (inj₁ MonadTC) (inj₂ MonadTC) refl tt tt tt tt Nothing  f g = refl
@@ -168,12 +168,12 @@ data MaybeListBindsFilter : TyCon → TyCon → Set where
 MaybeListSuperMonadFilter : SuperMonad (MonadTyCons ⊎ MonadTyCons)
 MaybeListSuperMonadFilter = record
   { ⟨_⟩ = ⟨_⟩
-  ; BindCompat = BindCompat
-  ; ReturnCompat = ReturnCompat
+  ; Binds = Binds
+  ; Returns = Returns
   ; functor = functor
   ; _◆_ = _◆_
-  ; bind⟨_,_,_⟩ = bind⟨_,_,_⟩
-  ; return⟨_,_⟩ = return⟨_,_⟩
+  ; bind = bind
+  ; return = return
   ; lawIdR = lawIdR
   ; lawIdL = lawIdL
   ; lawAssoc = lawAssoc
@@ -190,14 +190,14 @@ MaybeListSuperMonadFilter = record
     ⟨_⟩ (inj₁ MonadTC) = Maybe
     ⟨_⟩ (inj₂ MonadTC) = List
     
-    BindCompat : TyCons → TyCons → Set
-    BindCompat (inj₁ MonadTC) (inj₁ MonadTC) = ⊤
-    BindCompat (inj₁ MonadTC) (inj₂ MonadTC) = ⊤
-    BindCompat (inj₂ MonadTC) (inj₁ MonadTC) = ⊤
-    BindCompat (inj₂ MonadTC) (inj₂ MonadTC) = ⊤
+    Binds : TyCons → TyCons → Set
+    Binds (inj₁ MonadTC) (inj₁ MonadTC) = ⊤
+    Binds (inj₁ MonadTC) (inj₂ MonadTC) = ⊤
+    Binds (inj₂ MonadTC) (inj₁ MonadTC) = ⊤
+    Binds (inj₂ MonadTC) (inj₂ MonadTC) = ⊤
     
-    ReturnCompat : TyCons → Set
-    ReturnCompat M = ⊤
+    Returns : TyCons → Set
+    Returns M = ⊤
 
     _◆_ : TyCons → TyCons → TyCons
     inj₁ MonadTC ◆ inj₁ MonadTC = MaybeTC
@@ -211,15 +211,15 @@ MaybeListSuperMonadFilter = record
     _>>=M_ = Monad._>>=_ monadMaybe
     returnM = Monad.return monadMaybe
 
-    bind⟨_,_,_⟩ : (M N : TyCons) → BindCompat M N → [ ⟨ M ⟩ , ⟨ N ⟩ ]▷ ⟨ M ◆ N ⟩
-    bind⟨_,_,_⟩ (inj₁ MonadTC) (inj₁ MonadTC) tt ma f = ma >>=M f
-    bind⟨_,_,_⟩ (inj₁ MonadTC) (inj₂ MonadTC) tt ma f = bindMaybeListList ma f
-    bind⟨_,_,_⟩ (inj₂ MonadTC) (inj₁ MonadTC) tt ma f = bindListMaybeListFilter ma f
-    bind⟨_,_,_⟩ (inj₂ MonadTC) (inj₂ MonadTC) tt ma f = ma >>=L f
+    bind : {M N : TyCons} → Binds M N → [ ⟨ M ⟩ , ⟨ N ⟩ ]▷ ⟨ M ◆ N ⟩
+    bind {M = inj₁ MonadTC} {N = inj₁ MonadTC} tt ma f = ma >>=M f
+    bind {M = inj₁ MonadTC} {N = inj₂ MonadTC} tt ma f = bindMaybeListList ma f
+    bind {M = inj₂ MonadTC} {N = inj₁ MonadTC} tt ma f = bindListMaybeListFilter ma f
+    bind {M = inj₂ MonadTC} {N = inj₂ MonadTC} tt ma f = ma >>=L f
    
-    return⟨_,_⟩ : ∀ {α : Type} → (M : TyCons) → ReturnCompat M → α → ⟨ M ⟩ α
-    return⟨_,_⟩ (inj₁ MonadTC) tt = returnM
-    return⟨_,_⟩ (inj₂ MonadTC) tt = returnL
+    return : ∀ {α : Type} → {M : TyCons} → Returns M → α → ⟨ M ⟩ α
+    return {M = inj₁ MonadTC} tt = returnM
+    return {M = inj₂ MonadTC} tt = returnL
    
     fmap⟨_⟩ : (M : TyCons) → ∀ {α β : Type} → (α → β) → ⟨ M ⟩ α → ⟨ M ⟩ β
     fmap⟨_⟩ (inj₁ MonadTC) f ma = ma >>=M (returnM ∘ f)
@@ -228,9 +228,9 @@ MaybeListSuperMonadFilter = record
     lawIdR : ∀ {α β : Type} 
            → (M N : TyCons)
            → (N◆M≡M : N ◆ M ≡ M )
-           → (comp : BindCompat N M) → (compR : ReturnCompat N)
+           → (b : Binds N M) → (r : Returns N)
            → (a : α) → (k : α → ⟨ M ⟩ β)
-           → subst (λ X → ⟨ X ⟩ β) N◆M≡M (bind⟨ N , M , comp ⟩ (return⟨ N , compR ⟩ a) k) ≡ k a
+           → subst (λ X → ⟨ X ⟩ β) N◆M≡M (bind {M = N} {N = M} b (return r a) k) ≡ k a
     lawIdR (inj₁ MonadTC) (inj₁ MonadTC) refl tt tt a f = Monad.lawIdR monadMaybe a f
     lawIdR (inj₁ MonadTC) (inj₂ MonadTC) ()   tt tt a f
     lawIdR (inj₂ MonadTC) (inj₁ MonadTC) refl tt tt a f = refl
@@ -239,9 +239,9 @@ MaybeListSuperMonadFilter = record
     lawIdL : ∀ {α : Type} 
            → (M N : TyCons)
            → (M◆N≡M : M ◆ N ≡ M)
-           → (comp : BindCompat M N) → (compR : ReturnCompat N)
+           → (b : Binds M N) → (r : Returns N)
            → (m : ⟨ M ⟩ α)
-           → subst (λ X → ⟨ X ⟩ α) M◆N≡M (bind⟨ M , N , comp ⟩ m return⟨ N , compR ⟩) ≡ m
+           → subst (λ X → ⟨ X ⟩ α) M◆N≡M (bind b m (return r)) ≡ m
     lawIdL (inj₁ MonadTC) (inj₁ MonadTC) refl tt tt m = Monad.lawIdL monadMaybe m
     lawIdL (inj₁ MonadTC) (inj₂ MonadTC) ()   tt tt m
     lawIdL (inj₂ MonadTC) (inj₁ MonadTC) refl tt tt (x ∷ xs) = cong (λ XS → x ∷ XS) (lawIdL ListTC MaybeTC refl tt tt xs)
@@ -261,11 +261,11 @@ MaybeListSuperMonadFilter = record
     lawAssoc : ∀ {α β γ : Type} 
              → (M N P : TyCons)
              → (assoc : M ◆ (N ◆ P) ≡ (M ◆ N) ◆ P) 
-             → (comp1 : BindCompat M (N ◆ P)) → (comp2 : BindCompat N P)
-             → (comp3 : BindCompat (M ◆ N) P) → (comp4 : BindCompat M N)
+             → (b₁ : Binds M (N ◆ P)) → (b₂ : Binds N P)
+             → (b₃ : Binds (M ◆ N) P) → (b₄ : Binds M N)
              → (m : ⟨ M ⟩ α) → (f : α → ⟨ N ⟩ β) → (g : β → ⟨ P ⟩ γ)
-             → subst (λ X → ⟨ X ⟩ γ) assoc (bind⟨ M , N ◆ P , comp1 ⟩ m (λ x → bind⟨ N , P , comp2 ⟩ (f x) g)) 
-               ≡ bind⟨ M ◆ N , P , comp3 ⟩ (bind⟨ M , N , comp4 ⟩ m f) g
+             → subst (λ X → ⟨ X ⟩ γ) assoc (bind b₁ m (λ x → bind b₂ (f x) g)) 
+               ≡ bind b₃ (bind b₄ m f) g
     lawAssoc (inj₁ MonadTC) (inj₁ MonadTC) (inj₁ MonadTC) refl tt tt tt tt m f g = Monad.lawAssoc monadMaybe m f g
     lawAssoc (inj₁ MonadTC) (inj₁ MonadTC) (inj₂ MonadTC) refl tt tt tt tt (Just x) f g = refl
     lawAssoc (inj₁ MonadTC) (inj₁ MonadTC) (inj₂ MonadTC) refl tt tt tt tt Nothing  f g = refl

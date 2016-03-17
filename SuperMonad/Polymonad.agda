@@ -27,8 +27,8 @@ open import SuperMonad.Definition
 SuperMonad→Polymonad : ∀ {n}
                      → (TyCons : Set n)
                      → (monad : SuperMonad TyCons) 
-                     → ((M N : TyCons) → Dec (SuperMonad.BindCompat monad M N))
-                     → ((M : TyCons) → Dec (SuperMonad.ReturnCompat monad M))
+                     → ((M N : TyCons) → Dec (SuperMonad.Binds monad M N))
+                     → ((M : TyCons) → Dec (SuperMonad.Returns monad M))
                      → Polymonad (IdTyCons ⊎ TyCons) idTC
 SuperMonad→Polymonad {n = n} SuperTyCons monad decB decR = record
   { B[_,_]▷_ = B[_,_]▷_
@@ -40,7 +40,7 @@ SuperMonad→Polymonad {n = n} SuperTyCons monad decB decR = record
   ; lawMorph1 = lawMorph1
   ; lawMorph2 = lawMorph2
   ; lawMorph3 = lawMorph3
-  ; lawDiamond1 = {!!} -- lawDiamond1
+  ; lawDiamond1 = lawDiamond1
   ; lawDiamond2 = {!!} -- lawDiamond2
   ; lawAssoc = {!!} -- lawAssoc
   ; lawClosure = {!!} -- lawClosure
@@ -69,16 +69,16 @@ SuperMonad→Polymonad {n = n} SuperTyCons monad decB decR = record
     bind : (M N P : TyCons) → B[ M , N ]▷ P → [ ⟨ M ⟩ , ⟨ N ⟩ ]▷ ⟨ P ⟩
     bind (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) IdentB = bindId
     bind (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ M) b with decR M
-    bind (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ M) (ReturnB .M rCompat) | yes rCompat' = bindReturn M monad rCompat
-    bind (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ M) (lift ()) | no ¬rCompat 
+    bind (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ M) (ReturnB .M r) | yes r' = bindReturn M monad r
+    bind (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ M) (lift ()) | no ¬r
     bind (inj₁ IdentTC) (inj₂ N) (inj₁ IdentTC) (lift ())
     bind (inj₁ IdentTC) (inj₂ N) (inj₂ .N) (ApplyB .N) = bindApply N monad
     bind (inj₂ M) (inj₁ IdentTC) (inj₁ IdentTC) (lift ())
     bind (inj₂ M) (inj₁ IdentTC) (inj₂ .M) (FunctorB .M) = bindFunctor M monad
     bind (inj₂ M) (inj₂ N) (inj₁ IdentTC) (lift ())
     bind (inj₂ M) (inj₂ N) (inj₂ P) b with decB M N
-    bind (inj₂ M) (inj₂ N) (inj₂ ._) (MonadB .M .N bCompat) | yes bCompat' = bindMonad M N monad bCompat
-    bind (inj₂ M) (inj₂ N) (inj₂ P) (lift ()) | no ¬bCompat
+    bind (inj₂ M) (inj₂ N) (inj₂ ._) (MonadB .M .N b) | yes b' = bindMonad M N monad b
+    bind (inj₂ M) (inj₂ N) (inj₂ P) (lift ()) | no ¬b
 
     lawId : ⟨ Id ⟩ ≡ Identity
     lawId = refl
@@ -103,8 +103,8 @@ SuperMonad→Polymonad {n = n} SuperTyCons monad decB decR = record
               → (B[ M , Id ]▷ N → B[ Id , M ]▷ N)
     lawMorph1 (inj₁ IdentTC) (inj₁ IdentTC) IdentB = IdentB
     lawMorph1 (inj₁ IdentTC) (inj₂ M) b with decR M
-    lawMorph1 (inj₁ IdentTC) (inj₂ M) (ReturnB .M rCompat) | yes rCompat' = ReturnB M rCompat
-    lawMorph1 (inj₁ IdentTC) (inj₂ M) (lift ()) | no ¬rCompat
+    lawMorph1 (inj₁ IdentTC) (inj₂ M) (ReturnB .M r) | yes r' = ReturnB M r
+    lawMorph1 (inj₁ IdentTC) (inj₂ M) (lift ()) | no ¬r
     lawMorph1 (inj₂ M) (inj₁ IdentTC) (lift ())
     lawMorph1 (inj₂ M) (inj₂ .M) (FunctorB .M) = ApplyB M
     
@@ -112,8 +112,8 @@ SuperMonad→Polymonad {n = n} SuperTyCons monad decB decR = record
               → (B[ Id , M ]▷ N → B[ M , Id ]▷ N)
     lawMorph2 (inj₁ IdentTC) (inj₁ IdentTC) IdentB = IdentB
     lawMorph2 (inj₁ IdentTC) (inj₂ M) b with decR M
-    lawMorph2 (inj₁ IdentTC) (inj₂ M) (ReturnB .M rCompat) | yes rCompat' = ReturnB M rCompat
-    lawMorph2 (inj₁ IdentTC) (inj₂ M) (lift ()) | no ¬rCompat --  
+    lawMorph2 (inj₁ IdentTC) (inj₂ M) (ReturnB .M r) | yes r' = ReturnB M r
+    lawMorph2 (inj₁ IdentTC) (inj₂ M) (lift ()) | no ¬r
     lawMorph2 (inj₂ M) (inj₁ IdentTC) (lift ())
     lawMorph2 (inj₂ M) (inj₂ .M) (ApplyB .M) = FunctorB M
     
@@ -122,15 +122,15 @@ SuperMonad→Polymonad {n = n} SuperTyCons monad decB decR = record
               → (bind M Id N b₁) (f v) (id lawId) ≡ (bind Id M N b₂) ((id lawId) v) f
     lawMorph3 (inj₁ IdentTC) (inj₁ IdentTC) IdentB IdentB v f = refl
     lawMorph3 (inj₁ IdentTC) (inj₂ M) b₁ b₂ v f with decR M
-    lawMorph3 (inj₁ IdentTC) (inj₂ M) (ReturnB .M rCompat₁) (ReturnB .M rCompat₂) v f | yes rCompat = begin
-      bindReturn M monad rCompat₁ (f v) (id lawId)
+    lawMorph3 (inj₁ IdentTC) (inj₂ M) (ReturnB .M r₁) (ReturnB .M r₂) v f | yes rCompat = begin
+      bindReturn M monad r₁ (f v) (id lawId)
         ≡⟨ refl ⟩
-      SuperMonad.return⟨_,_⟩ monad M rCompat₁ (f v)
-        ≡⟨ cong (λ X → SuperMonad.return⟨_,_⟩ monad M X (f v)) {!!} ⟩
-      SuperMonad.return⟨_,_⟩ monad M rCompat₂ (f v)
+      SuperMonad.return monad r₁ (f v)
+        ≡⟨ cong (λ X → SuperMonad.return monad X (f v)) {!!} ⟩
+      SuperMonad.return monad r₂ (f v)
         ≡⟨ refl ⟩
-      bindReturn M monad rCompat₂ (id lawId v) f ∎
-    lawMorph3 (inj₁ IdentTC) (inj₂ M) (lift ()) (lift ()) v f | no ¬rCompat
+      bindReturn M monad r₂ (id lawId v) f ∎
+    lawMorph3 (inj₁ IdentTC) (inj₂ M) (lift ()) (lift ()) v f | no ¬r
     lawMorph3 (inj₂ M) (inj₁ IdentTC) (lift ()) (lift ()) v f
     lawMorph3 (inj₂ M) (inj₂ .M) (FunctorB .M) (ApplyB .M) v f = begin
       bindFunctor M monad (f v) (id lawId) 
