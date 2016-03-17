@@ -50,6 +50,20 @@ postulate
 funExt₂ : ∀ {l k n} {A : Set l} {B : A → Set k} {C : (a : A) → B a → Set n} {f g : (a : A) → (b : B a) → C a b} → ((a : A) → (b : B a) → f a b ≡ g a b) → f ≡ g
 funExt₂ {f = f} {g = g} p = funExt (λ a → funExt (p a))
 
+subst²≡id : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {p q : A}
+          → (eq : p ≡ q)
+          → (F : A → Set ℓ₂)
+          → (x : F q)
+          → x ≡ subst F eq (subst F (sym eq) x)
+subst²≡id refl F x = refl
+
+subst²≡id' : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {p q : A}
+           → (eq : q ≡ p)
+           → (F : A → Set ℓ₂)
+           → (x : F q)
+           → x ≡ subst F (sym eq) (subst F eq x)
+subst²≡id' refl F x = refl
+
 -- The laws involving the existance of certains bind operators 
 -- are simplified using the curry-howard correspondance:
 -- ∃ λ A → ⊤   ⇔   A
