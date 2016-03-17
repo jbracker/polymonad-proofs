@@ -3,6 +3,7 @@ module SuperMonad.Definition where
 
 -- Stdlib
 open import Level
+open import Function
 open import Agda.Primitive
 open import Data.Product
 open import Data.Sum
@@ -42,7 +43,7 @@ record SuperMonad {ℓ} (TyCons : Set ℓ) : Set (lsuc ℓ) where
            → (N◆M≡M : N ◆ M ≡ M )
            → (b : Binds N M) → (r : Returns N)
            → (a : α) → (k : α → ⟨ M ⟩ β)
-           → subst (λ X → ⟨ X ⟩ β) N◆M≡M (bind b (return r a) k) ≡ k a
+           → subst (λ X → ⟨ X ⟩ β) N◆M≡M (bind {M = N} {N = M} b (return {M = N} r a) k) ≡ k a
     lawIdL : ∀ {α : Type} 
            → (M N : TyCons)
            → (M◆N≡M : M ◆ N ≡ M)
@@ -63,13 +64,11 @@ record SuperMonad {ℓ} (TyCons : Set ℓ) : Set (lsuc ℓ) where
   
   funcDep = _◆_
 
-open SuperMonad
-
 K⟨_▷_⟩ : ∀ {n} {TyCons : Set n} → SuperMonad TyCons → TyCons → TyCon
-K⟨ monad ▷ M ⟩ = ⟨ monad ⟩ M
+K⟨ monad ▷ M ⟩ = SuperMonad.⟨ monad ⟩ M
 
 _◆⟨_⟩_ : ∀ {n} {TyCons : Set n} → TyCons → SuperMonad TyCons → TyCons → TyCons  
-_◆⟨_⟩_ M monad N = _◆_ monad M N
+_◆⟨_⟩_ M monad N = SuperMonad._◆_ monad M N
 
 -- -----------------------------------------------------------------------------
 -- Set to represent bind operations of Super Polymonad
@@ -77,14 +76,14 @@ _◆⟨_⟩_ M monad N = _◆_ monad M N
 
 data SuperBinds {n} {TyCons : Set n} (m : SuperMonad TyCons) : (M N P : IdTyCons ⊎ TyCons) → Set n where
   MonadB   : (M N : TyCons) 
-           → Binds m M N 
+           → SuperMonad.Binds m M N 
            → SuperBinds m (inj₂ M) (inj₂ N) (inj₂ (M ◆⟨ m ⟩ N))
   FunctorB : (M : TyCons) 
            → SuperBinds m (inj₂ M) idTC (inj₂ M)
   ApplyB   : (M : TyCons) 
            → SuperBinds m idTC (inj₂ M) (inj₂ M)
   ReturnB  : (M : TyCons) 
-           → Returns m M 
+           → SuperMonad.Returns m M 
            → SuperBinds m idTC idTC (inj₂ M) 
 
 -- -----------------------------------------------------------------------------
@@ -94,9 +93,9 @@ data SuperBinds {n} {TyCons : Set n} (m : SuperMonad TyCons) : (M N P : IdTyCons
 bindMonad : ∀ {n} {TyCons : Set n} 
           → (M N : TyCons)
           → (m : SuperMonad TyCons)
-          → Binds m M N
+          → SuperMonad.Binds m M N
           → [ K⟨ m ▷ M ⟩ , K⟨ m ▷ N ⟩ ]▷ K⟨ m ▷ M ◆⟨ m ⟩ N ⟩
-bindMonad M N monad b {α} {β} ma f = bind monad b {α} {β} ma f
+bindMonad M N monad b {α} {β} ma f = SuperMonad.bind monad b {α} {β} ma f
 
 bindFunctor : ∀ {n} {TyCons : Set n}
             → (M : TyCons)
@@ -109,13 +108,11 @@ bindApply : ∀ {n} {TyCons : Set n}
           → (M : TyCons) 
           → (m : SuperMonad TyCons)
           → [ Identity , K⟨ m ▷ M ⟩ ]▷ K⟨ m ▷ M ⟩
-bindApply M monad ma f = f ma 
-  -- subst (λ X → K⟨ monad ▷ X ⟩ β) M◆M≡M (bind⟨_,_,_⟩ monad M M bCompat (return⟨_,_⟩ monad M rCompat ma) f)
-  -- (return ma) >>= f
+bindApply M monad ma f = f ma
 
 bindReturn : ∀ {n} {TyCons : Set n} 
            → (M : TyCons) 
            → (m : SuperMonad TyCons)
-           → Returns m M
+           → SuperMonad.Returns m M
            → [ Identity , Identity ]▷ K⟨ m ▷ M ⟩
-bindReturn M monad r ma f = return monad r (f ma)
+bindReturn M monad r ma f = SuperMonad.return monad r (f ma)
