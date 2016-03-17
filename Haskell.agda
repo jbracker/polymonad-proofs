@@ -36,24 +36,6 @@ substBind {M₂} {N₂} {P₂} {M₁} {N₁} {P₁} eqM eqN eqP b =
         (subst (λ x → [ M₁ , x ]▷ P₂) eqN 
                (subst (λ x → [ M₁ , N₁ ]▷ x) eqP b))
 
-f≡subst²f : ∀ {M M' : TyCon} 
-          → (eqM : M ≡ M')
-          → ∀ {α β : Type} {f : α → M β}
-          → f ≡ subst (λ M → (α → M β)) (sym eqM) (subst (λ M → (α → M β)) eqM f)
-f≡subst²f refl = refl
-
-x≡subst²x : ∀ {M M' : TyCon} 
-          → (eqM : M ≡ M')
-          → ∀ {α : Type} {x : M α}
-          → x ≡ subst (λ M → M α) (sym eqM) (subst (λ M → M α) eqM x)
-x≡subst²x refl = refl
-
-x≡subst²x' : ∀ {M M' : TyCon} 
-           → (eqM : M ≡ M')
-           → ∀ {α : Type} {x : M' α}
-           → x ≡ subst (λ M → M α) eqM (subst (λ M → M α) (sym eqM) x)
-x≡subst²x' refl = refl
-
 b≡substBind²b : ∀ {M N P M' N' P' : TyCon} 
               → (b : [ M , N ]▷ P)
               → (eqM : M ≡ M')

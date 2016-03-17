@@ -47,13 +47,13 @@ id≡K→Mij∘Mij→K : {Ixs : Set} → {M : Ixs → Ixs → TyCon}
                → (K : PhantomIndices (Ixs ∷ Ixs ∷ []) (LiftM M))
                → ∀ {i j} → ∀ {α} → {mij : M i j α} 
                → mij ≡ (K→IxM (Ixs ∷ Ixs ∷ []) K (IxM→K (Ixs ∷ Ixs ∷ []) K mij))
-id≡K→Mij∘Mij→K K = x≡subst²x (lower (proj₂ K))
+id≡K→Mij∘Mij→K K {α = α} {mij = mij} = sym (subst²≡id' (lower (proj₂ K)) (λ M → M α) mij) 
 
 id≡Mij→K∘K→Mij : {Ixs : Set} → {M : Ixs → Ixs → TyCon} 
                → (K : PhantomIndices (Ixs ∷ Ixs ∷ []) (LiftM M))
                → ∀ {i j} → ∀ {α} → {k : (proj₁ K) α} 
                → k ≡ (IxM→K (Ixs ∷ Ixs ∷ []) K (K→IxM (Ixs ∷ Ixs ∷ []) K {i} {j} k))
-id≡Mij→K∘K→Mij K = x≡subst²x' (lower (proj₂ K))
+id≡Mij→K∘K→Mij K {α = α} {k = k} = sym (subst²≡id (lower (proj₂ K)) (λ M → M α) k)
 
 -- -----------------------------------------------------------------------------
 -- A indexed monad with phantom indices is basically equivalent to a normal monad.
@@ -138,7 +138,7 @@ PhantomIxMonad→Monad {Ixs = Ixs} {M = IxM} i K ixMonad = record
         subst (\X → (α → X α)) (sym Mij≡K) (castPhantomReturn K ixReturn)
           ≡⟨ refl ⟩
         subst (\X → (α → X α)) (sym Mij≡K) (subst (\X → (α → X α)) Mij≡K ixReturn)
-          ≡⟨ sym (f≡subst²f Mij≡K) ⟩
+          ≡⟨ subst²≡id' Mij≡K (\X → (α → X α)) ixReturn ⟩
         ixReturn ∎
 
       lawIdR : ∀ {α β : Type} 

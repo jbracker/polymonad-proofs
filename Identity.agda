@@ -90,7 +90,7 @@ unId : ∀ {τ : Type} {Id : TyCon} → Id ≡ Identity → Id τ → τ
 unId {τ = τ} lawId x = subst (λ X → X τ) lawId x
 
 X≡[id∘unId]X : ∀ {α : Type} {Id : TyCon} → (lawId : Id ≡ Identity) → (x : Id α) → x ≡ id lawId (unId lawId x)
-X≡[id∘unId]X lawId x = x≡subst²x lawId {x = x}
+X≡[id∘unId]X {α = α} lawId x = sym (subst²≡id' lawId (λ X → X α) x)
 
 X≡[id∘subst]X : ∀ {α : Type} {Id : TyCon} → (lawId : Id ≡ Identity) → (x : Id α) → x ≡ id lawId (subst (λ X → X α) lawId x)
 X≡[id∘subst]X refl x = refl

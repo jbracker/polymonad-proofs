@@ -211,7 +211,7 @@ polymonadUnion {TyCons₁} {TyCons₂} {pm₁} {pm₂} upm₁ upm₂ = record
               substBind refl eqId₁ refl (pmBind pm₁ b₁) m (subst (λ N → (α → N α)) eqId₁ (id lawId₁)) 
                 ≡⟨ substBindInwardEq (pmBind pm₁ b₁) eqM eqId₁ eqM m (subst (λ N → (α → N α)) eqId₁ (id lawId₁)) ⟩
               subst (λ P → P α) eqM (pmBind pm₁ b₁ (subst (λ M → M α) eqM m) (subst (λ N → (α → N α)) (sym eqId₁) (subst (λ N → (α → N α)) eqId₁ (id lawId₁)) ) )
-                ≡⟨ cong (λ q → subst (λ P → P α) eqM (pmBind pm₁ b₁ (subst (λ M → M α) eqM m) q)) (sym (f≡subst²f eqId₁)) ⟩
+                ≡⟨ cong (λ q → subst (λ P → P α) eqM (pmBind pm₁ b₁ (subst (λ M → M α) eqM m) q)) (subst²≡id' eqId₁ (λ N → (α → N α)) (id lawId₁)) ⟩
               subst (λ P → P α) eqM (pmBind pm₁ b₁ (subst (λ M → M α) eqM m) (id lawId₁))
                 ≡⟨ cong (λ x → subst (λ P → P α) eqM x) (proof₁ (subst (λ M → M α) eqM m)) ⟩ -- pmBind pm₁ b₁ m (pmId→ pm₁) ≡ m
               subst (λ P → P α) eqM (subst (λ M → M α) eqM m)
@@ -229,7 +229,7 @@ polymonadUnion {TyCons₁} {TyCons₂} {pm₁} {pm₂} upm₁ upm₂ = record
               substBind refl eqId₂ refl (pmBind pm₂ b₂) m (subst (λ N → (α → N α)) eqId₂ (id lawId₂)) 
                 ≡⟨ substBindInwardEq (pmBind pm₂ b₂) eqM eqId₂ eqM m (subst (λ N → (α → N α)) eqId₂ (id lawId₂)) ⟩
               subst (λ P → P α) eqM (pmBind pm₂ b₂ (subst (λ M → M α) eqM m) (subst (λ N → (α → N α)) (sym eqId₂) (subst (λ N → (α → N α)) eqId₂ (id lawId₂)) ) )
-                ≡⟨ cong (λ q → subst (λ P → P α) eqM (pmBind pm₂ b₂ (subst (λ M → M α) eqM m) q)) (sym (f≡subst²f eqId₂)) ⟩
+                ≡⟨ cong (λ q → subst (λ P → P α) eqM (pmBind pm₂ b₂ (subst (λ M → M α) eqM m) q)) (subst²≡id' eqId₂ (λ N → (α → N α)) (id lawId₂)) ⟩
               subst (λ P → P α) eqM (pmBind pm₂ b₂ (subst (λ M → M α) eqM m) (id lawId₂))
                 ≡⟨ cong (λ x → subst (λ P → P α) eqM x) (proof₂ (subst (λ M → M α) eqM m)) ⟩ -- pmBind pm₂ b₂ m (pmId→ pm₂) ≡ m
               subst (λ P → P α) eqM (subst (λ M → M α) eqM m)
@@ -289,13 +289,13 @@ polymonadUnion {TyCons₁} {TyCons₂} {pm₁} {pm₂} upm₁ upm₂ = record
           substBind eqM eqId eqP pmb₁ (f v) (subst (λ X → (β → X β)) eqId (id lawId₁)) 
             ≡⟨ substBindInwardEq pmb₁ eqM eqId eqP (f v) (subst (λ X → (β → X β)) eqId (id lawId₁)) ⟩
           subst (λ X → X β) eqP (pmb₁ (subst (λ X → X β) (sym eqM) (f v)) (subst (λ N → (β → N β)) (sym eqId) (subst (λ X → (β → X β)) eqId (id lawId₁))) ) 
-            ≡⟨ cong (λ x → subst (λ X → X β) eqP (pmb₁ (subst (λ X → X β) (sym eqM) (f v)) x )) (sym (f≡subst²f eqId)) ⟩
+            ≡⟨ cong (λ x → subst (λ X → X β) eqP (pmb₁ (subst (λ X → X β) (sym eqM) (f v)) x )) (subst²≡id' eqId (λ X → (β → X β)) (id lawId₁)) ⟩
           subst (λ X → X β) eqP (pmb₁ (subst (λ X → X β) (sym eqM) (f v)) (id lawId₁) )
             ≡⟨ cong (subst (λ X → X β) eqP) (pmLawMorph3 pm M P (subst (λ x → x) eqBind₁ b₁) (subst (λ x → x) eqBind₂ b₂) v ((λ x → subst (λ M → M β) (sym eqM) (f x)))) ⟩
           subst (λ X → X β) eqP (pmb₂ ((id lawId₁) v) (λ x → subst (λ X → X β) (sym eqM) (f x)) )
             ≡⟨ cong (λ x → subst (λ X → X β) eqP (pmb₂ ((id lawId₁) v) x) ) (shiftFunSubst (sym eqM) f) ⟩
           subst (λ X → X β) eqP (pmb₂ ((id lawId₁) v) (subst (λ X → (α → X β)) (sym eqM) f)) 
-            ≡⟨ cong (λ x → subst (λ X → X β) eqP (pmb₂ x (subst (λ X → (α → X β)) (sym eqM) f))) (x≡subst²x eqId) ⟩
+            ≡⟨ cong (λ x → subst (λ X → X β) eqP (pmb₂ x (subst (λ X → (α → X β)) (sym eqM) f))) (sym (subst²≡id' eqId (λ X → X α) ((id lawId₁) v))) ⟩
           subst (λ X → X β) eqP (pmb₂ (subst (λ X → X α) (sym eqId) (subst (λ X → (X α)) eqId ((id lawId₁) v))) (subst (λ X → (α → X β)) (sym eqM) f)) 
             ≡⟨ cong (λ x → subst (λ X → X β) eqP (pmb₂ (subst (λ X → X α) (sym eqId) x) (subst (λ X → (α → X β)) (sym eqM) f)) ) (sym (shiftApplySubst eqId v (id lawId₁))) ⟩
           subst (λ X → X β) eqP (pmb₂ (subst (λ X → X α) (sym eqId) ((subst (λ X → (α → X α)) eqId (id lawId₁)) v)) (subst (λ X → (α → X β)) (sym eqM) f)) 
@@ -335,13 +335,13 @@ polymonadUnion {TyCons₁} {TyCons₂} {pm₁} {pm₂} upm₁ upm₂ = record
           substBind eqM eqId eqP pmb₁ (f v) (subst (λ X → (β → X β)) eqId (id lawId₂)) 
             ≡⟨ substBindInwardEq pmb₁ eqM eqId eqP (f v) (subst (λ X → (β → X β)) eqId (id lawId₂)) ⟩
           subst (λ X → X β) eqP (pmb₁ (subst (λ X → X β) (sym eqM) (f v)) (subst (λ N → (β → N β)) (sym eqId) (subst (λ X → (β → X β)) eqId (id lawId₂))) ) 
-            ≡⟨ cong (λ x → subst (λ X → X β) eqP (pmb₁ (subst (λ X → X β) (sym eqM) (f v)) x )) (sym (f≡subst²f eqId)) ⟩
+            ≡⟨ cong (λ x → subst (λ X → X β) eqP (pmb₁ (subst (λ X → X β) (sym eqM) (f v)) x )) (subst²≡id' eqId (λ X → (β → X β)) (id lawId₂)) ⟩
           subst (λ X → X β) eqP (pmb₁ (subst (λ X → X β) (sym eqM) (f v)) (id lawId₂) )
             ≡⟨ cong (subst (λ X → X β) eqP) (pmLawMorph3 pm M P (subst (λ x → x) eqBind₁ b₁) (subst (λ x → x) eqBind₂ b₂) v ((λ x → subst (λ M → M β) (sym eqM) (f x)))) ⟩
           subst (λ X → X β) eqP (pmb₂ ((id lawId₂) v) (λ x → subst (λ X → X β) (sym eqM) (f x)) )
             ≡⟨ cong (λ x → subst (λ X → X β) eqP (pmb₂ ((id lawId₂) v) x) ) (shiftFunSubst (sym eqM) f) ⟩
           subst (λ X → X β) eqP (pmb₂ ((id lawId₂) v) (subst (λ X → (α → X β)) (sym eqM) f)) 
-            ≡⟨ cong (λ x → subst (λ X → X β) eqP (pmb₂ x (subst (λ X → (α → X β)) (sym eqM) f))) (x≡subst²x eqId) ⟩
+            ≡⟨ cong (λ x → subst (λ X → X β) eqP (pmb₂ x (subst (λ X → (α → X β)) (sym eqM) f))) (sym (subst²≡id' eqId (λ X → X α) ((id lawId₂) v))) ⟩
           subst (λ X → X β) eqP (pmb₂ (subst (λ X → X α) (sym eqId) (subst (λ X → (X α)) eqId ((id lawId₂) v))) (subst (λ X → (α → X β)) (sym eqM) f)) 
             ≡⟨ cong (λ x → subst (λ X → X β) eqP (pmb₂ (subst (λ X → X α) (sym eqId) x) (subst (λ X → (α → X β)) (sym eqM) f)) ) (sym (shiftApplySubst eqId v (id lawId₂))) ⟩
           subst (λ X → X β) eqP (pmb₂ (subst (λ X → X α) (sym eqId) ((subst (λ X → (α → X α)) eqId (id lawId₂)) v)) (subst (λ X → (α → X β)) (sym eqM) f)) 
@@ -917,7 +917,10 @@ polymonadUnion {TyCons₁} {TyCons₂} {pm₁} {pm₂} upm₁ upm₂ = record
                        (subst (λ X → X α) (sym eqM) m) 
                        (subst (λ X → (α → X β)) (sym eqN) f)))) 
                 (subst (λ X → (β → X γ)) (sym eqR) g)) 
-            ≡⟨ cong (λ X → subst (λ X → X γ) eqT (pbind₂ X (subst (λ X → (β → X γ)) (sym eqR) g))) (sym (x≡subst²x eqP)) ⟩
+            ≡⟨ cong (λ X → subst (λ X → X γ) eqT (pbind₂ X (subst (λ X → (β → X γ)) (sym eqR) g))) 
+                    (subst²≡id' eqP (λ X → X β) (pbind₁ 
+                       (subst (λ X → X α) (sym eqM) m) 
+                       (subst (λ X → (α → X β)) (sym eqN) f)) ) ⟩
           subst (λ X → X γ) eqT (pbind₂ 
                 (pbind₁ 
                        (subst (λ X → X α) (sym eqM) m) 
@@ -933,7 +936,8 @@ polymonadUnion {TyCons₁} {TyCons₂} {pm₁} {pm₂} upm₁ upm₂ = record
                     (shiftApplySubstF (sym eqN) (λ X → (pbind₃ X (subst (λ X → (β → X γ)) (sym eqR) g))) f) ⟩
           subst (λ X → X γ) eqT (pbind₄ (subst (λ X → X α) (sym eqM) m) 
                                         (λ x → (pbind₃ (subst (λ X → X β) (sym eqN) (f x)) (subst (λ X → (β → X γ)) (sym eqR) g))) )
-            ≡⟨ cong (λ X → subst (λ X → X γ) eqT (pbind₄ (subst (λ X → X α) (sym eqM) m) X )) (f≡subst²f eqS) ⟩
+            ≡⟨ cong (λ X → subst (λ X → X γ) eqT (pbind₄ (subst (λ X → X α) (sym eqM) m) X )) 
+                    (sym (subst²≡id' eqS (λ X → (α → X γ)) (λ x → (pbind₃ (subst (λ X → X β) (sym eqN) (f x)) (subst (λ X → (β → X γ)) (sym eqR) g))) )) ⟩
           subst (λ X → X γ) eqT (pbind₄ (subst (λ X → X α) (sym eqM) m) (subst (λ X → (α → X γ)) (sym eqS) 
                                         (subst (λ X → (α → X γ)) eqS (λ x → (pbind₃ (subst (λ X → X β) (sym eqN) (f x)) (subst (λ X → (β → X γ)) (sym eqR) g)))) ))
             ≡⟨ cong (λ X → subst (λ X → X γ) eqT (pbind₄ (subst (λ X → X α) (sym eqM) m) (subst (λ X → (α → X γ)) (sym eqS) X ))) 
@@ -1037,7 +1041,10 @@ polymonadUnion {TyCons₁} {TyCons₂} {pm₁} {pm₂} upm₁ upm₂ = record
                        (subst (λ X → X α) (sym eqM) m) 
                        (subst (λ X → (α → X β)) (sym eqN) f)))) 
                 (subst (λ X → (β → X γ)) (sym eqR) g)) 
-            ≡⟨ cong (λ X → subst (λ X → X γ) eqT (pbind₂ X (subst (λ X → (β → X γ)) (sym eqR) g))) (sym (x≡subst²x eqP)) ⟩
+            ≡⟨ cong (λ X → subst (λ X → X γ) eqT (pbind₂ X (subst (λ X → (β → X γ)) (sym eqR) g))) 
+                    (subst²≡id' eqP (λ X → X β) ((pbind₁ 
+                       (subst (λ X → X α) (sym eqM) m) 
+                       (subst (λ X → (α → X β)) (sym eqN) f)))) ⟩
           subst (λ X → X γ) eqT (pbind₂ 
                 (pbind₁ 
                        (subst (λ X → X α) (sym eqM) m) 
@@ -1053,7 +1060,8 @@ polymonadUnion {TyCons₁} {TyCons₂} {pm₁} {pm₂} upm₁ upm₂ = record
                     (shiftApplySubstF (sym eqN) (λ X → (pbind₃ X (subst (λ X → (β → X γ)) (sym eqR) g))) f) ⟩
           subst (λ X → X γ) eqT (pbind₄ (subst (λ X → X α) (sym eqM) m) 
                                         (λ x → (pbind₃ (subst (λ X → X β) (sym eqN) (f x)) (subst (λ X → (β → X γ)) (sym eqR) g))) )
-            ≡⟨ cong (λ X → subst (λ X → X γ) eqT (pbind₄ (subst (λ X → X α) (sym eqM) m) X )) (f≡subst²f eqS) ⟩
+            ≡⟨ cong (λ X → subst (λ X → X γ) eqT (pbind₄ (subst (λ X → X α) (sym eqM) m) X )) 
+                    (sym (subst²≡id' eqS (λ X → (α → X γ)) (λ x → (pbind₃ (subst (λ X → X β) (sym eqN) (f x)) (subst (λ X → (β → X γ)) (sym eqR) g))))) ⟩
           subst (λ X → X γ) eqT (pbind₄ (subst (λ X → X α) (sym eqM) m) (subst (λ X → (α → X γ)) (sym eqS) 
                                         (subst (λ X → (α → X γ)) eqS (λ x → (pbind₃ (subst (λ X → X β) (sym eqN) (f x)) (subst (λ X → (β → X γ)) (sym eqR) g)))) ))
             ≡⟨ cong (λ X → subst (λ X → X γ) eqT (pbind₄ (subst (λ X → X α) (sym eqM) m) (subst (λ X → (α → X γ)) (sym eqS) X ))) 
