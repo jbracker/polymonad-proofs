@@ -41,6 +41,7 @@ IxMonad→SuperMonad {n = n} Ixs M monad = record
   ; lawIdR = lawIdR
   ; lawIdL = lawIdL
   ; lawAssoc = lawAssoc
+  ; lawMonadFmap = lawMonadFmap
   } where
     TyCons = IxMonadTyCons Ixs
     
@@ -131,3 +132,12 @@ IxMonad→SuperMonad {n = n} Ixs M monad = record
               (ma >>= (return' ∘ g)) >>= (return' ∘ f)
                 ≡⟨ refl ⟩
               (fmap f ∘ fmap g) ma ∎
+    
+    lawMonadFmap : ∀ {α β : Type}
+                 → (M N : TyCons)
+                 → (M◆N≡M : M ◆ N ≡ M)
+                 → (b : Binds M N) → (r : Returns N)
+                 → (f : α → β) → (m : ⟨ M ⟩ α)
+                 → subst (λ X → ⟨ X ⟩ β) M◆N≡M (bind b m (return r ∘ f)) 
+                   ≡ Functor.fmap (functor M) f m
+    lawMonadFmap (IxMonadTC i j) (IxMonadTC .j .j) refl refl refl f m = refl

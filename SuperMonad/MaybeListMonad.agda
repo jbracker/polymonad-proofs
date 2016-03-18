@@ -65,6 +65,7 @@ MaybeListSuperMonad = record
   ; lawIdR = lawIdR
   ; lawIdL = lawIdL
   ; lawAssoc = lawAssoc
+  ; lawMonadFmap = lawMonadFmap
   } where
     TyCons = MonadTyCons ⊎ MonadTyCons
 
@@ -157,6 +158,18 @@ MaybeListSuperMonad = record
     functor : (M : TyCons) → Functor ⟨ M ⟩
     functor (inj₁ MonadTC) = Applicative.functor (Monad.applicative monadMaybe)
     functor (inj₂ MonadTC) = Applicative.functor (Monad.applicative monadList)
+    
+    lawMonadFmap : ∀ {α β : Type}
+                 → (M N : TyCons)
+                 → (M◆N≡M : M ◆ N ≡ M)
+                 → (b : Binds M N) → (r : Returns N)
+                 → (f : α → β) → (m : ⟨ M ⟩ α)
+                 → subst (λ X → ⟨ X ⟩ β) M◆N≡M (bind b m (return r ∘ f)) 
+                   ≡ Functor.fmap (functor M) f m
+    lawMonadFmap (inj₁ MonadTC) (inj₁ MonadTC) refl tt tt f m = refl
+    lawMonadFmap (inj₁ MonadTC) (inj₂ MonadTC) ()   tt tt f m
+    lawMonadFmap (inj₂ MonadTC) (inj₁ MonadTC) refl () tt f m
+    lawMonadFmap (inj₂ MonadTC) (inj₂ MonadTC) refl tt tt f m = refl
 
 -- -----------------------------------------------------------------------------
 -- Second version that uses the unclear [ List , Maybe ]▷ List version as well.
@@ -177,6 +190,7 @@ MaybeListSuperMonadFilter = record
   ; lawIdR = lawIdR
   ; lawIdL = lawIdL
   ; lawAssoc = lawAssoc
+  ; lawMonadFmap = lawMonadFmap
   } where
     TyCons = MonadTyCons ⊎ MonadTyCons
 
@@ -302,3 +316,17 @@ MaybeListSuperMonadFilter = record
     functor : (M : TyCons) → Functor ⟨ M ⟩
     functor (inj₁ MonadTC) = Applicative.functor (Monad.applicative monadMaybe)
     functor (inj₂ MonadTC) = Applicative.functor (Monad.applicative monadList)
+
+    lawMonadFmap : ∀ {α β : Type}
+                 → (M N : TyCons)
+                 → (M◆N≡M : M ◆ N ≡ M)
+                 → (b : Binds M N) → (r : Returns N)
+                 → (f : α → β) → (m : ⟨ M ⟩ α)
+                 → subst (λ X → ⟨ X ⟩ β) M◆N≡M (bind b m (return r ∘ f)) 
+                   ≡ Functor.fmap (functor M) f m
+    lawMonadFmap (inj₁ MonadTC) (inj₁ MonadTC) refl tt tt f m = refl
+    lawMonadFmap (inj₁ MonadTC) (inj₂ MonadTC) ()   tt tt f m
+    lawMonadFmap {α = α} (inj₂ MonadTC) (inj₁ MonadTC) refl tt tt f (x ∷ xs)
+      = cong (λ X → f x ∷ X) (lawMonadFmap {α = α} ListTC MaybeTC refl tt tt f xs)
+    lawMonadFmap (inj₂ MonadTC) (inj₁ MonadTC) refl tt tt f Nil = refl
+    lawMonadFmap (inj₂ MonadTC) (inj₂ MonadTC) refl tt tt f m = refl

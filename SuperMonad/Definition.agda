@@ -59,6 +59,14 @@ record SuperMonad {ℓ} (TyCons : Set ℓ) : Set (lsuc ℓ) where
              → subst (λ X → ⟨ X ⟩ γ) assoc (bind b₁ m (λ x → bind b₂ (f x) g)) 
                ≡ bind b₃ (bind b₄ m f) g
     
+    lawMonadFmap : ∀ {α β : Type}
+                 → (M N : TyCons)
+                 → (M◆N≡M : M ◆ N ≡ M)
+                 → (b : Binds M N) → (r : Returns N)
+                 → (f : α → β) → (m : ⟨ M ⟩ α)
+                 → subst (λ X → ⟨ X ⟩ β) M◆N≡M (bind b m (return r ∘ f)) 
+                   ≡ Functor.fmap (functor M) f m
+    
   sequence : ∀ {α β : Type} {M N : TyCons} → Binds M N → ⟨ M ⟩ α → ⟨ N ⟩ β → ⟨ M ◆ N ⟩ β
   sequence b ma mb = bind b ma (λ _ → mb)
   

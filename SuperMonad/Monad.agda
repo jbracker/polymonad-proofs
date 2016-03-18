@@ -41,6 +41,7 @@ Monad→SuperMonad M monad = record
   ; lawIdR = lawIdR
   ; lawIdL = lawIdL
   ; lawAssoc = lawAssoc
+  ; lawMonadFmap = lawMonadFmap
   } where
     TyCons = MonadTyCons
     
@@ -96,3 +97,12 @@ Monad→SuperMonad M monad = record
     
     functor : (M : TyCons) → Functor ⟨ M ⟩
     functor MonadTC = Applicative.functor (Monad.applicative monad)
+    
+    lawMonadFmap : ∀ {α β : Type}
+                 → (M N : TyCons)
+                 → (M◆N≡M : M ◆ N ≡ M)
+                 → (b : Binds M N) → (r : Returns N)
+                 → (f : α → β) → (m : ⟨ M ⟩ α)
+                 → subst (λ X → ⟨ X ⟩ β) M◆N≡M (bind b m (return r ∘ f)) 
+                   ≡ Functor.fmap (functor M) f m
+    lawMonadFmap MonadTC MonadTC refl tt tt f m = sym (Monad.lawMonadFmap monad f m)
