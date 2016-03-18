@@ -63,6 +63,7 @@ SuperMonad→HaskSuperMonad {ℓ = ℓ} {TyCons = TCs} SM = record
   ; lawIdR = lawIdR
   ; lawIdL = lawIdL
   ; lawAssoc = lawAssoc
+  ; lawMonadFmap = lawMonadFmap
   } where
     TyCons = IdTyCons ⊎ TCs
     
@@ -163,18 +164,44 @@ SuperMonad→HaskSuperMonad {ℓ = ℓ} {TyCons = TCs} SM = record
     fmap⟨ inj₁ IdentTC ⟩ = λ x → x
     fmap⟨ inj₂ M ⟩ = Functor.fmap (SuperMonad.functor SM M)
     
-    Id◆M≡M : ∀ {N} → idTC ◆ inj₂ N ≡ inj₂ N
-    Id◆M≡M = refl
-    
-    Id◆[N◆P]≡[Id◆N]◆P : ∀ {N P} → idTC ◆ (inj₂ N ◆ inj₂ P) ≡ (idTC ◆ inj₂ N) ◆ inj₂ P 
-    Id◆[N◆P]≡[Id◆N]◆P = refl
-    
     helper3 : {α : Type} 
             → (M N : TCs)
             → (M≡N : inj₂ M ≡ inj₂ N)
             → (x : ⟨ inj₂ M ⟩ α)
             → subst (λ X → K⟨ SM ▷ X ⟩ α) (helper1 M≡N) x ≡ subst (λ X → ⟨ X ⟩ α) M≡N x
     helper3 M .M refl x = refl
+    
+    lawMonadFmap : ∀ {α β : Type}
+                 → (M N : TyCons)
+                 → (M◆N≡M : M ◆ N ≡ M)
+                 → (b : Binds M N) → (r : Returns N)
+                 → (f : α → β) → (m : ⟨ M ⟩ α)
+                 → subst (λ X → ⟨ X ⟩ β) M◆N≡M (bind {M = M} {N = N} b m (return {M = N} r ∘ f)) 
+                   ≡ Functor.fmap (functor M) f m
+    lawMonadFmap (inj₁ IdentTC) (inj₁ IdentTC) refl IdentB IdentR f m = refl
+    lawMonadFmap (inj₁ IdentTC) (inj₂ M) () (ApplyB .M) r f m
+    lawMonadFmap (inj₂ M) (inj₁ IdentTC) refl (FunctorB .M) IdentR f m = refl
+    lawMonadFmap {β = β} (inj₂ M) (inj₂ N) M◆N≡M b r f m = begin 
+      subst (λ X → ⟨ X ⟩ β) M◆N≡M (SuperMonad.bind SM b m ((SuperMonad.return SM r) ∘ f))
+        ≡⟨ sym (helper3 (M ◆⟨ SM ⟩ N) M M◆N≡M (SuperMonad.bind SM b m ((SuperMonad.return SM r) ∘ f))) ⟩ 
+      subst (λ X → K⟨ SM ▷ X ⟩ β) (helper1 M◆N≡M) (SuperMonad.bind SM b m ((SuperMonad.return SM r) ∘ f))
+        ≡⟨ SuperMonad.lawMonadFmap SM M N (helper1 M◆N≡M) b r f m ⟩
+      Functor.fmap (SuperMonad.functor SM M) f m ∎
+    
+    Id◆M≡M : ∀ {N} → idTC ◆ inj₂ N ≡ inj₂ N
+    Id◆M≡M = refl
+    
+    M◆Id≡M : ∀ {N} → inj₂ N ◆ idTC ≡ inj₂ N
+    M◆Id≡M = refl
+    
+    Id◆[N◆P]≡[Id◆N]◆P : ∀ {N P} → idTC ◆ (inj₂ N ◆ inj₂ P) ≡ (idTC ◆ inj₂ N) ◆ inj₂ P 
+    Id◆[N◆P]≡[Id◆N]◆P = refl
+    
+    M◆[Id◆P]≡[M◆Id]◆P : ∀ {M P} → inj₂ M ◆ (idTC ◆ inj₂ P) ≡ (inj₂ M ◆ idTC) ◆ inj₂ P 
+    M◆[Id◆P]≡[M◆Id]◆P = refl
+    
+    [M◆Id]◆P≡M◆P : ∀ {M P} → (inj₂ M ◆ idTC) ◆ inj₂ P ≡ inj₂ M ◆ inj₂ P 
+    [M◆Id]◆P≡M◆P = refl
     
     lawAssoc : {α β γ : Type} 
              → (M N P : IdTyCons ⊎ TCs)
@@ -193,11 +220,11 @@ SuperMonad→HaskSuperMonad {ℓ = ℓ} {TyCons = TCs} SM = record
       SuperMonad.bind SM b₃ (f m) g ∎
     lawAssoc (inj₂ M) (inj₁ IdentTC) (inj₁ IdentTC) refl (FunctorB .M) IdentB (FunctorB .M) (FunctorB .M) m f g 
       = cong (λ X → X m) (Functor.lawDist (SuperMonad.functor SM M) g f)
-    lawAssoc (inj₂ M) (inj₁ IdentTC) (inj₂ P) refl b₁ (ApplyB .P) b₃ (FunctorB .M) m f g = begin
+    lawAssoc {β = β} {γ = γ} (inj₂ M) (inj₁ IdentTC) (inj₂ P) refl b₁ (ApplyB .P) b₃ (FunctorB .M) m f g = begin
       SuperMonad.bind SM b₁ m (g ∘ f)
         ≡⟨ {!!} ⟩
       SuperMonad.bind SM b₃ (fmap⟨ inj₂ M ⟩ f m) g ∎
-    lawAssoc (inj₂ M) (inj₂ N) (inj₁ IdentTC) refl b₁ (FunctorB .N) (FunctorB ._) b₄ m f g = begin
+    lawAssoc {γ = γ} (inj₂ M) (inj₂ N) (inj₁ IdentTC) refl b₁ (FunctorB .N) (FunctorB ._) b₄ m f g = begin
       SuperMonad.bind SM b₁ m (λ x → fmap⟨ inj₂ N ⟩ g (f x)) 
         ≡⟨ {!!} ⟩
       fmap⟨ inj₂ (M ◆⟨ SM ⟩ N) ⟩ g (SuperMonad.bind SM b₄ m f) ∎
@@ -208,3 +235,12 @@ SuperMonad→HaskSuperMonad {ℓ = ℓ} {TyCons = TCs} SM = record
         ≡⟨ SuperMonad.lawAssoc SM M N P (helper1 assoc) b₁ b₂ b₃ b₄ m f g ⟩ 
       SuperMonad.bind SM b₃ (SuperMonad.bind SM b₄ m f) g ∎
  
+{-
+ : ∀ {α β : Type}
+                 → (M N : TyCons)
+                 → (M◆N≡M : M ◆ N ≡ M)
+                 → (b : Binds M N) → (r : Returns N)
+                 → (f : α → β) → (m : ⟨ M ⟩ α)
+                 → subst (λ X → ⟨ X ⟩ β) M◆N≡M (bind {M = M} {N = N} b m (return {M = N} r ∘ f)) 
+                   ≡ Functor.fmap (functor M) f m
+-}
