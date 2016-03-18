@@ -169,6 +169,13 @@ SuperMonad→HaskSuperMonad {ℓ = ℓ} {TyCons = TCs} SM = record
     Id◆[N◆P]≡[Id◆N]◆P : ∀ {N P} → idTC ◆ (inj₂ N ◆ inj₂ P) ≡ (idTC ◆ inj₂ N) ◆ inj₂ P 
     Id◆[N◆P]≡[Id◆N]◆P = refl
     
+    helper3 : {α : Type} 
+            → (M N : TCs)
+            → (M≡N : inj₂ M ≡ inj₂ N)
+            → (x : ⟨ inj₂ M ⟩ α)
+            → subst (λ X → K⟨ SM ▷ X ⟩ α) (helper1 M≡N) x ≡ subst (λ X → ⟨ X ⟩ α) M≡N x
+    helper3 M .M refl x = refl
+    
     lawAssoc : {α β γ : Type} 
              → (M N P : IdTyCons ⊎ TCs)
              → (assoc : M ◆ (N ◆ P) ≡ (M ◆ N) ◆ P)
@@ -182,22 +189,22 @@ SuperMonad→HaskSuperMonad {ℓ = ℓ} {TyCons = TCs} SM = record
     lawAssoc (inj₁ IdentTC) (inj₂ M) (inj₁ IdentTC) refl (ApplyB .M) (FunctorB .M) (FunctorB .M) (ApplyB .M) m f g = refl
     lawAssoc {β = β} {γ = γ} (inj₁ IdentTC) (inj₂ N) (inj₂ P) refl (ApplyB ._) b₂ b₃ (ApplyB .N) m f g = begin
       SuperMonad.bind SM b₂ (f m) g
-        ≡⟨ cong (λ X → SuperMonad.bind SM b₂ X g) (lawIdR (inj₂ N) idTC Id◆M≡M (ApplyB N) IdentR m f) ⟩
-      SuperMonad.bind SM b₂ (subst (λ X → ⟨ X ⟩ β) Id◆M≡M (bind {M = idTC} {N = inj₂ N} (ApplyB N) (return {M = idTC} IdentR m) f)) g
-        ≡⟨ {!!} ⟩
-      subst (λ X → ⟨ idTC ◆ (X ◆ inj₂ P) ⟩ γ) (sym Id◆M≡M) 
-            (subst (λ X → ⟨ X ⟩ β → (β → ⟨ inj₂ P ⟩ γ) → ⟨ X ◆ inj₂ P ⟩ γ) (sym Id◆M≡M) (SuperMonad.bind SM b₂)
-                   (bind {M = idTC} {N = inj₂ N} (ApplyB N) (return {M = idTC} IdentR m) f) g)
-        ≡⟨ sym (lawAssoc idTC (inj₂ N) (inj₂ P) Id◆[N◆P]≡[Id◆N]◆P (ApplyB {!!}) b₃ b₂ (ApplyB N) m f g) ⟩
-      subst (λ X → ⟨ X ⟩ γ) Id◆[N◆P]≡[Id◆N]◆P 
-            (bind {M = idTC} {N = inj₂ N ◆ inj₂ P} (ApplyB (N ◆⟨ SM ⟩ P)) 
-                  (return {M = idTC} IdentR m) 
-                  (λ x → SuperMonad.bind SM {M = N} {N = P} b₃ (f x) g))
         ≡⟨ {!!} ⟩
       SuperMonad.bind SM b₃ (f m) g ∎
     lawAssoc (inj₂ M) (inj₁ IdentTC) (inj₁ IdentTC) refl (FunctorB .M) IdentB (FunctorB .M) (FunctorB .M) m f g 
       = cong (λ X → X m) (Functor.lawDist (SuperMonad.functor SM M) g f)
-    lawAssoc (inj₂ M₁) (inj₁ IdentTC) (inj₂ M) refl b₁ (ApplyB .M) b₃ (FunctorB .M₁) m f g = {!!}
-    lawAssoc (inj₂ M) (inj₂ N) (inj₁ IdentTC) refl b₁ (FunctorB .N) (FunctorB ._) b₄ m f g = {!!}
-    lawAssoc (inj₂ M) (inj₂ N) (inj₂ P) assoc b₁ b₂ b₃ b₄ m f g = {!!}
+    lawAssoc (inj₂ M) (inj₁ IdentTC) (inj₂ P) refl b₁ (ApplyB .P) b₃ (FunctorB .M) m f g = begin
+      SuperMonad.bind SM b₁ m (g ∘ f)
+        ≡⟨ {!!} ⟩
+      SuperMonad.bind SM b₃ (fmap⟨ inj₂ M ⟩ f m) g ∎
+    lawAssoc (inj₂ M) (inj₂ N) (inj₁ IdentTC) refl b₁ (FunctorB .N) (FunctorB ._) b₄ m f g = begin
+      SuperMonad.bind SM b₁ m (λ x → fmap⟨ inj₂ N ⟩ g (f x)) 
+        ≡⟨ {!!} ⟩
+      fmap⟨ inj₂ (M ◆⟨ SM ⟩ N) ⟩ g (SuperMonad.bind SM b₄ m f) ∎
+    lawAssoc {γ = γ} (inj₂ M) (inj₂ N) (inj₂ P) assoc b₁ b₂ b₃ b₄ m f g = begin
+      subst (λ X → ⟨ X ⟩ γ) assoc (SuperMonad.bind SM b₁ m (λ x → SuperMonad.bind SM b₂ (f x) g))
+        ≡⟨ sym (helper3 (M ◆⟨ SM ⟩ (N ◆⟨ SM ⟩ P)) ((M ◆⟨ SM ⟩ N) ◆⟨ SM ⟩ P) assoc (SuperMonad.bind SM b₁ m (λ x → SuperMonad.bind SM b₂ (f x) g))) ⟩ 
+      subst (λ X → K⟨ SM ▷ X ⟩ γ) (helper1 assoc) (SuperMonad.bind SM b₁ m (λ x → SuperMonad.bind SM b₂ (f x) g))
+        ≡⟨ SuperMonad.lawAssoc SM M N P (helper1 assoc) b₁ b₂ b₃ b₄ m f g ⟩ 
+      SuperMonad.bind SM b₃ (SuperMonad.bind SM b₄ m f) g ∎
  
