@@ -1,5 +1,5 @@
 
-module SuperMonad.Haskell where
+module SuperMonad.HaskSuperMonad where
 
 -- Stdlib
 open import Level
