@@ -23,6 +23,7 @@ open import Monad
 open import Monad.Polymonad
 open import Polymonad
 open import SuperMonad.Definition 
+open import SuperMonad.HaskSuperMonad
 
 -- -----------------------------------------------------------------------------
 -- Standard Monads are Super Monads
@@ -106,3 +107,44 @@ Monad→SuperMonad M monad = record
                  → subst (λ X → ⟨ X ⟩ β) M◆N≡M (bind b m (return r ∘ f)) 
                    ≡ Functor.fmap (functor M) f m
     lawMonadFmap MonadTC MonadTC refl tt tt f m = sym (Monad.lawMonadFmap monad f m)
+
+Monad→HaskSuperMonad : (M : TyCon)
+                     → Monad M → HaskSuperMonad MonadTyCons
+Monad→HaskSuperMonad M monad = record
+  { supermonad = Monad→SuperMonad M monad
+  ; lawUniqueBind = lawUniqueBind
+  ; lawCommuteFmapBind = lawCommuteFmapBind
+  ; lawDecomposeFmapIntro = lawDecomposeFmapIntro
+  } where
+    supermonad : SuperMonad MonadTyCons
+    supermonad = Monad→SuperMonad M monad
+    
+    TyCons = MonadTyCons
+    Binds = SuperMonad.Binds supermonad
+    ⟨_⟩ = SuperMonad.⟨_⟩ supermonad
+    bind = SuperMonad.bind supermonad
+    functor = SuperMonad.functor supermonad
+    _◆_ = SuperMonad._◆_ supermonad
+    
+    open Functor.Functor
+    
+    lawUniqueBind : {α β : Type}
+                  → (M N : TyCons)
+                  → (b₁ b₂ : Binds M N)
+                  → (m : ⟨ M ⟩ α) → (f : α → ⟨ N ⟩ β)
+                  → bind b₁ m f ≡ bind b₂ m f
+    lawUniqueBind MonadTC MonadTC tt tt m f = refl
+    
+    lawCommuteFmapBind : {α β γ : Type} 
+                       → (M N : TyCons)
+                       → (b : Binds M N)
+                       → (m : ⟨ M ⟩ α) → (f : α → ⟨ N ⟩ β) → (g : β → γ)
+                       → fmap (functor (M ◆ N)) g (bind b m f) ≡ bind b m (λ x → fmap (functor N) g (f x))
+    lawCommuteFmapBind MonadTC MonadTC tt m f g = commuteFmapBind monad m f g
+    
+    lawDecomposeFmapIntro : {α β γ : Type} 
+                          → (M N : TyCons)
+                          → (b : Binds M N)
+                          → (m : ⟨ M ⟩ α) → (f : α → β) → (g : β → ⟨ N ⟩ γ)
+                          → bind b m (g ∘ f) ≡ bind b (fmap (functor M) f m) g
+    lawDecomposeFmapIntro MonadTC MonadTC tt m f g = decomposeFmapIntro monad m f g
