@@ -286,12 +286,3 @@ extendHaskSuperMonadWithFunctorBind {ℓ = ℓ} {TyCons = TCs} HSM = record
         ≡⟨ SuperMonad.lawAssoc SM M N P (helper1 assoc) b₁ b₂ b₃ b₄ m f g ⟩ 
       SuperMonad.bind SM b₃ (SuperMonad.bind SM b₄ m f) g ∎
  
-{-
- : ∀ {α β : Type}
-                 → (M N : TyCons)
-                 → (M◆N≡M : M ◆ N ≡ M)
-                 → (b : Binds M N) → (r : Returns N)
-                 → (f : α → β) → (m : ⟨ M ⟩ α)
-                 → subst (λ X → ⟨ X ⟩ β) M◆N≡M (bind {M = M} {N = N} b m (return {M = N} r ∘ f)) 
-                   ≡ Functor.fmap (functor M) f m
--}
