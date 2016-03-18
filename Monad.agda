@@ -37,7 +37,7 @@ record Monad (M : TyCon) : Set₁ where
     
   _>>_ : ∀ {α β : Type} → M α → M β → M β
   ma >> mb = ma >>= λ a → mb
-
+  
 mBind = Monad._>>=_
 mReturn = Monad.return
 mSequence = Monad._>>_
@@ -75,3 +75,30 @@ lawMonadFunctorComp m g f ma = begin
     ≡⟨ refl ⟩
   monadFmap m f (monadFmap m g ma) ∎
 
+open Monad {{...}}
+
+commuteFmapBind : {α β γ : Type} {M : TyCon}
+                → (monad : Monad M)
+                → (m : M α) → (f : α → M β) → (g : β → γ)
+                → fmap (functor applicative) g (m >>= f) ≡ m >>= (λ x → fmap (functor applicative) g (f x))
+commuteFmapBind monad m f g = begin
+  fmap (functor applicative) g (m >>= f)
+    ≡⟨ lawMonadFmap g (m >>= f) ⟩
+  (m >>= f) >>= (return ∘ g)
+    ≡⟨ sym (lawAssoc m f (return ∘ g)) ⟩
+  m >>= (λ x → f x >>= (return ∘ g)) 
+    ≡⟨ cong (λ X → m >>= X) (funExt (λ x → sym (lawMonadFmap g (f x)))) ⟩
+  m >>= (λ x → fmap (functor applicative) g (f x)) ∎
+
+decomposeFmapIntro : {α β γ : Type} {M : TyCon}
+                   → (monad : Monad M)
+                   → (m : M α) → (f : α → β) → (g : β → M γ)
+                   → m >>= (g ∘ f) ≡ fmap (functor applicative) f m >>= g
+decomposeFmapIntro monad m f g = begin
+  m >>= (g ∘ f) 
+    ≡⟨ cong (λ X → m >>= X) (funExt (λ x → sym (lawIdR (f x) g))) ⟩
+  m >>= (λ x → return (f x) >>= g)
+    ≡⟨ lawAssoc m (return ∘ f) g ⟩
+  (m >>= (return ∘ f)) >>= g
+    ≡⟨ cong (λ X → X >>= g) (sym (lawMonadFmap f m)) ⟩
+  fmap (functor applicative) f m >>= g ∎
