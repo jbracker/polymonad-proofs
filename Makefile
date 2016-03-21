@@ -73,6 +73,7 @@ type-check:
 	$(AGDA_TC) SuperMonad/HaskSuperMonad.agda
 	$(AGDA_TC) SuperMonad/Monad.agda
 	$(AGDA_TC) SuperMonad/MaybeListMonad.agda
+	$(AGDA_TC) SuperMonad/MaybeListMonad/FilterVersion.agda
 	$(AGDA_TC) SuperMonad/IxMonad.agda
 	$(AGDA_TC) SuperMonad/EffectMonad.agda
 	# $(AGDA_TC) SuperMonad/Polymonad.agda
