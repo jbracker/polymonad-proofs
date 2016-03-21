@@ -21,6 +21,7 @@ open import Functor
 open import Polymonad
 open import Parameterized.IndexedMonad
 open import SuperMonad.Definition
+open import SuperMonad.HaskSuperMonad
 
 -- -----------------------------------------------------------------------------
 -- Indexed Monads are Super Monads
@@ -141,3 +142,55 @@ IxMonad→SuperMonad {n = n} Ixs M monad = record
                  → subst (λ X → ⟨ X ⟩ β) M◆N≡M (bind b m (return r ∘ f)) 
                    ≡ Functor.fmap (functor M) f m
     lawMonadFmap (IxMonadTC i j) (IxMonadTC .j .j) refl refl refl f m = refl
+
+IxMonad→HaskSuperMonad : ∀ {n}
+                       → (Ixs : Set n)
+                       → (M : Ixs → Ixs → TyCon)
+                       → IxMonad Ixs M → HaskSuperMonad (IxMonadTyCons Ixs)
+IxMonad→HaskSuperMonad Ixs M monad = record
+  { supermonad = IxMonad→SuperMonad Ixs M monad
+  ; lawUniqueBind = lawUniqueBind
+  ; lawCommuteFmapBind = lawCommuteFmapBind
+  ; lawDecomposeFmapIntro = lawDecomposeFmapIntro
+  } where
+    supermonad : SuperMonad (IxMonadTyCons Ixs)
+    supermonad = IxMonad→SuperMonad Ixs M monad
+    
+    TyCons = IxMonadTyCons Ixs
+    Binds = SuperMonad.Binds supermonad
+    ⟨_⟩ = SuperMonad.⟨_⟩ supermonad
+    bind = SuperMonad.bind supermonad
+    functor = SuperMonad.functor supermonad
+    _◆_ = SuperMonad._◆_ supermonad
+
+    _>>=_ = IxMonad._>>=_ monad
+    return = IxMonad.return monad
+    
+    open Functor.Functor
+    
+    lawUniqueBind : {α β : Type}
+                  → (M N : TyCons)
+                  → (b₁ b₂ : Binds M N)
+                  → (m : ⟨ M ⟩ α) → (f : α → ⟨ N ⟩ β)
+                  → bind b₁ m f ≡ bind b₂ m f
+    lawUniqueBind (IxMonadTC i j) (IxMonadTC .j k) refl refl m f = refl
+    
+    lawCommuteFmapBind : {α β γ : Type} 
+                       → (M N : TyCons)
+                       → (b : Binds M N)
+                       → (m : ⟨ M ⟩ α) → (f : α → ⟨ N ⟩ β) → (g : β → γ)
+                       → fmap (functor (M ◆ N)) g (bind b m f) ≡ bind b m (λ x → fmap (functor N) g (f x))
+    lawCommuteFmapBind (IxMonadTC i j) (IxMonadTC .j k) refl m f g
+      = sym (SuperMonad.lawAssoc supermonad (IxMonadTC i j) (IxMonadTC j k) (IxMonadTC k k)  refl  refl refl refl refl  m f (return ∘ g))
+    
+    lawDecomposeFmapIntro : {α β γ : Type} 
+                          → (M N : TyCons)
+                          → (b : Binds M N)
+                          → (m : ⟨ M ⟩ α) → (f : α → β) → (g : β → ⟨ N ⟩ γ)
+                          → bind b m (g ∘ f) ≡ bind b (fmap (functor M) f m) g
+    lawDecomposeFmapIntro (IxMonadTC i j) (IxMonadTC .j k) refl m f g = begin
+      m >>= (g ∘ f) 
+        ≡⟨ cong (λ X → m >>= X) (funExt (λ x → sym (SuperMonad.lawIdR supermonad (IxMonadTC j k) (IxMonadTC j j) refl refl refl (f x) g))) ⟩
+      m >>= (λ x → return (f x) >>= g)
+        ≡⟨ SuperMonad.lawAssoc supermonad (IxMonadTC i j) (IxMonadTC j j) (IxMonadTC j k) refl refl refl refl refl m (return ∘ f) g ⟩
+      (m >>= (return ∘ f)) >>= g ∎
