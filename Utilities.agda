@@ -65,6 +65,14 @@ subst²≡id' : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {p q : A}
            → subst F (sym eq) (subst F eq x) ≡ x
 subst²≡id' refl F x = refl
 
+subst₂²≡id1 : ∀ {ℓ₁ ℓ₂ ℓ₃} {A : Set ℓ₁} {B : Set ℓ₂} {p q : A} {s t : B}
+            → (eq₁ : p ≡ q)
+            → (eq₂ : t ≡ s)
+            → (F : A → B → Set ℓ₃)
+            → (x : F q s)
+            → subst₂ F eq₁ eq₂ (subst₂ F (sym eq₁) (sym eq₂) x) ≡ x
+subst₂²≡id1 refl refl F x = refl
+
 -- The laws involving the existance of certains bind operators 
 -- are simplified using the curry-howard correspondance:
 -- ∃ λ A → ⊤   ⇔   A
