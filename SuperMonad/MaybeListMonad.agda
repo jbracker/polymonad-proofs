@@ -24,6 +24,8 @@ open import Monad.Maybe
 open import Monad.List
 open import Monad.Polymonad
 open import SuperMonad.Definition 
+open import SuperMonad.Monad
+open import SuperMonad.HaskSuperMonad
 
 -- This has natural and clear semantics
 bindMaybeListList : [ Maybe , List ]▷ List
@@ -170,3 +172,70 @@ MaybeListSuperMonad = record
     lawMonadFmap (inj₁ MonadTC) (inj₂ MonadTC) ()   tt tt f m
     lawMonadFmap (inj₂ MonadTC) (inj₁ MonadTC) refl () tt f m
     lawMonadFmap (inj₂ MonadTC) (inj₂ MonadTC) refl tt tt f m = refl
+
+MaybeListHaskSuperMonad : HaskSuperMonad (MonadTyCons ⊎ MonadTyCons)
+MaybeListHaskSuperMonad  = record
+  { supermonad = supermonad
+  ; lawUniqueBind = lawUniqueBind
+  ; lawCommuteFmapBind = lawCommuteFmapBind
+  ; lawDecomposeFmapIntro = lawDecomposeFmapIntro
+  } where
+    supermonad : SuperMonad (MonadTyCons ⊎ MonadTyCons)
+    supermonad = MaybeListSuperMonad
+    
+    TyCons = MonadTyCons ⊎ MonadTyCons
+    Binds = SuperMonad.Binds supermonad
+    ⟨_⟩ = SuperMonad.⟨_⟩ supermonad
+    bind = SuperMonad.bind supermonad
+    functor = SuperMonad.functor supermonad
+    _◆_ = SuperMonad._◆_ supermonad
+    
+    _>>=L_ = Monad._>>=_ monadList
+    returnL = Monad.return monadList
+
+    _>>=M_ = Monad._>>=_ monadMaybe
+    returnM = Monad.return monadMaybe
+
+    _>>=MLL_ = bindMaybeListList
+    
+    open Functor.Functor
+    
+    lawUniqueBind : {α β : Type}
+                  → (M N : TyCons)
+                  → (b₁ b₂ : Binds M N)
+                  → (m : ⟨ M ⟩ α) → (f : α → ⟨ N ⟩ β)
+                  → bind b₁ m f ≡ bind b₂ m f
+    lawUniqueBind (inj₁ MonadTC) (inj₁ MonadTC) tt tt m f = refl
+    lawUniqueBind (inj₁ MonadTC) (inj₂ MonadTC) tt tt m f = refl
+    lawUniqueBind (inj₂ MonadTC) (inj₁ MonadTC) () () m f
+    lawUniqueBind (inj₂ MonadTC) (inj₂ MonadTC) tt tt m f = refl
+    
+    lawCommuteFmapBind : {α β γ : Type} 
+                       → (M N : TyCons)
+                       → (b : Binds M N)
+                       → (m : ⟨ M ⟩ α) → (f : α → ⟨ N ⟩ β) → (g : β → γ)
+                       → fmap (functor (M ◆ N)) g (bind b m f) ≡ bind b m (λ x → fmap (functor N) g (f x))
+    lawCommuteFmapBind (inj₁ MonadTC) (inj₁ MonadTC) tt m f g 
+      = HaskSuperMonad.lawCommuteFmapBind (Monad→HaskSuperMonad Maybe monadMaybe) MonadTC MonadTC tt m f g
+    lawCommuteFmapBind (inj₁ MonadTC) (inj₂ MonadTC) tt m f g 
+      = sym (SuperMonad.lawAssoc supermonad (inj₁ MonadTC) (inj₂ MonadTC) (inj₂ MonadTC) refl tt tt tt tt m f (returnL ∘ g))
+    lawCommuteFmapBind (inj₂ MonadTC) (inj₁ MonadTC) () m f g
+    lawCommuteFmapBind (inj₂ MonadTC) (inj₂ MonadTC) tt m f g 
+      = HaskSuperMonad.lawCommuteFmapBind (Monad→HaskSuperMonad List monadList) MonadTC MonadTC tt m f g
+    
+    lawDecomposeFmapIntro : {α β γ : Type} 
+                          → (M N : TyCons)
+                          → (b : Binds M N)
+                          → (m : ⟨ M ⟩ α) → (f : α → β) → (g : β → ⟨ N ⟩ γ)
+                          → bind b m (g ∘ f) ≡ bind b (fmap (functor M) f m) g
+    lawDecomposeFmapIntro (inj₁ MonadTC) (inj₁ MonadTC) tt m f g 
+      = HaskSuperMonad.lawDecomposeFmapIntro (Monad→HaskSuperMonad Maybe monadMaybe) MonadTC MonadTC tt m f g
+    lawDecomposeFmapIntro (inj₁ MonadTC) (inj₂ MonadTC) tt m f g = begin
+      m >>=MLL (g ∘ f)
+        ≡⟨ cong (λ X → m >>=MLL X) (funExt (λ x → sym (SuperMonad.lawIdR supermonad (inj₂ MonadTC) (inj₁ MonadTC) refl tt tt (f x) g))) ⟩
+      m >>=MLL (λ x → returnM (f x) >>=MLL g) 
+        ≡⟨ SuperMonad.lawAssoc supermonad (inj₁ MonadTC) (inj₁ MonadTC) (inj₂ MonadTC) refl tt tt tt tt m (returnM ∘ f) g ⟩
+      (m >>=M (returnM ∘ f)) >>=MLL g ∎
+    lawDecomposeFmapIntro (inj₂ MonadTC) (inj₁ MonadTC) () m f g
+    lawDecomposeFmapIntro (inj₂ MonadTC) (inj₂ MonadTC) tt m f g 
+      = HaskSuperMonad.lawDecomposeFmapIntro (Monad→HaskSuperMonad List monadList) MonadTC MonadTC tt m f g
