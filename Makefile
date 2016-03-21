@@ -1,4 +1,5 @@
 
+# NOTE: Files that still contain holes are commented out for now.
 
 REMOVE = rm -f
 
@@ -9,9 +10,16 @@ AGDA_TC = $(AGDA) -v 0 +RTS -K40m -RTS
 
 all: type-check
 
-type-check:
-	# NOTE: Files that still contain holes are commented out for now.
+type-check: | only-base only-hicks only-hicks only-monad only-parameterized only-supermonads
+	# Union of polymonads via morphisms between them
+	# $(AGDA_TC) MorphMonad/MorphMonad.agda
+	# $(AGDA_TC) MorphMonad/MaybeList.agda
+	# $(AGDA_TC) MorphMonad/Types.agda
+	# $(AGDA_TC) MorphMonad/Closure.agda
+	# $(AGDA_TC) MorphMonad/Diamond1.agda
+	# $(AGDA_TC) MorphMonad/Diamond2.agda
 	
+only-base:
 	# Foundations of formalization
 	$(AGDA_TC) Utilities.agda
 	$(AGDA_TC) Haskell.agda
@@ -20,12 +28,14 @@ type-check:
 	$(AGDA_TC) Applicative.agda
 	$(AGDA_TC) Monad.agda
 	$(AGDA_TC) Polymonad.agda
-	
+
+only-hicks:
 	# Proofs related to Hicks original formulation
 	$(AGDA_TC) Hicks/Polymonad.agda
 	$(AGDA_TC) Hicks/Equivalency.agda
 	$(AGDA_TC) Hicks/UniqueBinds.agda
-	
+
+only-polymonad:
 	# General polymonad proofs
 	$(AGDA_TC) Polymonad/Unionable.agda
 	$(AGDA_TC) Polymonad/Principal.agda
@@ -39,14 +49,7 @@ type-check:
 	$(AGDA_TC) Polymonad/Union/Principal.agda
 	$(AGDA_TC) Polymonad/Union/Principal/Utilities.agda
 	
-	# Union of polymonads via morphisms between them
-	# $(AGDA_TC) MorphMonad/MorphMonad.agda
-	# $(AGDA_TC) MorphMonad/MaybeList.agda
-	# $(AGDA_TC) MorphMonad/Types.agda
-	# $(AGDA_TC) MorphMonad/Closure.agda
-	# $(AGDA_TC) MorphMonad/Diamond1.agda
-	# $(AGDA_TC) MorphMonad/Diamond2.agda
-	
+only-monad:
 	# Standard Monads
 	$(AGDA_TC) Monad/Identity.agda
 	$(AGDA_TC) Monad/List.agda
@@ -55,7 +58,8 @@ type-check:
 	$(AGDA_TC) Monad/Unionable.agda
 	$(AGDA_TC) Monad/Principal.agda
 	$(AGDA_TC) Monad/PrincipalUnion.agda
-	
+
+only-parameterized:
 	# Parameterized Monads
 	$(AGDA_TC) Parameterized/PhantomIndices.agda
 	$(AGDA_TC) Parameterized/IndexedMonad.agda
@@ -68,6 +72,7 @@ type-check:
 	$(AGDA_TC) Parameterized/EffectMonad.agda
 	$(AGDA_TC) Parameterized/EffectMonad/Polymonad.agda
 
+only-supermonads:
 	# Super Monads
 	$(AGDA_TC) SuperMonad/Definition.agda
 	$(AGDA_TC) SuperMonad/HaskSuperMonad.agda
