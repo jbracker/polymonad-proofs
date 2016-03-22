@@ -21,7 +21,81 @@ open import Polymonad
 open import Functor
 open import SuperMonad.Definition
 open import SuperMonad.HaskSuperMonad
+{-
+LiftedSuperMonad : ∀ {ℓ₁ ℓ₂} {TyCons : Set ℓ₁} 
+                 → SuperMonad {ℓ = ℓ₁} TyCons → SuperMonad (Lift {ℓ = ℓ₁ ⊔ ℓ₂} TyCons)
+LiftedSuperMonad {ℓ₁ = ℓ₁} {ℓ₂ = ℓ₂} {TyCons = TCs} sm = record
+  { ⟨_⟩ = ⟨_⟩
+  ; Binds = Binds
+  ; Returns = Returns
+  ; functor = functor
+  ; _◆_ = _◆_
+  ; bind = bind
+  ; return = return
+  ; lawIdR = {!!}
+  ; lawIdL = {!!}
+  ; lawAssoc = {!!}
+  ; lawMonadFmap = {!!}
+  } where
+    ℓ = ℓ₁ ⊔ ℓ₂
+    
+    TyCons = Lift {ℓ = ℓ} TCs
+    
+    ⟨_⟩ : TyCons → TyCon
+    ⟨_⟩ (lift M) = K⟨ sm ▷ M ⟩
+    
+    Binds : TyCons → TyCons → Set ℓ
+    Binds (lift M) (lift N) = Lift {ℓ = ℓ} (SuperMonad.Binds sm M N)
+    
+    Returns : TyCons → Set ℓ
+    Returns (lift M) = Lift {ℓ = ℓ} (SuperMonad.Returns sm M)
+    
+    functor : (M : TyCons) → Functor ⟨ M ⟩
+    functor (lift M) = SuperMonad.functor sm M
+    
+    _◆_ : TyCons → TyCons → TyCons
+    lift M ◆ lift N = lift {ℓ = ℓ} (SuperMonad._◆_ sm M N)
+    
+    bind : {M N : TyCons} → Binds M N → [ ⟨ M ⟩ , ⟨ N ⟩ ]▷ ⟨ M ◆ N ⟩
+    bind (lift b) = SuperMonad.bind sm b
+    
+    return : ∀ {α : Type} → {M : TyCons} → Returns M → α → ⟨ M ⟩ α
+    return (lift r) = SuperMonad.return sm r
+   
+    lowerEq : {N M : TCs} → _≡_ {ℓ} {TyCons} (lift {ℓ = ℓ} N) (lift {ℓ = ℓ} M) → _≡_ {ℓ₁} {TCs} N M
+    lowerEq refl = refl
+    
+    lowerEq' : {N M : TCs} 
+             → lift {ℓ = ℓ} M ◆ lift {ℓ = ℓ} N ≡ lift {ℓ = ℓ} M 
+             → lift {ℓ = ℓ} (SuperMonad._◆_  sm M N) ≡ lift {ℓ = ℓ} M
+    lowerEq' eq = eq
 
+    lowerEq'' : {N M : TCs} 
+              → lift {ℓ = ℓ} M ◆ lift {ℓ = ℓ} N ≡ lift {ℓ = ℓ} (SuperMonad._◆_ sm M N)
+    lowerEq'' = refl
+
+    lowerB : ∀ {M N : TCs} → Binds (lift M) (lift N) → SuperMonad.Binds sm M N
+    lowerB (lift b) = b
+    lowerR : ∀ {M : TCs} → Returns (lift M) → SuperMonad.Returns sm M
+    lowerR (lift r) = r
+    
+    lawIdL : ∀ {α : Type} 
+           → (M N : TyCons)
+           → (M◆N≡M : M ◆ N ≡ M)
+           → (b : Binds M N) → (r : Returns N)
+           → (m : ⟨ M ⟩ α)
+           → subst (λ X → ⟨ X ⟩ α) M◆N≡M (bind {M = M} {N = N} b {α = α} {β = α} m (return {M = N} r)) ≡ m
+    lawIdL (lift M) (lift N) M◆N≡M (lift b) (lift r) m = SuperMonad.lawIdL sm M N (lowerEq (lowerEq' {!M◆N≡M!})) b r m
+
+    lawIdL' : ∀ {α : Type} 
+           → (M N : TCs)
+           → (M◆N≡M : lift M ◆ lift N ≡ lift M)
+           → (b : Binds (lift M) (lift N)) → (r : Returns (lift N))
+           → (m : ⟨ lift M ⟩ α)
+           → subst (λ X → ⟨ X ⟩ α) M◆N≡M (SuperMonad.bind sm {M = M} {N = N} (lowerB b) {α = α} {β = α} m (SuperMonad.return sm {M = N} (lowerR r))) ≡ m
+    lawIdL' M N M◆N≡M (lift b) (lift r) m = SuperMonad.lawIdL sm M N (lowerEq {!M◆N≡M!}) b r m
+    -}
+    
 superMonadUnion : ∀ {ℓ} {TyCons₁ : Set ℓ} {TyCons₂ : Set ℓ}
                 → SuperMonad TyCons₁
                 → SuperMonad TyCons₂
