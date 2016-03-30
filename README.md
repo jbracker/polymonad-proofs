@@ -70,3 +70,6 @@ few gigabytes of free RAM when type checking!
 * **`MorphMonad`**: 
   These modules contain ideas about the union of standard monads to polymonads by providing lifting
   functions (morphisms) between them (*WIP*).
+* **`SuperMonad`**:
+  Another approach to generalizing different kinds of monads, that I call Supermonads. 
+  This approach is driven by practical examples of generalized monads.
