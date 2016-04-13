@@ -75,6 +75,7 @@ only-parameterized:
 only-supermonads:
 	# Super Monads
 	$(AGDA_TC) SuperMonad/Definition.agda
+	$(AGDA_TC) SuperMonad/Laws.agda
 	$(AGDA_TC) SuperMonad/HaskSuperMonad.agda
 	$(AGDA_TC) SuperMonad/Union.agda
 	$(AGDA_TC) SuperMonad/Monad.agda
