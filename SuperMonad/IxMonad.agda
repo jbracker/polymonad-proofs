@@ -9,6 +9,8 @@ open import Data.Product
 open import Data.Sum
 open import Data.Unit
 open import Data.Empty
+open import Data.Nat
+open import Data.Vec hiding ( _>>=_ )
 open import Relation.Nullary
 open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning
@@ -20,8 +22,9 @@ open import Identity
 open import Functor
 open import Polymonad
 open import Parameterized.IndexedMonad
+open import Parameterized.PhantomIndices
 open import SuperMonad.Definition
-open import SuperMonad.HaskSuperMonad
+--open import SuperMonad.HaskSuperMonad
 
 -- -----------------------------------------------------------------------------
 -- Indexed Monads are Super Monads
@@ -36,9 +39,14 @@ IxMonad→SuperMonad {n = n} Ixs M monad = record
   ; Binds = Binds
   ; Returns = Returns
   ; functor = functor
-  ; _◆_ = _◆_
+  ; tyConArity = tyConArity
+  ; tyConArgTys = tyConArgTys
+  ; tyCon = tyCon
   ; bind = bind
   ; return = return
+  ; lawSingleTyCon = lawSingleTyCon
+  ; lawUniqueBind = lawUniqueBind
+  ; lawUniqueReturn = lawUniqueReturn
   ; lawIdR = lawIdR
   ; lawIdL = lawIdL
   ; lawAssoc = lawAssoc
@@ -49,20 +57,26 @@ IxMonad→SuperMonad {n = n} Ixs M monad = record
     ⟨_⟩ : TyCons → TyCon
     ⟨_⟩ (IxMonadTC i j) = M i j
     
-    Binds : TyCons → TyCons → Set n
-    Binds (IxMonadTC i j) (IxMonadTC k l) = j ≡ k
+    Binds : TyCons → TyCons → TyCons → Set n
+    Binds (IxMonadTC i j) (IxMonadTC j' k) (IxMonadTC i' k') = j ≡ j' × i ≡ i' × k ≡ k'
     
     Returns : TyCons → Set n
     Returns (IxMonadTC i j) = i ≡ j
-
-    _◆_ : TyCons → TyCons → TyCons
-    IxMonadTC i j ◆ IxMonadTC k l = IxMonadTC i l
     
     _>>=_ = IxMonad._>>=_ monad
     return' = IxMonad.return monad
+    
+    tyConArity : ℕ
+    tyConArity = 2
 
-    bind : {M N : TyCons} → Binds M N → [ ⟨ M ⟩ , ⟨ N ⟩ ]▷ ⟨ M ◆ N ⟩
-    bind {M = IxMonadTC i j} {N = IxMonadTC .j l} refl ma f = ma >>= f
+    tyConArgTys : Vec (Set n) tyConArity
+    tyConArgTys = Ixs ∷ Ixs ∷ []
+    
+    tyCon : ParamTyCon tyConArgTys
+    tyCon i j = lift $ M i j
+    
+    bind : {M N P : TyCons} → Binds M N P → [ ⟨ M ⟩ , ⟨ N ⟩ ]▷ ⟨ P ⟩
+    bind {M = IxMonadTC i j} {N = IxMonadTC .j l} {P = IxMonadTC .i .l} (refl , refl , refl) ma f = ma >>= f
     
     return : ∀ {α : Type} → {M : TyCons} → Returns M → α → ⟨ M ⟩ α
     return {M = IxMonadTC i .i} refl = return'
@@ -70,31 +84,42 @@ IxMonad→SuperMonad {n = n} Ixs M monad = record
     fmap⟨_⟩ : (M : TyCons) → ∀ {α β : Type} → (α → β) → ⟨ M ⟩ α → ⟨ M ⟩ β
     fmap⟨_⟩ (IxMonadTC i j) f ma = ma >>= (return' ∘ f)
     
+    lawSingleTyCon : ∀ (M : TyCons) 
+                   → ∃Indices tyConArgTys tyCon (λ X → Lift {ℓ = lsuc n} (⟨ M ⟩ ≡ X))
+    lawSingleTyCon (IxMonadTC i j) = i , j , lift refl
+    
+    lawUniqueBind : {M N P : TyCons} 
+                  → (b₁ b₂ : Binds M N P) 
+                  → b₁ ≡ b₂
+    lawUniqueBind {IxMonadTC i j} {IxMonadTC .j k} {IxMonadTC .i .k} (refl , refl , refl) (refl , refl , refl) = refl
+    
+    lawUniqueReturn : {M : TyCons} 
+                    → (r₁ r₂ : Returns M) 
+                    → r₁ ≡ r₂
+    lawUniqueReturn {IxMonadTC i .i} refl refl = refl
+    
     lawIdR : ∀ {α β : Type} 
            → (M N : TyCons)
-           → (N◆M≡M : N ◆ M ≡ M )
-           → (b : Binds N M) → (r : Returns N)
-           → (a : α) → (k : α → ⟨ M ⟩ β)
-           → subst (λ X → ⟨ X ⟩ β) N◆M≡M (bind b (return r a) k) ≡ k a
-    lawIdR (IxMonadTC i j) (IxMonadTC .i .i) refl refl refl a f = IxMonad.lawIdR monad a f
+           → (b : Binds M N N) → (r : Returns M)
+           → (a : α) → (k : α → ⟨ N ⟩ β)
+           → bind b (return r a) k ≡ k a
+    lawIdR (IxMonadTC i .i) (IxMonadTC .i k) (refl , refl , refl) refl a f = IxMonad.lawIdR monad a f
     
     lawIdL : ∀ {α : Type} 
            → (M N : TyCons)
-           → (M◆N≡M : M ◆ N ≡ M)
-           → (b : Binds M N) → (r : Returns N)
+           → (b : Binds M N M) → (r : Returns N)
            → (m : ⟨ M ⟩ α)
-           → subst (λ X → ⟨ X ⟩ α) M◆N≡M (bind b m (return r)) ≡ m
-    lawIdL (IxMonadTC i j) (IxMonadTC .j .j) refl refl refl m = IxMonad.lawIdL monad m
+           → bind b m (return r) ≡ m
+    lawIdL (IxMonadTC i j) (IxMonadTC .j .j) (refl , refl , refl) refl m = IxMonad.lawIdL monad m
     
     lawAssoc : ∀ {α β γ : Type} 
-             → (M N P : TyCons)
-             → (assoc : M ◆ (N ◆ P) ≡ (M ◆ N) ◆ P) 
-             → (b₁ : Binds M (N ◆ P)) → (b₂ : Binds N P)
-             → (b₃ : Binds (M ◆ N) P) → (b₄ : Binds M N)
-             → (m : ⟨ M ⟩ α) → (f : α → ⟨ N ⟩ β) → (g : β → ⟨ P ⟩ γ)
-             → subst (λ X → ⟨ X ⟩ γ) assoc (bind b₁ m (λ x → bind b₂ (f x) g)) 
-               ≡ bind b₃ (bind b₄ m f) g
-    lawAssoc (IxMonadTC i j) (IxMonadTC .j k) (IxMonadTC .k l) refl refl refl refl refl m f g = IxMonad.lawAssoc monad m f g
+             → (M N P S T : TyCons)
+             → (b₁ : Binds M N P) → (b₂ : Binds S T N)
+             → (b₃ : Binds N T P) → (b₄ : Binds M S N)
+             → (m : ⟨ M ⟩ α) → (f : α → ⟨ S ⟩ β) → (g : β → ⟨ T ⟩ γ)
+             → bind b₁ m (λ x → bind b₂ (f x) g) ≡ bind b₃ (bind b₄ m f) g
+    lawAssoc (IxMonadTC j .j) (IxMonadTC .j l) (IxMonadTC .j .l) (IxMonadTC .j .l) (IxMonadTC .l .l) 
+             (refl , refl , refl) (refl , refl , refl) (refl , refl , refl) (refl , refl , refl) m f g = IxMonad.lawAssoc monad m f g
     
     functor : (F : TyCons) → Functor ⟨ F ⟩
     functor (IxMonadTC i j) = record 
@@ -136,13 +161,11 @@ IxMonad→SuperMonad {n = n} Ixs M monad = record
     
     lawMonadFmap : ∀ {α β : Type}
                  → (M N : TyCons)
-                 → (M◆N≡M : M ◆ N ≡ M)
-                 → (b : Binds M N) → (r : Returns N)
+                 → (b : Binds M N M) → (r : Returns N)
                  → (f : α → β) → (m : ⟨ M ⟩ α)
-                 → subst (λ X → ⟨ X ⟩ β) M◆N≡M (bind b m (return r ∘ f)) 
-                   ≡ Functor.fmap (functor M) f m
-    lawMonadFmap (IxMonadTC i j) (IxMonadTC .j .j) refl refl refl f m = refl
-
+                 → bind b m (return r ∘ f) ≡ Functor.fmap (functor M) f m
+    lawMonadFmap (IxMonadTC i j) (IxMonadTC .j .j) (refl , refl , refl) refl f m = refl
+{-
 IxMonad→HaskSuperMonad : ∀ {n}
                        → (Ixs : Set n)
                        → (M : Ixs → Ixs → TyCon)
@@ -194,3 +217,4 @@ IxMonad→HaskSuperMonad Ixs M monad = record
       m >>= (λ x → return (f x) >>= g)
         ≡⟨ SuperMonad.lawAssoc supermonad (IxMonadTC i j) (IxMonadTC j j) (IxMonadTC j k) refl refl refl refl refl m (return ∘ f) g ⟩
       (m >>= (return ∘ f)) >>= g ∎
+-}

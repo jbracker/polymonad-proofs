@@ -93,7 +93,7 @@ record SuperMonad {ℓ} (TyCons : Set ℓ) : Set (lsuc ℓ) where
     
     -- The supermonad version of the monad-functor relationship.
     lawMonadFmap : ∀ {α β : Type}
-                 → (M N P : TyCons)
+                 → (M N : TyCons)
                  → (b : Binds M N M) → (r : Returns N)
                  → (f : α → β) → (m : ⟨ M ⟩ α)
                  → bind b m (return r ∘ f) ≡ Functor.fmap (functor M) f m

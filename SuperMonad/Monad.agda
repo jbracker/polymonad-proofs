@@ -31,31 +31,6 @@ open import SuperMonad.Definition
 -- -----------------------------------------------------------------------------
 -- Standard Monads are Super Monads
 -- -----------------------------------------------------------------------------
-{-
-
-    -- Arity of the supermonad type constructor.
-    tyConArity : ℕ
-    -- Argument types of the supermonad type constructor indices.
-    tyConArgTys : Vec (Set ℓ) tyConArity
-    -- The supermonad type constructor.
-    tyCon : ParamTyCon tyConArgTys
-
-
-    -- The supermonad only uses one type constructor.
-    lawSingleTyCon : ∀ (M : TyCons) 
-                   → ∃Indices tyConArgTys tyCon (λ X → Lift {ℓ = lsuc ℓ} (⟨ M ⟩ ≡ X))
-    
-    -- The supermonad only has a single bind operation.
-    lawUniqueBind : {M N P : TyCons} 
-                  → (b₁ b₂ : Binds M N P) 
-                  → b₁ ≡ b₂
-    
-    -- The supermonad only has a single return operation.
-    lawUniqueReturn : {M : TyCons} 
-                    → (r₁ r₂ : Returns M) 
-                    → r₁ ≡ r₂
--}
-
 
 Monad→SuperMonad : (M : TyCon)
                  → Monad M → SuperMonad MonadTyCons
@@ -149,11 +124,11 @@ Monad→SuperMonad M monad = record
     functor MonadTC = Applicative.functor (Monad.applicative monad)
     
     lawMonadFmap : ∀ {α β : Type}
-                 → (M N P : TyCons)
+                 → (M N : TyCons)
                  → (b : Binds M N M) → (r : Returns N)
                  → (f : α → β) → (m : ⟨ M ⟩ α)
                  → bind b m (return r ∘ f) ≡ Functor.fmap (functor M) f m
-    lawMonadFmap MonadTC MonadTC MonadTC tt tt f m = sym (Monad.lawMonadFmap monad f m)
+    lawMonadFmap MonadTC MonadTC tt tt f m = sym (Monad.lawMonadFmap monad f m)
 {-
 Monad→HaskSuperMonad : (M : TyCon)
                      → Monad M → HaskSuperMonad MonadTyCons

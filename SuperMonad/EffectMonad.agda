@@ -9,6 +9,8 @@ open import Data.Product
 open import Data.Sum
 open import Data.Unit
 open import Data.Empty
+open import Data.Nat
+open import Data.Vec hiding ( _>>=_ )
 open import Relation.Nullary
 open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning
@@ -19,9 +21,10 @@ open import Haskell
 open import Identity
 open import Functor
 open import Polymonad
+open import Parameterized.PhantomIndices
 open import Parameterized.EffectMonad
 open import SuperMonad.Definition
-open import SuperMonad.HaskSuperMonad
+--open import SuperMonad.HaskSuperMonad
 
 open Parameterized.EffectMonad.Monoid
 
@@ -39,9 +42,14 @@ EffectMonad→SuperMonad {n = n} Effect monoid M monad = record
   ; Binds = Binds
   ; Returns = Returns
   ; functor = functor
-  ; _◆_ = _◆_
+  ; tyConArity = tyConArity
+  ; tyConArgTys = tyConArgTys
+  ; tyCon = tyCon
   ; bind = bind
   ; return = return
+  ; lawSingleTyCon = lawSingleTyCon
+  ; lawUniqueBind = lawUniqueBind
+  ; lawUniqueReturn = lawUniqueReturn
   ; lawIdR = lawIdR
   ; lawIdL = lawIdL
   ; lawAssoc = lawAssoc
@@ -55,20 +63,26 @@ EffectMonad→SuperMonad {n = n} Effect monoid M monad = record
     ⟨_⟩ : TyCons → TyCon
     ⟨_⟩ (EffMonadTC e) = M e
     
-    Binds : TyCons → TyCons → Set n
-    Binds (EffMonadTC m) (EffMonadTC n) = Lift ⊤
+    Binds : TyCons → TyCons → TyCons → Set n
+    Binds (EffMonadTC m) (EffMonadTC n) (EffMonadTC p) = m ∙ n ≡ p 
     
     Returns : TyCons → Set n
     Returns (EffMonadTC m) = m ≡ ε
+
+    tyConArity : ℕ
+    tyConArity = 1
+
+    tyConArgTys : Vec (Set n) tyConArity
+    tyConArgTys = Effect ∷ []
     
-    _◆_ : TyCons → TyCons → TyCons
-    EffMonadTC m ◆ EffMonadTC n = EffMonadTC (m ∙ n)
+    tyCon : ParamTyCon tyConArgTys
+    tyCon e = lift $ M e
     
     _>>=_ = EffectMonad._>>=_ monad
     return' = EffectMonad.return monad
     
-    bind : {M N : TyCons} → Binds M N → [ ⟨ M ⟩ , ⟨ N ⟩ ]▷ ⟨ M ◆ N ⟩
-    bind {M = EffMonadTC m} {N = EffMonadTC n} (lift tt) = _>>=_
+    bind : {M N P : TyCons} → Binds M N P → [ ⟨ M ⟩ , ⟨ N ⟩ ]▷ ⟨ P ⟩
+    bind {M = EffMonadTC m} {N = EffMonadTC n} {P = EffMonadTC .(m ∙ n)} refl = _>>=_
     
     return : ∀ {α : Type} → {M : TyCons} → Returns M → α → ⟨ M ⟩ α
     return {M = EffMonadTC ._} refl = return'
@@ -76,6 +90,20 @@ EffectMonad→SuperMonad {n = n} Effect monoid M monad = record
     fmap : ∀ {m : Monoid.carrier monoid} {α β : Type} → (α → β) → M m α → M m β
     fmap {m = m} {β = β} f ma = subst₂ M (Monoid.lawIdR monoid m) refl (ma >>= (return' ∘ f))
     
+    lawSingleTyCon : ∀ (M : TyCons) 
+                   → ∃Indices tyConArgTys tyCon (λ X → Lift {ℓ = lsuc n} (⟨ M ⟩ ≡ X))
+    lawSingleTyCon (EffMonadTC m) = m , lift refl
+    
+    lawUniqueBind : {M N P : TyCons} 
+                  → (b₁ b₂ : Binds M N P) 
+                  → b₁ ≡ b₂
+    lawUniqueBind {M = EffMonadTC m} {N = EffMonadTC n} {P = EffMonadTC .(m ∙ n)} refl refl = refl
+    
+    lawUniqueReturn : {M : TyCons} 
+                    → (r₁ r₂ : Returns M) 
+                    → r₁ ≡ r₂
+    lawUniqueReturn {M = EffMonadTC .ε} refl refl = refl
+    {-
     Mε◆Me≡Me : (e : Monoid.carrier monoid) → EffMonadTC ε ◆ EffMonadTC e ≡ EffMonadTC e
     Mε◆Me≡Me e with Monoid.lawIdL monoid e
     Mε◆Me≡Me e | p with ε ∙ e 
@@ -121,53 +149,50 @@ EffectMonad→SuperMonad {n = n} Effect monoid M monad = record
     helpSubst4 e N◆M≡M m with Monoid.lawIdR monoid e 
     helpSubst4 e N◆M≡M m | p with e ∙ ε
     helpSubst4 e refl m | refl | .e = refl
-
+-}
+  
     lawIdR : ∀ {α β : Type} 
            → (M N : TyCons)
-           → (N◆M≡M : N ◆ M ≡ M )
-           → (b : Binds N M) → (r : Returns N)
-           → (a : α) → (k : α → ⟨ M ⟩ β)
-           → subst (λ X → ⟨ X ⟩ β) N◆M≡M (bind b (return r a) k) ≡ k a
-    lawIdR {α = α} {β = β} (EffMonadTC e) (EffMonadTC ._) N◆M≡M (lift tt) refl a k = begin
+           → (b : Binds M N N) → (r : Returns M)
+           → (a : α) → (k : α → ⟨ N ⟩ β)
+           → bind b (return r a) k ≡ k a
+    lawIdR (EffMonadTC .ε) (EffMonadTC x) b refl a k  = {!b!} {- begin
       subst (λ X → ⟨ X ⟩ β) N◆M≡M (return' a >>= k) 
         ≡⟨ cong (λ X → subst (λ Y → ⟨ Y ⟩ β) N◆M≡M X) (EffectMonad.lawIdL monad a k) ⟩
       subst (λ X → ⟨ X ⟩ β) N◆M≡M (subst₂ M (sym (Monoid.lawIdL monoid e)) refl (k a)) 
         ≡⟨ cong (λ X → subst (λ Y → ⟨ Y ⟩ β) N◆M≡M X) (helpSubst1 e N◆M≡M (k a)) ⟩
       subst (λ X → ⟨ X ⟩ β) N◆M≡M (subst (λ X → ⟨ X ⟩ β) (sym N◆M≡M) (k a)) 
         ≡⟨ subst²≡id N◆M≡M (λ X → ⟨ X ⟩ β) (k a) ⟩
-      k a ∎
+      k a ∎ -}
     
     lawIdL : ∀ {α : Type} 
            → (M N : TyCons)
-           → (M◆N≡M : M ◆ N ≡ M)
-           → (b : Binds M N) → (r : Returns N)
+           → (b : Binds M N M) → (r : Returns N)
            → (m : ⟨ M ⟩ α)
-           → subst (λ X → ⟨ X ⟩ α) M◆N≡M (bind b m (return r)) ≡ m
-    lawIdL {α = α} (EffMonadTC e) (EffMonadTC ._) M◆N≡M (lift tt) refl m = begin
+           → bind b m (return r) ≡ m
+    lawIdL {α = α} (EffMonadTC e) (EffMonadTC x) b r m = {!!} {- begin
       subst (λ X → ⟨ X ⟩ α) M◆N≡M (m >>= return')
         ≡⟨ cong (λ X → subst (λ Y → ⟨ Y ⟩ α) M◆N≡M X) (EffectMonad.lawIdR monad m) ⟩
       subst (λ X → ⟨ X ⟩ α) M◆N≡M (subst₂ M (sym (Monoid.lawIdR monoid e)) refl m)
         ≡⟨ cong (λ X → subst (λ Y → ⟨ Y ⟩ α) M◆N≡M X) (helpSubst2 e M◆N≡M m) ⟩
       subst (λ X → ⟨ X ⟩ α) M◆N≡M (subst (λ X → ⟨ X ⟩ α) (sym M◆N≡M) m)
         ≡⟨ subst²≡id M◆N≡M (λ X → ⟨ X ⟩ α) m ⟩
-      m ∎
+      m ∎ -}
 
     lawAssoc : ∀ {α β γ : Type} 
-             → (M N P : TyCons)
-             → (assoc : M ◆ (N ◆ P) ≡ (M ◆ N) ◆ P) 
-             → (b₁ : Binds M (N ◆ P)) → (b₂ : Binds N P)
-             → (b₃ : Binds (M ◆ N) P) → (b₄ : Binds M N)
-             → (m : ⟨ M ⟩ α) → (f : α → ⟨ N ⟩ β) → (g : β → ⟨ P ⟩ γ)
-             → subst (λ X → ⟨ X ⟩ γ) assoc (bind b₁ m (λ x → bind b₂ (f x) g)) 
-               ≡ bind b₃ (bind b₄ m f) g
-    lawAssoc {γ = γ} (EffMonadTC e₁) (EffMonadTC e₂) (EffMonadTC e₃) assoc (lift tt) (lift tt) (lift tt) (lift tt) m f g = begin 
+             → (M N P S T : TyCons)
+             → (b₁ : Binds M N P) → (b₂ : Binds S T N)
+             → (b₃ : Binds N T P) → (b₄ : Binds M S N)
+             → (m : ⟨ M ⟩ α) → (f : α → ⟨ S ⟩ β) → (g : β → ⟨ T ⟩ γ)
+             → bind b₁ m (λ x → bind b₂ (f x) g) ≡ bind b₃ (bind b₄ m f) g
+    lawAssoc {γ = γ} (EffMonadTC e₁) (EffMonadTC e₂) (EffMonadTC e₃) b c d e m f g = {!!} {- begin 
       subst (λ X → ⟨ X ⟩ γ) assoc (m >>= (λ x → f x >>= g))
         ≡⟨ cong (λ X → subst (λ Y → ⟨ Y ⟩ γ) assoc X) (EffectMonad.lawAssoc monad m f g) ⟩
       subst (λ X → ⟨ X ⟩ γ) assoc (subst₂ M (Monoid.lawAssoc monoid e₁ e₂ e₃) refl ((m >>= f) >>= g))
         ≡⟨ cong (λ X → subst (λ Y → ⟨ Y ⟩ γ) assoc X) (helpSubst3 e₁ e₂ e₃ assoc (((m >>= f) >>= g))) ⟩
       subst (λ X → ⟨ X ⟩ γ) assoc (subst (λ X → ⟨ X ⟩ γ) (sym assoc) ((m >>= f) >>= g))
         ≡⟨ subst²≡id assoc (λ X → ⟨ X ⟩ γ) (((m >>= f) >>= g)) ⟩
-      (m >>= f) >>= g ∎
+      (m >>= f) >>= g ∎ -}
     
     shiftSubstHelp3 : ∀ {γ : Type} {e₁ e₂ : Monoid.carrier monoid}
                     → (ma : ⟨ EffMonadTC e₁ ⟩ γ)
@@ -183,7 +208,7 @@ EffectMonad→SuperMonad {n = n} Effect monoid M monad = record
       ; lawDist = lawDist
       } where
         lawId : ∀ {α : Type} → fmap {α = α} identity ≡ identity
-        lawId {α = α} = funExt (λ ma → begin
+        lawId {α = α} = {!!} {- funExt (λ ma → begin
           fmap identity ma 
             ≡⟨ refl ⟩
           subst₂ M (Monoid.lawIdR monoid m) refl (ma >>= return')
@@ -195,7 +220,7 @@ EffectMonad→SuperMonad {n = n} Effect monoid M monad = record
             ≡⟨ helpSubst4 m (Me◆Mε≡Me m) (subst (λ X → ⟨ X ⟩ α) (sym (Me◆Mε≡Me m)) ma) ⟩
           subst (λ X → ⟨ X ⟩ α) (Me◆Mε≡Me m) (subst (λ X → ⟨ X ⟩ α) (sym (Me◆Mε≡Me m)) ma)
             ≡⟨ subst²≡id (Me◆Mε≡Me m) (λ X → ⟨ X ⟩ α) ma ⟩
-          identity ma ∎)
+          identity ma ∎) -}
 
         Meεε≡Meε : EffMonadTC (m ∙ (ε ∙ ε)) ≡ EffMonadTC (m ∙ ε)
         Meεε≡Meε = cong (λ X → EffMonadTC (m ∙ X)) (Monoid.lawIdL monoid ε)
@@ -236,7 +261,7 @@ EffectMonad→SuperMonad {n = n} Effect monoid M monad = record
         lawDist : ∀ {α β γ : Type} 
                 → (f : β → γ) → (g : α → β) 
                 → fmap (f ∘ g) ≡ fmap f ∘ fmap g
-        lawDist {β = β} {γ = γ} f g = funExt (λ ma → begin 
+        lawDist {β = β} {γ = γ} f g = {!!} {- funExt (λ ma → begin 
           fmap (f ∘ g) ma
             ≡⟨ refl ⟩
           subst₂ M (Monoid.lawIdR monoid m) refl (ma >>= (λ x → return' (f (g x))))
@@ -261,22 +286,20 @@ EffectMonad→SuperMonad {n = n} Effect monoid M monad = record
             ≡⟨ cong (λ X → subst₂ M (Monoid.lawIdR monoid m) refl X) (shiftSubstHelp2 (Monoid.lawIdR monoid m) eεε≡eε (ma >>= (return' ∘ g)) (return' ∘ f)) ⟩
           subst₂ M (Monoid.lawIdR monoid m) refl ((subst₂ M (Monoid.lawIdR monoid m) refl (ma >>= (return' ∘ g))) >>= (return' ∘ f))
             ≡⟨ refl ⟩
-          (fmap f ∘ fmap g) ma ∎)
+          (fmap f ∘ fmap g) ma ∎) -}
     
     lawMonadFmap : ∀ {α β : Type}
                  → (M N : TyCons)
-                 → (M◆N≡M : M ◆ N ≡ M)
-                 → (b : Binds M N) → (r : Returns N)
+                 → (b : Binds M N M) → (r : Returns N)
                  → (f : α → β) → (m : ⟨ M ⟩ α)
-                 → subst (λ X → ⟨ X ⟩ β) M◆N≡M (bind b m (return r ∘ f)) 
-                   ≡ Functor.fmap (functor M) f m
-    lawMonadFmap {β = β} (EffMonadTC x) (EffMonadTC ._) M◆N≡M (lift tt) refl f ma = begin
+                 → bind b m (return r ∘ f) ≡ Functor.fmap (functor M) f m
+    lawMonadFmap {β = β} (EffMonadTC x) (EffMonadTC ._) b refl f ma = {!!} {- begin
       subst (λ X → ⟨ X ⟩ β) M◆N≡M (ma >>= (return' ∘ f))
         ≡⟨ shiftSubstHelp3 (ma >>= (return' ∘ f)) M◆N≡M (Monoid.lawIdR monoid x) ⟩
       subst₂ M (Monoid.lawIdR monoid x) refl (ma >>= (return' ∘ f))
         ≡⟨ refl ⟩
-      fmap f ma ∎
-
+      fmap f ma ∎ -}
+{-
 EffectMonad→HaskSuperMonad : ∀ {n}
                      → (Effect : Set n)
                      → (EffectMonoid : Monoid Effect)
@@ -429,3 +452,4 @@ EffectMonad→HaskSuperMonad Effect monoid M monad = record
         ≡⟨ shiftSubstHelp2 (Monoid.lawIdR monoid x) [xε]y≡xy ((m >>= (return ∘ f))) g ⟩
       (subst₂ M (Monoid.lawIdR monoid x) refl (m >>= (return ∘ f))) >>= g ∎
 
+-}
