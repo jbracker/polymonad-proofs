@@ -9,6 +9,8 @@ open import Data.Product
 open import Data.Sum
 open import Data.Unit
 open import Data.Empty
+open import Data.Nat
+open import Data.Vec hiding ( _>>=_ )
 open import Relation.Nullary
 open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning
@@ -22,12 +24,38 @@ open import Applicative
 open import Monad
 open import Monad.Polymonad
 open import Polymonad
+open import Parameterized.PhantomIndices
 open import SuperMonad.Definition 
-open import SuperMonad.HaskSuperMonad
+-- open import SuperMonad.HaskSuperMonad
 
 -- -----------------------------------------------------------------------------
 -- Standard Monads are Super Monads
 -- -----------------------------------------------------------------------------
+{-
+
+    -- Arity of the supermonad type constructor.
+    tyConArity : ℕ
+    -- Argument types of the supermonad type constructor indices.
+    tyConArgTys : Vec (Set ℓ) tyConArity
+    -- The supermonad type constructor.
+    tyCon : ParamTyCon tyConArgTys
+
+
+    -- The supermonad only uses one type constructor.
+    lawSingleTyCon : ∀ (M : TyCons) 
+                   → ∃Indices tyConArgTys tyCon (λ X → Lift {ℓ = lsuc ℓ} (⟨ M ⟩ ≡ X))
+    
+    -- The supermonad only has a single bind operation.
+    lawUniqueBind : {M N P : TyCons} 
+                  → (b₁ b₂ : Binds M N P) 
+                  → b₁ ≡ b₂
+    
+    -- The supermonad only has a single return operation.
+    lawUniqueReturn : {M : TyCons} 
+                    → (r₁ r₂ : Returns M) 
+                    → r₁ ≡ r₂
+-}
+
 
 Monad→SuperMonad : (M : TyCon)
                  → Monad M → SuperMonad MonadTyCons
@@ -36,9 +64,14 @@ Monad→SuperMonad M monad = record
   ; Binds = Binds
   ; Returns = Returns
   ; functor = functor
-  ; _◆_ = _◆_
+  ; tyConArity = tyConArity
+  ; tyConArgTys = tyConArgTys
+  ; tyCon = tyCon
   ; bind = bind
   ; return = return
+  ; lawSingleTyCon = lawSingleTyCon
+  ; lawUniqueBind = lawUniqueBind
+  ; lawUniqueReturn = lawUniqueReturn
   ; lawIdR = lawIdR
   ; lawIdL = lawIdL
   ; lawAssoc = lawAssoc
@@ -49,20 +82,26 @@ Monad→SuperMonad M monad = record
     ⟨_⟩ : TyCons → TyCon
     ⟨_⟩ MonadTC = M
     
-    Binds : TyCons → TyCons → Set
-    Binds MonadTC MonadTC = ⊤
+    Binds : TyCons → TyCons → TyCons → Set
+    Binds MonadTC MonadTC MonadTC = ⊤
     
     Returns : TyCons → Set
     Returns MonadTC = ⊤
-
-    _◆_ : TyCons → TyCons → TyCons
-    MonadTC ◆ MonadTC = MonadTC
     
     _>>=_ = Monad._>>=_ monad
     return' = Monad.return monad
 
-    bind : {M N : TyCons} → Binds M N → [ ⟨ M ⟩ , ⟨ N ⟩ ]▷ ⟨ M ◆ N ⟩
-    bind {M = MonadTC} {N = MonadTC} tt ma f = ma >>= f
+    tyConArity : ℕ
+    tyConArity = 0
+
+    tyConArgTys : Vec Set tyConArity
+    tyConArgTys = []
+    
+    tyCon : ParamTyCon tyConArgTys
+    tyCon = lift M
+
+    bind : {M N P : TyCons} → Binds M N P → [ ⟨ M ⟩ , ⟨ N ⟩ ]▷ ⟨ P ⟩
+    bind {M = MonadTC} {N = MonadTC} {P = MonadTC} tt ma f = ma >>= f
     
     return : ∀ {α : Type} → {M : TyCons} → Returns M → α → ⟨ M ⟩ α
     return {M = MonadTC} tt = return'
@@ -70,44 +109,52 @@ Monad→SuperMonad M monad = record
     fmap⟨_⟩ : (M : TyCons) → ∀ {α β : Type} → (α → β) → ⟨ M ⟩ α → ⟨ M ⟩ β
     fmap⟨_⟩ MonadTC f ma = ma >>= (return' ∘ f)
     
+    lawSingleTyCon : ∀ (M : TyCons) 
+                   → ∃Indices tyConArgTys tyCon (λ X → Lift {ℓ = lsuc lzero} (⟨ M ⟩ ≡ X))
+    lawSingleTyCon MonadTC = lift refl
+    
+    lawUniqueBind : {M N P : TyCons} 
+                  → (b₁ b₂ : Binds M N P) 
+                  → b₁ ≡ b₂
+    lawUniqueBind {M = MonadTC} {N = MonadTC} {P = MonadTC} tt tt = refl
+    
+    lawUniqueReturn : {M : TyCons} 
+                    → (r₁ r₂ : Returns M) 
+                    → r₁ ≡ r₂
+    lawUniqueReturn {M = MonadTC} tt tt = refl
+    
     lawIdR : ∀ {α β : Type} 
            → (M N : TyCons)
-           → (N◆M≡M : N ◆ M ≡ M )
-           → (b : Binds N M) → (r : Returns N)
-           → (a : α) → (k : α → ⟨ M ⟩ β)
-           → subst (λ X → ⟨ X ⟩ β) N◆M≡M (bind b (return r a) k) ≡ k a
-    lawIdR MonadTC MonadTC refl tt tt a f = Monad.lawIdR monad a f
+           → (b : Binds M N N) → (r : Returns M)
+           → (a : α) → (k : α → ⟨ N ⟩ β)
+           → bind b (return r a) k ≡ k a
+    lawIdR MonadTC MonadTC tt tt a f = Monad.lawIdR monad a f
     
     lawIdL : ∀ {α : Type} 
            → (M N : TyCons)
-           → (M◆N≡M : M ◆ N ≡ M)
-           → (b : Binds M N) → (r : Returns N)
+           → (b : Binds M N M) → (r : Returns N)
            → (m : ⟨ M ⟩ α)
-           → subst (λ X → ⟨ X ⟩ α) M◆N≡M (bind b m (return r)) ≡ m
-    lawIdL MonadTC MonadTC refl tt tt m = Monad.lawIdL monad m
+           → bind b m (return r) ≡ m
+    lawIdL MonadTC MonadTC tt tt m = Monad.lawIdL monad m
     
     lawAssoc : ∀ {α β γ : Type} 
-             → (M N P : TyCons)
-             → (assoc : M ◆ (N ◆ P) ≡ (M ◆ N) ◆ P) 
-             → (b₁ : Binds M (N ◆ P)) → (b₂ : Binds N P)
-             → (b₃ : Binds (M ◆ N) P) → (b₄ : Binds M N)
-             → (m : ⟨ M ⟩ α) → (f : α → ⟨ N ⟩ β) → (g : β → ⟨ P ⟩ γ)
-             → subst (λ X → ⟨ X ⟩ γ) assoc (bind b₁ m (λ x → bind b₂ (f x) g)) 
-               ≡ bind b₃ (bind b₄ m f) g
-    lawAssoc MonadTC MonadTC MonadTC refl tt tt tt tt m f g = Monad.lawAssoc monad m f g
+             → (M N P S T : TyCons)
+             → (b₁ : Binds M N P) → (b₂ : Binds S T N)
+             → (b₃ : Binds N T P) → (b₄ : Binds M S N)
+             → (m : ⟨ M ⟩ α) → (f : α → ⟨ S ⟩ β) → (g : β → ⟨ T ⟩ γ)
+             → bind b₁ m (λ x → bind b₂ (f x) g) ≡ bind b₃ (bind b₄ m f) g
+    lawAssoc MonadTC MonadTC MonadTC MonadTC MonadTC tt tt tt tt m f g = Monad.lawAssoc monad m f g
     
     functor : (M : TyCons) → Functor ⟨ M ⟩
     functor MonadTC = Applicative.functor (Monad.applicative monad)
     
     lawMonadFmap : ∀ {α β : Type}
-                 → (M N : TyCons)
-                 → (M◆N≡M : M ◆ N ≡ M)
-                 → (b : Binds M N) → (r : Returns N)
+                 → (M N P : TyCons)
+                 → (b : Binds M N M) → (r : Returns N)
                  → (f : α → β) → (m : ⟨ M ⟩ α)
-                 → subst (λ X → ⟨ X ⟩ β) M◆N≡M (bind b m (return r ∘ f)) 
-                   ≡ Functor.fmap (functor M) f m
-    lawMonadFmap MonadTC MonadTC refl tt tt f m = sym (Monad.lawMonadFmap monad f m)
-
+                 → bind b m (return r ∘ f) ≡ Functor.fmap (functor M) f m
+    lawMonadFmap MonadTC MonadTC MonadTC tt tt f m = sym (Monad.lawMonadFmap monad f m)
+{-
 Monad→HaskSuperMonad : (M : TyCon)
                      → Monad M → HaskSuperMonad MonadTyCons
 Monad→HaskSuperMonad M monad = record
@@ -148,3 +195,4 @@ Monad→HaskSuperMonad M monad = record
                           → (m : ⟨ M ⟩ α) → (f : α → β) → (g : β → ⟨ N ⟩ γ)
                           → bind b m (g ∘ f) ≡ bind b (fmap (functor M) f m) g
     lawDecomposeFmapIntro MonadTC MonadTC tt m f g = decomposeFmapIntro monad m f g
+-}

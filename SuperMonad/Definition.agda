@@ -9,6 +9,8 @@ open import Data.Product
 open import Data.Sum
 open import Data.Unit
 open import Data.Empty
+open import Data.Nat hiding ( _⊔_ )
+open import Data.Vec
 open import Relation.Nullary
 open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning
@@ -20,6 +22,8 @@ open import Identity
 open import Polymonad
 open import Functor
 
+open import Parameterized.PhantomIndices
+
 -- -----------------------------------------------------------------------------
 -- Definition of SuperMonads
 -- -----------------------------------------------------------------------------
@@ -28,99 +32,74 @@ record SuperMonad {ℓ} (TyCons : Set ℓ) : Set (lsuc ℓ) where
   field
     ⟨_⟩ : TyCons → TyCon
     
-    Binds : TyCons → TyCons → Set ℓ
+    -- The constraints/condition that needs to hold for the bind operation.
+    Binds : TyCons → TyCons → TyCons → Set ℓ
+    
+    -- The constraints/condition that needs to hold for the return operation.
     Returns : TyCons → Set ℓ
 
+    -- The functor associated with the supermonad.
     functor : (M : TyCons) → Functor ⟨ M ⟩
-
-    _◆_ : TyCons → TyCons → TyCons
     
-    bind : {M N : TyCons} → Binds M N → [ ⟨ M ⟩ , ⟨ N ⟩ ]▷ ⟨ M ◆ N ⟩
+    -- A supermonad only uses a single type constructor.
+    
+    -- Arity of the supermonad type constructor.
+    tyConArity : ℕ
+    -- Argument types of the supermonad type constructor indices.
+    tyConArgTys : Vec (Set ℓ) tyConArity
+    -- The supermonad type constructor.
+    tyCon : ParamTyCon tyConArgTys
+    
+    -- The bind operation of the supermonad.
+    bind : {M N P : TyCons} → Binds M N P → [ ⟨ M ⟩ , ⟨ N ⟩ ]▷ ⟨ P ⟩
+    -- The return operation of the supermonad.
     return : ∀ {α : Type} {M : TyCons} → Returns M → α → ⟨ M ⟩ α
-
+    
+    -- The supermonad only uses one type constructor.
+    lawSingleTyCon : ∀ (M : TyCons) 
+                   → ∃Indices tyConArgTys tyCon (λ X → Lift {ℓ = lsuc ℓ} (⟨ M ⟩ ≡ X))
+    
+    -- The supermonad only has a single bind operation.
+    lawUniqueBind : {M N P : TyCons} 
+                  → (b₁ b₂ : Binds M N P) 
+                  → b₁ ≡ b₂
+    
+    -- The supermonad only has a single return operation.
+    lawUniqueReturn : {M : TyCons} 
+                    → (r₁ r₂ : Returns M) 
+                    → r₁ ≡ r₂
+    
+    -- The supermonad version of the right identity law.
     lawIdR : ∀ {α β : Type} 
            → (M N : TyCons)
-           → (N◆M≡M : N ◆ M ≡ M )
-           → (b : Binds N M) → (r : Returns N)
-           → (a : α) → (k : α → ⟨ M ⟩ β)
-           → subst (λ X → ⟨ X ⟩ β) N◆M≡M (bind {M = N} {N = M} b (return {M = N} r a) k) ≡ k a
+           → (b : Binds M N N) → (r : Returns M)
+           → (a : α) → (k : α → ⟨ N ⟩ β)
+           → bind b (return r a) k ≡ k a
+    
+    -- The supermonad version of the left identity law.
     lawIdL : ∀ {α : Type} 
            → (M N : TyCons)
-           → (M◆N≡M : M ◆ N ≡ M)
-           → (b : Binds M N) → (r : Returns N)
+           → (b : Binds M N M) → (r : Returns N)
            → (m : ⟨ M ⟩ α)
-           → subst (λ X → ⟨ X ⟩ α) M◆N≡M (bind b m (return r)) ≡ m
+           → bind b m (return r) ≡ m
+    
+    -- The supermonad version of the associativity law.
     lawAssoc : ∀ {α β γ : Type} 
-             → (M N P : TyCons)
-             → (assoc : M ◆ (N ◆ P) ≡ (M ◆ N) ◆ P) 
-             → (b₁ : Binds M (N ◆ P)) → (b₂ : Binds N P)
-             → (b₃ : Binds (M ◆ N) P) → (b₄ : Binds M N)
-             → (m : ⟨ M ⟩ α) → (f : α → ⟨ N ⟩ β) → (g : β → ⟨ P ⟩ γ)
-             → subst (λ X → ⟨ X ⟩ γ) assoc (bind b₁ m (λ x → bind b₂ (f x) g)) 
-               ≡ bind b₃ (bind b₄ m f) g
+             → (M N P S T : TyCons)
+             → (b₁ : Binds M N P) → (b₂ : Binds S T N)
+             → (b₃ : Binds N T P) → (b₄ : Binds M S N)
+             → (m : ⟨ M ⟩ α) → (f : α → ⟨ S ⟩ β) → (g : β → ⟨ T ⟩ γ)
+             → bind b₁ m (λ x → bind b₂ (f x) g) ≡ bind b₃ (bind b₄ m f) g
     
+    -- The supermonad version of the monad-functor relationship.
     lawMonadFmap : ∀ {α β : Type}
-                 → (M N : TyCons)
-                 → (M◆N≡M : M ◆ N ≡ M)
-                 → (b : Binds M N) → (r : Returns N)
+                 → (M N P : TyCons)
+                 → (b : Binds M N M) → (r : Returns N)
                  → (f : α → β) → (m : ⟨ M ⟩ α)
-                 → subst (λ X → ⟨ X ⟩ β) M◆N≡M (bind b m (return r ∘ f)) 
-                   ≡ Functor.fmap (functor M) f m
+                 → bind b m (return r ∘ f) ≡ Functor.fmap (functor M) f m
     
-  sequence : ∀ {α β : Type} {M N : TyCons} → Binds M N → ⟨ M ⟩ α → ⟨ N ⟩ β → ⟨ M ◆ N ⟩ β
+  sequence : ∀ {α β : Type} {M N P : TyCons} → Binds M N P → ⟨ M ⟩ α → ⟨ N ⟩ β → ⟨ P ⟩ β
   sequence b ma mb = bind b ma (λ _ → mb)
-  
-  funcDep = _◆_
 
 K⟨_▷_⟩ : ∀ {n} {TyCons : Set n} → SuperMonad TyCons → TyCons → TyCon
 K⟨ monad ▷ M ⟩ = SuperMonad.⟨ monad ⟩ M
-
-_◆⟨_⟩_ : ∀ {n} {TyCons : Set n} → TyCons → SuperMonad TyCons → TyCons → TyCons  
-_◆⟨_⟩_ M monad N = SuperMonad._◆_ monad M N
-
--- -----------------------------------------------------------------------------
--- Set to represent bind operations of Super Polymonad
--- -----------------------------------------------------------------------------
-
-data SuperBinds {n} {TyCons : Set n} (m : SuperMonad TyCons) : (M N P : IdTyCons ⊎ TyCons) → Set n where
-  MonadB   : (M N : TyCons) 
-           → SuperMonad.Binds m M N 
-           → SuperBinds m (inj₂ M) (inj₂ N) (inj₂ (M ◆⟨ m ⟩ N))
-  FunctorB : (M : TyCons) 
-           → SuperBinds m (inj₂ M) idTC (inj₂ M)
-  ApplyB   : (M : TyCons) 
-           → SuperBinds m idTC (inj₂ M) (inj₂ M)
-  ReturnB  : (M : TyCons) 
-           → SuperMonad.Returns m M 
-           → SuperBinds m idTC idTC (inj₂ M) 
-
--- -----------------------------------------------------------------------------
--- Bind operations required to implement a Super Polymonad
--- -----------------------------------------------------------------------------
-
-bindMonad : ∀ {n} {TyCons : Set n} 
-          → (M N : TyCons)
-          → (m : SuperMonad TyCons)
-          → SuperMonad.Binds m M N
-          → [ K⟨ m ▷ M ⟩ , K⟨ m ▷ N ⟩ ]▷ K⟨ m ▷ M ◆⟨ m ⟩ N ⟩
-bindMonad M N monad b {α} {β} ma f = SuperMonad.bind monad b {α} {β} ma f
-
-bindFunctor : ∀ {n} {TyCons : Set n}
-            → (M : TyCons)
-            → (m : SuperMonad TyCons)
-            → [ K⟨ m ▷ M ⟩ , Identity ]▷ K⟨ m ▷ M ⟩
-bindFunctor {TyCons = TyCons} M monad {α = α} {β = β} ma f 
-  = Functor.fmap (SuperMonad.functor monad M) f ma
-
-bindApply : ∀ {n} {TyCons : Set n} 
-          → (M : TyCons) 
-          → (m : SuperMonad TyCons)
-          → [ Identity , K⟨ m ▷ M ⟩ ]▷ K⟨ m ▷ M ⟩
-bindApply M monad ma f = f ma
-
-bindReturn : ∀ {n} {TyCons : Set n} 
-           → (M : TyCons) 
-           → (m : SuperMonad TyCons)
-           → SuperMonad.Returns m M
-           → [ Identity , Identity ]▷ K⟨ m ▷ M ⟩
-bindReturn M monad r ma f = SuperMonad.return monad r (f ma)
