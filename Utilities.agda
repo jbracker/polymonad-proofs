@@ -65,6 +65,14 @@ subst²≡id' : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {p q : A}
            → subst F (sym eq) (subst F eq x) ≡ x
 subst²≡id' refl F x = refl
 
+substTrans : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {q p o : A}
+           → (eqA : q ≡ p)
+           → (eqB : p ≡ o)
+           → (F : A → Set ℓ₂)
+           → (x : F q)
+           → subst F eqB (subst F eqA x) ≡ subst F (trans eqA eqB) x
+substTrans refl refl F x = refl
+
 subst₂²≡id1 : ∀ {ℓ₁ ℓ₂ ℓ₃} {A : Set ℓ₁} {B : Set ℓ₂} {p q : A} {s t : B}
             → (eq₁ : p ≡ q)
             → (eq₂ : t ≡ s)
