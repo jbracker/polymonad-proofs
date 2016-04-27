@@ -75,12 +75,12 @@ only-parameterized:
 only-supermonads:
 	# Super Monads
 	$(AGDA_TC) SuperMonad/Definition.agda
-	$(AGDA_TC) SuperMonad/Laws.agda
-	$(AGDA_TC) SuperMonad/HaskSuperMonad.agda
-	$(AGDA_TC) SuperMonad/Union.agda
+	# $(AGDA_TC) SuperMonad/Laws.agda
+	# $(AGDA_TC) SuperMonad/HaskSuperMonad.agda
+	# $(AGDA_TC) SuperMonad/Union.agda
 	$(AGDA_TC) SuperMonad/Monad.agda
-	$(AGDA_TC) SuperMonad/MaybeListMonad.agda
-	$(AGDA_TC) SuperMonad/MaybeListMonad/FilterVersion.agda
+	# $(AGDA_TC) SuperMonad/MaybeListMonad.agda
+	# $(AGDA_TC) SuperMonad/MaybeListMonad/FilterVersion.agda
 	$(AGDA_TC) SuperMonad/IxMonad.agda
 	$(AGDA_TC) SuperMonad/EffectMonad.agda
 	# $(AGDA_TC) SuperMonad/Polymonad.agda
