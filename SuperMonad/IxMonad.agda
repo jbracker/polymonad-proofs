@@ -165,6 +165,36 @@ IxMonad→Supermonad {n = n} Ixs M monad = record
                  → (f : α → β) → (m : ⟨ M ⟩ α)
                  → bind b m (return r ∘ f) ≡ Functor.fmap (functor M) f m
     lawMonadFmap (IxMonadTC i j) (IxMonadTC .j .j) (refl , refl , refl) refl f m = refl
+
+
+IxMonad→UnconstrainedSupermonad 
+  : ∀ {n}
+  → (Ixs : Set n)
+  → (M : Ixs → Ixs → TyCon)
+  → IxMonad Ixs M → UnconstrainedSupermonad (IxMonadTyCons Ixs)
+IxMonad→UnconstrainedSupermonad {n} Ixs M monad = record
+  { supermonad = supermonad
+  ; lawBindUnconstrained = Binds , lawBindUnconstrained
+  ; lawReturnUnconstrained = Returns , lawReturnUnconstrained
+  } where
+    supermonad = IxMonad→Supermonad Ixs M monad
+    TyCons = Supermonad.tyConSet supermonad
+    
+    Binds : TyCons → TyCons → TyCons → Set n
+    Binds (IxMonadTC i j) (IxMonadTC j' k) (IxMonadTC i' k') = j ≡ j' × i ≡ i' × k ≡ k'
+    
+    Returns : TyCons → Set n
+    Returns (IxMonadTC i j) = i ≡ j
+    
+    lawBindUnconstrained : (α β : Type) → (M N P : TyCons) 
+                         → Binds M N P ≡ Supermonad.Binds supermonad M N P α β
+    lawBindUnconstrained α β (IxMonadTC i j) (IxMonadTC j' k) (IxMonadTC i' k') = refl
+    
+    lawReturnUnconstrained : (α : Type) → (M : TyCons)
+                           → Returns M ≡ Supermonad.Returns supermonad M α
+    lawReturnUnconstrained α (IxMonadTC i j) = refl
+
+
 {-
 IxMonad→HaskSuperMonad : ∀ {n}
                        → (Ixs : Set n)

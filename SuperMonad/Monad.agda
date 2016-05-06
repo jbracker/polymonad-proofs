@@ -32,9 +32,9 @@ open import SuperMonad.Definition
 -- Standard Monads are Super Monads
 -- -----------------------------------------------------------------------------
 
-Monad→SuperMonad : (M : TyCon)
+Monad→Supermonad : (M : TyCon)
                  → Monad M → Supermonad MonadTyCons
-Monad→SuperMonad M monad = record
+Monad→Supermonad M monad = record
   { ⟨_⟩ = ⟨_⟩
   ; Binds = Binds
   ; Returns = Returns
@@ -129,6 +129,33 @@ Monad→SuperMonad M monad = record
                  → (f : α → β) → (m : ⟨ M ⟩ α)
                  → bind b m (return r ∘ f) ≡ Functor.fmap (functor M) f m
     lawMonadFmap MonadTC MonadTC tt tt f m = sym (Monad.lawMonadFmap monad f m)
+
+
+Monad→UnconstrainedSupermonad 
+  : (M : TyCon) → Monad M → UnconstrainedSupermonad MonadTyCons
+Monad→UnconstrainedSupermonad M monad = record
+  { supermonad = supermonad
+  ; lawBindUnconstrained = Binds , lawBindUnconstrained
+  ; lawReturnUnconstrained = Returns , lawReturnUnconstrained
+  } where
+    supermonad = Monad→Supermonad M monad
+    TyCons = Supermonad.tyConSet supermonad
+    
+    Binds : TyCons → TyCons → TyCons → Set
+    Binds MonadTC MonadTC MonadTC = ⊤
+    
+    Returns : TyCons → Set
+    Returns MonadTC = ⊤
+    
+    lawBindUnconstrained : (α β : Type) → (M N P : TyCons) 
+                         → Binds M N P ≡ Supermonad.Binds supermonad M N P α β
+    lawBindUnconstrained α β MonadTC MonadTC MonadTC = refl
+    
+    lawReturnUnconstrained : (α : Type) → (M : TyCons)
+                           → Returns M ≡ Supermonad.Returns supermonad M α
+    lawReturnUnconstrained α MonadTC = refl
+
+
 {-
 Monad→HaskSuperMonad : (M : TyCon)
                      → Monad M → HaskSuperMonad MonadTyCons

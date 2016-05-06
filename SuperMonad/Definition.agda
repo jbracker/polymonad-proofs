@@ -100,6 +100,9 @@ record Supermonad {ℓ} (TyCons : Set ℓ) : Set (lsuc ℓ) where
     
   sequence : {α β : Type} {M N P : TyCons} → Binds M N P α β → ⟨ M ⟩ α → ⟨ N ⟩ β → ⟨ P ⟩ β
   sequence b ma mb = bind b ma (λ _ → mb)
+  
+  tyConSet : Set ℓ
+  tyConSet = TyCons
 
 record UnconstrainedSupermonad {ℓ} (TyCons : Set ℓ) : Set (lsuc ℓ) where
   field
