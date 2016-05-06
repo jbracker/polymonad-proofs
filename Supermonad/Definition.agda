@@ -119,3 +119,5 @@ UnconstrainedSupermonad→Supermonad = UnconstrainedSupermonad.supermonad
 
 K⟨_▷_⟩ : ∀ {n} {TyCons : Set n} → Supermonad TyCons → TyCons → TyCon
 K⟨ monad ▷ M ⟩ = Supermonad.⟨ monad ⟩ M
+
+
