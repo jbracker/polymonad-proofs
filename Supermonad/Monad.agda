@@ -1,5 +1,5 @@
 
-module SuperMonad.Monad where
+module Supermonad.Monad where
 
 -- Stdlib
 open import Level
@@ -25,8 +25,7 @@ open import Monad
 open import Monad.Polymonad
 open import Polymonad
 open import Parameterized.PhantomIndices
-open import SuperMonad.Definition 
--- open import SuperMonad.HaskSuperMonad
+open import Supermonad.Definition 
 
 -- -----------------------------------------------------------------------------
 -- Standard Monads are Super Monads

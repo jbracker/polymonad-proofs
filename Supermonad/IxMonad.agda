@@ -1,5 +1,5 @@
 
-module SuperMonad.IxMonad where
+module Supermonad.IxMonad where
 
 -- Stdlib
 open import Level
@@ -23,8 +23,7 @@ open import Functor
 open import Polymonad
 open import Parameterized.IndexedMonad
 open import Parameterized.PhantomIndices
-open import SuperMonad.Definition
---open import SuperMonad.HaskSuperMonad
+open import Supermonad.Definition
 
 -- -----------------------------------------------------------------------------
 -- Indexed Monads are Super Monads

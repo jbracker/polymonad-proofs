@@ -74,11 +74,11 @@ only-parameterized:
 
 only-supermonads:
 	# Super Monads
-	$(AGDA_TC) SuperMonad/Definition.agda
-	$(AGDA_TC) SuperMonad/Monad.agda
-	$(AGDA_TC) SuperMonad/IxMonad.agda
-	$(AGDA_TC) SuperMonad/EffectMonad.agda
-	# $(AGDA_TC) SuperMonad/Polymonad.agda
+	$(AGDA_TC) Supermonad/Definition.agda
+	$(AGDA_TC) Supermonad/Monad.agda
+	$(AGDA_TC) Supermonad/IxMonad.agda
+	$(AGDA_TC) Supermonad/EffectMonad.agda
+	# $(AGDA_TC) Supermonad/Polymonad.agda
 
 clean:
 	$(REMOVE) *.agdai

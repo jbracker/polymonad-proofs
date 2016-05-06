@@ -1,5 +1,5 @@
 
-module SuperMonad.EffectMonad where
+module Supermonad.EffectMonad where
 
 -- Stdlib
 open import Level
@@ -23,8 +23,7 @@ open import Functor
 open import Polymonad
 open import Parameterized.PhantomIndices
 open import Parameterized.EffectMonad
-open import SuperMonad.Definition
---open import SuperMonad.HaskSuperMonad
+open import Supermonad.Definition
 
 open Parameterized.EffectMonad.Monoid
 

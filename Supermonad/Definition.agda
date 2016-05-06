@@ -1,5 +1,5 @@
 
-module SuperMonad.Definition where
+module Supermonad.Definition where
 
 -- Stdlib
 open import Level
