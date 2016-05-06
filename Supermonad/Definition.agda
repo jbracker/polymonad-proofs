@@ -21,6 +21,7 @@ open import Haskell
 open import Identity
 open import Polymonad
 open import Functor
+open import Constrained.ConstrainedFunctor
 
 open import Parameterized.PhantomIndices
 
@@ -39,7 +40,7 @@ record Supermonad {ℓ} (TyCons : Set ℓ) : Set (lsuc ℓ) where
     Returns : TyCons → Type → Set ℓ
 
     -- The functor associated with the supermonad.
-    functor : (M : TyCons) → Functor ⟨ M ⟩
+    functor : (M : TyCons) → ConstrainedFunctor {ℓ} ⟨ M ⟩
     
     -- A supermonad only uses a single type constructor.
     
@@ -94,9 +95,10 @@ record Supermonad {ℓ} (TyCons : Set ℓ) : Set (lsuc ℓ) where
     -- The supermonad version of the monad-functor relationship.
     lawMonadFmap : {α β : Type}
                  → (M N : TyCons)
+                 → (fcts : ConstrainedFunctor.FunctorCts (functor M) α β)
                  → (b : Binds M N M α β) → (r : Returns N β)
                  → (f : α → β) → (m : ⟨ M ⟩ α)
-                 → bind b m (return r ∘ f) ≡ Functor.fmap (functor M) f m
+                 → bind b m (return r ∘ f) ≡ (ConstrainedFunctor.fmap (functor M) fcts) f m
     
   sequence : {α β : Type} {M N P : TyCons} → Binds M N P α β → ⟨ M ⟩ α → ⟨ N ⟩ β → ⟨ P ⟩ β
   sequence b ma mb = bind b ma (λ _ → mb)
@@ -104,20 +106,31 @@ record Supermonad {ℓ} (TyCons : Set ℓ) : Set (lsuc ℓ) where
   tyConSet : Set ℓ
   tyConSet = TyCons
 
+K⟨_▷_⟩ : ∀ {n} {TyCons : Set n} → Supermonad TyCons → TyCons → TyCon
+K⟨ monad ▷ M ⟩ = Supermonad.⟨ monad ⟩ M
+
+open ConstrainedFunctor
+
 record UnconstrainedSupermonad {ℓ} (TyCons : Set ℓ) : Set (lsuc ℓ) where
   field
     supermonad : Supermonad TyCons
-    lawBindUnconstrained : ∃ λ (B : TyCons → TyCons → TyCons → Set ℓ) 
-                           → (α β : Type) → (M N P : TyCons) 
-                           → B M N P ≡ Supermonad.Binds supermonad M N P α β
-    lawReturnUnconstrained : ∃ λ (R : TyCons → Set ℓ)
-                             → (α : Type) → (M : TyCons)
-                             → R M ≡ Supermonad.Returns supermonad M α
+    lawBindUnconstrained : 
+      ∃ λ (B : TyCons → TyCons → TyCons → Set ℓ) 
+      → (α β : Type) → (M N P : TyCons) 
+      → B M N P ≡ Supermonad.Binds supermonad M N P α β
+    lawReturnUnconstrained : 
+      ∃ λ (R : TyCons → Set ℓ)
+      → (α : Type) → (M : TyCons)
+      → R M ≡ Supermonad.Returns supermonad M α
+    lawFunctorUnconstrained : 
+      ∃ λ (noCt : TyCons → Set ℓ) 
+      → (α β : Type) → (M : TyCons)
+      → noCt M ≡ FunctorCts (Supermonad.functor supermonad M) α β
 
-UnconstrainedSupermonad→Supermonad : ∀ {ℓ} {TyCons : Set ℓ} → UnconstrainedSupermonad {ℓ = ℓ} TyCons → Supermonad {ℓ = ℓ} TyCons
+UnconstrainedSupermonad→Supermonad : ∀ {ℓ} {TyCons : Set ℓ} 
+                                   → UnconstrainedSupermonad {ℓ = ℓ} TyCons 
+                                   → Supermonad {ℓ = ℓ} TyCons
 UnconstrainedSupermonad→Supermonad = UnconstrainedSupermonad.supermonad
 
-K⟨_▷_⟩ : ∀ {n} {TyCons : Set n} → Supermonad TyCons → TyCons → TyCon
-K⟨ monad ▷ M ⟩ = Supermonad.⟨ monad ⟩ M
 
 

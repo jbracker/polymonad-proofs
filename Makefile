@@ -28,6 +28,8 @@ only-base:
 	$(AGDA_TC) Applicative.agda
 	$(AGDA_TC) Monad.agda
 	$(AGDA_TC) Polymonad.agda
+	$(AGDA_TC) Constrained/ConstrainedFunctor.agda
+	$(AGDA_TC) Constrained/ConstrainedMonad.agda
 
 only-hicks:
 	# Proofs related to Hicks original formulation
@@ -72,12 +74,13 @@ only-parameterized:
 	$(AGDA_TC) Parameterized/EffectMonad.agda
 	$(AGDA_TC) Parameterized/EffectMonad/Polymonad.agda
 
-only-supermonads:
+only-supermonads: only-base
 	# Super Monads
 	$(AGDA_TC) Supermonad/Definition.agda
 	$(AGDA_TC) Supermonad/Monad.agda
 	$(AGDA_TC) Supermonad/IxMonad.agda
 	$(AGDA_TC) Supermonad/EffectMonad.agda
+	$(AGDA_TC) Supermonad/ConstrainedMonad.agda
 	# $(AGDA_TC) Supermonad/Polymonad.agda
 
 clean:

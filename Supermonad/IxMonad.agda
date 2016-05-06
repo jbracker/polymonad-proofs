@@ -21,6 +21,7 @@ open import Haskell
 open import Identity
 open import Functor
 open import Polymonad
+open import Constrained.ConstrainedFunctor
 open import Parameterized.IndexedMonad
 open import Parameterized.PhantomIndices
 open import Supermonad.Definition
@@ -37,7 +38,7 @@ IxMonad→Supermonad {n = n} Ixs M monad = record
   { ⟨_⟩ = ⟨_⟩
   ; Binds = Binds
   ; Returns = Returns
-  ; functor = functor
+  ; functor = cfunctor
   ; tyConArity = tyConArity
   ; tyConArgTys = tyConArgTys
   ; tyCon = tyCon
@@ -158,12 +159,16 @@ IxMonad→Supermonad {n = n} Ixs M monad = record
                 ≡⟨ refl ⟩
               (fmap f ∘ fmap g) ma ∎
     
+    cfunctor : (F : TyCons) → ConstrainedFunctor ⟨ F ⟩
+    cfunctor (IxMonadTC i j) = Functor→ConstrainedFunctor (M i j) (functor (IxMonadTC i j))
+    
     lawMonadFmap : ∀ {α β : Type}
                  → (M N : TyCons)
+                 → (fcts : ConstrainedFunctor.FunctorCts (cfunctor M) α β)
                  → (b : Binds M N M α β) → (r : Returns N β)
                  → (f : α → β) → (m : ⟨ M ⟩ α)
-                 → bind b m (return r ∘ f) ≡ Functor.fmap (functor M) f m
-    lawMonadFmap (IxMonadTC i j) (IxMonadTC .j .j) (refl , refl , refl) refl f m = refl
+                 → bind b m (return r ∘ f) ≡ ConstrainedFunctor.fmap (cfunctor M) fcts f m
+    lawMonadFmap (IxMonadTC i j) (IxMonadTC .j .j) fcts (refl , refl , refl) refl f m = refl
 
 
 IxMonad→UnconstrainedSupermonad 
@@ -175,6 +180,7 @@ IxMonad→UnconstrainedSupermonad {n} Ixs M monad = record
   { supermonad = supermonad
   ; lawBindUnconstrained = Binds , lawBindUnconstrained
   ; lawReturnUnconstrained = Returns , lawReturnUnconstrained
+  ; lawFunctorUnconstrained = (λ M → Lift ⊤) , lawFunctorUnconstrained
   } where
     supermonad = IxMonad→Supermonad Ixs M monad
     TyCons = Supermonad.tyConSet supermonad
@@ -193,4 +199,7 @@ IxMonad→UnconstrainedSupermonad {n} Ixs M monad = record
                            → Returns M ≡ Supermonad.Returns supermonad M α
     lawReturnUnconstrained α (IxMonadTC i j) = refl
 
+    lawFunctorUnconstrained : (α β : Type) → (M : TyCons)
+                            → Lift {ℓ = n} ⊤ ≡ ConstrainedFunctor.FunctorCts (Supermonad.functor supermonad M) α β
+    lawFunctorUnconstrained α β (IxMonadTC i j) = refl
 

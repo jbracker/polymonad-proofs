@@ -21,6 +21,7 @@ open import Haskell
 open import Identity
 open import Functor
 open import Polymonad
+open import Constrained.ConstrainedFunctor
 open import Parameterized.PhantomIndices
 open import Parameterized.EffectMonad
 open import Supermonad.Definition
@@ -40,7 +41,7 @@ EffectMonad→Supermonad {n = n} Effect monoid M monad = record
   { ⟨_⟩ = ⟨_⟩
   ; Binds = Binds
   ; Returns = Returns
-  ; functor = functor
+  ; functor = cfunctor
   ; tyConArity = tyConArity
   ; tyConArgTys = tyConArgTys
   ; tyCon = tyCon
@@ -276,12 +277,16 @@ EffectMonad→Supermonad {n = n} Effect monoid M monad = record
             ≡⟨ refl ⟩
           (fmap f ∘ fmap g) ma ∎)
     
+    cfunctor : (M : TyCons) → ConstrainedFunctor ⟨ M ⟩
+    cfunctor (EffMonadTC m) = Functor→ConstrainedFunctor (M m) (functor (EffMonadTC m))
+    
     lawMonadFmap : ∀ {α β : Type}
                  → (M N : TyCons)
+                 → (fcts : ConstrainedFunctor.FunctorCts (cfunctor M) α β)
                  → (b : Binds M N M α β) → (r : Returns N β)
                  → (f : α → β) → (m : ⟨ M ⟩ α)
-                 → bind b m (return r ∘ f) ≡ Functor.fmap (functor M) f m
-    lawMonadFmap {β = β} (EffMonadTC x) (EffMonadTC .ε) b refl f ma = begin
+                 → bind b m (return r ∘ f) ≡ (ConstrainedFunctor.fmap (cfunctor M) fcts) f m
+    lawMonadFmap {β = β} (EffMonadTC x) (EffMonadTC .ε) fcts b refl f ma = begin
       bind b ma (return' ∘ f) 
         ≡⟨ cong (λ X → X ma (return' ∘ f)) (bindEq b) ⟩
       subst (λ X → [ ⟨ EffMonadTC x ⟩ , ⟨ EffMonadTC ε ⟩ ]▷ ⟨ EffMonadTC X ⟩ ) (sym b) (_>>=_) ma (return' ∘ f)
@@ -305,6 +310,7 @@ EffectMonad→UnconstrainedSupermonad {n} Effect monoid M monad = record
   { supermonad = supermonad
   ; lawBindUnconstrained = Binds , lawBindUnconstrained
   ; lawReturnUnconstrained = Returns , lawReturnUnconstrained
+  ; lawFunctorUnconstrained = (λ M → Lift ⊤) , lawFunctorUnconstrained
   } where
     supermonad = EffectMonad→Supermonad Effect monoid M monad
     TyCons = Supermonad.tyConSet supermonad
@@ -324,5 +330,7 @@ EffectMonad→UnconstrainedSupermonad {n} Effect monoid M monad = record
     lawReturnUnconstrained : (α : Type) → (M : TyCons)
                            → Returns M ≡ Supermonad.Returns supermonad M α
     lawReturnUnconstrained α (EffMonadTC m) = refl
-
-
+    
+    lawFunctorUnconstrained : (α β : Type) → (M : TyCons)
+                            → Lift {ℓ = n} ⊤ ≡ ConstrainedFunctor.FunctorCts (Supermonad.functor supermonad M) α β
+    lawFunctorUnconstrained α β (EffMonadTC m) = refl
