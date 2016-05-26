@@ -132,6 +132,13 @@ pmLawClosure = Polymonad.lawClosure
 -- Polymonad General Lemmas
 --------------------------------------------------------------------------------
 
+-- We can always lift a value into the identity tycon of a polymonad.
+pmIdLift : ∀ {ℓ} {TyCons : Set ℓ} {Id : TyCons}
+         → (pm : Polymonad TyCons Id)
+         → ∀ {α : Type}
+         → α → ⟨ pm ▷ Id ⟩ α
+pmIdLift pm {α = α} a = subst (λ X → X) (sym (cong (λ M → M α) (pmLawId pm))) a
+
 -- There always is at least one identity bind operator.
 pmIdBind∃ : {TyCons : Set} {Id : TyCons}
           → (pm : Polymonad TyCons Id)
