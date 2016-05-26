@@ -65,6 +65,7 @@ only-parameterized:
 	# Parameterized Monads
 	$(AGDA_TC) Parameterized/PhantomIndices.agda
 	$(AGDA_TC) Parameterized/IndexedMonad.agda
+	$(AGDA_TC) Parameterized/IndexedMonad/Functor.agda
 	$(AGDA_TC) Parameterized/IndexedMonad/Polymonad.agda
 	$(AGDA_TC) Parameterized/IndexedMonad/Unionable.agda
 	$(AGDA_TC) Parameterized/IndexedMonad/PhantomMonad.agda
