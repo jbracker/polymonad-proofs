@@ -1,13 +1,16 @@
 
-module SuperMonad.Polymonad where
+module Supermonad.Polymonad where
 
 -- Stdlib
 open import Level
+open import Function hiding ( id )
 open import Agda.Primitive
 open import Data.Product
 open import Data.Sum
 open import Data.Unit
 open import Data.Empty
+open import Data.Vec
+open import Data.Nat
 open import Relation.Nullary
 open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning
@@ -18,87 +21,180 @@ open import Haskell
 open import Identity
 open import Functor
 open import Polymonad
-open import SuperMonad.Definition
-
+open import Constrained.ConstrainedFunctor
+open import Parameterized.PhantomIndices
+open import Supermonad.Definition
+{-
 -- -----------------------------------------------------------------------------
--- Every Super Monad is a Polymonad
+-- Supermonads are a certain form of Polymonads
 -- -----------------------------------------------------------------------------
+-- ∃Indices : ∀ {ℓ} {n} → (ts : Vec (Set ℓ) n) → (M : ParamTyCon ts) → (TyCon → Set (lsuc ℓ)) → Set (lsuc ℓ)
+Polymonad→Supermonad 
+  : ∀ {ℓ}
+  → (TyCons : Set ℓ) → (Id : TyCons)
+  → (pm : Polymonad TyCons Id)
+  → ( (M : TyCons) → B[ M , Id ] pm ▷ M )
+  → ( ∃ λ(n : ℕ) → ∃ λ(ts : Vec (Set ℓ) n) → ∃ λ(K : ParamTyCon ts) → ∀ (M : TyCons) → ∃Indices ts K (λ K' → Lift {ℓ = lsuc ℓ} (K' ≡ ⟨ pm ▷ M ⟩)) )
+  → UnconstrainedSupermonad TyCons
+Polymonad→Supermonad {ℓ = ℓ} TyCons Id pm ∃FunctorBind (n , ts , K , K≡) = record
+  { supermonad = supermonad
+  ; lawBindUnconstrained = {!!}
+  ; lawReturnUnconstrained = {!!}
+  ; lawFunctorUnconstrained = {!!}
+  } where
+    ⟨_⟩ : TyCons → TyCon
+    ⟨ M ⟩ = ⟨ pm ▷ M ⟩
+    
+    Binds : TyCons → TyCons → TyCons → Type → Type → Set ℓ
+    Binds M N P _ _ = B[ M , N ] pm ▷ P
+    
+    Returns : TyCons → Type → Set ℓ
+    Returns M _ = B[ Id , Id ] pm ▷ M
+    
+    fmap : ∀ {α β} {M : TyCons} → (α → β) → ⟨ M ⟩ α → ⟨ M ⟩ β 
+    fmap {M = M} f m = functorB m (λ a → pmIdLift pm (f a))
+      where
+        functorB = pmBind pm (∃FunctorBind M)
 
-SuperMonad→Polymonad : ∀ {n}
-                     → (TyCons : Set n)
-                     → (monad : SuperMonad TyCons) 
-                     → ((M N : TyCons) → Dec (SuperMonad.Binds monad M N))
-                     → ((M : TyCons) → Dec (SuperMonad.Returns monad M))
+    lawIdFunc : ∀ {α : Type} {M : TyCons} → fmap {α = α} {M = M} identity ≡ identity
+    lawIdFunc = {!!}
+
+    lawDistFunc : ∀ {α β γ : Type} {M : TyCons}
+                → (f : β → γ) → (g : α → β) 
+                → fmap {M = M} (f ∘ g) ≡ fmap f ∘ fmap g
+    lawDistFunc f g = {!!}
+    
+    functor : (M : TyCons) → Functor ⟨ M ⟩
+    functor M = record 
+      { fmap = fmap
+      ; lawId = lawIdFunc
+      ; lawDist = lawDistFunc
+      }
+    
+    cfunctor : (M : TyCons) → ConstrainedFunctor ⟨ M ⟩
+    cfunctor M = Functor→ConstrainedFunctor (⟨ M ⟩) (functor M)
+    
+    supermonad : Supermonad TyCons
+    supermonad = record
+      { ⟨_⟩ = ⟨_⟩
+      ; Binds = Binds
+      ; Returns = Returns
+      ; functor = cfunctor
+      ; tyConArity = {!!}
+      ; tyConArgTys = {!!}
+      ; tyCon = {!!}
+      ; bind = {!!}
+      ; return = {!!}
+      ; lawSingleTyCon = {!!}
+      ; lawUniqueBind = {!!}
+      ; lawUniqueReturn = {!!}
+      ; lawIdR = {!!}
+      ; lawIdL = {!!}
+      ; lawAssoc = {!!}
+      ; lawMonadFmap = {!!}
+      }
+-}
+-- -----------------------------------------------------------------------------
+-- Every Supermonad is a Polymonad
+-- -----------------------------------------------------------------------------
+{-
+Supermonad→Polymonad : ∀ {ℓ}
+                     → (TyCons : Set ℓ)
+                     → (monad : UnconstrainedSupermonad TyCons)
                      → Polymonad (IdTyCons ⊎ TyCons) idTC
-SuperMonad→Polymonad {n = n} SuperTyCons monad decB decR = record
+Supermonad→Polymonad {ℓ = ℓ} SuperTyCons ucsm = record
   { B[_,_]▷_ = B[_,_]▷_
   ; ⟨_⟩ = ⟨_⟩
-  ; bind = λ {M} {N} {P} b → bind M N P b
-  ; lawId = lawId
-  ; lawFunctor1 = lawFunctor1
-  ; lawFunctor2 = lawFunctor2
-  ; lawMorph1 = lawMorph1
-  ; lawMorph2 = lawMorph2
-  ; lawMorph3 = lawMorph3
-  ; lawDiamond1 = lawDiamond1
+  ; bind = {!!} -- λ {M} {N} {P} b → bind M N P b
+  ; lawId = {!!} -- lawId
+  ; lawFunctor1 = {!!} -- lawFunctor1
+  ; lawFunctor2 = {!!} -- lawFunctor2
+  ; lawMorph1 = {!!} -- lawMorph1
+  ; lawMorph2 = {!!} -- lawMorph2
+  ; lawMorph3 = {!!} -- lawMorph3
+  ; lawDiamond1 = {!!} -- lawDiamond1
   ; lawDiamond2 = {!!} -- lawDiamond2
   ; lawAssoc = {!!} -- lawAssoc
   ; lawClosure = {!!} -- lawClosure
   } where
     TyCons = IdTyCons ⊎ SuperTyCons
     Id = idTC
+
+    sm = UnconstrainedSupermonad.supermonad ucsm
+
+    Returns : SuperTyCons → Set ℓ
+    Returns = proj₁ (UnconstrainedSupermonad.lawReturnUnconstrained ucsm)
     
-    B[_,_]▷_ : (M N P : TyCons) → Set n
-    B[ inj₁ IdentTC , inj₁ IdentTC ]▷ inj₁ IdentTC = IdBinds
-    B[ inj₁ IdentTC , inj₁ IdentTC ]▷ inj₂ P       with decR P
-    B[ inj₁ IdentTC , inj₁ IdentTC ]▷ inj₂ P       | yes p = SuperBinds monad idTC idTC (inj₂ P)
-    B[ inj₁ IdentTC , inj₁ IdentTC ]▷ inj₂ P       | no ¬p = Lift ⊥ 
+    Binds : SuperTyCons → SuperTyCons → SuperTyCons → Set ℓ
+    Binds = proj₁ (UnconstrainedSupermonad.lawBindUnconstrained ucsm)
+
+    functor : 
+    
+    B[_,_]▷_ : (M N P : TyCons) → Set ℓ
+    B[ inj₁ IdentTC , inj₁ IdentTC ]▷ inj₁ IdentTC = Lift ⊤
+    B[ inj₁ IdentTC , inj₁ IdentTC ]▷ inj₂ P       = Returns P
     B[ inj₁ IdentTC , inj₂ N       ]▷ inj₁ IdentTC = Lift ⊥
-    B[ inj₁ IdentTC , inj₂ N       ]▷ inj₂ P       = SuperBinds monad idTC (inj₂ N) (inj₂ P)
+    B[ inj₁ IdentTC , inj₂ N       ]▷ inj₂ P       = Returns N × Binds N N P
     B[ inj₂ M       , inj₁ IdentTC ]▷ inj₁ IdentTC = Lift ⊥
-    B[ inj₂ M       , inj₁ IdentTC ]▷ inj₂ P       = SuperBinds monad (inj₂ M) idTC (inj₂ P)
+    B[ inj₂ M       , inj₁ IdentTC ]▷ inj₂ P       = Returns P × Binds M P P
     B[ inj₂ M       , inj₂ N       ]▷ inj₁ IdentTC = Lift ⊥
-    B[ inj₂ M       , inj₂ N       ]▷ inj₂ P       with decB M N
-    B[ inj₂ M       , inj₂ N       ]▷ inj₂ P       | yes p = SuperBinds monad (inj₂ M) (inj₂ N) (inj₂ P)
-    B[ inj₂ M       , inj₂ N       ]▷ inj₂ P       | no ¬p = Lift ⊥
+    B[ inj₂ M       , inj₂ N       ]▷ inj₂ P       = Binds M N P
     
     ⟨_⟩ : TyCons → TyCon
     ⟨_⟩ (inj₁ IdentTC) = Identity
-    ⟨_⟩ (inj₂ M) = K⟨ monad ▷ M ⟩
+    ⟨_⟩ (inj₂ M) = Supermonad.⟨_⟩ sm M
+    
+    Returns→SmReturns : ∀ {α} {M : SuperTyCons}
+                      → Returns M → Supermonad.Returns sm M α
+    Returns→SmReturns {α = α} {M = M} r = subst (λ X → X) (proj₂ (UnconstrainedSupermonad.lawReturnUnconstrained ucsm) α M) r
+    
+    Binds→SmBinds : ∀ {α β} {M N P : SuperTyCons}
+                  → Binds M N P → Supermonad.Binds sm M N P α β
+    Binds→SmBinds {α} {β} {M} {N} {P} b = subst (λ X → X) (proj₂ (UnconstrainedSupermonad.lawBindUnconstrained ucsm) α β M N P) b
+    
+    returnB : {M : SuperTyCons} → Returns M → [ ⟨ idTC ⟩ , ⟨ idTC ⟩ ]▷ ⟨ inj₂ M ⟩
+    returnB r m f = Supermonad.return sm (Returns→SmReturns r) (f m)
+    
+    bindB : {M N P : SuperTyCons} → Binds M N P → [ ⟨ inj₂ M ⟩ , ⟨ inj₂ N ⟩ ]▷ ⟨ inj₂ P ⟩
+    bindB b m f = Supermonad.bind sm (Binds→SmBinds b) m f
+    
+    applyB : {N P : SuperTyCons} → Returns N → Binds N N P → [ ⟨ idTC ⟩ , ⟨ inj₂ N ⟩ ]▷ ⟨ inj₂ P ⟩
+    applyB r b m f = bindB b (returnB r m identity) f
+    
+    functorB : {M P : SuperTyCons} → Returns P → Binds M P P → [ ⟨ inj₂ M ⟩ , ⟨ idTC ⟩ ]▷ ⟨ inj₂ P ⟩
+    functorB r b m f = bindB b m (λ a → returnB r a f)
     
     bind : (M N P : TyCons) → B[ M , N ]▷ P → [ ⟨ M ⟩ , ⟨ N ⟩ ]▷ ⟨ P ⟩
-    bind (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) IdentB = bindId
-    bind (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ M) b with decR M
-    bind (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ M) (ReturnB .M r) | yes r' = bindReturn M monad r
-    bind (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ M) (lift ()) | no ¬r
+    bind (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (lift tt) m f = f m
+    bind (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ P) = returnB
     bind (inj₁ IdentTC) (inj₂ N) (inj₁ IdentTC) (lift ())
-    bind (inj₁ IdentTC) (inj₂ N) (inj₂ .N) (ApplyB .N) = bindApply N monad
+    bind (inj₁ IdentTC) (inj₂ N) (inj₂ P) (r , b) = applyB r b
     bind (inj₂ M) (inj₁ IdentTC) (inj₁ IdentTC) (lift ())
-    bind (inj₂ M) (inj₁ IdentTC) (inj₂ .M) (FunctorB .M) = bindFunctor M monad
+    bind (inj₂ M) (inj₁ IdentTC) (inj₂ P) (r , b) = functorB r b
     bind (inj₂ M) (inj₂ N) (inj₁ IdentTC) (lift ())
-    bind (inj₂ M) (inj₂ N) (inj₂ P) b with decB M N
-    bind (inj₂ M) (inj₂ N) (inj₂ ._) (MonadB .M .N b) | yes b' = bindMonad M N monad b
-    bind (inj₂ M) (inj₂ N) (inj₂ P) (lift ()) | no ¬b
-
+    bind (inj₂ M) (inj₂ N) (inj₂ P) = bindB
+    
     lawId : ⟨ Id ⟩ ≡ Identity
     lawId = refl
     
     lawFunctor1 : ∀ (M : TyCons) → B[ M , Id ]▷ M
-    lawFunctor1 (inj₁ IdentTC) = IdentB
-    lawFunctor1 (inj₂ M) = FunctorB M
+    lawFunctor1 (inj₁ IdentTC) = lift tt
+    lawFunctor1 (inj₂ M) = {!!}
 
     lawFunctor2 : ∀ (M : TyCons) → ∀ (b : B[ M , Id ]▷ M)
                 → ∀ {α : Type} (m : ⟨ M ⟩ α) → (bind M Id M b) m (id lawId) ≡ m
     lawFunctor2 (inj₁ IdentTC) IdentB m = refl
-    lawFunctor2 (inj₂ M) (FunctorB .M) m = begin
-      (bind (inj₂ M) Id (inj₂ M) (FunctorB M)) m (id lawId)
+    lawFunctor2 (inj₂ M) (r , b) m = begin
+      (bind (inj₂ M) Id (inj₂ M) (r , b)) m (id lawId)
         ≡⟨ refl ⟩
-      (bindFunctor M monad) m (id lawId)
+      (functorB r b) m (id lawId)
         ≡⟨ refl ⟩
-      Functor.fmap (SuperMonad.functor monad M) (id lawId) m
+      Functor.fmap (functor M) (id lawId) m
         ≡⟨ cong (λ X → X m) (Functor.lawId (SuperMonad.functor monad M)) ⟩
       m ∎
+-}
 
+{-
     lawMorph1 : ∀ (M N : TyCons) 
               → (B[ M , Id ]▷ N → B[ Id , M ]▷ N)
     lawMorph1 (inj₁ IdentTC) (inj₁ IdentTC) IdentB = IdentB
@@ -161,6 +257,8 @@ SuperMonad→Polymonad {n = n} SuperTyCons monad decB decR = record
     lawDiamond1 (inj₁ IdentTC) (inj₂ N) (inj₂ R) (inj₂ T) (inj₂ .N , ApplyB .N , bm) = {!!}
     lawDiamond1 (inj₂ M) (inj₁ IdentTC) (inj₂ R) (inj₂ T) (inj₂ .M , FunctorB .M , bm) = {!!}
     lawDiamond1 (inj₂ M) (inj₂ N) (inj₂ R) (inj₂ T) (inj₂ P , bm1 , bm2) = {!!}
+    -}
+
     {-
     lawDiamond2 : ∀ (M N R T : TyCons)
                 → (∃ λ(S : TyCons) → B[ N , R ]▷ S × B[ M , S ]▷ T)
@@ -230,7 +328,7 @@ SuperMonad→Polymonad {n = n} SuperTyCons monad decB decR = record
     lawAssoc (inj₂ M) (inj₂ N) (inj₂ ._) (inj₂ R) (inj₂ ._) (inj₂ ._) (MonadB .M .N bCompat₁) (MonadB ._ .R bCompat₂) (MonadB .N .R bCompat₃) b₄ m f g
       = {!!}
 -}
-   
+   {-
     lawClosure : ∀ (M N P S T U : TyCons)
                → ( B[ M , N ]▷ P × B[ S , Id ]▷ M × B[ T , Id ]▷ N × B[ P , Id ]▷ U )
                → B[ S , T ]▷ U
@@ -267,3 +365,4 @@ SuperMonad→Polymonad {n = n} SuperTyCons monad decB decR = record
     lawClosure (inj₂ M) (inj₁ IdentTC) (inj₂ .M) (inj₂ .M) (inj₂ T) (inj₂ .M) (FunctorB .M , FunctorB .M , lift () , FunctorB .M)
     lawClosure (inj₂ M) (inj₂ N) (inj₂ P) (inj₂ .M) (inj₁ IdentTC) (inj₂ ._) (bMon , FunctorB .M , bRet , FunctorB ._) = {!!}
     lawClosure (inj₂ M) (inj₂ N) (inj₂ P) (inj₂ .M) (inj₂ .N) (inj₂ ._) (bMon , FunctorB .M , FunctorB .N , FunctorB ._) = bMon
+-}
