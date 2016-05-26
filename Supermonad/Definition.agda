@@ -122,15 +122,14 @@ record UnconstrainedSupermonad {ℓ} (TyCons : Set ℓ) : Set (lsuc ℓ) where
       ∃ λ (R : TyCons → Set ℓ)
       → (α : Type) → (M : TyCons)
       → R M ≡ Supermonad.Returns supermonad M α
-    lawFunctorUnconstrained : 
-      ∃ λ (noCt : TyCons → Set ℓ) 
-      → (α β : Type) → (M : TyCons)
-      → noCt M ≡ FunctorCts (Supermonad.functor supermonad M) α β
+    lawFunctorUnconstrained : (M : TyCons) → Functor K⟨ supermonad ▷ M ⟩
 
 UnconstrainedSupermonad→Supermonad : ∀ {ℓ} {TyCons : Set ℓ} 
                                    → UnconstrainedSupermonad {ℓ = ℓ} TyCons 
                                    → Supermonad {ℓ = ℓ} TyCons
 UnconstrainedSupermonad→Supermonad = UnconstrainedSupermonad.supermonad
 
-
-
+UnconstrainedSupermonad→Functor : ∀ {ℓ} {TyCons : Set ℓ}
+                                → (ucsm : UnconstrainedSupermonad {ℓ = ℓ} TyCons)
+                                → (M : TyCons) → Functor K⟨ UnconstrainedSupermonad.supermonad ucsm ▷ M ⟩
+UnconstrainedSupermonad→Functor {TyCons = TyCons} ucsm M = UnconstrainedSupermonad.lawFunctorUnconstrained ucsm M
