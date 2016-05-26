@@ -73,6 +73,7 @@ only-parameterized:
 	# $(AGDA_TC) Parameterized/IndexedMonad/SessionTypes.agda
 	$(AGDA_TC) Parameterized/IndexedMonad/DynState.agda
 	$(AGDA_TC) Parameterized/EffectMonad.agda
+	$(AGDA_TC) Parameterized/EffectMonad/Functor.agda
 	$(AGDA_TC) Parameterized/EffectMonad/Polymonad.agda
 
 only-supermonads: only-base

@@ -23,6 +23,7 @@ open import Functor
 open import Polymonad
 open import Constrained.ConstrainedFunctor
 open import Parameterized.IndexedMonad
+open import Parameterized.IndexedMonad.Functor
 open import Parameterized.PhantomIndices
 open import Supermonad.Definition
 
@@ -122,42 +123,7 @@ IxMonad→Supermonad {n = n} Ixs M monad = record
              (refl , refl , refl) (refl , refl , refl) (refl , refl , refl) (refl , refl , refl) m f g = IxMonad.lawAssoc monad m f g
     
     functor : (F : TyCons) → Functor ⟨ F ⟩
-    functor (IxMonadTC i j) = record 
-      { fmap = fmap 
-      ; lawId = lawId 
-      ; lawDist = lawDist
-      } where
-        F = IxMonadTC i j
-        fmap = fmap⟨ F ⟩
-        
-        lawId : ∀ {α : Type} → fmap {α = α} identity ≡ identity
-        lawId = funExt lawId'
-          where
-            lawId' : {α : Type} → (ma : ⟨ F ⟩ α) → fmap {α = α} identity ma ≡ identity ma 
-            lawId' ma = begin
-              fmap identity ma 
-                ≡⟨ refl ⟩
-              ma >>= return'
-                ≡⟨ IxMonad.lawIdL monad ma ⟩
-              identity ma ∎
-        
-        lawDist : ∀ {α β γ : Type} 
-                → (f : β → γ) → (g : α → β) 
-                → fmap (f ∘ g) ≡ fmap f ∘ fmap g
-        lawDist {α = α} f g = funExt lawDist'
-          where
-            lawDist' : (ma : ⟨ F ⟩ α)
-                     → fmap (f ∘ g) ma ≡ (fmap f ∘ fmap g) ma
-            lawDist' ma = begin 
-              fmap (f ∘ g) ma
-                ≡⟨ refl ⟩
-              ma >>= (λ x → return' (f (g x)))
-                ≡⟨ cong (λ X → ma >>= X) (funExt (λ x → sym (IxMonad.lawIdR monad (g x) (return' ∘ f)))) ⟩
-              ma >>= (λ x → return' (g x) >>= (return' ∘ f))
-                ≡⟨ IxMonad.lawAssoc monad ma (return' ∘ g) (return' ∘ f) ⟩
-              (ma >>= (return' ∘ g)) >>= (return' ∘ f)
-                ≡⟨ refl ⟩
-              (fmap f ∘ fmap g) ma ∎
+    functor (IxMonadTC i j) = IxMonad→Functor Ixs M monad i j
     
     cfunctor : (F : TyCons) → ConstrainedFunctor ⟨ F ⟩
     cfunctor (IxMonadTC i j) = Functor→ConstrainedFunctor (M i j) (functor (IxMonadTC i j))
@@ -180,7 +146,7 @@ IxMonad→UnconstrainedSupermonad {n} Ixs M monad = record
   { supermonad = supermonad
   ; lawBindUnconstrained = Binds , lawBindUnconstrained
   ; lawReturnUnconstrained = Returns , lawReturnUnconstrained
-  ; lawFunctorUnconstrained = (λ M → Lift ⊤) , lawFunctorUnconstrained
+  ; lawFunctorUnconstrained = lawFunctorUnconstrained
   } where
     supermonad = IxMonad→Supermonad Ixs M monad
     TyCons = Supermonad.tyConSet supermonad
@@ -199,7 +165,10 @@ IxMonad→UnconstrainedSupermonad {n} Ixs M monad = record
                            → Returns M ≡ Supermonad.Returns supermonad M α
     lawReturnUnconstrained α (IxMonadTC i j) = refl
 
+    lawFunctorUnconstrained : (M : TyCons) → Functor K⟨ supermonad ▷ M ⟩
+    lawFunctorUnconstrained (IxMonadTC i j) = IxMonad→Functor Ixs M monad i j
+    {-
     lawFunctorUnconstrained : (α β : Type) → (M : TyCons)
                             → Lift {ℓ = n} ⊤ ≡ ConstrainedFunctor.FunctorCts (Supermonad.functor supermonad M) α β
     lawFunctorUnconstrained α β (IxMonadTC i j) = refl
-
+    -}

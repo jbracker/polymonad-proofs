@@ -144,7 +144,7 @@ Monad→UnconstrainedSupermonad {ℓ = ℓ} M monad = record
   { supermonad = supermonad
   ; lawBindUnconstrained = Binds , lawBindUnconstrained
   ; lawReturnUnconstrained = Returns , lawReturnUnconstrained
-  ; lawFunctorUnconstrained = (λ _ → Lift ⊤) , lawFunctorUnconstrained
+  ; lawFunctorUnconstrained = lawFunctorUnconstrained
   } where
     supermonad = Monad→Supermonad {ℓ = ℓ} M monad
     TyCons = Supermonad.tyConSet supermonad
@@ -162,8 +162,11 @@ Monad→UnconstrainedSupermonad {ℓ = ℓ} M monad = record
     lawReturnUnconstrained : (α : Type) → (M : TyCons)
                            → Returns M ≡ Supermonad.Returns supermonad M α
     lawReturnUnconstrained α (lift MonadTC) = refl
-    
+  
+    lawFunctorUnconstrained : (M : TyCons) → Functor K⟨ supermonad ▷ M ⟩
+    lawFunctorUnconstrained (lift MonadTC) = Applicative.functor (Monad.applicative monad)
+    {-
     lawFunctorUnconstrained : (α β : Type) → (M : TyCons)
                             → Lift {ℓ = ℓ} ⊤ ≡ ConstrainedFunctor.FunctorCts (Supermonad.functor supermonad M) α β
     lawFunctorUnconstrained α β (lift MonadTC) = refl
-    
+    -}
