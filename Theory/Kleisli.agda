@@ -239,6 +239,9 @@ Monad→KleisliMonad {C = C} {T = T} m = record
       
     idL : {a : Obj C} → kext {a = a} η ≡ id
     idL = Monad.ηCoherL m
+
+    p : {a : Obj C} → T₁ (μ {a = a}) ≡ μ
+    p = {!!}
     
     coher : {a b c : Obj C} {k : Hom C a (T₀ b)} {l : Hom C b (T₀ c)}
           → kext (kext l ∘ k) ≡ kext l ∘ kext k
@@ -246,11 +249,21 @@ Monad→KleisliMonad {C = C} {T = T} m = record
       kext (kext l ∘ k) 
         ≡⟨ refl ⟩
       μ ∘ T₁ ((μ ∘ T₁ l) ∘ k)
-        ≡⟨ cong (λ X → μ ∘ T₁ X) (sym (assoc C)) ⟩
-      μ ∘ T₁ (μ ∘ (T₁ l ∘ k))
-        ≡⟨ {!!} ⟩
-
+        ≡⟨ cong (λ X → μ ∘ X) (Functor.dist T) ⟩
+      μ ∘ (T₁ (μ ∘ T₁ l) ∘ T₁ k)
+        ≡⟨ cong (λ X → μ ∘ (X ∘ T₁ k)) (Functor.dist T) ⟩
+      μ ∘ ((T₁ μ ∘ T₁ (T₁ l)) ∘ T₁ k)
+        ≡⟨ cong (λ X → μ ∘ ((X ∘ T₁ (T₁ l)) ∘ T₁ k)) {!p!} ⟩
+      μ ∘ ((μ ∘ T₁ (T₁ l)) ∘ T₁ k)
+        ≡⟨ cong (λ X → μ ∘ (X ∘ T₁ k)) (sym (NaturalTransformation.natural (Monad.μ m))) ⟩
+      μ ∘ ((T₁ l ∘ μ) ∘ T₁ k)
+        ≡⟨ cong (λ X → μ ∘ X) (sym (assoc C)) ⟩
+      μ ∘ (T₁ l ∘ (μ ∘ T₁ k))
+        ≡⟨ assoc C ⟩
       (μ ∘ T₁ l) ∘ (μ ∘ T₁ k)
         ≡⟨ refl ⟩
       kext l ∘ kext k ∎
 -- μ ∘ Tμ ≡ μ ∘ μT
+
+-- dist : ∀ {a b c} {f : Hom C a b} {g : Hom C b c} 
+--         → F₁ (g ∘ f) ≡ (F₁ g) ∘ (F₁ f)
