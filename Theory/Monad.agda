@@ -33,3 +33,13 @@ record Monad {ℓ : Level} {C : Category {ℓ = ℓ}} (M : Functor C C) : Set �
     ηCoherR : {x : Obj C}
             → _∘_ C (η⟨ μ ⟩ x) (η⟨ η ⟩ ([ M ]₀ x)) ≡ η⟨ Id⟨ M ⟩ ⟩ x
             -- μ ∘ ηT ≡ 1ₜ
+
+idMonad : {ℓ : Level} {C : Category {ℓ = ℓ}} → Monad (Id[ C ])
+idMonad {C = C} = record 
+  { η = Id⟨ Id[ C ] ⟩
+  ; μ = Id⟨ Id[ C ] ⟩
+  ; μCoher = refl
+  ; ηCoherL = Category.idR C
+  ; ηCoherR = Category.idL C
+  }
+

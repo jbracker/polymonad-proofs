@@ -25,6 +25,7 @@ record NaturalTransformation {ℓ : Level}
     
     natural : {a b : Obj C} {f : Hom C a b} 
             →  _∘_ D ([ G ]₁ f) (η a) ≡ _∘_ D (η b) ([ F ]₁ f)
+            -- G₁ f ∘ η ≡ η ∘ F₁ f
  
 η⟨_⟩ : ∀ {ℓ} {C D : Category {ℓ = ℓ}} {F G : Functor C D}
      → (N : NaturalTransformation F G) → (x : Obj C) → Hom D ([ F ]₀ x) ([ G ]₀ x)
