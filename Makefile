@@ -10,7 +10,7 @@ AGDA_TC = $(AGDA) -v 0 +RTS -K40m -RTS
 
 all: type-check
 
-type-check: | only-base only-hicks only-hicks only-monad only-parameterized only-supermonads
+type-check: | only-base only-hicks only-hicks only-monad only-parameterized only-supermonads only-cat-theory
 	# Union of polymonads via morphisms between them
 	# $(AGDA_TC) MorphMonad/MorphMonad.agda
 	# $(AGDA_TC) MorphMonad/MaybeList.agda
@@ -84,6 +84,16 @@ only-supermonads: only-base
 	$(AGDA_TC) Supermonad/EffectMonad.agda
 	$(AGDA_TC) Supermonad/ConstrainedMonad.agda
 	# $(AGDA_TC) Supermonad/Polymonad.agda
+
+only-cat-theory:
+	$(AGDA_TC) Theory/ProofIrrelevance.agda
+	$(AGDA_TC) Theory/Category.agda
+	$(AGDA_TC) Theory/Functor.agda
+	$(AGDA_TC) Theory/NaturalTransformation.agda
+	$(AGDA_TC) Theory/Monad.agda
+	$(AGDA_TC) Theory/Kleisli.agda
+	$(AGDA_TC) Theory/Monoid.agda
+	$(AGDA_TC) Theory/Preorder.agda
 
 clean:
 	$(REMOVE) *.agdai
