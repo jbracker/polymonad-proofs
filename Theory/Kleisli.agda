@@ -3,6 +3,7 @@ module Theory.Kleisli where
 
 -- Stdlib
 open import Level
+open import Function hiding ( id ) renaming ( _∘_ to _∘F_ )
 open import Data.Product
 open import Data.Sum
 open import Data.Unit
@@ -216,7 +217,7 @@ Monad→KleisliMonad {C = C} {T = T} m = record
     
     μ : {a : Obj C} → Hom C (T₀ (T₀ a)) (T₀ a)
     μ {a = a} = η⟨ Monad.μ m ⟩ a
-    
+
     kext : {a b : Obj C} → Hom C a (T₀ b) → Hom C (T₀ a) (T₀ b)
     kext f = μ ∘ T₁ f
     
@@ -239,9 +240,6 @@ Monad→KleisliMonad {C = C} {T = T} m = record
       
     idL : {a : Obj C} → kext {a = a} η ≡ id
     idL = Monad.ηCoherL m
-
-    p : {a : Obj C} → T₁ (μ {a = a}) ≡ μ
-    p = {!!}
     
     coher : {a b c : Obj C} {k : Hom C a (T₀ b)} {l : Hom C b (T₀ c)}
           → kext (kext l ∘ k) ≡ kext l ∘ kext k
@@ -253,7 +251,15 @@ Monad→KleisliMonad {C = C} {T = T} m = record
       μ ∘ (T₁ (μ ∘ T₁ l) ∘ T₁ k)
         ≡⟨ cong (λ X → μ ∘ (X ∘ T₁ k)) (Functor.dist T) ⟩
       μ ∘ ((T₁ μ ∘ T₁ (T₁ l)) ∘ T₁ k)
-        ≡⟨ cong (λ X → μ ∘ ((X ∘ T₁ (T₁ l)) ∘ T₁ k)) {!p!} ⟩
+        ≡⟨ assoc C ⟩
+      (μ ∘ (T₁ μ ∘ T₁ (T₁ l))) ∘ T₁ k
+        ≡⟨ cong (λ X → X ∘ T₁ k) (assoc C) ⟩
+      ((μ ∘ T₁ μ) ∘ T₁ (T₁ l)) ∘ T₁ k
+        ≡⟨ cong (λ X → (X ∘ T₁ (T₁ l)) ∘ T₁ k) (Monad.μCoher m) ⟩
+      ((μ ∘ μ) ∘ T₁ (T₁ l)) ∘ T₁ k
+        ≡⟨ cong (λ X → X ∘ T₁ k) (sym (assoc C)) ⟩
+      (μ ∘ (μ ∘ T₁ (T₁ l))) ∘ T₁ k
+        ≡⟨ sym (assoc C) ⟩
       μ ∘ ((μ ∘ T₁ (T₁ l)) ∘ T₁ k)
         ≡⟨ cong (λ X → μ ∘ (X ∘ T₁ k)) (sym (NaturalTransformation.natural (Monad.μ m))) ⟩
       μ ∘ ((T₁ l ∘ μ) ∘ T₁ k)
@@ -263,7 +269,3 @@ Monad→KleisliMonad {C = C} {T = T} m = record
       (μ ∘ T₁ l) ∘ (μ ∘ T₁ k)
         ≡⟨ refl ⟩
       kext l ∘ kext k ∎
--- μ ∘ Tμ ≡ μ ∘ μT
-
--- dist : ∀ {a b c} {f : Hom C a b} {g : Hom C b c} 
---         → F₁ (g ∘ f) ≡ (F₁ g) ∘ (F₁ f)
