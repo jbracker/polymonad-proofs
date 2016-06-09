@@ -22,7 +22,7 @@ open Category hiding ( idR ; idL ) renaming ( _∘_ to _∘C_ ; id to idC )
 -- -----------------------------------------------------------------------------
 -- Definition of a Kleisli monad/triple
 -- -----------------------------------------------------------------------------
-record KleisliMonad {ℓ : Level} {C : Category {ℓ = ℓ}} (T : Obj C → Obj C) : Set ℓ where
+record KleisliTriple {ℓ : Level} {C : Category {ℓ = ℓ}} (T : Obj C → Obj C) : Set ℓ where
   field
     η : {a : Obj C} → (Hom C a (T a))
     kext : {a b : Obj C} → (Hom C a (T b)) → (Hom C (T a) (T b))
@@ -37,17 +37,17 @@ record KleisliMonad {ℓ : Level} {C : Category {ℓ = ℓ}} (T : Obj C → Obj 
 -- -----------------------------------------------------------------------------
 -- Every Kleisli triple gives rise to a functor
 -- -----------------------------------------------------------------------------
-KleisliMonad→Functor : {ℓ : Level} {C : Category {ℓ = ℓ}} {T : Obj C → Obj C} 
-                     → KleisliMonad {C = C} T → Functor C C
-KleisliMonad→Functor {C = C} {T = T} km = record 
+KleisliTriple→Functor : {ℓ : Level} {C : Category {ℓ = ℓ}} {T : Obj C → Obj C} 
+                     → KleisliTriple {C = C} T → Functor C C
+KleisliTriple→Functor {C = C} {T = T} km = record 
   { F₀ = F₀
   ; F₁ = F₁
   ; id = idF
   ; dist = distF
   } where
     _∘_ = _∘C_ C
-    kext = KleisliMonad.kext km
-    η = KleisliMonad.η km
+    kext = KleisliTriple.kext km
+    η = KleisliTriple.η km
     id = idC C
     F₀ = T
     
@@ -61,7 +61,7 @@ KleisliMonad→Functor {C = C} {T = T} km = record
       kext (η ∘ id)
         ≡⟨ cong (λ X → kext X) (Category.idR C) ⟩ 
       kext η
-        ≡⟨ KleisliMonad.idL km ⟩ 
+        ≡⟨ KleisliTriple.idL km ⟩ 
       id ∎
     
     distF : {a b c : Obj C} {f : Hom C a b} {g : Hom C b c} 
@@ -72,11 +72,11 @@ KleisliMonad→Functor {C = C} {T = T} km = record
       kext ( η ∘ (g ∘ f) )
         ≡⟨ cong (λ X → kext X) (assoc C) ⟩
       kext ( (η ∘ g) ∘ f )
-        ≡⟨ cong (λ X → kext (X ∘ f)) (sym (KleisliMonad.idR km)) ⟩
+        ≡⟨ cong (λ X → kext (X ∘ f)) (sym (KleisliTriple.idR km)) ⟩
       kext ( (kext (η ∘ g) ∘ η) ∘ f )
         ≡⟨ cong (λ X → kext X) (sym (assoc C)) ⟩
       kext ( kext (η ∘ g) ∘ (η ∘ f) )
-        ≡⟨ KleisliMonad.coher km ⟩
+        ≡⟨ KleisliTriple.coher km ⟩
       kext (η ∘ g) ∘ kext (η ∘ f)
         ≡⟨ refl ⟩
       (F₁ g) ∘ (F₁ f) ∎
@@ -84,27 +84,27 @@ KleisliMonad→Functor {C = C} {T = T} km = record
 -- -----------------------------------------------------------------------------
 -- Every Kleisli triple is a monad
 -- -----------------------------------------------------------------------------
-KleisliMonad→Monad : {ℓ : Level} {C : Category {ℓ = ℓ}} {T : Obj C → Obj C}
-                   → (km : KleisliMonad {C = C} T) → Monad (KleisliMonad→Functor km)
-KleisliMonad→Monad {C = C} {T = T} km = record 
+KleisliTriple→Monad : {ℓ : Level} {C : Category {ℓ = ℓ}} {T : Obj C → Obj C}
+                   → (km : KleisliTriple {C = C} T) → Monad (KleisliTriple→Functor km)
+KleisliTriple→Monad {C = C} {T = T} km = record 
   { η = ηNatTrans 
   ; μ = μNatTrans 
   ; μCoher = μCoher 
   ; ηCoherL = ηCoherL 
   ; ηCoherR = ηCoherR
   } where
-    TF = KleisliMonad→Functor km
+    TF = KleisliTriple→Functor km
     IdC = Id[ C ]
     _∘_ = _∘C_ C
     id = idC C
-    kext = KleisliMonad.kext km
-    ηk = KleisliMonad.η km
+    kext = KleisliTriple.kext km
+    ηk = KleisliTriple.η km
     
     μ : (x : Obj C) → Hom C ([ [ TF ]∘[ TF ] ]₀ x) ([ TF ]₀ x)
     μ x = kext (id {a = T x})
     
     η : (x : Obj C) → Hom C ([ IdC ]₀ x) ([ TF ]₀ x)
-    η x = KleisliMonad.η km {a = x}
+    η x = KleisliTriple.η km {a = x}
     
     μNatural : {a b : Obj C} {f : Hom C a b} 
             → ([ TF ]₁ f) ∘ μ a ≡ μ b ∘ ([ [ TF ]∘[ TF ] ]₁ f)
@@ -112,17 +112,17 @@ KleisliMonad→Monad {C = C} {T = T} km = record
       ([ TF ]₁ f) ∘ μ a 
         ≡⟨ refl ⟩
       kext (ηk ∘ f) ∘ kext id
-        ≡⟨ sym (KleisliMonad.coher km) ⟩
+        ≡⟨ sym (KleisliTriple.coher km) ⟩
       kext (kext (ηk ∘ f) ∘ id)
         ≡⟨ cong (λ X → kext X) (Category.idR C) ⟩
       kext (kext (ηk ∘ f))
         ≡⟨ cong (λ X → kext X) (sym (Category.idL C)) ⟩
       kext (id ∘ kext (ηk ∘ f))
-        ≡⟨ cong (λ X → kext (X ∘ kext (ηk ∘ f))) (sym (KleisliMonad.idR km)) ⟩
+        ≡⟨ cong (λ X → kext (X ∘ kext (ηk ∘ f))) (sym (KleisliTriple.idR km)) ⟩
       kext ((kext id ∘ ηk) ∘ kext (ηk ∘ f))
         ≡⟨ cong (λ X → kext X) (sym (assoc C)) ⟩
       kext (kext id ∘ (ηk ∘ kext (ηk ∘ f)))
-        ≡⟨ KleisliMonad.coher km ⟩
+        ≡⟨ KleisliTriple.coher km ⟩
       kext id ∘ kext (ηk ∘ kext (ηk ∘ f))
         ≡⟨ refl ⟩
       μ b ∘ ([ [ TF ]∘[ TF ] ]₁ f) ∎
@@ -133,7 +133,7 @@ KleisliMonad→Monad {C = C} {T = T} km = record
       ([ TF ]₁ f) ∘ η a 
         ≡⟨ refl ⟩ 
       kext (η b ∘ f) ∘ η a
-        ≡⟨ KleisliMonad.idR km ⟩ 
+        ≡⟨ KleisliTriple.idR km ⟩ 
       η b ∘ f
         ≡⟨ refl ⟩ 
       η b ∘ ([ IdC ]₁ f) ∎
@@ -143,17 +143,17 @@ KleisliMonad→Monad {C = C} {T = T} km = record
       μ x ∘ ([ TF ]₁ μ x)
         ≡⟨ refl ⟩
       kext id ∘ kext (ηk ∘ kext id)
-        ≡⟨ sym (KleisliMonad.coher km) ⟩ 
+        ≡⟨ sym (KleisliTriple.coher km) ⟩ 
       kext (kext id ∘ (ηk ∘ kext id))
         ≡⟨ cong kext (assoc C) ⟩ 
       kext ((kext id ∘ ηk) ∘ kext id)
-        ≡⟨ cong (λ X → kext (X ∘ kext id)) (KleisliMonad.idR km) ⟩ 
+        ≡⟨ cong (λ X → kext (X ∘ kext id)) (KleisliTriple.idR km) ⟩ 
       kext (id ∘ kext id)
         ≡⟨ cong kext (Category.idL C) ⟩ 
       kext (kext id)
         ≡⟨ cong kext (sym (Category.idR C)) ⟩ 
       kext (kext id ∘ id)
-        ≡⟨ KleisliMonad.coher km ⟩ 
+        ≡⟨ KleisliTriple.coher km ⟩ 
       kext id ∘ kext id
         ≡⟨ refl ⟩
       μ x ∘ μ ([ TF ]₀ x) ∎
@@ -163,21 +163,21 @@ KleisliMonad→Monad {C = C} {T = T} km = record
       μ x ∘ ([ TF ]₁ η x) 
         ≡⟨ refl ⟩
       kext id ∘ kext (ηk ∘ ηk) 
-        ≡⟨ sym (KleisliMonad.coher km) ⟩
+        ≡⟨ sym (KleisliTriple.coher km) ⟩
       kext (kext id ∘ (ηk ∘ ηk))
         ≡⟨ cong kext (assoc C) ⟩
       kext ((kext id ∘ ηk) ∘ ηk)
-        ≡⟨ cong (λ X → kext (X ∘ ηk)) (KleisliMonad.idR km) ⟩
+        ≡⟨ cong (λ X → kext (X ∘ ηk)) (KleisliTriple.idR km) ⟩
       kext (id ∘ ηk)
         ≡⟨ cong kext (Category.idL C) ⟩
       kext ηk
-        ≡⟨ KleisliMonad.idL km ⟩
+        ≡⟨ KleisliTriple.idL km ⟩
       id
         ≡⟨ refl ⟩
       η⟨ Id⟨ TF ⟩ ⟩ x ∎
     
     ηCoherR : {x : Obj C} → μ x ∘ (η ([ TF ]₀ x)) ≡ η⟨ Id⟨ TF ⟩ ⟩ x
-    ηCoherR {x = x} = KleisliMonad.idR km
+    ηCoherR {x = x} = KleisliTriple.idR km
     
     μNatTrans : NaturalTransformation [ TF ]∘[ TF ] TF
     μNatTrans = record 
@@ -194,9 +194,9 @@ KleisliMonad→Monad {C = C} {T = T} km = record
 -- -----------------------------------------------------------------------------
 -- Every monad gives rise to a Kleisli triple
 -- -----------------------------------------------------------------------------
-Monad→KleisliMonad : {ℓ : Level} {C : Category {ℓ = ℓ}} {T : Functor C C}
-                   → Monad T → KleisliMonad {C = C} (Functor.F₀ T)  
-Monad→KleisliMonad {C = C} {T = T} m = record 
+Monad→KleisliTriple : {ℓ : Level} {C : Category {ℓ = ℓ}} {T : Functor C C}
+                    → Monad T → KleisliTriple {C = C} (Functor.F₀ T)  
+Monad→KleisliTriple {C = C} {T = T} m = record 
   { η = η 
   ; kext = kext
   ; idR = idR
