@@ -27,7 +27,7 @@ record Monoid {ℓ} (C : Set ℓ) : Set ℓ where
   carrier : Set ℓ
   carrier = C
 
-Monoid→Category : ∀ {ℓ} {C : Set ℓ} → Monoid C → Category {ℓ = ℓ}
+Monoid→Category : ∀ {ℓ} {C : Set ℓ} → Monoid C → Category {ℓ₀ = ℓ}
 Monoid→Category {ℓ = ℓ} monoid = record
   { Obj = Lift ⊤
   ; Hom = \_ _ → Monoid.carrier monoid

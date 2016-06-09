@@ -22,7 +22,7 @@ open Category hiding ( idR ; idL ) renaming ( _∘_ to _∘C_ ; id to idC )
 -- -----------------------------------------------------------------------------
 -- Definition of a Kleisli monad/triple
 -- -----------------------------------------------------------------------------
-record KleisliTriple {ℓ : Level} {C : Category {ℓ = ℓ}} (T : Obj C → Obj C) : Set ℓ where
+record KleisliTriple {ℓC₀ ℓC₁ : Level} {C : Category {ℓC₀} {ℓC₁}} (T : Obj C → Obj C) : Set (ℓC₀ ⊔ ℓC₁) where
   field
     η : {a : Obj C} → (Hom C a (T a))
     kext : {a b : Obj C} → (Hom C a (T b)) → (Hom C (T a) (T b))
@@ -37,7 +37,7 @@ record KleisliTriple {ℓ : Level} {C : Category {ℓ = ℓ}} (T : Obj C → Obj
 -- -----------------------------------------------------------------------------
 -- Every Kleisli triple gives rise to a functor
 -- -----------------------------------------------------------------------------
-KleisliTriple→Functor : {ℓ : Level} {C : Category {ℓ = ℓ}} {T : Obj C → Obj C} 
+KleisliTriple→Functor : {ℓC₀ ℓC₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {T : Obj C → Obj C} 
                      → KleisliTriple {C = C} T → Functor C C
 KleisliTriple→Functor {C = C} {T = T} km = record 
   { F₀ = F₀
@@ -84,7 +84,7 @@ KleisliTriple→Functor {C = C} {T = T} km = record
 -- -----------------------------------------------------------------------------
 -- Every Kleisli triple is a monad
 -- -----------------------------------------------------------------------------
-KleisliTriple→Monad : {ℓ : Level} {C : Category {ℓ = ℓ}} {T : Obj C → Obj C}
+KleisliTriple→Monad : {ℓC₀ ℓC₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {T : Obj C → Obj C}
                    → (km : KleisliTriple {C = C} T) → Monad (KleisliTriple→Functor km)
 KleisliTriple→Monad {C = C} {T = T} km = record 
   { η = ηNatTrans 
@@ -194,7 +194,7 @@ KleisliTriple→Monad {C = C} {T = T} km = record
 -- -----------------------------------------------------------------------------
 -- Every monad gives rise to a Kleisli triple
 -- -----------------------------------------------------------------------------
-Monad→KleisliTriple : {ℓ : Level} {C : Category {ℓ = ℓ}} {T : Functor C C}
+Monad→KleisliTriple : {ℓC₀ ℓC₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {T : Functor C C}
                     → Monad T → KleisliTriple {C = C} (Functor.F₀ T)  
 Monad→KleisliTriple {C = C} {T = T} m = record 
   { η = η 

@@ -20,7 +20,8 @@ open Category hiding ( idR ; idL )
 -- -----------------------------------------------------------------------------
 -- Definition of a categorical supermonad
 -- -----------------------------------------------------------------------------
-record Supermonad {ℓ : Level} {C D E : Category {ℓ = ℓ}} (T : {a b : Obj E} → Hom E a b → Functor C D) (J : Functor C D) : Set ℓ where
+record Supermonad {ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓE₀ ℓE₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} {E : Category {ℓE₀} {ℓE₁}} 
+                  (T : {a b : Obj E} → Hom E a b → Functor C D) (J : Functor C D) : Set (ℓC₀ ⊔ ℓC₁ ⊔ ℓD₀ ⊔ ℓD₁ ⊔ ℓE₀ ⊔ ℓE₁) where
   field
     η : {a : Obj C} {e : Obj E} → Hom D ([ J ]₀ a) ([ T (id E {a = e}) ]₀ a)
     kext : {a b : Obj C} {e₁ e₂ e₃ : Obj E} {f : Hom E e₂ e₃} {g : Hom E e₁ e₂} → Hom D ([ J ]₀ a) ([ T f ]₀ b) → Hom D ([ T g ]₀ a) ([ T (_∘_ E f g) ]₀ b)
@@ -63,8 +64,8 @@ Supermonad→FunctorT {C = C} {D = D} {E = E} {T = T} {J = J} e sm = record
 -- -----------------------------------------------------------------------------
 open import Theory.RelativeMonad
 
-Supermonad→RelativeMonad : {ℓ : Level} {C D : Category {ℓ = ℓ}} {T : Functor C D} {J : Functor C D} 
-                         → Supermonad {E = UnitCategory} (const {b = ℓ} T) J → RelativeMonad (Functor.F₀ T) J
+Supermonad→RelativeMonad : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓE₀ ℓE₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} {T : Functor C D} {J : Functor C D} 
+                         → Supermonad {E = unitCategory {ℓE₀} {ℓE₁}} (const T) J → RelativeMonad (Functor.F₀ T) J
 Supermonad→RelativeMonad sm = record 
   { η = Supermonad.η sm
   ; kext = Supermonad.kext sm
@@ -73,8 +74,8 @@ Supermonad→RelativeMonad sm = record
   ; coher = Supermonad.coher sm
   }
 
-RelativeMonad→Supermonad : {ℓ : Level} {C D : Category {ℓ = ℓ}} {T : Functor C D} {J : Functor C D} 
-                         → RelativeMonad (Functor.F₀ T) J → Supermonad {E = UnitCategory} (const {b = ℓ} T) J
+RelativeMonad→Supermonad : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓE₀ ℓE₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} {T : Functor C D} {J : Functor C D} 
+                         → RelativeMonad (Functor.F₀ T) J → Supermonad {E = unitCategory {ℓE₀} {ℓE₁}} (const T) J
 RelativeMonad→Supermonad rm = record 
   { η = RelativeMonad.η rm 
   ; kext = RelativeMonad.kext rm 
@@ -88,10 +89,10 @@ RelativeMonad→Supermonad rm = record
 -- -----------------------------------------------------------------------------
 open import Theory.Kleisli
 
-Supermonad→KleisliTriple : {ℓ : Level} {C : Category {ℓ = ℓ}} {T : Functor C C} 
-                         → Supermonad {E = UnitCategory} (const {b = ℓ} T) Id[ C ] → KleisliTriple {C = C} (Functor.F₀ T)
+Supermonad→KleisliTriple : {ℓC₀ ℓC₁ ℓE₀ ℓE₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {T : Functor C C} 
+                         → Supermonad {E = unitCategory {ℓE₀} {ℓE₁}} (const T) Id[ C ] → KleisliTriple {C = C} (Functor.F₀ T)
 Supermonad→KleisliTriple sm = RelativeMonad→KleisliTriple (Supermonad→RelativeMonad sm)
 
-KleisliTriple→Supermonad : {ℓ : Level} {C : Category {ℓ = ℓ}} {T : Functor C C} 
-                         → KleisliTriple {C = C} (Functor.F₀ T) → Supermonad {E = UnitCategory} (const {b = ℓ} T) Id[ C ] 
+KleisliTriple→Supermonad : {ℓC₀ ℓC₁ ℓE₀ ℓE₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {T : Functor C C} 
+                         → KleisliTriple {C = C} (Functor.F₀ T) → Supermonad {E = unitCategory {ℓE₀} {ℓE₁}} (const T) Id[ C ] 
 KleisliTriple→Supermonad kleisli = RelativeMonad→Supermonad (KleisliTriple→RelativeMonad kleisli)

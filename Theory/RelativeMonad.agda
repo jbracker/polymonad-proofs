@@ -20,7 +20,7 @@ open Category hiding ( idR ; idL )
 -- -----------------------------------------------------------------------------
 -- Definition of a relative monad
 -- -----------------------------------------------------------------------------
-record RelativeMonad {ℓ : Level} {C D : Category {ℓ = ℓ}} (T : Obj C → Obj D) (J : Functor C D) : Set ℓ where
+record RelativeMonad {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} (T : Obj C → Obj D) (J : Functor C D) : Set (ℓC₀ ⊔ ℓC₁ ⊔ ℓD₀ ⊔ ℓD₁) where
   field
     η : {a : Obj C} → Hom D ([ J ]₀ a) (T a)
     kext : {a b : Obj C} → Hom D ([ J ]₀ a) (T b) → Hom D (T a) (T b)
@@ -38,7 +38,8 @@ record RelativeMonad {ℓ : Level} {C D : Category {ℓ = ℓ}} (T : Obj C → O
 -- -----------------------------------------------------------------------------
 open import Theory.Kleisli
 
-RelativeMonad→KleisliTriple : {ℓ : Level} {C : Category {ℓ = ℓ}} {T : Obj C → Obj C} → RelativeMonad T Id[ C ] → KleisliTriple {C = C} T
+RelativeMonad→KleisliTriple : {ℓC₀ ℓC₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {T : Obj C → Obj C} 
+                            → RelativeMonad T Id[ C ] → KleisliTriple {C = C} T
 RelativeMonad→KleisliTriple {C = C} {T = T} rm = record 
   { η = RelativeMonad.η rm 
   ; kext = RelativeMonad.kext rm 
@@ -47,7 +48,8 @@ RelativeMonad→KleisliTriple {C = C} {T = T} rm = record
   ; coher = RelativeMonad.coher rm 
   }
 
-KleisliTriple→RelativeMonad : {ℓ : Level} {C : Category {ℓ = ℓ}} {T : Obj C → Obj C} → KleisliTriple {C = C} T → RelativeMonad T Id[ C ]
+KleisliTriple→RelativeMonad : {ℓC₀ ℓC₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {T : Obj C → Obj C} 
+                            → KleisliTriple {C = C} T → RelativeMonad T Id[ C ]
 KleisliTriple→RelativeMonad kleisli = record 
   { η = KleisliTriple.η kleisli
   ; kext = KleisliTriple.kext kleisli

@@ -28,7 +28,7 @@ record Preorder {ℓ : Level} (P : Set ℓ) : Set (lsuc ℓ) where
 Preorder→Category : ∀ {ℓ} {P : Set ℓ} 
                   → (preorder : Preorder P) 
                   → ProofIrrelevance (Preorder._≤_ preorder)
-                  → Category {ℓ = ℓ}
+                  → Category {ℓ₀ = ℓ}
 Preorder→Category {ℓ = ℓ} {P = P} preorder irrelevance = record
   { Obj = P
   ; Hom = _≤_

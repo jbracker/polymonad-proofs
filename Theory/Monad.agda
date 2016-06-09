@@ -17,7 +17,7 @@ open import Theory.NaturalTransformation
 
 open Category
 
-record Monad {ℓ : Level} {C : Category {ℓ = ℓ}} (M : Functor C C) : Set ℓ where
+record Monad {ℓC₀ ℓC₁ : Level} {C : Category {ℓC₀} {ℓC₁}} (M : Functor C C) : Set (ℓC₀ ⊔ ℓC₁) where
   field
     η : NaturalTransformation Id[ C ]     M
     μ : NaturalTransformation [ M ]∘[ M ] M
@@ -34,7 +34,7 @@ record Monad {ℓ : Level} {C : Category {ℓ = ℓ}} (M : Functor C C) : Set �
             → _∘_ C (η⟨ μ ⟩ x) (η⟨ η ⟩ ([ M ]₀ x)) ≡ η⟨ Id⟨ M ⟩ ⟩ x
             -- μ ∘ ηT ≡ 1ₜ
 
-idMonad : {ℓ : Level} {C : Category {ℓ = ℓ}} → Monad (Id[ C ])
+idMonad : {ℓC₀ ℓC₁ : Level} {C : Category {ℓC₀} {ℓC₁}} → Monad (Id[ C ])
 idMonad {C = C} = record 
   { η = Id⟨ Id[ C ] ⟩
   ; μ = Id⟨ Id[ C ] ⟩
