@@ -37,9 +37,9 @@ unitCategory = record
   }
 
 -- Category of sets and functions.
-setCategory : {ℓ : Level} → Category
-setCategory {ℓ = ℓ} = record
-  { Obj = Set ℓ
+setCategory : {ℓ₀ : Level} → Category
+setCategory {ℓ₀ = ℓ₀} = record
+  { Obj = Set ℓ₀
   ; Hom = λ a b → (a → b)
   ; _∘_ = λ f g → f ∘F g
   ; id = idF
@@ -47,3 +47,4 @@ setCategory {ℓ = ℓ} = record
   ; idL = refl
   ; idR = refl
   }
+
