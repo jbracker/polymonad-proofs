@@ -2,7 +2,7 @@
 module Theory.Category where
 
 -- Stdlib
-open import Agda.Primitive
+open import Level renaming ( suc to lsuc ; zero to lzero )
 open import Data.Product
 open import Data.Sum
 open import Data.Unit
@@ -22,3 +22,14 @@ record Category {ℓ : Level} : Set (lsuc ℓ) where
           → h ∘ (g ∘ f) ≡ (h ∘ g) ∘ f
     idL : {a b : Obj} {f : Hom a b} → id ∘ f ≡ f
     idR : {a b : Obj} {f : Hom a b} → f ∘ id ≡ f
+
+UnitCategory : {ℓ : Level} → Category {ℓ = ℓ}
+UnitCategory = record
+  { Obj = Lift ⊤
+  ; Hom = λ _ _ → Lift ⊤
+  ; _∘_ = λ _ _ → lift tt
+  ; id = lift tt
+  ; assoc = refl
+  ; idL = refl
+  ; idR = refl
+  }

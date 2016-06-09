@@ -93,6 +93,7 @@ only-cat-theory:
 	$(AGDA_TC) Theory/Monad.agda
 	$(AGDA_TC) Theory/Kleisli.agda
 	$(AGDA_TC) Theory/RelativeMonad.agda
+	$(AGDA_TC) Theory/Supermonad.agda
 	$(AGDA_TC) Theory/Monoid.agda
 	$(AGDA_TC) Theory/Preorder.agda
 
