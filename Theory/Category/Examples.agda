@@ -38,19 +38,22 @@ setCategory {ℓ₀ = ℓ₀} = record
   ; idR = refl
   }
 
-{-
--- Category of categories and functors.
-catCategory : {ℓC ℓF ℓ₀ ℓ₁ : Level} 
-            → (Cats : Set ℓC) → (catOf : Cats → Category {ℓ₀ = ℓ₀} {ℓ₁ = ℓ₁}) 
-            → (Funcs : (C : Cats) → (D : Cats) → ∃ λ (Fs : Set ℓF) → ((f : Fs) → Functor (catOf C) (catOf D)) ) 
-            → Category {ℓ₀ = ℓC} {ℓ₁ = ℓ₁ ⊔ (ℓ₀ ⊔ lsuc ℓF)}
-catCategory Cats catOf Funcs = record
-  { Obj = Cats
-  ; Hom = λ C D → {!Funcs C D!}
-  ; _∘_ = {!!}
-  ; id = {!!}
-  ; assoc = {!!}
-  ; idL = {!!}
-  ; idR = {!!}
-  }
--}
+catCategory : {ℓ₀ ℓ₁ : Level} → Category {ℓ₀ = lsuc (ℓ₀ ⊔ ℓ₁)} {ℓ₁ = ℓ₀ ⊔ ℓ₁}
+catCategory {ℓ₀} {ℓ₁} = record
+  { Obj = Category {ℓ₀} {ℓ₁}
+  ; Hom = λ C D → Functor C D
+  ; _∘_ = [_]∘[_]
+  ; id = λ {C} → Id[ C ]
+  ; assoc = λ {a b c d} {f} {g} {h} → assoc {a} {b} {c} {d} {f} {g} {h}
+  ; idL = idL
+  ; idR = idR
+  } where
+    assoc : {a b c d : Category} {f : Functor a b} {g : Functor b c} {h : Functor c d} 
+          → [ h ]∘[ [ g ]∘[ f ] ] ≡ [ [ h ]∘[ g ] ]∘[ f ]
+    assoc = {!!}
+    
+    idL : {a b : Category} {f : Functor a b} → [ Id[ b ] ]∘[ f ] ≡ f
+    idL = {!!}
+
+    idR : {a b : Category} {f : Functor a b} → [ f ]∘[ Id[ a ] ] ≡ f
+    idR = refl
