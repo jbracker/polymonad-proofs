@@ -17,6 +17,7 @@ open import Theory.Category
 open Category hiding ( id )
 
 record Functor {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} (C : Category {ℓC₀} {ℓC₁}) (D : Category {ℓD₀} {ℓD₁}) : Set (ℓC₀ ⊔ ℓC₁ ⊔ ℓD₀ ⊔ ℓD₁) where
+  constructor functor
   field
     F₀ : Obj C → Obj D
     F₁ : ∀ {a b} → Hom C a b → Hom D (F₀ a) (F₀ b)
