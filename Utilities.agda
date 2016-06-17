@@ -47,6 +47,9 @@ funCong₂ {a = a} {b} {f} {g} fg = cong (λ h → h a b) fg
 postulate
   funExt : ∀ {l k} {A : Set l} {B : A → Set k} {f g : (a : A) → B a} → ((x : A) → f x ≡ g x) → f ≡ g
 
+funExtImplicit : ∀ {l k} {A : Set l} {B : A → Set k} {f g : {a : A} → B a} → ((x : A) → f {x} ≡ g {x}) → (λ {a} → f {a}) ≡ (λ {a} → g {a})
+funExtImplicit {f = f} {g = g} p = cong (λ X → (λ {a} → X a)) (funExt p)
+
 funExt₂ : ∀ {l k n} {A : Set l} {B : A → Set k} {C : (a : A) → B a → Set n} {f g : (a : A) → (b : B a) → C a b} → ((a : A) → (b : B a) → f a b ≡ g a b) → f ≡ g
 funExt₂ {f = f} {g = g} p = funExt (λ a → funExt (p a))
 
