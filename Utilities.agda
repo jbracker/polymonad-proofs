@@ -34,6 +34,14 @@ subst₃ : ∀ {a b c d} {A : Set a} {B : Set b} {C : Set c}
        → x₁ ≡ x₂ → y₁ ≡ y₂ → z₁ ≡ z₂ → P x₁ y₁ z₁ → P x₂ y₂ z₂
 subst₃ P refl refl refl p = p
 
+-- Substitution with four arguments.
+subst₄ : ∀ {a b c d p} {A : Set a} {B : Set b} {C : Set c} {D : Set d} 
+       → (P : A → B → C → D → Set p)
+       → ∀ {x₁ x₂ y₁ y₂ z₁ z₂ w₁ w₂} 
+       → x₁ ≡ x₂ → y₁ ≡ y₂ → z₁ ≡ z₂ → w₁ ≡ w₂ 
+       → P x₁ y₁ z₁ w₁ → P x₂ y₂ z₂ w₂
+subst₄ P refl refl refl refl p = p
+
 -- If two type functions are equivalent, then applying them to the same value 
 -- delivers equivalent results.
 funCong : ∀ {ℓ₀ ℓ₁} {A : Set ℓ₀} {f g : A → Set ℓ₁} → f ≡ g → {a : A} → f a ≡ g a
