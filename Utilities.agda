@@ -2,7 +2,7 @@
 module Utilities where
 
 -- Stdlib
-open import Level
+open import Level renaming ( suc to lsuc )
 open import Data.Product
 open import Data.Sum
 open import Data.Unit
@@ -36,8 +36,8 @@ subst₃ P refl refl refl p = p
 
 -- If two type functions are equivalent, then applying them to the same value 
 -- delivers equivalent results.
-funCong : ∀ {a : Set} {f g : Set → Set} → f ≡ g → f a ≡ g a
-funCong {a} {f} {g} fg = cong (λ h → h a) fg
+funCong : ∀ {ℓ₀ ℓ₁} {A : Set ℓ₀} {f g : A → Set ℓ₁} → f ≡ g → {a : A} → f a ≡ g a
+funCong {ℓ₀ = ℓ₀} {ℓ₁ = ℓ₁} {A} {f} {g} fg {a} = cong {a = lsuc ℓ₁ ⊔ ℓ₀} (λ h → h a) fg
 
 funCong₂ : ∀ {A B C : Set} {a : A} {b : B} {f g : A → B → C} → f ≡ g → f a b ≡ g a b
 funCong₂ {a = a} {b} {f} {g} fg = cong (λ h → h a b) fg
