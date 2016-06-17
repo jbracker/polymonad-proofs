@@ -12,6 +12,7 @@ open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning 
 
 -- Local
+open import Utilities
 open import Theory.Category
 
 open Category hiding ( id )
@@ -70,3 +71,27 @@ compFunctor {C = C} {D = D} {E = E} F G = record
 [_]∘[_] : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓE₀ ℓE₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} {E : Category {ℓE₀} {ℓE₁}}
         → Functor D E → Functor C D → Functor C E
 [ G ]∘[ F ] = compFunctor F G
+
+open Category
+
+propEqFunctor : {Cℓ₀ Cℓ₁ Dℓ₀ Dℓ₁ : Level} {C : Category {Cℓ₀} {Cℓ₁}} {D : Category {Dℓ₀} {Dℓ₁}} 
+              → {F₀ G₀ : Obj C → Obj D}
+              → {F₁ : (a b : Obj C) → Hom C a b → Hom D (F₀ a) (F₀ b)}
+              → {G₁ : (a b : Obj C) → Hom C a b → Hom D (G₀ a) (G₀ b)}
+              → {idF : {a : Obj C} → F₁ a a (id C) ≡ id D}
+              → {idG : {a : Obj C} → G₁ a a (id C) ≡ id D}
+              → {distF : ∀ {a b c} {f : Hom C a b} {g : Hom C b c} → F₁ a c (_∘_ C g f) ≡ _∘_ D (F₁ b c g) (F₁ a b f)}
+              → {distG : ∀ {a b c} {f : Hom C a b} {g : Hom C b c} → G₁ a c (_∘_ C g f) ≡ _∘_ D (G₁ b c g) (G₁ a b f)}
+              → (eq₀ : F₀ ≡ G₀)
+              → (eq₁ : F₁ ≡ subst₂ (λ X Y → (a b : Obj C) → Hom C a b → Hom D (X a) (Y b)) (sym eq₀) (sym eq₀) G₁ )
+              → functor {C = C} {D = D} F₀ (λ {a b} → F₁ a b) idF distF ≡ functor {C = C} {D = D} G₀ (λ {a b} → G₁ a b) idG distG
+propEqFunctor {F₀ = F₀} {F₁ = F₁} {idF = idF} {idG} {distF} {distG} refl refl = cong₂ (functor F₀ (λ {a b} → F₁ a b)) p1 p2
+  where
+    p1 = funExtImplicit (λ a → proof-irrelevance (idF {a}) (idG {a}))
+    p2 = funExtImplicit 
+           (λ a → funExtImplicit 
+           (λ b → funExtImplicit
+           (λ c → funExtImplicit
+           (λ f → funExtImplicit
+           (λ g → proof-irrelevance (distF {a} {b} {c} {f} {g}) (distG {a} {b} {c} {f} {g})
+           ) ) ) ) )
