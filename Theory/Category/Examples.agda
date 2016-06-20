@@ -15,18 +15,6 @@ open import Utilities
 open import Theory.Category
 open import Theory.Functor
 
--- The unit category with exactly one element and one morphism.
-unitCategory : {ℓ₀ ℓ₁ : Level} → Category {ℓ₀ = ℓ₀} {ℓ₁ = ℓ₁}
-unitCategory = record
-  { Obj = Lift ⊤
-  ; Hom = λ _ _ → Lift ⊤
-  ; _∘_ = λ _ _ → lift tt
-  ; id = lift tt
-  ; assoc = refl
-  ; idL = refl
-  ; idR = refl
-  }
-
 -- Category of sets and functions.
 setCategory : {ℓ₀ : Level} → Category {ℓ₀ = lsuc ℓ₀}
 setCategory {ℓ₀ = ℓ₀} = record

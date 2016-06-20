@@ -28,6 +28,24 @@ record Category {ℓ₀ ℓ₁ : Level} : Set (lsuc (ℓ₀ ⊔ ℓ₁)) where
     idR : {a b : Obj} {f : Hom a b} → f ∘ id ≡ f
 
 -------------------------------------------------------------------------------
+-- The Unit Category
+-------------------------------------------------------------------------------
+
+-- The unit category with exactly one element and one morphism.
+unitCategory : {ℓ₀ ℓ₁ : Level} → Category {ℓ₀ = ℓ₀} {ℓ₁ = ℓ₁}
+unitCategory = record
+  { Obj = Lift ⊤
+  ; Hom = λ _ _ → Lift ⊤
+  ; _∘_ = λ _ _ → lift tt
+  ; id = lift tt
+  ; assoc = refl
+  ; idL = refl
+  ; idR = refl
+  }
+
+⊤-Cat = unitCategory
+
+-------------------------------------------------------------------------------
 -- Product of Categories
 -------------------------------------------------------------------------------
 open Category
