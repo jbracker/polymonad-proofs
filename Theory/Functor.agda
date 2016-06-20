@@ -57,7 +57,7 @@ Id[ C ] = idFunctor C
 -- Composition of Functors
 -------------------------------------------------------------------------------
 compFunctor : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓE₀ ℓE₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} {E : Category {ℓE₀} {ℓE₁}}
-            → Functor C D → Functor D E → Functor C E
+            → Functor D E → Functor C D → Functor C E
 compFunctor {C = C} {D = D} {E = E} F G = record 
   { F₀ = F₀
   ; F₁ = F₁
@@ -65,17 +65,17 @@ compFunctor {C = C} {D = D} {E = E} F G = record
   ; dist = dist
   } where
     F₀ : Obj C → Obj E
-    F₀ a = [ G ]₀ ( [ F ]₀ a )
+    F₀ a = [ F ]₀ ( [ G ]₀ a )
     
     F₁ : {a b : Obj C} → Hom C a b → Hom E (F₀ a) (F₀ b)
-    F₁ f = [ G ]₁ ( [ F ]₁ f )
+    F₁ f = [ F ]₁ ( [ G ]₁ f )
     
     id : ∀ {a : Obj C} → F₁ {a = a} (Category.id C) ≡ Category.id E
-    id = trans (cong (λ X → Functor.F₁ G X) (Functor.id F)) (Functor.id G)
+    id = trans (cong (λ X → Functor.F₁ F X) (Functor.id G)) (Functor.id F)
     
     dist : ∀ {a b c} {f : Hom C a b} {g : Hom C b c} 
          → F₁ (_∘_ C g f) ≡ _∘_ E (F₁ g) (F₁ f)
-    dist = trans (cong (λ X → Functor.F₁ G X) (Functor.dist F)) (Functor.dist G)
+    dist = trans (cong (λ X → Functor.F₁ F X) (Functor.dist G)) (Functor.dist F)
 
 [_]∘[_] = compFunctor
 
