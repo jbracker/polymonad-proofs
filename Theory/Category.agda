@@ -23,3 +23,32 @@ record Category {ℓ₀ ℓ₁ : Level} : Set (lsuc (ℓ₀ ⊔ ℓ₁)) where
           → h ∘ (g ∘ f) ≡ (h ∘ g) ∘ f
     idL : {a b : Obj} {f : Hom a b} → id ∘ f ≡ f
     idR : {a b : Obj} {f : Hom a b} → f ∘ id ≡ f
+
+open Category
+
+productCategory : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} → Category {ℓC₀} {ℓC₁} → Category {ℓD₀} {ℓD₁} → Category
+productCategory {ℓC₀} {ℓC₁} {ℓD₀} {ℓD₁} C D = record
+  { Obj = ObjP
+  ; Hom = HomP
+  ; _∘_ = _∘P_
+  ; id = idP
+  ; assoc = cong₂ (λ X Y → X , Y) (assoc C) (assoc D)
+  ; idL = cong₂ (λ X Y → X , Y) (idL C) (idL D)
+  ; idR = cong₂ (λ X Y → X , Y) (idR C) (idR D)
+  } where
+    ObjP = Obj C × Obj D
+
+    _∘C_ = _∘_ C
+    _∘D_ = _∘_ D
+    
+    HomP : ObjP → ObjP → Set (ℓD₁ ⊔ ℓC₁)
+    HomP (ca , da) (cb , db) = Hom C ca cb × Hom D da db
+    
+    _∘P_ : {a b c : ObjP} → HomP b c → HomP a b → HomP a c
+    _∘P_ (cf , df) (cg , dg) = cf ∘C cg , df ∘D dg 
+    
+    idP : {a : ObjP} → HomP a a
+    idP {ca , da} = id C {ca} , id D {da}
+
+_×C_ : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} → Category {ℓC₀} {ℓC₁} → Category {ℓD₀} {ℓD₁} → Category
+C ×C D = productCategory C D
