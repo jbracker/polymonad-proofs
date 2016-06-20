@@ -11,6 +11,9 @@ open import Data.Empty
 open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning
 
+-------------------------------------------------------------------------------
+-- Definition of Categories
+-------------------------------------------------------------------------------
 record Category {ℓ₀ ℓ₁ : Level} : Set (lsuc (ℓ₀ ⊔ ℓ₁)) where
   field
     Obj : Set ℓ₀
@@ -24,6 +27,9 @@ record Category {ℓ₀ ℓ₁ : Level} : Set (lsuc (ℓ₀ ⊔ ℓ₁)) where
     idL : {a b : Obj} {f : Hom a b} → id ∘ f ≡ f
     idR : {a b : Obj} {f : Hom a b} → f ∘ id ≡ f
 
+-------------------------------------------------------------------------------
+-- Product of Categories
+-------------------------------------------------------------------------------
 open Category
 
 productCategory : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} → Category {ℓC₀} {ℓC₁} → Category {ℓD₀} {ℓD₁} → Category
@@ -50,5 +56,4 @@ productCategory {ℓC₀} {ℓC₁} {ℓD₀} {ℓD₁} C D = record
     idP : {a : ObjP} → HomP a a
     idP {ca , da} = id C {ca} , id D {da}
 
-_×C_ : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} → Category {ℓC₀} {ℓC₁} → Category {ℓD₀} {ℓD₁} → Category
-C ×C D = productCategory C D
+_×C_ = productCategory
