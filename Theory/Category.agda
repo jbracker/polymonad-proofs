@@ -32,12 +32,12 @@ record Category {ℓ₀ ℓ₁ : Level} : Set (lsuc (ℓ₀ ⊔ ℓ₁)) where
 -------------------------------------------------------------------------------
 
 -- The unit category with exactly one element and one morphism.
-unitCategory : {ℓ₀ ℓ₁ : Level} → Category {ℓ₀ = ℓ₀} {ℓ₁ = ℓ₁}
+unitCategory : Category
 unitCategory = record
-  { Obj = Lift ⊤
-  ; Hom = λ _ _ → Lift ⊤
-  ; _∘_ = λ _ _ → lift tt
-  ; id = lift tt
+  { Obj = ⊤
+  ; Hom = λ _ _ → ⊤
+  ; _∘_ = λ _ _ → tt
+  ; id = tt
   ; assoc = refl
   ; idL = refl
   ; idR = refl
@@ -46,10 +46,56 @@ unitCategory = record
 ⊤-Cat = unitCategory
 
 -------------------------------------------------------------------------------
--- Product of Categories
+-- Lifting of Categories to another Level
 -------------------------------------------------------------------------------
 open Category
 
+liftCategory : {ℓC₀ ℓC₁ ℓL₀ ℓL₁ : Level} → Category {ℓC₀} {ℓC₁} → Category {ℓ₀ = ℓC₀ ⊔ ℓL₀} {ℓ₁ = ℓC₁ ⊔ ℓL₁}
+liftCategory {ℓC₀} {ℓC₁} {ℓL₀} {ℓL₁} C = record
+  { Obj = ObjL
+  ; Hom = HomL
+  ; _∘_ = _∘L_
+  ; id = idLift
+  ; assoc = assocL
+  ; idL = trans shiftL (cong lift (idL C))
+  ; idR = trans shiftL (cong lift (idR C))
+  } where
+    ObjL : Set (ℓC₀ ⊔ ℓL₀)
+    ObjL = Lift {ℓ = ℓL₀} (Obj C)
+
+    HomL : ObjL → ObjL → Set (ℓC₁ ⊔ ℓL₁) 
+    HomL (lift a) (lift b) = Lift {ℓ = ℓL₁} (Hom C a b)
+    
+    _∘C_ = _∘_ C
+    
+    _∘L_ : {a b c : ObjL} → HomL b c → HomL a b → HomL a c
+    _∘L_ (lift f) (lift g) = lift (f ∘C g)
+    
+    idLift : {a : ObjL} → HomL a a
+    idLift = lift (id C)
+    
+    shiftL :  {a b c : Obj C} {f : Hom C a b} {g : Hom C b c} 
+           → lift g ∘L lift f ≡ lift (g ∘C f)
+    shiftL = refl
+    
+    assocL : {a b c d : ObjL} {f : HomL a b} {g : HomL b c} {h : HomL c d} 
+           → h ∘L (g ∘L f) ≡ (h ∘L g) ∘L f
+    assocL {f = lift f} {lift g} {lift h} = begin
+      lift h ∘L (lift g ∘L lift f) 
+        ≡⟨ cong (λ X → lift h ∘L X) shiftL ⟩ 
+      lift h ∘L lift (g ∘C f) 
+        ≡⟨ shiftL ⟩ 
+      lift (h ∘C (g ∘C f))
+        ≡⟨ cong lift (assoc C) ⟩
+      lift ((h ∘C g) ∘C f)
+        ≡⟨ sym shiftL ⟩
+      lift (h ∘C g) ∘L lift f 
+        ≡⟨ cong (λ X → X ∘L lift f) (sym shiftL) ⟩
+      (lift h ∘L lift g) ∘L lift f ∎
+
+-------------------------------------------------------------------------------
+-- Product of Categories
+-------------------------------------------------------------------------------
 productCategory : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} → Category {ℓC₀} {ℓC₁} → Category {ℓD₀} {ℓD₁} → Category
 productCategory {ℓC₀} {ℓC₁} {ℓD₀} {ℓD₁} C D = record
   { Obj = ObjP
