@@ -17,6 +17,9 @@ open import Theory.Category
 
 open Category hiding ( id )
 
+-------------------------------------------------------------------------------
+-- Definition of a Functor
+-------------------------------------------------------------------------------
 record Functor {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} (C : Category {ℓC₀} {ℓC₁}) (D : Category {ℓD₀} {ℓD₁}) : Set (ℓC₀ ⊔ ℓC₁ ⊔ ℓD₀ ⊔ ℓD₁) where
   constructor functor
   field
@@ -36,6 +39,9 @@ record Functor {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} (C : Category {ℓC₀}
       → (F : Functor C D) → ( Hom C a b → Hom D ([ F ]₀ a) ([ F ]₀ b) )
 [_]₁_ F f = Functor.F₁ F f
 
+-------------------------------------------------------------------------------
+-- The Identity Functor
+-------------------------------------------------------------------------------
 idFunctor : {ℓ₀ ℓ₁ : Level} (C : Category {ℓ₀} {ℓ₁}) → Functor C C
 idFunctor C = record 
   { F₀ = idF 
@@ -47,6 +53,9 @@ idFunctor C = record
 Id[_] : {ℓC₀ ℓC₁ : Level} → (C : Category {ℓC₀} {ℓC₁}) → Functor C C
 Id[ C ] = idFunctor C
 
+-------------------------------------------------------------------------------
+-- Composition of Functors
+-------------------------------------------------------------------------------
 compFunctor : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓE₀ ℓE₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} {E : Category {ℓE₀} {ℓE₁}}
             → Functor C D → Functor D E → Functor C E
 compFunctor {C = C} {D = D} {E = E} F G = record 
@@ -68,12 +77,35 @@ compFunctor {C = C} {D = D} {E = E} F G = record
          → F₁ (_∘_ C g f) ≡ _∘_ E (F₁ g) (F₁ f)
     dist = trans (cong (λ X → Functor.F₁ G X) (Functor.dist F)) (Functor.dist G)
 
-[_]∘[_] : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓE₀ ℓE₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} {E : Category {ℓE₀} {ℓE₁}}
-        → Functor D E → Functor C D → Functor C E
-[ G ]∘[ F ] = compFunctor F G
+[_]∘[_] = compFunctor
 
+-------------------------------------------------------------------------------
+-- Product of Functors
+-------------------------------------------------------------------------------
 open Category
 
+productFunctor : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓE₀ ℓE₁ ℓK₀ ℓK₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} {E : Category {ℓE₀} {ℓE₁}} {K : Category {ℓK₀} {ℓK₁}}
+               → Functor C D → Functor E K → Functor (C ×C E) (D ×C K)
+productFunctor {C = C} {D} {E} {K} F G = record 
+  { F₀ = P₀ 
+  ; F₁ = P₁ 
+  ; id = cong₂ (λ X Y → X , Y) (Functor.id F) (Functor.id G)
+  ; dist = cong₂ (λ X Y → X , Y) (Functor.dist F) (Functor.dist G)
+  } where
+    C×E = C ×C E
+    D×K = D ×C K
+    
+    P₀ : Obj C×E → Obj D×K
+    P₀ (ca , ea) = [ F ]₀ ca , [ G ]₀ ea 
+    
+    P₁ : {a b : Obj C×E} → Hom C×E a b → Hom D×K (P₀ a) (P₀ b)
+    P₁ (f , g) = [ F ]₁ f , [ G ]₁ g
+    
+[_]×[_] = productFunctor
+
+-------------------------------------------------------------------------------
+-- Propositional Equality of Functors
+-------------------------------------------------------------------------------
 propEqFunctor : {Cℓ₀ Cℓ₁ Dℓ₀ Dℓ₁ : Level} {C : Category {Cℓ₀} {Cℓ₁}} {D : Category {Dℓ₀} {Dℓ₁}} 
               → {F₀ G₀ : Obj C → Obj D}
               → {F₁ : (a b : Obj C) → Hom C a b → Hom D (F₀ a) (F₀ b)}
