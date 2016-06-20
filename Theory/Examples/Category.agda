@@ -1,5 +1,5 @@
 
-module Theory.Category.Examples where 
+module Theory.Examples.Category where 
 
 -- Stdlib
 open import Level renaming ( suc to lsuc ; zero to lzero )
