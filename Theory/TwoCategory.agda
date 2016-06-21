@@ -11,6 +11,7 @@ open import Data.Empty
 open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning
 
+-- Local
 open import Theory.Category
 open import Theory.Functor
 open import Theory.NaturalTransformation
