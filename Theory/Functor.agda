@@ -104,6 +104,51 @@ productFunctor {C = C} {D} {E} {K} F G = record
 [_]×[_] = productFunctor
 
 -------------------------------------------------------------------------------
+-- Constant Functor
+-------------------------------------------------------------------------------
+constFunctor : {ℓC₀ ℓC₁ : Level} → (C : Category {ℓC₀} {ℓC₁}) → (c : Obj C) → Functor ⊤-Cat C
+constFunctor C c = record
+  { F₀ = F₀
+  ; F₁ = F₁
+  ; id = refl
+  ; dist = sym (Category.idL C)
+  } where
+    F₀ : Obj ⊤-Cat → Obj C
+    F₀ tt = c
+    
+    F₁ : {a b : Obj ⊤-Cat} → Hom ⊤-Cat a b → Hom C (F₀ a) (F₀ b)
+    F₁ {a = tt} {b = tt} tt = Category.id C {c}
+    
+-------------------------------------------------------------------------------
+-- Left and right extensions of a Functors result
+-------------------------------------------------------------------------------
+leftExtendFunctor 
+  : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓE₀ ℓE₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} 
+  → (E : Category {ℓE₀} {ℓE₁}) → Obj E → Functor C D → Functor C (E ×C D)
+leftExtendFunctor E e F = record
+  { F₀ = λ c → e , [ F ]₀ c
+  ; F₁ = λ f → id E {e} , [ F ]₁ f
+  ; id = cong₂ _,_ refl (Functor.id F)
+  ; dist = cong₂ _,_ (sym (Category.idL E)) (Functor.dist F)
+  }
+
+-- ▷ = \rhd
+[_,_▷_] = leftExtendFunctor
+
+rightExtendFunctor 
+  : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓE₀ ℓE₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}}
+  → Functor C D → (E : Category {ℓE₀} {ℓE₁}) → Obj E → Functor C (D ×C E)
+rightExtendFunctor F E e = record
+  { F₀ = λ c → [ F ]₀ c , e
+  ; F₁ = λ f → [ F ]₁ f , id E {e}
+  ; id = cong₂ _,_ (Functor.id F) refl
+  ; dist = cong₂ _,_ (Functor.dist F) (sym (Category.idR E))
+  }
+
+-- ◁ = \lhd
+[_◁_,_] = rightExtendFunctor
+
+-------------------------------------------------------------------------------
 -- Propositional Equality of Functors
 -------------------------------------------------------------------------------
 propEqFunctor : {Cℓ₀ Cℓ₁ Dℓ₀ Dℓ₁ : Level} {C : Category {Cℓ₀} {Cℓ₁}} {D : Category {Dℓ₀} {Dℓ₁}} 
