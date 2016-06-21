@@ -96,7 +96,7 @@ only-cat-theory:
 	$(AGDA_TC) Theory/RelativeMonad.agda
 	$(AGDA_TC) Theory/Monoid.agda
 	$(AGDA_TC) Theory/Preorder.agda
-	#$(AGDA_TC) Theory/TwoCategory.agda
+	$(AGDA_TC) Theory/TwoCategory.agda
 	$(AGDA_TC) Theory/Examples/Category.agda
 	$(AGDA_TC) Theory/Examples/Functor.agda
 
