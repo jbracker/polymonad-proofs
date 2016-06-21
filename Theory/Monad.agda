@@ -19,8 +19,8 @@ open Category
 
 record Monad {ℓC₀ ℓC₁ : Level} {C : Category {ℓC₀} {ℓC₁}} (M : Functor C C) : Set (ℓC₀ ⊔ ℓC₁) where
   field
-    η : NaturalTransformation Id[ C ]     M
-    μ : NaturalTransformation [ M ]∘[ M ] M
+    η : NaturalTransformation _≡_ Id[ C ]     M
+    μ : NaturalTransformation _≡_ [ M ]∘[ M ] M
     
     μCoher : {x : Obj C}
            → _∘_ C (η⟨ μ ⟩ x) ([ M ]₁ (η⟨ μ ⟩ x)) ≡ _∘_ C (η⟨ μ ⟩ x) (η⟨ μ ⟩ ([ M ]₀ x))

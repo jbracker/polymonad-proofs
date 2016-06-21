@@ -179,13 +179,13 @@ KleisliTriple→Monad {C = C} {T = T} km = record
     ηCoherR : {x : Obj C} → μ x ∘ (η ([ TF ]₀ x)) ≡ η⟨ Id⟨ TF ⟩ ⟩ x
     ηCoherR {x = x} = KleisliTriple.idR km
     
-    μNatTrans : NaturalTransformation [ TF ]∘[ TF ] TF
+    μNatTrans : NaturalTransformation _≡_ [ TF ]∘[ TF ] TF
     μNatTrans = record 
       { η = μ 
       ; natural = μNatural
       }
     
-    ηNatTrans : NaturalTransformation Id[ C ] TF
+    ηNatTrans : NaturalTransformation _≡_ Id[ C ] TF
     ηNatTrans = record 
       { η = η 
       ; natural = ηNatural
