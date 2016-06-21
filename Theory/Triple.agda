@@ -15,12 +15,12 @@ record Triple {ℓ₀ ℓ₁ ℓ₂ : Level} (A : Set ℓ₀) (B : Set ℓ₁) (
 -- A nice way to write the triple type
 _×_×_ = Triple
 
--- Split the triple on the left side to compose it out of standard tuples/products
-splitL : {ℓ₀ ℓ₁ ℓ₂ : Level} {A : Set ℓ₀} {B : Set ℓ₁} {C : Set ℓ₂} 
+-- Associate the triple to the right with standard tuples/products
+assocTripleR : {ℓ₀ ℓ₁ ℓ₂ : Level} {A : Set ℓ₀} {B : Set ℓ₁} {C : Set ℓ₂} 
        → A × B × C → A ×' (B ×' C)
-splitL (a , b , c) = a ,' (b ,' c)
+assocTripleR (a , b , c) = a ,' (b ,' c)
 
--- Split the triple on the right side to compuse it out of standard tuples/products
-splitR : {ℓ₀ ℓ₁ ℓ₂ : Level} {A : Set ℓ₀} {B : Set ℓ₁} {C : Set ℓ₂} 
+-- Associate the triple to the left with standard tuples/products
+assocTripleL : {ℓ₀ ℓ₁ ℓ₂ : Level} {A : Set ℓ₀} {B : Set ℓ₁} {C : Set ℓ₂} 
        → A × B × C → (A ×' B) ×' C
-splitR (a , b , c) = (a ,' b) ,' c
+assocTripleL (a , b , c) = (a ,' b) ,' c

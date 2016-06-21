@@ -25,36 +25,22 @@ leftAssocTriFunctor
   → {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} {E : Category {ℓE₀} {ℓE₁}} 
   → Functor (C ×C D ×C E) ((C ×C D) ×C E)
 leftAssocTriFunctor {C = C} {D} {E} = record 
-  { F₀ = F₀
-  ; F₁ = F₁ 
+  { F₀ = assocTripleL
+  ; F₁ = assocTripleL
   ; id = refl
   ; dist = refl
-  } where
-    open Category
-    
-    F₀ : Obj (C ×C D ×C E) → Obj ((C ×C D) ×C E)
-    F₀ (c , d , e) = (c ,' d) ,' e
-
-    F₁ : {a b : Obj (C ×C D ×C E)} → Hom (C ×C D ×C E) a b → Hom ((C ×C D) ×C E) (F₀ a) (F₀ b)
-    F₁ (c , d , e) = (c ,' d) ,' e
+  }
 
 rightAssocTriFunctor 
   : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓE₀ ℓE₁ : Level} 
   → {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} {E : Category {ℓE₀} {ℓE₁}} 
   → Functor (C ×C D ×C E) (C ×C (D ×C E))
 rightAssocTriFunctor {C = C} {D} {E} = record 
-  { F₀ = F₀
-  ; F₁ = F₁ 
+  { F₀ = assocTripleR
+  ; F₁ = assocTripleR
   ; id = refl
   ; dist = refl
-  } where
-    open Category
-    
-    F₀ : Obj (C ×C D ×C E) → Obj (C ×C (D ×C E))
-    F₀ (c , d , e) = c ,' (d ,' e)
-
-    F₁ : {a b : Obj (C ×C D ×C E)} → Hom (C ×C D ×C E) a b → Hom ( C ×C (D ×C E)) (F₀ a) (F₀ b)
-    F₁ (c , d , e) = c ,' (d ,' e)
+  }
 
 A×B×C→[A×B]×C = leftAssocTriFunctor
 A×B×C→A×[B×C] = rightAssocTriFunctor
