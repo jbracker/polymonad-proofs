@@ -22,8 +22,8 @@ counterexample : ∀ {k l} {A : Set k} {P : A → Set l}
 counterexample ce P = let a , ¬Pa = ce P in ¬Pa (P a)
 
 -- Congruence with three arguments.
-cong₃ : ∀ {a b c d} {A : Set a} {B : Set b} {C : Set c}
-        (f : A → B → C → Set d) {x y u v r s} 
+cong₃ : ∀ {a b c d} {A : Set a} {B : Set b} {C : Set c} {D : Set d}
+        (f : A → B → C → D) {x y u v r s} 
       → x ≡ y → u ≡ v → r ≡ s 
       → f x u r ≡ f y v s
 cong₃ f refl refl refl = refl
