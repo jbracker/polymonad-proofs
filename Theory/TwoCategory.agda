@@ -22,28 +22,35 @@ open import Theory.Examples.Functor
 -------------------------------------------------------------------------------
 open Category hiding ( idL ; idR ; assoc ) renaming ( id to idC )
 
-record TwoCategory {ℓ₀ ℓ₁ ℓ₂ : Level} : Set (lsuc (ℓ₀ ⊔ ℓ₁ ⊔ ℓ₂)) where
+record StrictTwoCategory {ℓ₀ ℓ₁ ℓ₂ : Level} : Set (lsuc (ℓ₀ ⊔ ℓ₁ ⊔ ℓ₂)) where
   field
     Cell₀ : Set ℓ₀
-    Cell₁ : Cell₀ → Cell₀ → Category {ℓ₁} {ℓ₂}
+    HomCat : Cell₀ → Cell₀ → Category {ℓ₁} {ℓ₂}
 
     --                       (b c × a b ↦ a c)
-    comp : {a b c : Cell₀} → Functor (Cell₁ b c ×C Cell₁ a b) (Cell₁ a c) 
-    id   : {a : Cell₀} → Obj (Cell₁ a a)
+    comp : {a b c : Cell₀} → Functor (HomCat b c ×C HomCat a b) (HomCat a c) 
+    id   : {a : Cell₀} → Obj (HomCat a a)
     
     idL : {a b : Cell₀} 
         -- (a b × a a ↦ a b)  ∘  (a b ↦ a b × a a)
-        → [ comp {a} {a} {b} ]∘[ [ Id[ Cell₁ a b ] ◁ Cell₁ a a , id {a} ] ]
+        → [ comp {a} {a} {b} ]∘[ [ Id[ HomCat a b ] ◁ HomCat a a , id {a} ] ]
         -- (a b ↦ a b) 
-        ≡ Id[ Cell₁ a b ]
+        ≡ Id[ HomCat a b ]
     idR : {a b : Cell₀}
         -- (b b × a b ↦ a b)  ∘  (a b ↦ b b × a b)
-        → [ comp {a} {b} {b} ]∘[ [ Cell₁ b b , id {b} ▷ Id[ Cell₁ a b ] ] ] 
+        → [ comp {a} {b} {b} ]∘[ [ HomCat b b , id {b} ▷ Id[ HomCat a b ] ] ] 
         -- (a b ↦ a b)
-        ≡ Id[ Cell₁ a b ]
+        ≡ Id[ HomCat a b ]
     
     assoc : {a b c d : Cell₀}
           -- (c d × a c → a d)  ∘  (c d × (b c × a c) ↦ c d × a c)             ∘ (c d × b c × a b ↦ c d × (b c × a b))
-          → [ comp {a} {c} {d} ]∘[ [ [ Id[ Cell₁ c d ] ]×[ comp {a} {b} {c} ] ]∘[ A×B×C→A×[B×C] ] ] 
+          → [ comp {a} {c} {d} ]∘[ [ [ Id[ HomCat c d ] ]×[ comp {a} {b} {c} ] ]∘[ A×B×C→A×[B×C] ] ] 
           -- (b d × a b ↦ a d)  ∘  ((c d × b c) × a b ↦ b d × a b)             ∘ (c d × b c × a b ↦ (c d × b c) × a b)
-          ≡ [ comp {a} {b} {d} ]∘[ [ [ comp {b} {c} {d} ]×[ Id[ Cell₁ a b ] ] ]∘[ A×B×C→[A×B]×C ] ]
+          ≡ [ comp {a} {b} {d} ]∘[ [ [ comp {b} {c} {d} ]×[ Id[ HomCat a b ] ] ]∘[ A×B×C→[A×B]×C ] ]
+
+  Cell₁ : Cell₀ → Cell₀ → Set ℓ₁
+  Cell₁ a b = Obj (HomCat a b)
+  
+  Cell₂ : {a b : Cell₀} → (f g : Cell₁ a b) → Set ℓ₂
+  Cell₂ {a} {b} f g = Hom (HomCat a b) f g
+

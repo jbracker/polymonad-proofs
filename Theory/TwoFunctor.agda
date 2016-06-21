@@ -22,17 +22,19 @@ open import Theory.TwoCategory
 -- Definition of 2-Functors
 -------------------------------------------------------------------------------
 open Category hiding ( idL ; idR ; assoc ) renaming ( id to idC )
-open TwoCategory renaming ( id to id2C ; comp to comp2C )
+open StrictTwoCategory renaming ( id to id2C ; comp to comp2C )
 
-record TwoFunctor {ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓD₂ : Level} (C : Category {ℓC₀} {ℓC₁}) (D : TwoCategory {ℓD₀} {ℓD₁} {ℓD₂}) : Set (lsuc (ℓC₀ ⊔ ℓC₁ ⊔ ℓD₀ ⊔ ℓD₁ ⊔ ℓD₂)) where
+record LaxTwoFunctor {ℓC₀ ℓC₁ ℓC₂ ℓD₀ ℓD₁ ℓD₂ : Level} (C : StrictTwoCategory {ℓC₀} {ℓC₁} {ℓC₂}) (D : StrictTwoCategory {ℓD₀} {ℓD₁} {ℓD₂}) 
+  : Set (lsuc (ℓC₀ ⊔ ℓC₁ ⊔ ℓC₂ ⊔ ℓD₀ ⊔ ℓD₁ ⊔ ℓD₂)) where
   field
-    F₀ : Obj C → Cell₀ D
-    F₁ : {a b : Obj C} → Hom C a b → Functor (Cell₁ D (F₀ a) (F₀ a)) (Cell₁ D (F₀ b) (F₀ b))
+    F₀ : Cell₀ C → Cell₀ D
+    F₁ : {a b : Cell₀ C} → Functor (HomCat C a b) (HomCat D (F₀ a) (F₀ b))
     
-    id : {a : Obj C}
+    id : {a : Cell₀ C}
+       → {fd : Cell₁ D (F₀ a) (F₀ a)} {fc : Cell₁ C a a}
        -- (a a ↦ a a) ∼ (F₁ (a → a))
-       → NaturalTransformation _≡_ Id[ Cell₁ D (F₀ a) (F₀ a) ] (F₁ (idC C {a}))
+       → Cell₂ D fd ([ F₁ ]₀ fc)
 
-    comp : {a b c : Obj C} {f : Hom C a b} {g : Hom C b c}
+    comp : {a b c : Cell₀ C}
          -- (F₁ g ∘ F₁ f) ∼ F₁ (g ∘ f)
-         → NaturalTransformation _≡_ [ F₁ g ]∘[ F₁ f ] (F₁ (_∘_ C g f))
+         → NaturalTransformation _≡_ [ F₁ {a} {b} ]∘[ F₁ {a} {b} ] (F₁ {a} {b})
