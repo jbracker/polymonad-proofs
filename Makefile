@@ -86,6 +86,7 @@ only-supermonads: only-base
 	# $(AGDA_TC) Supermonad/Polymonad.agda
 
 only-cat-theory:
+	$(AGDA_TC) Theory/Triple.agda
 	$(AGDA_TC) Theory/ProofIrrelevance.agda
 	$(AGDA_TC) Theory/Category.agda
 	$(AGDA_TC) Theory/Functor.agda
