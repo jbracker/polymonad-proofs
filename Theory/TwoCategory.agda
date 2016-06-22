@@ -53,4 +53,21 @@ record StrictTwoCategory {ℓ₀ ℓ₁ ℓ₂ : Level} : Set (lsuc (ℓ₀ ⊔ 
   
   Cell₂ : {a b : Cell₀} → (f g : Cell₁ a b) → Set ℓ₂
   Cell₂ {a} {b} f g = Hom (HomCat a b) f g
+  
+  -- Horizontal composition
+  _∘ₕ_ : {a b c : Cell₀} → Cell₁ b c → Cell₁ a b → Cell₁ a c
+  _∘ₕ_ f g = [ comp ]₀ (f , g)
 
+  -- Vertical composition
+  _∘ᵥ_ : {a b : Cell₀} {f g h : Cell₁ a b} → Cell₂ g h → Cell₂ f g → Cell₂ f h
+  _∘ᵥ_ {a = a} {b = b} η θ = Category._∘_ (HomCat a b) η θ
+  
+  -- Right whiskering
+  _▷_ : {a b c : Cell₀} {f g : Cell₁ a b} 
+      → (h : Cell₁ b c) → Cell₂ f g → Cell₂ (h ∘ₕ f) (h ∘ₕ g)
+  _▷_ {b = b} {c = c} h η = [ comp ]₁ (Category.id (HomCat b c) , η)
+
+  -- Left whiskering
+  _◁_ : {a b c : Cell₀} {f g : Cell₁ b c} 
+      → (h : Cell₁ a b) → Cell₂ f g → Cell₂ (f ∘ₕ h) (g ∘ₕ h)
+  _◁_ {a = a} {b = b} h η = [ comp ]₁ (η , Category.id (HomCat a b))
