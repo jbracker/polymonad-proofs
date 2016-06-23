@@ -133,7 +133,7 @@ leftExtendFunctor E e F = record
   }
 
 -- ▷ = \rhd
-[_,_▷_] = leftExtendFunctor
+[_,_]▷[_] = leftExtendFunctor
 
 rightExtendFunctor 
   : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓE₀ ℓE₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}}
@@ -146,7 +146,7 @@ rightExtendFunctor F E e = record
   }
 
 -- ◁ = \lhd
-[_◁_,_] = rightExtendFunctor
+[_]◁[_,_] = rightExtendFunctor
 
 -------------------------------------------------------------------------------
 -- Propositional Equality of Functors
