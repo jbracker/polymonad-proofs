@@ -22,7 +22,7 @@ open import Theory.TwoCategory
 -- Definition of 2-Functors
 -------------------------------------------------------------------------------
 open Category hiding ( idL ; idR ; assoc ) renaming ( id to idC )
-open StrictTwoCategory renaming ( id to id2C ; comp to comp2C )
+open StrictTwoCategory
 
 record LaxTwoFunctor {ℓC₀ ℓC₁ ℓC₂ ℓD₀ ℓD₁ ℓD₂ : Level} 
                      (C : StrictTwoCategory {ℓC₀} {ℓC₁} {ℓC₂}) 
@@ -34,18 +34,15 @@ record LaxTwoFunctor {ℓC₀ ℓC₁ ℓC₂ ℓD₀ ℓD₁ ℓD₂ : Level}
 
     _∘Dᵥ_ = _∘ᵥ_ D
     _∘Cᵥ_ = _∘ᵥ_ C
+
   field
     F₀ : Cell₀ C → Cell₀ D
     F₁ : {a b : Cell₀ C} → Functor (HomCat C a b) (HomCat D (F₀ a) (F₀ b))
     
     η : {a : Cell₀ C}
-       → {fd : Cell₁ D (F₀ a) (F₀ a)} {fc : Cell₁ C a a}
-       -- (a a ↦ a a) ∼ (F₁ (a → a))
-       → Cell₂ D fd ([ F₁ ]₀ fc)
+      → Cell₂ D (id₁ D {F₀ a}) ([ F₁ ]₀ (id₁ C {a}))
 
     μ : {a b c : Cell₀ C} {f : Cell₁ C a b} {g : Cell₁ C b c }
          -- (F₁ g ∘ F₁ f) ∼ F₁ (g ∘ f)
          → Cell₂ D ([ F₁ ]₀ g  ∘Dₕ  [ F₁ ]₀ f) ([ F₁ ]₀ (g ∘Cₕ f))
-    
-    id : {a b : Cell₀ C} {f : Cell₁ C a b} → {!!} ≡ Cell₂ D {!!} {![ F₁ ]₀ f!}
     
