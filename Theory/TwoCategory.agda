@@ -71,3 +71,6 @@ record StrictTwoCategory {ℓ₀ ℓ₁ ℓ₂ : Level} : Set (lsuc (ℓ₀ ⊔ 
   _◁_ : {a b c : Cell₀} {f g : Cell₁ b c} 
       → (h : Cell₁ a b) → Cell₂ f g → Cell₂ (f ∘ₕ h) (g ∘ₕ h)
   _◁_ {a = a} {b = b} h η = [ comp ]₁ (η , Category.id (HomCat a b))
+  
+  id→functor : {a : Cell₀} → Functor ⊤-Cat (HomCat a a)
+  id→functor {a} = constFunctor (HomCat a a) (id {a})
