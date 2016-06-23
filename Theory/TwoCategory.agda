@@ -29,16 +29,16 @@ record StrictTwoCategory {ℓ₀ ℓ₁ ℓ₂ : Level} : Set (lsuc (ℓ₀ ⊔ 
 
     --                       (b c × a b ↦ a c)
     comp : {a b c : Cell₀} → Functor (HomCat b c ×C HomCat a b) (HomCat a c) 
-    id   : {a : Cell₀} → Obj (HomCat a a)
+    id₁  : {a : Cell₀} → Obj (HomCat a a)
     
     idL : {a b : Cell₀} 
         -- (a b × a a ↦ a b)  ∘  (a b ↦ a b × a a)
-        → [ comp {a} {a} {b} ]∘[ [ Id[ HomCat a b ] ◁ HomCat a a , id {a} ] ]
+        → [ comp {a} {a} {b} ]∘[ [ Id[ HomCat a b ] ◁ HomCat a a , id₁ {a} ] ]
         -- (a b ↦ a b) 
         ≡ Id[ HomCat a b ]
     idR : {a b : Cell₀}
         -- (b b × a b ↦ a b)  ∘  (a b ↦ b b × a b)
-        → [ comp {a} {b} {b} ]∘[ [ HomCat b b , id {b} ▷ Id[ HomCat a b ] ] ] 
+        → [ comp {a} {b} {b} ]∘[ [ HomCat b b , id₁ {b} ▷ Id[ HomCat a b ] ] ] 
         -- (a b ↦ a b)
         ≡ Id[ HomCat a b ]
     
@@ -74,7 +74,7 @@ record StrictTwoCategory {ℓ₀ ℓ₁ ℓ₂ : Level} : Set (lsuc (ℓ₀ ⊔ 
   
   -- The functor designated by id
   id→functor : {a : Cell₀} → Functor ⊤-Cat (HomCat a a)
-  id→functor {a} = constFunctor (HomCat a a) (id {a})
+  id→functor {a} = constFunctor (HomCat a a) (id₁ {a})
   
-  id₂ : {a : Cell₀} → Cell₂ (id {a}) (id {a})
-  id₂ {a} = Category.id (HomCat a a)
+  id₂ : {a b : Cell₀} {f : Cell₁ a b} → Cell₂ f f
+  id₂ {a} {b} = Category.id (HomCat a b)
