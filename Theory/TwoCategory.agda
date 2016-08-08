@@ -21,6 +21,7 @@ open import Theory.Examples.Functor
 -------------------------------------------------------------------------------
 -- Definition of 2-Categories
 -------------------------------------------------------------------------------
+
 open Category hiding ( idL ; idR ; assoc ) renaming ( id to idC )
 
 record StrictTwoCategory {ℓ₀ ℓ₁ ℓ₂ : Level} : Set (lsuc (ℓ₀ ⊔ ℓ₁ ⊔ ℓ₂)) where
@@ -260,3 +261,60 @@ record StrictTwoCategory {ℓ₀ ℓ₁ ℓ₂ : Level} : Set (lsuc (ℓ₀ ⊔ 
      → (f : Cell₁ a b) (g : Cell₁ b c) (h : Cell₁ c d)
      → Cell₂ ((h ∘ₕ g) ∘ₕ f) (h ∘ₕ (g ∘ₕ f)) 
   α' f g h = associatorInv {f = f} {g} {h}
+
+-------------------------------------------------------------------------------
+-- Creating a Strict 2-Category from a Category.
+-------------------------------------------------------------------------------
+
+Category→StrictTwoCategory : ∀ {ℓ₀ ℓ₁} → Category {ℓ₀} {ℓ₁} → StrictTwoCategory {ℓ₀} {ℓ₁} {lzero}
+Category→StrictTwoCategory {ℓ₀} {ℓ₁} C = record
+  { Cell₀ = Cell₀
+  ; HomCat = HomCat
+  ; comp = comp
+  ; id₁ = id₁
+  ; horizontalIdR₁ = Category.idR C
+  ; horizontalIdR₂ = refl
+  ; horizontalIdL₁ = Category.idL C
+  ; horizontalIdL₂ = refl
+  ; horizontalAssoc₁ = Category.assoc C
+  ; horizontalAssoc₂ = refl
+  ; whiskerCoher1' = refl
+  ; whiskerCoher2' = refl
+  ; whiskerCoher3' = refl
+  ; whiskerCoher4' = refl
+  } where
+    ℓ₂ = lzero
+    _∘C_ = _∘_ C
+    
+    Cell₀ = Obj C
+    
+    HomCat : Cell₀ → Cell₀ → Category {ℓ₁} {ℓ₂}
+    HomCat a b = record
+      { Obj = Hom C a b
+      ; Hom = λ f g → ⊤
+      ; _∘_ = λ tt tt → tt
+      ; id = tt
+      ; assoc = refl
+      ; idL = refl
+      ; idR = refl
+      }
+    
+    comp : {a b c : Cell₀} 
+         → Functor (HomCat b c ×C HomCat a b) (HomCat a c)
+    comp {a} {b} {c} = record 
+      { F₀ = F₀
+      ; F₁ = λ {x} {y} → F₁ {x} {y}
+      ; id = refl
+      ; dist = refl
+      } where
+          F₀ : Obj (HomCat b c ×C HomCat a b) → Obj (HomCat a c)
+          F₀ (g , f) = g ∘C f
+          
+          F₁ : {x y : Obj (HomCat b c ×C HomCat a b)} 
+             → Hom (HomCat b c ×C HomCat a b) x y → Hom (HomCat a c) (F₀ x) (F₀ y)
+          F₁ f = tt
+    
+    id₁ : {a : Cell₀} → Obj (HomCat a a)
+    id₁ = idC C
+    
+    
