@@ -316,5 +316,14 @@ Category→StrictTwoCategory {ℓ₀} {ℓ₁} C = record
     
     id₁ : {a : Cell₀} → Obj (HomCat a a)
     id₁ = idC C
-    
-    
+
+StrictTwoCategory→Category : ∀ {ℓ₀ ℓ₁ ℓ₂} → StrictTwoCategory {ℓ₀} {ℓ₁} {ℓ₂} → Category {ℓ₀} {ℓ₁}
+StrictTwoCategory→Category TwoCat = record
+  { Obj = StrictTwoCategory.Cell₀ TwoCat
+  ; Hom = StrictTwoCategory.Cell₁ TwoCat
+  ; _∘_ = λ f g → [ StrictTwoCategory.comp TwoCat ]₀ (f , g)
+  ; id = StrictTwoCategory.id₁ TwoCat
+  ; assoc = StrictTwoCategory.horizontalAssoc₁ TwoCat
+  ; idL = StrictTwoCategory.horizontalIdL₁ TwoCat
+  ; idR = StrictTwoCategory.horizontalIdR₁ TwoCat
+  } 
