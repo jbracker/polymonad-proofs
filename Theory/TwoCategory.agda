@@ -54,7 +54,8 @@ record StrictTwoCategory {ℓ₀ ℓ₁ ℓ₂ : Level} : Set (lsuc (ℓ₀ ⊔ 
                      → ([ comp ]₁ (η , [ comp ]₁ (θ , ι))) ≡ subst₂ (Hom (HomCat a d)) (sym horizontalAssoc₁) (sym horizontalAssoc₁) ([ comp ]₁ ([ comp ]₁ (η , θ) , ι))
     
     whiskerCoher1' : {a b c d : Cell₀} {f : Obj (HomCat a b)} {g : Obj (HomCat b c)} {h i : Obj (HomCat c d)} {η : Hom (HomCat c d) h i}
-                   → [ comp ]₁ (η , idC (HomCat a c)) ≡ subst₂ (Hom (HomCat a d)) (sym (horizontalAssoc₁ {f = f} {g = g})) (sym horizontalAssoc₁) ([ comp ]₁ ([ comp ]₁ (η , idC (HomCat b c)) , idC (HomCat a b)))
+                   → [ comp ]₁ (η , idC (HomCat a c)) 
+                   ≡ subst₂ (Hom (HomCat a d)) (sym (horizontalAssoc₁ {f = f} {g = g})) (sym horizontalAssoc₁) ([ comp ]₁ ([ comp ]₁ (η , idC (HomCat b c)) , idC (HomCat a b)))
     
     whiskerCoher2' : {a b c d : Cell₀} {f : Obj (HomCat a b)} {g h : Obj (HomCat b c)} {i : Obj (HomCat c d)} {η : Hom (HomCat b c) g h} 
                    → Functor.F₁ comp {a = i , [ comp ]₀ (g , f)} (idC (HomCat c d) , (Functor.F₁ comp {a = g , f} (η , idC (HomCat a b)))) 
@@ -128,7 +129,8 @@ record StrictTwoCategory {ℓ₀ ℓ₁ ℓ₂ : Level} : Set (lsuc (ℓ₀ ⊔ 
         → id₂ {b} {b} ∘ₕ₂ η ≡ subst₂ Cell₂ (sym hIdR₁) (sym hIdR₁) η
   hIdR₂ = horizontalIdL₂
   
-  hAssoc₁ : {a b c d : Cell₀} {f : Cell₁ a b} {g : Cell₁ b c} {h : Cell₁ c d} → h ∘ₕ (g ∘ₕ f) ≡ (h ∘ₕ g) ∘ₕ f
+  hAssoc₁ : {a b c d : Cell₀} {f : Cell₁ a b} {g : Cell₁ b c} {h : Cell₁ c d} 
+          → h ∘ₕ (g ∘ₕ f) ≡ (h ∘ₕ g) ∘ₕ f
   hAssoc₁ = horizontalAssoc₁
 
   hAssoc₂ : {a b c d : Cell₀} {f f' : Cell₁ a b} {g g' : Cell₁ b c} {h h' : Cell₁ c d}
@@ -153,27 +155,13 @@ record StrictTwoCategory {ℓ₀ ℓ₁ ℓ₂ : Level} : Set (lsuc (ℓ₀ ⊔ 
   whiskerLeftDist : {a b c : Cell₀} {f : Cell₁ a b} {g h i : Cell₁ b c} {η : Cell₂ g h} {θ : Cell₂ h i}
                   → (θ ◁ f) ∘ᵥ (η ◁ f) ≡ (θ ∘ᵥ η) ◁ f
   whiskerLeftDist {a} {b} {c} {f} {η = η} {θ} = 
-    let id' : Cell₂ f f
-        id' = Category.id (HomCat a b)
-        _∘ab_ = Category._∘_ (HomCat a b)
-        _∘ac_ = Category._∘_ (HomCat a c)
-        _∘bc_ = Category._∘_ (HomCat b c)
-    in begin
-    (θ ◁ f) ∘ᵥ (η ◁ f) 
-      ≡⟨ refl ⟩
-    ([ comp ]₁ (θ , id')) ∘ac ([ comp ]₁ (η , id'))
-      ≡⟨ sym (Functor.dist comp) ⟩
-    [ comp ]₁ (θ ∘bc η , id' ∘ab id')
-      ≡⟨ cong (λ X → [ comp ]₁ (θ ∘bc η , X)) vIdL ⟩
-    [ comp ]₁ (θ ∘bc η , id')
-      ≡⟨ refl ⟩
-    (θ ∘ᵥ η) ◁ f ∎
+    let _∘bc_ = Category._∘_ (HomCat b c)
+    in trans (sym (Functor.dist comp)) (cong (λ X → [ comp ]₁ (θ ∘bc η , X)) vIdL)
 
   whiskerRightDist : {a b c : Cell₀} {f g h : Cell₁ a b} {i : Cell₁ b c} {η : Cell₂ f g} {θ : Cell₂ g h}
                    → (i ▷ θ) ∘ᵥ (i ▷ η) ≡ i ▷ (θ ∘ᵥ η)
   whiskerRightDist {a} {b} {c} {η = η} {θ} = 
     let _∘ab_ = Category._∘_ (HomCat a b)
-    -- Similar as in 'whiskerLeftDist'
     in trans (sym (Functor.dist comp)) (cong (λ X → [ comp ]₁ (X , θ ∘ab η)) vIdL)
   
   
@@ -194,59 +182,70 @@ record StrictTwoCategory {ℓ₀ ℓ₁ ℓ₂ : Level} : Set (lsuc (ℓ₀ ⊔ 
   whiskerCoher4 = whiskerCoher4'
 
   -- Unitors
-  lunitor : {a b : Cell₀} {f : Cell₁ a b} → Cell₂ (f ∘ₕ id₁) f
-  lunitor {a} {b} {f} = subst (λ X → Cell₂ X f) (sym hIdL₁) (id₂ {a} {b} {f})
-  
-  lunitor' : {a b : Cell₀} {f : Cell₁ a b} → Cell₂ f (f ∘ₕ id₁)
-  lunitor' {a} {b} {f} = subst (λ X → Cell₂ f X) (sym hIdL₁) (id₂ {a} {b} {f})
+  lUnitor : {a b : Cell₀} {f : Cell₁ a b} → Cell₂ (f ∘ₕ id₁) f
+  lUnitor {a} {b} {f} = subst₂ Cell₂ (sym hIdL₁) refl id₂ 
 
+  lUnitorInv : {a b : Cell₀} {f : Cell₁ a b} → Cell₂ f (f ∘ₕ id₁)
+  lUnitorInv {a} {b} {f} = subst₂ Cell₂ refl (sym hIdL₁) id₂
+  
   λ' : {a b : Cell₀} → (f : Cell₁ a b) → Cell₂ (f ∘ₕ id₁) f
-  λ' f = lunitor {f = f}
+  λ' f = lUnitor {f = f}
   
   λ'' : {a b : Cell₀} (f : Cell₁ a b) → Cell₂ f (f ∘ₕ id₁)
-  λ'' f = lunitor' {f = f}
+  λ'' f = lUnitorInv {f = f}
   
-  runitor : {a b : Cell₀} {f : Cell₁ a b} → Cell₂ (id₁ ∘ₕ f) f
-  runitor {a} {b} {f} = subst (λ X → Cell₂ X f) (sym hIdR₁) (id₂ {a} {b} {f})
-
-  runitor' : {a b : Cell₀} {f : Cell₁ a b} → Cell₂ f (id₁ ∘ₕ f)
-  runitor' {a} {b} {f} = subst (λ X → Cell₂ f X) (sym hIdR₁) (id₂ {a} {b} {f})
+  rUnitor : {a b : Cell₀} {f : Cell₁ a b} → Cell₂ (id₁ ∘ₕ f) f
+  rUnitor {a} {b} {f} = subst₂ Cell₂ (sym hIdR₁) refl id₂
+  
+  rUnitorInv : {a b : Cell₀} {f : Cell₁ a b} → Cell₂ f (id₁ ∘ₕ f)
+  rUnitorInv {a} {b} {f} = subst₂ Cell₂ refl (sym hIdR₁) id₂
 
   ρ : {a b : Cell₀} (f : Cell₁ a b) → Cell₂ (id₁ ∘ₕ f) f
-  ρ f = runitor {f = f}
+  ρ f = rUnitor {f = f}
   
   ρ' : {a b : Cell₀} (f : Cell₁ a b) → Cell₂ f (id₁ ∘ₕ f)
-  ρ' f = runitor' {f = f}
+  ρ' f = rUnitorInv {f = f}
   
-  {-
+  private
+    substComp₁ : {a b : Cell₀} {f g : Cell₁ a b}
+               → (eq : g ≡ f)
+               → (subst₂ Cell₂ refl eq id₂) ∘ᵥ (subst₂ Cell₂ eq refl id₂) ≡ id₂ ∘ᵥ id₂
+    substComp₁ refl = refl
   
-  idLeftFunctorEq : {a b : Cell₀} 
-                  -- (a b × a a ↦ a b)  ∘  (a b ↦ a b × a a)
-                  → [ comp {a} {a} {b} ]∘[ [ Id[ HomCat a b ] ]◁[ HomCat a a , id₁ {a} ] ]
-                  -- (a b ↦ a b) 
-                  ≡ Id[ HomCat a b ]
-  idLeftFunctorEq {a} {b} = propEqFunctor p1 p2
-    where
-      p1 : Functor.F₀ [ comp {a} {a} {b} ]∘[ [ Id[ HomCat a b ] ]◁[ HomCat a a , id₁ {a} ] ] ≡ λ x → x
-      p1 = funExt $ λ f → hIdR₁ {f = f}
- 
-      p3 : {f g : Cell₁ a b} {η : Cell₂ f g}
-         → subst₂ Cell₂ (sym hIdR₁) (sym hIdR₁) η
-         ≡ subst₂ (λ X Y → (f' g' : Cell₁ a b) → Cell₂ f' g' → Cell₂ (X f') (Y g')) (sym (funExt $ λ f → hIdR₁ {f = f})) (sym (funExt $ λ f → hIdR₁ {f = f})) (λ f' g' η' → η') f g η ∎
-      p3 = ?
+    substComp₂ : {a b : Cell₀} {f g : Cell₁ a b}
+               → (eq : g ≡ f)
+               → (subst₂ Cell₂ eq refl id₂) ∘ᵥ (subst₂ Cell₂ refl eq id₂) ≡ id₂ ∘ᵥ id₂
+    substComp₂ refl = refl
+  
+  lUnitorId : {a b : Cell₀} {f : Cell₁ a b} 
+            → lUnitor {a} {b} {f} ∘ᵥ lUnitorInv {a} {b} {f} ≡ id₂ {f = f}
+  lUnitorId {a} {b} {f} = trans (substComp₂ (sym hIdL₁)) vIdL
+  
+  lUnitorId' : {a b : Cell₀} {f : Cell₁ a b} 
+             → lUnitorInv {a} {b} {f} ∘ᵥ lUnitor {a} {b} {f} ≡ id₂
+  lUnitorId' {a} {b} {f} = trans (substComp₁ (sym hIdL₁)) vIdL
+  
+  rUnitorId : {a b : Cell₀} {f : Cell₁ a b} 
+            → rUnitor {a} {b} {f} ∘ᵥ rUnitorInv {a} {b} {f} ≡ id₂ {f = f}
+  rUnitorId {a} {b} {f} = trans (substComp₂ (sym hIdR₁)) vIdR
 
-      p2 : (λ f g → Functor.F₁ ([ comp {a} {a} {b} ]∘[ [ Id[ HomCat a b ] ]◁[ HomCat a a , id₁ {a} ] ]) {f} {g})
-         ≡ subst₂ (λ X Y → (f g : Cell₁ a b) → Cell₂ f g → Cell₂ (X f) (Y g)) (sym p1) (sym p1) (λ f g η → η)
-      p2 = funExt $ λ f → funExt $ λ g → funExt $ λ η → begin
-        Functor.F₁ [ comp ]∘[ [ Id[ HomCat a b ] ]◁[ HomCat a a , id₁ ] ] η
-          ≡⟨ refl ⟩
-        [ comp ]₁ (η , id₂)
-          ≡⟨ refl ⟩
-        η ◁ id₁
-          ≡⟨ whiskerLeftId₂ ⟩
-        subst₂ Cell₂ (sym hIdR₁) (sym hIdR₁) η
-          ≡⟨ refl ⟩
-        subst₂ Cell₂ (sym hIdR₁) (sym hIdR₁) η
-          ≡⟨ {!!} ⟩
-        subst₂ (λ X Y → (f' g' : Cell₁ a b) → Cell₂ f' g' → Cell₂ (X f') (Y g')) (sym p1) (sym p1) (λ f' g' η' → η') f g η ∎
-  -}
+  rUnitorId' : {a b : Cell₀} {f : Cell₁ a b} 
+             → rUnitorInv {a} {b} {f} ∘ᵥ rUnitor {a} {b} {f} ≡ id₂
+  rUnitorId' {a} {b} {f} = trans (substComp₁ (sym hIdR₁)) vIdR
+  
+  -- Associators
+  associator : {a b c d : Cell₀} {f : Cell₁ a b} {g : Cell₁ b c} {h : Cell₁ c d}
+             → Cell₂ (h ∘ₕ (g ∘ₕ f)) ((h ∘ₕ g) ∘ₕ f)
+  associator {a} {b} {c} {d} {f} {g} {h} = subst₂ Cell₂ refl hAssoc₁ id₂
+
+  associatorInv : {a b c d : Cell₀} {f : Cell₁ a b} {g : Cell₁ b c} {h : Cell₁ c d}
+                → Cell₂ ((h ∘ₕ g) ∘ₕ f) (h ∘ₕ (g ∘ₕ f)) 
+  associatorInv {a} {b} {c} {d} {f} {g} {h} = subst₂ Cell₂ hAssoc₁ refl id₂
+
+  associatorId : {a b c d : Cell₀} {f : Cell₁ a b} {g : Cell₁ b c} {h : Cell₁ c d}
+               → associator {f = f} {g} {h} ∘ᵥ associatorInv {f = f} {g} {h} ≡ id₂
+  associatorId = trans (substComp₁ hAssoc₁) vIdR
+  
+  associatorId' : {a b c d : Cell₀} {f : Cell₁ a b} {g : Cell₁ b c} {h : Cell₁ c d}
+                → associatorInv {f = f} {g} {h} ∘ᵥ associator {f = f} {g} {h} ≡ id₂
+  associatorId' = trans (substComp₂ hAssoc₁) vIdR
