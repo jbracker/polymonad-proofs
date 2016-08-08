@@ -23,7 +23,7 @@ open import Theory.Examples.Functor
 -------------------------------------------------------------------------------
 open Category hiding ( idL ; idR ; assoc ) renaming ( id to idC )
 
-record LaxTwoCategory {ℓ₀ ℓ₁ ℓ₂ : Level} : Set (lsuc (ℓ₀ ⊔ ℓ₁ ⊔ ℓ₂)) where
+record StrictTwoCategory {ℓ₀ ℓ₁ ℓ₂ : Level} : Set (lsuc (ℓ₀ ⊔ ℓ₁ ⊔ ℓ₂)) where
   field
     Cell₀ : Set ℓ₀
     HomCat : Cell₀ → Cell₀ → Category {ℓ₁} {ℓ₂}
