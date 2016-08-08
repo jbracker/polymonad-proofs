@@ -25,6 +25,8 @@ open Category hiding ( idL ; idR ; assoc ) renaming ( id to idC )
 
 record StrictTwoCategory {ℓ₀ ℓ₁ ℓ₂ : Level} : Set (lsuc (ℓ₀ ⊔ ℓ₁ ⊔ ℓ₂)) where
   field
+    -- Names and structure base on: https://ncatlab.org/nlab/show/strict+2-category
+    
     Cell₀ : Set ℓ₀
     HomCat : Cell₀ → Cell₀ → Category {ℓ₁} {ℓ₂}
 
@@ -102,29 +104,29 @@ record StrictTwoCategory {ℓ₀ ℓ₁ ℓ₂ : Level} : Set (lsuc (ℓ₀ ⊔ 
   id→functor : {a : Cell₀} → Functor ⊤-Cat (HomCat a a)
   id→functor {a} = constFunctor (HomCat a a) (id₁ {a})
 
-  vIdR : {a b : Cell₀} {f g : Cell₁ a b} {θ : Cell₂ f g} → θ ∘ᵥ id₂ ≡ θ
-  vIdR {a} {b} = Category.idR (HomCat a b)
+  vIdL : {a b : Cell₀} {f g : Cell₁ a b} {θ : Cell₂ f g} → θ ∘ᵥ id₂ ≡ θ
+  vIdL {a} {b} = Category.idR (HomCat a b)
 
-  vIdL : {a b : Cell₀} {f g : Cell₁ a b} {θ : Cell₂ f g} → id₂ ∘ᵥ θ ≡ θ
-  vIdL {a} {b} = Category.idL (HomCat a b)
+  vIdR : {a b : Cell₀} {f g : Cell₁ a b} {θ : Cell₂ f g} → id₂ ∘ᵥ θ ≡ θ
+  vIdR {a} {b} = Category.idL (HomCat a b)
   
   vAssoc : {a b : Cell₀} {f g h i : Cell₁ a b} {η : Cell₂ f g} {θ : Cell₂ g h} {ι : Cell₂ h i}
                 → ι ∘ᵥ (θ ∘ᵥ η) ≡ (ι ∘ᵥ θ) ∘ᵥ η
   vAssoc {a} {b} = Category.assoc (HomCat a b)
   
-  hIdR₁ : {a b : Cell₀} {f : Cell₁ a b} → f ∘ₕ id₁ {a} ≡ f
-  hIdR₁ = horizontalIdR₁
+  hIdL₁ : {a b : Cell₀} {f : Cell₁ a b} → f ∘ₕ id₁ {a} ≡ f
+  hIdL₁ = horizontalIdR₁
   
-  hIdL₁ :  {a b : Cell₀} {f : Cell₁ a b} → id₁ {b} ∘ₕ f ≡ f
-  hIdL₁ = horizontalIdL₁
-
-  hIdR₂ : {a b : Cell₀} {f g : Cell₁ a b} {η : Cell₂ f g} 
-        → η ∘ₕ₂ id₂ {a} {a} ≡ subst₂ Cell₂ (sym hIdR₁) (sym hIdR₁) η
-  hIdR₂ = horizontalIdR₂
+  hIdR₁ :  {a b : Cell₀} {f : Cell₁ a b} → id₁ {b} ∘ₕ f ≡ f
+  hIdR₁ = horizontalIdL₁
 
   hIdL₂ : {a b : Cell₀} {f g : Cell₁ a b} {η : Cell₂ f g} 
-        → id₂ {b} {b} ∘ₕ₂ η ≡ subst₂ Cell₂ (sym hIdL₁) (sym hIdL₁) η
-  hIdL₂ = horizontalIdL₂
+        → η ∘ₕ₂ id₂ {a} {a} ≡ subst₂ Cell₂ (sym hIdL₁) (sym hIdL₁) η
+  hIdL₂ = horizontalIdR₂
+
+  hIdR₂ : {a b : Cell₀} {f g : Cell₁ a b} {η : Cell₂ f g} 
+        → id₂ {b} {b} ∘ₕ₂ η ≡ subst₂ Cell₂ (sym hIdR₁) (sym hIdR₁) η
+  hIdR₂ = horizontalIdL₂
   
   hAssoc₁ : {a b c d : Cell₀} {f : Cell₁ a b} {g : Cell₁ b c} {h : Cell₁ c d} → h ∘ₕ (g ∘ₕ f) ≡ (h ∘ₕ g) ∘ₕ f
   hAssoc₁ = horizontalAssoc₁
@@ -142,10 +144,10 @@ record StrictTwoCategory {ℓ₀ ℓ₁ ℓ₂ : Level} : Set (lsuc (ℓ₀ ⊔ 
                  → g ▷ id₂ {f = f} ≡ id₂ {f = g ∘ₕ f}
   whiskerRightId₁ = Functor.id comp
   
-  whiskerLeftId₂ : {a b : Cell₀} {f g : Cell₁ a b} {η : Cell₂ f g} → η ◁ id₁ {a} ≡ subst₂ Cell₂ (sym hIdR₁) (sym hIdR₁) η
+  whiskerLeftId₂ : {a b : Cell₀} {f g : Cell₁ a b} {η : Cell₂ f g} → η ◁ id₁ {a} ≡ subst₂ Cell₂ (sym hIdL₁) (sym hIdL₁) η
   whiskerLeftId₂ = horizontalIdR₂
   
-  whiskerRightId₂ : {a b : Cell₀} {f g : Cell₁ a b} {η : Cell₂ f g} → id₁ {b} ▷ η ≡ subst₂ Cell₂ (sym hIdL₁) (sym hIdL₁) η
+  whiskerRightId₂ : {a b : Cell₀} {f g : Cell₁ a b} {η : Cell₂ f g} → id₁ {b} ▷ η ≡ subst₂ Cell₂ (sym hIdR₁) (sym hIdR₁) η
   whiskerRightId₂ = horizontalIdL₂
 
   whiskerLeftDist : {a b c : Cell₀} {f : Cell₁ a b} {g h i : Cell₁ b c} {η : Cell₂ g h} {θ : Cell₂ h i}
@@ -190,6 +192,32 @@ record StrictTwoCategory {ℓ₀ ℓ₁ ℓ₂ : Level} : Set (lsuc (ℓ₀ ⊔ 
   whiskerCoher4 : {a b c : Cell₀} {f g : Cell₁ a b} {h i : Cell₁ b c} {η : Cell₂ f g} {θ : Cell₂ h i}
                 → (i ▷ η) ∘ᵥ (θ ◁ f) ≡ (θ ◁ g) ∘ᵥ (h ▷ η)
   whiskerCoher4 = whiskerCoher4'
+
+  -- Unitors
+  lunitor : {a b : Cell₀} {f : Cell₁ a b} → Cell₂ (f ∘ₕ id₁) f
+  lunitor {a} {b} {f} = subst (λ X → Cell₂ X f) (sym hIdL₁) (id₂ {a} {b} {f})
+  
+  lunitor' : {a b : Cell₀} {f : Cell₁ a b} → Cell₂ f (f ∘ₕ id₁)
+  lunitor' {a} {b} {f} = subst (λ X → Cell₂ f X) (sym hIdL₁) (id₂ {a} {b} {f})
+
+  λ' : {a b : Cell₀} → (f : Cell₁ a b) → Cell₂ (f ∘ₕ id₁) f
+  λ' f = lunitor {f = f}
+  
+  λ'' : {a b : Cell₀} (f : Cell₁ a b) → Cell₂ f (f ∘ₕ id₁)
+  λ'' f = lunitor' {f = f}
+  
+  runitor : {a b : Cell₀} {f : Cell₁ a b} → Cell₂ (id₁ ∘ₕ f) f
+  runitor {a} {b} {f} = subst (λ X → Cell₂ X f) (sym hIdR₁) (id₂ {a} {b} {f})
+
+  runitor' : {a b : Cell₀} {f : Cell₁ a b} → Cell₂ f (id₁ ∘ₕ f)
+  runitor' {a} {b} {f} = subst (λ X → Cell₂ f X) (sym hIdR₁) (id₂ {a} {b} {f})
+
+  ρ : {a b : Cell₀} (f : Cell₁ a b) → Cell₂ (id₁ ∘ₕ f) f
+  ρ f = runitor {f = f}
+  
+  ρ' : {a b : Cell₀} (f : Cell₁ a b) → Cell₂ f (id₁ ∘ₕ f)
+  ρ' f = runitor' {f = f}
+  
   {-
   
   idLeftFunctorEq : {a b : Cell₀} 
