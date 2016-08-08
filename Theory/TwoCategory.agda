@@ -26,6 +26,7 @@ open Category hiding ( idL ; idR ; assoc ) renaming ( id to idC )
 record StrictTwoCategory {ℓ₀ ℓ₁ ℓ₂ : Level} : Set (lsuc (ℓ₀ ⊔ ℓ₁ ⊔ ℓ₂)) where
   field
     -- Names and structure base on: https://ncatlab.org/nlab/show/strict+2-category
+    --                              https://ncatlab.org/nlab/show/bicategory
     
     Cell₀ : Set ℓ₀
     HomCat : Cell₀ → Cell₀ → Category {ℓ₁} {ℓ₂}
@@ -249,3 +250,13 @@ record StrictTwoCategory {ℓ₀ ℓ₁ ℓ₂ : Level} : Set (lsuc (ℓ₀ ⊔ 
   associatorId' : {a b c d : Cell₀} {f : Cell₁ a b} {g : Cell₁ b c} {h : Cell₁ c d}
                 → associatorInv {f = f} {g} {h} ∘ᵥ associator {f = f} {g} {h} ≡ id₂
   associatorId' = trans (substComp₂ hAssoc₁) vIdR
+  
+  α : {a b c d : Cell₀} 
+    → (f : Cell₁ a b) (g : Cell₁ b c) (h : Cell₁ c d)
+    → Cell₂ (h ∘ₕ (g ∘ₕ f)) ((h ∘ₕ g) ∘ₕ f)
+  α f g h = associator {f = f} {g} {h}
+  
+  α' : {a b c d : Cell₀} 
+     → (f : Cell₁ a b) (g : Cell₁ b c) (h : Cell₁ c d)
+     → Cell₂ ((h ∘ₕ g) ∘ₕ f) (h ∘ₕ (g ∘ₕ f)) 
+  α' f g h = associatorInv {f = f} {g} {h}
