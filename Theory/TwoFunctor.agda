@@ -47,6 +47,7 @@ record LaxTwoFunctor {ℓC₀ ℓC₁ ℓC₂ ℓD₀ ℓD₁ ℓD₂ : Level}
 
   field
     -- Names and structure base on: https://ncatlab.org/nlab/show/pseudofunctor
+    -- Of course, adapted to lax 2-functors.
     
     -- P_{x}
     P₀ : Cell₀ C → Cell₀ D
@@ -62,17 +63,25 @@ record LaxTwoFunctor {ℓC₀ ℓC₁ ℓC₂ ℓD₀ ℓD₁ ℓD₂ : Level}
          -- (F₁ g ∘ F₁ f) ∼ F₁ (g ∘ f)
          → Cell₂ D ([ P₁ ]₀ g  ∘Dₕ  [ P₁ ]₀ f) ([ P₁ ]₀ (g ∘Cₕ f))
     
-    lawId₁ : {x y : Cell₀ C} {f : Cell₁ C x y} 
-           → ([ P₁ {x} {y} ]₁ (λ' C f)) 
-         ∘Dᵥ ( (μ {x} {x} {y} {id₁ C {x}} {f}) 
-         ∘Dᵥ   (id₂ D {f = [ P₁ {x} {y} ]₀ f} ∘Dₕ₂ η {x}) )
-           ≡ λ' D ([ P₁ {x} {y} ]₀ f)
+    laxFunId₁ : {x y : Cell₀ C} {f : Cell₁ C x y} 
+              → ([ P₁ {x} {y} ]₁ (λ' C f)) 
+            ∘Dᵥ ( (μ {x} {x} {y} {id₁ C {x}} {f}) 
+            ∘Dᵥ   (id₂ D {f = [ P₁ {x} {y} ]₀ f} ∘Dₕ₂ η {x}) )
+              ≡ λ' D ([ P₁ {x} {y} ]₀ f)
     
-    lawId₂ : {x y : Cell₀ C} {f : Cell₁ C x y} 
-           → ([ P₁ {x} {y} ]₁ (ρ C f)) 
-         ∘Dᵥ ( (μ {x} {y} {y} {f} {id₁ C {y}}) 
-         ∘Dᵥ   (η {y} ∘Dₕ₂ id₂ D {f = [ P₁ {x} {y} ]₀ f}) ) 
-           ≡ ρ D ([ P₁ {x} {y} ]₀ f)
+    laxFunId₂ : {x y : Cell₀ C} {f : Cell₁ C x y} 
+              → ([ P₁ {x} {y} ]₁ (ρ C f)) 
+            ∘Dᵥ ( (μ {x} {y} {y} {f} {id₁ C {y}}) 
+            ∘Dᵥ   (η {y} ∘Dₕ₂ id₂ D {f = [ P₁ {x} {y} ]₀ f}) ) 
+              ≡ ρ D ([ P₁ {x} {y} ]₀ f)
+
+    laxFunAssoc : {w x y z : Cell₀ C} {f : Cell₁ C w x} {g : Cell₁ C x y} {h : Cell₁ C y z}
+               → ([ P₁ {w} {z} ]₁ (α C f g h)) 
+             ∘Dᵥ ( (μ {w} {y} {z} {g ∘Cₕ f} {h}) 
+             ∘Dᵥ   (id₂ D {P₀ y} {P₀ z} {[ P₁ {y} {z} ]₀ h} ∘Dₕ₂ μ {w} {x} {y} {f} {g}) ) 
+               ≡ μ {w} {x} {z} {f} {h ∘Cₕ g} 
+             ∘Dᵥ ( (μ {x} {y} {z} {g} {h} ∘Dₕ₂ id₂ D {P₀ w} {P₀ x} {[ P₁ {w} {x} ]₀ f}) 
+             ∘Dᵥ   (α D ([ P₁ {w} {x} ]₀ f) ([ P₁ {x} {y} ]₀ g) ([ P₁ {y} {z} ]₀ h)) )
     
--- horizontal composite:  ∘  =   _∘ₕ_
+-- horizontal composite:  ∘  =   _∘ₕ_  = flip (;)
 -- vertical composite:    •  =   _∘ᵥ_
