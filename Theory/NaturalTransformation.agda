@@ -43,3 +43,44 @@ idNaturalTransformation {C = C} {D = D} F = record
   }
 
 Id⟨_⟩ = idNaturalTransformation
+
+-------------------------------------------------------------------------------
+-- Composition of Natural Transformations
+-------------------------------------------------------------------------------
+
+compNaturalTransformation : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} 
+                          → {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}}
+                          → {F G H : Functor C D}
+                          → NaturalTransformation _≡_ G H → NaturalTransformation _≡_ F G
+                          → NaturalTransformation _≡_ F H
+compNaturalTransformation {C = C} {D} {F} {G} {H} α β =  record 
+  { η = η 
+  ; natural = natural
+  } where
+    _∘D_ = Category._∘_ D
+    ηα = NaturalTransformation.η α
+    ηβ = NaturalTransformation.η β
+    
+    η :  (a : Category.Obj C) → Category.Hom D ([ F ]₀ a) ([ H ]₀ a)
+    η a = ηα a ∘D ηβ a
+    
+    natural : {a b : Category.Obj C} {f : Category.Hom C a b} → ([ H ]₁ f) ∘D (η a) ≡ (η b) ∘D ([ F ]₁ f)
+    natural {a} {b} {f} = begin
+      ([ H ]₁ f) ∘D (η a) 
+        ≡⟨ refl ⟩
+      ([ H ]₁ f) ∘D (ηα a ∘D ηβ a) 
+        ≡⟨ Category.assoc D ⟩
+      (([ H ]₁ f) ∘D ηα a) ∘D ηβ a 
+        ≡⟨ cong (λ X → X ∘D ηβ a) (NaturalTransformation.natural α) ⟩
+      (ηα b ∘D ([ G ]₁ f)) ∘D ηβ a 
+        ≡⟨ sym (Category.assoc D) ⟩
+      ηα b ∘D (([ G ]₁ f) ∘D ηβ a)
+        ≡⟨ cong (λ X → ηα b ∘D X) (NaturalTransformation.natural β) ⟩
+      ηα b ∘D (ηβ b ∘D ([ F ]₁ f))
+        ≡⟨ Category.assoc D ⟩
+      (ηα b ∘D ηβ b) ∘D ([ F ]₁ f)
+        ≡⟨ refl ⟩
+      (η b) ∘D ([ F ]₁ f) ∎
+
+⟨_⟩∘⟨_⟩ = compNaturalTransformation
+
