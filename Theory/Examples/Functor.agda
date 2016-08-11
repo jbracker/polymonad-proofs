@@ -210,7 +210,7 @@ biFunctor→triFunctor₂ {C = C} {D} {E} {J} {K} C×D→J J×E→K = record
     idF {a} = begin 
       F₁ (id ((C ×C D) ×C E)) 
         ≡⟨ refl ⟩ 
-      [ J×E→K ]₁ ([ C×D→J ]₁ id (C ×C D) ,' id E)
+      [ J×E→K ]₁ ([ C×D→J ]₁ (Category.id (C ×C D)) ,' id E)
         ≡⟨ cong (λ X → [ J×E→K ]₁ (X ,' id E)) (Functor.id C×D→J) ⟩ 
       [ J×E→K ]₁ (id J ,' id E)
         ≡⟨ Functor.id J×E→K ⟩ 
