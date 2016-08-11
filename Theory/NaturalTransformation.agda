@@ -23,8 +23,10 @@ open Functor
 -------------------------------------------------------------------------------
 -- Definition of Natural Transformations
 -------------------------------------------------------------------------------
-record NaturalTransformation {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}}
-                             (F : Functor C D) (G : Functor C D) : Set (ℓC₀ ⊔ ℓC₁ ⊔ ℓD₀ ⊔ ℓD₁) where
+record NaturalTransformation {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} 
+                             {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}}
+                             (F : Functor C D) (G : Functor C D) 
+                             : Set (ℓC₀ ⊔ ℓC₁ ⊔ ℓD₀ ⊔ ℓD₁) where
   constructor naturalTransformation
   field
     η : (x : Obj C) → Hom D ([ F ]₀ x) ([ G ]₀ x)
@@ -38,7 +40,8 @@ record NaturalTransformation {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} {C : Cate
 -------------------------------------------------------------------------------
 -- The Identity Natural Transformation
 -------------------------------------------------------------------------------
-idNaturalTransformation : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}}
+idNaturalTransformation : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} 
+                        → {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}}
                         → (F : Functor C D) → NaturalTransformation F F
 idNaturalTransformation {C = C} {D = D} F = record 
   { η = λ x → Category.id D
@@ -52,10 +55,10 @@ Id⟨_⟩ = idNaturalTransformation
 -------------------------------------------------------------------------------
 
 compVertNaturalTransformation : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} 
-                          → {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}}
-                          → {F G H : Functor C D}
-                          → NaturalTransformation G H → NaturalTransformation F G
-                          → NaturalTransformation F H
+                              → {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}}
+                              → {F G H : Functor C D}
+                              → NaturalTransformation G H → NaturalTransformation F G
+                              → NaturalTransformation F H
 compVertNaturalTransformation {C = C} {D} {F} {G} {H} α β =  record 
   { η = η 
   ; natural = natural
@@ -67,7 +70,8 @@ compVertNaturalTransformation {C = C} {D} {F} {G} {H} α β =  record
     η :  (a : Category.Obj C) → Category.Hom D ([ F ]₀ a) ([ H ]₀ a)
     η a = ηα a ∘D ηβ a
     
-    natural : {a b : Category.Obj C} {f : Category.Hom C a b} → ([ H ]₁ f) ∘D (η a) ≡ (η b) ∘D ([ F ]₁ f)
+    natural : {a b : Category.Obj C} {f : Category.Hom C a b} 
+            → ([ H ]₁ f) ∘D (η a) ≡ (η b) ∘D ([ F ]₁ f)
     natural {a} {b} {f} = begin
       ([ H ]₁ f) ∘D (η a) 
         ≡⟨ refl ⟩
@@ -91,11 +95,12 @@ compVertNaturalTransformation {C = C} {D} {F} {G} {H} α β =  record
 -- Horizontal Composition of Natural Transformations
 -------------------------------------------------------------------------------
 
-compNaturalTransformationHorz : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓE₀ ℓE₁ : Level} 
-                              → {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} {E : Category {ℓE₀} {ℓE₁}}
-                              → {G G' : Functor D E} {F F' : Functor C D}
-                              → NaturalTransformation G G' → NaturalTransformation F F'
-                              → NaturalTransformation [ G ]∘[ F ] [ G' ]∘[ F' ]
+compNaturalTransformationHorz 
+  : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓE₀ ℓE₁ : Level} 
+  → {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} {E : Category {ℓE₀} {ℓE₁}}
+  → {G G' : Functor D E} {F F' : Functor C D}
+  → NaturalTransformation G G' → NaturalTransformation F F'
+  → NaturalTransformation [ G ]∘[ F ] [ G' ]∘[ F' ]
 compNaturalTransformationHorz {C = C} {D} {E} {G} {G'} {F} {F'} α β =  record 
   { η = η 
   ; natural = natural
@@ -137,7 +142,8 @@ compNaturalTransformationHorz {C = C} {D} {E} {G} {G'} {F} {F'} α β =  record
 -- Propositional Equality of Natural Transformations
 -------------------------------------------------------------------------------
 
-propEqNatTrans : {Cℓ₀ Cℓ₁ Dℓ₀ Dℓ₁ : Level} {C : Category {Cℓ₀} {Cℓ₁}} {D : Category {Dℓ₀} {Dℓ₁}} 
+propEqNatTrans : {Cℓ₀ Cℓ₁ Dℓ₀ Dℓ₁ : Level} 
+               → {C : Category {Cℓ₀} {Cℓ₁}} {D : Category {Dℓ₀} {Dℓ₁}} 
                → {F₀ G₀ F₁ G₁ : Functor C D}
                → {η₀ : (x : Obj C) → Hom D ([ F₀ ]₀ x) ([ G₀ ]₀ x)}
                → {η₁ : (x : Obj C) → Hom D ([ F₁ ]₀ x) ([ G₁ ]₀ x)}
@@ -156,3 +162,12 @@ propEqNatTrans {nat₀ = nat₀} {nat₁} refl refl refl with p
           (λ f → proof-irrelevance (nat₀ {a} {b} {f}) (nat₁ {a} {b} {f})
           ) ) )
 propEqNatTrans {F₀ = functor F₀ F₁ idF distF} {functor G₀ G₁ idG distG} {functor .F₀ .F₁ .idF .distF} {functor .G₀ .G₁ .idG .distG} refl refl refl | refl = refl
+
+
+extractPropEqNatTransEta : {Cℓ₀ Cℓ₁ Dℓ₀ Dℓ₁ : Level}
+                         → {C : Category {Cℓ₀} {Cℓ₁}} {D : Category {Dℓ₀} {Dℓ₁}} 
+                         → {F G : Functor C D}
+                         → {α β : NaturalTransformation F G}
+                         → α ≡ β
+                         → NaturalTransformation.η α ≡ NaturalTransformation.η β
+extractPropEqNatTransEta refl = refl
