@@ -48,15 +48,15 @@ idNaturalTransformation {C = C} {D = D} F = record
 Id⟨_⟩ = idNaturalTransformation
 
 -------------------------------------------------------------------------------
--- Composition of Natural Transformations
+-- Vertical Composition of Natural Transformations
 -------------------------------------------------------------------------------
 
-compNaturalTransformation : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} 
+compVertNaturalTransformation : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} 
                           → {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}}
                           → {F G H : Functor C D}
                           → NaturalTransformation G H → NaturalTransformation F G
                           → NaturalTransformation F H
-compNaturalTransformation {C = C} {D} {F} {G} {H} α β =  record 
+compVertNaturalTransformation {C = C} {D} {F} {G} {H} α β =  record 
   { η = η 
   ; natural = natural
   } where
@@ -85,7 +85,53 @@ compNaturalTransformation {C = C} {D} {F} {G} {H} α β =  record
         ≡⟨ refl ⟩
       (η b) ∘D ([ F ]₁ f) ∎
 
-⟨_⟩∘⟨_⟩ = compNaturalTransformation
+⟨_⟩∘ᵥ⟨_⟩ = compVertNaturalTransformation
+
+-------------------------------------------------------------------------------
+-- Horizontal Composition of Natural Transformations
+-------------------------------------------------------------------------------
+
+compNaturalTransformationHorz : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓE₀ ℓE₁ : Level} 
+                              → {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} {E : Category {ℓE₀} {ℓE₁}}
+                              → {G G' : Functor D E} {F F' : Functor C D}
+                              → NaturalTransformation G G' → NaturalTransformation F F'
+                              → NaturalTransformation [ G ]∘[ F ] [ G' ]∘[ F' ]
+compNaturalTransformationHorz {C = C} {D} {E} {G} {G'} {F} {F'} α β =  record 
+  { η = η 
+  ; natural = natural
+  } where
+    _∘E_ = Category._∘_ E
+    _∘D_ = Category._∘_ D
+    ηα = NaturalTransformation.η α
+    ηβ = NaturalTransformation.η β
+
+    η : (c : Obj C) → Hom E ([ [ G ]∘[ F ] ]₀ c) ([ [ G' ]∘[ F' ] ]₀ c)
+    η c = ηα ([ F' ]₀ c) ∘E [ G ]₁ (ηβ c)
+    
+    natural : {a b : Obj C} {f : Hom C a b} 
+            → ([ [ G' ]∘[ F' ] ]₁ f) ∘E (η a) ≡ (η b) ∘E ([ [ G ]∘[ F ] ]₁ f)
+    natural {a} {b} {f} = begin
+      ([ [ G' ]∘[ F' ] ]₁ f) ∘E (η a) 
+        ≡⟨ refl ⟩ 
+      [ G' ]₁ ([ F' ]₁ f) ∘E (ηα ([ F' ]₀ a) ∘E [ G ]₁ (ηβ a)) 
+        ≡⟨ Category.assoc E ⟩ 
+      ([ G' ]₁ ([ F' ]₁ f) ∘E ηα ([ F' ]₀ a)) ∘E [ G ]₁ (ηβ a)
+        ≡⟨ cong (λ X → X ∘E [ G ]₁ (ηβ a)) (NaturalTransformation.natural α) ⟩ 
+      (ηα ([ F' ]₀ b) ∘E [ G ]₁ ([ F' ]₁ f)) ∘E [ G ]₁ (ηβ a)
+        ≡⟨ sym (Category.assoc E) ⟩ 
+      ηα ([ F' ]₀ b) ∘E ([ G ]₁ ([ F' ]₁ f) ∘E [ G ]₁ (ηβ a))
+        ≡⟨ cong (λ X → ηα ([ F' ]₀ b) ∘E X) (sym (Functor.dist G)) ⟩ 
+      ηα ([ F' ]₀ b) ∘E [ G ]₁ ([ F' ]₁ f ∘D ηβ a)
+        ≡⟨ cong (λ X → ηα ([ F' ]₀ b) ∘E [ G ]₁ X) (NaturalTransformation.natural β) ⟩ 
+      ηα ([ F' ]₀ b) ∘E [ G ]₁ (ηβ b ∘D [ F ]₁ f)
+        ≡⟨ cong (λ X → ηα ([ F' ]₀ b) ∘E X) (Functor.dist G) ⟩
+      ηα ([ F' ]₀ b) ∘E ([ G ]₁ (ηβ b) ∘E [ G ]₁ ([ F ]₁ f))
+        ≡⟨ Category.assoc E ⟩ 
+      (ηα ([ F' ]₀ b) ∘E [ G ]₁ (ηβ b)) ∘E [ G ]₁ ([ F ]₁ f)
+        ≡⟨ refl ⟩ 
+      (η b) ∘E ([ [ G ]∘[ F ] ]₁ f) ∎
+
+⟨_⟩∘ₕ⟨_⟩ = compNaturalTransformationHorz
 
 -------------------------------------------------------------------------------
 -- Propositional Equality of Natural Transformations
@@ -120,7 +166,7 @@ functorNatTransCategory : {Cℓ₀ Cℓ₁ Dℓ₀ Dℓ₁ : Level}
 functorNatTransCategory C D = record
   { Obj = Functor C D
   ; Hom = NaturalTransformation {C = C} {D}
-  ; _∘_ = λ {F} {G} {H} → ⟨_⟩∘⟨_⟩ {C = C} {D} {F} {G} {H}
+  ; _∘_ = λ {F} {G} {H} → ⟨_⟩∘ᵥ⟨_⟩ {C = C} {D} {F} {G} {H}
   ; id = λ {F} → Id⟨ F ⟩
   ; assoc = propEqNatTrans refl refl $ funExt $ λ _ → assoc D
   ; idL = propEqNatTrans refl refl $ funExt $ λ _ → idL D
