@@ -152,3 +152,22 @@ rightWhiskerId₂
 rightWhiskerId₂ {C = C} {D} {E} {F} {G} K α = 
   propEqNatTrans refl refl $ funExt $ λ (x : Obj C) → idL E
 
+
+whiskerCompositionHorzEq 
+  : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓE₀ ℓE₁ : Level} 
+  → {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} {E : Category {ℓE₀} {ℓE₁}}
+  → {F G : Functor C D}
+  → {H K : Functor D E}
+  → (α : NaturalTransformation F G)
+  → (β : NaturalTransformation H K)
+  → ⟨ [ K ]∘⟨ α ⟩ ⟩∘ᵥ⟨ ⟨ β ⟩∘[ F ] ⟩ ≡ ⟨ ⟨ β ⟩∘[ G ] ⟩∘ᵥ⟨ [ H ]∘⟨ α ⟩ ⟩
+whiskerCompositionHorzEq {C = C} {D} {E} {F} {G} {H} {K} α β = 
+  propEqNatTrans refl refl $ funExt $ λ (x : Obj C) → begin
+    η ⟨ [ K ]∘⟨ α ⟩ ⟩∘ᵥ⟨ ⟨ β ⟩∘[ F ] ⟩ x
+      ≡⟨ refl ⟩ 
+    [ K ]₁ (η α x) ∘E η β ([ F ]₀ x)
+      ≡⟨ natural β ⟩ 
+    η β ([ G ]₀ x) ∘E [ H ]₁ (η α x)
+      ≡⟨ refl ⟩ 
+    η ⟨ ⟨ β ⟩∘[ G ] ⟩∘ᵥ⟨ [ H ]∘⟨ α ⟩ ⟩ x ∎
+  where _∘E_ = _∘_ E
