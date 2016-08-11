@@ -31,13 +31,13 @@ record Functor {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} (C : Category {ℓC₀}
     dist : ∀ {a b c} {f : Hom C a b} {g : Hom C b c} 
          → F₁ (_∘_ C g f) ≡ _∘_ D (F₁ g) (F₁ f)
 
-[_]₀_ : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} 
+[_]₀ : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} 
       → Functor C D → ( Obj C → Obj D )
-[_]₀_ F a = Functor.F₀ F a
+[_]₀ F a = Functor.F₀ F a
 
-[_]₁_ : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} {a b : Obj C} 
+[_]₁ : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} {a b : Obj C} 
       → (F : Functor C D) → ( Hom C a b → Hom D ([ F ]₀ a) ([ F ]₀ b) )
-[_]₁_ F f = Functor.F₁ F f
+[_]₁ F f = Functor.F₁ F f
 
 -------------------------------------------------------------------------------
 -- The Identity Functor
