@@ -16,6 +16,86 @@ open import Utilities
 open import Theory.Triple
 open import Theory.Category
 open import Theory.Functor
+open import Theory.NaturalTransformation
+open import Theory.NaturalTransformation.Whisker
+
+open import Theory.Examples.Category renaming ( functorCategory to Fun )
+
+natTransCompositionHorzFunctor 
+  : {ℓA₀ ℓA₁ ℓB₀ ℓB₁ ℓC₀ ℓC₁ : Level} 
+  → {A : Category {ℓA₀} {ℓA₁}} {B : Category {ℓB₀} {ℓB₁}} {C : Category {ℓC₀} {ℓC₁}} 
+  → Functor (Fun B C ×C Fun A B) (Fun A C)
+natTransCompositionHorzFunctor {A = A} {B} {C} = record 
+  { F₀ = F₀ 
+  ; F₁ = F₁
+  ; id = λ {F} → id {F}
+  ; dist = λ {F} {G} {H} {α} {β} → dist {F} {G} {H} {α} {β} 
+  } where  
+    open Category renaming ( id to idC )
+    open NaturalTransformation
+    
+    F₀ : Obj (Fun B C ×C Fun A B) → Obj (Fun A C)
+    F₀ (G ,' F) = [ G ]∘[ F ]
+    
+    F₁ : {F G : Obj (Fun B C ×C Fun A B)} 
+       → Hom (Fun B C ×C Fun A B) F G → Hom (Fun A C) (F₀ F) (F₀ G)
+    F₁ (α ,' β) = ⟨ α ⟩∘ₕ⟨ β ⟩
+    
+    id : {F : Obj (Fun B C ×C Fun A B)} 
+       → F₁ {F = F} {G = F} (idC (Fun B C ×C Fun A B)) ≡ idC (Fun A C)
+    id {F} = begin 
+      F₁ {F = F} {G = F} (idC (Fun B C ×C Fun A B)) 
+        ≡⟨ refl ⟩
+      ⟨ Id⟨ proj₁' F ⟩ ⟩∘ₕ⟨ Id⟨ proj₂' F ⟩ ⟩ 
+        ≡⟨ propEqNatTrans refl refl lemma ⟩
+      Id⟨ [ proj₁' F ]∘[ proj₂' F ] ⟩
+        ≡⟨ refl ⟩
+      Category.id (Fun A C) {a = [ proj₁' F ]∘[ proj₂' F ]} ∎
+      where
+        _∘C_ = _∘_ C
+        
+        lemma : η ⟨ Id⟨ proj₁' F ⟩ ⟩∘ₕ⟨ Id⟨ proj₂' F ⟩ ⟩ ≡ η Id⟨ [ proj₁' F ]∘[ proj₂' F ] ⟩
+        lemma = funExt $ λ (x : Obj A) → begin 
+          η ⟨ Id⟨ proj₁' F ⟩ ⟩∘ₕ⟨ Id⟨ proj₂' F ⟩ ⟩ x
+            ≡⟨ refl ⟩
+          η Id⟨ proj₁' F ⟩ ([ proj₂' F ]₀ x) ∘C [ proj₁' F ]₁ (η Id⟨ proj₂' F ⟩ x)
+            ≡⟨ refl ⟩
+          idC C ∘C [ proj₁' F ]₁ (idC B)
+            ≡⟨ idL C ⟩
+          [ proj₁' F ]₁ (idC B)
+            ≡⟨ Functor.id (proj₁' F) ⟩
+          idC C
+            ≡⟨ refl ⟩
+          η Id⟨ [ proj₁' F ]∘[ proj₂' F ] ⟩ x ∎
+        
+    dist : {F G H : Obj (Fun B C ×C Fun A B)}
+         → {α : Hom (Fun B C ×C Fun A B) F G}
+         → {β : Hom (Fun B C ×C Fun A B) G H}
+         → F₁ ( ⟨ proj₁' β ⟩∘ᵥ⟨ proj₁' α ⟩ ,' ⟨ proj₂' β ⟩∘ᵥ⟨ proj₂' α ⟩ ) ≡ ⟨ F₁ β ⟩∘ᵥ⟨ F₁ α ⟩
+    dist {F ,' F'} {G ,' G'} {H ,' H'} {α = α₁ ,' α₂} {β = β₁ ,' β₂} = 
+      propEqNatTrans refl refl $ funExt $ λ (x : Obj A) → begin
+        η ⟨ ⟨ β₁ ⟩∘ᵥ⟨ α₁ ⟩ ⟩∘ₕ⟨ ⟨ β₂ ⟩∘ᵥ⟨ α₂ ⟩ ⟩ x
+          ≡⟨ refl ⟩
+        η ⟨ β₁ ⟩∘ᵥ⟨ α₁ ⟩ ([ H' ]₀ x) ∘C [ F ]₁ (η ⟨ β₂ ⟩∘ᵥ⟨ α₂ ⟩ x)
+          ≡⟨ refl ⟩
+        (η β₁ ([ H' ]₀ x) ∘C η α₁ ([ H' ]₀ x)) ∘C [ F ]₁ (η β₂ x ∘B η α₂ x)
+           ≡⟨ cong (λ X → (η β₁ ([ H' ]₀ x) ∘C η α₁ ([ H' ]₀ x)) ∘C X) (Functor.dist F) ⟩
+        (η β₁ ([ H' ]₀ x) ∘C η α₁ ([ H' ]₀ x)) ∘C ([ F ]₁ (η β₂ x) ∘C [ F ]₁ (η α₂ x))
+           ≡⟨ sym (assoc C) ⟩
+        η β₁ ([ H' ]₀ x) ∘C (η α₁ ([ H' ]₀ x) ∘C ([ F ]₁ (η β₂ x) ∘C [ F ]₁ (η α₂ x)))
+          ≡⟨ cong (λ X → η β₁ ([ H' ]₀ x) ∘C X) (assoc C) ⟩
+        η β₁ ([ H' ]₀ x) ∘C ((η α₁ ([ H' ]₀ x) ∘C [ F ]₁ (η β₂ x)) ∘C [ F ]₁ (η α₂ x))
+          ≡⟨ cong (λ X → η β₁ ([ H' ]₀ x) ∘C (X ∘C [ F ]₁ (η α₂ x))) (sym (cong (λ X → X x) (extractPropEqNatTransEta (whiskerCompositionHorzEq β₂ α₁)))) ⟩
+        η β₁ ([ H' ]₀ x) ∘C (([ G ]₁ (η β₂ x) ∘C η α₁ ([ G' ]₀ x)) ∘C [ F ]₁ (η α₂ x))
+          ≡⟨ cong (λ X → η β₁ ([ H' ]₀ x) ∘C X) (sym (assoc C)) ⟩
+        η β₁ ([ H' ]₀ x) ∘C ([ G ]₁ (η β₂ x) ∘C (η α₁ ([ G' ]₀ x) ∘C [ F ]₁ (η α₂ x)))
+          ≡⟨ assoc C ⟩
+        (η β₁ ([ H' ]₀ x) ∘C [ G ]₁ (η β₂ x)) ∘C (η α₁ ([ G' ]₀ x) ∘C [ F ]₁ (η α₂ x))
+           ≡⟨ refl ⟩
+        η ⟨ β₁ ⟩∘ₕ⟨ β₂ ⟩ x ∘C η ⟨ α₁ ⟩∘ₕ⟨ α₂ ⟩ x
+          ≡⟨ refl ⟩
+        η ⟨ ⟨ β₁ ⟩∘ₕ⟨ β₂ ⟩ ⟩∘ᵥ⟨ ⟨ α₁ ⟩∘ₕ⟨ α₂ ⟩ ⟩ x ∎
+      where _∘B_ = _∘_ B ; _∘C_ = _∘_ C
 
 -------------------------------------------------------------------------------
 -- Tri-Functors that map Triples into associated tuples/products
