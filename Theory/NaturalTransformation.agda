@@ -54,12 +54,12 @@ Id⟨_⟩ = idNaturalTransformation
 -- Vertical Composition of Natural Transformations
 -------------------------------------------------------------------------------
 
-compVertNaturalTransformation : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} 
+compNaturalTransformationVert : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} 
                               → {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}}
                               → {F G H : Functor C D}
                               → NaturalTransformation G H → NaturalTransformation F G
                               → NaturalTransformation F H
-compVertNaturalTransformation {C = C} {D} {F} {G} {H} α β =  record 
+compNaturalTransformationVert {C = C} {D} {F} {G} {H} α β =  record 
   { η = η 
   ; natural = natural
   } where
@@ -89,7 +89,7 @@ compVertNaturalTransformation {C = C} {D} {F} {G} {H} α β =  record
         ≡⟨ refl ⟩
       (η b) ∘D ([ F ]₁ f) ∎
 
-⟨_⟩∘ᵥ⟨_⟩ = compVertNaturalTransformation
+⟨_⟩∘ᵥ⟨_⟩ = compNaturalTransformationVert
 
 -------------------------------------------------------------------------------
 -- Horizontal Composition of Natural Transformations
