@@ -21,6 +21,9 @@ open import Theory.NaturalTransformation.Whisker
 
 open import Theory.Examples.Category renaming ( functorCategory to Fun )
 
+-------------------------------------------------------------------------------
+-- Horizontal composition functor for natural transformations.
+-------------------------------------------------------------------------------
 natTransCompositionHorzFunctor 
   : {ℓA₀ ℓA₁ ℓB₀ ℓB₁ ℓC₀ ℓC₁ : Level} 
   → {A : Category {ℓA₀} {ℓA₁}} {B : Category {ℓB₀} {ℓB₁}} {C : Category {ℓC₀} {ℓC₁}} 
