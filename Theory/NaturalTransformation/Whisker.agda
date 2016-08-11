@@ -1,0 +1,154 @@
+
+module Theory.NaturalTransformation.Whisker where
+
+-- Stdlib
+open import Level
+open import Function hiding ( _∘_ ; id )
+open import Data.Product
+open import Data.Sum
+open import Data.Unit
+open import Data.Empty
+open import Relation.Binary.Core
+open import Relation.Binary.PropositionalEquality
+open ≡-Reasoning 
+
+-- Local
+open import Utilities
+open import Theory.Category
+open import Theory.Functor
+open import Theory.NaturalTransformation
+
+open Category
+open Functor 
+open NaturalTransformation
+
+-- Based on the slides: 
+-- http://www.math.vanderbilt.edu/~tacl2013/coursematerials/SelingerTACL20132.pdf
+
+-------------------------------------------------------------------------------
+-- Left whiskering of natural transformations
+-------------------------------------------------------------------------------
+
+leftWhiskerNatTrans : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓE₀ ℓE₁ : Level} 
+                    → {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} {E : Category {ℓE₀} {ℓE₁}}
+                    → {G H : Functor D E} 
+                    → (α : NaturalTransformation G H) 
+                    → (F : Functor C D)
+                    → NaturalTransformation [ G ]∘[ F ] [ H ]∘[ F ]
+leftWhiskerNatTrans {C = C} {D} {E} {G} {H} α F = record 
+  { η = λ x → η α ([ F ]₀ x)
+  ; natural = natural α
+  }
+
+⟨_⟩∘[_] = leftWhiskerNatTrans
+
+-------------------------------------------------------------------------------
+-- Right whiskering of natural transformations
+-------------------------------------------------------------------------------
+
+rightWhiskerNatTrans : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓE₀ ℓE₁ : Level} 
+                     → {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} {E : Category {ℓE₀} {ℓE₁}}
+                     → {G H : Functor C D} 
+                     → (F : Functor D E)
+                     → (α : NaturalTransformation G H) 
+                     → NaturalTransformation [ F ]∘[ G ] [ F ]∘[ H ]
+rightWhiskerNatTrans {C = C} {D} {E} {G} {H} F α = record 
+  { η = λ x → [ F ]₁ (η α x)
+  ; natural = λ {a} {b} {f} → begin
+      [ F ]₁ ([ H ]₁ f) ∘E ([ F ]₁ (η α a)) 
+        ≡⟨ sym (dist F) ⟩
+      [ F ]₁ ([ H ]₁ f ∘D η α a)
+        ≡⟨ cong (F₁ F) (natural α) ⟩
+      [ F ]₁ (η α b ∘D [ G ]₁ f)
+        ≡⟨ dist F ⟩
+      [ F ]₁ (η α b) ∘E [ F ]₁ ([ G ]₁ f) ∎
+  } where _∘E_ = _∘_ E ; _∘D_ = _∘_ D
+
+[_]∘⟨_⟩ = rightWhiskerNatTrans
+
+-------------------------------------------------------------------------------
+-- Laws about whiskering
+-------------------------------------------------------------------------------
+
+rightWhiskerDist 
+  : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓE₀ ℓE₁ : Level} 
+  → {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} {E : Category {ℓE₀} {ℓE₁}}
+  → {F G H : Functor C D} 
+  → (K : Functor D E)
+  → (α : NaturalTransformation F G)
+  → (β : NaturalTransformation G H)
+  → [ K ]∘⟨ ⟨ β ⟩∘ᵥ⟨ α ⟩ ⟩ ≡ ⟨ [ K ]∘⟨ β ⟩ ⟩∘ᵥ⟨ [ K ]∘⟨ α ⟩ ⟩
+rightWhiskerDist {C = C} {D} {E} {F} {G} {H} K α β =
+  propEqNatTrans refl refl $ funExt $ λ (x : Obj C) → begin
+    η [ K ]∘⟨ ⟨ β ⟩∘ᵥ⟨ α ⟩ ⟩ x 
+      ≡⟨ refl ⟩
+    [ K ]₁ (η β x ∘D η α x)
+      ≡⟨ dist K ⟩
+    [ K ]₁ (η β x) ∘E [ K ]₁ (η α x)
+      ≡⟨ refl ⟩
+    η ⟨ [ K ]∘⟨ β ⟩ ⟩∘ᵥ⟨ [ K ]∘⟨ α ⟩ ⟩ x ∎
+  where _∘E_ = _∘_ E ; _∘D_ = _∘_ D
+
+
+leftWhiskerDist 
+  : {ℓB₀ ℓB₁ ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} 
+  → {B : Category {ℓB₀} {ℓB₁}} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} 
+  → {F G H : Functor C D} 
+  → (K : Functor B C)
+  → (α : NaturalTransformation F G)
+  → (β : NaturalTransformation G H)
+  → ⟨ ⟨ β ⟩∘ᵥ⟨ α ⟩ ⟩∘[ K ] ≡ ⟨ ⟨ β ⟩∘[ K ] ⟩∘ᵥ⟨ ⟨ α ⟩∘[ K ] ⟩
+leftWhiskerDist {B = B} K α β =
+  propEqNatTrans refl refl $ funExt $ λ (x : Obj B) → refl
+
+
+leftWhiskerId₁
+  : {ℓB₀ ℓB₁ ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} 
+  → {B : Category {ℓB₀} {ℓB₁}} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} 
+  → {F : Functor C D} 
+  → (K : Functor B C)
+  → ⟨ Id⟨ F ⟩ ⟩∘[ K ] ≡ Id⟨ [ F ]∘[ K ] ⟩
+leftWhiskerId₁ {B = B} K = 
+  propEqNatTrans refl refl $ funExt $ λ (x : Obj B) → refl
+
+
+leftWhiskerId₂
+  : {ℓB₀ ℓB₁ ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} 
+  → {B : Category {ℓB₀} {ℓB₁}} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} 
+  → {F G : Functor C D} 
+  → (K : Functor B C)
+  → (α : NaturalTransformation F G)
+  → ⟨ α ⟩∘ₕ⟨ Id⟨ K ⟩ ⟩ ≡ ⟨ α ⟩∘[ K ]
+leftWhiskerId₂ {B = B} {C} {D} {F} {G} K α = 
+  propEqNatTrans refl refl $ funExt $ λ (x : Obj B) → begin
+    η ⟨ α ⟩∘ₕ⟨ Id⟨ K ⟩ ⟩ x 
+      ≡⟨ refl ⟩
+    η α ([ K ]₀ x) ∘D [ F ]₁ (Category.id C) 
+      ≡⟨ cong (λ X → η α ([ K ]₀ x) ∘D X) (Functor.id F) ⟩
+    η α ([ K ]₀ x) ∘D Category.id D 
+      ≡⟨ idR D ⟩
+    η α ([ K ]₀ x)
+      ≡⟨ refl ⟩
+    η ⟨ α ⟩∘[ K ] x ∎
+  where _∘D_ = _∘_ D
+
+rightWhiskerId₁ 
+  : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓE₀ ℓE₁ : Level} 
+  → {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} {E : Category {ℓE₀} {ℓE₁}} 
+  → {F : Functor C D} 
+  → (K : Functor D E)
+  → [ K ]∘⟨ Id⟨ F ⟩ ⟩ ≡ Id⟨ [ K ]∘[ F ] ⟩
+rightWhiskerId₁ {C = C} K = 
+  propEqNatTrans refl refl $ funExt $ λ (x : Obj C) → Functor.id K
+
+
+rightWhiskerId₂
+  : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓE₀ ℓE₁ : Level} 
+  → {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} {E : Category {ℓE₀} {ℓE₁}} 
+  → {F G : Functor C D} 
+  → (K : Functor D E)
+  → (α : NaturalTransformation F G)
+  → ⟨ Id⟨ K ⟩ ⟩∘ₕ⟨ α ⟩ ≡ [ K ]∘⟨ α ⟩
+rightWhiskerId₂ {C = C} {D} {E} {F} {G} K α = 
+  propEqNatTrans refl refl $ funExt $ λ (x : Obj C) → idL E
+
