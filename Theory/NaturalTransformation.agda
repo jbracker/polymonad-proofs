@@ -156,19 +156,3 @@ propEqNatTrans {nat₀ = nat₀} {nat₁} refl refl refl with p
           (λ f → proof-irrelevance (nat₀ {a} {b} {f}) (nat₁ {a} {b} {f})
           ) ) )
 propEqNatTrans {F₀ = functor F₀ F₁ idF distF} {functor G₀ G₁ idG distG} {functor .F₀ .F₁ .idF .distF} {functor .G₀ .G₁ .idG .distG} refl refl refl | refl = refl
-
--------------------------------------------------------------------------------
--- Category of Functors and Natural Transformations
--------------------------------------------------------------------------------
-
-functorNatTransCategory : {Cℓ₀ Cℓ₁ Dℓ₀ Dℓ₁ : Level} 
-                        → Category {Cℓ₀} {Cℓ₁} → Category {Dℓ₀} {Dℓ₁} → Category
-functorNatTransCategory C D = record
-  { Obj = Functor C D
-  ; Hom = NaturalTransformation {C = C} {D}
-  ; _∘_ = λ {F} {G} {H} → ⟨_⟩∘ᵥ⟨_⟩ {C = C} {D} {F} {G} {H}
-  ; id = λ {F} → Id⟨ F ⟩
-  ; assoc = propEqNatTrans refl refl $ funExt $ λ _ → assoc D
-  ; idL = propEqNatTrans refl refl $ funExt $ λ _ → idL D
-  ; idR = propEqNatTrans refl refl $ funExt $ λ _ → idR D
-  }

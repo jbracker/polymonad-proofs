@@ -14,6 +14,7 @@ open ≡-Reasoning
 open import Utilities
 open import Theory.Category
 open import Theory.Functor
+open import Theory.NaturalTransformation
 
 -- Category of sets and functions.
 setCategory : {ℓ₀ : Level} → Category {ℓ₀ = lsuc ℓ₀}
@@ -47,3 +48,15 @@ catCategory {ℓ₀} {ℓ₁} = record
 
     idR : {a b : Category} {f : Functor a b} → [ f ]∘[ Id[ a ] ] ≡ f
     idR = refl
+
+-- Category of functors and natural transformations
+functorCategory : {Cℓ₀ Cℓ₁ Dℓ₀ Dℓ₁ : Level} → Category {Cℓ₀} {Cℓ₁} → Category {Dℓ₀} {Dℓ₁} → Category
+functorCategory C D = record
+  { Obj = Functor C D
+  ; Hom = NaturalTransformation {C = C} {D}
+  ; _∘_ = λ {F} {G} {H} → ⟨_⟩∘ᵥ⟨_⟩ {C = C} {D} {F} {G} {H}
+  ; id = λ {F} → Id⟨ F ⟩
+  ; assoc = propEqNatTrans refl refl $ funExt $ λ _ → Category.assoc D
+  ; idL = propEqNatTrans refl refl $ funExt $ λ _ → Category.idL D
+  ; idR = propEqNatTrans refl refl $ funExt $ λ _ → Category.idR D
+  }
