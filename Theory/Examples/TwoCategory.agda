@@ -3,7 +3,7 @@ module Theory.Examples.TwoCategory where
 
 -- Stdlib
 open import Level renaming ( suc to lsuc ; zero to lzero )
-open import Function hiding ( _∘_ ) renaming ( id to idF )
+open import Function renaming ( _∘_ to _∘F_ ; id to idF )
 open import Data.Product
 open import Data.Sum
 open import Data.Unit
@@ -33,7 +33,7 @@ functorTwoCategory {ℓObj} {ℓHom} = record
   ; horizontalIdR₂ = horizontalIdR₂
   ; horizontalIdL₁ = horizontalIdL₁
   ; horizontalIdL₂ = {!!}
-  ; horizontalAssoc₁ = {!!}
+  ; horizontalAssoc₁ = λ {A} {B} {C} {D} {F} {G} {H} → horizontalAssoc₁ {ℓB₀ = ℓObj} {ℓHom} {ℓObj} {ℓHom} {A = A} {B} {C} {D} {F} {G} {H}
   ; horizontalAssoc₂ = {!!}
   ; whiskerCoher1' = {!!}
   ; whiskerCoher2' = {!!}
@@ -82,19 +82,41 @@ functorTwoCategory {ℓObj} {ℓHom} = record
         η α ([ Id[ A ] ]₀ x)
           ≡⟨ refl ⟩
         η α x ∎
-        -- η c = ηα ([ F' ]₀ c) ∘E [ G ]₁ (ηβ c)
       where _∘B_ = Category._∘_ B
 
     horizontalIdL₁ : ∀ {ℓA₀ ℓA₁ ℓB₀ ℓB₁}
                    → {A : Cell₀ {ℓA₀} {ℓA₁}} {B : Cell₀ {ℓB₀} {ℓB₁}} 
                    → {F : Cell₁ A B}
-                   → [ comp ]₀ (id₁ , F) ≡ F
-    horizontalIdL₁ {A = A} {B} {F} = 
-      propEqFunctor refl $ funExt $ λ a → funExt $ λ b → funExt $ λ x → refl
-
+                   → [ id₁ ]∘[ F ] ≡ F
+    horizontalIdL₁ {A = A} {B} {F} = propEqFunctor refl refl
+{-
     horizontalIdL₂ : ∀ {ℓA₀ ℓA₁ ℓB₀ ℓB₁}
                    → {A : Cell₀ {ℓA₀} {ℓA₁}} {B : Cell₀ {ℓB₀} {ℓB₁}} 
-                   → {F G : Cell₁ A B} {α : Cell₂ F G}
-                   → [ comp ]₁ (idC (HomCat B B) , α) ≡ subst₂ (Cell₂ {A = A} {B}) (sym (horizontalIdL₁ {F = F})) (sym (horizontalIdL₁ {F = G})) α
-    horizontalIdL₂ = {!!}
- 
+                   → {F G : Cell₁ A B}
+                   → {α : Cell₂ F G} 
+                   → ⟨ idC (HomCat B B) {a = Id[ B ]} ⟩∘ₕ⟨ α ⟩ ≡ subst₂ Cell₂ (sym horizontalIdL₁) (sym horizontalIdL₁) α
+    horizontalIdL₂ {A = A} {B} {F} {G} {α} =
+      propEqNatTrans refl refl $ funExt $ λ (x : Obj A) → begin
+        η ⟨ idC (HomCat B B) {a = Id[ B ]} ⟩∘ₕ⟨ α ⟩ x 
+          ≡⟨ refl ⟩
+        Category.id B ∘B η α x
+          ≡⟨ idL B ⟩
+        η α x
+          ≡⟨ lemma x ⟩
+        η (subst₂ Cell₂ (sym (horizontalIdL₁ {F = F})) (sym (horizontalIdL₁ {F = G})) α) x ∎
+      where 
+        _∘B_ = _∘_ B
+        
+        lemma : (x : Obj A) 
+              → η α x ≡ η (subst₂ Cell₂ (sym (horizontalIdL₁ {F = F})) (sym (horizontalIdL₁ {F = G})) α) x
+        lemma x = begin
+          η α x 
+            ≡⟨ {!!} ⟩
+          η (subst₂ Cell₂ (sym (horizontalIdL₁ {F = F})) (sym (horizontalIdL₁ {F = G})) α) x ∎
+-}
+    horizontalAssoc₁ : ∀ {ℓA₀ ℓA₁ ℓB₀ ℓB₁ ℓC₀ ℓC₁ ℓD₀ ℓD₁}
+                   → {A : Cell₀ {ℓA₀} {ℓA₁}} {B : Cell₀ {ℓB₀} {ℓB₁}} {C : Cell₀ {ℓC₀} {ℓC₁}} {D : Cell₀ {ℓD₀} {ℓD₁}}
+                   → {F : Cell₁ A B} {G : Cell₁ B C} {H : Cell₁ C D} 
+                   → [ H ]∘[ [ G ]∘[ F ] ] ≡ [ [ H ]∘[ G ] ]∘[ F ]
+    horizontalAssoc₁ {A = A} {B} {C} {D} {F} {G} {H} = propEqFunctor refl refl
+    
