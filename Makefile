@@ -91,15 +91,17 @@ only-cat-theory:
 	$(AGDA_TC) Theory/Category.agda
 	$(AGDA_TC) Theory/Functor.agda
 	$(AGDA_TC) Theory/NaturalTransformation.agda
+	$(AGDA_TC) Theory/NaturalTransformation/Whisker.agda
 	$(AGDA_TC) Theory/Monad.agda
 	$(AGDA_TC) Theory/Kleisli.agda
 	$(AGDA_TC) Theory/RelativeMonad.agda
 	$(AGDA_TC) Theory/Monoid.agda
 	$(AGDA_TC) Theory/Preorder.agda
 	$(AGDA_TC) Theory/TwoCategory.agda
-	#$(AGDA_TC) Theory/TwoFunctor.agda
+	$(AGDA_TC) Theory/TwoFunctor.agda
 	$(AGDA_TC) Theory/Examples/Category.agda
 	$(AGDA_TC) Theory/Examples/Functor.agda
+	#$(AGDA_TC) Theory/Examples/TwoCategory.agda
 
 clean:
 	$(REMOVE) *.agdai
