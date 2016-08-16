@@ -31,13 +31,13 @@ record Functor {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} (C : Category {ℓC₀}
     dist : ∀ {a b c} {f : Hom C a b} {g : Hom C b c} 
          → F₁ (_∘_ C g f) ≡ _∘_ D (F₁ g) (F₁ f)
 
-[_]₀_ : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} 
+[_]₀ : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} 
       → Functor C D → ( Obj C → Obj D )
-[_]₀_ F a = Functor.F₀ F a
+[_]₀ F a = Functor.F₀ F a
 
-[_]₁_ : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} {a b : Obj C} 
+[_]₁ : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} {a b : Obj C} 
       → (F : Functor C D) → ( Hom C a b → Hom D ([ F ]₀ a) ([ F ]₀ b) )
-[_]₁_ F f = Functor.F₁ F f
+[_]₁ F f = Functor.F₁ F f
 
 -------------------------------------------------------------------------------
 -- The Identity Functor
@@ -172,3 +172,19 @@ propEqFunctor {F₀ = F₀} {F₁ = F₁} {idF = idF} {idG} {distF} {distG} refl
            (λ f → funExtImplicit
            (λ g → proof-irrelevance (distF {a} {b} {c} {f} {g}) (distG {a} {b} {c} {f} {g})
            ) ) ) ) )
+
+
+extractPropEqFunctorF₀ : {Cℓ₀ Cℓ₁ Dℓ₀ Dℓ₁ : Level}
+                       → {C : Category {Cℓ₀} {Cℓ₁}} {D : Category {Dℓ₀} {Dℓ₁}} 
+                       → {F G : Functor C D}
+                       → F ≡ G
+                       → Functor.F₀ F ≡ Functor.F₀ G
+extractPropEqFunctorF₀ refl = refl
+
+extractPropEqFunctorF₁ : {Cℓ₀ Cℓ₁ Dℓ₀ Dℓ₁ : Level}
+                       → {C : Category {Cℓ₀} {Cℓ₁}} {D : Category {Dℓ₀} {Dℓ₁}} 
+                       → {F G : Functor C D}
+                       → (eq : F ≡ G)
+                       → (λ {a b : Obj C} → Functor.F₁ F {a = a} {b}) 
+                       ≡ subst₂ (λ X Y → {a b : Obj C} → Hom C a b → Hom D (X a) (Y b)) (sym (extractPropEqFunctorF₀ eq)) (sym (extractPropEqFunctorF₀ eq)) (Functor.F₁ G)
+extractPropEqFunctorF₁ refl = refl
