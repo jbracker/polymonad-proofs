@@ -138,9 +138,9 @@ KleisliTriple→Monad {C = C} {T = T} km = record
         ≡⟨ refl ⟩ 
       η b ∘ ([ IdC ]₁ f) ∎
     
-    μCoher : {x : Obj C} → μ x ∘ ([ TF ]₁ μ x) ≡ μ x ∘ μ ([ TF ]₀ x)
+    μCoher : {x : Obj C} → μ x ∘ ([ TF ]₁ (μ x)) ≡ μ x ∘ μ ([ TF ]₀ x)
     μCoher {x = x} = begin
-      μ x ∘ ([ TF ]₁ μ x)
+      μ x ∘ ([ TF ]₁ (μ x))
         ≡⟨ refl ⟩
       kext id ∘ kext (ηk ∘ kext id)
         ≡⟨ sym (KleisliTriple.coher km) ⟩ 
@@ -158,9 +158,9 @@ KleisliTriple→Monad {C = C} {T = T} km = record
         ≡⟨ refl ⟩
       μ x ∘ μ ([ TF ]₀ x) ∎
     
-    ηCoherL : {x : Obj C} → μ x ∘ ([ TF ]₁ η x) ≡ η⟨ Id⟨ TF ⟩ ⟩ x
+    ηCoherL : {x : Obj C} → μ x ∘ ([ TF ]₁ (η x)) ≡ η⟨ Id⟨ TF ⟩ ⟩ x
     ηCoherL {x = x} = begin
-      μ x ∘ ([ TF ]₁ η x) 
+      μ x ∘ ([ TF ]₁ (η x)) 
         ≡⟨ refl ⟩
       kext id ∘ kext (ηk ∘ ηk) 
         ≡⟨ sym (KleisliTriple.coher km) ⟩
@@ -179,13 +179,13 @@ KleisliTriple→Monad {C = C} {T = T} km = record
     ηCoherR : {x : Obj C} → μ x ∘ (η ([ TF ]₀ x)) ≡ η⟨ Id⟨ TF ⟩ ⟩ x
     ηCoherR {x = x} = KleisliTriple.idR km
     
-    μNatTrans : NaturalTransformation _≡_ [ TF ]∘[ TF ] TF
+    μNatTrans : NaturalTransformation [ TF ]∘[ TF ] TF
     μNatTrans = record 
       { η = μ 
       ; natural = μNatural
       }
     
-    ηNatTrans : NaturalTransformation _≡_ Id[ C ] TF
+    ηNatTrans : NaturalTransformation Id[ C ] TF
     ηNatTrans = record 
       { η = η 
       ; natural = ηNatural
