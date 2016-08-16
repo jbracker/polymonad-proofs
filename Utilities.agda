@@ -8,6 +8,7 @@ open import Data.Sum
 open import Data.Unit
 open import Data.Empty
 open import Relation.Nullary -- ¬
+open import Relation.Binary.HeterogeneousEquality renaming ( trans to htrans ; cong to hcong ; subst to hsubst ; subst₂ to hsubst₂ ; sym to hsym ) -- ≅
 open import Relation.Binary.PropositionalEquality -- ≡
 open ≡-Reasoning
 
@@ -55,8 +56,15 @@ funCong₂ {a = a} {b} {f} {g} fg = cong (λ h → h a b) fg
 postulate
   funExt : ∀ {l k} {A : Set l} {B : A → Set k} {f g : (a : A) → B a} → ((x : A) → f x ≡ g x) → f ≡ g
 
+
+hFunExt : ∀ {l k} {A : Set l} {B : A → Set k} {f g : (a : A) → B a} → ((x : A) → f x ≅ g x) → f ≅ g
+hFunExt p = ≡-to-≅ (funExt (λ x → ≅-to-≡ (p x)))
+
 funExtImplicit : ∀ {l k} {A : Set l} {B : A → Set k} {f g : {a : A} → B a} → ((x : A) → f {x} ≡ g {x}) → (λ {a} → f {a}) ≡ (λ {a} → g {a})
 funExtImplicit {f = f} {g = g} p = cong (λ X → (λ {a} → X a)) (funExt p)
+
+hFunExtImplicit : ∀ {l k} {A : Set l} {B : A → Set k} {f g : {a : A} → B a} → ((x : A) → f {x} ≅ g {x}) → (λ {a} → f {a}) ≅ (λ {a} → g {a})
+hFunExtImplicit {f = f} {g = g} p = hcong (λ X → (λ {a} → X a)) (hFunExt p)
 
 funExt₂ : ∀ {l k n} {A : Set l} {B : A → Set k} {C : (a : A) → B a → Set n} {f g : (a : A) → (b : B a) → C a b} → ((a : A) → (b : B a) → f a b ≡ g a b) → f ≡ g
 funExt₂ {f = f} {g = g} p = funExt (λ a → funExt (p a))
