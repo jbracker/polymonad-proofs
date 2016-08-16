@@ -28,6 +28,10 @@ open import Theory.Examples.Category
 
 open NaturalTransformation
 
+-------------------------------------------------------------------------------
+-- Strict 2-Category of categories, functors and natural transformations
+-------------------------------------------------------------------------------
+
 functorTwoCategory : ∀ {ℓObj ℓHom} → StrictTwoCategory
 functorTwoCategory {ℓObj} {ℓHom} = record
   { Cell₀ = Cell₀ {ℓObj} {ℓHom}
@@ -35,15 +39,15 @@ functorTwoCategory {ℓObj} {ℓHom} = record
   ; comp = λ {A} {B} {C} → comp {A = A} {B} {C}
   ; id₁ = id₁
   ; horizontalIdR₁ = refl
-  ; horizontalIdR₂ = {!!} -- λ {A} {B} {F} {G} {α} → horizontalIdR₂ {A = A} {B} {F} {G} {α}
-  ; horizontalIdL₁ = {!!} -- λ {A} {B} {F} → horizontalIdL₁ {A = A} {B} {F}
-  ; horizontalIdL₂ = {!!} -- λ {A} {B} {F} {G} {α} → horizontalIdL₂ {A = A} {B} {F} {G} {α}
-  ; horizontalAssoc₁ = {!!} -- λ {A} {B} {C} {D} {F} {G} {H} → horizontalAssoc₁ {ℓB₀ = ℓObj} {ℓHom} {ℓObj} {ℓHom} {A = A} {B} {C} {D} {F} {G} {H}
-  ; horizontalAssoc₂ = {!!} -- λ {A} {B} {C} {D} {F} {F'} {G} {G'} {H} {H'} {α} {β} {γ} → horizontalAssoc₂ {A = A} {B} {C} {D} {F} {F'} {G} {G'} {H} {H'} {α} {β} {γ}  
-  ; whiskerCoher1' = {!!}
-  ; whiskerCoher2' = {!!}
-  ; whiskerCoher3' = {!!}
-  ; whiskerCoher4' = {!refl!}
+  ; horizontalIdR₂ = λ {A} {B} {F} {G} {α} → horizontalIdR₂ {A = A} {B} {F} {G} {α}
+  ; horizontalIdL₁ = λ {A} {B} {F} → horizontalIdL₁ {A = A} {B} {F}
+  ; horizontalIdL₂ = λ {A} {B} {F} {G} {α} → horizontalIdL₂ {A = A} {B} {F} {G} {α}
+  ; horizontalAssoc₁ = λ {A} {B} {C} {D} {F} {G} {H} → horizontalAssoc₁ {ℓB₀ = ℓObj} {ℓHom} {ℓObj} {ℓHom} {A = A} {B} {C} {D} {F} {G} {H}
+  ; horizontalAssoc₂ = λ {A} {B} {C} {D} {F} {F'} {G} {G'} {H} {H'} {α} {β} {γ} → horizontalAssoc₂ {A = A} {B} {C} {D} {F} {F'} {G} {G'} {H} {H'} {α} {β} {γ}  
+  ; whiskerCoher1' = λ {A} {B} {C} {D} {F} {G} {H} {I} {α} → whiskerCoher1 {A = A} {B} {C} {D} {F} {G} {H} {I} {α}
+  ; whiskerCoher2' = λ {A} {B} {C} {D} {F} {G} {H} {I} {α} → whiskerCoher2 {A = A} {B} {C} {D} {F} {G} {H} {I} {α}
+  ; whiskerCoher3' = λ {A} {B} {C} {D} {F} {G} {H} {I} {α} → whiskerCoher3 {A = A} {B} {C} {D} {F} {G} {H} {I} {α}
+  ; whiskerCoher4' = λ {A} {B} {C} {F} {G} {H} {I} {α} {β} → whiskerCoher4 {A = A} {B} {C} {F} {G} {H} {I} {α} {β}
   } where
     open Category renaming ( id to idC )
     
@@ -82,7 +86,19 @@ functorTwoCategory {ℓObj} {ℓHom} = record
                   → (x : Obj A) 
                   → η α x ≅ η (subst₂ Cell₂ eqA eqB α) x
     subst₂-insert refl refl α x = refl
-
+    
+    horizontalIdL₁ : ∀ {ℓA₀ ℓA₁ ℓB₀ ℓB₁}
+                   → {A : Cell₀ {ℓA₀} {ℓA₁}} {B : Cell₀ {ℓB₀} {ℓB₁}} 
+                   → {F : Cell₁ A B}
+                   → [ id₁ ]∘[ F ] ≡ F
+    horizontalIdL₁ {A = A} {B} {F} = propEqFunctor refl refl
+    
+    horizontalAssoc₁ : ∀ {ℓA₀ ℓA₁ ℓB₀ ℓB₁ ℓC₀ ℓC₁ ℓD₀ ℓD₁}
+                   → {A : Cell₀ {ℓA₀} {ℓA₁}} {B : Cell₀ {ℓB₀} {ℓB₁}} {C : Cell₀ {ℓC₀} {ℓC₁}} {D : Cell₀ {ℓD₀} {ℓD₁}}
+                   → {F : Cell₁ A B} {G : Cell₁ B C} {H : Cell₁ C D} 
+                   → [ H ]∘[ [ G ]∘[ F ] ] ≡ [ [ H ]∘[ G ] ]∘[ F ]
+    horizontalAssoc₁ {A = A} {B} {C} {D} {F} {G} {H} = propEqFunctor refl refl
+    
     horizontalIdR₂ : ∀ {ℓA₀ ℓA₁ ℓB₀ ℓB₁}
                    → {A : Cell₀ {ℓA₀} {ℓA₁}} {B : Cell₀ {ℓB₀} {ℓB₁}} 
                    → {F G : Cell₁ A B} {α : Cell₂ F G} 
@@ -98,12 +114,6 @@ functorTwoCategory {ℓObj} {ℓHom} = record
           ≡⟨ refl ⟩
         η α x ∎
       where _∘B_ = Category._∘_ B
-
-    horizontalIdL₁ : ∀ {ℓA₀ ℓA₁ ℓB₀ ℓB₁}
-                   → {A : Cell₀ {ℓA₀} {ℓA₁}} {B : Cell₀ {ℓB₀} {ℓB₁}} 
-                   → {F : Cell₁ A B}
-                   → [ id₁ ]∘[ F ] ≡ F
-    horizontalIdL₁ {A = A} {B} {F} = propEqFunctor refl refl
     
     horizontalIdL₂ : ∀ {ℓA₀ ℓA₁ ℓB₀ ℓB₁}
                    → {A : Cell₀ {ℓA₀} {ℓA₁}} {B : Cell₀ {ℓB₀} {ℓB₁}} 
@@ -120,12 +130,6 @@ functorTwoCategory {ℓObj} {ℓHom} = record
           ≡⟨ ≅-to-≡ (subst₂-insert (sym (horizontalIdL₁ {F = F})) (sym (horizontalIdL₁ {F = G})) α x) ⟩
         η (subst₂ Cell₂ (sym (horizontalIdL₁ {F = F})) (sym (horizontalIdL₁ {F = G})) α) x ∎
       where _∘B_ = _∘_ B
-
-    horizontalAssoc₁ : ∀ {ℓA₀ ℓA₁ ℓB₀ ℓB₁ ℓC₀ ℓC₁ ℓD₀ ℓD₁}
-                   → {A : Cell₀ {ℓA₀} {ℓA₁}} {B : Cell₀ {ℓB₀} {ℓB₁}} {C : Cell₀ {ℓC₀} {ℓC₁}} {D : Cell₀ {ℓD₀} {ℓD₁}}
-                   → {F : Cell₁ A B} {G : Cell₁ B C} {H : Cell₁ C D} 
-                   → [ H ]∘[ [ G ]∘[ F ] ] ≡ [ [ H ]∘[ G ] ]∘[ F ]
-    horizontalAssoc₁ {A = A} {B} {C} {D} {F} {G} {H} = propEqFunctor refl refl
     
     horizontalAssoc₂ : ∀ {ℓA₀ ℓA₁ ℓB₀ ℓB₁ ℓC₀ ℓC₁ ℓD₀ ℓD₁}
                      → {A : Cell₀ {ℓA₀} {ℓA₁}} {B : Cell₀ {ℓB₀} {ℓB₁}} {C : Cell₀ {ℓC₀} {ℓC₁}} {D : Cell₀ {ℓD₀} {ℓD₁}}
@@ -153,3 +157,122 @@ functorTwoCategory {ℓObj} {ℓHom} = record
               ( η α ([ G' ]₀ ([ F' ]₀ x)) ∘D [ H ]₁ (η β ([ F' ]₀ x)) ) ∘D [ H ]₁ ([ G ]₁ (η γ x)) -- η ⟨ α ⟩∘ₕ⟨ β ⟩ ([ F' ]₀ x)
                 ≅⟨ refl ⟩
               η ([ comp ]₁ ([ comp ]₁ (α , β) , γ)) x ∎h
+
+    whiskerCoher1 : ∀ {ℓA₀ ℓA₁ ℓB₀ ℓB₁ ℓC₀ ℓC₁ ℓD₀ ℓD₁}
+                  → {A : Cell₀ {ℓA₀} {ℓA₁}} {B : Cell₀ {ℓB₀} {ℓB₁}} {C : Cell₀ {ℓC₀} {ℓC₁}} {D : Cell₀ {ℓD₀} {ℓD₁}} 
+                  → {F : Cell₁ A B} {G : Cell₁ B C} {H I : Cell₁ C D}
+                  → {α : Cell₂ H I} 
+                  → [ comp ]₁ (α , idC (HomCat A C) {a = [ G ]∘[ F ]}) 
+                  ≡ subst₂ Cell₂ (sym $ horizontalAssoc₁ {F = F} {G} {H}) (sym $ horizontalAssoc₁ {F = F} {G} {I}) 
+                           ([ comp ]₁ ([ comp ]₁ (α , idC (HomCat B C) {a = G}) , idC (HomCat A B) {a = F}))
+    whiskerCoher1 {A = A} {B} {C} {D} {F} {G} {H} {I} {α} = propEqNatTrans refl refl $ funExt $ (λ (x : Obj A) → 
+      ≅-to-≡ $ htrans (lemma x) (subst₂-insert eqA eqB ([ comp ]₁ ([ comp ]₁ (α , idC (HomCat B C) {a = G}) , idC (HomCat A B) {a = F})) x))
+      where
+        _∘D_ = _∘_ D
+        eqA = sym $ horizontalAssoc₁ {F = F} {G} {H}
+        eqB = sym $ horizontalAssoc₁ {F = F} {G} {I}
+        
+        lemma : (x : Obj A) → η ([ comp ]₁ (α , idC (HomCat A C) {a = [ G ]∘[ F ]})) x ≅ η ([ comp ]₁ ([ comp ]₁ (α , idC (HomCat B C) {a = G}) , idC (HomCat A B) {a = F})) x
+        lemma x = hbegin
+          η ([ comp ]₁ (α , idC (HomCat A C) {a = [ G ]∘[ F ]})) x 
+            ≅⟨ refl ⟩
+          η α ([ G ]₀ ([ F ]₀ x)) ∘D [ H ]₁ (Category.id C)
+            ≅⟨ hcong (λ X → η α ([ G ]₀ ([ F ]₀ x)) ∘D X) (≡-to-≅ $ Functor.id H) ⟩
+          η α ([ G ]₀ ([ F ]₀ x)) ∘D Category.id D
+            ≅⟨ hcong (λ X → η α ([ G ]₀ ([ F ]₀ x)) ∘D X) (≡-to-≅ $ sym $ Functor.id H) ⟩
+          η α ([ G ]₀ ([ F ]₀ x)) ∘D [ H ]₁ (idC C)
+            ≅⟨ ≡-to-≅ $ sym $ idR D ⟩
+          ( η α ([ G ]₀ ([ F ]₀ x)) ∘D [ H ]₁ (idC C) ) ∘D idC D
+            ≅⟨ hcong (λ X → ( η α ([ G ]₀ ([ F ]₀ x)) ∘D [ H ]₁ (idC C) ) ∘D X) (≡-to-≅ $ sym $ Functor.id H) ⟩
+          ( η α ([ G ]₀ ([ F ]₀ x)) ∘D [ H ]₁ (idC C) ) ∘D [ H ]₁ (idC C)
+            ≅⟨ hcong (λ X → ( η α ([ G ]₀ ([ F ]₀ x)) ∘D [ H ]₁ (idC C) ) ∘D ( [ H ]₁ X )) (≡-to-≅ $ sym $ Functor.id G) ⟩
+          ( η α ([ G ]₀ ([ F ]₀ x)) ∘D [ H ]₁ (idC C) ) ∘D [ H ]₁ ([ G ]₁ (idC B))
+            ≅⟨ refl ⟩
+          η ([ comp ]₁ ([ comp ]₁ (α , idC (HomCat B C) {a = G}) , idC (HomCat A B) {a = F})) x ∎h
+
+    whiskerCoher2 : ∀ {ℓA₀ ℓA₁ ℓB₀ ℓB₁ ℓC₀ ℓC₁ ℓD₀ ℓD₁}
+                  → {A : Cell₀ {ℓA₀} {ℓA₁}} {B : Cell₀ {ℓB₀} {ℓB₁}} {C : Cell₀ {ℓC₀} {ℓC₁}} {D : Cell₀ {ℓD₀} {ℓD₁}} 
+                  → {F : Cell₁ A B} {G H : Cell₁ B C} {I : Cell₁ C D}
+                  → {α : Cell₂ G H} 
+                  → [ comp ]₁ (idC (HomCat C D) {a = I} , [ comp ]₁ (α , idC (HomCat A B) {a = F}))
+                  ≡ subst₂ (Hom (HomCat A D)) (sym $ horizontalAssoc₁ {F = F} {G} {I}) (sym $ horizontalAssoc₁ {F = F} {H} {I}) 
+                           ([ comp ]₁ ([ comp ]₁ (idC (HomCat C D) {a = I} , α) , idC (HomCat A B) {a = F}))
+    whiskerCoher2 {A = A} {B} {C} {D} {F} {G} {H} {I} {α} = propEqNatTrans refl refl $ funExt $ λ (x : Obj A) → 
+      ≅-to-≡ $ htrans (lemma x) (subst₂-insert eqA eqB ([ comp ]₁ ([ comp ]₁ (idC (HomCat C D) {a = I} , α) , idC (HomCat A B) {a = F})) x)
+      where
+        eqA = sym $ horizontalAssoc₁ {F = F} {G} {I}
+        eqB = sym $ horizontalAssoc₁ {F = F} {H} {I}
+        
+        _∘D_ = _∘_ D
+        _∘C_ = _∘_ C
+        
+        lemma : (x : Obj A) 
+              → η ([ comp ]₁ (idC (HomCat C D) {a = I} , [ comp ]₁ (α , idC (HomCat A B) {a = F}))) x
+              ≅ η ([ comp ]₁ ([ comp ]₁ (idC (HomCat C D) {a = I} , α) , idC (HomCat A B) {a = F})) x
+        lemma x = hbegin
+          η ([ comp ]₁ (idC (HomCat C D) {a = I} , [ comp ]₁ (α , idC (HomCat A B) {a = F}))) x
+            ≅⟨ refl ⟩
+          idC D ∘D [ I ]₁ (η α ([ F ]₀ x) ∘C [ G ]₁ (idC B))
+            ≅⟨ ≡-to-≅ $ idL D ⟩
+          [ I ]₁ (η α ([ F ]₀ x) ∘C [ G ]₁ (idC B))
+            ≅⟨ ≡-to-≅ $ Functor.dist I ⟩
+          [ I ]₁ (η α ([ F ]₀ x)) ∘D [ I ]₁ ([ G ]₁ (idC B))
+            ≅⟨ hcong (λ X → X ∘D [ I ]₁ ([ G ]₁ (idC B))) (≡-to-≅ $ sym $ idL D) ⟩
+          ( idC D ∘D [ I ]₁ (η α ([ F ]₀ x)) ) ∘D [ I ]₁ ([ G ]₁ (idC B))
+            ≅⟨ refl ⟩
+          η ([ comp ]₁ ([ comp ]₁ (idC (HomCat C D) {a = I} , α) , idC (HomCat A B) {a = F})) x ∎h
+ 
+    whiskerCoher3 : ∀ {ℓA₀ ℓA₁ ℓB₀ ℓB₁ ℓC₀ ℓC₁ ℓD₀ ℓD₁}
+                  → {A : Cell₀ {ℓA₀} {ℓA₁}} {B : Cell₀ {ℓB₀} {ℓB₁}} {C : Cell₀ {ℓC₀} {ℓC₁}} {D : Cell₀ {ℓD₀} {ℓD₁}} 
+                  → {F G : Cell₁ A B} {H : Cell₁ B C} {I : Cell₁ C D}
+                  → {α : Cell₂ F G} 
+                  → [ comp ]₁ (idC (HomCat C D) {a = I} , [ comp ]₁ (idC (HomCat B C) {a = H} , α))
+                  ≡ subst₂ (Hom (HomCat A D)) (sym $ horizontalAssoc₁ {F = F} {H} {I}) (sym $ horizontalAssoc₁ {F = G} {H} {I}) ([ comp ]₁ (idC (HomCat B D) {a = [ I ]∘[ H ]} , α))
+    whiskerCoher3 {A = A} {B} {C} {D} {F} {G} {H} {I} {α} = propEqNatTrans refl refl $ funExt $ λ (x : Obj A) → 
+      ≅-to-≡ $ htrans (lemma x) (subst₂-insert eqA eqB ([ comp ]₁ (idC (HomCat B D) {a = [ I ]∘[ H ]} , α)) x)
+      where
+        eqA = sym $ horizontalAssoc₁ {F = F} {H} {I}
+        eqB = sym $ horizontalAssoc₁ {F = G} {H} {I}
+        
+        _∘D_ = _∘_ D
+        _∘C_ = _∘_ C
+        
+        lemma : (x : Obj A) 
+              → η ([ comp ]₁ (idC (HomCat C D) {a = I} , [ comp ]₁ (idC (HomCat B C) {a = H} , α))) x
+              ≅ η ([ comp ]₁ (idC (HomCat B D) {a = [ I ]∘[ H ]} , α)) x
+        lemma x = hbegin
+          η ([ comp ]₁ (idC (HomCat C D) {a = I} , [ comp ]₁ (idC (HomCat B C) {a = H} , α))) x
+            ≅⟨ refl ⟩ 
+          idC D ∘D [ I ]₁ (idC C ∘C [ H ]₁ (η α x))
+            ≅⟨ hcong (λ X → idC D ∘D [ I ]₁ X) (≡-to-≅ $ idL C) ⟩ 
+          idC D ∘D [ I ]₁ ([ H ]₁ (η α x))
+            ≅⟨ refl ⟩ 
+          η ([ comp ]₁ (idC (HomCat B D) {a = [ I ]∘[ H ]} , α)) x ∎h
+    
+    whiskerCoher4 : ∀ {ℓA₀ ℓA₁ ℓB₀ ℓB₁ ℓC₀ ℓC₁}
+                  → {A : Cell₀ {ℓA₀} {ℓA₁}} {B : Cell₀ {ℓB₀} {ℓB₁}} {C : Cell₀ {ℓC₀} {ℓC₁}}
+                  → {F G : Cell₁ A B} {H I : Cell₁ B C}
+                  → {α : Cell₂ F G} {β : Cell₂ H I} 
+                  → ⟨ [ comp ]₁ (idC (HomCat B C) {a = I} , α) ⟩∘ᵥ⟨ [ comp ]₁ (β , idC (HomCat A B) {a = F}) ⟩
+                  ≡ ⟨ [ comp ]₁ (β , idC (HomCat A B) {a = G}) ⟩∘ᵥ⟨ [ comp ]₁ (idC (HomCat B C) {a = H} , α) ⟩
+    whiskerCoher4 {A = A} {B} {C} {F} {G} {H} {I} {α} {β} = propEqNatTrans refl refl $ funExt $ λ (x : Obj A) → begin
+      η ⟨ [ comp ]₁ (idC (HomCat B C) {a = I} , α) ⟩∘ᵥ⟨ [ comp ]₁ (β , idC (HomCat A B) {a = F}) ⟩ x
+        ≡⟨ refl ⟩
+      ( idC C ∘C [ I ]₁ (η α x) ) ∘C ( η β ([ F ]₀ x) ∘C [ H ]₁ (idC B) )
+        ≡⟨ cong (λ X → X ∘C ( η β ([ F ]₀ x) ∘C [ H ]₁ (idC B) )) (idL C) ⟩ 
+      [ I ]₁ (η α x) ∘C ( η β ([ F ]₀ x) ∘C [ H ]₁ (idC B) )
+        ≡⟨ cong (λ X → [ I ]₁ (η α x) ∘C ( η β ([ F ]₀ x) ∘C X )) (Functor.id H) ⟩ 
+      [ I ]₁ (η α x) ∘C ( η β ([ F ]₀ x) ∘C idC C )
+        ≡⟨ cong (λ X → [ I ]₁ (η α x) ∘C X) (idR C) ⟩ 
+      [ I ]₁ (η α x) ∘C η β ([ F ]₀ x)
+        ≡⟨ natural β ⟩ 
+      η β ([ G ]₀ x) ∘C [ H ]₁ (η α x)
+        ≡⟨ cong (λ X → η β ([ G ]₀ x) ∘C X) (sym (idL C)) ⟩ 
+      η β ([ G ]₀ x) ∘C ( idC C ∘C [ H ]₁ (η α x) )
+        ≡⟨ cong (λ X → X ∘C ( idC C ∘C [ H ]₁ (η α x) )) (sym (idR C)) ⟩ 
+      ( η β ([ G ]₀ x) ∘C idC C ) ∘C ( idC C ∘C [ H ]₁ (η α x) )
+        ≡⟨ cong (λ X → ( η β ([ G ]₀ x) ∘C X ) ∘C ( idC C ∘C [ H ]₁ (η α x) )) (sym (Functor.id H)) ⟩ 
+      ( η β ([ G ]₀ x) ∘C [ H ]₁ (idC B) ) ∘C ( idC C ∘C [ H ]₁ (η α x) )
+        ≡⟨ refl ⟩ 
+      η ⟨ [ comp ]₁ (β , idC (HomCat A B) {a = G}) ⟩∘ᵥ⟨ [ comp ]₁ (idC (HomCat B C) {a = H} , α) ⟩ x ∎
+      where _∘C_ = _∘_ C
