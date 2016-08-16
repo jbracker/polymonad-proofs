@@ -10,6 +10,8 @@ open import Data.Unit
 open import Data.Empty
 open import Relation.Binary.Core
 open import Relation.Binary.PropositionalEquality
+open import Relation.Binary.HeterogeneousEquality
+  renaming ( sym to hsym ; trans to htrans ; cong to hcong ; subst₂ to hsubst₂ ; proof-irrelevance to hproof-irrelevance )
 open ≡-Reasoning 
 
 -- Local
@@ -28,11 +30,12 @@ record NaturalTransformation {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level}
                              (F : Functor C D) (G : Functor C D) 
                              : Set (ℓC₀ ⊔ ℓC₁ ⊔ ℓD₀ ⊔ ℓD₁) where
   constructor naturalTransformation
+  private _∘D_ = Category._∘_ D
   field
     η : (x : Obj C) → Hom D ([ F ]₀ x) ([ G ]₀ x)
     
     natural : {a b : Obj C} {f : Hom C a b} 
-            → ( _∘_ D ([ G ]₁ f) (η a) ) ≡ ( _∘_ D (η b) ([ F ]₁ f) )
+            → ([ G ]₁ f) ∘D (η a) ≡ (η b) ∘D ([ F ]₁ f)
             -- G₁ f ∘ η ≡ η ∘ F₁ f
 
 η⟨_⟩_ = NaturalTransformation.η
@@ -152,7 +155,7 @@ propEqNatTrans : {Cℓ₀ Cℓ₁ Dℓ₀ Dℓ₁ : Level}
                → (eq₀ : F₀ ≡ F₁)
                → (eq₁ : G₀ ≡ G₁)
                → (eq₂ : subst₂ (λ F G → (x : Obj C) → Hom D ([ F ]₀ x) ([ G ]₀ x)) eq₀ eq₁ η₀ ≡ η₁)
-               → subst₂ (λ F G → NaturalTransformation F G) eq₀ eq₁ (naturalTransformation {F = F₀} {G = G₀} η₀ nat₀) 
+               → subst₂ (λ F G → NaturalTransformation F G) eq₀ eq₁ (naturalTransformation {F = F₀} {G = G₀} η₀ (nat₀)) 
                ≡ naturalTransformation {F = F₁} {G = G₁} η₁ nat₁
 propEqNatTrans {nat₀ = nat₀} {nat₁} refl refl refl with p
   where
@@ -162,6 +165,26 @@ propEqNatTrans {nat₀ = nat₀} {nat₁} refl refl refl with p
           (λ f → proof-irrelevance (nat₀ {a} {b} {f}) (nat₁ {a} {b} {f})
           ) ) )
 propEqNatTrans {F₀ = functor F₀ F₁ idF distF} {functor G₀ G₁ idG distG} {functor .F₀ .F₁ .idF .distF} {functor .G₀ .G₁ .idG .distG} refl refl refl | refl = refl
+
+hetEqNatTrans : {Cℓ₀ Cℓ₁ Dℓ₀ Dℓ₁ : Level} 
+              → {C : Category {Cℓ₀} {Cℓ₁}} {D : Category {Dℓ₀} {Dℓ₁}} 
+              → {F₀ G₀ F₁ G₁ : Functor C D}
+              → {η₀ : (x : Obj C) → Hom D ([ F₀ ]₀ x) ([ G₀ ]₀ x)}
+              → {η₁ : (x : Obj C) → Hom D ([ F₁ ]₀ x) ([ G₁ ]₀ x)}
+              → {nat₀ : {a b : Obj C} {f : Hom C a b} → ( _∘_ D ([ G₀ ]₁ f) (η₀ a) ) ≅ ( _∘_ D (η₀ b) ([ F₀ ]₁ f) )}
+              → {nat₁ : {a b : Obj C} {f : Hom C a b} → ( _∘_ D ([ G₁ ]₁ f) (η₁ a) ) ≅ ( _∘_ D (η₁ b) ([ F₁ ]₁ f) )}
+              → (eq₀ : F₀ ≅ F₁)
+              → (eq₁ : G₀ ≅ G₁)
+              → (eq₂ : η₀ ≅ η₁)
+              → naturalTransformation {F = F₀} {G = G₀} η₀ (≅-to-≡ nat₀) ≅ naturalTransformation {F = F₁} {G = G₁} η₁ (≅-to-≡ nat₁)
+hetEqNatTrans {nat₀ = nat₀} {nat₁} refl refl refl with p
+  where
+    p = hFunExtImplicit 
+          (λ a → hFunExtImplicit 
+          (λ b → hFunExtImplicit 
+          (λ f → ≡-to-≅ (hproof-irrelevance (nat₀ {a} {b} {f}) (nat₁ {a} {b} {f}))
+          ) ) )
+hetEqNatTrans {F₀ = functor F₀ F₁ idF distF} {functor G₀ G₁ idG distG} {functor .F₀ .F₁ .idF .distF} {functor .G₀ .G₁ .idG .distG} refl refl refl | refl = refl
 
 
 extractPropEqNatTransEta : {Cℓ₀ Cℓ₁ Dℓ₀ Dℓ₁ : Level}
