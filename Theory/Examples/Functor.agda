@@ -9,6 +9,7 @@ open import Data.Sum
 open import Data.Unit
 open import Data.Empty
 open import Relation.Binary.PropositionalEquality
+open import Relation.Binary.HeterogeneousEquality hiding ( cong ; subst ; subst₂ ; sym ; trans )
 open ≡-Reasoning 
 
 -- Local
@@ -237,3 +238,15 @@ biFunctor→triFunctor₂ {C = C} {D} {E} {J} {K} C×D→J J×E→K = record
       ([ J×E→K ]₁ ([ C×D→J ]₁ gCD ,' gE)) ∘K ([ J×E→K ]₁ ([ C×D→J ]₁ fCD ,' fE))
         ≡⟨ refl ⟩
       (F₁ (gCD ,' gE)) ∘K (F₁ (fCD ,' fE)) ∎
+
+functorCompIdR : {ℓA₀ ℓA₁ ℓB₀ ℓB₁ : Level} 
+               → {A : Category {ℓA₀} {ℓA₁}} {B : Category {ℓB₀} {ℓB₁}} 
+               → (F : Functor A B)
+               → [ Id[ B ] ]∘[ F ] ≡ F
+functorCompIdR F = propEqFunctor refl refl
+
+functorCompIdL : {ℓA₀ ℓA₁ ℓB₀ ℓB₁ : Level} 
+               → {A : Category {ℓA₀} {ℓA₁}} {B : Category {ℓB₀} {ℓB₁}} 
+               → (F : Functor A B)
+               → [ F ]∘[ Id[ A ] ] ≡ F
+functorCompIdL F = propEqFunctor refl refl
