@@ -73,39 +73,6 @@ functorTwoCategory {ℓObj} {ℓHom} = record
     id₁ : ∀ {ℓA₀ ℓA₁} → {A : Cell₀ {ℓA₀} {ℓA₁}} → Cell₁ A A
     id₁ {A = A} = Id[ A ]
     
-    
-    subst₂-convert : ∀ {ℓA₀ ℓA₁ ℓB₀ ℓB₁}
-                   → {A : Category {ℓA₀} {ℓA₁}} {B : Category {ℓB₀} {ℓB₁}} 
-                   → {F F' G G' : Functor A B}
-                   → (eqA : F ≡ F')
-                   → (eqB : G ≡ G')
-                   → (α : NaturalTransformation F G)
-                   → subst₂ Cell₂ eqA eqB α
-                   ≅ hsubst₂ Cell₂ (≡-to-≅ eqA) (≡-to-≅ eqB) α
-    subst₂-convert refl refl α = refl
-
-
-    subst₂-removal : ∀ {ℓA₀ ℓA₁ ℓB₀ ℓB₁}
-               → {A : Category {ℓA₀} {ℓA₁}} {B : Category {ℓB₀} {ℓB₁}} 
-               → {F F' G G' : Functor A B}
-               → (eqA : F ≅ F')
-               → (eqB : G ≅ G')
-               → (α : NaturalTransformation F G)
-               → α ≅ hsubst₂ Cell₂ eqA eqB α
-    subst₂-removal refl refl α = refl
-
-    replaceNatTrans : ∀ {ℓA₀ ℓA₁ ℓB₀ ℓB₁}
-               → {A : Category {ℓA₀} {ℓA₁}} {B : Category {ℓB₀} {ℓB₁}} 
-               → {F F' G G' : Functor A B}
-               → (α : NaturalTransformation F G)
-               → (β : NaturalTransformation F' G')
-               → (eqA : F ≅ F')
-               → (eqB : G ≅ G')
-               → (eq : α ≅ β)
-               → (x : Obj A)
-               → η α x ≅ η β x
-    replaceNatTrans α .α refl refl refl x = refl
-
     subst₂-insert : ∀ {ℓA₀ ℓA₁ ℓB₀ ℓB₁}
                   → {A : Category {ℓA₀} {ℓA₁}} {B : Category {ℓB₀} {ℓB₁}} 
                   → {F F' G G' : Functor A B}
