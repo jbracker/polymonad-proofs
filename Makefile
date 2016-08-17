@@ -102,6 +102,7 @@ only-cat-theory:
 	$(AGDA_TC) Theory/Examples/Category.agda
 	$(AGDA_TC) Theory/Examples/Functor.agda
 	$(AGDA_TC) Theory/Examples/TwoCategory.agda
+	$(AGDA_TC) Theory/Examples/TwoFunctor.agda
 
 clean:
 	$(REMOVE) *.agdai
