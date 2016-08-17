@@ -263,6 +263,49 @@ record StrictTwoCategory {ℓ₀ ℓ₁ ℓ₂ : Level} : Set (lsuc (ℓ₀ ⊔ 
   α' f g h = associatorInv {f = f} {g} {h}
 
 -------------------------------------------------------------------------------
+-- Unit strict 2-category
+-------------------------------------------------------------------------------
+
+unitStrictTwoCategory : StrictTwoCategory
+unitStrictTwoCategory = record
+  { Cell₀ = ⊤
+  ; HomCat = HomCat
+  ; comp = comp
+  ; id₁ = id₁
+  ; horizontalIdR₁ = refl
+  ; horizontalIdR₂ = refl
+  ; horizontalIdL₁ = refl
+  ; horizontalIdL₂ = refl
+  ; horizontalAssoc₁ = refl
+  ; horizontalAssoc₂ = refl
+  ; whiskerCoher1' = refl
+  ; whiskerCoher2' = refl
+  ; whiskerCoher3' = refl
+  ; whiskerCoher4' = refl
+  } where
+    HomCat : ⊤ → ⊤ → Category
+    HomCat tt tt = ⊤-Cat
+    
+    F₀ : Obj (HomCat tt tt ×C HomCat tt tt) → Obj (HomCat tt tt)
+    F₀ (tt , tt) = tt
+    
+    F₁ : {a b : Obj (HomCat tt tt ×C HomCat tt tt)} → Hom (HomCat tt tt ×C HomCat tt tt) a b → Hom (HomCat tt tt) tt tt
+    F₁ {tt , tt} {tt , tt} (tt , tt) = tt
+    
+    comp : {a b c : ⊤} → Functor (HomCat b c ×C HomCat a b) (HomCat a c)
+    comp {tt} {tt} {tt} = record 
+      { F₀ = F₀
+      ; F₁ = F₁
+      ; id = refl
+      ; dist = refl
+      }
+    
+    id₁ : {a : ⊤} → Obj (HomCat a a)
+    id₁ {tt} = tt
+
+⊤-TwoCat = unitStrictTwoCategory
+
+-------------------------------------------------------------------------------
 -- Creating a Strict 2-Category from a Category.
 -------------------------------------------------------------------------------
 
