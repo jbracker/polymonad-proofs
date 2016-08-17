@@ -28,8 +28,8 @@ record Category {ℓ₀ ℓ₁ : Level} : Set (lsuc (ℓ₀ ⊔ ℓ₁)) where
     
     assoc : {a b c d : Obj} {f : Hom a b} {g : Hom b c} {h : Hom c d} 
           → h ∘ (g ∘ f) ≡ (h ∘ g) ∘ f
-    idL : {a b : Obj} {f : Hom a b} → id ∘ f ≡ f
-    idR : {a b : Obj} {f : Hom a b} → f ∘ id ≡ f
+    idR : {a b : Obj} {f : Hom a b} → id ∘ f ≡ f
+    idL : {a b : Obj} {f : Hom a b} → f ∘ id ≡ f
 
 -------------------------------------------------------------------------------
 -- The Unit Category
@@ -61,8 +61,8 @@ liftCategory {ℓC₀} {ℓC₁} {ℓL₀} {ℓL₁} C = record
   ; _∘_ = _∘L_
   ; id = idLift
   ; assoc = assocL
-  ; idL = trans shiftL (cong lift (idL C))
   ; idR = trans shiftL (cong lift (idR C))
+  ; idL = trans shiftL (cong lift (idL C))
   } where
     ObjL : Set (ℓC₀ ⊔ ℓL₀)
     ObjL = Lift {ℓ = ℓL₀} (Obj C)

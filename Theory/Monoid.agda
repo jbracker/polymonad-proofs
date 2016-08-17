@@ -20,8 +20,8 @@ record Monoid {ℓ} (C : Set ℓ) : Set ℓ where
     ε : C
     _∙_ : C → C → C
     
-    idR : {m : C} → m ∙ ε ≡ m
-    idL : {m : C} → ε ∙ m ≡ m
+    idL : {m : C} → m ∙ ε ≡ m
+    idR : {m : C} → ε ∙ m ≡ m
     assoc : {m n o : C} → m ∙ (n ∙ o) ≡ (m ∙ n) ∙ o
   
   carrier : Set ℓ

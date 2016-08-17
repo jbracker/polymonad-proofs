@@ -59,7 +59,7 @@ KleisliTriple→Functor {C = C} {T = T} km = record
       F₁ {a = a} id
         ≡⟨ refl ⟩ 
       kext (η ∘ id)
-        ≡⟨ cong (λ X → kext X) (Category.idR C) ⟩ 
+        ≡⟨ cong (λ X → kext X) (Category.idL C) ⟩ 
       kext η
         ≡⟨ KleisliTriple.idL km ⟩ 
       id ∎
@@ -114,9 +114,9 @@ KleisliTriple→Monad {C = C} {T = T} km = record
       kext (ηk ∘ f) ∘ kext id
         ≡⟨ sym (KleisliTriple.coher km) ⟩
       kext (kext (ηk ∘ f) ∘ id)
-        ≡⟨ cong (λ X → kext X) (Category.idR C) ⟩
+        ≡⟨ cong (λ X → kext X) (Category.idL C) ⟩
       kext (kext (ηk ∘ f))
-        ≡⟨ cong (λ X → kext X) (sym (Category.idL C)) ⟩
+        ≡⟨ cong (λ X → kext X) (sym (Category.idR C)) ⟩
       kext (id ∘ kext (ηk ∘ f))
         ≡⟨ cong (λ X → kext (X ∘ kext (ηk ∘ f))) (sym (KleisliTriple.idR km)) ⟩
       kext ((kext id ∘ ηk) ∘ kext (ηk ∘ f))
@@ -149,9 +149,9 @@ KleisliTriple→Monad {C = C} {T = T} km = record
       kext ((kext id ∘ ηk) ∘ kext id)
         ≡⟨ cong (λ X → kext (X ∘ kext id)) (KleisliTriple.idR km) ⟩ 
       kext (id ∘ kext id)
-        ≡⟨ cong kext (Category.idL C) ⟩ 
+        ≡⟨ cong kext (Category.idR C) ⟩ 
       kext (kext id)
-        ≡⟨ cong kext (sym (Category.idR C)) ⟩ 
+        ≡⟨ cong kext (sym (Category.idL C)) ⟩ 
       kext (kext id ∘ id)
         ≡⟨ KleisliTriple.coher km ⟩ 
       kext id ∘ kext id
@@ -169,7 +169,7 @@ KleisliTriple→Monad {C = C} {T = T} km = record
       kext ((kext id ∘ ηk) ∘ ηk)
         ≡⟨ cong (λ X → kext (X ∘ ηk)) (KleisliTriple.idR km) ⟩
       kext (id ∘ ηk)
-        ≡⟨ cong kext (Category.idL C) ⟩
+        ≡⟨ cong kext (Category.idR C) ⟩
       kext ηk
         ≡⟨ KleisliTriple.idL km ⟩
       id
@@ -235,7 +235,7 @@ Monad→KleisliTriple {C = C} {T = T} m = record
       (μ ∘ η) ∘ k
         ≡⟨ cong (λ X → X ∘ k) (Monad.ηCoherR m) ⟩
       id ∘ k
-        ≡⟨ Category.idL C ⟩
+        ≡⟨ Category.idR C ⟩
       k ∎
       
     idL : {a : Obj C} → kext {a = a} η ≡ id

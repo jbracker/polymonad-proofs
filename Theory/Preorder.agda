@@ -49,8 +49,8 @@ Preorder→Category {ℓ = ℓ} {P = P} preorder irrelevance = record
           → h ∘ (g ∘ f) ≡ (h ∘ g) ∘ f
     assoc {f = f} {g = g} {h = h} = irrelevance (h ∘ (g ∘ f)) ((h ∘ g) ∘ f)
     
-    idL : ∀ {a b : P} {f : a ≤ b} → id ∘ f ≡ f
-    idL {f = f} = irrelevance (id ∘ f) f
+    idR : ∀ {a b : P} {f : a ≤ b} → id ∘ f ≡ f
+    idR {f = f} = irrelevance (id ∘ f) f
 
-    idR : ∀ {a b : P} {f : a ≤ b} → f ∘ id ≡ f
-    idR {f = f} = irrelevance (f ∘ id) f
+    idL : ∀ {a b : P} {f : a ≤ b} → f ∘ id ≡ f
+    idL {f = f} = irrelevance (f ∘ id) f

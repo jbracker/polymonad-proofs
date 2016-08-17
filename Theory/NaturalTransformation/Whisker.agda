@@ -126,7 +126,7 @@ leftWhiskerId₂ {B = B} {C} {D} {F} {G} K α =
     η α ([ K ]₀ x) ∘D [ F ]₁ (Category.id C) 
       ≡⟨ cong (λ X → η α ([ K ]₀ x) ∘D X) (Functor.id F) ⟩
     η α ([ K ]₀ x) ∘D Category.id D 
-      ≡⟨ idR D ⟩
+      ≡⟨ idL D ⟩
     η α ([ K ]₀ x)
       ≡⟨ refl ⟩
     η ⟨ α ⟩∘[ K ] x ∎
@@ -150,7 +150,7 @@ rightWhiskerId₂
   → (α : NaturalTransformation F G)
   → ⟨ Id⟨ K ⟩ ⟩∘ₕ⟨ α ⟩ ≡ [ K ]∘⟨ α ⟩
 rightWhiskerId₂ {C = C} {D} {E} {F} {G} K α = 
-  propEqNatTrans refl refl $ funExt $ λ (x : Obj C) → idL E
+  propEqNatTrans refl refl $ funExt $ λ (x : Obj C) → idR E
 
 
 whiskerCompositionHorzEq 

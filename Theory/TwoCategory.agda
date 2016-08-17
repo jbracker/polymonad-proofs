@@ -36,17 +36,17 @@ record StrictTwoCategory {ℓ₀ ℓ₁ ℓ₂ : Level} : Set (lsuc (ℓ₀ ⊔ 
     comp : {a b c : Cell₀} → Functor (HomCat b c ×C HomCat a b) (HomCat a c) 
     id₁  : {a : Cell₀} → Obj (HomCat a a)
     
-    horizontalIdR₁ : {a b : Cell₀} {f : Obj (HomCat a b)} 
+    horizontalIdL₁ : {a b : Cell₀} {f : Obj (HomCat a b)} 
                    → [ comp {a} {a} {b} ]₀ (f , id₁ {a}) ≡ f
     
-    horizontalIdR₂ : {a b : Cell₀} {f g : Obj (HomCat a b)} {η : Hom (HomCat a b) f g} 
-                   → [ comp {a} {a} {b} ]₁ (η , idC (HomCat a a)) ≡ subst₂ (Hom (HomCat a b)) (sym horizontalIdR₁) (sym horizontalIdR₁) η
+    horizontalIdL₂ : {a b : Cell₀} {f g : Obj (HomCat a b)} {η : Hom (HomCat a b) f g} 
+                   → [ comp {a} {a} {b} ]₁ (η , idC (HomCat a a)) ≡ subst₂ (Hom (HomCat a b)) (sym horizontalIdL₁) (sym horizontalIdL₁) η
     
-    horizontalIdL₁ : {a b : Cell₀} {f : Obj (HomCat a b)} 
+    horizontalIdR₁ : {a b : Cell₀} {f : Obj (HomCat a b)} 
                    → [ comp {a} {b} {b} ]₀ (id₁ {b} , f) ≡ f
     
-    horizontalIdL₂ : {a b : Cell₀} {f g : Obj (HomCat a b)} {η : Hom (HomCat a b) f g} 
-                   → [ comp {a} {b} {b} ]₁ (idC (HomCat b b), η) ≡ subst₂ (Hom (HomCat a b)) (sym horizontalIdL₁) (sym horizontalIdL₁) η
+    horizontalIdR₂ : {a b : Cell₀} {f g : Obj (HomCat a b)} {η : Hom (HomCat a b) f g} 
+                   → [ comp {a} {b} {b} ]₁ (idC (HomCat b b), η) ≡ subst₂ (Hom (HomCat a b)) (sym horizontalIdR₁) (sym horizontalIdR₁) η
 
     horizontalAssoc₁ : {a b c d : Cell₀} {f : Obj (HomCat a b)} {g : Obj (HomCat b c)} {h : Obj (HomCat c d)}
                      → [ comp ]₀ (h , [ comp ]₀ (g , f)) ≡ [ comp ]₀ ([ comp ]₀ (h , g) , f)
@@ -108,28 +108,28 @@ record StrictTwoCategory {ℓ₀ ℓ₁ ℓ₂ : Level} : Set (lsuc (ℓ₀ ⊔ 
   id→functor {a} = constFunctor (HomCat a a) (id₁ {a})
 
   vIdL : {a b : Cell₀} {f g : Cell₁ a b} {θ : Cell₂ f g} → θ ∘ᵥ id₂ ≡ θ
-  vIdL {a} {b} = Category.idR (HomCat a b)
+  vIdL {a} {b} = Category.idL (HomCat a b)
 
   vIdR : {a b : Cell₀} {f g : Cell₁ a b} {θ : Cell₂ f g} → id₂ ∘ᵥ θ ≡ θ
-  vIdR {a} {b} = Category.idL (HomCat a b)
+  vIdR {a} {b} = Category.idR (HomCat a b)
   
   vAssoc : {a b : Cell₀} {f g h i : Cell₁ a b} {η : Cell₂ f g} {θ : Cell₂ g h} {ι : Cell₂ h i}
                 → ι ∘ᵥ (θ ∘ᵥ η) ≡ (ι ∘ᵥ θ) ∘ᵥ η
   vAssoc {a} {b} = Category.assoc (HomCat a b)
   
   hIdL₁ : {a b : Cell₀} {f : Cell₁ a b} → f ∘ₕ id₁ {a} ≡ f
-  hIdL₁ = horizontalIdR₁
+  hIdL₁ = horizontalIdL₁
   
   hIdR₁ :  {a b : Cell₀} {f : Cell₁ a b} → id₁ {b} ∘ₕ f ≡ f
-  hIdR₁ = horizontalIdL₁
+  hIdR₁ = horizontalIdR₁
 
   hIdL₂ : {a b : Cell₀} {f g : Cell₁ a b} {η : Cell₂ f g} 
         → η ∘ₕ₂ id₂ {a} {a} ≡ subst₂ Cell₂ (sym hIdL₁) (sym hIdL₁) η
-  hIdL₂ = horizontalIdR₂
+  hIdL₂ = horizontalIdL₂
 
   hIdR₂ : {a b : Cell₀} {f g : Cell₁ a b} {η : Cell₂ f g} 
         → id₂ {b} {b} ∘ₕ₂ η ≡ subst₂ Cell₂ (sym hIdR₁) (sym hIdR₁) η
-  hIdR₂ = horizontalIdL₂
+  hIdR₂ = horizontalIdR₂
   
   hAssoc₁ : {a b c d : Cell₀} {f : Cell₁ a b} {g : Cell₁ b c} {h : Cell₁ c d} 
           → h ∘ₕ (g ∘ₕ f) ≡ (h ∘ₕ g) ∘ₕ f
@@ -148,21 +148,21 @@ record StrictTwoCategory {ℓ₀ ℓ₁ ℓ₂ : Level} : Set (lsuc (ℓ₀ ⊔ 
                  → g ▷ id₂ {f = f} ≡ id₂ {f = g ∘ₕ f}
   whiskerRightId₁ = Functor.id comp
   
-  whiskerLeftId₂ : {a b : Cell₀} {f g : Cell₁ a b} {η : Cell₂ f g} → η ◁ id₁ {a} ≡ subst₂ Cell₂ (sym hIdL₁) (sym hIdL₁) η
-  whiskerLeftId₂ = horizontalIdR₂
-  
-  whiskerRightId₂ : {a b : Cell₀} {f g : Cell₁ a b} {η : Cell₂ f g} → id₁ {b} ▷ η ≡ subst₂ Cell₂ (sym hIdR₁) (sym hIdR₁) η
+  whiskerRightId₂ : {a b : Cell₀} {f g : Cell₁ a b} {η : Cell₂ f g} → η ◁ id₁ {a} ≡ subst₂ Cell₂ (sym hIdL₁) (sym hIdL₁) η
   whiskerRightId₂ = horizontalIdL₂
+  
+  whiskerLeftId₂ : {a b : Cell₀} {f g : Cell₁ a b} {η : Cell₂ f g} → id₁ {b} ▷ η ≡ subst₂ Cell₂ (sym hIdR₁) (sym hIdR₁) η
+  whiskerLeftId₂ = horizontalIdR₂
 
-  whiskerLeftDist : {a b c : Cell₀} {f : Cell₁ a b} {g h i : Cell₁ b c} {η : Cell₂ g h} {θ : Cell₂ h i}
+  whiskerRightDist : {a b c : Cell₀} {f : Cell₁ a b} {g h i : Cell₁ b c} {η : Cell₂ g h} {θ : Cell₂ h i}
                   → (θ ◁ f) ∘ᵥ (η ◁ f) ≡ (θ ∘ᵥ η) ◁ f
-  whiskerLeftDist {a} {b} {c} {f} {η = η} {θ} = 
+  whiskerRightDist {a} {b} {c} {f} {η = η} {θ} = 
     let _∘bc_ = Category._∘_ (HomCat b c)
     in trans (sym (Functor.dist comp)) (cong (λ X → [ comp ]₁ (θ ∘bc η , X)) vIdL)
 
-  whiskerRightDist : {a b c : Cell₀} {f g h : Cell₁ a b} {i : Cell₁ b c} {η : Cell₂ f g} {θ : Cell₂ g h}
+  whiskerLeftDist : {a b c : Cell₀} {f g h : Cell₁ a b} {i : Cell₁ b c} {η : Cell₂ f g} {θ : Cell₂ g h}
                    → (i ▷ θ) ∘ᵥ (i ▷ η) ≡ i ▷ (θ ∘ᵥ η)
-  whiskerRightDist {a} {b} {c} {η = η} {θ} = 
+  whiskerLeftDist {a} {b} {c} {η = η} {θ} = 
     let _∘ab_ = Category._∘_ (HomCat a b)
     in trans (sym (Functor.dist comp)) (cong (λ X → [ comp ]₁ (X , θ ∘ab η)) vIdL)
   

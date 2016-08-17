@@ -43,11 +43,11 @@ catCategory {ℓ₀} {ℓ₁} = record
           → [ h ]∘[ [ g ]∘[ f ] ] ≡ [ [ h ]∘[ g ] ]∘[ f ]
     assoc = propEqFunctor refl refl
     
-    idL : {a b : Category} {f : Functor a b} → [ Id[ b ] ]∘[ f ] ≡ f
-    idL = propEqFunctor refl refl
+    idR : {a b : Category} {f : Functor a b} → [ Id[ b ] ]∘[ f ] ≡ f
+    idR = propEqFunctor refl refl
 
-    idR : {a b : Category} {f : Functor a b} → [ f ]∘[ Id[ a ] ] ≡ f
-    idR = refl
+    idL : {a b : Category} {f : Functor a b} → [ f ]∘[ Id[ a ] ] ≡ f
+    idL = refl
 
 -- Category of functors and natural transformations
 functorCategory : {Cℓ₀ Cℓ₁ Dℓ₀ Dℓ₁ : Level} → Category {Cℓ₀} {Cℓ₁} → Category {Dℓ₀} {Dℓ₁} → Category

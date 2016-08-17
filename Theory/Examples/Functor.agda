@@ -65,7 +65,7 @@ natTransCompositionHorzFunctor {A = A} {B} {C} = record
           η Id⟨ proj₁' F ⟩ ([ proj₂' F ]₀ x) ∘C [ proj₁' F ]₁ (η Id⟨ proj₂' F ⟩ x)
             ≡⟨ refl ⟩
           idC C ∘C [ proj₁' F ]₁ (idC B)
-            ≡⟨ idL C ⟩
+            ≡⟨ idR C ⟩
           [ proj₁' F ]₁ (idC B)
             ≡⟨ Functor.id (proj₁' F) ⟩
           idC C

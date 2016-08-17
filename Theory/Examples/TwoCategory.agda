@@ -38,9 +38,9 @@ functorTwoCategory {ℓObj} {ℓHom} = record
   ; HomCat = HomCat
   ; comp = λ {A} {B} {C} → comp {A = A} {B} {C}
   ; id₁ = id₁
-  ; horizontalIdR₁ = refl
+  ; horizontalIdR₁ = λ {A} {B} {F} → horizontalIdR₁ {A = A} {B} {F}
   ; horizontalIdR₂ = λ {A} {B} {F} {G} {α} → horizontalIdR₂ {A = A} {B} {F} {G} {α}
-  ; horizontalIdL₁ = λ {A} {B} {F} → horizontalIdL₁ {A = A} {B} {F}
+  ; horizontalIdL₁ = refl
   ; horizontalIdL₂ = λ {A} {B} {F} {G} {α} → horizontalIdL₂ {A = A} {B} {F} {G} {α}
   ; horizontalAssoc₁ = λ {A} {B} {C} {D} {F} {G} {H} → horizontalAssoc₁ {ℓB₀ = ℓObj} {ℓHom} {ℓObj} {ℓHom} {A = A} {B} {C} {D} {F} {G} {H}
   ; horizontalAssoc₂ = λ {A} {B} {C} {D} {F} {F'} {G} {G'} {H} {H'} {α} {β} {γ} → horizontalAssoc₂ {A = A} {B} {C} {D} {F} {F'} {G} {G'} {H} {H'} {α} {β} {γ}  
@@ -77,11 +77,11 @@ functorTwoCategory {ℓObj} {ℓHom} = record
     id₁ : ∀ {ℓA₀ ℓA₁} → {A : Cell₀ {ℓA₀} {ℓA₁}} → Cell₁ A A
     id₁ {A = A} = Id[ A ]
     
-    horizontalIdL₁ : ∀ {ℓA₀ ℓA₁ ℓB₀ ℓB₁}
+    horizontalIdR₁ : ∀ {ℓA₀ ℓA₁ ℓB₀ ℓB₁}
                    → {A : Cell₀ {ℓA₀} {ℓA₁}} {B : Cell₀ {ℓB₀} {ℓB₁}} 
                    → {F : Cell₁ A B}
                    → [ id₁ ]∘[ F ] ≡ F
-    horizontalIdL₁ {A = A} {B} {F} = propEqFunctor refl refl
+    horizontalIdR₁ {A = A} {B} {F} = propEqFunctor refl refl
     
     horizontalAssoc₁ : ∀ {ℓA₀ ℓA₁ ℓB₀ ℓB₁ ℓC₀ ℓC₁ ℓD₀ ℓD₁}
                    → {A : Cell₀ {ℓA₀} {ℓA₁}} {B : Cell₀ {ℓB₀} {ℓB₁}} {C : Cell₀ {ℓC₀} {ℓC₁}} {D : Cell₀ {ℓD₀} {ℓD₁}}
@@ -89,36 +89,36 @@ functorTwoCategory {ℓObj} {ℓHom} = record
                    → [ H ]∘[ [ G ]∘[ F ] ] ≡ [ [ H ]∘[ G ] ]∘[ F ]
     horizontalAssoc₁ {A = A} {B} {C} {D} {F} {G} {H} = propEqFunctor refl refl
     
-    horizontalIdR₂ : ∀ {ℓA₀ ℓA₁ ℓB₀ ℓB₁}
+    horizontalIdL₂ : ∀ {ℓA₀ ℓA₁ ℓB₀ ℓB₁}
                    → {A : Cell₀ {ℓA₀} {ℓA₁}} {B : Cell₀ {ℓB₀} {ℓB₁}} 
                    → {F G : Cell₁ A B} {α : Cell₂ F G} 
                    → ⟨_⟩∘ₕ⟨_⟩ {C = A} {A} {B} {F} {G} {Id[ A ]} {Id[ A ]} α (idC (HomCat A A)) ≡ α
-    horizontalIdR₂ {A = A} {B} {F} {G} {α} = propEqNatTrans refl refl $ funExt $ λ (x : Obj A) → begin
+    horizontalIdL₂ {A = A} {B} {F} {G} {α} = propEqNatTrans refl refl $ funExt $ λ (x : Obj A) → begin
         η α ([ Id[ A ] ]₀ x) ∘B [ F ]₁ (η (idC (HomCat A A) {a = Id[ A ]}) x)
           ≡⟨ refl ⟩
         η α ([ Id[ A ] ]₀ x) ∘B [ F ]₁ (idC A)
           ≡⟨ cong (λ X → η α ([ Id[ A ] ]₀ x) ∘B X) (Functor.id F) ⟩
         η α ([ Id[ A ] ]₀ x) ∘B idC B
-          ≡⟨  Category.idR B ⟩
+          ≡⟨  Category.idL B ⟩
         η α ([ Id[ A ] ]₀ x)
           ≡⟨ refl ⟩
         η α x ∎
       where _∘B_ = Category._∘_ B
     
-    horizontalIdL₂ : ∀ {ℓA₀ ℓA₁ ℓB₀ ℓB₁}
+    horizontalIdR₂ : ∀ {ℓA₀ ℓA₁ ℓB₀ ℓB₁}
                    → {A : Cell₀ {ℓA₀} {ℓA₁}} {B : Cell₀ {ℓB₀} {ℓB₁}} 
                    → {F G : Cell₁ A B}
                    → {α : Cell₂ F G} 
-                   → ⟨ idC (HomCat B B) {a = Id[ B ]} ⟩∘ₕ⟨ α ⟩ ≡ subst₂ Cell₂ (sym horizontalIdL₁) (sym horizontalIdL₁) α
-    horizontalIdL₂ {A = A} {B} {F} {G} {α} =
+                   → ⟨ idC (HomCat B B) {a = Id[ B ]} ⟩∘ₕ⟨ α ⟩ ≡ subst₂ Cell₂ (sym horizontalIdR₁) (sym horizontalIdR₁) α
+    horizontalIdR₂ {A = A} {B} {F} {G} {α} =
       propEqNatTrans refl refl $ funExt $ λ (x : Obj A) → begin
         η ⟨ idC (HomCat B B) {a = Id[ B ]} ⟩∘ₕ⟨ α ⟩ x 
           ≡⟨ refl ⟩
         Category.id B ∘B η α x
-          ≡⟨ idL B ⟩
+          ≡⟨ idR B ⟩
         η α x
-          ≡⟨ ≅-to-≡ (subst₂-insert (sym (horizontalIdL₁ {F = F})) (sym (horizontalIdL₁ {F = G})) α x) ⟩
-        η (subst₂ Cell₂ (sym (horizontalIdL₁ {F = F})) (sym (horizontalIdL₁ {F = G})) α) x ∎
+          ≡⟨ ≅-to-≡ (subst₂-insert (sym (horizontalIdR₁ {F = F})) (sym (horizontalIdR₁ {F = G})) α x) ⟩
+        η (subst₂ Cell₂ (sym (horizontalIdR₁ {F = F})) (sym (horizontalIdR₁ {F = G})) α) x ∎
       where _∘B_ = _∘_ B
     
     horizontalAssoc₂ : ∀ {ℓA₀ ℓA₁ ℓB₀ ℓB₁ ℓC₀ ℓC₁ ℓD₀ ℓD₁}
@@ -171,7 +171,7 @@ functorTwoCategory {ℓObj} {ℓHom} = record
           η α ([ G ]₀ ([ F ]₀ x)) ∘D Category.id D
             ≅⟨ hcong (λ X → η α ([ G ]₀ ([ F ]₀ x)) ∘D X) (≡-to-≅ $ sym $ Functor.id H) ⟩
           η α ([ G ]₀ ([ F ]₀ x)) ∘D [ H ]₁ (idC C)
-            ≅⟨ ≡-to-≅ $ sym $ idR D ⟩
+            ≅⟨ ≡-to-≅ $ sym $ idL D ⟩
           ( η α ([ G ]₀ ([ F ]₀ x)) ∘D [ H ]₁ (idC C) ) ∘D idC D
             ≅⟨ hcong (λ X → ( η α ([ G ]₀ ([ F ]₀ x)) ∘D [ H ]₁ (idC C) ) ∘D X) (≡-to-≅ $ sym $ Functor.id H) ⟩
           ( η α ([ G ]₀ ([ F ]₀ x)) ∘D [ H ]₁ (idC C) ) ∘D [ H ]₁ (idC C)
@@ -203,11 +203,11 @@ functorTwoCategory {ℓObj} {ℓHom} = record
           η ([ comp ]₁ (idC (HomCat C D) {a = I} , [ comp ]₁ (α , idC (HomCat A B) {a = F}))) x
             ≅⟨ refl ⟩
           idC D ∘D [ I ]₁ (η α ([ F ]₀ x) ∘C [ G ]₁ (idC B))
-            ≅⟨ ≡-to-≅ $ idL D ⟩
+            ≅⟨ ≡-to-≅ $ idR D ⟩
           [ I ]₁ (η α ([ F ]₀ x) ∘C [ G ]₁ (idC B))
             ≅⟨ ≡-to-≅ $ Functor.dist I ⟩
           [ I ]₁ (η α ([ F ]₀ x)) ∘D [ I ]₁ ([ G ]₁ (idC B))
-            ≅⟨ hcong (λ X → X ∘D [ I ]₁ ([ G ]₁ (idC B))) (≡-to-≅ $ sym $ idL D) ⟩
+            ≅⟨ hcong (λ X → X ∘D [ I ]₁ ([ G ]₁ (idC B))) (≡-to-≅ $ sym $ idR D) ⟩
           ( idC D ∘D [ I ]₁ (η α ([ F ]₀ x)) ) ∘D [ I ]₁ ([ G ]₁ (idC B))
             ≅⟨ refl ⟩
           η ([ comp ]₁ ([ comp ]₁ (idC (HomCat C D) {a = I} , α) , idC (HomCat A B) {a = F})) x ∎h
@@ -234,7 +234,7 @@ functorTwoCategory {ℓObj} {ℓHom} = record
           η ([ comp ]₁ (idC (HomCat C D) {a = I} , [ comp ]₁ (idC (HomCat B C) {a = H} , α))) x
             ≅⟨ refl ⟩ 
           idC D ∘D [ I ]₁ (idC C ∘C [ H ]₁ (η α x))
-            ≅⟨ hcong (λ X → idC D ∘D [ I ]₁ X) (≡-to-≅ $ idL C) ⟩ 
+            ≅⟨ hcong (λ X → idC D ∘D [ I ]₁ X) (≡-to-≅ $ idR C) ⟩ 
           idC D ∘D [ I ]₁ ([ H ]₁ (η α x))
             ≅⟨ refl ⟩ 
           η ([ comp ]₁ (idC (HomCat B D) {a = [ I ]∘[ H ]} , α)) x ∎h
@@ -249,17 +249,17 @@ functorTwoCategory {ℓObj} {ℓHom} = record
       η ⟨ [ comp ]₁ (idC (HomCat B C) {a = I} , α) ⟩∘ᵥ⟨ [ comp ]₁ (β , idC (HomCat A B) {a = F}) ⟩ x
         ≡⟨ refl ⟩
       ( idC C ∘C [ I ]₁ (η α x) ) ∘C ( η β ([ F ]₀ x) ∘C [ H ]₁ (idC B) )
-        ≡⟨ cong (λ X → X ∘C ( η β ([ F ]₀ x) ∘C [ H ]₁ (idC B) )) (idL C) ⟩ 
+        ≡⟨ cong (λ X → X ∘C ( η β ([ F ]₀ x) ∘C [ H ]₁ (idC B) )) (idR C) ⟩ 
       [ I ]₁ (η α x) ∘C ( η β ([ F ]₀ x) ∘C [ H ]₁ (idC B) )
         ≡⟨ cong (λ X → [ I ]₁ (η α x) ∘C ( η β ([ F ]₀ x) ∘C X )) (Functor.id H) ⟩ 
       [ I ]₁ (η α x) ∘C ( η β ([ F ]₀ x) ∘C idC C )
-        ≡⟨ cong (λ X → [ I ]₁ (η α x) ∘C X) (idR C) ⟩ 
+        ≡⟨ cong (λ X → [ I ]₁ (η α x) ∘C X) (idL C) ⟩ 
       [ I ]₁ (η α x) ∘C η β ([ F ]₀ x)
         ≡⟨ natural β ⟩ 
       η β ([ G ]₀ x) ∘C [ H ]₁ (η α x)
-        ≡⟨ cong (λ X → η β ([ G ]₀ x) ∘C X) (sym (idL C)) ⟩ 
+        ≡⟨ cong (λ X → η β ([ G ]₀ x) ∘C X) (sym (idR C)) ⟩ 
       η β ([ G ]₀ x) ∘C ( idC C ∘C [ H ]₁ (η α x) )
-        ≡⟨ cong (λ X → X ∘C ( idC C ∘C [ H ]₁ (η α x) )) (sym (idR C)) ⟩ 
+        ≡⟨ cong (λ X → X ∘C ( idC C ∘C [ H ]₁ (η α x) )) (sym (idL C)) ⟩ 
       ( η β ([ G ]₀ x) ∘C idC C ) ∘C ( idC C ∘C [ H ]₁ (η α x) )
         ≡⟨ cong (λ X → ( η β ([ G ]₀ x) ∘C X ) ∘C ( idC C ∘C [ H ]₁ (η α x) )) (sym (Functor.id H)) ⟩ 
       ( η β ([ G ]₀ x) ∘C [ H ]₁ (idC B) ) ∘C ( idC C ∘C [ H ]₁ (η α x) )
