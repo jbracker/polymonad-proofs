@@ -94,17 +94,7 @@ Monad→LaxTwoFunctor {C = C} {M} monad = record
        → {f : Cell₁ ⊤-TwoCat x y} {g : Cell₁ ⊤-TwoCat y z}
        → Cell₂ FunTwoCat (_∘ₕ_ FunTwoCat ([ P₁ ]₀ g) ([ P₁ ]₀ f)) ([ P₁ ]₀ (_∘ₕ_ ⊤-TwoCat g f))
     μP {tt} {tt} {tt} {tt} {tt} = Monad.μ monad
-    
-    subst₂-insert : ∀ {ℓA₀ ℓA₁ ℓB₀ ℓB₁}
-                  → {A : Category {ℓA₀} {ℓA₁}} {B : Category {ℓB₀} {ℓB₁}} 
-                  → {F F' G G' : Functor A B}
-                  → (eqA : F ≡ F')
-                  → (eqB : G ≡ G')
-                  → (α : NaturalTransformation F G)
-                  → (x : Obj A) 
-                  → η α x ≅ η (subst₂ NaturalTransformation eqA eqB α) x
-    subst₂-insert refl refl α x = refl
-    
+        
     laxFunId₁ : {x y : Cell₀ ⊤-TwoCat} 
               → {f : Cell₁ ⊤-TwoCat x y}
               → [ P₁ ]₁ (λ' ⊤-TwoCat f) ∘V (μP ∘V ((id₂ FunTwoCat) ∘H2 ηP)) 

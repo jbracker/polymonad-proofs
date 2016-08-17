@@ -77,16 +77,6 @@ functorTwoCategory {ℓObj} {ℓHom} = record
     id₁ : ∀ {ℓA₀ ℓA₁} → {A : Cell₀ {ℓA₀} {ℓA₁}} → Cell₁ A A
     id₁ {A = A} = Id[ A ]
     
-    subst₂-insert : ∀ {ℓA₀ ℓA₁ ℓB₀ ℓB₁}
-                  → {A : Category {ℓA₀} {ℓA₁}} {B : Category {ℓB₀} {ℓB₁}} 
-                  → {F F' G G' : Functor A B}
-                  → (eqA : F ≡ F')
-                  → (eqB : G ≡ G')
-                  → (α : NaturalTransformation F G)
-                  → (x : Obj A) 
-                  → η α x ≅ η (subst₂ Cell₂ eqA eqB α) x
-    subst₂-insert refl refl α x = refl
-    
     horizontalIdL₁ : ∀ {ℓA₀ ℓA₁ ℓB₀ ℓB₁}
                    → {A : Cell₀ {ℓA₀} {ℓA₁}} {B : Cell₀ {ℓB₀} {ℓB₁}} 
                    → {F : Cell₁ A B}
