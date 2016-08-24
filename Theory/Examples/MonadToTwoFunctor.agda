@@ -98,7 +98,7 @@ Monad→LaxTwoFunctor {ℓC₀} {ℓC₁} {C} {M} monad = record
         
     laxFunId₁ : {x y : Cell₀ ⊤-TwoCat} 
               → {f : Cell₁ ⊤-TwoCat x y}
-              → [ P₁ ]₁ (λ' ⊤-TwoCat f) ∘V (μP ∘V ((id₂ FunTwoCat) ∘H2 ηP)) 
+              → [ P₁ ]₁ (λ' ⊤-TwoCat f) ∘V (μP ∘V ((id₂ FunTwoCat {f = M}) ∘H2 ηP)) 
               ≡ λ' FunTwoCat ([ P₁ ]₀ f)
     laxFunId₁ {tt} {tt} {tt} = propEqNatTrans refl refl $ funExt $ λ (x : Obj C) → begin
       η ([ P₁ ]₁ (λ' ⊤-TwoCat tt) ∘V (μP ∘V ((id₂ FunTwoCat {f = M}) ∘H2 ηP))) x
@@ -158,11 +158,3 @@ Monad→LaxTwoFunctor {ℓC₀} {ℓC₁} {C} {M} monad = record
         ≡⟨ refl ⟩
       η (μP ∘V ((μP ∘H2 (id₂ FunTwoCat {f = M})) ∘V α FunTwoCat ([ P₁ ]₀ tt) ([ P₁ ]₀ tt) ([ P₁ ]₀ tt))) x ∎
 
-{-
-LaxTwoFunctor→Monad : (F : LaxTwoFunctor ⊤-TwoCat FunTwoCat) → Monad {!P₁ F {x = tt} {y = tt}!}
-LaxTwoFunctor→Monad F = {!!}
-  where
-    p = LaxTwoFunctor.P₁ F {x = tt} {y = tt}
-
-    q = {!p!}
--}
