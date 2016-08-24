@@ -109,7 +109,7 @@ natTransAtkeyFunctor {S = S} {C} {D} s s' F = record
     _∘C_ = _∘_ C ; _∘D_ = _∘_ D ; _∘S_ = _∘_ S
     
     F₀ : Obj C → Obj D
-    F₀ c = [ F ]₀ (s , s' , c)
+    F₀ x = [ F ]₀ (s , s' , x)
 
     F₁ : {a b : Obj C} → Hom C a b → Hom D (F₀ a) (F₀ b)
     F₁ f = [ F ]₁ (id S {s} , id S {s'} , f)
@@ -124,6 +124,98 @@ natTransAtkeyFunctor {S = S} {C} {D} s s' F = record
       [ F ]₁ ((id S {s} ∘S id S {s}) , (id S {s'} ∘S id S {s'}) , (g ∘C f))
         ≡⟨ Functor.dist F ⟩
       [ F ]₁ (id S {s} , id S {s'} , g) ∘D [ F ]₁ (id S {s} , id S {s'} , f) ∎
+
+
+natTransAtkeyFunctorFst : {ℓS₀ ℓS₁ ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} 
+                        → {S : Category {ℓS₀} {ℓS₁}} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}}
+                        → Obj S → Obj C
+                        → Functor (S op ×C S ×C C) D 
+                        → Functor (S op) D
+natTransAtkeyFunctorFst {S = S} {C} {D} s' x F = record 
+  { F₀ = F₀
+  ; F₁ = F₁  
+  ; id = Functor.id F
+  ; dist = dist
+  } where
+    _∘C_ = _∘_ C ; _∘D_ = _∘_ D ; _∘S_ = _∘_ S ; _∘Sop_ = _∘_ (S op)
+    
+    F₀ : Obj (S op) → Obj D
+    F₀ s = [ F ]₀ (s , s' , x)
+
+    F₁ : {a b : Obj (S op)} → Hom (S op) a b → Hom D (F₀ a) (F₀ b)
+    F₁ sf = [ F ]₁ (sf , id S {s'} , id C {x})
+    
+    dist : {a b c : Obj (S op)} 
+         → {sf : Hom (S op) a b} {sg : Hom (S op) b c}
+         → F₁ (sg ∘Sop sf) ≡ (F₁ sg) ∘D (F₁ sf)
+    dist {a} {b} {c} {sf} {sg} = begin
+      [ F ]₁ ((sg ∘Sop sf) , id S {s'} , id C {x})
+        ≡⟨ cong₂ (λ X Y → [ F ]₁ ((sg ∘Sop sf) , X , Y)) (sym $ Category.idL S) (sym $ Category.idL C) ⟩
+      [ F ]₁ ((sg ∘Sop sf) , (id S {s'} ∘S id S {s'}) , (id C {x} ∘C id C {x}))
+        ≡⟨ Functor.dist F ⟩
+      [ F ]₁ (sg , id S {s'} , id C {x}) ∘D [ F ]₁ (sf , id S {s'} , id C {x}) ∎
+
+
+natTransAtkeyFunctorSnd : {ℓS₀ ℓS₁ ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} 
+                        → {S : Category {ℓS₀} {ℓS₁}} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}}
+                        → Obj (S op) → Obj C
+                        → Functor (S op ×C S ×C C) D 
+                        → Functor S D
+natTransAtkeyFunctorSnd {S = S} {C} {D} s x F = record 
+  { F₀ = F₀
+  ; F₁ = F₁  
+  ; id = Functor.id F
+  ; dist = dist
+  } where
+    _∘C_ = _∘_ C ; _∘D_ = _∘_ D ; _∘S_ = _∘_ S ; _∘Sop_ = _∘_ (S op)
+    
+    F₀ : Obj S → Obj D
+    F₀ s' = [ F ]₀ (s , s' , x)
+
+    F₁ : {a b : Obj S} → Hom S a b → Hom D (F₀ a) (F₀ b)
+    F₁ sf' = [ F ]₁ (id (S op) {s} , sf' , id C {x})
+    
+    dist : {a b c : Obj S} 
+         → {sf' : Hom S a b} {sg' : Hom S b c}
+         → F₁ (sg' ∘S sf') ≡ (F₁ sg') ∘D (F₁ sf')
+    dist {a} {b} {c} {sf'} {sg'} = begin
+      [ F ]₁ (id (S op) {s} , (sg' ∘S sf') , id C {x})
+        ≡⟨ cong₂ (λ X Y → [ F ]₁ (X , (sg' ∘S sf') , Y)) (sym $ Category.idL (S op)) (sym $ Category.idL C) ⟩
+      [ F ]₁ ((id (S op) {s} ∘Sop id (S op) {s}) , (sg' ∘S sf') , (id C {x} ∘C id C {x}))
+        ≡⟨ Functor.dist F ⟩
+      [ F ]₁ (id (S op) {s} , sg' , id C {x}) ∘D [ F ]₁ (id (S op) {s} , sf' , id C {x}) ∎
+
+natTransAtkeyFunctorConst : {ℓS₀ ℓS₁ ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓE₀ ℓE₁ : Level} 
+                        → {S : Category {ℓS₀} {ℓS₁}} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} 
+                        → (E : Category {ℓE₀} {ℓE₁})
+                        → Obj (S op) → Obj S → Obj C
+                        → Functor (S op ×C S ×C C) D 
+                        → Functor E D
+natTransAtkeyFunctorConst {S = S} {C} {D} E s s' x F = record 
+  { F₀ = F₀
+  ; F₁ = F₁  
+  ; id = Functor.id F
+  ; dist = λ {a} {b} {c} {ef} {eg} → dist {a} {b} {c} {ef} {eg}
+  } where
+    _∘C_ = _∘_ C ; _∘D_ = _∘_ D ; _∘S_ = _∘_ S ; _∘Sop_ = _∘_ (S op) ; _∘E_ = _∘_ E
+    
+    F₀ : Obj E → Obj D
+    F₀ e = [ F ]₀ (s , s' , x)
+
+    F₁ : {a b : Obj E} → Hom E a b → Hom D (F₀ a) (F₀ b)
+    F₁ ef = [ F ]₁ (id (S op) {s} , id S {s'} , id C {x})
+    
+    dist : {a b c : Obj E} 
+         → {ef : Hom E a b} {eg : Hom E b c}
+         → F₁ (eg ∘E ef) ≡ (F₁ eg) ∘D (F₁ ef)
+    dist {a} {b} {c} {ef} {eg} = begin
+      [ F ]₁ (id (S op) {s} , id S {s'} , id C {x})
+        ≡⟨ cong₂ (λ X Y → [ F ]₁ (X , Y , id C {x})) (sym $ Category.idL (S op)) (sym $ Category.idL S) ⟩
+      [ F ]₁ ((id (S op) {s} ∘Sop id (S op) {s}) , (id S {s'} ∘S id S {s'}) , id C {x})
+        ≡⟨ cong (λ X → [ F ]₁ ((id (S op) {s} ∘Sop id (S op) {s}) , (id S {s'} ∘S id S {s'}) , X)) (sym $ Category.idL C) ⟩
+      [ F ]₁ ((id (S op) {s} ∘Sop id (S op) {s}) , (id S {s'} ∘S id S {s'}) , (id C {x} ∘C id C {x}))
+        ≡⟨ Functor.dist F ⟩
+      [ F ]₁ (id (S op) {s} , id S {s'} , id C {x}) ∘D [ F ]₁ (id (S op) {s} , id S {s'} , id C {x}) ∎
 
 -- This is not the strong definition presented in Atkeys paper.
 record AtkeyParameterizedMonad {ℓC₀ ℓC₁ ℓS₀ ℓS₁ : Level} (C : Category {ℓC₀} {ℓC₁}) (S : Category {ℓS₀} {ℓS₁}) (T : Functor (S op ×C S ×C C) C) : Set (ℓC₀ ⊔ ℓC₁ ⊔ ℓS₀ ⊔ ℓS₁) where
@@ -165,3 +257,5 @@ record AtkeyParameterizedMonad {ℓC₀ ℓC₁ ℓS₀ ℓS₁ : Level} (C : Ca
   NatTrans-μ : (s₁ s₂ s₃ : Obj S) → NaturalTransformation [ natTransAtkeyFunctor s₁ s₂ T ]∘[ natTransAtkeyFunctor s₂ s₃ T ] (natTransAtkeyFunctor s₁ s₃ T)
   NatTrans-μ s₁ s₂ s₃ = naturalTransformation (λ x → μ {x} {s₁} {s₂} {s₃}) naturalμ
   
+  NatTrans-μ₁ : (s₂ s₃ : Obj S) (x : Obj C) → NaturalTransformation [ natTransAtkeyFunctorFst s₂ x T ]∘[ {!!} ] (natTransAtkeyFunctorFst s₃ x T)
+  NatTrans-μ₁ s₂ s₃ x = naturalTransformation {!λ s₁ → μ {x} {?} {?} {?}!} {!!}
