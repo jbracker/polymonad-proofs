@@ -158,6 +158,15 @@ subst₂-insert : ∀ {ℓA₀ ℓA₁ ℓB₀ ℓB₁}
               → η α x ≅ η (subst₂ NaturalTransformation eqA eqB α) x
 subst₂-insert refl refl α x = refl
 
+subst₂-replace : ∀ {ℓA₀ ℓA₁ ℓB₀ ℓB₁}
+              → {A : Category {ℓA₀} {ℓA₁}} {B : Category {ℓB₀} {ℓB₁}} 
+              → {F G : Functor A B}
+              → (α β : NaturalTransformation F G)
+              → (α ≅ β)
+              → (x : Obj A) 
+              → η α x ≅ η β x
+subst₂-replace α .α refl x = refl
+
 -------------------------------------------------------------------------------
 -- Propositional Equality of Natural Transformations
 -------------------------------------------------------------------------------
