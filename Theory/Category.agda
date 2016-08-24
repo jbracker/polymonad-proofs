@@ -126,6 +126,24 @@ productCategory {ℓC₀} {ℓC₁} {ℓD₀} {ℓD₁} C D = record
 
 _×C_ = productCategory
 
+
+-------------------------------------------------------------------------------
+-- Dual of a category
+-------------------------------------------------------------------------------
+
+dualCategory : {ℓC₀ ℓC₁ : Level} → Category {ℓC₀} {ℓC₁} → Category {ℓC₀} {ℓC₁}
+dualCategory {ℓC₀} {ℓC₁} C = record
+  { Obj = Obj C
+  ; Hom = λ a b → Hom C b a
+  ; _∘_ = λ {a} {b} {c} f g → _∘_ C g f
+  ; id = id C
+  ; assoc = sym $ assoc C
+  ; idR = idL C
+  ; idL = idR C
+  }
+
+_op = dualCategory
+
 -------------------------------------------------------------------------------
 -- Triple of Categories
 -------------------------------------------------------------------------------
