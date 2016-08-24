@@ -28,9 +28,9 @@ open import Theory.TwoFunctor
 
 open StrictTwoCategory
 
-Monad→LaxTwoFunctor : ∀ {ℓC₀ ℓC₁} 
+LaxTwoFunctor→Monad : ∀ {ℓC₀ ℓC₁} 
                     → (F : LaxTwoFunctor ⊤-TwoCat (functorTwoCategory {ℓC₀} {ℓC₁})) → Monad ([ LaxTwoFunctor.P₁ F ]₀ tt)
-Monad→LaxTwoFunctor {ℓC₀} {ℓC₁} F = record 
+LaxTwoFunctor→Monad {ℓC₀} {ℓC₁} F = record 
   { η = ηNat
   ; μ = μNat
   ; μCoher = μCoher
