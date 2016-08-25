@@ -125,7 +125,6 @@ natTransAtkeyFunctor {S = S} {C} {D} s s' F = record
         ≡⟨ Functor.dist F ⟩
       [ F ]₁ (id S {s} , id S {s'} , g) ∘D [ F ]₁ (id S {s} , id S {s'} , f) ∎
 
-
 natTransAtkeyFunctorFst : {ℓS₀ ℓS₁ ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} 
                         → {S : Category {ℓS₀} {ℓS₁}} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}}
                         → Obj S → Obj C
@@ -217,7 +216,63 @@ natTransAtkeyFunctorConst {S = S} {C} {D} E s s' x F = record
         ≡⟨ Functor.dist F ⟩
       [ F ]₁ (id (S op) {s} , id S {s'} , id C {x}) ∘D [ F ]₁ (id (S op) {s} , id S {s'} , id C {x}) ∎
 
--- This is not the strong definition presented in Atkeys paper.
+natTransAtkeyFunctorComp : {ℓS₀ ℓS₁ ℓC₀ ℓC₁ : Level} 
+                         → {S : Category {ℓS₀} {ℓS₁}} {C : Category {ℓC₀} {ℓC₁}}
+                         → Obj S
+                         → Functor (S op ×C S ×C C) C
+                         → Functor (S op ×C S ×C C) C
+                         → Functor (S op ×C S ×C C) C
+natTransAtkeyFunctorComp {S = S} {C} s₂ F G = record 
+  { F₀ = F₀
+  ; F₁ = F₁  
+  ; id = idFunc
+  ; dist = dist
+  } where
+    _∘C_ = _∘_ C ; _∘S_ = _∘_ S ; _∘Sop_ = _∘_ (S op)
+    _∘SSC_ = _∘_ (S op ×C S ×C C)
+    
+    F₀ : Obj (S op ×C S ×C C) → Obj C
+    F₀ (s₁ , s₃ , x) = [ G ]₀ (s₁ , s₂ , [ F ]₀ (s₂ , s₃ , x))
+
+    F₁ : {a b : Obj (S op ×C S ×C C)} → Hom (S op ×C S ×C C) a b → Hom C (F₀ a) (F₀ b)
+    F₁ (s₁ , s₃ , f) = [ G ]₁ (s₁ , id S {s₂} , [ F ]₁ (id S {s₂} , s₃ , f))
+    
+    idFunc : {a : Obj ((S op) ×C S ×C C)}
+           → F₁ (id ((S op) ×C S ×C C) {a}) ≡ id C
+    idFunc {s₁ , s₃ , x} = begin
+      F₁ (id ((S op) ×C S ×C C) {s₁ , s₃ , x})
+        ≡⟨ refl ⟩
+      [ G ]₁ (id (S op) {s₁} , id S {s₂} , [ F ]₁ (id S {s₂} , id S {s₃} , id C {x}))
+        ≡⟨ cong (λ X → [ G ]₁ (id (S op) {s₁} , id S {s₂} , X)) (Functor.id F) ⟩
+      [ G ]₁ (id (S op) {s₁} , id S {s₂} , id C)
+        ≡⟨ Functor.id G ⟩
+      id C ∎
+    
+    dist : {a b c : Obj ((S op) ×C S ×C C)}
+         → {f : Hom ((S op) ×C S ×C C) a b} {g : Hom ((S op) ×C S ×C C) b c}
+         → F₁ (g ∘SSC f) ≡ F₁ g ∘C F₁ f
+    dist {f = sf , sf' , f} {g = sg , sg' , g} = begin
+      F₁ ((sg , sg' , g) ∘SSC (sf , sf' , f)) 
+        ≡⟨ refl ⟩
+      [ G ]₁ ((sg ∘Sop sf) , id S {s₂} , [ F ]₁ (id (S op) {s₂} , (sg' ∘S sf') , (g ∘C f)))
+        ≡⟨ cong (λ X → [ G ]₁ ((sg ∘Sop sf) , id S {s₂} , [ F ]₁ (X , (sg' ∘S sf') , (g ∘C f)))) (sym $ Category.idL (S op)) ⟩
+      [ G ]₁ ((sg ∘Sop sf) , id S {s₂} , [ F ]₁ ((id (S op) {s₂} ∘Sop id (S op) {s₂})  , (sg' ∘S sf') , (g ∘C f)))
+        ≡⟨ cong (λ X → [ G ]₁ ((sg ∘Sop sf) , id S {s₂} , X)) (Functor.dist F) ⟩
+      [ G ]₁ ((sg ∘Sop sf) , id S {s₂} , ([ F ]₁ (id (S op) {s₂} , sg' , g) ∘C [ F ]₁ (id (S op) {s₂}  , sf' , f)))
+        ≡⟨ cong (λ X → [ G ]₁ ((sg ∘Sop sf) , X , ([ F ]₁ (id (S op) {s₂} , sg' , g) ∘C [ F ]₁ (id (S op) {s₂}  , sf' , f)))) (sym $ Category.idL S) ⟩
+      [ G ]₁ ((sg ∘Sop sf) , (id S {s₂} ∘S id S {s₂}) , ([ F ]₁ (id (S op) {s₂} , sg' , g) ∘C [ F ]₁ (id (S op) {s₂}  , sf' , f)))
+        ≡⟨ Functor.dist G ⟩
+      [ G ]₁ (sg , id S {s₂} , [ F ]₁ (id (S op) {s₂} , sg' , g)) ∘C [ G ]₁ (sf , id S {s₂} , [ F ]₁ (id (S op) {s₂}  , sf' , f)) 
+        ≡⟨ refl ⟩
+      F₁ (sg , sg' , g) ∘C F₁ (sf , sf' , f) ∎
+
+-------------------------------------------------------------------------------
+-- Definition of parameterized monads as given by Atkey
+-------------------------------------------------------------------------------
+
+-- The definition and names choosen closly follow the definition given in 
+-- Atkeys paper "Parameterized notions of computation" (page 339).
+-- This is definition does not contain a strength conditions.
 record AtkeyParameterizedMonad {ℓC₀ ℓC₁ ℓS₀ ℓS₁ : Level} (C : Category {ℓC₀} {ℓC₁}) (S : Category {ℓS₀} {ℓS₁}) (T : Functor (S op ×C S ×C C) C) : Set (ℓC₀ ⊔ ℓC₁ ⊔ ℓS₀ ⊔ ℓS₁) where
   private
     _∘C_ = _∘_ C
@@ -227,20 +282,33 @@ record AtkeyParameterizedMonad {ℓC₀ ℓC₁ ℓS₀ ℓS₁ : Level} (C : Ca
     μ : {a : Obj C} {s₁ s₂ s₃ : Obj S} → Hom C ([ T ]₀ (s₁ , s₂ , ([ T ]₀ (s₂ , s₃ , a)))) ([ T ]₀ (s₁ , s₃ , a))
     
 
-    naturalη : {a b : Obj C} {f : Hom C a b} {x : Obj S} {s₁ : Hom S x x} {s₂ : Hom S x x}
-             → ([ T ]₁ (s₁ , s₂ , f)) ∘C (η {a} {x}) ≡ (η {b} {x}) ∘C ([ Id[ C ] ]₁ f)
+    naturalη : {s : Obj S} {s₁ : Hom S s s} {s₂ : Hom S s s}
+             → {a b : Obj C} {f : Hom C a b} 
+             → ([ T ]₁ (s₁ , s₂ , f)) ∘C (η {a} {s}) 
+             ≡ (η {b} {s}) ∘C ([ Id[ C ] ]₁ f)
     
     dinaturalη : {c : Obj C} {s s' : Obj S} {f : Hom S s s'}
-               → [ T ]₁ (id S {s} , f , id C {c}) ∘C (η {c} {s} ∘C [ Id[ C ] ]₁ (id C {c})) ≡ [ T ]₁ (f , id S {s'} , id C {c}) ∘C (η {c} {s'} ∘C [ Id[ C ] ]₁ (id C {c}))
+               → [ T ]₁ (id S {s} , f , id C {c}) ∘C (η {c} {s} ∘C [ Id[ C ] ]₁ (id C {c})) 
+               ≡ [ T ]₁ (f , id S {s'} , id C {c}) ∘C (η {c} {s'} ∘C [ Id[ C ] ]₁ (id C {c}))
 
-    naturalμ : {s t u : Obj S} {s₁ : Hom S s s} {s₂ : Hom S t t} {s₃ : Hom S u u} {a b : Obj C} 
-             → {f : Hom C a b} 
-             → [ T ]₁ (s₁ , s₃ , f) ∘C μ {a} {s} {t} {u}
-             ≡ μ {b} {s} {t} {u} ∘C [ T ]₁ (s₁ , s₂ , ([ T ]₁ (s₂ , s₃ , f))) 
+    naturalμ : {s₁ s₂ s₃ : Obj S}
+             → {a b : Obj C} → {f : Hom C a b} 
+             → [ T ]₁ (id (S op) {s₁} , id S {s₃} , f) ∘C μ {a} {s₁} {s₂} {s₃}
+             ≡ μ {b} {s₁} {s₂} {s₃} ∘C [ T ]₁ (id (S op) {s₁} , id S {s₂} , ([ T ]₁ (id (S op) {s₂} , id S {s₃} , f))) 
+    
+    naturalμ₁ : {s₂ s₃ : Obj S} {x : Obj C} 
+              → {a b : Obj (S op)} {f : Hom (S op) a b} 
+              → [ T ]₁ (f , id S {s₃} , id C {x}) ∘C μ {x} {a} {s₂} {s₃}
+              ≡ μ {x} {b} {s₂} {s₃} ∘C [ T ]₁ (f , id S {s₂} , [ T ]₁ (id S {s₂} ,  id S {s₃} , id C {x}))
 
+    naturalμ₂ : {s₁ s₂ : Obj S} {x : Obj C} 
+              → {a b : Obj S} {f : Hom S a b}
+              → [ T ]₁ (id (S op) {s₁} , f , id C {x}) ∘C μ {x} {s₁} {s₂} {a}
+              ≡ μ {x} {s₁} {s₂} {b} ∘C [ T ]₁ (id (S op) {s₁} , id S {s₂} , [ T ]₁ (id S {s₂} , f , id C {x}))
     
     assoc : ∀ {x : Obj C} {a b c d : Obj S} {s₁ : Hom S d d} {s₂ : Hom S a a}
-           → μ {x} {d} {a} {c} ∘C [ T ]₁ (s₁ , s₂ , μ {x} {a} {b} {c}) ≡ μ {x} {d} {b} {c} ∘C μ {[ T ]₀ (b , c , x)} {d} {a} {b}
+           → μ {x} {d} {a} {c} ∘C [ T ]₁ (s₁ , s₂ , μ {x} {a} {b} {c}) 
+           ≡ μ {x} {d} {b} {c} ∘C μ {[ T ]₀ (b , c , x)} {d} {a} {b}
 
     idL : {x : Obj C} {a b : Obj S}
         → μ {x} {a} {a} {b} ∘C η {[ T ]₀ (a , b , x)} {a} ≡ id C
@@ -249,13 +317,20 @@ record AtkeyParameterizedMonad {ℓC₀ ℓC₁ ℓS₀ ℓS₁ : Level} (C : Ca
         → [ T ]₁ (s₁ , s₂ , η {x} {b}) ∘C μ {x} {a} {b} {b} ≡ id C
   
   NatTrans-η : (s : Obj S) → NaturalTransformation Id[ C ] (natTransAtkeyFunctor s s T)
-  NatTrans-η s = naturalTransformation (λ x → η {x} {s}) naturalη
+  NatTrans-η s = naturalTransformation (λ x → η {x} {s}) (naturalη {s})
   
   DiNatTrans-η : (x : Obj C) → DinaturalTransformation (diNatAtkeyConstFunctor C S x) (diNatAtkeyFunctor x T)
   DiNatTrans-η x = dinaturalTransformation (λ s → η {x} {s}) dinaturalη
 
   NatTrans-μ : (s₁ s₂ s₃ : Obj S) → NaturalTransformation [ natTransAtkeyFunctor s₁ s₂ T ]∘[ natTransAtkeyFunctor s₂ s₃ T ] (natTransAtkeyFunctor s₁ s₃ T)
-  NatTrans-μ s₁ s₂ s₃ = naturalTransformation (λ x → μ {x} {s₁} {s₂} {s₃}) naturalμ
-  
-  NatTrans-μ₁ : (s₂ s₃ : Obj S) (x : Obj C) → NaturalTransformation [ natTransAtkeyFunctorFst s₂ x T ]∘[ {!!} ] (natTransAtkeyFunctorFst s₃ x T)
-  NatTrans-μ₁ s₂ s₃ x = naturalTransformation {!λ s₁ → μ {x} {?} {?} {?}!} {!!}
+  NatTrans-μ s₁ s₂ s₃ = naturalTransformation (λ x → μ {x} {s₁} {s₂} {s₃}) (naturalμ {s₁} {s₂} {s₃})
+
+  NatTrans-μ₁ : (s₂ s₃ : Obj S) (x : Obj C) → NaturalTransformation (natTransAtkeyFunctorFst s₃ x (natTransAtkeyFunctorComp s₂ T T)) (natTransAtkeyFunctorFst s₃ x T)
+  NatTrans-μ₁ s₂ s₃ x = naturalTransformation (λ s₁ → μ {x} {s₁} {s₂} {s₃}) (naturalμ₁ {s₂} {s₃} {x})
+
+  NatTrans-μ₂ : (s₁ s₂ : Obj S) (x : Obj C) → NaturalTransformation (natTransAtkeyFunctorSnd s₁ x (natTransAtkeyFunctorComp s₂ T T)) (natTransAtkeyFunctorSnd s₁ x T)
+  NatTrans-μ₂ s₁ s₂ x = naturalTransformation (λ s₃ → μ {x} {s₁} {s₂} {s₃}) (naturalμ₂ {s₁} {s₂} {x})
+  {-
+  DiNatTrans-μ : (s₁ s₃ : Obj S) (x : Obj C) → DinaturalTransformation {!!} {!!}
+  DiNatTrans-μ s₁ s₃ x = dinaturalTransformation (λ s₂ → μ {x} {s₁} {s₂} {s₃}) {!!}
+-}
