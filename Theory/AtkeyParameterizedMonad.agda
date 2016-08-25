@@ -355,15 +355,15 @@ record AtkeyParameterizedMonad {ℓC₀ ℓC₁ ℓS₀ ℓS₁ : Level} (C : Ca
                → μ {x} {s₁} {a} {s₃} ∘C [ T ]₁ (id (S op) {s₁} , id S {a} , [ T ]₁ (f , id S {s₃} , id C {x}))
                ≡ μ {x} {s₁} {b} {s₃} ∘C [ T ]₁ (id (S op) {s₁} , f , [ T ]₁ (id S {b} , id S {s₃} , id C {x}))
     
-    assoc : ∀ {x : Obj C} {a b c d : Obj S} {s₁ : Hom S d d} {s₂ : Hom S a a}
-           → μ {x} {d} {a} {c} ∘C [ T ]₁ (s₁ , s₂ , μ {x} {a} {b} {c}) 
-           ≡ μ {x} {d} {b} {c} ∘C μ {[ T ]₀ (b , c , x)} {d} {a} {b}
-
-    idL : {x : Obj C} {a b : Obj S}
-        → μ {x} {a} {a} {b} ∘C η {[ T ]₀ (a , b , x)} {a} ≡ id C
+    assoc : ∀ {x : Obj C} {s₀ s₁ s₂ s₃ : Obj S}
+           → μ {x} {s₀} {s₁} {s₃} ∘C [ T ]₁ (id S {s₀} , id S {s₁} , μ {x} {s₁} {s₂} {s₃}) 
+           ≡ μ {x} {s₀} {s₂} {s₃} ∘C μ {[ T ]₀ (s₂ , s₃ , x)} {s₀} {s₁} {s₂}
     
-    idR : {x : Obj C} {a b : Obj S} {s₁ : Hom S a a} {s₂ : Hom S b b}
-        → [ T ]₁ (s₁ , s₂ , η {x} {b}) ∘C μ {x} {a} {b} {b} ≡ id C
+    idL : {x : Obj C} {s₁ s₂ : Obj S}
+        → μ {x} {s₁} {s₁} {s₂} ∘C η {[ T ]₀ (s₁ , s₂ , x)} {s₁} ≡ id C
+    
+    idR : {x : Obj C} {s₁ s₂ : Obj S}
+        → [ T ]₁ (id (S op) {s₁} , id S {s₂} , η {x} {s₂}) ∘C μ {x} {s₁} {s₂} {s₂} ≡ id C
   
   NatTrans-η : (s : Obj S) → NaturalTransformation Id[ C ] (natTransAtkeyFunctor s s T)
   NatTrans-η s = naturalTransformation (λ x → η {x} {s}) (naturalη {s})
