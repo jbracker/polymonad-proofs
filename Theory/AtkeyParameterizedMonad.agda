@@ -19,33 +19,16 @@ open import Theory.DinaturalTransformation
 
 open Category hiding (assoc ; idL ; idR )
 
-diNatFunctor : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} 
-             → {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}}
-             → Functor C D 
-             → Functor (C op ×C C) D
-diNatFunctor {C = C} {D} F = record
-  { F₀ = F₀
-  ; F₁ = F₁ 
-  ; id = Functor.id F
-  ; dist = Functor.dist F
-  } where
-    F₀ : Obj (C op ×C C) → Obj D
-    F₀ (c' ,' c) = [ F ]₀ c
-    
-    F₁ : {a b : Obj ((C op) ×C C)} → Hom ((C op) ×C C) a b → Hom D (F₀ a) (F₀ b)
-    F₁ (f' ,' f) = [ F ]₁ f
+-------------------------------------------------------------------------------
+-- Helper functors to model the dinatural transformations of a parameterized monad
+-------------------------------------------------------------------------------
 
-DiNat[_] = diNatFunctor
-
-IdDiNat[_] : {ℓC₀ ℓC₁ : Level} → (C : Category {ℓC₀} {ℓC₁}) → Functor (C op ×C C) C
-IdDiNat[_] C = DiNat[ Id[ C ] ]
-
-diNatAtkeyConstFunctor : {ℓS₀ ℓS₁ ℓD₀ ℓD₁ : Level} 
+diNatAtkeyFunctorConst : {ℓS₀ ℓS₁ ℓD₀ ℓD₁ : Level} 
                        → (D : Category {ℓD₀} {ℓD₁})
                        → (S : Category {ℓS₀} {ℓS₁})
                        → Obj D
                        → Functor (S op ×C S) D
-diNatAtkeyConstFunctor D S x = record
+diNatAtkeyFunctorConst D S x = record
   { F₀ = F₀
   ; F₁ = F₁ 
   ; id = refl
@@ -57,6 +40,45 @@ diNatAtkeyConstFunctor D S x = record
     F₁ : {a b : Obj (S op ×C S)} 
        → Hom (S op ×C S) a b → Hom D (F₀ a) (F₀ b)
     F₁ (sf ,' sf') = id D {x}
+
+
+diNatAtkeyFunctorConst' : {ℓS₀ ℓS₁ ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} 
+                       → {C : Category {ℓC₀} {ℓC₁}}
+                       → {D : Category {ℓD₀} {ℓD₁}}
+                       → {S : Category {ℓS₀} {ℓS₁}}
+                       → Obj (S op) → Obj S → Obj C
+                       → Functor (S op ×C S ×C C) D
+                       → Functor (S op ×C S) D
+diNatAtkeyFunctorConst' {C = C} {D} {S} s₁ s₃ x F = record
+  { F₀ = F₀
+  ; F₁ = F₁ 
+  ; id = Functor.id F
+  ; dist = λ {a} {b} {c} {f} {g} → dist {a} {b} {c} {f} {g}
+  } where
+    _∘D_ = _∘_ D ; _∘C_ = _∘_ C ; _∘SS_ = _∘_ (S op ×C S) ; _∘S_ = _∘_ S ; _∘Sop_ = _∘_ (S op)
+    
+    F₀ : Obj (S op ×C S) → Obj D
+    F₀ (s ,' s') = [ F ]₀ (s₁ , s₃ , x)
+    
+    F₁ : {a b : Obj (S op ×C S)} 
+       → Hom (S op ×C S) a b → Hom D (F₀ a) (F₀ b)
+    F₁ (sf ,' sf') = [ F ]₁ (id (S op) {s₁} , id S {s₃} , id C {x})
+    
+    dist : {a b c : Obj ((S op) ×C S)} 
+         → {f : Hom ((S op) ×C S) a b} {g : Hom ((S op) ×C S) b c}
+         → F₁ (g ∘SS f) ≡ F₁ g ∘D F₁ f
+    dist {f = sf ,' sf'} {g = sg ,' sg'} = begin
+      F₁ ((sg ,' sg') ∘SS (sf ,' sf')) 
+        ≡⟨ refl ⟩
+      [ F ]₁ (id (S op) {s₁} , id S {s₃} , id C {x})
+        ≡⟨ Functor.id F ⟩
+      id D
+        ≡⟨ sym $ Category.idL D ⟩
+      id D ∘D id D
+        ≡⟨ cong₂ _∘D_ (sym $ Functor.id F) (sym $ Functor.id F) ⟩
+      [ F ]₁ (id (S op) {s₁} , id S {s₃} , id C {x}) ∘D [ F ]₁ (id (S op) {s₁} , id S {s₃} , id C {x})
+        ≡⟨ refl ⟩
+      F₁ (sg ,' sg') ∘D F₁ (sf ,' sf') ∎
 
 diNatAtkeyFunctor : {ℓS₀ ℓS₁ ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} 
                   → {S : Category {ℓS₀} {ℓS₁}} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}}
@@ -94,6 +116,59 @@ diNatAtkeyFunctor {S = S} {C} {D} x F = record
       [ F ]₁ (g , g' , id C {x}) ∘D [ F ]₁ (f , f' , id C {x})
         ≡⟨ refl ⟩
       (F₁ (g ,' g')) ∘D (F₁ (f ,' f')) ∎
+
+diNatAtkeyFunctorComp : {ℓS₀ ℓS₁ ℓC₀ ℓC₁ : Level} 
+                  → {S : Category {ℓS₀} {ℓS₁}} {C : Category {ℓC₀} {ℓC₁}}
+                  → Obj (S op) → Obj S → Obj C
+                  → Functor (S op ×C S ×C C) C 
+                  → Functor (S op ×C S ×C C) C 
+                  → Functor (S op ×C S) C
+diNatAtkeyFunctorComp {S = S} {C} s₁ s₃ x F G = record
+  { F₀ = F₀
+  ; F₁ = F₁  
+  ; id = idFunc
+  ; dist = dist
+  } where
+    _∘SS_ = _∘_ (S op ×C S) ; _∘C_ = _∘_ C
+    _∘S_ = _∘_ S ; _∘Sop_ = _∘_ (S op)
+
+    F₀ : Obj ((S op) ×C S) → Obj C
+    F₀ (s₂ ,' s₂') = [ G ]₀ (s₁ , s₂' , [ F ]₀ (s₂ , s₃ , x))
+
+    F₁ : {a b : Obj (S op ×C S)} → Hom (S op ×C S) a b → Hom C (F₀ a) (F₀ b)
+    F₁ (s₂f ,' s₂f') = [ G ]₁ (id (S op) {s₁} , s₂f' , [ F ]₁ (s₂f , id S {s₃} , id C {x}))
+    
+    idFunc : {a : Obj (S op ×C S)} → F₁ (id (S op ×C S) {a})  ≡ id C
+    idFunc {s₂ ,' s₂'} = begin
+      F₁ (id (S op ×C S) {s₂ ,' s₂'}) 
+        ≡⟨ refl ⟩
+      [ G ]₁ (id (S op) {s₁} , id S {s₂'} , [ F ]₁ (id (S op) {s₂} , id S {s₃} , id C {x}))
+        ≡⟨ cong (λ X → [ G ]₁ (id (S op) {s₁} , id S {s₂'} , X)) (Functor.id F) ⟩
+      [ G ]₁ (id (S op) {s₁} , id S {s₂'} , id C)
+        ≡⟨ Functor.id G ⟩
+      id C ∎
+
+    dist : {a b c : Obj ((S op) ×C S)} 
+         → {f : Hom ((S op) ×C S) a b} {g : Hom ((S op) ×C S) b c}
+         → F₁ (g ∘SS f) ≡ F₁ g ∘C F₁ f
+    dist {f = sf ,' sf'} {g = sg ,' sg'} = begin
+      F₁ ((sg ,' sg') ∘SS (sf ,' sf')) 
+        ≡⟨ refl ⟩
+      [ G ]₁ (id (S op) {s₁} , (sg' ∘S sf') , [ F ]₁ ((sg ∘Sop sf) , id S {s₃} , id C {x}))
+        ≡⟨ cong₂ (λ X Y → [ G ]₁ (id (S op) {s₁} , (sg' ∘S sf') , [ F ]₁ ((sg ∘Sop sf) , X , Y))) (sym $ Category.idL S) (sym $ Category.idL C) ⟩
+      [ G ]₁ (id (S op) {s₁} , (sg' ∘S sf') , [ F ]₁ ((sg ∘Sop sf) , (id S {s₃} ∘S id S {s₃}) , (id C {x} ∘C id C {x})))
+        ≡⟨ cong (λ X → [ G ]₁ (id (S op) {s₁} , (sg' ∘S sf') , X)) (Functor.dist F) ⟩
+      [ G ]₁ (id (S op) {s₁} , (sg' ∘S sf') , ([ F ]₁ (sg , id S {s₃} , id C {x}) ∘C [ F ]₁ (sf , id S {s₃} , id C {x})) )
+        ≡⟨ cong (λ X → [ G ]₁ (X , (sg' ∘S sf') , ([ F ]₁ (sg , id S {s₃} , id C {x}) ∘C [ F ]₁ (sf , id S {s₃} , id C {x})) )) (sym $ Category.idL (S op)) ⟩
+      [ G ]₁ ((id (S op) {s₁} ∘Sop id (S op) {s₁}) , (sg' ∘S sf') , ([ F ]₁ (sg , id S {s₃} , id C {x}) ∘C [ F ]₁ (sf , id S {s₃} , id C {x})) )
+        ≡⟨ Functor.dist G ⟩
+      ([ G ]₁ (id (S op) {s₁} , sg' , [ F ]₁ (sg , id S {s₃} , id C {x}))) ∘C ([ G ]₁ (id (S op) {s₁} , sf' , [ F ]₁ (sf , id S {s₃} , id C {x})))
+        ≡⟨ refl ⟩
+      F₁ (sg ,' sg') ∘C F₁ (sf ,' sf') ∎
+
+-------------------------------------------------------------------------------
+-- Helper functors to model the natural transformations of a parameterized monad
+-------------------------------------------------------------------------------
 
 natTransAtkeyFunctor : {ℓS₀ ℓS₁ ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} 
                      → {S : Category {ℓS₀} {ℓS₁}} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}}
@@ -184,38 +259,6 @@ natTransAtkeyFunctorSnd {S = S} {C} {D} s x F = record
         ≡⟨ Functor.dist F ⟩
       [ F ]₁ (id (S op) {s} , sg' , id C {x}) ∘D [ F ]₁ (id (S op) {s} , sf' , id C {x}) ∎
 
-natTransAtkeyFunctorConst : {ℓS₀ ℓS₁ ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓE₀ ℓE₁ : Level} 
-                        → {S : Category {ℓS₀} {ℓS₁}} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} 
-                        → (E : Category {ℓE₀} {ℓE₁})
-                        → Obj (S op) → Obj S → Obj C
-                        → Functor (S op ×C S ×C C) D 
-                        → Functor E D
-natTransAtkeyFunctorConst {S = S} {C} {D} E s s' x F = record 
-  { F₀ = F₀
-  ; F₁ = F₁  
-  ; id = Functor.id F
-  ; dist = λ {a} {b} {c} {ef} {eg} → dist {a} {b} {c} {ef} {eg}
-  } where
-    _∘C_ = _∘_ C ; _∘D_ = _∘_ D ; _∘S_ = _∘_ S ; _∘Sop_ = _∘_ (S op) ; _∘E_ = _∘_ E
-    
-    F₀ : Obj E → Obj D
-    F₀ e = [ F ]₀ (s , s' , x)
-
-    F₁ : {a b : Obj E} → Hom E a b → Hom D (F₀ a) (F₀ b)
-    F₁ ef = [ F ]₁ (id (S op) {s} , id S {s'} , id C {x})
-    
-    dist : {a b c : Obj E} 
-         → {ef : Hom E a b} {eg : Hom E b c}
-         → F₁ (eg ∘E ef) ≡ (F₁ eg) ∘D (F₁ ef)
-    dist {a} {b} {c} {ef} {eg} = begin
-      [ F ]₁ (id (S op) {s} , id S {s'} , id C {x})
-        ≡⟨ cong₂ (λ X Y → [ F ]₁ (X , Y , id C {x})) (sym $ Category.idL (S op)) (sym $ Category.idL S) ⟩
-      [ F ]₁ ((id (S op) {s} ∘Sop id (S op) {s}) , (id S {s'} ∘S id S {s'}) , id C {x})
-        ≡⟨ cong (λ X → [ F ]₁ ((id (S op) {s} ∘Sop id (S op) {s}) , (id S {s'} ∘S id S {s'}) , X)) (sym $ Category.idL C) ⟩
-      [ F ]₁ ((id (S op) {s} ∘Sop id (S op) {s}) , (id S {s'} ∘S id S {s'}) , (id C {x} ∘C id C {x}))
-        ≡⟨ Functor.dist F ⟩
-      [ F ]₁ (id (S op) {s} , id S {s'} , id C {x}) ∘D [ F ]₁ (id (S op) {s} , id S {s'} , id C {x}) ∎
-
 natTransAtkeyFunctorComp : {ℓS₀ ℓS₁ ℓC₀ ℓC₁ : Level} 
                          → {S : Category {ℓS₀} {ℓS₁}} {C : Category {ℓC₀} {ℓC₁}}
                          → Obj S
@@ -282,14 +325,15 @@ record AtkeyParameterizedMonad {ℓC₀ ℓC₁ ℓS₀ ℓS₁ : Level} (C : Ca
     μ : {a : Obj C} {s₁ s₂ s₃ : Obj S} → Hom C ([ T ]₀ (s₁ , s₂ , ([ T ]₀ (s₂ , s₃ , a)))) ([ T ]₀ (s₁ , s₃ , a))
     
 
-    naturalη : {s : Obj S} {s₁ : Hom S s s} {s₂ : Hom S s s}
+    naturalη : {s : Obj S}
              → {a b : Obj C} {f : Hom C a b} 
-             → ([ T ]₁ (s₁ , s₂ , f)) ∘C (η {a} {s}) 
-             ≡ (η {b} {s}) ∘C ([ Id[ C ] ]₁ f)
+             → [ T ]₁ (id (S op) {s} , id S {s} , f) ∘C η {a} {s}
+             ≡ η {b} {s} ∘C f
     
-    dinaturalη : {c : Obj C} {s s' : Obj S} {f : Hom S s s'}
-               → [ T ]₁ (id S {s} , f , id C {c}) ∘C (η {c} {s} ∘C [ Id[ C ] ]₁ (id C {c})) 
-               ≡ [ T ]₁ (f , id S {s'} , id C {c}) ∘C (η {c} {s'} ∘C [ Id[ C ] ]₁ (id C {c}))
+    dinaturalη : {x : Obj C} 
+               → {a b : Obj S} {f : Hom S a b} 
+               → [ T ]₁ (id S {a} , f , id C {x}) ∘C η {x} {a}
+               ≡ [ T ]₁ (f , id S {b} , id C {x}) ∘C η {x} {b}
 
     naturalμ : {s₁ s₂ s₃ : Obj S}
              → {a b : Obj C} → {f : Hom C a b} 
@@ -305,6 +349,11 @@ record AtkeyParameterizedMonad {ℓC₀ ℓC₁ ℓS₀ ℓS₁ : Level} (C : Ca
               → {a b : Obj S} {f : Hom S a b}
               → [ T ]₁ (id (S op) {s₁} , f , id C {x}) ∘C μ {x} {s₁} {s₂} {a}
               ≡ μ {x} {s₁} {s₂} {b} ∘C [ T ]₁ (id (S op) {s₁} , id S {s₂} , [ T ]₁ (id S {s₂} , f , id C {x}))
+
+    dinaturalμ : {s₁ s₃ : Obj S} {x : Obj C}
+               → {a b : Obj S} {f : Hom S a b}
+               → μ {x} {s₁} {a} {s₃} ∘C [ T ]₁ (id (S op) {s₁} , id S {a} , [ T ]₁ (f , id S {s₃} , id C {x}))
+               ≡ μ {x} {s₁} {b} {s₃} ∘C [ T ]₁ (id (S op) {s₁} , f , [ T ]₁ (id S {b} , id S {s₃} , id C {x}))
     
     assoc : ∀ {x : Obj C} {a b c d : Obj S} {s₁ : Hom S d d} {s₂ : Hom S a a}
            → μ {x} {d} {a} {c} ∘C [ T ]₁ (s₁ , s₂ , μ {x} {a} {b} {c}) 
@@ -319,8 +368,15 @@ record AtkeyParameterizedMonad {ℓC₀ ℓC₁ ℓS₀ ℓS₁ : Level} (C : Ca
   NatTrans-η : (s : Obj S) → NaturalTransformation Id[ C ] (natTransAtkeyFunctor s s T)
   NatTrans-η s = naturalTransformation (λ x → η {x} {s}) (naturalη {s})
   
-  DiNatTrans-η : (x : Obj C) → DinaturalTransformation (diNatAtkeyConstFunctor C S x) (diNatAtkeyFunctor x T)
-  DiNatTrans-η x = dinaturalTransformation (λ s → η {x} {s}) dinaturalη
+  DiNatTrans-η : (x : Obj C) → DinaturalTransformation (diNatAtkeyFunctorConst C S x) (diNatAtkeyFunctor x T)
+  DiNatTrans-η x = dinaturalTransformation (λ s → η {x} {s}) $ λ {a b : Obj S} {f : Hom S a b} → begin
+    [ T ]₁ (id S {a} , f , id C {x}) ∘C (η {x} {a} ∘C id C {x})
+      ≡⟨ cong (λ X → [ T ]₁ (id S {a} , f , id C {x}) ∘C X) (Category.idL C) ⟩
+    [ T ]₁ (id S {a} , f , id C {x}) ∘C η {x} {a}
+      ≡⟨ dinaturalη {x} ⟩
+    [ T ]₁ (f , id S {b} , id C {x}) ∘C η {x} {b}
+      ≡⟨ cong (λ X → [ T ]₁ (f , id S {b} , id C {x}) ∘C X) (sym $ Category.idL C) ⟩
+    [ T ]₁ (f , id S {b} , id C {x}) ∘C (η {x} {b} ∘C id C {x}) ∎
 
   NatTrans-μ : (s₁ s₂ s₃ : Obj S) → NaturalTransformation [ natTransAtkeyFunctor s₁ s₂ T ]∘[ natTransAtkeyFunctor s₂ s₃ T ] (natTransAtkeyFunctor s₁ s₃ T)
   NatTrans-μ s₁ s₂ s₃ = naturalTransformation (λ x → μ {x} {s₁} {s₂} {s₃}) (naturalμ {s₁} {s₂} {s₃})
@@ -330,7 +386,17 @@ record AtkeyParameterizedMonad {ℓC₀ ℓC₁ ℓS₀ ℓS₁ : Level} (C : Ca
 
   NatTrans-μ₂ : (s₁ s₂ : Obj S) (x : Obj C) → NaturalTransformation (natTransAtkeyFunctorSnd s₁ x (natTransAtkeyFunctorComp s₂ T T)) (natTransAtkeyFunctorSnd s₁ x T)
   NatTrans-μ₂ s₁ s₂ x = naturalTransformation (λ s₃ → μ {x} {s₁} {s₂} {s₃}) (naturalμ₂ {s₁} {s₂} {x})
-  {-
-  DiNatTrans-μ : (s₁ s₃ : Obj S) (x : Obj C) → DinaturalTransformation {!!} {!!}
-  DiNatTrans-μ s₁ s₃ x = dinaturalTransformation (λ s₂ → μ {x} {s₁} {s₂} {s₃}) {!!}
--}
+  
+  DiNatTrans-μ : (s₁ s₃ : Obj S) (x : Obj C) → DinaturalTransformation (diNatAtkeyFunctorComp s₁ s₃ x T T) (diNatAtkeyFunctorConst' s₁ s₃ x T)
+  DiNatTrans-μ s₁ s₃ x = dinaturalTransformation (λ s₂ → μ {x} {s₁} {s₂} {s₃}) $ λ {a b : Obj S} {f : Hom S a b} → begin
+    [ T ]₁ (id (S op) {s₁} , id S {s₃} , id C {x}) ∘C (μ {x} {s₁} {a} {s₃} ∘C [ T ]₁ (id (S op) {s₁} , id S {a} , [ T ]₁ (f , id S {s₃} , id C {x})))
+      ≡⟨ cong (λ X → X ∘C (μ {x} {s₁} {a} {s₃} ∘C [ T ]₁ (id (S op) {s₁} , id S {a} , [ T ]₁ (f , id S {s₃} , id C {x})))) (Functor.id T) ⟩ 
+    id C ∘C (μ {x} {s₁} {a} {s₃} ∘C [ T ]₁ (id (S op) {s₁} , id S {a} , [ T ]₁ (f , id S {s₃} , id C {x})))
+      ≡⟨ Category.idR C ⟩ 
+    μ {x} {s₁} {a} {s₃} ∘C [ T ]₁ (id (S op) {s₁} , id S {a} , [ T ]₁ (f , id S {s₃} , id C {x}))
+      ≡⟨ dinaturalμ {s₁} {s₃} {x} ⟩ 
+    μ {x} {s₁} {b} {s₃} ∘C [ T ]₁ (id (S op) {s₁} , f , [ T ]₁ (id S {b} , id S {s₃} , id C {x}))
+      ≡⟨ sym $ Category.idR C ⟩ 
+    id C ∘C (μ {x} {s₁} {b} {s₃} ∘C [ T ]₁ (id (S op) {s₁} , f , [ T ]₁ (id S {b} , id S {s₃} , id C {x})))
+      ≡⟨ cong (λ X → X ∘C (μ {x} {s₁} {b} {s₃} ∘C [ T ]₁ (id (S op) {s₁} , f , [ T ]₁ (id S {b} , id S {s₃} , id C {x})))) (sym $ Functor.id T) ⟩ 
+    [ T ]₁ (id (S op) {s₁} , id S {s₃} , id C {x}) ∘C (μ {x} {s₁} {b} {s₃} ∘C [ T ]₁ (id (S op) {s₁} , f , [ T ]₁ (id S {b} , id S {s₃} , id C {x}))) ∎ --(dinaturalμ {s₁} {s₃} {x})
