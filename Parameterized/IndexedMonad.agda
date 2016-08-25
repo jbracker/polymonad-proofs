@@ -36,6 +36,9 @@ record IxMonad {n} (Ixs : Set n) (M : Ixs → Ixs → TyCon) : Set (n ⊔ lsuc l
   ma >> mb = ma >>= λ a → mb
 
   bind = _>>=_
+  
+  join : ∀ {α : Type} {i j k : Ixs} → M i j (M j k α) → M i k α
+  join mma = mma >>= λ x → x
 
 data IxMonadTyCons {n} (Ixs : Set n) : Set n where
   IxMonadTC : Ixs → Ixs → IxMonadTyCons Ixs
