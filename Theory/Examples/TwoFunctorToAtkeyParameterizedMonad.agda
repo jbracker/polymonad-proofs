@@ -21,10 +21,25 @@ open import Haskell
 open import Theory.Category
 open import Theory.Functor
 open import Theory.NaturalTransformation
-open import Theory.Monad
+open import Theory.AtkeyParameterizedMonad
 open import Theory.TwoCategory
 open import Theory.Examples.TwoCategory
 open import Theory.TwoFunctor
 
 
- 
+open StrictTwoCategory
+
+
+LaxTwoFunctor→AtkeyFunctor 
+  : {ℓC₀ ℓC₁ ℓS₀ ℓS₁ : Level} 
+  → {S : Category {ℓS₀} {ℓS₁}}
+  → (F : LaxTwoFunctor (Category→StrictTwoCategory S) (functorTwoCategory {ℓC₀} {ℓC₁})) 
+  → Functor (S op ×C S ×C LaxTwoFunctor.P₀ F {!!}) (LaxTwoFunctor.P₀ F {!!})
+LaxTwoFunctor→AtkeyFunctor F = {!!}
+
+LaxTwoFunctor→AtkeyParameterizedMonad 
+  : {ℓC₀ ℓC₁ ℓS₀ ℓS₁ : Level} 
+  → {S : Category {ℓS₀} {ℓS₁}}
+  → (F : LaxTwoFunctor (Category→StrictTwoCategory S) (functorTwoCategory {ℓC₀} {ℓC₁})) 
+  → AtkeyParameterizedMonad (LaxTwoFunctor.P₀ F {!!}) S (LaxTwoFunctor→AtkeyFunctor F)
+LaxTwoFunctor→AtkeyParameterizedMonad {ℓC₀} {ℓC₁} {ℓS₀} {ℓS₁} {S} F = {!!}
