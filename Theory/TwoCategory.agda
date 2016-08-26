@@ -185,7 +185,7 @@ record StrictTwoCategory {ℓ₀ ℓ₁ ℓ₂ : Level} : Set (lsuc (ℓ₀ ⊔ 
 
   -- Unitors
   lUnitor : {a b : Cell₀} {f : Cell₁ a b} → Cell₂ (f ∘ₕ id₁) f
-  lUnitor {a} {b} {f} = subst₂ Cell₂ (sym hIdL₁) refl id₂ 
+  lUnitor {a} {b} {f} = subst₂ Cell₂ (sym $ hIdL₁ {a} {b} {f}) refl id₂ 
 
   lUnitorInv : {a b : Cell₀} {f : Cell₁ a b} → Cell₂ f (f ∘ₕ id₁)
   lUnitorInv {a} {b} {f} = subst₂ Cell₂ refl (sym hIdL₁) id₂
