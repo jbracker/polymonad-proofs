@@ -41,7 +41,7 @@ AtkeyParameterizedMonad→LaxTwoFunctor {ℓC₀} {ℓC₁} {ℓS₀} {ℓS₁} 
   ; P₁ = P₁
   ; η = η
   ; μ = λ {s₁} {s₂} {s₃} {f} {g} → μ {s₁} {s₂} {s₃} {f} {g}
-  ; laxFunId₁ = {!!}
+  ; laxFunId₁ = λ {x} {y} {f} → laxFunId₁ {x} {y} {f}
   ; laxFunId₂ = {!!}
   ; laxFunAssoc = {!!}
   } where
@@ -99,4 +99,9 @@ AtkeyParameterizedMonad→LaxTwoFunctor {ℓC₀} {ℓC₁} {ℓS₀} {ℓS₁} 
     μ : {s₁ s₂ s₃ : Obj S} {f : Hom S s₁ s₂} {g : Hom S s₂ s₃}
       → NatTrans [ [ P₁ ]₀ g ]∘[ [ P₁ ]₀ f ] ([ P₁ ]₀ (g ∘S f))
     μ {s₁} {s₂} {s₃} {f} {g} = naturalTransformation (λ x → AtkeyParameterizedMonad.μ monad {x} {s₃} {s₂} {s₁}) (AtkeyParameterizedMonad.naturalμ monad {s₃} {s₂} {s₁})
-        
+    
+    laxFunId₁ : {s₁ s₂ : Obj S} {f : Hom S s₁ s₂}
+              → ⟨ Functor.F₁ (P₁ {s₁} {s₂}) {f} {f} (λ' S2 f) ⟩∘ᵥ⟨ ⟨ μ {s₁} {s₁} {s₂} {id S {s₁}} {f} ⟩∘ᵥ⟨ ⟨ id₂ FunTwoCat ⟩∘ₕ⟨ η ⟩ ⟩ ⟩
+              ≡ λ' FunTwoCat ([ P₁ ]₀ f)
+    laxFunId₁ {s₁} {s₂} {f} = propEqNatTrans refl refl {!!}
+
