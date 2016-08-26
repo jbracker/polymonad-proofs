@@ -40,7 +40,7 @@ AtkeyParameterizedMonad→LaxTwoFunctor {ℓC₀} {ℓC₁} {ℓS₀} {ℓS₁} 
   { P₀ = P₀
   ; P₁ = P₁
   ; η = η
-  ; μ = μ
+  ; μ = λ {s₁} {s₂} {s₃} {f} {g} → μ {s₁} {s₂} {s₃} {f} {g}
   ; laxFunId₁ = {!!}
   ; laxFunId₂ = {!!}
   ; laxFunAssoc = {!!}
@@ -64,21 +64,21 @@ AtkeyParameterizedMonad→LaxTwoFunctor {ℓC₀} {ℓC₁} {ℓS₀} {ℓS₁} 
         _∘CC_ = _∘_ (HomCat FunTwoCat C C)
         
         F₀₀ :  Obj C → Obj C
-        F₀₀ a = [ M ]₀ ((s₁ , s₂ , a))
+        F₀₀ a = [ M ]₀ ((s₂ , s₁ , a))
         
         F₀₁ : {a b : Obj C} → Hom C a b → Hom C (F₀₀ a) (F₀₀ b)
-        F₀₁ f = [ M ]₁ (id (S op) {s₁} , id S {s₂} , f)
+        F₀₁ f = [ M ]₁ (id (S op) {s₂} , id S {s₁} , f)
  
         dist₀ : {a b c : Obj C} 
               → {f : Hom C a b} {g : Hom C b c} 
-              → [ M ]₁ (id (S op) {s₁} , id S {s₂} , (g ∘C f)) 
-              ≡ [ M ]₁ (id (S op) {s₁} , id S {s₂} , g) ∘C [ M ]₁ (id (S op) {s₁} , id S {s₂} , f)
+              → [ M ]₁ (id (S op) {s₂} , id S {s₁} , (g ∘C f)) 
+              ≡ [ M ]₁ (id (S op) {s₂} , id S {s₁} , g) ∘C [ M ]₁ (id (S op) {s₂} , id S {s₁} , f)
         dist₀ {a} {b} {c} {f} {g} = begin
-          [ M ]₁ (id (S op) {s₁} , id S {s₂} , (g ∘C f)) 
+          [ M ]₁ (id (S op) {s₂} , id S {s₁} , (g ∘C f)) 
             ≡⟨ cong₂ (λ X Y → [ M ]₁ (X , Y , (g ∘C f))) (sym $ idL (S op)) (sym $ idL S) ⟩
-          [ M ]₁ ((id (S op) {s₁} ∘Sop id (S op) {s₁}) , (id S {s₂} ∘S id S {s₂}) , (g ∘C f))
+          [ M ]₁ ((id (S op) {s₂} ∘Sop id (S op) {s₂}) , (id S {s₁} ∘S id S {s₁}) , (g ∘C f))
             ≡⟨ Functor.dist M ⟩
-          [ M ]₁ (id (S op) {s₁} , id S {s₂} , g) ∘C [ M ]₁ (id (S op) {s₁} , id S {s₂} , f) ∎
+          [ M ]₁ (id (S op) {s₂} , id S {s₁} , g) ∘C [ M ]₁ (id (S op) {s₂} , id S {s₁} , f) ∎
 
         F₀ : Hom S s₁ s₂ → Functor (P₀ s₁) (P₀ s₂)
         F₀ f = functor F₀₀ F₀₁ (Functor.id M) dist₀
@@ -98,9 +98,5 @@ AtkeyParameterizedMonad→LaxTwoFunctor {ℓC₀} {ℓC₁} {ℓS₀} {ℓS₁} 
     
     μ : {s₁ s₂ s₃ : Obj S} {f : Hom S s₁ s₂} {g : Hom S s₂ s₃}
       → NatTrans [ [ P₁ ]₀ g ]∘[ [ P₁ ]₀ f ] ([ P₁ ]₀ (g ∘S f))
-    μ {s₁} {s₂} {s₃} {f} {g} = naturalTransformation μ' {!!}
-      where
-        μ' : (x : Obj C) → Hom C ([ M ]₀ (s₂ , s₃ , ([ M ]₀ (s₁ , s₂ , x)))) ([ M ]₀ (s₁ , s₃ , x))
-        μ' x = {!AtkeyParameterizedMonad.μ monad {x} {?} {?} {?} !}
+    μ {s₁} {s₂} {s₃} {f} {g} = naturalTransformation (λ x → AtkeyParameterizedMonad.μ monad {x} {s₃} {s₂} {s₁}) (AtkeyParameterizedMonad.naturalμ monad {s₃} {s₂} {s₁})
         
--- μ : {a : Obj C} {s₁ s₂ s₃ : Obj S} → Hom C ([ T ]₀ (s₁ , s₂ , ([ T ]₀ (s₂ , s₃ , a)))) ([ T ]₀ (s₁ , s₃ , a))
