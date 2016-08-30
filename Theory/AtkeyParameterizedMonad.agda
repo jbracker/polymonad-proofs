@@ -318,7 +318,7 @@ natTransAtkeyFunctorComp {S = S} {C} s₂ F G = record
 -- This is definition does not contain a strength conditions.
 record AtkeyParameterizedMonad {ℓC₀ ℓC₁ ℓS₀ ℓS₁ : Level} (C : Category {ℓC₀} {ℓC₁}) (S : Category {ℓS₀} {ℓS₁}) (T : Functor (S op ×C S ×C C) C) : Set (ℓC₀ ⊔ ℓC₁ ⊔ ℓS₀ ⊔ ℓS₁) where
   private
-    _∘C_ = _∘_ C
+    _∘C_ = _∘_ C ; _∘S_ = _∘_ S ; _∘Sop_ = _∘_ (S op)
   field
     η : {a : Obj C} {s : Obj S} → Hom C a ([ T ]₀ (s , s , a))
     
@@ -360,10 +360,10 @@ record AtkeyParameterizedMonad {ℓC₀ ℓC₁ ℓS₀ ℓS₁ : Level} (C : Ca
            ≡ μ {x} {s₀} {s₂} {s₃} ∘C μ {[ T ]₀ (s₂ , s₃ , x)} {s₀} {s₁} {s₂}
     
     idL : {x : Obj C} {s₁ s₂ : Obj S}
-        → μ {x} {s₁} {s₁} {s₂} ∘C η {[ T ]₀ (s₁ , s₂ , x)} {s₁} ≡ id C
+        → μ {x} {s₁} {s₂} {s₂} ∘C [ T ]₁ (id (S op) {s₁} , id S {s₂} , η {x} {s₂}) ≡ id C {[ T ]₀ (s₁ , s₂ , x)}
     
     idR : {x : Obj C} {s₁ s₂ : Obj S}
-        → [ T ]₁ (id (S op) {s₁} , id S {s₂} , η {x} {s₂}) ∘C μ {x} {s₁} {s₂} {s₂} ≡ id C
+        → μ {x} {s₁} {s₁} {s₂} ∘C η {[ T ]₀ (s₁ , s₂ , x)} {s₁} ≡ id C {[ T ]₀ (s₁ , s₂ , x)}
   
   NatTrans-η : (s : Obj S) → NaturalTransformation Id[ C ] (natTransAtkeyFunctor s s T)
   NatTrans-η s = naturalTransformation (λ x → η {x} {s}) (naturalη {s})
