@@ -16,6 +16,14 @@ open ≡-Reasoning
 -- Utilities
 --------------------------------------------------------------------------------
 
+subst₂-removable : ∀ {a b p} {A : Set a} {B : Set b} (P : A → B → Set p) 
+                 → ∀ {x₁ x₂ y₁ y₂}
+                 → (eqx : x₁ ≡ x₂ ) → (eqy : y₁ ≡ y₂) 
+                 → (z : P x₁ y₁)
+                 → subst₂ P eqx eqy z ≅ z
+subst₂-removable P refl refl z = refl
+
+
 -- Disprove a proposition by providing a counterexample.
 counterexample : ∀ {k l} {A : Set k} {P : A → Set l}
            → (((a : A) → P a) → ∃ λ(a : A) → ¬ (P a)) 
