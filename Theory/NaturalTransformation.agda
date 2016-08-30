@@ -47,7 +47,7 @@ idNaturalTransformation : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level}
                         → {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}}
                         → (F : Functor C D) → NaturalTransformation F F
 idNaturalTransformation {C = C} {D = D} F = record 
-  { η = λ x → Category.id D
+  { η = λ x → Category.id D {[ F ]₀ x}
   ; natural = trans (idL D) (sym (idR D))
   }
 
