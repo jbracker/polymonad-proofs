@@ -197,10 +197,10 @@ record StrictTwoCategory {ℓ₀ ℓ₁ ℓ₂ : Level} : Set (lsuc (ℓ₀ ⊔ 
   λ'' {a} {b} f = lUnitorInv {a} {b} {f}
   
   rUnitor : {a b : Cell₀} {f : Cell₁ a b} → Cell₂ (id₁ ∘ₕ f) f
-  rUnitor {a} {b} {f} = subst₂ Cell₂ (sym hIdR₁) refl (id₂ {a} {b})
+  rUnitor {a} {b} {f} = subst₂ Cell₂ (sym $ hIdR₁ {a} {b} {f}) refl (id₂ {a} {b})
   
   rUnitorInv : {a b : Cell₀} {f : Cell₁ a b} → Cell₂ f (id₁ ∘ₕ f)
-  rUnitorInv {a} {b} {f} = subst₂ Cell₂ refl (sym hIdR₁) (id₂ {a} {b})
+  rUnitorInv {a} {b} {f} = subst₂ Cell₂ refl (sym $ hIdR₁ {a} {b} {f}) (id₂ {a} {b})
 
   ρ : {a b : Cell₀} (f : Cell₁ a b) → Cell₂ (id₁ ∘ₕ f) f
   ρ {a} {b} f = rUnitor {a} {b} {f}
