@@ -10,10 +10,10 @@ open import Data.Sum
 open import Data.Unit
 open import Data.Empty
 open import Relation.Binary.PropositionalEquality
---open import Relation.Binary.HeterogeneousEquality 
---  renaming ( sym to hsym ; trans to htrans ; cong to hcong ; subst to hsubst ; subst₂ to hsubst₂ )
+open import Relation.Binary.HeterogeneousEquality 
+  renaming ( sym to hsym ; trans to htrans ; cong to hcong ; cong₂ to hcong₂ ; subst to hsubst ; subst₂ to hsubst₂ )
 open ≡-Reasoning hiding ( _≅⟨_⟩_ )
--- open ≅-Reasoning hiding ( _≡⟨_⟩_ ) renaming ( begin_ to hbegin_ ; _∎ to _∎h)
+open ≅-Reasoning hiding ( _≡⟨_⟩_ ) renaming ( begin_ to hbegin_ ; _∎ to _∎h)
 
 -- Local
 open import Utilities
@@ -41,9 +41,9 @@ AtkeyParameterizedMonad→LaxTwoFunctor {ℓC₀} {ℓC₁} {ℓS₀} {ℓS₁} 
   ; P₁ = P₁
   ; η = η
   ; μ = λ {s₁} {s₂} {s₃} {f} {g} → μ {s₁} {s₂} {s₃} {f} {g}
-  ; laxFunId₁ = λ {x} {y} {f} → laxFunId₁ {x} {y} {f}
-  ; laxFunId₂ = {!!}
-  ; laxFunAssoc = {!!}
+  ; laxFunId₁ = λ {s₁} {s₂} {f} → laxFunId₁ {s₁} {s₂} {f}
+  ; laxFunId₂ = λ {s₁} {s₂} {f} → laxFunId₂ {s₁} {s₂} {f}
+  ; laxFunAssoc = λ {s₀} {s₁} {s₂} {s₃} {f} {g} {h} → laxFunAssoc {s₀} {s₁} {s₂} {s₃} {f} {g} {h}
   } where
     FunTwoCat = functorTwoCategory {ℓC₀} {ℓC₁}
     S2 = Category→StrictTwoCategory S
@@ -64,7 +64,7 @@ AtkeyParameterizedMonad→LaxTwoFunctor {ℓC₀} {ℓC₁} {ℓS₀} {ℓS₁} 
         _∘CC_ = _∘_ (HomCat FunTwoCat C C)
         
         F₀₀ :  Obj C → Obj C
-        F₀₀ a = [ M ]₀ ((s₂ , s₁ , a))
+        F₀₀ a = [ M ]₀ (s₂ , s₁ , a)
         
         F₀₁ : {a b : Obj C} → Hom C a b → Hom C (F₀₀ a) (F₀₀ b)
         F₀₁ f = [ M ]₁ (id (S op) {s₂} , id S {s₁} , f)
@@ -101,7 +101,57 @@ AtkeyParameterizedMonad→LaxTwoFunctor {ℓC₀} {ℓC₁} {ℓS₀} {ℓS₁} 
     μ {s₁} {s₂} {s₃} {f} {g} = naturalTransformation (λ x → AtkeyParameterizedMonad.μ monad {x} {s₃} {s₂} {s₁}) (AtkeyParameterizedMonad.naturalμ monad {s₃} {s₂} {s₁})
     
     laxFunId₁ : {s₁ s₂ : Obj S} {f : Hom S s₁ s₂}
-              → ⟨ Functor.F₁ (P₁ {s₁} {s₂}) {f} {f} (λ' S2 f) ⟩∘ᵥ⟨ ⟨ μ {s₁} {s₁} {s₂} {id S {s₁}} {f} ⟩∘ᵥ⟨ ⟨ id₂ FunTwoCat ⟩∘ₕ⟨ η ⟩ ⟩ ⟩
-              ≡ λ' FunTwoCat ([ P₁ ]₀ f)
-    laxFunId₁ {s₁} {s₂} {f} = propEqNatTrans refl refl {!!}
+              → ⟨ Functor.F₁ (P₁ {s₁} {s₂}) {f} {f} (λ' S2 f) ⟩∘ᵥ⟨ ⟨ μ {s₁} {s₁} {s₂} {id S {s₁}} {f} ⟩∘ᵥ⟨ ⟨ id₂ FunTwoCat {C} {C} {[ P₁ {s₁} {s₂} ]₀ f} ⟩∘ₕ⟨ η {s₁} ⟩ ⟩ ⟩
+              ≡ λ' FunTwoCat ([ P₁ {s₁} {s₂} ]₀ f)
+    laxFunId₁ {s₁} {s₂} {f} = propEqNatTrans refl refl $ funExt $ λ (x : Obj C) → begin
+      NatTrans.η (⟨ Functor.F₁ (P₁ {s₁} {s₂}) {f} {f} (λ' S2 f) ⟩∘ᵥ⟨ ⟨ μ {s₁} {s₁} {s₂} {id S {s₁}} {f} ⟩∘ᵥ⟨ ⟨ id₂ FunTwoCat {C} {C} {[ P₁ {s₁} {s₂} ]₀ f} ⟩∘ₕ⟨ η {s₁} ⟩ ⟩ ⟩) x
+        ≡⟨ refl ⟩
+      id C {[ M ]₀ (s₂ , s₁ , x)} ∘C (NatTrans.η (μ {s₁} {s₁} {s₂} {id S {s₁}} {f}) x 
+                                  ∘C (id C {[ M ]₀ (s₂ , s₁ , [ M ]₀ (s₁ , s₁ , x))}
+                                  ∘C [ M ]₁ (id (S op) {s₂} , id S {s₁} , NatTrans.η (η {s₁}) x) ) )
+        ≡⟨ idR C ⟩
+      NatTrans.η (μ {s₁} {s₁} {s₂} {id S {s₁}} {f}) x ∘C (Category.id C {[ M ]₀ (s₂ , s₁ , [ M ]₀ (s₁ , s₁ , x))}
+                                                      ∘C [ M ]₁ (id (S op) {s₂} , id S {s₁} , NatTrans.η (η {s₁}) x) )
+        ≡⟨ cong (λ X → NatTrans.η (μ {s₁} {s₁} {s₂} {id S {s₁}} {f}) x ∘C X) (idR C) ⟩
+      NatTrans.η (μ {s₁} {s₁} {s₂} {id S {s₁}} {f}) x ∘C [ M ]₁ (id (S op) {s₂} , id S {s₁} , NatTrans.η (η {s₁}) x)
+        ≡⟨ refl ⟩
+      AtkeyParameterizedMonad.μ monad {x} {s₂} {s₁} {s₁} ∘C [ M ]₁ (id (S op) {s₂} , id S {s₁} , AtkeyParameterizedMonad.η monad {x} {s₁})
+        ≡⟨ AtkeyParameterizedMonad.idL monad {x} {s₂} {s₁} ⟩
+      id C {[ [ P₁ {s₁} {s₂} ]₀ f ]₀ x}
+        ≡⟨ refl ⟩
+      NatTrans.η Id⟨ [ P₁ {s₁} {s₂} ]₀ f ⟩ x
+        ≡⟨ ≅-to-≡ $ subst₂-insert (sym $ hIdL₁ FunTwoCat {C} {C} {[ P₁ {s₁} {s₂} ]₀ f}) refl (Id⟨ [ P₁ {s₁} {s₂} ]₀ f ⟩) x ⟩
+      NatTrans.η (subst₂ NatTrans (sym $ hIdL₁ FunTwoCat {C} {C} {[ P₁ {s₁} {s₂} ]₀ f}) refl (Id⟨ [ P₁ {s₁} {s₂} ]₀ f ⟩)) x
+        ≡⟨ refl ⟩
+      NatTrans.η (lUnitor FunTwoCat {C} {C} {[ P₁ {s₁} {s₂} ]₀ f}) x ∎
+    
+    laxFunId₂ : {s₁ s₂ : Obj S} {f : Hom S s₁ s₂} 
+      → ⟨ Functor.F₁ (P₁ {s₁} {s₂}) {f} {f} (ρ S2 f) ⟩∘ᵥ⟨ ⟨ μ {s₁} {s₂} {s₂} {f} {id S {s₂}} ⟩∘ᵥ⟨ ⟨ η {s₂} ⟩∘ₕ⟨ id₂ FunTwoCat {C} {C} {[ P₁ {s₁} {s₂} ]₀ f} ⟩ ⟩ ⟩
+      ≡ ρ FunTwoCat ([ P₁ {s₁} {s₂} ]₀ f)
+    laxFunId₂ {s₁} {s₂} {f} = propEqNatTrans refl refl $ funExt $ λ (x : Obj C) → begin
+      NatTrans.η ⟨ Functor.F₁ (P₁ {s₁} {s₂}) {f} {f} (ρ S2 f) ⟩∘ᵥ⟨ ⟨ μ {s₁} {s₂} {s₂} {f} {id S {s₂}} ⟩∘ᵥ⟨ ⟨ η {s₂} ⟩∘ₕ⟨ id₂ FunTwoCat {C} {C} {[ P₁ {s₁} {s₂} ]₀ f} ⟩ ⟩ ⟩ x
+        ≡⟨ refl ⟩
+      id C {[ M ]₀ (s₂ , s₁ , x)} ∘C (NatTrans.η (μ {s₁} {s₂} {s₂} {f} {id S {s₂}}) x 
+                                  ∘C (NatTrans.η (η {s₂}) ([ M ]₀ (s₂ , s₁ , x)) 
+                                  ∘C Category.id C {[ M ]₀ (s₂ , s₁ , x)} ) )
+        ≡⟨ idR C ⟩
+      NatTrans.η (μ {s₁} {s₂} {s₂} {f} {id S {s₂}}) x ∘C (NatTrans.η (η {s₂}) ([ M ]₀ (s₂ , s₁ , x)) 
+                                                      ∘C Category.id C {[ M ]₀ (s₂ , s₁ , x)} )
+        ≡⟨ cong (λ X → NatTrans.η (μ {s₁} {s₂} {s₂} {f} {id S {s₂}}) x ∘C X) (idL C) ⟩
+      NatTrans.η (μ {s₁} {s₂} {s₂} {f} {id S {s₂}}) x ∘C NatTrans.η (η {s₂}) ([ M ]₀ (s₂ , s₁ , x))
+        ≡⟨ refl ⟩
+      AtkeyParameterizedMonad.μ monad {x} {s₂} {s₂} {s₁} ∘C AtkeyParameterizedMonad.η monad {[ M ]₀ (s₂ , s₁ , x)} {s₂}
+        ≡⟨ AtkeyParameterizedMonad.idR monad {x} {s₂} {s₁}  ⟩
+      id C {[ M ]₀ (s₂ , s₁ , x)}
+        ≡⟨ refl ⟩
+      NatTrans.η Id⟨ [ P₁ {s₁} {s₂} ]₀ f ⟩ x
+        ≡⟨ ≅-to-≡ $ subst₂-insert (sym $ hIdR₁ FunTwoCat {C} {C} {[ P₁ {s₁} {s₂} ]₀ f}) refl (Id⟨ [ P₁ {s₁} {s₂} ]₀ f ⟩) x ⟩
+      NatTrans.η (subst₂ NatTrans (sym $ hIdR₁ FunTwoCat {C} {C} {[ P₁ {s₁} {s₂} ]₀ f}) refl (Id⟨ [ P₁ {s₁} {s₂} ]₀ f ⟩)) x
+        ≡⟨ refl ⟩
+      NatTrans.η (ρ FunTwoCat {C} {C} ([ P₁ {s₁} {s₂} ]₀ f)) x ∎ 
 
+    laxFunAssoc : {s₀ s₁ s₂ s₃ : Obj S}
+                → {f : Hom S s₀ s₁} {g : Hom S s₁ s₂} {h : Hom S s₂ s₃}
+                → ⟨ Functor.F₁ (P₁ {s₀} {s₃}) {(h ∘S g) ∘S f} {(h ∘S g) ∘S f} (α S2 {s₀} {s₁} {s₂} {s₃} f g h) ⟩∘ᵥ⟨ ⟨ μ {s₀} {s₂} {s₃} {g ∘S f} {h} ⟩∘ᵥ⟨ ⟨ id₂ FunTwoCat {C} {C} {[ P₁ {s₂} {s₃} ]₀ h} ⟩∘ₕ⟨ μ {s₀} {s₁} {s₂} {f} {g} ⟩ ⟩ ⟩
+                ≡ ⟨ μ {s₀} {s₁} {s₃} {f} {h ∘S g} ⟩∘ᵥ⟨ ⟨ ⟨ μ {s₁} {s₂} {s₃} {g} {h} ⟩∘ₕ⟨ id₂ FunTwoCat {C} {C} {[ P₁ {s₀} {s₁} ]₀ f} ⟩ ⟩∘ᵥ⟨ α FunTwoCat {C} {C} {C} {C} ([ P₁ {s₀} {s₁} ]₀ f) ([ P₁ {s₁} {s₂} ]₀ g) ([ P₁ {s₂} {s₃} ]₀ h) ⟩ ⟩
+    laxFunAssoc {s₀} {s₁} {s₂} {s₃} {f} {g} {h} = {!!}
