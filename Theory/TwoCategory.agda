@@ -185,28 +185,28 @@ record StrictTwoCategory {ℓ₀ ℓ₁ ℓ₂ : Level} : Set (lsuc (ℓ₀ ⊔ 
 
   -- Unitors
   lUnitor : {a b : Cell₀} {f : Cell₁ a b} → Cell₂ (f ∘ₕ id₁) f
-  lUnitor {a} {b} {f} = subst₂ Cell₂ (sym $ hIdL₁ {a} {b} {f}) refl id₂ 
+  lUnitor {a} {b} {f} = subst₂ Cell₂ (sym $ hIdL₁ {a} {b} {f}) refl (id₂ {a} {b})
 
   lUnitorInv : {a b : Cell₀} {f : Cell₁ a b} → Cell₂ f (f ∘ₕ id₁)
-  lUnitorInv {a} {b} {f} = subst₂ Cell₂ refl (sym hIdL₁) id₂
+  lUnitorInv {a} {b} {f} = subst₂ Cell₂ refl (sym hIdL₁) (id₂ {a} {b})
   
   λ' : {a b : Cell₀} → (f : Cell₁ a b) → Cell₂ (f ∘ₕ id₁) f
-  λ' f = lUnitor {f = f}
+  λ' {a} {b} f = lUnitor {a} {b} {f}
   
   λ'' : {a b : Cell₀} (f : Cell₁ a b) → Cell₂ f (f ∘ₕ id₁)
-  λ'' f = lUnitorInv {f = f}
+  λ'' {a} {b} f = lUnitorInv {a} {b} {f}
   
   rUnitor : {a b : Cell₀} {f : Cell₁ a b} → Cell₂ (id₁ ∘ₕ f) f
-  rUnitor {a} {b} {f} = subst₂ Cell₂ (sym hIdR₁) refl id₂
+  rUnitor {a} {b} {f} = subst₂ Cell₂ (sym hIdR₁) refl (id₂ {a} {b})
   
   rUnitorInv : {a b : Cell₀} {f : Cell₁ a b} → Cell₂ f (id₁ ∘ₕ f)
-  rUnitorInv {a} {b} {f} = subst₂ Cell₂ refl (sym hIdR₁) id₂
+  rUnitorInv {a} {b} {f} = subst₂ Cell₂ refl (sym hIdR₁) (id₂ {a} {b})
 
   ρ : {a b : Cell₀} (f : Cell₁ a b) → Cell₂ (id₁ ∘ₕ f) f
-  ρ f = rUnitor {f = f}
+  ρ {a} {b} f = rUnitor {a} {b} {f}
   
   ρ' : {a b : Cell₀} (f : Cell₁ a b) → Cell₂ f (id₁ ∘ₕ f)
-  ρ' f = rUnitorInv {f = f}
+  ρ' {a} {b} f = rUnitorInv {a} {b} {f}
   
   private
     substComp₁ : {a b : Cell₀} {f g : Cell₁ a b}
