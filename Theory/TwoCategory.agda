@@ -238,29 +238,29 @@ record StrictTwoCategory {ℓ₀ ℓ₁ ℓ₂ : Level} : Set (lsuc (ℓ₀ ⊔ 
   -- Associators
   associator : {a b c d : Cell₀} {f : Cell₁ a b} {g : Cell₁ b c} {h : Cell₁ c d}
              → Cell₂ (h ∘ₕ (g ∘ₕ f)) ((h ∘ₕ g) ∘ₕ f)
-  associator {a} {b} {c} {d} {f} {g} {h} = subst₂ Cell₂ refl hAssoc₁ id₂
+  associator {a} {b} {c} {d} {f} {g} {h} = subst₂ Cell₂ refl (hAssoc₁ {a} {b} {c} {d} {f} {g} {h}) (id₂ {a} {d} {h ∘ₕ (g ∘ₕ f)})
 
   associatorInv : {a b c d : Cell₀} {f : Cell₁ a b} {g : Cell₁ b c} {h : Cell₁ c d}
                 → Cell₂ ((h ∘ₕ g) ∘ₕ f) (h ∘ₕ (g ∘ₕ f)) 
-  associatorInv {a} {b} {c} {d} {f} {g} {h} = subst₂ Cell₂ hAssoc₁ refl id₂
+  associatorInv {a} {b} {c} {d} {f} {g} {h} = subst₂ Cell₂ (hAssoc₁ {a} {b} {c} {d} {f} {g} {h}) refl (id₂ {a} {d} {h ∘ₕ (g ∘ₕ f)})
 
   associatorId : {a b c d : Cell₀} {f : Cell₁ a b} {g : Cell₁ b c} {h : Cell₁ c d}
-               → associator {f = f} {g} {h} ∘ᵥ associatorInv {f = f} {g} {h} ≡ id₂
+               → associator {a} {b} {c} {d} {f = f} {g} {h} ∘ᵥ associatorInv {a} {b} {c} {d} {f = f} {g} {h} ≡ id₂
   associatorId = trans (substComp₁ hAssoc₁) vIdR
   
   associatorId' : {a b c d : Cell₀} {f : Cell₁ a b} {g : Cell₁ b c} {h : Cell₁ c d}
-                → associatorInv {f = f} {g} {h} ∘ᵥ associator {f = f} {g} {h} ≡ id₂
+                → associatorInv {a} {b} {c} {d} {f = f} {g} {h} ∘ᵥ associator {a} {b} {c} {d} {f = f} {g} {h} ≡ id₂
   associatorId' = trans (substComp₂ hAssoc₁) vIdR
   
   α : {a b c d : Cell₀} 
     → (f : Cell₁ a b) (g : Cell₁ b c) (h : Cell₁ c d)
     → Cell₂ (h ∘ₕ (g ∘ₕ f)) ((h ∘ₕ g) ∘ₕ f)
-  α f g h = associator {f = f} {g} {h}
+  α {a} {b} {c} {d} f g h = associator {a} {b} {c} {d} {f = f} {g} {h}
   
   α' : {a b c d : Cell₀} 
      → (f : Cell₁ a b) (g : Cell₁ b c) (h : Cell₁ c d)
      → Cell₂ ((h ∘ₕ g) ∘ₕ f) (h ∘ₕ (g ∘ₕ f)) 
-  α' f g h = associatorInv {f = f} {g} {h}
+  α' {a} {b} {c} {d} f g h = associatorInv {a} {b} {c} {d} {f = f} {g} {h}
 
 -------------------------------------------------------------------------------
 -- Unit strict 2-category
