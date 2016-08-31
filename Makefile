@@ -104,14 +104,18 @@ only-cat-theory:
 	$(AGDA_TC) Theory/Examples/Category.agda
 	$(AGDA_TC) Theory/Examples/Functor.agda
 	$(AGDA_TC) Theory/Examples/TwoCategory.agda
-	# Lax 2-Functor <===> Monad
+	# Monad (Categorical) <===> Monad (Haskell)
+	# $(AGDA_TC) Theory/Examples/MonadToHaskellMonad.agda
+	# $(AGDA_TC) Theory/Examples/HaskellMonadToMonad.agda
+	# Lax 2-Functor <===> Monad (Categorical)
 	$(AGDA_TC) Theory/Examples/MonadToTwoFunctor.agda
 	$(AGDA_TC) Theory/Examples/TwoFunctorToMonad.agda
 	# Lax 2-Functor <===> Atkey Parameterized Monad
 	$(AGDA_TC) Theory/Examples/AtkeyParameterizedMonadToTwoFunctor.agda
 	# $(AGDA_TC) Theory/Examples/TwoFunctorToAtkeyParameterizedMonad.agda
 	# IxMonad <===> Atkey Parameterized Monad
-	# $(AGDA_TC) Theory/Examples/AtkeyParameterizedMonadToIxMonad.agda
+	$(AGDA_TC) Theory/Examples/AtkeyParameterizedMonadToIxMonad.agda
+	# $(AGDA_TC) Theory/Examples/IxMonadToAtkeyParameterizedMonad.agda
 
 clean:
 	$(REMOVE) *.agdai
