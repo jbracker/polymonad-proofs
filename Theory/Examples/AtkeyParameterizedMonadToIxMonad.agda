@@ -11,7 +11,7 @@ open import Data.Unit
 open import Data.Empty
 open import Relation.Binary.PropositionalEquality
 open import Relation.Binary.HeterogeneousEquality 
-  renaming ( sym to hsym ; trans to htrans ; cong to hcong ; subst to hsubst ; subst₂ to hsubst₂ )
+  renaming ( sym to hsym ; trans to htrans ; cong to hcong ; cong₂ to hcong₂ ; subst to hsubst ; subst₂ to hsubst₂ )
 open ≡-Reasoning hiding ( _≅⟨_⟩_ )
 open ≅-Reasoning hiding ( _≡⟨_⟩_ ) renaming ( begin_ to hbegin_ ; _∎ to _∎h)
 
@@ -56,6 +56,9 @@ AtkeyParameterizedMonad→IxMonad S F monad = record
     SetCat = setCategory {lzero}
     M = AtkeyFunctor→IxTyCon F
 
+    _∘S_ = _∘_ S
+    _∘Sop_ = _∘_ (S op)
+
     fmap : {α β : Type} {i j : Obj S}
          → (α → β) → M i j α → M i j β
     fmap {i = i} {j} f ma = [ F ]₁ (id (S op) {i} , id S {j} , f) ma
@@ -86,8 +89,8 @@ AtkeyParameterizedMonad→IxMonad S F monad = record
         ≡⟨ cong (λ X → (μ monad ∘F X) a) (naturalη monad) ⟩
       (μ monad ∘F (η monad ∘F k)) a
         ≡⟨ refl ⟩
-      ((μ monad ∘F η monad) ∘F k) a
-        ≡⟨ cong (λ X → (X ∘F k) a) (AtkeyParameterizedMonad.idL monad) ⟩
+      (μ monad ∘F η monad) (k a)
+        ≡⟨ cong (λ X → X (k a)) (AtkeyParameterizedMonad.idR monad) ⟩
       k a ∎
     
     lawIdL : {α : Type} {i j : Obj S}
@@ -97,13 +100,35 @@ AtkeyParameterizedMonad→IxMonad S F monad = record
       m >>= return 
         ≡⟨ refl ⟩
       (μ monad ∘F [ F ]₁ (id (S op) {i} , id S {j} , η monad)) m
-        ≡⟨ {!!} ⟩
+        ≡⟨ cong (λ X →  X m) (AtkeyParameterizedMonad.idL monad) ⟩
       m ∎
-    
+
     lawAssoc : {α β γ : Type} {i j k l : Obj S}
              → (m : M i j α) (f : α → M j k β) (g : β → M k l γ) 
              → m >>= (λ x → f x >>= g) ≡ (m >>= f) >>= g
     lawAssoc m f g = begin
       m >>= (λ x → f x >>= g) 
-        ≡⟨ {!!} ⟩
+        ≡⟨ refl ⟩
+      (μ monad ∘F ([ F ]₁ ( id (S op) , id S , (μ monad ∘F ([ F ]₁ (id (S op) , id S , g)) ∘F f)) ) ) m
+        ≡⟨ cong₂ (λ X Y → (μ monad ∘F ([ F ]₁ (X , Y , (μ monad ∘F ([ F ]₁ (id (S op) , id S , g)) ∘F f)) ) ) m) (sym $ Category.idL (S op)) (sym $ Category.idL S) ⟩
+      (μ monad ∘F ([ F ]₁ ( (id (S op) ∘Sop id (S op)) , (id S ∘S id S) , (μ monad ∘F ([ F ]₁ (id (S op) , id S , g)) ∘F f)) ) ) m
+        ≡⟨ cong (λ X → (μ monad ∘F X) m) (Functor.dist F) ⟩
+      (μ monad ∘F ([ F ]₁ ( id (S op) , id S , μ monad ) ∘F [ F ]₁ (id (S op) , id S , ([ F ]₁ (id (S op) , id S , g) ∘F f)))) m
+        ≡⟨ refl ⟩ -- associativity of ∘F
+      ( (μ monad ∘F [ F ]₁ (id (S op) , id S , μ monad) ) ∘F [ F ]₁ (id (S op) , id S , ([ F ]₁ (id (S op) , id S , g) ∘F f))) m
+        ≡⟨ cong (λ X → (X ∘F [ F ]₁ (id (S op) , id S , ([ F ]₁ (id (S op) , id S , g) ∘F f))) m) (AtkeyParameterizedMonad.assoc monad) ⟩
+      ( (μ monad ∘F μ monad) ∘F [ F ]₁ (id (S op) , id S , ([ F ]₁ (id (S op) , id S , g) ∘F f))) m
+        ≡⟨ refl ⟩ -- associativity of ∘F
+      (μ monad ∘F (μ monad ∘F [ F ]₁ (id (S op) , id S , ([ F ]₁ (id (S op) , id S , g) ∘F f)))) m
+        ≡⟨ cong₂ (λ X Y → (μ monad ∘F (μ monad ∘F [ F ]₁ (X , Y , ([ F ]₁ (id (S op) , id S , g) ∘F f)))) m) (sym $ Category.idL (S op)) (sym $ Category.idL S) ⟩
+      (μ monad ∘F (μ monad ∘F [ F ]₁ ((id (S op) ∘Sop id (S op)) , (id S ∘S id S) , ([ F ]₁ (id (S op) , id S , g) ∘F f)))) m
+        ≡⟨ cong (λ X → (μ monad ∘F (μ monad ∘F X)) m) (Functor.dist F) ⟩
+      (μ monad ∘F (μ monad ∘F ([ F ]₁ (id (S op) , id S , ([ F ]₁ (id (S op) , id S , g))) ∘F [ F ]₁ (id (S op) , id S , f)))) m
+        ≡⟨ refl ⟩ -- associativity of ∘F
+      (μ monad ∘F ((μ monad ∘F [ F ]₁ (id (S op) , id S , ([ F ]₁ (id (S op) , id S , g))) ) ∘F [ F ]₁ (id (S op) , id S , f))) m
+        ≡⟨ cong (λ X → (μ monad ∘F (X ∘F [ F ]₁ (id (S op) , id S , f))) m) (sym $ naturalμ monad) ⟩
+      (μ monad ∘F (([ F ]₁ (id (S op) , id S , g) ∘F μ monad) ∘F [ F ]₁ (id (S op) , id S , f))) m
+        ≡⟨ refl ⟩ -- associativity of ∘F
+      (μ monad ∘F ([ F ]₁ (id (S op) , id S , g) ∘F (μ monad ∘F [ F ]₁ (id (S op) , id S , f)))) m
+        ≡⟨ refl ⟩
       (m >>= f) >>= g ∎
