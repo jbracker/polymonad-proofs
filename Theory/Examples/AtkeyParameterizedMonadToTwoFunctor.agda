@@ -43,7 +43,7 @@ AtkeyParameterizedMonad→LaxTwoFunctor {ℓC₀} {ℓC₁} {ℓS₀} {ℓS₁} 
   ; μ = λ {s₁} {s₂} {s₃} {f} {g} → μ {s₁} {s₂} {s₃} {f} {g}
   ; laxFunId₁ = λ {s₁} {s₂} {f} → laxFunId₁ {s₁} {s₂} {f}
   ; laxFunId₂ = λ {s₁} {s₂} {f} → laxFunId₂ {s₁} {s₂} {f}
-  ; laxFunAssoc = λ {s₀} {s₁} {s₂} {s₃} {f} {g} {h} → laxFunAssoc {s₀} {s₁} {s₂} {s₃} {f} {g} {h}
+  ; laxFunAssoc = λ {s₀} {s₁} {s₂} {s₃} {f} {g} {h} → propEqNatTrans refl refl $ funExt $ laxFunAssoc {s₀} {s₁} {s₂} {s₃} {f} {g} {h}
   } where
     FunTwoCat = functorTwoCategory {ℓC₀} {ℓC₁}
     S2 = Category→StrictTwoCategory S
@@ -152,6 +152,53 @@ AtkeyParameterizedMonad→LaxTwoFunctor {ℓC₀} {ℓC₁} {ℓS₀} {ℓS₁} 
 
     laxFunAssoc : {s₀ s₁ s₂ s₃ : Obj S}
                 → {f : Hom S s₀ s₁} {g : Hom S s₁ s₂} {h : Hom S s₂ s₃}
-                → ⟨ Functor.F₁ (P₁ {s₀} {s₃}) {(h ∘S g) ∘S f} {(h ∘S g) ∘S f} (α S2 {s₀} {s₁} {s₂} {s₃} f g h) ⟩∘ᵥ⟨ ⟨ μ {s₀} {s₂} {s₃} {g ∘S f} {h} ⟩∘ᵥ⟨ ⟨ id₂ FunTwoCat {C} {C} {[ P₁ {s₂} {s₃} ]₀ h} ⟩∘ₕ⟨ μ {s₀} {s₁} {s₂} {f} {g} ⟩ ⟩ ⟩
-                ≡ ⟨ μ {s₀} {s₁} {s₃} {f} {h ∘S g} ⟩∘ᵥ⟨ ⟨ ⟨ μ {s₁} {s₂} {s₃} {g} {h} ⟩∘ₕ⟨ id₂ FunTwoCat {C} {C} {[ P₁ {s₀} {s₁} ]₀ f} ⟩ ⟩∘ᵥ⟨ α FunTwoCat {C} {C} {C} {C} ([ P₁ {s₀} {s₁} ]₀ f) ([ P₁ {s₁} {s₂} ]₀ g) ([ P₁ {s₂} {s₃} ]₀ h) ⟩ ⟩
-    laxFunAssoc {s₀} {s₁} {s₂} {s₃} {f} {g} {h} = {!!}
+                → (x : Obj C)
+                → id C {[ M ]₀ (s₃ , s₀ , x)}
+                    ∘C ( AtkeyParameterizedMonad.μ monad {x} {s₃} {s₂} {s₀}
+                    ∘C ( id C {[ M ]₀ (s₃ , s₂ , ([ M ]₀ (s₂ , s₀ , x)))} 
+                    ∘C [ M ]₁ (id (S op) {s₃} , id S {s₂} , AtkeyParameterizedMonad.μ monad {x} {s₂} {s₁} {s₀}) ) )
+                ≡ AtkeyParameterizedMonad.μ monad {x} {s₃} {s₁} {s₀}
+                    ∘C ( ( AtkeyParameterizedMonad.μ monad {[ M ]₀ (s₁ , s₀ , x)} {s₃} {s₂} {s₁} ∘C [ M ]₁ (id (S op) {s₃} , id S {s₂} , [ M ]₁ (id (S op) {s₂} , id S {s₁} , id C {[ M ]₀ (s₁ , s₀ , x)} ) ) )
+                    ∘C NatTrans.η (subst₂ NatTrans refl (hAssoc₁ FunTwoCat {C} {C} {C} {C} {[ P₁ {s₀} {s₁} ]₀ f} {[ P₁ {s₁} {s₂} ]₀ g} {[ P₁ {s₂} {s₃} ]₀ h}) 
+                                                        (Id⟨ [ [ P₁ {s₂} {s₃} ]₀ h ]∘[ [ [ P₁ {s₁} {s₂} ]₀ g ]∘[ [ P₁ {s₀} {s₁} ]₀ f ] ] ⟩)) x)
+    laxFunAssoc {s₀} {s₁} {s₂} {s₃} {f} {g} {h} x = begin
+      id C {[ M ]₀ (s₃ , s₀ , x)}
+        ∘C ( AtkeyParameterizedMonad.μ monad {x} {s₃} {s₂} {s₀}
+        ∘C ( id C {[ M ]₀ (s₃ , s₂ , ([ M ]₀ (s₂ , s₀ , x)))} 
+        ∘C [ M ]₁ (id (S op) {s₃} , id S {s₂} , AtkeyParameterizedMonad.μ monad {x} {s₂} {s₁} {s₀}) ) )
+        ≡⟨ idR C ⟩ 
+      AtkeyParameterizedMonad.μ monad {x} {s₃} {s₂} {s₀}
+        ∘C ( id C {[ M ]₀ (s₃ , s₂ , ([ M ]₀ (s₂ , s₀ , x)))} 
+        ∘C [ M ]₁ (id (S op) {s₃} , id S {s₂} , AtkeyParameterizedMonad.μ monad {x} {s₂} {s₁} {s₀}) )
+        ≡⟨ cong (λ X → AtkeyParameterizedMonad.μ monad {x} {s₃} {s₂} {s₀} ∘C X) (idR C) ⟩ 
+      AtkeyParameterizedMonad.μ monad {x} {s₃} {s₂} {s₀}
+        ∘C [ M ]₁ (id (S op) {s₃} , id S {s₂} , AtkeyParameterizedMonad.μ monad {x} {s₂} {s₁} {s₀})
+        ≡⟨ AtkeyParameterizedMonad.assoc monad ⟩ 
+      AtkeyParameterizedMonad.μ monad {x} {s₃} {s₁} {s₀}
+        ∘C AtkeyParameterizedMonad.μ monad {[ M ]₀ (s₁ , s₀ , x)} {s₃} {s₂} {s₁}
+        ≡⟨ cong (λ X → AtkeyParameterizedMonad.μ monad {x} {s₃} {s₁} {s₀} ∘C X) (sym $ idL C) ⟩ 
+      AtkeyParameterizedMonad.μ monad {x} {s₃} {s₁} {s₀}
+        ∘C ( AtkeyParameterizedMonad.μ monad {[ M ]₀ (s₁ , s₀ , x)} {s₃} {s₂} {s₁} ∘C id C )
+        ≡⟨ cong (λ X → AtkeyParameterizedMonad.μ monad {x} {s₃} {s₁} {s₀} ∘C ( AtkeyParameterizedMonad.μ monad {[ M ]₀ (s₁ , s₀ , x)} {s₃} {s₂} {s₁} ∘C X)) (sym $ Functor.id M) ⟩ 
+      AtkeyParameterizedMonad.μ monad {x} {s₃} {s₁} {s₀}
+        ∘C ( AtkeyParameterizedMonad.μ monad {[ M ]₀ (s₁ , s₀ , x)} {s₃} {s₂} {s₁} ∘C [ M ]₁ (id (S op) {s₃} , id S {s₂} , id C ) )
+        ≡⟨ cong (λ X → AtkeyParameterizedMonad.μ monad {x} {s₃} {s₁} {s₀} ∘C ( AtkeyParameterizedMonad.μ monad {[ M ]₀ (s₁ , s₀ , x)} {s₃} {s₂} {s₁} ∘C [ M ]₁ (id (S op) {s₃} , id S {s₂} , X ) )) (sym $ Functor.id M) ⟩ 
+      AtkeyParameterizedMonad.μ monad {x} {s₃} {s₁} {s₀}
+        ∘C ( AtkeyParameterizedMonad.μ monad {[ M ]₀ (s₁ , s₀ , x)} {s₃} {s₂} {s₁} ∘C [ M ]₁ (id (S op) {s₃} , id S {s₂} , [ M ]₁ (id (S op) {s₂} , id S {s₁} , id C {[ M ]₀ (s₁ , s₀ , x)} ) ) )
+        ≡⟨ cong (λ X → AtkeyParameterizedMonad.μ monad {x} {s₃} {s₁} {s₀} ∘C X) (sym $ idL C) ⟩ 
+      AtkeyParameterizedMonad.μ monad {x} {s₃} {s₁} {s₀}
+        ∘C ( ( AtkeyParameterizedMonad.μ monad {[ M ]₀ (s₁ , s₀ , x)} {s₃} {s₂} {s₁} ∘C [ M ]₁ (id (S op) {s₃} , id S {s₂} , [ M ]₁ (id (S op) {s₂} , id S {s₁} , id C {[ M ]₀ (s₁ , s₀ , x)} ) ) )
+        ∘C Category.id C {[ [ [ P₁ {s₂} {s₃} ]₀ h ]∘[ [ [ P₁ {s₁} {s₂} ]₀ g ]∘[ [ P₁ {s₀} {s₁} ]₀ f ] ] ]₀ x} )
+        ≡⟨ refl ⟩ 
+      AtkeyParameterizedMonad.μ monad {x} {s₃} {s₁} {s₀}
+        ∘C ( ( AtkeyParameterizedMonad.μ monad {[ M ]₀ (s₁ , s₀ , x)} {s₃} {s₂} {s₁} ∘C [ M ]₁ (id (S op) {s₃} , id S {s₂} , [ M ]₁ (id (S op) {s₂} , id S {s₁} , id C {[ M ]₀ (s₁ , s₀ , x)} ) ) )
+        ∘C NatTrans.η (Id⟨ [ [ P₁ {s₂} {s₃} ]₀ h ]∘[ [ [ P₁ {s₁} {s₂} ]₀ g ]∘[ [ P₁ {s₀} {s₁} ]₀ f ] ] ⟩) x)
+        ≡⟨ cong (λ X → AtkeyParameterizedMonad.μ monad {x} {s₃} {s₁} {s₀}
+                       ∘C ( ( AtkeyParameterizedMonad.μ monad {[ M ]₀ (s₁ , s₀ , x)} {s₃} {s₂} {s₁} ∘C [ M ]₁ (id (S op) {s₃} , id S {s₂} , [ M ]₁ (id (S op) {s₂} , id S {s₁} , id C {[ M ]₀ (s₁ , s₀ , x)} ) ) ) ∘C X)) 
+                (≅-to-≡ $ subst₂-insert refl 
+                                        (hAssoc₁ FunTwoCat {C} {C} {C} {C} {[ P₁ {s₀} {s₁} ]₀ f} {[ P₁ {s₁} {s₂} ]₀ g} {[ P₁ {s₂} {s₃} ]₀ h}) 
+                                        (Id⟨ [ [ P₁ {s₂} {s₃} ]₀ h ]∘[ [ [ P₁ {s₁} {s₂} ]₀ g ]∘[ [ P₁ {s₀} {s₁} ]₀ f ] ] ⟩) x) ⟩ 
+      AtkeyParameterizedMonad.μ monad {x} {s₃} {s₁} {s₀}
+        ∘C ( ( AtkeyParameterizedMonad.μ monad {[ M ]₀ (s₁ , s₀ , x)} {s₃} {s₂} {s₁} ∘C [ M ]₁ (id (S op) {s₃} , id S {s₂} , [ M ]₁ (id (S op) {s₂} , id S {s₁} , id C {[ M ]₀ (s₁ , s₀ , x)} ) ) )
+        ∘C NatTrans.η (subst₂ NatTrans refl (hAssoc₁ FunTwoCat {C} {C} {C} {C} {[ P₁ {s₀} {s₁} ]₀ f} {[ P₁ {s₁} {s₂} ]₀ g} {[ P₁ {s₂} {s₃} ]₀ h}) 
+                                            (Id⟨ [ [ P₁ {s₂} {s₃} ]₀ h ]∘[ [ [ P₁ {s₁} {s₂} ]₀ g ]∘[ [ P₁ {s₀} {s₁} ]₀ f ] ] ⟩)) x) ∎
