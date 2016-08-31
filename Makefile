@@ -104,6 +104,9 @@ only-cat-theory:
 	$(AGDA_TC) Theory/Examples/Category.agda
 	$(AGDA_TC) Theory/Examples/Functor.agda
 	$(AGDA_TC) Theory/Examples/TwoCategory.agda
+	# Functor (Categorical) <===> Functor (Haskell)
+	$(AGDA_TC) Theory/Examples/FunctorToHaskellFunctor.agda
+	$(AGDA_TC) Theory/Examples/HaskellFunctorToFunctor.agda
 	# Monad (Categorical) <===> Monad (Haskell)
 	# $(AGDA_TC) Theory/Examples/MonadToHaskellMonad.agda
 	# $(AGDA_TC) Theory/Examples/HaskellMonadToMonad.agda
