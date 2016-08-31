@@ -108,7 +108,7 @@ only-cat-theory:
 	$(AGDA_TC) Theory/Examples/MonadToTwoFunctor.agda
 	$(AGDA_TC) Theory/Examples/TwoFunctorToMonad.agda
 	# Lax 2-Functor <===> Atkey Parameterized Monad
-	# $(AGDA_TC) Theory/Examples/AtkeyParameterizedMonadToTwoFunctor.agda
+	$(AGDA_TC) Theory/Examples/AtkeyParameterizedMonadToTwoFunctor.agda
 	# $(AGDA_TC) Theory/Examples/TwoFunctorToAtkeyParameterizedMonad.agda
 	# IxMonad <===> Atkey Parameterized Monad
 	# $(AGDA_TC) Theory/Examples/AtkeyParameterizedMonadToIxMonad.agda
