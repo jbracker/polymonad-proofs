@@ -38,7 +38,7 @@ Monad→LaxTwoFunctor {ℓC₀} {ℓC₁} {C} {M} monad = record
   ; μ = μP
   ; laxFunId₁ = λ {x} {y} {f} → laxFunId₁ {x} {y} {f}
   ; laxFunId₂ = λ {x} {y} {f} → laxFunId₂ {x} {y} {f}
-  ; laxFunAssoc = λ {x} {y} {z} {w} {f} {g} {h} → laxFunAssoc {x} {y} {z} {w} {f} {g} {h}
+  ; laxFunAssoc = λ {x} {y} {z} {w} {f} {g} {h} → propEqNatTrans refl refl $ funExt $ laxFunAssoc {x} {y} {z} {w} {f} {g} {h}
   } where
     open Category
     open NaturalTransformation
@@ -133,11 +133,10 @@ Monad→LaxTwoFunctor {ℓC₀} {ℓC₁} {C} {M} monad = record
     
     laxFunAssoc : {w x y z : Cell₀ ⊤-TwoCat}
                 → {f : Cell₁ ⊤-TwoCat w x} {g : Cell₁ ⊤-TwoCat x y} {h : Cell₁ ⊤-TwoCat y z} 
-                → [ P₁ ]₁ (α ⊤-TwoCat f g h) ∘V (μP ∘V (id₂ FunTwoCat {f = M} ∘H2 μP))
-                ≡ μP ∘V ((μP ∘H2 (id₂ FunTwoCat {f = M})) ∘V α FunTwoCat ([ P₁ ]₀ f) ([ P₁ ]₀ g) ([ P₁ ]₀ h))
-    laxFunAssoc {tt} {tt} {tt} {tt} {tt} {tt} {tt} = propEqNatTrans refl refl $ funExt $ λ (x : Obj C) → begin 
-      η ([ P₁ ]₁ (α ⊤-TwoCat tt tt tt) ∘V (μP ∘V (id₂ FunTwoCat {f = M} ∘H2 μP))) x
-        ≡⟨ refl ⟩
+                → (x : Obj C)
+                → Category.id C ∘C (η μP x ∘C (Category.id C ∘C [ M ]₁ (η μP x) ))
+                ≡ η μP x ∘C (( η μP ([ M ]₀ x) ∘C [ M ]₁ ([ M ]₁ (Category.id C)) ) ∘C η (subst₂ NaturalTransformation refl (hAssoc₁ FunTwoCat {f = M} {M} {M}) Id⟨ [ M ]∘[ [ M ]∘[ M ] ] ⟩) x)
+    laxFunAssoc {tt} {tt} {tt} {tt} {tt} {tt} {tt} x = begin 
       Category.id C ∘C (η μP x ∘C (Category.id C ∘C [ M ]₁ (η μP x) ))
         ≡⟨ idR C ⟩
       η μP x ∘C (Category.id C ∘C [ M ]₁ (η μP x) )
@@ -154,7 +153,5 @@ Monad→LaxTwoFunctor {ℓC₀} {ℓC₁} {C} {M} monad = record
         ≡⟨ cong (λ X → η μP x ∘C X) (sym (idL C)) ⟩
       η μP x ∘C (( η μP ([ M ]₀ x) ∘C [ M ]₁ ([ M ]₁ (Category.id C)) ) ∘C Category.id C)
         ≡⟨ cong (λ X → η μP x ∘C (( η μP ([ M ]₀ x) ∘C [ M ]₁ ([ M ]₁ (Category.id C)) ) ∘C X)) (≅-to-≡ $ subst₂-insert refl (hAssoc₁ FunTwoCat {f = M} {M} {M}) Id⟨ [ M ]∘[ [ M ]∘[ M ] ] ⟩ x) ⟩
-      η μP x ∘C (( η μP ([ M ]₀ x) ∘C [ M ]₁ ([ M ]₁ (Category.id C)) ) ∘C η (subst₂ NaturalTransformation refl (hAssoc₁ FunTwoCat {f = M} {M} {M}) Id⟨ [ M ]∘[ [ M ]∘[ M ] ] ⟩) x)
-        ≡⟨ refl ⟩
-      η (μP ∘V ((μP ∘H2 (id₂ FunTwoCat {f = M})) ∘V α FunTwoCat ([ P₁ ]₀ tt) ([ P₁ ]₀ tt) ([ P₁ ]₀ tt))) x ∎
+      η μP x ∘C (( η μP ([ M ]₀ x) ∘C [ M ]₁ ([ M ]₁ (Category.id C)) ) ∘C η (subst₂ NaturalTransformation refl (hAssoc₁ FunTwoCat {f = M} {M} {M}) Id⟨ [ M ]∘[ [ M ]∘[ M ] ] ⟩) x) ∎
 
