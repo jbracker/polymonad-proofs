@@ -1,7 +1,7 @@
  
 module Monad where
 
-open import Function
+open import Function renaming ( id to idF )
 open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning
 
@@ -35,8 +35,11 @@ record Monad (M : TyCon) : Set₁ where
                  → (f : α → β) → (x : M α) 
                  → fmap (functor applicative) f x ≡ x >>= (return ∘ f)
     
-  _>>_ : ∀ {α β : Type} → M α → M β → M β
+  _>>_ : {α β : Type} → M α → M β → M β
   ma >> mb = ma >>= λ a → mb
+  
+  join : {α : Type} → M (M α) → M α
+  join mma = mma >>= idF
   
 mBind = Monad._>>=_
 mReturn = Monad.return
