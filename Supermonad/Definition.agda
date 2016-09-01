@@ -19,11 +19,11 @@ open ≡-Reasoning
 open import Utilities
 open import Haskell
 open import Identity
-open import Polymonad
-open import Functor
-open import Constrained.ConstrainedFunctor
+open import Polymonad.Definition
+open import Haskell.Functor
+open import Haskell.Constrained.ConstrainedFunctor
 
-open import Parameterized.PhantomIndices
+open import Haskell.Parameterized.PhantomIndices
 
 -- -----------------------------------------------------------------------------
 -- Definition of SuperMonads

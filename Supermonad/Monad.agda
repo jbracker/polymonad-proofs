@@ -19,13 +19,12 @@ open ≡-Reasoning
 open import Utilities
 open import Haskell
 open import Identity
-open import Functor
-open import Applicative
-open import Monad
-open import Monad.Polymonad
-open import Constrained.ConstrainedFunctor
-open import Polymonad
-open import Parameterized.PhantomIndices
+open import Haskell.Functor
+open import Haskell.Applicative
+open import Haskell.Monad
+open import Haskell.Monad.Polymonad
+open import Haskell.Constrained.ConstrainedFunctor
+open import Haskell.Parameterized.PhantomIndices
 open import Supermonad.Definition 
 
 -- -----------------------------------------------------------------------------

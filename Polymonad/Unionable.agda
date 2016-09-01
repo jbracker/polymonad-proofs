@@ -13,13 +13,13 @@ open ≡-Reasoning -- begin ≡⟨⟩ ∎
 open import Utilities
 open import Haskell
 open import Identity
-open import Polymonad
+open import Polymonad.Definition
 
 -- -----------------------------------------------------------------------------
 -- Unionable Polymonad
 -- -----------------------------------------------------------------------------
 
-open Polymonad.Polymonad
+open Polymonad
 
 -- Set of laws that need to hold in order for union of polymonads to work.
 record UnionablePolymonad {TyCons : Set} (pm : Polymonad (IdTyCons ⊎ TyCons) idTC) : Set₁ where

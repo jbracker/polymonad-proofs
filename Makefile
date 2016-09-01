@@ -10,7 +10,7 @@ AGDA_TC = $(AGDA) -v 0 +RTS -K40m -RTS
 
 all: type-check
 
-type-check: | only-base only-hicks only-hicks only-monad only-parameterized only-supermonads only-cat-theory
+type-check: | only-base only-haskell only-hicks only-hicks only-parameterized only-supermonads only-cat-theory
 	# Union of polymonads via morphisms between them
 	# $(AGDA_TC) MorphMonad/MorphMonad.agda
 	# $(AGDA_TC) MorphMonad/MaybeList.agda
@@ -24,12 +24,22 @@ only-base:
 	$(AGDA_TC) Utilities.agda
 	$(AGDA_TC) Haskell.agda
 	$(AGDA_TC) Identity.agda
-	$(AGDA_TC) Functor.agda
-	$(AGDA_TC) Applicative.agda
-	$(AGDA_TC) Monad.agda
-	$(AGDA_TC) Polymonad.agda
-	$(AGDA_TC) Constrained/ConstrainedFunctor.agda
-	$(AGDA_TC) Constrained/ConstrainedMonad.agda
+
+only-haskell:
+	$(AGDA_TC) Haskell/Functor.agda
+	$(AGDA_TC) Haskell/Applicative.agda
+	$(AGDA_TC) Haskell/Monad.agda
+	# Standard Monads
+	$(AGDA_TC) Haskell/Monad/Identity.agda
+	$(AGDA_TC) Haskell/Monad/List.agda
+	$(AGDA_TC) Haskell/Monad/Maybe.agda
+	$(AGDA_TC) Haskell/Monad/Polymonad.agda
+	$(AGDA_TC) Haskell/Monad/Unionable.agda
+	$(AGDA_TC) Haskell/Monad/Principal.agda
+	$(AGDA_TC) Haskell/Monad/PrincipalUnion.agda
+	# Constrained Monads & Functors
+	$(AGDA_TC) Haskell/Constrained/ConstrainedFunctor.agda
+	$(AGDA_TC) Haskell/Constrained/ConstrainedMonad.agda
 
 only-hicks:
 	# Proofs related to Hicks original formulation
@@ -39,6 +49,7 @@ only-hicks:
 
 only-polymonad:
 	# General polymonad proofs
+	$(AGDA_TC) Polymonad/Definition.agda
 	$(AGDA_TC) Polymonad/Unionable.agda
 	$(AGDA_TC) Polymonad/Principal.agda
 	$(AGDA_TC) Polymonad/Identity.agda
@@ -50,33 +61,23 @@ only-polymonad:
 	$(AGDA_TC) Polymonad/Union/Properties.agda
 	$(AGDA_TC) Polymonad/Union/Principal.agda
 	$(AGDA_TC) Polymonad/Union/Principal/Utilities.agda
-	
-only-monad:
-	# Standard Monads
-	$(AGDA_TC) Monad/Identity.agda
-	$(AGDA_TC) Monad/List.agda
-	$(AGDA_TC) Monad/Maybe.agda
-	$(AGDA_TC) Monad/Polymonad.agda
-	$(AGDA_TC) Monad/Unionable.agda
-	$(AGDA_TC) Monad/Principal.agda
-	$(AGDA_TC) Monad/PrincipalUnion.agda
 
 only-parameterized:
 	# Parameterized Monads
-	$(AGDA_TC) Parameterized/PhantomIndices.agda
-	$(AGDA_TC) Parameterized/IndexedMonad.agda
-	$(AGDA_TC) Parameterized/IndexedMonad/Functor.agda
-	$(AGDA_TC) Parameterized/IndexedMonad/Polymonad.agda
-	$(AGDA_TC) Parameterized/IndexedMonad/Unionable.agda
-	$(AGDA_TC) Parameterized/IndexedMonad/PhantomMonad.agda
-	# $(AGDA_TC) Parameterized/IndexedMonad/Principal.agda
-	# $(AGDA_TC) Parameterized/IndexedMonad/SessionTypes.agda
-	$(AGDA_TC) Parameterized/IndexedMonad/DynState.agda
-	$(AGDA_TC) Parameterized/EffectMonad.agda
-	$(AGDA_TC) Parameterized/EffectMonad/Functor.agda
-	$(AGDA_TC) Parameterized/EffectMonad/Polymonad.agda
+	$(AGDA_TC) Haskell/Parameterized/PhantomIndices.agda
+	$(AGDA_TC) Haskell/Parameterized/IndexedMonad.agda
+	$(AGDA_TC) Haskell/Parameterized/IndexedMonad/Functor.agda
+	$(AGDA_TC) Haskell/Parameterized/IndexedMonad/Polymonad.agda
+	$(AGDA_TC) Haskell/Parameterized/IndexedMonad/Unionable.agda
+	$(AGDA_TC) Haskell/Parameterized/IndexedMonad/PhantomMonad.agda
+	# $(AGDA_TC) Haskell/Parameterized/IndexedMonad/Principal.agda
+	# $(AGDA_TC) Haskell/Parameterized/IndexedMonad/SessionTypes.agda
+	$(AGDA_TC) Haskell/Parameterized/IndexedMonad/DynState.agda
+	$(AGDA_TC) Haskell/Parameterized/EffectMonad.agda
+	$(AGDA_TC) Haskell/Parameterized/EffectMonad/Functor.agda
+	$(AGDA_TC) Haskell/Parameterized/EffectMonad/Polymonad.agda
 
-only-supermonads: only-base
+only-supermonads:
 	# Super Monads
 	$(AGDA_TC) Supermonad/Definition.agda
 	$(AGDA_TC) Supermonad/Monad.agda

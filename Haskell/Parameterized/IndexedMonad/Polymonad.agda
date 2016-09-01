@@ -1,5 +1,5 @@
  
-module Parameterized.IndexedMonad.Polymonad where
+module Haskell.Parameterized.IndexedMonad.Polymonad where
 
 -- Stdlib
 open import Level
@@ -15,8 +15,8 @@ open ≡-Reasoning
 open import Utilities
 open import Haskell
 open import Identity
-open import Polymonad
-open import Parameterized.IndexedMonad
+open import Polymonad.Definition
+open import Haskell.Parameterized.IndexedMonad
 
 open IxMonad renaming (bind to mBind; return to mReturn; lawAssoc to mLawAssoc)
 

@@ -1,5 +1,5 @@
 
-module Monad.Unionable where
+module Haskell.Monad.Unionable where
 
 -- Stdlib
 open import Data.Product
@@ -14,10 +14,10 @@ open ≡-Reasoning
 open import Utilities
 open import Haskell
 open import Identity
-open import Polymonad
+open import Polymonad.Definition
 open import Polymonad.Unionable
-open import Monad
-open import Monad.Polymonad
+open import Haskell.Monad
+open import Haskell.Monad.Polymonad
 
 Monad→UnionablePolymonad : ∀ {M : TyCon} 
                           → (monad : Monad M)
@@ -32,7 +32,7 @@ Monad→UnionablePolymonad {M = M'} monad = record
     pm : Polymonad TyCons idTC
     pm = Monad→Polymonad monad
     
-    open Polymonad.Polymonad
+    open Polymonad
     
     lawEqBindId : ∀ {α β : Type} → (b : B[ idTC , idTC ] pm ▷ idTC) 
                 → substBind (lawId pm) (lawId pm) (lawId pm) (bind pm {M = idTC} {N = idTC} {P = idTC} b) {α} {β} ≡ bindId {α} {β}

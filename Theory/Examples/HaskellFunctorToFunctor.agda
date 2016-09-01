@@ -6,7 +6,7 @@ open import Level renaming ( suc to lsuc ; zero to lzero )
 
 -- Local
 open import Haskell
-open import Functor renaming ( Functor to HaskellFunctor )
+open import Haskell.Functor renaming ( Functor to HaskellFunctor )
 open import Theory.Category
 open import Theory.Functor
 open import Theory.Examples.Category

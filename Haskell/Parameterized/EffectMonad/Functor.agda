@@ -1,5 +1,5 @@
 
-module Parameterized.EffectMonad.Functor where
+module Haskell.Parameterized.EffectMonad.Functor where
 
 -- Stdlib
 open import Function
@@ -15,15 +15,15 @@ open ≡-Reasoning
 open import Utilities
 open import Haskell
 open import Identity
-open import Functor
-open import Parameterized.EffectMonad
+open import Haskell.Functor
+open import Haskell.Parameterized.EffectMonad
 
 -- -----------------------------------------------------------------------------
 -- Effect Monads are Functors
 -- -----------------------------------------------------------------------------
 
 open EffectMonad hiding ( _>>=_ ; return )
-open Parameterized.EffectMonad.Monoid
+open Haskell.Parameterized.EffectMonad.Monoid
 
 EffectMonad→Functor : ∀ {ℓ}
                 → {Eff : Set ℓ}

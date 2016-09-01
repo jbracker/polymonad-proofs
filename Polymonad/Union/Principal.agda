@@ -15,17 +15,17 @@ open ≡-Reasoning
 -- Local
 open import Haskell
 open import Identity
-open import Polymonad
+open import Polymonad.Definition
 open import Polymonad.Unionable
 open import Polymonad.Principal
 open import Polymonad.Union
 open import Polymonad.Union.Unionable
 open import Polymonad.Union.Properties
 open import Polymonad.Union.Principal.Utilities
-open import Monad.Polymonad
-open import Monad.Unionable
-open import Monad.List
-open import Monad.Maybe
+open import Haskell.Monad.Polymonad
+open import Haskell.Monad.Unionable
+open import Haskell.Monad.List
+open import Haskell.Monad.Maybe
 
 principalPolymonadUnion : ∀ {TyCons₁ TyCons₂ : Set}
                         → {pm₁ : Polymonad (IdTyCons ⊎ TyCons₁) idTC}
@@ -60,7 +60,7 @@ principalPolymonadUnion : ∀ {TyCons₁ TyCons₂ : Set}
                         → PrincipalPM (polymonadUnion upm₁ upm₂)
 principalPolymonadUnion {TyCons₁} {TyCons₂} {pm₁} {pm₂} upm₁ upm₂ partition onlyIdPair princ₁ princ₂ = princ
   where
-    open Polymonad.Polymonad
+    open Polymonad
 
     pm = polymonadUnion upm₁ upm₂
     upm = polymonadUnionableUnion upm₁ upm₂

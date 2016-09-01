@@ -1,15 +1,14 @@
  
-module Applicative where
+module Haskell.Applicative where
 
 open import Function hiding ( id ; _∘_ ) renaming ( _∘′_ to _∘_ )
 open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning
 
 open import Utilities
-open import Polymonad
-open import Haskell 
 open import Identity
-open import Functor
+open import Haskell 
+open import Haskell.Functor
 
 record Applicative (F : TyCon) : Set₁ where
   infixl 4 _*>_ _<*_ _<*>_

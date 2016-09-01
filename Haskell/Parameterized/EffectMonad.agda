@@ -1,5 +1,5 @@
  
-module Parameterized.EffectMonad where
+module Haskell.Parameterized.EffectMonad where
 
 -- Stdlib
 open import Agda.Primitive
@@ -14,8 +14,6 @@ open ≡-Reasoning
 open import Utilities
 open import Haskell
 open import Identity
-open import Polymonad
-open import Polymonad.Identity
 
 -- TODO: This is still unfinished work, since the constraints that can be applied to the monoid
 -- elements are not modelled at all right now.

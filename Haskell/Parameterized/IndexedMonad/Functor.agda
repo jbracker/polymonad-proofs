@@ -1,5 +1,5 @@
 
-module Parameterized.IndexedMonad.Functor where
+module Haskell.Parameterized.IndexedMonad.Functor where
 
 -- Stdlib
 open import Function
@@ -15,8 +15,8 @@ open ≡-Reasoning
 open import Utilities
 open import Haskell
 open import Identity
-open import Functor
-open import Parameterized.IndexedMonad
+open import Haskell.Functor
+open import Haskell.Parameterized.IndexedMonad
 
 -- -----------------------------------------------------------------------------
 -- Indexed Monads are Functors

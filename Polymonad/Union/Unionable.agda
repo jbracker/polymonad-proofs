@@ -13,13 +13,13 @@ open ≡-Reasoning
 -- Local
 open import Utilities
 open import Haskell
-open import Polymonad
+open import Polymonad.Definition
 open import Identity
 open import Polymonad.Identity
 open import Polymonad.Unionable
 open import Polymonad.Union
 
-open Polymonad.Polymonad
+open Polymonad
 
 -- If we union two unionable polymonads, the result again is a unionable polymonad.
 polymonadUnionableUnion : ∀ {TyCons₁ TyCons₂ : Set}

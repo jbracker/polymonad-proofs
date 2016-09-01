@@ -1,5 +1,5 @@
  
-module Parameterized.IndexedMonad where
+module Haskell.Parameterized.IndexedMonad where
 
 -- Stdlib
 open import Agda.Primitive
@@ -15,7 +15,7 @@ open ≡-Reasoning
 open import Utilities
 open import Haskell
 open import Identity
-open import Monad renaming ( mBind to monadBind ; mReturn to monadReturn )
+open import Haskell.Monad renaming ( mBind to monadBind ; mReturn to monadReturn )
 
 record IxMonad {n} (Ixs : Set n) (M : Ixs → Ixs → TyCon) : Set (n ⊔ lsuc lzero) where
   field

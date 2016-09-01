@@ -1,5 +1,5 @@
  
-module Monad.Polymonad where
+module Haskell.Monad.Polymonad where
 
 -- Stdlib
 open import Function hiding ( id ; _∘_ ) renaming ( _∘′_ to _∘_ )
@@ -13,9 +13,9 @@ open ≡-Reasoning
 -- Local
 open import Utilities
 open import Haskell
-open import Polymonad
-open import Applicative
-open import Monad
+open import Polymonad.Definition
+open import Haskell.Applicative
+open import Haskell.Monad
 open import Identity
 
 data MonadTyCons : Set where
@@ -332,7 +332,7 @@ Monad→Polymonad {M = M'} monad = record
     lawClosure (inj₂ MonadTC) (inj₂ MonadTC) (inj₂ MonadTC) (inj₁ IdentTC) (inj₂ MonadTC) (inj₂ MonadTC) (MonadB , ReturnB  , FunctorB , FunctorB) = ApplyB
     lawClosure (inj₂ MonadTC) (inj₂ MonadTC) (inj₂ MonadTC) (inj₂ MonadTC) (inj₂ MonadTC) (inj₂ MonadTC) (MonadB , FunctorB , FunctorB , FunctorB) = MonadB
 
-open Polymonad.Polymonad
+open Polymonad
 
 Polymonad→Monad : ∀ {TyCons : Set} {Id : TyCons}
                 → (pm : Polymonad TyCons Id)

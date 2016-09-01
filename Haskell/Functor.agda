@@ -1,11 +1,10 @@
-module Functor where
+module Haskell.Functor where
 
 open import Function
 open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning
 
 open import Utilities
-open import Polymonad
 open import Haskell 
 open import Identity
 

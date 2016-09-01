@@ -1,5 +1,5 @@
  
-module Parameterized.PhantomIndices where
+module Haskell.Parameterized.PhantomIndices where
 
 open import Level renaming ( suc to lsuc )
 

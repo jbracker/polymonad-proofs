@@ -1,5 +1,5 @@
 
-module Constrained.ConstrainedFunctor where
+module Haskell.Constrained.ConstrainedFunctor where
 
 open import Agda.Primitive
 open import Level
@@ -9,10 +9,9 @@ open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning
 
 open import Utilities
-open import Polymonad
 open import Haskell 
 open import Identity
-open import Functor
+open import Haskell.Functor
 
 record ConstrainedFunctor {ℓ : Level} (F : TyCon) : Set (lsuc ℓ) where
   field

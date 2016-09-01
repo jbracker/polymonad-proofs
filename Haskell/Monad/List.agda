@@ -1,5 +1,5 @@
 
-module Monad.List where
+module Haskell.Monad.List where
 
 -- Stdlib
 open import Data.Product
@@ -12,8 +12,8 @@ open ≡-Reasoning
 -- Local
 open import Utilities
 open import Haskell
-open import Applicative
-open import Monad
+open import Haskell.Applicative
+open import Haskell.Monad
 open import Identity 
 
 

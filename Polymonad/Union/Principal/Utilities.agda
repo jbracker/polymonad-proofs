@@ -8,7 +8,7 @@ open import Relation.Binary.PropositionalEquality
 
 
 open import Identity
-open import Polymonad
+open import Polymonad.Definition
 open import Polymonad.Unionable
 open import Polymonad.Union
 open import Polymonad.Principal

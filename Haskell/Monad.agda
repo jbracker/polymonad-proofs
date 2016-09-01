@@ -1,18 +1,17 @@
  
-module Monad where
+module Haskell.Monad where
 
 open import Function renaming ( id to idF )
 open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning
 
 open import Utilities
-open import Polymonad
 open import Haskell
-open import Functor
-open import Applicative
+open import Haskell.Functor
+open import Haskell.Applicative
 
-open Functor.Functor
-open Applicative.Applicative
+open Functor
+open Applicative
 
 record Monad (M : TyCon) : Set₁ where
   field

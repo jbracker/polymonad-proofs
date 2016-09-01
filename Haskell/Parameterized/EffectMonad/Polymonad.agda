@@ -1,5 +1,5 @@
  
-module Parameterized.EffectMonad.Polymonad where
+module Haskell.Parameterized.EffectMonad.Polymonad where
 
 -- Stdlib
 open import Agda.Primitive
@@ -14,9 +14,9 @@ open ≡-Reasoning
 open import Utilities
 open import Haskell
 open import Identity
-open import Polymonad
+open import Polymonad.Definition
 open import Polymonad.Identity
-open import Parameterized.EffectMonad
+open import Haskell.Parameterized.EffectMonad
 
 
 open Monoid.Monoid {{...}} renaming ( lawIdR to monLawIdR ; lawIdL to monLawIdL ; lawAssoc to monLawAssoc ; carrier to monCarrier )

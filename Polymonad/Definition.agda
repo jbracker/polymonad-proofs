@@ -1,5 +1,5 @@
 
-module Polymonad where
+module Polymonad.Definition where
 
 -- Stdlib
 open import Agda.Primitive

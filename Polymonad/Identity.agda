@@ -15,10 +15,10 @@ open ≡-Reasoning
 open import Utilities
 open import Haskell
 open import Identity
-open import Monad.Identity
-open import Monad.Polymonad
-open import Monad.Principal
-open import Polymonad
+open import Haskell.Monad.Identity
+open import Haskell.Monad.Polymonad
+open import Haskell.Monad.Principal
+open import Polymonad.Definition
 open import Polymonad.Principal
 open import Polymonad.Unionable
 

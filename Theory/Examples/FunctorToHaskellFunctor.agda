@@ -5,7 +5,7 @@ module Theory.Examples.FunctorToHaskellFunctor where
 open import Level renaming ( suc to lsuc ; zero to lzero )
 
 -- Local
-open import Functor renaming ( Functor to HaskellFunctor )
+open import Haskell.Functor renaming ( Functor to HaskellFunctor )
 open import Theory.Functor
 open import Theory.Examples.Category 
 

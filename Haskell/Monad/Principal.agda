@@ -1,5 +1,5 @@
 
-module Monad.Principal where
+module Haskell.Monad.Principal where
 
 -- Stdlib
 open import Data.Product
@@ -13,9 +13,9 @@ open ≡-Reasoning
 -- Local
 open import Haskell
 open import Identity
-open import Monad
-open import Monad.Polymonad
-open import Polymonad
+open import Haskell.Monad
+open import Haskell.Monad.Polymonad
+open import Polymonad.Definition
 open import Polymonad.Principal
 
 Monad→PrincipalPolymonad : ∀ {M : TyCon} → (monad : Monad M) → PrincipalPM (Monad→Polymonad monad)

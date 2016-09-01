@@ -1,5 +1,5 @@
 
-module Parameterized.IndexedMonad.DynState where
+module Haskell.Parameterized.IndexedMonad.DynState where
 
 -- Stdlib
 open import Level renaming ( suc to lsuc ; zero to lzero)
@@ -18,9 +18,8 @@ open ≡-Reasoning
 open import Utilities
 open import Haskell
 open import Identity
-open import Polymonad
-open import Parameterized.IndexedMonad
-open import Parameterized.PhantomIndices  
+open import Haskell.Parameterized.IndexedMonad
+open import Haskell.Parameterized.PhantomIndices  
 
 -- -----------------------------------------------------------------------------
 -- Definition of the dynamic state monad

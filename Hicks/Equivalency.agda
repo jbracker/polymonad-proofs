@@ -14,7 +14,7 @@ open ≡-Reasoning
 open import Utilities
 open import Haskell
 open import Identity
-open import Polymonad
+open import Polymonad.Definition
 open import Hicks.Polymonad
 open import Hicks.UniqueBinds using ( uniqueFunctor )
     
@@ -52,7 +52,7 @@ HicksPolymonad⇒Polymonad hpm = record
   ; lawClosure  = HicksPolymonad.lawClosure hpm
   }
 
-open Polymonad.Polymonad
+open Polymonad
 
 Polymonad⇒HicksPolymonad : ∀ {TyCons : Set} {Id : TyCons} → Polymonad TyCons Id → HicksPolymonad TyCons Id
 Polymonad⇒HicksPolymonad pm = record

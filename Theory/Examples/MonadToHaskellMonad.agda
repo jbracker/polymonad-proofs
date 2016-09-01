@@ -18,9 +18,9 @@ open ≡-Reasoning hiding ( _≅⟨_⟩_ )
 -- Local
 open import Utilities
 open import Haskell
-open import Monad renaming ( Monad to HaskellMonad )
-open import Applicative renaming ( Applicative to HaskellApplicative )
-open import Functor renaming ( Functor to HaskellFunctor )
+open import Haskell.Monad renaming ( Monad to HaskellMonad )
+open import Haskell.Applicative renaming ( Applicative to HaskellApplicative )
+open import Haskell.Functor renaming ( Functor to HaskellFunctor )
 open import Theory.Category
 open import Theory.Functor
 open import Theory.NaturalTransformation renaming ( NaturalTransformation to NatTrans )

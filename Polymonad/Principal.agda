@@ -12,7 +12,7 @@ open ≡-Reasoning
 
 -- Local
 open import Haskell
-open import Polymonad
+open import Polymonad.Definition
 open import Identity
 
 -- Formalization of a subsets for a given set.

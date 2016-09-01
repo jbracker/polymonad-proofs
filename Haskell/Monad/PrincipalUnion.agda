@@ -1,5 +1,5 @@
  
-module Monad.PrincipalUnion where
+module Haskell.Monad.PrincipalUnion where
 
 -- Stdlib
 open import Data.Product
@@ -16,16 +16,16 @@ open ≡-Reasoning
 -- Local
 open import Haskell
 open import Identity
-open import Polymonad
+open import Polymonad.Definition
 open import Polymonad.Unionable
 open import Polymonad.Principal
 open import Polymonad.Union
-open import Parameterized.IndexedMonad
-open import Parameterized.IndexedMonad.Polymonad
-open import Parameterized.IndexedMonad.Unionable
-open import Monad
-open import Monad.Polymonad
-open import Monad.Unionable
+open import Haskell.Parameterized.IndexedMonad
+open import Haskell.Parameterized.IndexedMonad.Polymonad
+open import Haskell.Parameterized.IndexedMonad.Unionable
+open import Haskell.Monad
+open import Haskell.Monad.Polymonad
+open import Haskell.Monad.Unionable
 
 -- -----------------------------------------------------------------------------
 -- EXAMPLE for principality of polymonad union

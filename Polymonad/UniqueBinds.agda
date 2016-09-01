@@ -11,12 +11,12 @@ open ≡-Reasoning
 
 -- Local
 open import Haskell
-open import Polymonad
+open import Polymonad.Definition
 open import Identity
 open import Utilities
 
 -- Records
-open Polymonad.Polymonad
+open Polymonad
 
 -- -----------------------------------------------------------------------------
 -- Bind operators are unique

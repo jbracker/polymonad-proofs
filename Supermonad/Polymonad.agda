@@ -17,12 +17,12 @@ open ≡-Reasoning
 
 -- Local
 open import Utilities
-open import Haskell
 open import Identity
-open import Functor
-open import Polymonad
-open import Constrained.ConstrainedFunctor
-open import Parameterized.PhantomIndices
+open import Polymonad.Definition
+open import Haskell
+open import Haskell.Functor
+open import Haskell.Constrained.ConstrainedFunctor
+open import Haskell.Parameterized.PhantomIndices
 open import Supermonad.Definition
 {-
 -- -----------------------------------------------------------------------------

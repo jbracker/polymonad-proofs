@@ -1,5 +1,5 @@
  
-module Monad.Identity where
+module Haskell.Monad.Identity where
 
 -- Stdlib
 open import Function
@@ -13,13 +13,13 @@ open ≡-Reasoning
 -- Local
 open import Utilities
 open import Haskell
-open import Functor
-open import Applicative
-open import Monad
+open import Haskell.Functor
+open import Haskell.Applicative
+open import Haskell.Monad
 open import Identity
 
-open Functor.Functor
-open Applicative.Applicative
+open Functor
+open Applicative
 
 monadId : Monad Identity
 monadId = record

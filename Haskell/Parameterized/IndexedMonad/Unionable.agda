@@ -1,5 +1,5 @@
  
-module Parameterized.IndexedMonad.Unionable where
+module Haskell.Parameterized.IndexedMonad.Unionable where
 
 -- Stdlib
 open import Level
@@ -16,13 +16,13 @@ open ≡-Reasoning
 open import Utilities
 open import Haskell
 open import Identity
-open import Polymonad
+open import Polymonad.Definition
 open import Polymonad.Unionable
-open import Parameterized.IndexedMonad
-open import Parameterized.IndexedMonad.Polymonad
+open import Haskell.Parameterized.IndexedMonad
+open import Haskell.Parameterized.IndexedMonad.Polymonad
 
 open IxMonad renaming (bind to mBind; return to mReturn; lawAssoc to mLawAssoc)
-open Polymonad.Polymonad
+open Polymonad
 
 IxMonad→UnionablePolymonad : ∀ {Ixs : Set} {M : Ixs → Ixs → TyCon} 
                             → (monad : IxMonad Ixs M)

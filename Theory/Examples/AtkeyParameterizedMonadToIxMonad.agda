@@ -18,7 +18,7 @@ open ≅-Reasoning hiding ( _≡⟨_⟩_ ) renaming ( begin_ to hbegin_ ; _∎ t
 -- Local
 open import Utilities
 open import Haskell
-open import Parameterized.IndexedMonad
+open import Haskell.Parameterized.IndexedMonad
 open import Theory.Triple
 open import Theory.Category
 open import Theory.Functor
