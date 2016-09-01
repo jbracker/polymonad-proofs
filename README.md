@@ -1,12 +1,11 @@
  
-# Polymonad Formalization and Proofs
+# Formalization and Proofs of Polymonads, Supermonads and Category Theory
 
-This repository contains a formalization of polymonads in Agda as 
-presented in the paper 
-["Polymonadic Programming" by Hicks et al. (MSFP 2014)](http://www.cs.bham.ac.uk/~pbl/msfp2014/polymonad.pdf).
+This repository contains the formalization of supermonads and polymonads ( ["Polymonadic Programming" by Hicks et al. (MSFP 2014)](http://www.cs.bham.ac.uk/~pbl/msfp2014/polymonad.pdf) )
+as well as formalizations and proofs about category theory.
 
 The formalization is targeted to provide proofs that are useful for
-the Haskell implementation of polymonads. Therefore, some of the
+the Haskell implementations. Therefore, some of the
 formalizations assume we are working in a "Haskell World".
 
 ## Type Checking and Versions
