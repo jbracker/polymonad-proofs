@@ -17,13 +17,14 @@ open import Haskell
 open import Identity
 open import Haskell.Functor
 open import Haskell.Parameterized.EffectMonad
+open import Theory.Monoid
 
 -- -----------------------------------------------------------------------------
 -- Effect Monads are Functors
 -- -----------------------------------------------------------------------------
 
 open EffectMonad hiding ( _>>=_ ; return )
-open Haskell.Parameterized.EffectMonad.Monoid
+open Monoid hiding ( _∙_ ; ε )
 
 EffectMonad→Functor : ∀ {ℓ}
                 → {Eff : Set ℓ}
@@ -38,21 +39,30 @@ EffectMonad→Functor {Eff = Eff} {monoid = monoid} M monad m = record
   } where
     _∙_ = Monoid._∙_ monoid
     ε = Monoid.ε monoid
+
+    monLawIdR : (m : Eff) → m ∙ ε ≡ m
+    monLawIdR m = Monoid.idL monoid {m}
+    
+    monLawIdL : (m : Eff) → ε ∙ m ≡ m
+    monLawIdL m = Monoid.idR monoid {m}
+    
+    monLawAssoc : (m n o : Eff) → m ∙ (n ∙ o) ≡ (m ∙ n) ∙ o
+    monLawAssoc m n o = Monoid.assoc monoid {m} {n} {o}
     
     _>>=_ = EffectMonad._>>=_ monad
     return = EffectMonad.return monad
     
     fmap : ∀ {α β : Type} → (α → β) → M m α → M m β
-    fmap {α = α} {β = β} f ma = subst₂ M (Monoid.lawIdR monoid m) refl (ma >>= (return ∘ f))
+    fmap {α = α} {β = β} f ma = subst₂ M (monLawIdR m) refl (ma >>= (return ∘ f))
     
     lawId : ∀ {α : Type} → fmap {α = α} identity ≡ identity
     lawId {α = α} = funExt (λ ma → begin
       fmap identity ma 
         ≡⟨ refl ⟩
-      subst₂ M (Monoid.lawIdR monoid m) refl (ma >>= (return ∘ identity))
-        ≡⟨ cong (λ X → subst₂ M (Monoid.lawIdR monoid m) refl X) (EffectMonad.lawIdR monad ma) ⟩
-      subst₂ M (Monoid.lawIdR monoid m) refl (subst₂ M (sym (Monoid.lawIdR monoid m)) refl ma)
-        ≡⟨ subst₂²≡id1 (Monoid.lawIdR monoid m) refl M ma ⟩
+      subst₂ M (monLawIdR m) refl (ma >>= (return ∘ identity))
+        ≡⟨ cong (λ X → subst₂ M (monLawIdR m) refl X) (EffectMonad.lawIdR monad ma) ⟩
+      subst₂ M (monLawIdR m) refl (subst₂ M (sym (monLawIdR m)) refl ma)
+        ≡⟨ subst₂²≡id1 (monLawIdR m) refl M ma ⟩
       identity ma ∎)
         
     bindFunSubstShift : {α β : Type} {m n p : Eff}
@@ -85,54 +95,54 @@ EffectMonad→Functor {Eff = Eff} {monoid = monoid} M monad m = record
     lawDist {β = β} {γ = γ} f g = funExt (λ ma → begin
       fmap (f ∘ g) ma 
         ≡⟨ refl ⟩
-      subst₂ M (Monoid.lawIdR monoid m) refl (ma >>= (return ∘ (f ∘ g)))
-        ≡⟨ subst₂ToSubst (Monoid.lawIdR monoid m) (ma >>= (return ∘ (f ∘ g))) ⟩
-      subst (λ X → M X γ) (Monoid.lawIdR monoid m) (ma >>= (return ∘ (f ∘ g)))
+      subst₂ M (monLawIdR m) refl (ma >>= (return ∘ (f ∘ g)))
+        ≡⟨ subst₂ToSubst (monLawIdR m) (ma >>= (return ∘ (f ∘ g))) ⟩
+      subst (λ X → M X γ) (monLawIdR m) (ma >>= (return ∘ (f ∘ g)))
         ≡⟨ cong (λ X → subst (λ X → M X γ) X (ma >>= (return ∘ (f ∘ g)))) 
-                (proof-irrelevance (Monoid.lawIdR monoid m) 
-                                   (trans (cong (λ X → m ∙ X) (sym (Monoid.lawIdL monoid ε))) 
-                                          (trans (sym (Monoid.lawAssoc monoid m ε ε)) 
-                                                 (trans (cong (λ X → X ∙ ε) (Monoid.lawIdR monoid m)) (Monoid.lawIdR monoid m))))) ⟩
-      subst (λ X → M X γ) (trans (cong (λ X → m ∙ X) (sym (Monoid.lawIdL monoid ε))) 
-                                              (trans (sym (Monoid.lawAssoc monoid m ε ε)) 
-                                                     (trans (cong (λ X → X ∙ ε) (Monoid.lawIdR monoid m)) (Monoid.lawIdR monoid m))))
+                (proof-irrelevance (monLawIdR m) 
+                                   (trans (cong (λ X → m ∙ X) (sym (monLawIdL ε))) 
+                                          (trans (monLawAssoc m ε ε)
+                                                 (trans (cong (λ X → X ∙ ε) (monLawIdR m)) (monLawIdR m))))) ⟩
+      subst (λ X → M X γ) (trans (cong (λ X → m ∙ X) (sym (monLawIdL ε))) 
+                                              (trans (monLawAssoc m ε ε)
+                                                     (trans (cong (λ X → X ∙ ε) (monLawIdR m)) (monLawIdR m))))
             (ma >>= (return ∘ (f ∘ g)))
-        ≡⟨ sym (substTrans (cong (λ X → m ∙ X) (sym (Monoid.lawIdL monoid ε))) 
-                           (trans (sym (Monoid.lawAssoc monoid m ε ε)) (trans (cong (λ X → X ∙ ε) (Monoid.lawIdR monoid m)) (Monoid.lawIdR monoid m))) 
+        ≡⟨ sym (substTrans (cong (λ X → m ∙ X) (sym (monLawIdL ε))) 
+                           (trans (monLawAssoc m ε ε) (trans (cong (λ X → X ∙ ε) (monLawIdR m)) (monLawIdR m))) 
                            (λ X → M X γ) (ma >>= (return ∘ (f ∘ g)))) ⟩
-      subst (λ X → M X γ) (trans (sym (Monoid.lawAssoc monoid m ε ε)) (trans (cong (λ X → X ∙ ε) (Monoid.lawIdR monoid m)) (Monoid.lawIdR monoid m)))
-            (subst (λ X → M X γ) (cong (λ X → m ∙ X) (sym (Monoid.lawIdL monoid ε))) (ma >>= (return ∘ (f ∘ g))))
-        ≡⟨ cong (λ X → subst (λ X → M X γ) (trans (sym (Monoid.lawAssoc monoid m ε ε)) (trans (cong (λ X → X ∙ ε) (Monoid.lawIdR monoid m)) (Monoid.lawIdR monoid m))) X) 
-                (bindFunSubstShift (sym (Monoid.lawIdL monoid ε)) ma (return ∘ (f ∘ g))) ⟩
-      subst (λ X → M X γ) (trans (sym (Monoid.lawAssoc monoid m ε ε)) (trans (cong (λ X → X ∙ ε) (Monoid.lawIdR monoid m)) (Monoid.lawIdR monoid m)))
-            (ma >>= (λ a → subst (λ X → M X γ) (sym (Monoid.lawIdL monoid ε)) (return (f (g a)))))
-        ≡⟨ cong (λ X → subst (λ X → M X γ) (trans (sym (Monoid.lawAssoc monoid m ε ε)) (trans (cong (λ X → X ∙ ε) (Monoid.lawIdR monoid m)) (Monoid.lawIdR monoid m))) (ma >>= X))
-                (funExt (λ a → sym (subst₂ToSubst (sym (Monoid.lawIdL monoid ε)) (return (f (g a)))))) ⟩
-      subst (λ X → M X γ) (trans (sym (Monoid.lawAssoc monoid m ε ε)) (trans (cong (λ X → X ∙ ε) (Monoid.lawIdR monoid m)) (Monoid.lawIdR monoid m)))
-            (ma >>= (λ a → subst₂ M (sym (Monoid.lawIdL monoid ε)) refl (return (f (g a)))))
-        ≡⟨ cong (λ X → subst (λ X → M X γ) (trans (sym (Monoid.lawAssoc monoid m ε ε)) (trans (cong (λ X → X ∙ ε) (Monoid.lawIdR monoid m)) (Monoid.lawIdR monoid m))) (ma >>= X)) 
+      subst (λ X → M X γ) (trans (monLawAssoc m ε ε) (trans (cong (λ X → X ∙ ε) (monLawIdR m)) (monLawIdR m)))
+            (subst (λ X → M X γ) (cong (λ X → m ∙ X) (sym (monLawIdL ε))) (ma >>= (return ∘ (f ∘ g))))
+        ≡⟨ cong (λ X → subst (λ X → M X γ) (trans (monLawAssoc m ε ε) (trans (cong (λ X → X ∙ ε) (monLawIdR m)) (monLawIdR m))) X) 
+                (bindFunSubstShift (sym (monLawIdL ε)) ma (return ∘ (f ∘ g))) ⟩
+      subst (λ X → M X γ) (trans (monLawAssoc m ε ε) (trans (cong (λ X → X ∙ ε) (monLawIdR m)) (monLawIdR m)))
+            (ma >>= (λ a → subst (λ X → M X γ) (sym (monLawIdL ε)) (return (f (g a)))))
+        ≡⟨ cong (λ X → subst (λ X → M X γ) (trans (monLawAssoc m ε ε) (trans (cong (λ X → X ∙ ε) (monLawIdR m)) (monLawIdR m))) (ma >>= X))
+                (funExt (λ a → sym (subst₂ToSubst (sym (monLawIdL ε)) (return (f (g a)))))) ⟩
+      subst (λ X → M X γ) (trans (monLawAssoc m ε ε) (trans (cong (λ X → X ∙ ε) (monLawIdR m)) (monLawIdR m)))
+            (ma >>= (λ a → subst₂ M (sym (monLawIdL ε)) refl (return (f (g a)))))
+        ≡⟨ cong (λ X → subst (λ X → M X γ) (trans (monLawAssoc m ε ε) (trans (cong (λ X → X ∙ ε) (monLawIdR m)) (monLawIdR m))) (ma >>= X)) 
                 (funExt (λ a → sym (EffectMonad.lawIdL monad (g a) (return ∘ f)))) ⟩
-      subst (λ X → M X γ) (trans (sym (Monoid.lawAssoc monoid m ε ε)) (trans (cong (λ X → X ∙ ε) (Monoid.lawIdR monoid m)) (Monoid.lawIdR monoid m)))
+      subst (λ X → M X γ) (trans (monLawAssoc m ε ε) (trans (cong (λ X → X ∙ ε) (monLawIdR m)) (monLawIdR m)))
             (ma >>= (λ a → return (g a) >>= (return ∘ f)))
-        ≡⟨ sym (substTrans (sym (Monoid.lawAssoc monoid m ε ε)) (trans (cong (λ X → X ∙ ε) (Monoid.lawIdR monoid m)) (Monoid.lawIdR monoid m)) 
+        ≡⟨ sym (substTrans (monLawAssoc m ε ε) (trans (cong (λ X → X ∙ ε) (monLawIdR m)) (monLawIdR m)) 
                            (λ X → M X γ) 
                            (ma >>= (λ a → return (g a) >>= (return ∘ f)))) ⟩
-      subst (λ X → M X γ) (trans (cong (λ X → X ∙ ε) (Monoid.lawIdR monoid m)) (Monoid.lawIdR monoid m)) 
-            (subst (λ X → M X γ) (sym (Monoid.lawAssoc monoid m ε ε)) (ma >>= (λ a → return (g a) >>= (return ∘ f))))
-        ≡⟨ cong (λ X → subst (λ X → M X γ) (trans (cong (λ X → X ∙ ε) (Monoid.lawIdR monoid m)) (Monoid.lawIdR monoid m)) X) 
-                (sym (subst₂ToSubst (sym (Monoid.lawAssoc monoid m ε ε)) (ma >>= (λ a → return (g a) >>= (return ∘ f))))) ⟩
-      subst (λ X → M X γ) (trans (cong (λ X → X ∙ ε) (Monoid.lawIdR monoid m)) (Monoid.lawIdR monoid m)) 
-            (subst₂ M (sym (Monoid.lawAssoc monoid m ε ε)) refl (ma >>= (λ a → return (g a) >>= (return ∘ f))))
-        ≡⟨ cong (λ X → subst (λ X → M X γ) (trans (cong (λ X → X ∙ ε) (Monoid.lawIdR monoid m)) (Monoid.lawIdR monoid m)) X) 
+      subst (λ X → M X γ) (trans (cong (λ X → X ∙ ε) (monLawIdR m)) (monLawIdR m)) 
+            (subst (λ X → M X γ) (monLawAssoc m ε ε) (ma >>= (λ a → return (g a) >>= (return ∘ f))))
+        ≡⟨ cong (λ X → subst (λ X → M X γ) (trans (cong (λ X → X ∙ ε) (monLawIdR m)) (monLawIdR m)) X) 
+                (sym (subst₂ToSubst (monLawAssoc m ε ε) (ma >>= (λ a → return (g a) >>= (return ∘ f))))) ⟩
+      subst (λ X → M X γ) (trans (cong (λ X → X ∙ ε) (monLawIdR m)) (monLawIdR m)) 
+            (subst₂ M (monLawAssoc m ε ε) refl (ma >>= (λ a → return (g a) >>= (return ∘ f))))
+        ≡⟨ cong (λ X → subst (λ X → M X γ) (trans (cong (λ X → X ∙ ε) (monLawIdR m)) (monLawIdR m)) X) 
                 (EffectMonad.symLawAssoc monad ma (return ∘ g) (return ∘ f)) ⟩
-      subst (λ X → M X γ) (trans (cong (λ X → X ∙ ε) (Monoid.lawIdR monoid m)) (Monoid.lawIdR monoid m)) 
+      subst (λ X → M X γ) (trans (cong (λ X → X ∙ ε) (monLawIdR m)) (monLawIdR m)) 
             ((ma >>= (return ∘ g)) >>= (return ∘ f))
-        ≡⟨ assocSubstShift (trans (cong (λ X → X ∙ ε) (Monoid.lawIdR monoid m)) (Monoid.lawIdR monoid m)) 
-                           (Monoid.lawIdR monoid m) (Monoid.lawIdR monoid m) (ma >>= (return ∘ g)) (return ∘ f) ⟩
-      subst (λ X → M X γ) (Monoid.lawIdR monoid m) ((subst (λ X → M X β) (Monoid.lawIdR monoid m) (ma >>= (return ∘ g))) >>= (return ∘ f))
-        ≡⟨ sym (subst₂ToSubst (Monoid.lawIdR monoid m) ((subst (λ X → M X β) (Monoid.lawIdR monoid m) (ma >>= (return ∘ g))) >>= (return ∘ f))) ⟩
-      subst₂ M (Monoid.lawIdR monoid m) refl ((subst (λ X → M X β) (Monoid.lawIdR monoid m) (ma >>= (return ∘ g))) >>= (return ∘ f))
-        ≡⟨ cong (λ Y → subst₂ M (Monoid.lawIdR monoid m) refl (Y >>= (return ∘ f))) (sym (subst₂ToSubst (Monoid.lawIdR monoid m) (ma >>= (return ∘ g)))) ⟩
-      subst₂ M (Monoid.lawIdR monoid m) refl ((subst₂ M (Monoid.lawIdR monoid m) refl (ma >>= (return ∘ g))) >>= (return ∘ f))
+        ≡⟨ assocSubstShift (trans (cong (λ X → X ∙ ε) (monLawIdR m)) (monLawIdR m)) 
+                           (monLawIdR m) (monLawIdR m) (ma >>= (return ∘ g)) (return ∘ f) ⟩
+      subst (λ X → M X γ) (monLawIdR m) ((subst (λ X → M X β) (monLawIdR m) (ma >>= (return ∘ g))) >>= (return ∘ f))
+        ≡⟨ sym (subst₂ToSubst (monLawIdR m) ((subst (λ X → M X β) (monLawIdR m) (ma >>= (return ∘ g))) >>= (return ∘ f))) ⟩
+      subst₂ M (monLawIdR m) refl ((subst (λ X → M X β) (monLawIdR m) (ma >>= (return ∘ g))) >>= (return ∘ f))
+        ≡⟨ cong (λ Y → subst₂ M (monLawIdR m) refl (Y >>= (return ∘ f))) (sym (subst₂ToSubst (monLawIdR m) (ma >>= (return ∘ g)))) ⟩
+      subst₂ M (monLawIdR m) refl ((subst₂ M (monLawIdR m) refl (ma >>= (return ∘ g))) >>= (return ∘ f))
         ≡⟨ refl ⟩
       (fmap f ∘ fmap g) ma ∎)

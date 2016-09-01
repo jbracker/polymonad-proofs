@@ -2,6 +2,7 @@
 module Haskell.Parameterized.EffectMonad where
 
 -- Stdlib
+open import Function
 open import Agda.Primitive
 open import Data.Product
 open import Data.Sum
@@ -14,25 +15,13 @@ open ≡-Reasoning
 open import Utilities
 open import Haskell
 open import Identity
+open import Theory.Monoid
 
 -- TODO: This is still unfinished work, since the constraints that can be applied to the monoid
 -- elements are not modelled at all right now.
 
-module Monoid where
-  record Monoid {k} (C : Set k) : Set k where
-    field
-      ε : C
-      _∙_ : C → C → C
-    
-      lawIdR : (m : C) → m ∙ ε ≡ m
-      lawIdL : (m : C) → ε ∙ m ≡ m
-      lawAssoc : (m n o : C) → (m ∙ n) ∙ o ≡ m ∙ (n ∙ o)
-  
-    carrier : Set k
-    carrier = C
-
-open Monoid.Monoid {{...}} renaming ( lawIdR to monLawIdR ; lawIdL to monLawIdL ; lawAssoc to monLawAssoc ; carrier to monCarrier )
-open Monoid
+open Monoid {{...}} renaming ( idR to monLawIdL ; idL to monLawIdR ; assoc to monLawAssoc ; carrier to monCarrier )
+--open Monoid
 
 record EffectMonad {n} (Effect : Set n) {{effectMonoid : Monoid Effect}} (M : Effect → TyCon) : Set (lsuc n) where
   field
@@ -41,32 +30,26 @@ record EffectMonad {n} (Effect : Set n) {{effectMonoid : Monoid Effect}} (M : Ef
     
     lawIdL : ∀ {α β : Type} {i : Effect}
            → (a : α) → (k : α → M i β) 
-           → return a >>= k ≡ subst₂ M (sym (monLawIdL i)) refl (k a)
+           → return a >>= k ≡ subst₂ M (sym (monLawIdL {m = i})) refl (k a)
     lawIdR : ∀ {α : Type} {i : Effect}
            → (m : M i α)
-           → m >>= return ≡ subst₂ M (sym (monLawIdR i)) refl m
+           → m >>= return ≡ subst₂ M (sym (monLawIdR {m = i})) refl m
     lawAssoc : ∀ {α β γ : Type} {i j k : Effect}
              → (m : M i α) → (f : α → M j β) → (g : β → M k γ)
-             → m >>= (λ x → f x >>= g) ≡ subst₂ M (monLawAssoc i j k) refl ((m >>= f) >>= g)
+             → m >>= (λ x → f x >>= g) ≡ subst₂ M (sym $ monLawAssoc {m = i} {j} {k}) refl ((m >>= f) >>= g)
   
   _>>_ : ∀ {α β : Type} {i j : Effect} → M i α → M j β → M (i ∙ j) β
   ma >> mb = ma >>= λ a → mb
 
   symLawAssoc : ∀ {α β γ : Type} {i j k : Effect}
               → (m : M i α) → (f : α → M j β) → (g : β → M k γ)
-              → subst₂ M (sym (monLawAssoc i j k)) refl (m >>= (λ x → f x >>= g)) ≡ (m >>= f) >>= g
-  symLawAssoc {i = i} {j = j} {k = k} m f g = begin
-    subst₂ M (sym (Monoid.lawAssoc effectMonoid i j k)) refl (m >>= (λ x → f x >>= g))
-      ≡⟨ cong (λ X → subst₂ M (sym (Monoid.lawAssoc effectMonoid i j k)) refl X) (lawAssoc m f g) ⟩
-    subst₂ M (sym (Monoid.lawAssoc effectMonoid i j k)) refl (subst₂ M (Monoid.lawAssoc effectMonoid i j k) refl ((m >>= f) >>= g))
-      ≡⟨ sym (substInsert (Monoid.lawAssoc effectMonoid i j k)) ⟩
+              → subst₂ M (monLawAssoc {m = i} {j} {k}) refl (m >>= (λ x → f x >>= g)) ≡ (m >>= f) >>= g
+  symLawAssoc {α} {β} {γ} {i} {j} {k} m f g = begin
+    subst₂ M (monLawAssoc {m = i} {j} {k}) refl (m >>= (λ x → f x >>= g))
+      ≡⟨ cong (λ X → subst₂ M (monLawAssoc {m = i} {j} {k}) refl X) (lawAssoc m f g) ⟩
+    subst₂ M (monLawAssoc {m = i} {j} {k}) refl (subst₂ M (sym $ monLawAssoc {m = i} {j} {k}) refl ((m >>= f) >>= g))
+      ≡⟨ subst₂²≡id1 (monLawAssoc {m = i} {j} {k}) refl M ((m >>= f) >>= g) ⟩
     (m >>= f) >>= g ∎
-    where
-      substInsert : ∀ {i j : Effect} 
-                  → (i≡j : i ≡ j)
-                  → ∀ {α : Type} {x : M i α}
-                  → x ≡ subst₂ M (sym i≡j) refl (subst₂ M i≡j refl x)
-      substInsert refl = refl
 
 data EffMonadTyCons {n} (Effect : Set n) : Set n where
   EffMonadTC : Effect → EffMonadTyCons Effect
@@ -85,11 +68,11 @@ bindMonad m = mBind m
 
 bindFunctor : ∀ {n} {Effect : Set n}  {M : Effect → TyCon} {i : Effect} {{effMonoid : Monoid Effect}} → (m : EffectMonad Effect M)
             → [ M i , Identity ]▷ M i
-bindFunctor {M = M} {i = i} m ma f = subst₂ M (monLawIdR i) refl (mBind m ma (λ a → mReturn m (f a)))
+bindFunctor {M = M} {i = i} m ma f = subst₂ M (monLawIdR {m = i}) refl (mBind m ma (λ a → mReturn m (f a)))
 
 bindApply : ∀ {n} {Effect : Set n}  {M : Effect → TyCon} {i : Effect} {{effMonoid : Monoid Effect}} → (m : EffectMonad Effect M)
           → [ Identity , M i ]▷ M i
-bindApply {M = M} {i = i} m ma f = subst₂ M (monLawIdL i) refl (mBind m (mReturn m ma) f)
+bindApply {M = M} {i = i} m ma f = subst₂ M (monLawIdL {m = i}) refl (mBind m (mReturn m ma) f)
 
 bindReturn : ∀ {n} {Effect : Set n} {M : Effect → TyCon} {{effMonoid : Monoid Effect}} → (m : EffectMonad Effect M)
            → [ Identity , Identity ]▷ M ε
