@@ -40,6 +40,15 @@ record Functor {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} (C : Category {ℓC₀}
 [_]₁ F f = Functor.F₁ F f
 
 -------------------------------------------------------------------------------
+-- Definition of a Contravariant Functor
+-------------------------------------------------------------------------------
+
+-- Contravariant functors offer "F₁ : Hom C b a → Hom D (F₀ a) (F₀ b)"
+-- instead of "Hom C a b → Hom D (F₀ a) (F₀ b)"
+ContravariantFunctor : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} (C : Category {ℓC₀} {ℓC₁}) (D : Category {ℓD₀} {ℓD₁}) → Set (ℓC₀ ⊔ ℓC₁ ⊔ ℓD₀ ⊔ ℓD₁)
+ContravariantFunctor C D = Functor (C op) D
+
+-------------------------------------------------------------------------------
 -- The Identity Functor
 -------------------------------------------------------------------------------
 idFunctor : {ℓ₀ ℓ₁ : Level} (C : Category {ℓ₀} {ℓ₁}) → Functor C C
