@@ -16,40 +16,11 @@ open ≡-Reasoning
 -- Utilities
 --------------------------------------------------------------------------------
 
-subst₂-removable : ∀ {a b p} {A : Set a} {B : Set b} (P : A → B → Set p) 
-                 → ∀ {x₁ x₂ y₁ y₂}
-                 → (eqx : x₁ ≡ x₂ ) → (eqy : y₁ ≡ y₂) 
-                 → (z : P x₁ y₁)
-                 → subst₂ P eqx eqy z ≅ z
-subst₂-removable P refl refl z = refl
-
-
 -- Disprove a proposition by providing a counterexample.
 counterexample : ∀ {k l} {A : Set k} {P : A → Set l}
            → (((a : A) → P a) → ∃ λ(a : A) → ¬ (P a)) 
            → ¬ ((a : A) → P a)
 counterexample ce P = let a , ¬Pa = ce P in ¬Pa (P a)
-
--- Congruence with three arguments.
-cong₃ : ∀ {a b c d} {A : Set a} {B : Set b} {C : Set c} {D : Set d}
-        (f : A → B → C → D) {x y u v r s} 
-      → x ≡ y → u ≡ v → r ≡ s 
-      → f x u r ≡ f y v s
-cong₃ f refl refl refl = refl
-
--- Substitution with three arguments.
-subst₃ : ∀ {a b c d} {A : Set a} {B : Set b} {C : Set c} 
-         (P : A → B → C → Set d) {x₁ x₂ y₁ y₂ z₁ z₂} 
-       → x₁ ≡ x₂ → y₁ ≡ y₂ → z₁ ≡ z₂ → P x₁ y₁ z₁ → P x₂ y₂ z₂
-subst₃ P refl refl refl p = p
-
--- Substitution with four arguments.
-subst₄ : ∀ {a b c d p} {A : Set a} {B : Set b} {C : Set c} {D : Set d} 
-       → (P : A → B → C → D → Set p)
-       → ∀ {x₁ x₂ y₁ y₂ z₁ z₂ w₁ w₂} 
-       → x₁ ≡ x₂ → y₁ ≡ y₂ → z₁ ≡ z₂ → w₁ ≡ w₂ 
-       → P x₁ y₁ z₁ w₁ → P x₂ y₂ z₂ w₂
-subst₄ P refl refl refl refl p = p
 
 -- If two type functions are equivalent, then applying them to the same value 
 -- delivers equivalent results.
