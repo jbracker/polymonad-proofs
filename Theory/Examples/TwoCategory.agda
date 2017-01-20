@@ -81,19 +81,19 @@ functorTwoCategory {ℓObj} {ℓHom} = record
                    → {A : Cell₀ {ℓA₀} {ℓA₁}} {B : Cell₀ {ℓB₀} {ℓB₁}} 
                    → {F : Cell₁ A B}
                    → [ id₁ ]∘[ F ] ≡ F
-    horizontalIdR₁ {A = A} {B} {F} = propEqFunctor refl refl
+    horizontalIdR₁ {A = A} {B} {F} = propFunctorEq refl refl
     
     horizontalAssoc₁ : ∀ {ℓA₀ ℓA₁ ℓB₀ ℓB₁ ℓC₀ ℓC₁ ℓD₀ ℓD₁}
                    → {A : Cell₀ {ℓA₀} {ℓA₁}} {B : Cell₀ {ℓB₀} {ℓB₁}} {C : Cell₀ {ℓC₀} {ℓC₁}} {D : Cell₀ {ℓD₀} {ℓD₁}}
                    → {F : Cell₁ A B} {G : Cell₁ B C} {H : Cell₁ C D} 
                    → [ H ]∘[ [ G ]∘[ F ] ] ≡ [ [ H ]∘[ G ] ]∘[ F ]
-    horizontalAssoc₁ {A = A} {B} {C} {D} {F} {G} {H} = propEqFunctor refl refl
+    horizontalAssoc₁ {A = A} {B} {C} {D} {F} {G} {H} = propFunctorEq refl refl
     
     horizontalIdL₂ : ∀ {ℓA₀ ℓA₁ ℓB₀ ℓB₁}
                    → {A : Cell₀ {ℓA₀} {ℓA₁}} {B : Cell₀ {ℓB₀} {ℓB₁}} 
                    → {F G : Cell₁ A B} {α : Cell₂ F G} 
                    → ⟨_⟩∘ₕ⟨_⟩ {C = A} {A} {B} {F} {G} {Id[ A ]} {Id[ A ]} α (idC (HomCat A A)) ≡ α
-    horizontalIdL₂ {A = A} {B} {F} {G} {α} = propEqNatTrans refl refl $ funExt $ λ (x : Obj A) → begin
+    horizontalIdL₂ {A = A} {B} {F} {G} {α} = propNatTransEq refl refl $ funExt $ λ (x : Obj A) → begin
         η α ([ Id[ A ] ]₀ x) ∘B [ F ]₁ (η (idC (HomCat A A) {a = Id[ A ]}) x)
           ≡⟨ refl ⟩
         η α ([ Id[ A ] ]₀ x) ∘B [ F ]₁ (idC A)
@@ -111,7 +111,7 @@ functorTwoCategory {ℓObj} {ℓHom} = record
                    → {α : Cell₂ F G} 
                    → ⟨ idC (HomCat B B) {a = Id[ B ]} ⟩∘ₕ⟨ α ⟩ ≡ subst₂ Cell₂ (sym horizontalIdR₁) (sym horizontalIdR₁) α
     horizontalIdR₂ {A = A} {B} {F} {G} {α} =
-      propEqNatTrans refl refl $ funExt $ λ (x : Obj A) → begin
+      propNatTransEq refl refl $ funExt $ λ (x : Obj A) → begin
         η ⟨ idC (HomCat B B) {a = Id[ B ]} ⟩∘ₕ⟨ α ⟩ x 
           ≡⟨ refl ⟩
         Category.id B ∘B η α x
@@ -128,7 +128,7 @@ functorTwoCategory {ℓObj} {ℓHom} = record
                      → [ comp ]₁ (α , [ comp ]₁ (β , γ)) 
                      ≡ subst₂ (Hom (HomCat A D)) (sym $ horizontalAssoc₁ {F = F} {G} {H}) (sym $ horizontalAssoc₁ {F = F'} {G'} {H'}) ([ comp ]₁ ([ comp ]₁ (α , β) , γ))
     horizontalAssoc₂ {A = A} {B} {C} {D} {F} {F'} {G} {G'} {H} {H'} {α} {β} {γ} = 
-      propEqNatTrans refl refl $ funExt $ λ x → ≅-to-≡ (htrans (lemma x) (subst₂-insert eqA eqB ([ comp ]₁ ([ comp ]₁ (α , β) , γ)) x))
+      propNatTransEq refl refl $ funExt $ λ x → ≅-to-≡ (htrans (lemma x) (subst₂-insert eqA eqB ([ comp ]₁ ([ comp ]₁ (α , β) , γ)) x))
       where _∘D_ = _∘_ D
             _∘C_ = _∘_ C
             _∘B_ = _∘_ B
@@ -155,7 +155,7 @@ functorTwoCategory {ℓObj} {ℓHom} = record
                   → [ comp ]₁ (α , idC (HomCat A C) {a = [ G ]∘[ F ]}) 
                   ≡ subst₂ Cell₂ (sym $ horizontalAssoc₁ {F = F} {G} {H}) (sym $ horizontalAssoc₁ {F = F} {G} {I}) 
                            ([ comp ]₁ ([ comp ]₁ (α , idC (HomCat B C) {a = G}) , idC (HomCat A B) {a = F}))
-    whiskerCoher1 {A = A} {B} {C} {D} {F} {G} {H} {I} {α} = propEqNatTrans refl refl $ funExt $ (λ (x : Obj A) → 
+    whiskerCoher1 {A = A} {B} {C} {D} {F} {G} {H} {I} {α} = propNatTransEq refl refl $ funExt $ (λ (x : Obj A) → 
       ≅-to-≡ $ htrans (lemma x) (subst₂-insert eqA eqB ([ comp ]₁ ([ comp ]₁ (α , idC (HomCat B C) {a = G}) , idC (HomCat A B) {a = F})) x))
       where
         _∘D_ = _∘_ D
@@ -187,7 +187,7 @@ functorTwoCategory {ℓObj} {ℓHom} = record
                   → [ comp ]₁ (idC (HomCat C D) {a = I} , [ comp ]₁ (α , idC (HomCat A B) {a = F}))
                   ≡ subst₂ (Hom (HomCat A D)) (sym $ horizontalAssoc₁ {F = F} {G} {I}) (sym $ horizontalAssoc₁ {F = F} {H} {I}) 
                            ([ comp ]₁ ([ comp ]₁ (idC (HomCat C D) {a = I} , α) , idC (HomCat A B) {a = F}))
-    whiskerCoher2 {A = A} {B} {C} {D} {F} {G} {H} {I} {α} = propEqNatTrans refl refl $ funExt $ λ (x : Obj A) → 
+    whiskerCoher2 {A = A} {B} {C} {D} {F} {G} {H} {I} {α} = propNatTransEq refl refl $ funExt $ λ (x : Obj A) → 
       ≅-to-≡ $ htrans (lemma x) (subst₂-insert eqA eqB ([ comp ]₁ ([ comp ]₁ (idC (HomCat C D) {a = I} , α) , idC (HomCat A B) {a = F})) x)
       where
         eqA = sym $ horizontalAssoc₁ {F = F} {G} {I}
@@ -218,7 +218,7 @@ functorTwoCategory {ℓObj} {ℓHom} = record
                   → {α : Cell₂ F G} 
                   → [ comp ]₁ (idC (HomCat C D) {a = I} , [ comp ]₁ (idC (HomCat B C) {a = H} , α))
                   ≡ subst₂ (Hom (HomCat A D)) (sym $ horizontalAssoc₁ {F = F} {H} {I}) (sym $ horizontalAssoc₁ {F = G} {H} {I}) ([ comp ]₁ (idC (HomCat B D) {a = [ I ]∘[ H ]} , α))
-    whiskerCoher3 {A = A} {B} {C} {D} {F} {G} {H} {I} {α} = propEqNatTrans refl refl $ funExt $ λ (x : Obj A) → 
+    whiskerCoher3 {A = A} {B} {C} {D} {F} {G} {H} {I} {α} = propNatTransEq refl refl $ funExt $ λ (x : Obj A) → 
       ≅-to-≡ $ htrans (lemma x) (subst₂-insert eqA eqB ([ comp ]₁ (idC (HomCat B D) {a = [ I ]∘[ H ]} , α)) x)
       where
         eqA = sym $ horizontalAssoc₁ {F = F} {H} {I}
@@ -245,7 +245,7 @@ functorTwoCategory {ℓObj} {ℓHom} = record
                   → {α : Cell₂ F G} {β : Cell₂ H I} 
                   → ⟨ [ comp ]₁ (idC (HomCat B C) {a = I} , α) ⟩∘ᵥ⟨ [ comp ]₁ (β , idC (HomCat A B) {a = F}) ⟩
                   ≡ ⟨ [ comp ]₁ (β , idC (HomCat A B) {a = G}) ⟩∘ᵥ⟨ [ comp ]₁ (idC (HomCat B C) {a = H} , α) ⟩
-    whiskerCoher4 {A = A} {B} {C} {F} {G} {H} {I} {α} {β} = propEqNatTrans refl refl $ funExt $ λ (x : Obj A) → begin
+    whiskerCoher4 {A = A} {B} {C} {F} {G} {H} {I} {α} {β} = propNatTransEq refl refl $ funExt $ λ (x : Obj A) → begin
       η ⟨ [ comp ]₁ (idC (HomCat B C) {a = I} , α) ⟩∘ᵥ⟨ [ comp ]₁ (β , idC (HomCat A B) {a = F}) ⟩ x
         ≡⟨ refl ⟩
       ( idC C ∘C [ I ]₁ (η α x) ) ∘C ( η β ([ F ]₀ x) ∘C [ H ]₁ (idC B) )

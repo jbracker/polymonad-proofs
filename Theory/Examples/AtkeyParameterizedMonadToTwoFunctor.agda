@@ -43,7 +43,7 @@ AtkeyParameterizedMonad→LaxTwoFunctor {ℓC₀} {ℓC₁} {ℓS₀} {ℓS₁} 
   ; μ = λ {s₁} {s₂} {s₃} {f} {g} → μ {s₁} {s₂} {s₃} {f} {g}
   ; laxFunId₁ = λ {s₁} {s₂} {f} → laxFunId₁ {s₁} {s₂} {f}
   ; laxFunId₂ = λ {s₁} {s₂} {f} → laxFunId₂ {s₁} {s₂} {f}
-  ; laxFunAssoc = λ {s₀} {s₁} {s₂} {s₃} {f} {g} {h} → propEqNatTrans refl refl $ funExt $ laxFunAssoc {s₀} {s₁} {s₂} {s₃} {f} {g} {h}
+  ; laxFunAssoc = λ {s₀} {s₁} {s₂} {s₃} {f} {g} {h} → propNatTransEq refl refl $ funExt $ laxFunAssoc {s₀} {s₁} {s₂} {s₃} {f} {g} {h}
   } where
     FunTwoCat = functorTwoCategory {ℓC₀} {ℓC₁}
     S2 = Category→StrictTwoCategory S
@@ -91,7 +91,7 @@ AtkeyParameterizedMonad→LaxTwoFunctor {ℓC₀} {ℓC₁} {ℓS₀} {ℓS₁} 
         dist : {a b c : Hom S s₁ s₂}
              → {f : Hom (HomCat S2 s₁ s₂) a b} {g : Hom (HomCat S2 s₁ s₂) b c}
              → F₁ {a} {c} (_∘SS_ {a} {b} {c} g f) ≡ (F₁ {a} {b} g) ∘CC (F₁ {b} {c} f)
-        dist {a} {b} {c} {tt} {tt} = propEqNatTrans refl refl $ funExt $ λ (x : Obj C) → sym (idR C)
+        dist {a} {b} {c} {tt} {tt} = propNatTransEq refl refl $ funExt $ λ (x : Obj C) → sym (idR C)
     
     η : {s : Obj S} → NatTrans Id[ C ] ([ P₁ {s} {s} ]₀ (id S {s}))
     η {s} = naturalTransformation (λ x → AtkeyParameterizedMonad.η monad {x} {s}) (AtkeyParameterizedMonad.naturalη monad {s})
@@ -103,7 +103,7 @@ AtkeyParameterizedMonad→LaxTwoFunctor {ℓC₀} {ℓC₁} {ℓS₀} {ℓS₁} 
     laxFunId₁ : {s₁ s₂ : Obj S} {f : Hom S s₁ s₂}
               → ⟨ Functor.F₁ (P₁ {s₁} {s₂}) {f} {f} (λ' S2 f) ⟩∘ᵥ⟨ ⟨ μ {s₁} {s₁} {s₂} {id S {s₁}} {f} ⟩∘ᵥ⟨ ⟨ id₂ FunTwoCat {C} {C} {[ P₁ {s₁} {s₂} ]₀ f} ⟩∘ₕ⟨ η {s₁} ⟩ ⟩ ⟩
               ≡ λ' FunTwoCat ([ P₁ {s₁} {s₂} ]₀ f)
-    laxFunId₁ {s₁} {s₂} {f} = propEqNatTrans refl refl $ funExt $ λ (x : Obj C) → begin
+    laxFunId₁ {s₁} {s₂} {f} = propNatTransEq refl refl $ funExt $ λ (x : Obj C) → begin
       NatTrans.η (⟨ Functor.F₁ (P₁ {s₁} {s₂}) {f} {f} (λ' S2 f) ⟩∘ᵥ⟨ ⟨ μ {s₁} {s₁} {s₂} {id S {s₁}} {f} ⟩∘ᵥ⟨ ⟨ id₂ FunTwoCat {C} {C} {[ P₁ {s₁} {s₂} ]₀ f} ⟩∘ₕ⟨ η {s₁} ⟩ ⟩ ⟩) x
         ≡⟨ refl ⟩
       id C {[ M ]₀ (s₂ , s₁ , x)} ∘C (NatTrans.η (μ {s₁} {s₁} {s₂} {id S {s₁}} {f}) x 
@@ -128,7 +128,7 @@ AtkeyParameterizedMonad→LaxTwoFunctor {ℓC₀} {ℓC₁} {ℓS₀} {ℓS₁} 
     laxFunId₂ : {s₁ s₂ : Obj S} {f : Hom S s₁ s₂} 
       → ⟨ Functor.F₁ (P₁ {s₁} {s₂}) {f} {f} (ρ S2 f) ⟩∘ᵥ⟨ ⟨ μ {s₁} {s₂} {s₂} {f} {id S {s₂}} ⟩∘ᵥ⟨ ⟨ η {s₂} ⟩∘ₕ⟨ id₂ FunTwoCat {C} {C} {[ P₁ {s₁} {s₂} ]₀ f} ⟩ ⟩ ⟩
       ≡ ρ FunTwoCat ([ P₁ {s₁} {s₂} ]₀ f)
-    laxFunId₂ {s₁} {s₂} {f} = propEqNatTrans refl refl $ funExt $ λ (x : Obj C) → begin
+    laxFunId₂ {s₁} {s₂} {f} = propNatTransEq refl refl $ funExt $ λ (x : Obj C) → begin
       NatTrans.η ⟨ Functor.F₁ (P₁ {s₁} {s₂}) {f} {f} (ρ S2 f) ⟩∘ᵥ⟨ ⟨ μ {s₁} {s₂} {s₂} {f} {id S {s₂}} ⟩∘ᵥ⟨ ⟨ η {s₂} ⟩∘ₕ⟨ id₂ FunTwoCat {C} {C} {[ P₁ {s₁} {s₂} ]₀ f} ⟩ ⟩ ⟩ x
         ≡⟨ refl ⟩
       id C {[ M ]₀ (s₂ , s₁ , x)} ∘C (NatTrans.η (μ {s₁} {s₂} {s₂} {f} {id S {s₂}}) x 

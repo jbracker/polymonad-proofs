@@ -38,7 +38,7 @@ Monad→LaxTwoFunctor {ℓC₀} {ℓC₁} {C} {M} monad = record
   ; μ = μP
   ; laxFunId₁ = λ {x} {y} {f} → laxFunId₁ {x} {y} {f}
   ; laxFunId₂ = λ {x} {y} {f} → laxFunId₂ {x} {y} {f}
-  ; laxFunAssoc = λ {x} {y} {z} {w} {f} {g} {h} → propEqNatTrans refl refl $ funExt $ laxFunAssoc {x} {y} {z} {w} {f} {g} {h}
+  ; laxFunAssoc = λ {x} {y} {z} {w} {f} {g} {h} → propNatTransEq refl refl $ funExt $ laxFunAssoc {x} {y} {z} {w} {f} {g} {h}
   } where
     open Category
     open NaturalTransformation
@@ -79,7 +79,7 @@ Monad→LaxTwoFunctor {ℓC₀} {ℓC₁} {C} {M} monad = record
              → F₁ ((HomCat ⊤-TwoCat tt tt ∘ g) f) 
              ≡ _∘_ (HomCat FunTwoCat C C) (F₁ g) (F₁ f)
         dist {tt} {tt} {tt} {tt} {tt} = 
-          propEqNatTrans refl refl $ funExt $ λ (x : Obj C) → begin
+          propNatTransEq refl refl $ funExt $ λ (x : Obj C) → begin
             ηF x 
               ≡⟨ refl ⟩
             Category.id C
@@ -100,7 +100,7 @@ Monad→LaxTwoFunctor {ℓC₀} {ℓC₁} {C} {M} monad = record
               → {f : Cell₁ ⊤-TwoCat x y}
               → [ P₁ ]₁ (λ' ⊤-TwoCat f) ∘V (μP ∘V ((id₂ FunTwoCat {f = M}) ∘H2 ηP)) 
               ≡ λ' FunTwoCat ([ P₁ ]₀ f)
-    laxFunId₁ {tt} {tt} {tt} = propEqNatTrans refl refl $ funExt $ λ (x : Obj C) → begin
+    laxFunId₁ {tt} {tt} {tt} = propNatTransEq refl refl $ funExt $ λ (x : Obj C) → begin
       η ([ P₁ ]₁ (λ' ⊤-TwoCat tt) ∘V (μP ∘V ((id₂ FunTwoCat {f = M}) ∘H2 ηP))) x
         ≡⟨ refl ⟩ 
       Category.id C ∘C (η μP x ∘C (Category.id C ∘C [ M ]₁ (η ηP x)))
@@ -116,7 +116,7 @@ Monad→LaxTwoFunctor {ℓC₀} {ℓC₁} {C} {M} monad = record
     laxFunId₂ : {x y : Cell₀ ⊤-TwoCat} 
               → {f : Cell₁ ⊤-TwoCat x y}
               → [ P₁ ]₁ (ρ ⊤-TwoCat f) ∘V (μP ∘V (ηP ∘H2 (id₂ FunTwoCat {f = M}))) ≡ ρ FunTwoCat ([ P₁ ]₀ f)
-    laxFunId₂ {tt} {tt} {tt} = propEqNatTrans refl refl $ funExt $ λ (x : Obj C) → begin
+    laxFunId₂ {tt} {tt} {tt} = propNatTransEq refl refl $ funExt $ λ (x : Obj C) → begin
       η ([ P₁ ]₁ (ρ ⊤-TwoCat tt) ∘V (μP ∘V (ηP ∘H2 (id₂ FunTwoCat {f = M})))) x
         ≡⟨ refl ⟩
       Category.id C ∘C (η μP x ∘C (η ηP ([ M ]₀ x) ∘C Category.id C))
