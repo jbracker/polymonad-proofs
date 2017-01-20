@@ -160,7 +160,7 @@ rightExtendFunctor F E e = record
 -------------------------------------------------------------------------------
 -- Propositional Equality of Functors
 -------------------------------------------------------------------------------
-propEqFunctor : {Cℓ₀ Cℓ₁ Dℓ₀ Dℓ₁ : Level} {C : Category {Cℓ₀} {Cℓ₁}} {D : Category {Dℓ₀} {Dℓ₁}} 
+propFunctorEq : {Cℓ₀ Cℓ₁ Dℓ₀ Dℓ₁ : Level} {C : Category {Cℓ₀} {Cℓ₁}} {D : Category {Dℓ₀} {Dℓ₁}} 
               → {F₀ G₀ : Obj C → Obj D}
               → {F₁ : (a b : Obj C) → Hom C a b → Hom D (F₀ a) (F₀ b)}
               → {G₁ : (a b : Obj C) → Hom C a b → Hom D (G₀ a) (G₀ b)}
@@ -171,7 +171,7 @@ propEqFunctor : {Cℓ₀ Cℓ₁ Dℓ₀ Dℓ₁ : Level} {C : Category {Cℓ₀
               → (eq₀ : F₀ ≡ G₀)
               → (eq₁ : F₁ ≡ subst₂ (λ X Y → (a b : Obj C) → Hom C a b → Hom D (X a) (Y b)) (sym eq₀) (sym eq₀) G₁ )
               → functor {C = C} {D = D} F₀ (λ {a b} → F₁ a b) idF distF ≡ functor {C = C} {D = D} G₀ (λ {a b} → G₁ a b) idG distG
-propEqFunctor {F₀ = F₀} {F₁ = F₁} {idF = idF} {idG} {distF} {distG} refl refl = cong₂ (functor F₀ (λ {a b} → F₁ a b)) p1 p2
+propFunctorEq {F₀ = F₀} {F₁ = F₁} {idF = idF} {idG} {distF} {distG} refl refl = cong₂ (functor F₀ (λ {a b} → F₁ a b)) p1 p2
   where
     p1 = funExtImplicit (λ a → proof-irrelevance (idF {a}) (idG {a}))
     p2 = funExtImplicit 
@@ -183,17 +183,17 @@ propEqFunctor {F₀ = F₀} {F₁ = F₁} {idF = idF} {idG} {distF} {distG} refl
            ) ) ) ) )
 
 
-extractPropEqFunctorF₀ : {Cℓ₀ Cℓ₁ Dℓ₀ Dℓ₁ : Level}
+extractPropFunctorEqF₀ : {Cℓ₀ Cℓ₁ Dℓ₀ Dℓ₁ : Level}
                        → {C : Category {Cℓ₀} {Cℓ₁}} {D : Category {Dℓ₀} {Dℓ₁}} 
                        → {F G : Functor C D}
                        → F ≡ G
                        → Functor.F₀ F ≡ Functor.F₀ G
-extractPropEqFunctorF₀ refl = refl
+extractPropFunctorEqF₀ refl = refl
 
-extractPropEqFunctorF₁ : {Cℓ₀ Cℓ₁ Dℓ₀ Dℓ₁ : Level}
+extractPropFunctorEqF₁ : {Cℓ₀ Cℓ₁ Dℓ₀ Dℓ₁ : Level}
                        → {C : Category {Cℓ₀} {Cℓ₁}} {D : Category {Dℓ₀} {Dℓ₁}} 
                        → {F G : Functor C D}
                        → (eq : F ≡ G)
                        → (λ {a b : Obj C} → Functor.F₁ F {a = a} {b}) 
-                       ≡ subst₂ (λ X Y → {a b : Obj C} → Hom C a b → Hom D (X a) (Y b)) (sym (extractPropEqFunctorF₀ eq)) (sym (extractPropEqFunctorF₀ eq)) (Functor.F₁ G)
-extractPropEqFunctorF₁ refl = refl
+                       ≡ subst₂ (λ X Y → {a b : Obj C} → Hom C a b → Hom D (X a) (Y b)) (sym (extractPropFunctorEqF₀ eq)) (sym (extractPropFunctorEqF₀ eq)) (Functor.F₁ G)
+extractPropFunctorEqF₁ refl = refl

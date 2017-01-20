@@ -171,7 +171,7 @@ subst₂-replace α .α refl x = refl
 -- Propositional Equality of Natural Transformations
 -------------------------------------------------------------------------------
 
-propEqNatTrans : {Cℓ₀ Cℓ₁ Dℓ₀ Dℓ₁ : Level} 
+propNatTransEq : {Cℓ₀ Cℓ₁ Dℓ₀ Dℓ₁ : Level} 
                → {C : Category {Cℓ₀} {Cℓ₁}} {D : Category {Dℓ₀} {Dℓ₁}} 
                → {F₀ G₀ F₁ G₁ : Functor C D}
                → {η₀ : (x : Obj C) → Hom D ([ F₀ ]₀ x) ([ G₀ ]₀ x)}
@@ -183,16 +183,16 @@ propEqNatTrans : {Cℓ₀ Cℓ₁ Dℓ₀ Dℓ₁ : Level}
                → (eq₂ : subst₂ (λ F G → (x : Obj C) → Hom D ([ F ]₀ x) ([ G ]₀ x)) eq₀ eq₁ η₀ ≡ η₁)
                → subst₂ (λ F G → NaturalTransformation F G) eq₀ eq₁ (naturalTransformation {F = F₀} {G = G₀} η₀ (nat₀)) 
                ≡ naturalTransformation {F = F₁} {G = G₁} η₁ nat₁
-propEqNatTrans {nat₀ = nat₀} {nat₁} refl refl refl with p
+propNatTransEq {nat₀ = nat₀} {nat₁} refl refl refl with p
   where
     p = funExtImplicit 
           (λ a → funExtImplicit 
           (λ b → funExtImplicit 
           (λ f → proof-irrelevance (nat₀ {a} {b} {f}) (nat₁ {a} {b} {f})
           ) ) )
-propEqNatTrans {F₀ = functor F₀ F₁ idF distF} {functor G₀ G₁ idG distG} {functor .F₀ .F₁ .idF .distF} {functor .G₀ .G₁ .idG .distG} refl refl refl | refl = refl
+propNatTransEq {F₀ = functor F₀ F₁ idF distF} {functor G₀ G₁ idG distG} {functor .F₀ .F₁ .idF .distF} {functor .G₀ .G₁ .idG .distG} refl refl refl | refl = refl
 
-hetEqNatTrans : {Cℓ₀ Cℓ₁ Dℓ₀ Dℓ₁ : Level} 
+hetNatTransEq : {Cℓ₀ Cℓ₁ Dℓ₀ Dℓ₁ : Level} 
               → {C : Category {Cℓ₀} {Cℓ₁}} {D : Category {Dℓ₀} {Dℓ₁}} 
               → {F₀ G₀ F₁ G₁ : Functor C D}
               → {η₀ : (x : Obj C) → Hom D ([ F₀ ]₀ x) ([ G₀ ]₀ x)}
@@ -203,20 +203,20 @@ hetEqNatTrans : {Cℓ₀ Cℓ₁ Dℓ₀ Dℓ₁ : Level}
               → (eq₁ : G₀ ≅ G₁)
               → (eq₂ : η₀ ≅ η₁)
               → naturalTransformation {F = F₀} {G = G₀} η₀ (≅-to-≡ nat₀) ≅ naturalTransformation {F = F₁} {G = G₁} η₁ (≅-to-≡ nat₁)
-hetEqNatTrans {nat₀ = nat₀} {nat₁} refl refl refl with p
+hetNatTransEq {nat₀ = nat₀} {nat₁} refl refl refl with p
   where
     p = hFunExtImplicit 
           (λ a → hFunExtImplicit 
           (λ b → hFunExtImplicit 
           (λ f → ≡-to-≅ (hproof-irrelevance (nat₀ {a} {b} {f}) (nat₁ {a} {b} {f}))
           ) ) )
-hetEqNatTrans {F₀ = functor F₀ F₁ idF distF} {functor G₀ G₁ idG distG} {functor .F₀ .F₁ .idF .distF} {functor .G₀ .G₁ .idG .distG} refl refl refl | refl = refl
+hetNatTransEq {F₀ = functor F₀ F₁ idF distF} {functor G₀ G₁ idG distG} {functor .F₀ .F₁ .idF .distF} {functor .G₀ .G₁ .idG .distG} refl refl refl | refl = refl
 
 
-extractPropEqNatTransEta : {Cℓ₀ Cℓ₁ Dℓ₀ Dℓ₁ : Level}
+extractPropNatTransEqEta : {Cℓ₀ Cℓ₁ Dℓ₀ Dℓ₁ : Level}
                          → {C : Category {Cℓ₀} {Cℓ₁}} {D : Category {Dℓ₀} {Dℓ₁}} 
                          → {F G : Functor C D}
                          → {α β : NaturalTransformation F G}
                          → α ≡ β
                          → NaturalTransformation.η α ≡ NaturalTransformation.η β
-extractPropEqNatTransEta refl = refl
+extractPropNatTransEqEta refl = refl
