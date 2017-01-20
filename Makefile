@@ -22,6 +22,8 @@ type-check: | only-base only-haskell only-hicks only-hicks only-parameterized on
 only-base:
 	# Foundations of formalization
 	$(AGDA_TC) Utilities.agda
+	$(AGDA_TC) Substitution.agda
+	$(AGDA_TC) Congruence.agda
 	$(AGDA_TC) Haskell.agda
 	$(AGDA_TC) Identity.agda
 
