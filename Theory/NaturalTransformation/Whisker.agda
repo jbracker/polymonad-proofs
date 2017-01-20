@@ -79,7 +79,7 @@ rightWhiskerDist
   → (β : NaturalTransformation G H)
   → [ K ]∘⟨ ⟨ β ⟩∘ᵥ⟨ α ⟩ ⟩ ≡ ⟨ [ K ]∘⟨ β ⟩ ⟩∘ᵥ⟨ [ K ]∘⟨ α ⟩ ⟩
 rightWhiskerDist {C = C} {D} {E} {F} {G} {H} K α β =
-  propEqNatTrans refl refl $ funExt $ λ (x : Obj C) → begin
+  propNatTransEq refl refl $ funExt $ λ (x : Obj C) → begin
     η [ K ]∘⟨ ⟨ β ⟩∘ᵥ⟨ α ⟩ ⟩ x 
       ≡⟨ refl ⟩
     [ K ]₁ (η β x ∘D η α x)
@@ -99,7 +99,7 @@ leftWhiskerDist
   → (β : NaturalTransformation G H)
   → ⟨ ⟨ β ⟩∘ᵥ⟨ α ⟩ ⟩∘[ K ] ≡ ⟨ ⟨ β ⟩∘[ K ] ⟩∘ᵥ⟨ ⟨ α ⟩∘[ K ] ⟩
 leftWhiskerDist {B = B} K α β =
-  propEqNatTrans refl refl $ funExt $ λ (x : Obj B) → refl
+  propNatTransEq refl refl $ funExt $ λ (x : Obj B) → refl
 
 
 leftWhiskerId₁
@@ -109,7 +109,7 @@ leftWhiskerId₁
   → (K : Functor B C)
   → ⟨ Id⟨ F ⟩ ⟩∘[ K ] ≡ Id⟨ [ F ]∘[ K ] ⟩
 leftWhiskerId₁ {B = B} K = 
-  propEqNatTrans refl refl $ funExt $ λ (x : Obj B) → refl
+  propNatTransEq refl refl $ funExt $ λ (x : Obj B) → refl
 
 
 leftWhiskerId₂
@@ -120,7 +120,7 @@ leftWhiskerId₂
   → (α : NaturalTransformation F G)
   → ⟨ α ⟩∘ₕ⟨ Id⟨ K ⟩ ⟩ ≡ ⟨ α ⟩∘[ K ]
 leftWhiskerId₂ {B = B} {C} {D} {F} {G} K α = 
-  propEqNatTrans refl refl $ funExt $ λ (x : Obj B) → begin
+  propNatTransEq refl refl $ funExt $ λ (x : Obj B) → begin
     η ⟨ α ⟩∘ₕ⟨ Id⟨ K ⟩ ⟩ x 
       ≡⟨ refl ⟩
     η α ([ K ]₀ x) ∘D [ F ]₁ (Category.id C) 
@@ -139,7 +139,7 @@ rightWhiskerId₁
   → (K : Functor D E)
   → [ K ]∘⟨ Id⟨ F ⟩ ⟩ ≡ Id⟨ [ K ]∘[ F ] ⟩
 rightWhiskerId₁ {C = C} K = 
-  propEqNatTrans refl refl $ funExt $ λ (x : Obj C) → Functor.id K
+  propNatTransEq refl refl $ funExt $ λ (x : Obj C) → Functor.id K
 
 
 rightWhiskerId₂
@@ -150,7 +150,7 @@ rightWhiskerId₂
   → (α : NaturalTransformation F G)
   → ⟨ Id⟨ K ⟩ ⟩∘ₕ⟨ α ⟩ ≡ [ K ]∘⟨ α ⟩
 rightWhiskerId₂ {C = C} {D} {E} {F} {G} K α = 
-  propEqNatTrans refl refl $ funExt $ λ (x : Obj C) → idR E
+  propNatTransEq refl refl $ funExt $ λ (x : Obj C) → idR E
 
 
 whiskerCompositionHorzEq 
@@ -162,7 +162,7 @@ whiskerCompositionHorzEq
   → (β : NaturalTransformation H K)
   → ⟨ [ K ]∘⟨ α ⟩ ⟩∘ᵥ⟨ ⟨ β ⟩∘[ F ] ⟩ ≡ ⟨ ⟨ β ⟩∘[ G ] ⟩∘ᵥ⟨ [ H ]∘⟨ α ⟩ ⟩
 whiskerCompositionHorzEq {C = C} {D} {E} {F} {G} {H} {K} α β = 
-  propEqNatTrans refl refl $ funExt $ λ (x : Obj C) → begin
+  propNatTransEq refl refl $ funExt $ λ (x : Obj C) → begin
     η ⟨ [ K ]∘⟨ α ⟩ ⟩∘ᵥ⟨ ⟨ β ⟩∘[ F ] ⟩ x
       ≡⟨ refl ⟩ 
     [ K ]₁ (η α x) ∘E η β ([ F ]₀ x)

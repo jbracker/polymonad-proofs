@@ -51,7 +51,7 @@ natTransCompositionHorzFunctor {A = A} {B} {C} = record
       F₁ {F = F} {G = F} (idC (Fun B C ×C Fun A B)) 
         ≡⟨ refl ⟩
       ⟨ Id⟨ proj₁' F ⟩ ⟩∘ₕ⟨ Id⟨ proj₂' F ⟩ ⟩ 
-        ≡⟨ propEqNatTrans refl refl lemma ⟩
+        ≡⟨ propNatTransEq refl refl lemma ⟩
       Id⟨ [ proj₁' F ]∘[ proj₂' F ] ⟩
         ≡⟨ refl ⟩
       Category.id (Fun A C) {a = [ proj₁' F ]∘[ proj₂' F ]} ∎
@@ -77,7 +77,7 @@ natTransCompositionHorzFunctor {A = A} {B} {C} = record
          → {β : Hom (Fun B C ×C Fun A B) G H}
          → F₁ ( ⟨ proj₁' β ⟩∘ᵥ⟨ proj₁' α ⟩ ,' ⟨ proj₂' β ⟩∘ᵥ⟨ proj₂' α ⟩ ) ≡ ⟨ F₁ β ⟩∘ᵥ⟨ F₁ α ⟩
     dist {F ,' F'} {G ,' G'} {H ,' H'} {α = α₁ ,' α₂} {β = β₁ ,' β₂} = 
-      propEqNatTrans refl refl $ funExt $ λ (x : Obj A) → begin
+      propNatTransEq refl refl $ funExt $ λ (x : Obj A) → begin
         η ⟨ ⟨ β₁ ⟩∘ᵥ⟨ α₁ ⟩ ⟩∘ₕ⟨ ⟨ β₂ ⟩∘ᵥ⟨ α₂ ⟩ ⟩ x
           ≡⟨ refl ⟩
         η ⟨ β₁ ⟩∘ᵥ⟨ α₁ ⟩ ([ H' ]₀ x) ∘C [ F ]₁ (η ⟨ β₂ ⟩∘ᵥ⟨ α₂ ⟩ x)
@@ -89,7 +89,7 @@ natTransCompositionHorzFunctor {A = A} {B} {C} = record
         η β₁ ([ H' ]₀ x) ∘C (η α₁ ([ H' ]₀ x) ∘C ([ F ]₁ (η β₂ x) ∘C [ F ]₁ (η α₂ x)))
           ≡⟨ cong (λ X → η β₁ ([ H' ]₀ x) ∘C X) (assoc C) ⟩
         η β₁ ([ H' ]₀ x) ∘C ((η α₁ ([ H' ]₀ x) ∘C [ F ]₁ (η β₂ x)) ∘C [ F ]₁ (η α₂ x))
-          ≡⟨ cong (λ X → η β₁ ([ H' ]₀ x) ∘C (X ∘C [ F ]₁ (η α₂ x))) (sym (cong (λ X → X x) (extractPropEqNatTransEta (whiskerCompositionHorzEq β₂ α₁)))) ⟩
+          ≡⟨ cong (λ X → η β₁ ([ H' ]₀ x) ∘C (X ∘C [ F ]₁ (η α₂ x))) (sym (cong (λ X → X x) (extractPropNatTransEqEta (whiskerCompositionHorzEq β₂ α₁)))) ⟩
         η β₁ ([ H' ]₀ x) ∘C (([ G ]₁ (η β₂ x) ∘C η α₁ ([ G' ]₀ x)) ∘C [ F ]₁ (η α₂ x))
           ≡⟨ cong (λ X → η β₁ ([ H' ]₀ x) ∘C X) (sym (assoc C)) ⟩
         η β₁ ([ H' ]₀ x) ∘C ([ G ]₁ (η β₂ x) ∘C (η α₁ ([ G' ]₀ x) ∘C [ F ]₁ (η α₂ x)))
@@ -243,10 +243,10 @@ functorCompIdR : {ℓA₀ ℓA₁ ℓB₀ ℓB₁ : Level}
                → {A : Category {ℓA₀} {ℓA₁}} {B : Category {ℓB₀} {ℓB₁}} 
                → (F : Functor A B)
                → [ Id[ B ] ]∘[ F ] ≡ F
-functorCompIdR F = propEqFunctor refl refl
+functorCompIdR F = propFunctorEq refl refl
 
 functorCompIdL : {ℓA₀ ℓA₁ ℓB₀ ℓB₁ : Level} 
                → {A : Category {ℓA₀} {ℓA₁}} {B : Category {ℓB₀} {ℓB₁}} 
                → (F : Functor A B)
                → [ F ]∘[ Id[ A ] ] ≡ F
-functorCompIdL F = propEqFunctor refl refl
+functorCompIdL F = propFunctorEq refl refl

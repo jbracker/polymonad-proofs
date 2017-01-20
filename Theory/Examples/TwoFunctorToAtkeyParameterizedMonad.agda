@@ -43,16 +43,16 @@ LaxTwoFunctor→AtkeyFunctor
   → {S : Category {ℓS₀} {ℓS₁}}
   → (F : LaxTwoFunctor (Category→StrictTwoCategory S) (functorTwoCategory {ℓC₀} {ℓC₁})) 
   → (∀ s → LaxTwoFunctor.P₀ F s ≡ C)
-  → (∀ {s₀ s₁} → (f g : Hom S s₀ s₁) → [ LaxTwoFunctor.P₁ F {s₀} {s₁} ]₀ f ≡ [ LaxTwoFunctor.P₁ F {s₀} {s₁} ]₀ g) 
+  → ( (s₀ s₁ : Obj S) → Hom S s₀ s₁ )
   → Functor (S op ×C S ×C C) C
-LaxTwoFunctor→AtkeyFunctor {C = C} {S} F eq eqP = functor F₀ {!!} {!!} {!!}
+LaxTwoFunctor→AtkeyFunctor {C = C} {S} F eq ∃arrow = functor F₀ F₁ {!!} {!!}
   where
     
     F₀ : Obj (S op ×C S ×C C) → Obj C
-    F₀ (s₀ , s₁ , x) = Functor.F₀ (functor-convert (eq s₀) (eq s₁) $ [ LaxTwoFunctor.P₁ F {s₀} {s₁} ]₀ ({!!})) x
+    F₀ (s₀ , s₁ , x) = Functor.F₀ (functor-convert (eq s₀) (eq s₁) $ [ LaxTwoFunctor.P₁ F {s₀} {s₁} ]₀ (∃arrow s₀ s₁)) x
     
     F₁ : {a b : Obj ((S op) ×C S ×C C)} → Hom (S op ×C S ×C C) a b → Hom C (F₀ a) (F₀ b)
-    F₁ {as₀ , as₁ , ax} {bs₀ , bs₁ , bx} (sf₀ , sf₁ , f) = Functor.F₁ (functor-convert {!eq!} {!!} ([ LaxTwoFunctor.P₁ F {as₁} {bs₁} ]₀ sf₁)) f
+    F₁ {as₀ , as₁ , ax} {bs₀ , bs₁ , bx} (sf₀ , sf₁ , f) = {!Functor.F₁ (functor-convert (eq as₁) (eq bs₁) ([ LaxTwoFunctor.P₁ F {as₁} {bs₁} ]₀ sf₁)) f!}
   
 {-
 LaxTwoFunctor→AtkeyParameterizedMonad 

@@ -41,10 +41,10 @@ catCategory {ℓ₀} {ℓ₁} = record
   } where
     assoc : {a b c d : Category} {f : Functor a b} {g : Functor b c} {h : Functor c d} 
           → [ h ]∘[ [ g ]∘[ f ] ] ≡ [ [ h ]∘[ g ] ]∘[ f ]
-    assoc = propEqFunctor refl refl
+    assoc = propFunctorEq refl refl
     
     idR : {a b : Category} {f : Functor a b} → [ Id[ b ] ]∘[ f ] ≡ f
-    idR = propEqFunctor refl refl
+    idR = propFunctorEq refl refl
 
     idL : {a b : Category} {f : Functor a b} → [ f ]∘[ Id[ a ] ] ≡ f
     idL = refl
@@ -56,7 +56,7 @@ functorCategory C D = record
   ; Hom = NaturalTransformation {C = C} {D}
   ; _∘_ = λ {F} {G} {H} → ⟨_⟩∘ᵥ⟨_⟩ {C = C} {D} {F} {G} {H}
   ; id = λ {F} → Id⟨ F ⟩
-  ; assoc = propEqNatTrans refl refl $ funExt $ λ _ → Category.assoc D
-  ; idL = propEqNatTrans refl refl $ funExt $ λ _ → Category.idL D
-  ; idR = propEqNatTrans refl refl $ funExt $ λ _ → Category.idR D
+  ; assoc = propNatTransEq refl refl $ funExt $ λ _ → Category.assoc D
+  ; idL = propNatTransEq refl refl $ funExt $ λ _ → Category.idL D
+  ; idR = propNatTransEq refl refl $ funExt $ λ _ → Category.idR D
   }
