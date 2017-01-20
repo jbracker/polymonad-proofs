@@ -212,11 +212,3 @@ hetNatTransEq {nat₀ = nat₀} {nat₁} refl refl refl with p
           ) ) )
 hetNatTransEq {F₀ = functor F₀ F₁ idF distF} {functor G₀ G₁ idG distG} {functor .F₀ .F₁ .idF .distF} {functor .G₀ .G₁ .idG .distG} refl refl refl | refl = refl
 
-
-extractPropNatTransEqEta : {Cℓ₀ Cℓ₁ Dℓ₀ Dℓ₁ : Level}
-                         → {C : Category {Cℓ₀} {Cℓ₁}} {D : Category {Dℓ₀} {Dℓ₁}} 
-                         → {F G : Functor C D}
-                         → {α β : NaturalTransformation F G}
-                         → α ≡ β
-                         → NaturalTransformation.η α ≡ NaturalTransformation.η β
-extractPropNatTransEqEta refl = refl

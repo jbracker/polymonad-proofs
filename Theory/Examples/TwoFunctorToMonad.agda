@@ -68,7 +68,7 @@ LaxTwoFunctor→Monad {ℓC₀} {ℓC₁} F = record
     laxFunAssoc : (x : Obj C)
                 → natη ([ LaxTwoFunctor.P₁ F ]₁ tt) x ∘C ( μ x ∘C ( Category.id C ∘C [ M ]₁ (μ x) ) )
                 ≡ μ x ∘C ( ( μ ([ M ]₀ x) ∘C [ M ]₁ ([ M ]₁ (Category.id C)) ) ∘C natη (α FunTwoCat M M M) x )
-    laxFunAssoc x = cong (λ X → X x) $ extractPropNatTransEqEta (LaxTwoFunctor.laxFunAssoc F {tt} {tt} {tt} {tt} {tt} {tt} {tt})
+    laxFunAssoc x = cong (λ X → X x) $ cong natη (LaxTwoFunctor.laxFunAssoc F {tt} {tt} {tt} {tt} {tt} {tt} {tt})
     
     μCoher : {x : Obj C} 
            → μ x ∘C [ M ]₁ (μ x) ≡ μ x ∘C μ ([ M ]₀ x)
@@ -100,7 +100,7 @@ LaxTwoFunctor→Monad {ℓC₀} {ℓC₁} F = record
     laxFunId₁ : (x : Obj C)
               → natη ([ LaxTwoFunctor.P₁ F ]₁ tt) x ∘C ( μ x ∘C ( id C ∘C [ M ]₁ (η x) ) )
               ≡ natη (λ' FunTwoCat M) x
-    laxFunId₁ x = cong (λ X → X x) $ extractPropNatTransEqEta $ LaxTwoFunctor.laxFunId₁ F {tt} {tt} {tt}
+    laxFunId₁ x = cong (λ X → X x) $ cong natη $ LaxTwoFunctor.laxFunId₁ F {tt} {tt} {tt}
     
     ηCoherL : {x : Obj C} 
             → μ x ∘C [ M ]₁ (η x) ≡ η⟨ Id⟨ M ⟩ ⟩ x
@@ -122,7 +122,7 @@ LaxTwoFunctor→Monad {ℓC₀} {ℓC₁} F = record
     laxFunId₂ : (x : Obj C) 
               → natη ([ LaxTwoFunctor.P₁ F ]₁ tt) x ∘C ( μ x ∘C ( η ([ M ]₀ x) ∘C id C ) )
               ≡ natη (ρ FunTwoCat M) x
-    laxFunId₂ x = cong (λ X → X x) $ extractPropNatTransEqEta $ LaxTwoFunctor.laxFunId₂ F {tt} {tt} {tt}
+    laxFunId₂ x = cong (λ X → X x) $ cong natη $ LaxTwoFunctor.laxFunId₂ F {tt} {tt} {tt}
 
     ηCoherR : {x : Obj C} 
             → μ x ∘C η ([ M ]₀ x) ≡ η⟨ Id⟨ M ⟩ ⟩ x

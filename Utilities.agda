@@ -3,6 +3,7 @@ module Utilities where
 
 -- Stdlib
 open import Level renaming ( suc to lsuc )
+open import Function
 open import Data.Product
 open import Data.Sum
 open import Data.Unit
