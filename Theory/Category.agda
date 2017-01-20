@@ -13,12 +13,15 @@ open ≡-Reasoning
 
 -- Local
 open import Utilities
+open import Congruence
+open import Substitution
 open import Theory.Triple
 
 -------------------------------------------------------------------------------
 -- Definition of Categories
 -------------------------------------------------------------------------------
 record Category {ℓ₀ ℓ₁ : Level} : Set (lsuc (ℓ₀ ⊔ ℓ₁)) where
+  constructor category
   field
     Obj : Set ℓ₀
     Hom : Obj → Obj → Set ℓ₁
@@ -30,6 +33,60 @@ record Category {ℓ₀ ℓ₁ : Level} : Set (lsuc (ℓ₀ ⊔ ℓ₁)) where
           → h ∘ (g ∘ f) ≡ (h ∘ g) ∘ f
     idR : {a b : Obj} {f : Hom a b} → id ∘ f ≡ f
     idL : {a b : Obj} {f : Hom a b} → f ∘ id ≡ f
+
+-------------------------------------------------------------------------------
+-- Propositional equality of categories
+-------------------------------------------------------------------------------
+
+propCatEqHelp : ∀ {ℓ₀ ℓ₁} 
+               → {ObjC ObjD : Set ℓ₀} → (eq₀ : ObjC ≡ ObjD)
+               → {HomC : ObjC → ObjC → Set ℓ₁} → {HomD : ObjD → ObjD → Set ℓ₁} → (eq₁ : subst (λ X → (X → X → Set ℓ₁)) eq₀ HomC ≡ HomD)
+               → {a b : ObjC} → HomD (subst idF eq₀ a) (subst idF eq₀ b) ≡ HomC a b
+propCatEqHelp refl refl = refl
+
+propCategoryEq : ∀ {ℓ₀ ℓ₁} 
+               → {ObjC : Set ℓ₀}
+               → {ObjD : Set ℓ₀}
+               → {HomC : ObjC → ObjC → Set ℓ₁}
+               → {HomD : ObjD → ObjD → Set ℓ₁}
+               → {_∘C_ : ∀ {a b c} → HomC b c → HomC a b → HomC a c}
+               → {_∘D_ : ∀ {a b c} → HomD b c → HomD a b → HomD a c}
+               → {idC : {a : ObjC} → HomC a a}
+               → {idD : {a : ObjD} → HomD a a}
+               → {assocC : {a b c d : ObjC} {f : HomC a b} {g : HomC b c} {h : HomC c d} → h ∘C (g ∘C f) ≡ (h ∘C g) ∘C f}
+               → {assocD : {a b c d : ObjD} {f : HomD a b} {g : HomD b c} {h : HomD c d} → h ∘D (g ∘D f) ≡ (h ∘D g) ∘D f}
+               → {idRC : {a b : ObjC} {f : HomC a b} → idC ∘C f ≡ f}
+               → {idRD : {a b : ObjD} {f : HomD a b} → idD ∘D f ≡ f}
+               → {idLC : {a b : ObjC} {f : HomC a b} → f ∘C idC ≡ f}
+               → {idLD : {a b : ObjD} {f : HomD a b} → f ∘D idD ≡ f}
+               → (objEq  : ObjC ≡ ObjD)
+               → (homEq  : subst (λ X → (X → X → Set ℓ₁)) objEq HomC ≡ HomD)
+               → ( compEq : (λ {a} {b} {c} →  _∘C_ {a} {b} {c}) 
+                 ≡ (λ {a} {b} {c} f g → subst₃ (λ X Y Z → X → Y → Z) (propCatEqHelp objEq homEq) (propCatEqHelp objEq homEq) (propCatEqHelp objEq homEq) (_∘D_ {subst idF objEq a} {subst idF objEq b} {subst idF objEq c}) f g) ) 
+               → (idEq   : (λ {a} → idC {a}) ≡ (λ {a} → subst idF (propCatEqHelp objEq homEq) (idD {subst idF objEq a})) )
+               → category ObjC HomC _∘C_ idC assocC idRC idLC ≡ category ObjD HomD _∘D_ idD assocD idRD idLD
+propCategoryEq {ℓ₀} {ℓ₁} {ObjC} {.ObjC} {HomC} {.HomC}  {_∘C_} {._∘C_} {idC} {.idC} {assocC} {assocD} {idRC} {idRD} {idLC} {idLD} refl refl refl refl 
+  = cong₃ (category ObjC HomC _∘C_ idC) p1 p2 p3
+  where
+    p1 : (λ {a} {b} {c} {d} {f} {g} {h} → assocC {a} {b} {c} {d} {f} {g} {h}) ≡ assocD
+    p1 = funExtImplicit $ λ a → 
+         funExtImplicit $ λ b → 
+         funExtImplicit $ λ c → 
+         funExtImplicit $ λ d → 
+         funExtImplicit $ λ f → 
+         funExtImplicit $ λ g → 
+         funExtImplicit $ λ h → 
+         proof-irrelevance (assocC {a} {b} {c} {d} {f} {g} {h}) (assocD {a} {b} {c} {d} {f} {g} {h})
+    p2 : (λ {a} {b} {f} → idRC {a} {b} {f}) ≡ (λ {a} {b} {f} → idRD {a} {b} {f})
+    p2 = funExtImplicit $ λ a →
+         funExtImplicit $ λ b →
+         funExtImplicit $ λ f →
+         proof-irrelevance (idRC {a} {b} {f}) (idRD {a} {b} {f})
+    p3 : (λ {a} {b} {f} → idLC {a} {b} {f}) ≡ (λ {a} {b} {f} → idLD {a} {b} {f})
+    p3 = funExtImplicit $ λ a →
+         funExtImplicit $ λ b →
+         funExtImplicit $ λ f →
+         proof-irrelevance (idLC {a} {b} {f}) (idLD {a} {b} {f})
 
 -------------------------------------------------------------------------------
 -- The Unit Category
