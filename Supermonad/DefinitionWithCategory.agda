@@ -3,7 +3,7 @@ module Supermonad.DefinitionWithCategory where
 
 -- Stdlib
 open import Level
-open import Function hiding ( _∘_ ; id )
+open import Function renaming ( _∘_ to _∘F_ ; id to idF )
 open import Agda.Primitive
 open import Data.Product
 open import Data.Sum
@@ -67,6 +67,12 @@ record SupermonadC {ℓ₀ ℓ₁ ℓF : Level} (C : Category {ℓ₀} {ℓ₁})
           → (m : M i α) → (f : α → M j β) → (g : β → M k γ)
           → subst (λ X → M X γ) (catAssoc C) ((m >>= f) >>= g) ≡ (m >>= (λ x → f x >>= g))
     
+    monadFmap : {α β : Type} {a b : Obj C}
+              → {i : Hom C a b}
+              → (fcts : ConstrainedFunctor.FunctorCts (functor i) α β)
+              → (m : M i α) → (k : α → β)
+              → subst (λ X → M X β) (catIdR C {f = i}) (m >>= (return ∘F k)) ≡ ConstrainedFunctor.fmap (functor i) fcts k m
+    
   _>>_ : {α β : Type} {a b c : Obj C}
            → {i : Hom C a b} {j : Hom C b c}
            → M i α → M j β → M (j ∘ i) β
@@ -100,7 +106,7 @@ SupermonadC→Supermonad {ℓ₀} {ℓ₁} {C = C} {F = F} uniqueHom smc = recor
   ; lawIdR = lawIdR
   ; lawIdL = lawIdL
   ; lawAssoc = lawAssoc
-  ; lawMonadFmap = {!!}
+  ; lawMonadFmap = lawMonadFmap
   }
   where
     _∘_ = comp C
@@ -136,6 +142,14 @@ SupermonadC→Supermonad {ℓ₀} {ℓ₁} {C = C} {F = F} uniqueHom smc = recor
     return {M = a , .a , f} (lift refl) with uniqueHom f (id C {a})
     return {α} {a , .a , .(id C {a})} (lift refl) | refl = ret
     
+    bindReplace : {α β : Type} {a b c : Obj C} 
+                → {f : Hom C a b} {g : Hom C b c} {h : Hom C a c}
+                → (eq : g ∘ f ≡ h)
+                → (b : Binds (a , b , f) (b , c , g) (a , c , h) α β)
+                → (m : F f α) (k : α → F g β)
+                → bind b m k ≡ subst (λ X → F X β) eq (m >>= k) 
+    bindReplace refl (lift (refl , refl , refl , refl)) m k = refl
+    
     functor : (M : HomIx) → ConstrainedFunctor (F (proj₂ (proj₂ M)))
     functor (a , b , f) = record 
       { FunctorCts = ConstrainedFunctor.FunctorCts (SupermonadC.functor smc f)
@@ -143,6 +157,26 @@ SupermonadC→Supermonad {ℓ₀} {ℓ₁} {C = C} {F = F} uniqueHom smc = recor
       ; lawId = ConstrainedFunctor.lawId (SupermonadC.functor smc f)
       ; lawDist = ConstrainedFunctor.lawDist (SupermonadC.functor smc f)
       }
+    
+    fmap :  (M : HomIx) → {α β : Type} → ConstrainedFunctor.FunctorCts (functor M) α β → ( (α → β) → (F (proj₂ (proj₂ M)) α → F (proj₂ (proj₂ M)) β) )
+    fmap (a , b , f) = ConstrainedFunctor.fmap (SupermonadC.functor smc f)
+    
+    lawMonadFmap : {α β : Type} (M N : HomIx)
+                 → (fcts : ConstrainedFunctor.FunctorCts (functor M) α β)
+                 → (b : Binds M N M α β) (r : Returns N β) 
+                 → (k : α → β) (m : ⟨ M ⟩ α) 
+                 → bind b m ((return r) ∘F k) ≡ fmap M fcts k m
+    lawMonadFmap {α} {β} (a , b , f) (.b , .b , g) fcts (lift (refl , refl , refl , g∘f≡f)) (lift refl) k m with uniqueHom g (id C {b})
+    lawMonadFmap {α} {β} (a , b , f) (.b , .b , .(id C {b})) fcts (lift (refl , refl , refl , g∘f≡f)) (lift refl) k m | refl = begin
+      bind (lift (refl , refl , refl , g∘f≡f)) m (ret ∘F k)
+        ≡⟨ cong (λ X → bind (lift (refl , refl , refl , X)) m (ret ∘F k)) (proof-irrelevance g∘f≡f (catIdR C {f = f})) ⟩
+      bind (lift (refl , refl , refl , catIdR C {f = f})) m (ret ∘F k)
+        ≡⟨ bindReplace (catIdR C {f = f}) (lift (refl , refl , refl , catIdR C {f = f})) m (ret ∘F k) ⟩
+      subst (λ X → F X β) (catIdR C {f = f}) (m >>= (ret ∘F k)) 
+        ≡⟨ SupermonadC.monadFmap smc fcts m k ⟩
+      ConstrainedFunctor.fmap (SupermonadC.functor smc f) fcts k m
+        ≡⟨ refl ⟩
+      fmap (a , b , f) fcts k m ∎
     
     lawSingleTyCon : (M : HomIx) → ∃ (λ i → Lift {ℓ = lsuc (ℓ₀ ⊔ ℓ₁)} (⟨ M ⟩ ≡ lower (tyCon i)))
     lawSingleTyCon (a , b , f) = (a , b , f) , (lift refl)
@@ -154,24 +188,6 @@ SupermonadC→Supermonad {ℓ₀} {ℓ₁} {C = C} {F = F} uniqueHom smc = recor
     lawUniqueReturn : {α : Type} {M : HomIx}
                     → (r₁ r₂ : Returns M α) → r₁ ≡ r₂
     lawUniqueReturn (lift refl) (lift refl) = refl
-    
-    bindReplace : {α β : Type} {a b c : Obj C} 
-                → {f : Hom C a b} {g : Hom C b c} {h : Hom C a c}
-                → (eq : g ∘ f ≡ h)
-                → (b : Binds (a , b , f) (b , c , g) (a , c , h) α β)
-                → (m : F f α) (k : α → F g β)
-                → bind b m k ≡ subst (λ X → F X β) eq (m >>= k) 
-    bindReplace refl (lift (refl , refl , refl , refl)) m k = refl
-    {-
-    returnReplace : {α : Type} {a : Obj C} 
-                → {f : Hom C a a}
-                → (eq : f ≡ id C {a})
-                → (r : Returns (a , a , f) α)
-                → (x : α)
-                → return r x ≡ ret x
-    returnReplace {a = a} {f = .(id C {a})} refl (lift refl) x with uniqueHom (id C {a}) (id C {a})
-    returnReplace refl (lift refl) x | refl = refl
-    -}
     
     lawIdR : {α β : Type} → (M N : HomIx) → (b : Binds M N N α β) → (r : Returns M α) 
            → (a : α) (k : α → ⟨ N ⟩ β) → bind b (return r a) k ≡ k a
