@@ -4,7 +4,7 @@ module Haskell.Parameterized.PhantomIndices where
 open import Level renaming ( suc to lsuc )
 
 open import Data.Empty
-open import Data.Nat
+open import Data.Nat hiding ( _⊔_ )
 open import Data.Vec
 open import Data.Product
 
@@ -13,15 +13,15 @@ open import Relation.Binary.PropositionalEquality
 
 open import Haskell
 
-ParamTyCon : ∀ {ℓ} {n} → (ts : Vec (Set ℓ) n) → Set (lsuc ℓ)
-ParamTyCon {ℓ = ℓ} [] = Lift {ℓ = lsuc ℓ} TyCon
-ParamTyCon (T ∷ ts) = T → ParamTyCon ts
+ParamTyCon : ∀ {ℓ} {ℓT} {n} → (ts : Vec (Set ℓ) n) → Set (lsuc (ℓT ⊔ ℓ))
+ParamTyCon {ℓ = ℓ} {ℓT} [] = Lift {ℓ = lsuc ℓT ⊔ lsuc ℓ} (Set ℓT → Set ℓT)
+ParamTyCon {ℓT = ℓT} (T ∷ ts) = T → ParamTyCon {ℓT = ℓT} ts
 
-∃Indices : ∀ {ℓ} {n} → (ts : Vec (Set ℓ) n) → (M : ParamTyCon ts) → (TyCon → Set (lsuc ℓ)) → Set (lsuc ℓ)
+∃Indices : ∀ {ℓ ℓT} {n} → (ts : Vec (Set ℓ) n) → (M : ParamTyCon {ℓT = ℓT} ts) → ((Set ℓT → Set ℓT) → Set (lsuc (ℓT ⊔ ℓ))) → Set (lsuc (ℓT ⊔ ℓ))
 ∃Indices [] M pred = pred (lower M)
 ∃Indices (T ∷ ts) M pred = ∃ λ(i : T) → ∃Indices ts (M i) pred
 
-∀Indices : ∀ {l} {n} → (ts : Vec (Set l) n) → (M : ParamTyCon ts) → (TyCon → Set (lsuc l)) → Set (lsuc l)
+∀Indices : ∀ {ℓ ℓT} {n} → (ts : Vec (Set ℓ) n) → (M : ParamTyCon {ℓT = ℓT} ts) → ((Set ℓT → Set ℓT) → Set (lsuc (ℓT ⊔ ℓ))) → Set (lsuc (ℓT ⊔ ℓ))
 ∀Indices [] M pred = pred (lower M)
 ∀Indices (T ∷ ts) M pred = ∀ {i : T} → ∀Indices ts (M i) pred
 
@@ -55,7 +55,7 @@ ParamTyCon (T ∷ ts) = T → ParamTyCon ts
 PhantomIndices : ∀ {ℓ} {n} (ts : Vec (Set ℓ) n) → (M : ParamTyCon ts) → Set (lsuc ℓ)
 PhantomIndices {ℓ = ℓ} ts M = ∃ λ(K : TyCon) → ∀Indices ts M (λ X → Lift {ℓ = lsuc ℓ} (X ≡ K))
 
-NonPhantomIndices : ∀ {ℓ} {n} (ts : Vec (Set ℓ) n) → (M : ParamTyCon ts) → Set (lsuc ℓ)
+NonPhantomIndices : ∀ {ℓ ℓT} {n} (ts : Vec (Set ℓ) n) → (M : ParamTyCon {ℓT = ℓT} ts) → Set (lsuc (ℓT ⊔ ℓ))
 NonPhantomIndices {ℓ = ℓ} ts M = ∃Indices ts M (λ X → ∃Indices ts M (λ Y → Lift {ℓ = lsuc ℓ} (¬ X ≡ Y)))
 
 PI→¬NPI : ∀ {n} (ts : Vec Set n) → (M : ParamTyCon ts) → PhantomIndices ts M → ¬ NonPhantomIndices ts M
