@@ -28,18 +28,6 @@ open import Supermonad.Definition
 -- formalization of supermonads.
 -- -----------------------------------------------------------------------------
 
-{-
-record Category {ℓ₀ ℓ₁ : Level} (Obj : Set ℓ₀) (Hom : Obj → Obj → Set ℓ₁) : Set (lsuc (ℓ₀ ⊔ ℓ₁)) where
-  field
-    _∘_ : ∀ {a b c} → Hom b c → Hom a b → Hom a c
-    id : ∀ {a} → Hom a a
-    
-    assoc : {a b c d : Obj} {f : Hom a b} {g : Hom b c} {h : Hom c d} 
-          → h ∘ (g ∘ f) ≡ (h ∘ g) ∘ f
-    idR : {a b : Obj} {f : Hom a b} → id ∘ f ≡ f
-    idL : {a b : Obj} {f : Hom a b} → f ∘ id ≡ f
--}
-
 open Category renaming ( idL to catIdL ; idR to catIdR ; assoc to catAssoc ; _∘_ to comp )
 
 record SupermonadC {ℓ₀ ℓ₁ ℓF : Level} (C : Category {ℓ₀} {ℓ₁}) (M : ∀ {a b} → Hom C a b → TyCon) : Set (lsuc ℓF ⊔ ℓ₀ ⊔ ℓ₁) where
@@ -80,15 +68,12 @@ record SupermonadC {ℓ₀ ℓ₁ ℓF : Level} (C : Category {ℓ₀} {ℓ₁})
 
   sequence = _>>_
   bind = _>>=_
-  
-DecidableEquality : ∀ {ℓ} → (A : Set ℓ) → Set ℓ
-DecidableEquality A = (a : A) → (b : A) → Dec (a ≡ b)
 
-UniqueHomomorphisms : ∀ {ℓ₀ ℓ₁} → (C : Category {ℓ₀} {ℓ₁}) → Set (ℓ₁ ⊔ ℓ₀)
-UniqueHomomorphisms C = ∀ {a b} → (f : Hom C a b) → (g : Hom C a b) → f ≡ g
+UniqueIdHomomorphisms : ∀ {ℓ₀ ℓ₁} → (C : Category {ℓ₀} {ℓ₁}) → Set (ℓ₁ ⊔ ℓ₀)
+UniqueIdHomomorphisms C = ∀ {a} → (f : Hom C a a) → f ≡ id C {a}
 
 SupermonadC→Supermonad : {ℓ₀ ℓ₁ : Level} {C : Category {ℓ₀} {ℓ₁}} {F : ∀ {a b} → Hom C a b → Type → Type}
-                       → UniqueHomomorphisms C
+                       → UniqueIdHomomorphisms C
                        → SupermonadC {ℓ₀} {ℓ₁} {ℓ₀ ⊔ ℓ₁} C F → Supermonad (∃ λ a → ∃ λ b → Hom C a b)
 SupermonadC→Supermonad {ℓ₀} {ℓ₁} {C = C} {F = F} uniqueHom smc = record
   { ⟨_⟩ = ⟨_⟩
@@ -139,7 +124,7 @@ SupermonadC→Supermonad {ℓ₀} {ℓ₁} {C = C} {F = F} uniqueHom smc = recor
     
     return : {α : Type} {M : HomIx} → Returns M α 
            → α → ⟨ M ⟩ α
-    return {M = a , .a , f} (lift refl) with uniqueHom f (id C {a})
+    return {M = a , .a , f} (lift refl) with uniqueHom f
     return {α} {a , .a , .(id C {a})} (lift refl) | refl = ret
     
     bindReplace : {α β : Type} {a b c : Obj C} 
@@ -166,7 +151,7 @@ SupermonadC→Supermonad {ℓ₀} {ℓ₁} {C = C} {F = F} uniqueHom smc = recor
                  → (b : Binds M N M α β) (r : Returns N β) 
                  → (k : α → β) (m : ⟨ M ⟩ α) 
                  → bind b m ((return r) ∘F k) ≡ fmap M fcts k m
-    lawMonadFmap {α} {β} (a , b , f) (.b , .b , g) fcts (lift (refl , refl , refl , g∘f≡f)) (lift refl) k m with uniqueHom g (id C {b})
+    lawMonadFmap {α} {β} (a , b , f) (.b , .b , g) fcts (lift (refl , refl , refl , g∘f≡f)) (lift refl) k m with uniqueHom g
     lawMonadFmap {α} {β} (a , b , f) (.b , .b , .(id C {b})) fcts (lift (refl , refl , refl , g∘f≡f)) (lift refl) k m | refl = begin
       bind (lift (refl , refl , refl , g∘f≡f)) m (ret ∘F k)
         ≡⟨ cong (λ X → bind (lift (refl , refl , refl , X)) m (ret ∘F k)) (proof-irrelevance g∘f≡f (catIdR C {f = f})) ⟩
@@ -191,7 +176,7 @@ SupermonadC→Supermonad {ℓ₀} {ℓ₁} {C = C} {F = F} uniqueHom smc = recor
     
     lawIdR : {α β : Type} → (M N : HomIx) → (b : Binds M N N α β) → (r : Returns M α) 
            → (a : α) (k : α → ⟨ N ⟩ β) → bind b (return r a) k ≡ k a
-    lawIdR {α} {β} (a , .a , f) (.a , b , g) (lift (refl , refl , refl , f∘g≡g)) (lift refl) x k with uniqueHom f (id C {a})
+    lawIdR {α} {β} (a , .a , f) (.a , b , g) (lift (refl , refl , refl , f∘g≡g)) (lift refl) x k with uniqueHom f
     lawIdR {α} {β} (a , .a , .(id C {a})) (.a , b , g) (lift (refl , refl , refl , f∘g≡g)) (lift refl) x k | refl = begin
       bind (lift (refl , refl , refl , f∘g≡g)) (ret x) k
         ≡⟨ bindReplace f∘g≡g (lift (refl , refl , refl , f∘g≡g)) (ret x) k ⟩
@@ -206,7 +191,7 @@ SupermonadC→Supermonad {ℓ₀} {ℓ₁} {C = C} {F = F} uniqueHom smc = recor
            → (b : Binds M N M α α) → (r : Returns N α)
            → (m : ⟨ M ⟩ α) 
            → bind b m (return r) ≡ m
-    lawIdL {α} (a , b , f) (.b , .b , g) (lift (refl , refl , refl , g∘f≡f)) (lift refl) m with uniqueHom g (id C {b})
+    lawIdL {α} (a , b , f) (.b , .b , g) (lift (refl , refl , refl , g∘f≡f)) (lift refl) m with uniqueHom g
     lawIdL {α} (a , b , f) (.b , .b , .(id C {b})) (lift (refl , refl , refl , g∘f≡f)) (lift refl) m | refl = begin
       bind (lift (refl , refl , refl , g∘f≡f)) m ret 
         ≡⟨ bindReplace g∘f≡f (lift (refl , refl , refl , g∘f≡f)) m ret ⟩
@@ -224,7 +209,7 @@ SupermonadC→Supermonad {ℓ₀} {ℓ₁} {C = C} {F = F} uniqueHom smc = recor
              → bind b₁ m (λ x → bind b₂ (f x) g) ≡ bind b₃ (bind b₄ m f) g
     lawAssoc {α} {β} {γ} (a1 , .a1 , f1) (.a1 , b2 , .(f5 ∘ f4)) (.a1 , .b2 , .((f5 ∘ f4) ∘ f1)) (.a1 , .b2 , f4) (.b2 , .b2 , f5) 
              (lift (refl , refl , refl , refl)) (lift (refl , refl , refl , refl)) (lift (refl , refl , refl , f4∘f1≡f5∘f4)) (lift (refl , refl , refl , f5∘f5∘f4≡f5∘f4∘f1))
-             m k l with uniqueHom f1 (id C {a = a1}) | uniqueHom f5 (id C {a = b2})
+             m k l with uniqueHom f1 | uniqueHom f5
     lawAssoc {α} {β} {γ} (a1 , .a1 , .(id C {a = a1})) (.a1 , b2 , .(id C {a = b2} ∘ f4)) (.a1 , .b2 , .((id C {a = b2} ∘ f4) ∘ id C {a = a1})) (.a1 , .b2 , f4) (.b2 , .b2 , .(id C {a = b2})) 
              (lift (refl , refl , refl , refl)) (lift (refl , refl , refl , refl)) (lift (refl , refl , refl , f5∘f5∘f4≡f5∘f4∘f1)) (lift (refl , refl , refl , f4∘f1≡f5∘f4))
              m k l | refl | refl = begin
