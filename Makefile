@@ -87,6 +87,8 @@ only-supermonads:
 	$(AGDA_TC) Supermonad/EffectMonad.agda
 	$(AGDA_TC) Supermonad/ConstrainedMonad.agda
 	# $(AGDA_TC) Supermonad/Polymonad.agda
+	$(AGDA_TC) Supermonad/DefinitionWithCategory.agda
+	$(AGDA_TC) Supermonad/DefinitionWithCategory/SubsetOfDefinition.agda
 
 only-cat-theory:
 	$(AGDA_TC) Theory/Triple.agda
