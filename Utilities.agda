@@ -14,6 +14,19 @@ open import Relation.Binary.PropositionalEquality -- ≡
 open ≡-Reasoning
 
 --------------------------------------------------------------------------------
+-- Formalization of Subsets
+--------------------------------------------------------------------------------
+
+-- Formalization of a subsets for a given set.
+SubsetOf : ∀ {ℓ} → Set ℓ → Set (lsuc ℓ)
+SubsetOf {ℓ} X = X → Set ℓ
+
+-- An element is in the subset, if the subset predicate is true.
+_∈_ : ∀ {ℓ} {X : Set ℓ} → (x : X) → (S : SubsetOf X) → Set ℓ
+x ∈ S = S x
+
+
+--------------------------------------------------------------------------------
 -- Utilities
 --------------------------------------------------------------------------------
 
