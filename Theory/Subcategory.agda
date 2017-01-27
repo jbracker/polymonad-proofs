@@ -44,8 +44,8 @@ Subcategory→Category {ℓ₀} {ℓ₁} {C} S =  record
   ; _∘_ = λ {a} {b} {c} → _∘S_ {a} {b} {c}
   ; id = λ {a} → idS {a}
   ; assoc = λ {a} {b} {c} {d} → assocS {a} {b} {c} {d}
-  ; idL = {!!}
-  ; idR = {!!}
+  ; idL = λ {a} {b} → idLS {a} {b}
+  ; idR = λ {a} {b} → idRS {a} {b}
   } where
     _∘C_ = _∘_ S
     
@@ -61,6 +61,28 @@ Subcategory→Category {ℓ₀} {ℓ₁} {C} S =  record
     idS : {a : ObjS} → HomS a a
     idS {a , a∈S} = id C {a} , closedId S a∈S
     
+    helper : {a b : Obj C} → (f g : Hom C a b)
+           → (f∈S : f ∈ SubHom S a b) → (g∈S : g ∈ SubHom S a b)
+           → f ≡ g → (f , f∈S) ≡ (g , g∈S)
+    helper f .f f∈S g∈S refl with f∈S | g∈S
+    ... | p | q = {!!}
+    
     assocS : {a b c d : ObjS} {f : HomS a b} {g : HomS b c} {h : HomS c d}
-           → h ∘S (g ∘S f) ≡ (h ∘S g) ∘S f
-    assocS {a , a∈S} {b , b∈S} {c , c∈S} {d , d∈S} {f , f∈S} {g , g∈S} {h , h∈S} = {!!}
+           → _∘S_ {a} {c} {d} h (_∘S_ {a} {b} {c} g f) ≡ _∘S_ {a} {b} {d} (_∘S_ {b} {c} {d} h g) f
+    assocS {a , a∈S} {b , b∈S} {c , c∈S} {d , d∈S} {f , f∈S} {g , g∈S} {h , h∈S} 
+      = helper (h ∘C (g ∘C f)) ((h ∘C g) ∘C f) 
+               (closedComp S (g ∘C f) h (closedComp S f g f∈S g∈S) h∈S) 
+               (closedComp S f (h ∘C g) f∈S (closedComp S g h g∈S h∈S))
+               (assoc C {f = f} {g} {h})
+    
+    idLS : {a b : ObjS} {f : HomS a b} → _∘S_ {a} {a} {b} f (idS {a}) ≡ f
+    idLS {a , a∈S} {b , b∈S} {f , f∈S} 
+      = helper (f ∘C id C {a}) f 
+               (closedComp S (id C {a}) f (closedId S a∈S) f∈S) 
+               f∈S (idL C)
+    
+    idRS : {a b : ObjS} {f : HomS a b} → _∘S_ {a} {b} {b} (idS {b}) f ≡ f
+    idRS {a , a∈S} {b , b∈S} {f , f∈S} 
+      = helper (id C {b} ∘C f) f 
+               (closedComp S f (id C {b}) f∈S (closedId S b∈S)) 
+               f∈S (idR C)
