@@ -8,11 +8,13 @@ open import Data.Product
 open import Data.Sum
 open import Data.Unit
 open import Data.Empty
+open import Data.Nat hiding ( _⊔_ )
 open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning
 
 -- Local
-open import Utilities
+open import Utilities hiding ( _∈_ )
+open import ProofIrrelevance
 open import Theory.Category
 
 
@@ -23,16 +25,16 @@ record Subcategory {ℓ₀ ℓ₁ : Level} (C : Category {ℓ₀} {ℓ₁}) : Se
   _∘_ = comp C
   
   field
-    SubObj : SubsetOf (Obj C)
-    SubHom : (a : Obj C) → (b : Obj C) → SubsetOf (Hom C a b)
+    SubObj : PropSubsetOf (Obj C)
+    SubHom : (a : Obj C) → (b : Obj C) → PropSubsetOf (Hom C a b)
     
-    closedMorphs : {a b : Obj C} → (f : Hom C a b) 
-                 → f ∈ SubHom a b → (a ∈ SubObj) × (b ∈ SubObj)
+    closedMorphs : {a b : Obj C} → (f : Hom C a b)
+                 → (proj₁ $ SubHom a b f) → (proj₁ $ SubObj a) × (proj₁ $ SubObj b)
     
-    closedComp : {a b c : Obj C} → (f : Hom C a b) → (g : Hom C b c)
-                → (f ∈ SubHom a b) → (g ∈ SubHom b c) → ((g ∘ f) ∈ SubHom a c)
+    closedComp : {a b c : Obj C} → (f : Hom C a b) → (g : Hom C b c) 
+               → (proj₁ $ SubHom a b f) → (proj₁ $ SubHom b c g) → (proj₁ $ SubHom a c (g ∘ f))
     
-    closedId : {a : Obj C} → (a ∈ SubObj) → (id C ∈ SubHom a a)
+    closedId : {a : Obj C} → (proj₁ $ SubObj a) → (proj₁ $ SubHom a a (id C))
 
 open Subcategory
 
@@ -64,8 +66,7 @@ Subcategory→Category {ℓ₀} {ℓ₁} {C} S =  record
     helper : {a b : Obj C} → (f g : Hom C a b)
            → (f∈S : f ∈ SubHom S a b) → (g∈S : g ∈ SubHom S a b)
            → f ≡ g → (f , f∈S) ≡ (g , g∈S)
-    helper f .f f∈S g∈S refl with f∈S | g∈S
-    ... | p | q = {!!}
+    helper {a} {b} f .f f∈S g∈S refl = cong (λ X → (f , X)) (subset-proof-irr (SubHom S a b) refl f∈S g∈S)
     
     assocS : {a b c d : ObjS} {f : HomS a b} {g : HomS b c} {h : HomS c d}
            → _∘S_ {a} {c} {d} h (_∘S_ {a} {b} {c} g f) ≡ _∘S_ {a} {b} {d} (_∘S_ {b} {c} {d} h g) f
@@ -86,3 +87,16 @@ Subcategory→Category {ℓ₀} {ℓ₁} {C} S =  record
       = helper (id C {b} ∘C f) f 
                (closedComp S f (id C {b}) f∈S (closedId S b∈S)) 
                f∈S (idR C)
+
+fullSubcategory : {ℓ₀ ℓ₁ : Level} → (C : Category {ℓ₀} {ℓ₁}) → Subcategory C
+fullSubcategory C = record 
+  { SubObj = λ a → Lift ⊤ , ⊤-pi
+  ; SubHom = λ a b f → Lift ⊤ , ⊤-pi
+  ; closedMorphs = λ f f∈S → lift tt , lift tt
+  ; closedComp = λ f g f∈S g∈S → lift tt
+  ; closedId = λ a∈S → lift tt
+  } where
+    ⊤-pi : {ℓ : Level} → (x y : Lift {ℓ = ℓ} ⊤) → x ≡ y
+    ⊤-pi (lift tt) (lift tt) = refl
+    
+    
