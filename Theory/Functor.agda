@@ -49,6 +49,17 @@ ContravariantFunctor : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} (C : Category {
 ContravariantFunctor C D = Functor (C op) D
 
 -------------------------------------------------------------------------------
+-- Definition of Injective Functor 
+-------------------------------------------------------------------------------
+
+-- The given functor is considered to be injective iff its object and 
+-- homomorphism mapping are injective respectivly.
+IsInjectiveFunctor : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} {C : Category {ℓC₀} {ℓC₁}} 
+                   → {D : Category {ℓD₀} {ℓD₁}} 
+                   → Functor C D → Set (ℓD₁ ⊔ ℓD₀ ⊔ ℓC₁ ⊔ ℓC₀)
+IsInjectiveFunctor {C = C} {D} F = IsInjective (Functor.F₀ F) × ((x y : Category.Obj C) → IsInjective (Functor.F₁ F {x} {y}))
+
+-------------------------------------------------------------------------------
 -- The Identity Functor
 -------------------------------------------------------------------------------
 idFunctor : {ℓ₀ ℓ₁ : Level} (C : Category {ℓ₀} {ℓ₁}) → Functor C C
