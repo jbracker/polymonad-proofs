@@ -14,6 +14,7 @@ open import Theory.Subcategory
 open import Theory.Functor
 
 -- Define the subcategory of D in terms of C's inclusion into D through a functor.
+-- Every injective functor defines a subcategory of its target category.
 InclusionFunctor→Subcategory : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓC₀ ⊔ ℓD₀} {ℓC₀ ⊔ ℓC₁ ⊔ ℓD₀ ⊔ ℓD₁}}
                              → (IncF : Functor C D)
                              → IsInjective (Functor.F₀ IncF)
@@ -66,6 +67,7 @@ InclusionFunctor→Subcategory {C = C} {D = D} IncF injF₀ injF₁ = record
              → (α ∈ SubObj) → (Category.id D ∈ SubHom α α)
     closedId {._} (x , refl) = (x , refl) , (x , refl) , Category.id C , Functor.id IncF
 
+-- Generalize such that any target category can be used to define a subcategory of its lifting.
 InclusionFunctor→LiftSubcategory : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}}
                                  → (IncF : Functor C D)
                                  → IsInjective (Functor.F₀ IncF)
