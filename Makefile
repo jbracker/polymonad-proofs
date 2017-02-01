@@ -96,6 +96,7 @@ only-cat-theory:
 	$(AGDA_TC) Theory/Category.agda
 	$(AGDA_TC) Theory/Subcategory.agda
 	$(AGDA_TC) Theory/Functor.agda
+	$(AGDA_TC) Theory/InclusionFunctor.agda
 	$(AGDA_TC) Theory/NaturalTransformation.agda
 	$(AGDA_TC) Theory/NaturalTransformation/Whisker.agda
 	$(AGDA_TC) Theory/DinaturalTransformation.agda
