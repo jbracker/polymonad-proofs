@@ -6,6 +6,7 @@ open import Data.Product
 open import Data.Sum
 open import Data.Unit
 open import Data.Empty
+open import Data.List
 open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning
 
@@ -31,7 +32,7 @@ monadList = record
     _>>=_ = bindList
     
     return : ∀ {α : Type} → α → List α
-    return x = x ∷ Nil
+    return x = x ∷ []
     
     lawIdR : ∀ {α β : Type} 
            → (a : α) → (k : α → List β) 
@@ -39,7 +40,7 @@ monadList = record
     lawIdR a k = begin
       return a >>= k
         ≡⟨ refl ⟩
-      k a ++ Nil
+      k a ++ []
         ≡⟨ xs++Nil≡xs (k a) ⟩
       k a ∎
     
@@ -47,7 +48,7 @@ monadList = record
            → (m : List α)
            → m >>= return ≡ m
     lawIdL (x ∷ xs) = cong (_∷_ x) (lawIdL xs)
-    lawIdL Nil = refl
+    lawIdL [] = refl
     
     lawAssoc : ∀ {α β γ : Type} 
              → (m : List α) → (k : α → List β) → (h : β → List γ) 
@@ -62,5 +63,5 @@ monadList = record
       (k x ++ (xs >>= k)) >>= h
         ≡⟨ refl ⟩
       ((x ∷ xs) >>= k) >>= h ∎
-    lawAssoc Nil k h = refl
+    lawAssoc [] k h = refl
     
