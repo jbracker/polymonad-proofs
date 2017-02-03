@@ -2,11 +2,13 @@
 module Haskell where
 
 -- StdLib
+open import Level renaming ( zero to lzero)
 open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning
 
 -- Local
 open import Utilities
+open import Theory.Examples.Category
 
 --------------------------------------------------------------------------------
 -- Type Synonyms
@@ -23,6 +25,12 @@ TyCon = Type → Type
 -- Short-hand notation for bind-operation type signatures as used in the paper.
 [_,_]▷_ : (M N P : TyCon) → Set₁
 [ M , N ]▷ P = (∀ {α β : Type} → (M α → (α → N β) → P β))
+
+--------------------------------------------------------------------------------
+-- What we assume to be the category of Haskell
+--------------------------------------------------------------------------------
+
+Hask = setCategory {lzero}
 
 --------------------------------------------------------------------------------
 -- Some general equality laws
