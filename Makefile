@@ -96,7 +96,6 @@ only-cat-theory:
 	$(AGDA_TC) Theory/Category.agda
 	$(AGDA_TC) Theory/Subcategory.agda
 	$(AGDA_TC) Theory/Functor.agda
-	$(AGDA_TC) Theory/InclusionFunctor.agda
 	$(AGDA_TC) Theory/ConstrainedFunctor.agda
 	$(AGDA_TC) Theory/NaturalTransformation.agda
 	$(AGDA_TC) Theory/NaturalTransformation/Whisker.agda
@@ -110,8 +109,12 @@ only-cat-theory:
 	$(AGDA_TC) Theory/TwoCategory.agda
 	$(AGDA_TC) Theory/TwoFunctor.agda
 	$(AGDA_TC) Theory/Examples/Category.agda
+	$(AGDA_TC) Theory/Examples/Subcategory.agda
 	$(AGDA_TC) Theory/Examples/Functor.agda
 	$(AGDA_TC) Theory/Examples/TwoCategory.agda
+	# Haskell Examples
+	# $(AGDA_TC) Theory/Examples/Haskell/FunctorSet.agda
+	$(AGDA_TC) Theory/Examples/Haskell/FunctorEndomorphisms.agda
 	# Functor (Categorical) <===> Functor (Haskell)
 	$(AGDA_TC) Theory/Examples/FunctorToHaskellFunctor.agda
 	$(AGDA_TC) Theory/Examples/HaskellFunctorToFunctor.agda
