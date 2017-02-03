@@ -4,16 +4,15 @@ module Theory.Examples.Haskell.FunctorSet where
 
 open import Function renaming ( _∘_ to _∘F_ ; id to idF )
 open import Level renaming ( suc to lsuc ; zero to lzero)
-open import Data.Unit hiding ( _≤_ )
+open import Data.Unit hiding ( _≤_ ; _≟_ ; total )
 open import Data.Empty
-open import Data.Bool
 open import Data.List
-open import Data.Nat renaming ( _>_ to _>ℕ_ ; _<_ to _<ℕ_ ; _≤_ to _≤ℕ_ ; _≥_ to _≥ℕ_ )
-open import Data.Product
-open import Data.Sum
+open import Data.Nat renaming ( _>_ to _>ℕ_ ; _<_ to _<ℕ_ ; _≤_ to _≤ℕ_ ; _≥_ to _≥ℕ_ ) hiding ( _⊔_ ; _≟_ )
+open import Data.Product hiding ( map )
+open import Data.Sum hiding ( map )
 open import Relation.Nullary
-open import Relation.Binary using ( IsDecEquivalence ; IsEquivalence )
-open import Relation.Binary.PropositionalEquality renaming ( refl to prefl ; sym to psym ; trans to ptrans )
+open import Relation.Binary using ( IsDecEquivalence ; IsEquivalence ; IsDecTotalOrder )
+open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning
 
 
@@ -29,263 +28,154 @@ open import ProofIrrelevance
 open import Theory.Category
 open import Theory.Subcategory
 open import Theory.Functor
+open import Theory.ConstrainedFunctor
 open import Theory.Examples.Subcategory
 open import Theory.Examples.Category
 open import Theory.Examples.HaskellFunctorToFunctor
 
-record EqDict (A : Type) : Type where
+-------------------------------------------------------------------------------
+-- Definition of Eq and Ord instances
+-------------------------------------------------------------------------------
+
+-- An 'Eq' instance in Haskell describes a decidable equivalence 
+-- relation for its type.
+record EqInstance {ℓ : Level} (A : Type) : Set (lsuc ℓ) where
   field
-    _==_ : A → A → Bool
-    eqRefl : (a : A) → (a == a) ≡ true
-    eqSym  : (a b : A) → (a == b) ≡ true → (b == a) ≡ true
-    eqTrans : (a b c : A) → (a == b) ≡ true → (b == c) ≡ true → (a == c) ≡ true
-    eqDec : (a b : A) → Dec ((a == b) ≡ true)
-  
-  _≠_ : A → A → Bool
-  _≠_ a b = not $ a == b
+    _==_ : A → A → Set ℓ
+    isDecEquivalence : IsDecEquivalence {A = A} _==_
 
-record OrdDict (A : Type) (eq : EqDict A) : Type where
-  _==_ = EqDict._==_ eq
-  _≠_ = EqDict._≠_ eq
+  decEq = IsDecEquivalence._≟_ isDecEquivalence
+    
+  open Relation.Binary.IsDecEquivalence isDecEquivalence public
+
+-- An 'Ord' instance in Haskell describes a decidable total ordering
+-- relation for its type.
+record OrdInstance {ℓEq ℓOrd : Level} (A : Type) : Set (lsuc ℓEq ⊔ lsuc ℓOrd) where
   field
-    _≤_ : A → A → Bool
-    ordRefl : (a : A) → (a ≤ a) ≡ true
-    ordTrans : (a b c : A) → (a ≤ b) ≡ true → (b ≤ c) ≡ true → (a ≤ c) ≡ true
-    ordAntiSym : (a b : A) → (a ≤ b) ≡ true → (b ≤ a) ≡ true → (a == b) ≡ true
-    ordTotal : (a b : A) → ((a ≤ b) ≡ true) ⊎ ((b ≤ a) ≡ true)
-    ordDec : (a b : A) → Dec ((a ≤ b) ≡ true)
-
-  _>_ : A → A → Bool
-  _>_ a b = not $ a ≤ b
-
-  _≥_ : A → A → Bool
-  _≥_ a b = (a > b) ∨ (a == b)
+    _≤_ : A → A → Set ℓOrd
+    eqInstance : EqInstance {ℓ = ℓEq} A
   
-  _<_ : A → A → Bool
-  _<_ a b = (a ≤ b) ∧ (a ≠ b)
+  open EqInstance eqInstance public using (_==_ ; decEq)
+  
+  field
+    isDecTotalOrder : IsDecTotalOrder {A = A} _==_ _≤_
+  
+  dec-ord = IsDecTotalOrder._≤?_ isDecTotalOrder
+  
+  open Relation.Binary.IsDecTotalOrder isDecTotalOrder public
+  
+  excluded-middle-ord : {x y : A} → ¬ (x ≤ y) → (y ≤ x)
+  excluded-middle-ord {x} {y} ¬x≤y with total x y
+  excluded-middle-ord {x} {y} ¬x≤y | inj₁ x≤y = ⊥-elim (¬x≤y x≤y)
+  excluded-middle-ord {x} {y} ¬x≤y | inj₂ y≤x = y≤x
 
--- Equality up to reordering or equal elements
-data _=[_]=_ {A : Type} (x : A) (EqA : EqDict A) (y : A) : Type where
-  refl : EqDict._==_ EqA x y ≡ true → x =[ EqA ]= y
+-------------------------------------------------------------------------------
+-- Definition of predicates on lists
+-------------------------------------------------------------------------------
 
-HaskEquivalence : {A : Type} → (EqA : EqDict A) → IsDecEquivalence (λ a b → a =[ EqA ]= b)
-HaskEquivalence {A} EqA = record 
-  { isEquivalence = record 
-    { refl = hrefl 
-    ; sym = hsym
-    ; trans = htrans
-    }
-  ; _≟_ = dec
+IsSortedList : {ℓEq : Level} {A : Type} → OrdInstance {ℓEq} A → List A → Set lzero
+IsSortedList OrdA [] = ⊤
+IsSortedList OrdA (x ∷ []) = ⊤
+IsSortedList OrdA (x ∷ y ∷ xs) = (x ≤ y) × IsSortedList OrdA (y ∷ xs)
+  where _≤_ = OrdInstance._≤_ OrdA
+
+∀List : {ℓ : Level} {A : Type} → (A → Set ℓ) → List A → Set ℓ
+∀List p [] = Lift ⊤
+∀List p (x ∷ xs) = p x × ∀List p xs
+
+IsNoDupList : {ℓEq ℓOrd : Level} {A : Type} → OrdInstance {ℓEq} {ℓOrd} A → List A → Set (ℓEq ⊔ ℓOrd)
+IsNoDupList OrdA [] = Lift ⊤
+IsNoDupList OrdA (x ∷ xs) = ∀List (λ y → ¬ (x == y)) xs × IsNoDupList OrdA xs
+  where _==_ = OrdInstance._==_ OrdA
+
+law-IsSortedList-forget-elem : {ℓEq : Level} {A : Type} 
+                             → (OrdA : OrdInstance {ℓEq} A) → (x : A) → (xs : List A) 
+                             → IsSortedList OrdA (x ∷ xs) → IsSortedList OrdA xs
+law-IsSortedList-forget-elem OrdA x [] tt = tt
+law-IsSortedList-forget-elem OrdA x (y ∷ xs) (x≤y , sorted) = sorted
+
+-------------------------------------------------------------------------------
+-- Definition of ordered sets in form of lists
+-------------------------------------------------------------------------------
+
+data ListSet (A : Σ Type OrdInstance) : Type where
+  listSet : (xs : List (proj₁ A)) → IsSortedList (proj₂ A) xs → IsNoDupList (proj₂ A) xs  → ListSet A
+
+insert : {A : Type} → (OrdA : OrdInstance {lzero} A) → A → Σ (List A) (IsSortedList OrdA) → Σ (List A) (IsSortedList OrdA)
+insert OrdA x ([] , tt) = (x ∷ []) , tt
+insert OrdA x (y ∷ ys , sorted) with OrdInstance.dec-ord OrdA x y
+insert OrdA x (y ∷ ys , sorted) | yes x≤y = (x ∷ y ∷ ys) , (x≤y , sorted)
+insert OrdA x (y ∷ ys , sorted) | no ¬x≤y = (y ∷ {!!}) , {!!} -- proj₂ insertRes 
+  where insertRes = insert OrdA x (ys , law-IsSortedList-forget-elem OrdA y ys sorted)
+
+sort : {A : Type} → (OrdA : OrdInstance A) → List A → Σ (List A) (IsSortedList OrdA)
+sort OrdA [] = [] , tt
+sort OrdA (x ∷ xs) = insert OrdA x (sort OrdA xs)
+
+nub : {A : Type} → (OrdA : OrdInstance {lzero} A) → Σ (List A) (IsSortedList OrdA) → Σ (List A) (λ xs → IsSortedList OrdA xs × IsNoDupList OrdA xs)
+nub OrdA ([] , sorted) = [] , tt , lift tt
+nub OrdA (x ∷ xs , sorted) = {!!}
+
+mkListSet : {α : Σ Type OrdInstance} → List (proj₁ α) → ListSet α
+mkListSet {α , OrdA} xs = listSet (proj₁ sortRes) (proj₂ sortRes) {!!}
+  where sortRes = sort OrdA xs
+
+setmap : {α β : Σ Type OrdInstance} → (proj₁ α → proj₁ β) → ListSet α → ListSet β
+setmap {α , OrdA} {β , OrdB} f (listSet xs sorted noDup) = mkListSet (map f xs)
+
+FunctorListSet : ConstrainedFunctor
+FunctorListSet = record
+  { ObjCts = ObjCts
+  ; HomCts = HomCts
+  ; _∘Ct_ = λ {α} {β} {γ} {f} {g} {α'} {β'} {γ'} → _∘Ct_ {α} {β} {γ} {f} {g} {α'} {β'} {γ'}
+  ; ctId = λ {α} {α'} → ctId {α} {α'}
+  ; ctAssoc = λ {α} {β} {γ} {δ} {α'} {β'} {γ'} {δ'} {f} {g} {h} → ctAssoc {α} {β} {γ} {δ} {α'} {β'} {γ'} {δ'} {f} {g} {h}
+  ; ctIdR = λ {α} {β} {α'} {β'} {f} → ctIdR {α} {β} {α'} {β'} {f}
+  ; ctIdL = λ {α} {β} {α'} {β'} {f} → ctIdL {α} {β} {α'} {β'} {f}
+  ; F = F
+  ; ctMap = {!!}
+  ; ctFuncId = {!!}
+  ; ctFuncComp = {!!}
+  ; ctObjProofIrr = {!!}
+  ; ctHomProofIrr = {!!}
   } where
-    dec : (a b : A) → Dec (a =[ EqA ]= b)
-    dec a b with EqDict.eqDec EqA a b
-    dec a b | yes p = yes (refl p)
-    dec a b | no ¬p = no q
-      where q : ¬ (a =[ EqA ]= b)
-            q (refl p) = ¬p p
+    ObjCts : Type → Set (lsuc lzero)
+    ObjCts = OrdInstance
     
-    hrefl : {a : A} → (a =[ EqA ]= a)
-    hrefl {a} = refl $ EqDict.eqRefl EqA a
+    HomCts : {α β : Type} → ObjCts α → ObjCts β → (α → β) → Set lzero
+    HomCts OrdA OrdB f = ⊤
     
-    hsym : {a b : A} → (a =[ EqA ]= b) → (b =[ EqA ]= a)
-    hsym {a} {b} (refl a==b) = refl $ EqDict.eqSym EqA a b a==b
-    
-    htrans : {a b c : A} → (a =[ EqA ]= b) → (b =[ EqA ]= c) → (a =[ EqA ]= c)
-    htrans {a} {b} {c} (refl a==b) (refl b==c) = refl $ EqDict.eqTrans EqA a b c a==b b==c
-
-
-split-∧ : {a b : Bool} → a ∧ b ≡ true → a ≡ true × b ≡ true
-split-∧ {true} {true} a∧b = prefl , prefl
-split-∧ {true} {false} ()
-split-∧ {false} {true} ()
-split-∧ {false} {false} ()
-
-EqList : {A : Type} → EqDict A → EqDict (List A)
-EqList {A} EqA = record
-  { _==_ = _==_ 
-  ; eqRefl = eqRefl 
-  ; eqSym = eqSym 
-  ; eqTrans = eqTrans 
-  ; eqDec = eqDec
-  } where
-    _=A=_ = EqDict._==_ EqA
-    
-    _==_ : List A → List A → Bool
-    [] == [] = true
-    [] == (x ∷ ys) = false
-    (x ∷ xs) == [] = false
-    (x ∷ xs) == (y ∷ ys) = x =A= y ∧ xs == ys
-    
-    eqRefl : (a : List A) → a == a ≡ true
-    eqRefl [] = prefl
-    eqRefl (x ∷ xs) with EqDict.eqRefl EqA x | eqRefl xs
-    eqRefl (x ∷ xs) | x==x | xs==xs = cong₂ _∧_ x==x xs==xs
-    
-    eqSym : (a b : List A) → a == b ≡ true → b == a ≡ true
-    eqSym [] [] xs==ys = prefl
-    eqSym [] (x ∷ ys) ()
-    eqSym (x ∷ xs) [] ()
-    eqSym (x ∷ xs) (y ∷ ys) xs==ys 
-      = cong₂ _∧_ (EqDict.eqSym EqA x y (proj₁ (split-∧ xs==ys))) 
-                  (eqSym xs ys (proj₂ (split-∧ {a = x =A= y} xs==ys)))
-
-    eqTrans : (a b c : List A) → a == b ≡ true → b == c ≡ true → a == c ≡ true
-    eqTrans [] [] [] xs==ys ys==zs = prefl
-    eqTrans [] [] (z ∷ zs) xs==ys ()
-    eqTrans [] (y ∷ ys) [] () ()
-    eqTrans [] (y ∷ ys) (z ∷ zs) () ys==zs
-    eqTrans (x ∷ xs) [] [] () ys==zs
-    eqTrans (x ∷ xs) [] (z ∷ zs) () ()
-    eqTrans (x ∷ xs) (y ∷ ys) [] xs==ys ()
-    eqTrans (x ∷ xs) (y ∷ ys) (z ∷ zs) xs==ys ys==zs 
-      = cong₂ _∧_ (EqDict.eqTrans EqA x y z (proj₁ (split-∧ xs==ys)) (proj₁ (split-∧ ys==zs))) 
-                  (eqTrans xs ys zs (proj₂ (split-∧ {a = x =A= y} xs==ys)) (proj₂ (split-∧ {a = y =A= z} ys==zs)))
-    
-    eqDec : (a b : List A) → Dec (a == b ≡ true)
-    eqDec [] [] = yes prefl
-    eqDec [] (y ∷ ys) = no (λ ())
-    eqDec (x ∷ xs) [] = no (λ ())
-    eqDec (x ∷ xs) (y ∷ ys) with EqDict.eqDec EqA x y | eqDec xs ys
-    eqDec (x ∷ xs) (y ∷ ys) | yes p | yes q = yes (cong₂ _∧_ p q)
-    eqDec (x ∷ xs) (y ∷ ys) | yes p | no ¬q = no (λ xs==ys → ¬q (proj₂ (split-∧ {a = x =A= y} xs==ys)))
-    eqDec (x ∷ xs) (y ∷ ys) | no ¬p | yes q = no (λ x==y → ¬p (proj₁ (split-∧ x==y)))
-    eqDec (x ∷ xs) (y ∷ ys) | no ¬p | no ¬q = no (λ x==y → ¬p (proj₁ (split-∧ x==y)))
-
-Eqℕ : EqDict ℕ
-Eqℕ = record 
-  { _==_ = _==_ 
-  ; eqRefl = eqRefl
-  ; eqSym = eqSym
-  ; eqTrans = eqTrans
-  ; eqDec = eqDec
-  } where
-    _==_ : ℕ → ℕ → Bool
-    zero == zero = true
-    zero == suc m = false
-    suc n == zero = false
-    suc n == suc m = n == m
-    
-    eqRefl : (a : ℕ) → a == a ≡ true
-    eqRefl zero = prefl
-    eqRefl (suc a) = eqRefl a
-
-    eqSym : (a b : ℕ) → (a == b) ≡ true → (b == a) ≡ true
-    eqSym zero zero prefl = prefl
-    eqSym zero (suc b) ()
-    eqSym (suc a) zero ()
-    eqSym (suc a) (suc b) = eqSym a b
-    
-    eqTrans : (a b c : ℕ) → (a == b) ≡ true → (b == c) ≡ true → (a == c) ≡ true
-    eqTrans zero zero zero prefl prefl = prefl
-    eqTrans zero zero (suc c) prefl ()
-    eqTrans zero (suc b) c ()
-    eqTrans (suc a) zero c ()
-    eqTrans (suc a) (suc b) zero a==b ()
-    eqTrans (suc a) (suc b) (suc c) = eqTrans a b c
-    
-    eqDec : (a b : ℕ) → Dec (a == b ≡ true)
-    eqDec zero zero = yes prefl
-    eqDec zero (suc b) = no (λ ())
-    eqDec (suc a) zero = no (λ ())
-    eqDec (suc a) (suc b) = eqDec a b
-
-
-Ordℕ : OrdDict ℕ Eqℕ
-Ordℕ = record
-  { _≤_ = _≤_
-  ; ordRefl = ordRefl
-  ; ordTrans = ordTrans
-  ; ordAntiSym = ordAntiSym
-  ; ordTotal = ordTotal
-  ; ordDec = ordDec
-  } where
-    _==_ = EqDict._==_ Eqℕ
-    
-    _≤_ : ℕ → ℕ → Bool
-    zero  ≤ _     = true
-    suc a ≤ zero  = false
-    suc a ≤ suc b = a ≤ b
-
-    ordRefl : (a : ℕ) → a ≤ a ≡ true
-    ordRefl zero = prefl
-    ordRefl (suc a) = ordRefl a
-    
-    ordTrans : (a b c : ℕ) → (a ≤ b) ≡ true → (b ≤ c) ≡ true → (a ≤ c) ≡ true
-    ordTrans zero zero zero prefl prefl = prefl
-    ordTrans zero zero (suc c) prefl prefl = prefl
-    ordTrans zero (suc b) zero prefl ()
-    ordTrans zero (suc b) (suc c) prefl b≤c = prefl
-    ordTrans (suc a) zero zero ()
-    ordTrans (suc a) zero (suc c) ()
-    ordTrans (suc a) (suc b) zero a≤b ()
-    ordTrans (suc a) (suc b) (suc c) = ordTrans a b c
-    
-    ordAntiSym : (a b : ℕ) → (a ≤ b) ≡ true → (b ≤ a) ≡ true → (a == b) ≡ true
-    ordAntiSym zero zero prefl prefl = prefl
-    ordAntiSym zero (suc b) prefl ()
-    ordAntiSym (suc a) zero ()
-    ordAntiSym (suc a) (suc b) = ordAntiSym a b
-    
-    ordTotal : (a b : ℕ) → (a ≤ b) ≡ true ⊎ (b ≤ a) ≡ true
-    ordTotal zero zero = inj₁ prefl
-    ordTotal zero (suc b) = inj₁ prefl
-    ordTotal (suc a) zero = inj₂ prefl
-    ordTotal (suc a) (suc b) = ordTotal a b
-    
-    ordDec : (a b : ℕ) → Dec (a ≤ b ≡ true)
-    ordDec zero zero = yes prefl
-    ordDec zero (suc b) = yes prefl
-    ordDec (suc a) zero = no (λ ())
-    ordDec (suc a) (suc b) = ordDec a b
-
-
-
-HaskOrd : Category
-HaskOrd = record
-  { Obj = Obj
-  ; Hom = Hom
-  ; _∘_ = λ {a} {b} {c} → _∘_ {a} {b} {c}
-  ; id = λ {a} → id {a}
-  ; assoc = prefl
-  ; idL = prefl
-  ; idR = prefl
-  } where
     Obj : Set (lsuc lzero)
-    Obj = ∃ λ (A : Type) → ∃ λ (Eq : EqDict A) → OrdDict A Eq
+    Obj = Σ Type ObjCts
     
-    Hom : Obj → Obj → Set lzero
-    Hom (A , EqA , OrdA) (B , EqB , OrdB) = A → B
-
-    _∘_ : {a b c : Obj} → Hom b c → Hom a b → Hom a c
-    _∘_ f g = f ∘F g
+    F : Obj → Type
+    F (α , OrdA) = ListSet (α , OrdA)
     
-    id : {a : Obj} → Hom a a
-    id = idF
-
-HaskOrdInclusionFunctor : Functor HaskOrd Hask
-HaskOrdInclusionFunctor = record 
-  { F₀ = λ OrdA → proj₁ OrdA 
-  ; F₁ = idF
-  ; id = prefl
-  ; dist = prefl
-  }
-
-
-IsSorted : {A : Type} {EqA : EqDict A} → OrdDict A EqA → List A → Set lzero
-IsSorted OrdA [] = ⊤
-IsSorted OrdA (x ∷ []) = ⊤
-IsSorted OrdA (x ∷ y ∷ xs) = (x ≤ y ≡ true) × IsSorted OrdA (y ∷ xs)
-  where _≤_ = OrdDict._≤_ OrdA
-
-data ListSet (A : Category.Obj HaskOrd) : Type where
-  listSet : (xs : List (proj₁ A)) → IsSorted (proj₂ (proj₂ A)) xs → ListSet A
-
-
-insert : {A : Type} {Eq : EqDict A} → OrdDict A Eq → A → List A → List A
-insert ord x [] = x ∷ []
-insert ord x (y ∷ ys) with OrdDict.ordDec ord x y
-insert ord x (y ∷ ys) | yes x≤y = x ∷ y ∷ ys
-insert ord x (y ∷ ys) | no ¬x≤y = y ∷ insert ord x ys
+    _∘Ct_ : {α β γ : Type} {f : β → γ} {g : α → β} 
+        → {α' : ObjCts α} {β' : ObjCts β} {γ' : ObjCts γ}
+        → HomCts β' γ' f → HomCts α' β' g → HomCts α' γ' (f ∘F g)
+    _∘Ct_ tt tt = tt
+    
+    ctId : {α : Type} {α' : ObjCts α} → HomCts α' α' idF
+    ctId = tt
+    
+    ctAssoc : {α β γ δ : Type} 
+            → {α' : ObjCts α} {β' : ObjCts β} {γ' : ObjCts γ} {δ' : ObjCts δ}
+            → {f : α → β} {g : β → γ} {h : γ → δ}
+            → (f' : HomCts α' β' f) (g' : HomCts β' γ' g) (h' : HomCts γ' δ' h)
+            → _∘Ct_ {α} {γ} {δ} {h} {g ∘F f} {α'} {γ'} {δ'} h' (_∘Ct_ {α} {β} {γ} {g} {f} {α'} {β'} {γ'} g' f') 
+            ≡ _∘Ct_ {α} {β} {δ} {h ∘F g} {f} {α'} {β'} {δ'} (_∘Ct_ {β} {γ} {δ} {h} {g} {β'} {γ'} {δ'} h' g') f'
+    ctAssoc tt tt tt = refl
+    
+    ctIdR : {α β : Type} {α' : ObjCts α} {β' : ObjCts β} {f : α → β}
+          → (f' : HomCts α' β' f) → _∘Ct_ {α} {β} {β} {idF} {f} {α'} {β'} {β'} (ctId {β} {β'}) f' ≡ f'
+    ctIdR tt = refl
+    
+    ctIdL : {α β : Type} {α' : ObjCts α} {β' : ObjCts β} {f : α → β}
+          → (f' : HomCts α' β' f) → _∘Ct_ {α} {α} {β} {f} {idF} {α'} {α'} {β'} f' (ctId {α} {α'}) ≡ f'
+    ctIdL tt = refl
+    
+{-
 
 law-insert-length : {A : Type} {Eq : EqDict A} 
                   → (ord : OrdDict A Eq) → (x : A) → (xs : List A)
@@ -350,9 +240,6 @@ law-sorted-forget : {A : Type} {EqA : EqDict A}
 law-sorted-forget OrdA x [] tt = tt
 law-sorted-forget OrdA x (y ∷ xs) (_ , sorted) = sorted
 
-sort : {A : Type} {EqA : EqDict A} → OrdDict A EqA → List A → List A
-sort ord [] = []
-sort ord (x ∷ xs) = insert ord x (sort ord xs)
 
 law-sort-length : {A : Type} {Eq : EqDict A} 
                 → (OrdA : OrdDict A Eq) → (xs : List A)
@@ -387,12 +274,6 @@ law-sort-idempotence OrdA (x ∷ y ∷ xs) (x≤y , sorted) = begin
   insert OrdA x (y ∷ xs) 
     ≡⟨ law-insert-sorted OrdA x (y ∷ xs) (x≤y , sorted) ⟩ 
   x ∷ y ∷ xs ∎
-
-mkListSet : {A : Category.Obj HaskOrd} → List (proj₁ A) → ListSet A
-mkListSet {A} xs = listSet (sort (proj₂ (proj₂ A)) xs) (law-sort-sorted (proj₂ (proj₂ A)) xs)
-
-unListSet : {A : Category.Obj HaskOrd} → ListSet A → List (proj₁ A)
-unListSet (listSet xs _) = xs
 
 proof-irr-sorted : {A : Type} {EqA : EqDict A} → (OrdA : OrdDict A EqA) → (xs : List A) → (sa sb : IsSorted OrdA xs) → sa ≡ sb 
 proof-irr-sorted OrdA [] tt tt = prefl
@@ -541,3 +422,4 @@ listSetMap = Functor.F₁ ListSetFunctor
 -- law-sort-idempotence : {A : Type} {EqA : EqDict A} → (OrdA : OrdDict A EqA) → (xs : List A) → IsSorted OrdA xs → sort OrdA xs ≡ xs
 -- proof-irr-sorted : {A : Type} {EqA : EqDict A} → (OrdA : OrdDict A EqA) → (xs : List A) → (sa sb : IsSorted OrdA xs) → sa ≡ sb
  
+-}
