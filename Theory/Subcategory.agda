@@ -66,7 +66,7 @@ Subcategory→Category {ℓ₀} {ℓ₁} {C} S =  record
     helper : {a b : Obj C} → (f g : Hom C a b)
            → (f∈S : f ∈ SubHom S a b) → (g∈S : g ∈ SubHom S a b)
            → f ≡ g → (f , f∈S) ≡ (g , g∈S)
-    helper {a} {b} f .f f∈S g∈S refl = cong (λ X → (f , X)) (subset-proof-irr (SubHom S a b) refl f∈S g∈S)
+    helper {a} {b} f .f f∈S g∈S refl = cong (λ X → (f , X)) (proof-irr-PropSubset (SubHom S a b) f f∈S g∈S)
     
     assocS : {a b c d : ObjS} {f : HomS a b} {g : HomS b c} {h : HomS c d}
            → _∘S_ {a} {c} {d} h (_∘S_ {a} {b} {c} g f) ≡ _∘S_ {a} {b} {d} (_∘S_ {b} {c} {d} h g) f
