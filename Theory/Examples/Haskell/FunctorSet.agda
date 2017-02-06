@@ -7,11 +7,13 @@ open import Level renaming ( suc to lsuc ; zero to lzero)
 open import Data.Unit hiding ( _≤_ ; _≟_ ; total )
 open import Data.Empty
 open import Data.List
+open import Data.List.Any hiding ( map )
+open import Data.List.Properties using ( map-id )
 open import Data.Nat renaming ( _>_ to _>ℕ_ ; _<_ to _<ℕ_ ; _≤_ to _≤ℕ_ ; _≥_ to _≥ℕ_ ) hiding ( _⊔_ ; _≟_ )
 open import Data.Product hiding ( map )
 open import Data.Sum hiding ( map )
 open import Relation.Nullary
-open import Relation.Binary using ( IsDecEquivalence ; IsEquivalence ; IsDecTotalOrder )
+open import Relation.Binary using ( IsDecEquivalence ; IsEquivalence ; IsDecTotalOrder ; IsPreorder )
 open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning
 
@@ -44,9 +46,9 @@ record EqInstance {ℓ : Level} (A : Type) : Set (lsuc ℓ) where
     _==_ : A → A → Set ℓ
     isDecEquivalence : IsDecEquivalence {A = A} _==_
 
-  decEq = IsDecEquivalence._≟_ isDecEquivalence
+  dec-eq = IsDecEquivalence._≟_ isDecEquivalence
     
-  open Relation.Binary.IsDecEquivalence isDecEquivalence public
+  open Relation.Binary.IsDecEquivalence isDecEquivalence public renaming ( trans to trans-eq ; sym to sym-eq ; refl to refl-eq)
 
 -- An 'Ord' instance in Haskell describes a decidable total ordering
 -- relation for its type.
@@ -55,7 +57,7 @@ record OrdInstance {ℓEq ℓOrd : Level} (A : Type) : Set (lsuc ℓEq ⊔ lsuc 
     _≤_ : A → A → Set ℓOrd
     eqInstance : EqInstance {ℓ = ℓEq} A
   
-  open EqInstance eqInstance public using (_==_ ; decEq)
+  open EqInstance eqInstance public using (_==_ ; dec-eq ; trans-eq ; sym-eq ; refl-eq)
   
   field
     isDecTotalOrder : IsDecTotalOrder {A = A} _==_ _≤_
@@ -79,14 +81,12 @@ IsSortedList OrdA (x ∷ []) = ⊤
 IsSortedList OrdA (x ∷ y ∷ xs) = (x ≤ y) × IsSortedList OrdA (y ∷ xs)
   where _≤_ = OrdInstance._≤_ OrdA
 
-∀List : {ℓ : Level} {A : Type} → (A → Set ℓ) → List A → Set ℓ
-∀List p [] = Lift ⊤
-∀List p (x ∷ xs) = p x × ∀List p xs
+InList : {ℓEq ℓOrd : Level} {A : Type} → (OrdA : OrdInstance {ℓEq} {ℓOrd} A) → A → List A → Set ℓEq
+InList {ℓEq} {ℓOrd} {A} OrdA x xs = Any (OrdInstance._==_ OrdA x) xs
 
 IsNoDupList : {ℓEq ℓOrd : Level} {A : Type} → OrdInstance {ℓEq} {ℓOrd} A → List A → Set (ℓEq ⊔ ℓOrd)
 IsNoDupList OrdA [] = Lift ⊤
-IsNoDupList OrdA (x ∷ xs) = ∀List (λ y → ¬ (x == y)) xs × IsNoDupList OrdA xs
-  where _==_ = OrdInstance._==_ OrdA
+IsNoDupList OrdA (x ∷ xs) = ¬ (InList OrdA x xs) × IsNoDupList OrdA xs
 
 law-IsSortedList-forget-elem : {ℓEq : Level} {A : Type} 
                              → (OrdA : OrdInstance {ℓEq} A) → (x : A) → (xs : List A) 
@@ -99,29 +99,148 @@ law-IsSortedList-forget-elem OrdA x (y ∷ xs) (x≤y , sorted) = sorted
 -------------------------------------------------------------------------------
 
 data ListSet (A : Σ Type OrdInstance) : Type where
-  listSet : (xs : List (proj₁ A)) → IsSortedList (proj₂ A) xs → IsNoDupList (proj₂ A) xs  → ListSet A
+  listSet : (xs : List (proj₁ A)) → IsSortedList (proj₂ A) xs → IsNoDupList (proj₂ A) xs → ListSet A
 
-insert : {A : Type} → (OrdA : OrdInstance {lzero} A) → A → Σ (List A) (IsSortedList OrdA) → Σ (List A) (IsSortedList OrdA)
-insert OrdA x ([] , tt) = (x ∷ []) , tt
-insert OrdA x (y ∷ ys , sorted) with OrdInstance.dec-ord OrdA x y
-insert OrdA x (y ∷ ys , sorted) | yes x≤y = (x ∷ y ∷ ys) , (x≤y , sorted)
-insert OrdA x (y ∷ ys , sorted) | no ¬x≤y = (y ∷ {!!}) , {!!} -- proj₂ insertRes 
-  where insertRes = insert OrdA x (ys , law-IsSortedList-forget-elem OrdA y ys sorted)
+insert : {ℓEq ℓOrd : Level} {A : Type} → (OrdA : OrdInstance {ℓEq} {ℓOrd} A) → A → List A → List A
+insert OrdA x [] = x ∷ []
+insert OrdA x (y ∷ ys) with OrdInstance.dec-ord OrdA x y
+insert OrdA x (y ∷ ys) | yes x≤y = x ∷ y ∷ ys
+insert OrdA x (y ∷ ys) | no ¬x≤y = y ∷ insert OrdA x ys
 
-sort : {A : Type} → (OrdA : OrdInstance A) → List A → Σ (List A) (IsSortedList OrdA)
-sort OrdA [] = [] , tt
+law-insert-preserve-sorted' : {ℓEq : Level }{A : Type}
+                            → (OrdA : OrdInstance {ℓEq} A)
+                            → (x z : A) → (xs : List A)
+                            → IsSortedList OrdA (x ∷ xs)
+                            → (IsSortedList OrdA (x ∷ insert OrdA z xs)) 
+                            ⊎ (IsSortedList OrdA (z ∷ x ∷ xs))
+law-insert-preserve-sorted' OrdA x z [] tt with OrdInstance.dec-ord OrdA x z 
+law-insert-preserve-sorted' OrdA x z [] tt | yes x≤z = inj₁ $ x≤z , tt
+law-insert-preserve-sorted' OrdA x z [] tt | no ¬x≤z with OrdInstance.total OrdA x z
+law-insert-preserve-sorted' OrdA x z [] tt | no ¬x≤z | inj₁ x≤z = ⊥-elim (¬x≤z x≤z)
+law-insert-preserve-sorted' OrdA x z [] tt | no ¬x≤z | inj₂ z≤x = inj₂ $ z≤x , tt
+law-insert-preserve-sorted' OrdA x z (y ∷ xs) (x≤y , sorted[y∷xs]) with OrdInstance.dec-ord OrdA x z
+law-insert-preserve-sorted' OrdA x z (y ∷ xs) (x≤y , sorted[y∷xs]) | yes x≤z with OrdInstance.dec-ord OrdA z y
+law-insert-preserve-sorted' OrdA x z (y ∷ xs) (x≤y , sorted[y∷xs]) | yes x≤z | yes z≤y = inj₁ $ x≤z , z≤y , sorted[y∷xs]
+law-insert-preserve-sorted' OrdA x z (y ∷ xs) (x≤y , sorted[y∷xs]) | yes x≤z | no ¬z≤y with law-insert-preserve-sorted' OrdA y z xs sorted[y∷xs]
+law-insert-preserve-sorted' OrdA x z (y ∷ xs) (x≤y , sorted[y∷xs]) | yes x≤z | no ¬z≤y | inj₁ p = inj₁ $ x≤y , p
+law-insert-preserve-sorted' OrdA x z (y ∷ xs) (x≤y , sorted[y∷xs]) | yes x≤z | no ¬z≤y | inj₂ (z≤y , _) = ⊥-elim (¬z≤y z≤y)
+law-insert-preserve-sorted' OrdA x z (y ∷ xs) (x≤y , sorted[y∷xs]) | no ¬x≤z with OrdInstance.total OrdA x z
+law-insert-preserve-sorted' OrdA x z (y ∷ xs) (x≤y , sorted[y∷xs]) | no ¬x≤z | inj₁ x≤z = ⊥-elim (¬x≤z x≤z)
+law-insert-preserve-sorted' OrdA x z (y ∷ xs) (x≤y , sorted[y∷xs]) | no ¬x≤z | inj₂ z≤x = inj₂ $ z≤x , x≤y , sorted[y∷xs]
+
+law-insert-preserve-sorted : {ℓEq : Level} {A : Type} → (OrdA : OrdInstance {ℓEq} A) → (x : A) → (xs : List A) → IsSortedList OrdA xs → IsSortedList OrdA (insert OrdA x xs)
+law-insert-preserve-sorted OrdA x [] tt = tt
+law-insert-preserve-sorted OrdA x (y ∷ []) tt with OrdInstance.dec-ord OrdA x y 
+law-insert-preserve-sorted OrdA x (y ∷ []) tt | yes x≤y = x≤y , tt
+law-insert-preserve-sorted OrdA x (y ∷ []) tt | no ¬x≤y with OrdInstance.total OrdA y x
+law-insert-preserve-sorted OrdA x (y ∷ []) tt | no ¬x≤y | inj₁ y≤x = y≤x , tt
+law-insert-preserve-sorted OrdA x (y ∷ []) tt | no ¬x≤y | inj₂ x≤y = ⊥-elim (¬x≤y x≤y)
+law-insert-preserve-sorted OrdA x (y ∷ z ∷ xs) (y≤z , sorted[z∷xs]) with OrdInstance.dec-ord OrdA x y
+law-insert-preserve-sorted OrdA x (y ∷ z ∷ xs) (y≤z , sorted[z∷xs]) | yes x≤y = x≤y , y≤z , sorted[z∷xs]
+law-insert-preserve-sorted OrdA x (y ∷ z ∷ xs) (y≤z , sorted[z∷xs]) | no ¬x≤y with OrdInstance.total OrdA x y
+law-insert-preserve-sorted OrdA x (y ∷ z ∷ xs) (y≤z , sorted[z∷xs]) | no ¬x≤y | inj₁ x≤y = ⊥-elim (¬x≤y x≤y)
+law-insert-preserve-sorted OrdA x (y ∷ z ∷ xs) (y≤z , sorted[z∷xs]) | no ¬x≤y | inj₂ y≤x with OrdInstance.dec-ord OrdA x z
+law-insert-preserve-sorted OrdA x (y ∷ z ∷ xs) (y≤z , sorted[z∷xs]) | no ¬x≤y | inj₂ y≤x | yes x≤z = y≤x , x≤z , sorted[z∷xs]
+law-insert-preserve-sorted OrdA x (y ∷ z ∷ xs) (y≤z , sorted[z∷xs]) | no ¬x≤y | inj₂ y≤x | no ¬x≤z with law-insert-preserve-sorted' OrdA z x xs sorted[z∷xs]
+law-insert-preserve-sorted OrdA x (y ∷ z ∷ xs) (y≤z , sorted[z∷xs]) | no ¬x≤y | inj₂ y≤x | no ¬x≤z | inj₁ p = y≤z , p
+law-insert-preserve-sorted OrdA x (y ∷ z ∷ xs) (y≤z , sorted[z∷xs]) | no ¬x≤y | inj₂ y≤x | no ¬x≤z | inj₂ (x≤z , _) = ⊥-elim (¬x≤z x≤z) 
+
+sort : {ℓEq ℓOrd : Level} {A : Type} → (OrdA : OrdInstance {ℓEq} {ℓOrd} A) → List A → List A
+sort OrdA [] = []
 sort OrdA (x ∷ xs) = insert OrdA x (sort OrdA xs)
 
-nub : {A : Type} → (OrdA : OrdInstance {lzero} A) → Σ (List A) (IsSortedList OrdA) → Σ (List A) (λ xs → IsSortedList OrdA xs × IsNoDupList OrdA xs)
-nub OrdA ([] , sorted) = [] , tt , lift tt
-nub OrdA (x ∷ xs , sorted) = {!!}
+law-sort-sorted : {ℓEq : Level} {A : Type} → (OrdA : OrdInstance {ℓEq} A) → (xs : List A) → IsSortedList OrdA (sort OrdA xs)
+law-sort-sorted OrdA [] = tt
+law-sort-sorted OrdA (x ∷ []) = tt
+law-sort-sorted OrdA (x ∷ y ∷ xs) = law-insert-preserve-sorted OrdA x
+                                                               (insert OrdA y (sort OrdA xs))
+                                                               (law-insert-preserve-sorted OrdA y (sort OrdA xs) (law-sort-sorted OrdA xs))
 
-mkListSet : {α : Σ Type OrdInstance} → List (proj₁ α) → ListSet α
-mkListSet {α , OrdA} xs = listSet (proj₁ sortRes) (proj₂ sortRes) {!!}
-  where sortRes = sort OrdA xs
 
-setmap : {α β : Σ Type OrdInstance} → (proj₁ α → proj₁ β) → ListSet α → ListSet β
-setmap {α , OrdA} {β , OrdB} f (listSet xs sorted noDup) = mkListSet (map f xs)
+law-insert-smaller-in-front : {ℓEq : Level} {A : Type} → (OrdA : OrdInstance {ℓEq} A)
+                            → (y x : A) → (xs : List A)
+                            → (OrdInstance._≤_ OrdA y x) → IsSortedList OrdA xs
+                            → insert OrdA y (x ∷ xs) ≡ y ∷ (x ∷ xs)
+law-insert-smaller-in-front OrdA y x xs y≤x sorted with OrdInstance.dec-ord OrdA y x
+law-insert-smaller-in-front OrdA y x xs y≤x sorted | yes y≤x' = refl
+law-insert-smaller-in-front OrdA y x xs y≤x sorted | no ¬y≤x = ⊥-elim (¬y≤x y≤x)
+
+law-sort-preserve-sorted : {ℓEq : Level} {A : Type} → (OrdA : OrdInstance {ℓEq} A) → (xs : List A) → IsSortedList OrdA xs → sort OrdA xs ≡ xs
+law-sort-preserve-sorted OrdA [] sorted = refl
+law-sort-preserve-sorted OrdA (y ∷ []) sorted = refl
+law-sort-preserve-sorted OrdA (y ∷ x ∷ xs) (y≤x , sorted) with law-sort-preserve-sorted OrdA (x ∷ xs) sorted
+law-sort-preserve-sorted OrdA (y ∷ x ∷ xs) (y≤x , sorted) | p =
+  trans (cong (insert OrdA y) p)
+        (law-insert-smaller-in-front OrdA y x xs y≤x (law-IsSortedList-forget-elem OrdA x xs sorted))
+
+
+nub : {ℓEq ℓOrd : Level} {A : Type} → (OrdA : OrdInstance {ℓEq} {ℓOrd} A) → List A → List A
+nub OrdA [] = []
+nub OrdA (x ∷ []) = x ∷ []
+nub OrdA (y ∷ x ∷ xs) with OrdInstance.dec-eq OrdA y x
+nub OrdA (y ∷ x ∷ xs) | yes y==x = nub OrdA (x ∷ xs)
+nub OrdA (y ∷ x ∷ xs) | no ¬y==x = y ∷ nub OrdA (x ∷ xs)
+
+law-nub-preserve-no-dup : {ℓEq ℓOrd : Level} {A : Type} → (OrdA : OrdInstance {ℓEq} {ℓOrd} A) → (xs : List A) → IsNoDupList OrdA xs → nub OrdA xs ≡ xs
+law-nub-preserve-no-dup OrdA [] noDup = refl
+law-nub-preserve-no-dup OrdA (x ∷ []) noDup = refl
+law-nub-preserve-no-dup OrdA (x ∷ y ∷ xs) noDup with OrdInstance.dec-eq OrdA x y
+law-nub-preserve-no-dup OrdA (x ∷ y ∷ xs) (¬x∈y∷xs , noDup) | yes x==y = ⊥-elim (¬x∈y∷xs (here x==y))
+law-nub-preserve-no-dup OrdA (x ∷ y ∷ xs) noDup | no ¬x==y = cong (λ XS → x ∷ XS) (law-nub-preserve-no-dup OrdA (y ∷ xs) (proj₂ noDup))
+
+law-nub-no-dup : {ℓEq : Level} {A : Type} → (OrdA : OrdInstance {ℓEq} A) → (xs : List A) → IsSortedList OrdA xs → IsNoDupList OrdA (nub OrdA xs)
+law-nub-no-dup OrdA [] sorted = lift tt
+law-nub-no-dup OrdA (x ∷ []) sorted = (λ ()) , lift tt
+law-nub-no-dup OrdA (x ∷ y ∷ xs) sorted with OrdInstance.dec-eq OrdA x y
+law-nub-no-dup OrdA (x ∷ y ∷ xs) sorted | yes x==y = law-nub-no-dup OrdA (y ∷ xs) (proj₂ sorted)
+law-nub-no-dup OrdA (x ∷ y ∷ []) (x≤y , sorted) | no ¬x==y = x∈y∷[] , (λ ()) , lift tt
+  where x∈y∷[] : ¬ InList OrdA x (y ∷ [])
+        x∈y∷[] (here x==y) = ⊥-elim (¬x==y x==y)
+        x∈y∷[] (there ())
+law-nub-no-dup OrdA (x ∷ y ∷ z ∷ xs) (x≤y , y≤z ,  sorted) | no ¬x==y with law-nub-no-dup OrdA (y ∷ z ∷ xs) (y≤z , sorted)
+law-nub-no-dup OrdA (x ∷ y ∷ z ∷ xs) (x≤y , y≤z ,  sorted) | no ¬x==y | p = f , p
+  where f : ¬ InList OrdA x (nub OrdA (y ∷ z ∷ xs))
+        f x∈nubxs with OrdInstance.dec-eq OrdA y z
+        f x∈nubxs | yes y==z = {!!}
+        f (here x==y) | no ¬y==z = ¬x==y x==y
+        f (there x∈nubxs) | no ¬y==z = {!!}
+
+¬x==y∧y==z→¬x==z : {ℓEq ℓOrd : Level} {A : Type} → (OrdA : OrdInstance {ℓEq} {ℓOrd} A) → (x y z : A)
+                 → (¬ (OrdInstance._==_ OrdA x y)) → OrdInstance._==_ OrdA y z → ¬ (OrdInstance._==_ OrdA x z)
+¬x==y∧y==z→¬x==z OrdA x y z ¬x==y y==z x==z = ¬x==y (OrdInstance.trans-eq OrdA x==z (OrdInstance.sym-eq OrdA y==z))
+
+x≤y∧y==z→x≤z : {ℓEq ℓOrd : Level} {A : Type} → (OrdA : OrdInstance {ℓEq} {ℓOrd} A) → (x y z : A)
+                 → OrdInstance._≤_ OrdA x y → OrdInstance._==_ OrdA y z → OrdInstance._≤_ OrdA x z
+x≤y∧y==z→x≤z OrdA x y z x≤y y==z = (proj₁ (IsPreorder.∼-resp-≈ (OrdInstance.isPreorder OrdA))) y==z x≤y
+
+law-nub-preserve-sorted' : {A : Type} → (OrdA : OrdInstance {lzero} A)
+                         → (y x : A) (xs : List A)
+                         → ¬ (OrdInstance._==_ OrdA y x) → (OrdInstance._≤_ OrdA y x)
+                         → IsSortedList OrdA (nub OrdA (x ∷ xs)) → IsSortedList OrdA (y ∷ nub OrdA (x ∷ xs))
+law-nub-preserve-sorted' OrdA y x [] ¬y==x y≤x sorted = y≤x , tt
+law-nub-preserve-sorted' OrdA y x (z ∷ xs) ¬y==x y≤x sorted with OrdInstance.dec-eq OrdA x z
+law-nub-preserve-sorted' OrdA y x (z ∷ xs) ¬y==x y≤x sorted | yes x==z = law-nub-preserve-sorted' OrdA y z xs (¬x==y∧y==z→¬x==z OrdA y x z ¬y==x x==z) (x≤y∧y==z→x≤z OrdA y x z y≤x x==z) sorted
+law-nub-preserve-sorted' OrdA y x (z ∷ xs) ¬y==x y≤x sorted | no ¬x==z = y≤x , sorted
+
+law-nub-preserve-sorted : {A : Type} → (OrdA : OrdInstance {lzero} A) → (xs : List A) → IsSortedList OrdA xs → IsSortedList OrdA (nub OrdA xs)
+law-nub-preserve-sorted OrdA [] sorted = tt
+law-nub-preserve-sorted OrdA (y ∷ []) sorted = tt
+law-nub-preserve-sorted OrdA (y ∷ x ∷ xs) (y≤x , sorted) with law-nub-preserve-sorted OrdA (x ∷ xs) sorted
+law-nub-preserve-sorted OrdA (y ∷ x ∷ xs) (y≤x , sorted) | p with OrdInstance.dec-eq OrdA y x
+law-nub-preserve-sorted OrdA (y ∷ x ∷ xs) (y≤x , sorted) | p | yes y==x = p
+law-nub-preserve-sorted OrdA (y ∷ x ∷ []) (y≤x , sorted) | p | no ¬y==x = y≤x , tt
+law-nub-preserve-sorted OrdA (y ∷ x ∷ z ∷ xs) (y≤x , sorted) | p | no ¬y==x with OrdInstance.dec-eq OrdA x z
+law-nub-preserve-sorted OrdA (y ∷ x ∷ z ∷ xs) (y≤x , sorted) | p | no ¬y==x | no ¬x==z = y≤x , p
+law-nub-preserve-sorted OrdA (y ∷ x ∷ z ∷ xs) (y≤x , sorted) | p | no ¬y==x | yes x==z with OrdInstance.dec-eq OrdA y z
+law-nub-preserve-sorted OrdA (y ∷ x ∷ z ∷ xs) (y≤x , sorted) | p | no ¬y==x | yes x==z | yes y==z = ⊥-elim (¬y==x (OrdInstance.trans-eq OrdA y==z (OrdInstance.sym-eq OrdA x==z)))
+law-nub-preserve-sorted OrdA (y ∷ x ∷ z ∷ xs) (y≤x , x≤z , sorted) | p | no ¬y==x | yes x==z | no ¬y==z = law-nub-preserve-sorted' OrdA y z xs ¬y==z (OrdInstance.trans OrdA y≤x x≤z) p
+
+mkListSet : {α : Σ Type (OrdInstance {lzero})} → List (proj₁ α) → ListSet α
+mkListSet {α , OrdA} xs = listSet (nub OrdA (sort OrdA xs)) (law-nub-preserve-sorted OrdA (sort OrdA xs) (law-sort-sorted OrdA xs)) {!!}
+  --where sortRes = sort OrdA xs
+
+setmap : {α β : Σ Type (OrdInstance)} → (Σ (proj₁ α → proj₁ β) (λ _ → ⊤)) → ListSet α → ListSet β
+setmap {α , OrdA} {β , OrdB} (f , tt) (listSet xs sorted noDup) = mkListSet (map f xs)
 
 FunctorListSet : ConstrainedFunctor
 FunctorListSet = record
@@ -133,8 +252,8 @@ FunctorListSet = record
   ; ctIdR = λ {α} {β} {α'} {β'} {f} → ctIdR {α} {β} {α'} {β'} {f}
   ; ctIdL = λ {α} {β} {α'} {β'} {f} → ctIdL {α} {β} {α'} {β'} {f}
   ; F = F
-  ; ctMap = {!!}
-  ; ctFuncId = {!!}
+  ; ctMap = setmap
+  ; ctFuncId = ctFuncId
   ; ctFuncComp = {!!}
   ; ctObjProofIrr = {!!}
   ; ctHomProofIrr = {!!}
@@ -175,251 +294,18 @@ FunctorListSet = record
           → (f' : HomCts α' β' f) → _∘Ct_ {α} {α} {β} {f} {idF} {α'} {α'} {β'} f' (ctId {α} {α'}) ≡ f'
     ctIdL tt = refl
     
-{-
-
-law-insert-length : {A : Type} {Eq : EqDict A} 
-                  → (ord : OrdDict A Eq) → (x : A) → (xs : List A)
-                  → length (insert ord x xs) ≡ suc (length xs) 
-law-insert-length ord x [] = prefl
-law-insert-length ord x (y ∷ ys) with OrdDict.ordDec ord x y
-law-insert-length ord x (y ∷ ys) | yes p = prefl
-law-insert-length ord x (y ∷ ys) | no ¬p = cong suc (law-insert-length ord x ys)
-
-law-insert-length-cong : {A : Type} {Eq : EqDict A} 
-                       → (ord : OrdDict A Eq) 
-                       → (x : A) → (xs ys : List A)
-                       → length (x ∷ xs) ≡ length ys → length (insert ord x xs) ≡ length ys
-law-insert-length-cong ord x xs ys eq = ptrans (law-insert-length ord x xs) eq
-
-law-sorted-insert' : {A : Type} {EqA : EqDict A}
-                   → (ord : OrdDict A EqA)
-                   → (x z : A) → (xs : List A)
-                   → IsSorted ord (x ∷ xs)
-                   → (IsSorted ord (x ∷ insert ord z xs)) 
-                   ⊎ (IsSorted ord (z ∷ x ∷ xs))
-law-sorted-insert' ord x z [] tt with OrdDict.ordDec ord x z 
-law-sorted-insert' ord x z [] tt | yes x≤z = inj₁ $ x≤z , tt
-law-sorted-insert' ord x z [] tt | no ¬x≤z with OrdDict.ordTotal ord x z
-law-sorted-insert' ord x z [] tt | no ¬x≤z | inj₁ x≤z = ⊥-elim (¬x≤z x≤z)
-law-sorted-insert' ord x z [] tt | no ¬x≤z | inj₂ z≤x = inj₂ $ z≤x , tt
-law-sorted-insert' ord x z (y ∷ xs) (x≤y , sorted[y∷xs]) with OrdDict.ordDec ord x z
-law-sorted-insert' ord x z (y ∷ xs) (x≤y , sorted[y∷xs]) | yes x≤z with OrdDict.ordDec ord z y
-law-sorted-insert' ord x z (y ∷ xs) (x≤y , sorted[y∷xs]) | yes x≤z | yes z≤y = inj₁ $ x≤z , z≤y , sorted[y∷xs]
-law-sorted-insert' ord x z (y ∷ xs) (x≤y , sorted[y∷xs]) | yes x≤z | no ¬z≤y with law-sorted-insert' ord y z xs sorted[y∷xs]
-law-sorted-insert' ord x z (y ∷ xs) (x≤y , sorted[y∷xs]) | yes x≤z | no ¬z≤y | inj₁ p = inj₁ $ x≤y , p
-law-sorted-insert' ord x z (y ∷ xs) (x≤y , sorted[y∷xs]) | yes x≤z | no ¬z≤y | inj₂ (z≤y , _) = ⊥-elim (¬z≤y z≤y)
-law-sorted-insert' ord x z (y ∷ xs) (x≤y , sorted[y∷xs]) | no ¬x≤z with OrdDict.ordTotal ord x z
-law-sorted-insert' ord x z (y ∷ xs) (x≤y , sorted[y∷xs]) | no ¬x≤z | inj₁ x≤z = ⊥-elim (¬x≤z x≤z)
-law-sorted-insert' ord x z (y ∷ xs) (x≤y , sorted[y∷xs]) | no ¬x≤z | inj₂ z≤x = inj₂ $ z≤x , x≤y , sorted[y∷xs]
-
-law-sorted-insert : {A : Type} {EqA : EqDict A}
-                  → (ord : OrdDict A EqA)
-                  → (x : A) → (xs : List A)
-                  → IsSorted ord xs
-                  → IsSorted ord (insert ord x xs)
-law-sorted-insert ord x [] tt = tt
-law-sorted-insert ord x (y ∷ []) tt with OrdDict.ordDec ord x y 
-law-sorted-insert ord x (y ∷ []) tt | yes x≤y = x≤y , tt
-law-sorted-insert ord x (y ∷ []) tt | no ¬x≤y with OrdDict.ordTotal ord y x
-law-sorted-insert ord x (y ∷ []) tt | no ¬x≤y | inj₁ y≤x = y≤x , tt
-law-sorted-insert ord x (y ∷ []) tt | no ¬x≤y | inj₂ x≤y = ⊥-elim (¬x≤y x≤y)
-law-sorted-insert ord x (y ∷ z ∷ xs) (y≤z , sorted[z∷xs]) with OrdDict.ordDec ord x y
-law-sorted-insert ord x (y ∷ z ∷ xs) (y≤z , sorted[z∷xs]) | yes x≤y = x≤y , y≤z , sorted[z∷xs]
-law-sorted-insert ord x (y ∷ z ∷ xs) (y≤z , sorted[z∷xs]) | no ¬x≤y with OrdDict.ordTotal ord x y
-law-sorted-insert ord x (y ∷ z ∷ xs) (y≤z , sorted[z∷xs]) | no ¬x≤y | inj₁ x≤y = ⊥-elim (¬x≤y x≤y)
-law-sorted-insert ord x (y ∷ z ∷ xs) (y≤z , sorted[z∷xs]) | no ¬x≤y | inj₂ y≤x with OrdDict.ordDec ord x z
-law-sorted-insert ord x (y ∷ z ∷ xs) (y≤z , sorted[z∷xs]) | no ¬x≤y | inj₂ y≤x | yes x≤z = y≤x , x≤z , sorted[z∷xs]
-law-sorted-insert ord x (y ∷ z ∷ xs) (y≤z , sorted[z∷xs]) | no ¬x≤y | inj₂ y≤x | no ¬x≤z with law-sorted-insert' ord z x xs sorted[z∷xs]
-law-sorted-insert ord x (y ∷ z ∷ xs) (y≤z , sorted[z∷xs]) | no ¬x≤y | inj₂ y≤x | no ¬x≤z | inj₁ p = y≤z , p
-law-sorted-insert ord x (y ∷ z ∷ xs) (y≤z , sorted[z∷xs]) | no ¬x≤y | inj₂ y≤x | no ¬x≤z | inj₂ (x≤z , _) = ⊥-elim (¬x≤z x≤z)
-
-law-sorted-forget : {A : Type} {EqA : EqDict A} 
-                  → (OrdA : OrdDict A EqA) 
-                  → (x : A) → (xs : List A) 
-                  → IsSorted OrdA (x ∷ xs) → IsSorted OrdA xs
-law-sorted-forget OrdA x [] tt = tt
-law-sorted-forget OrdA x (y ∷ xs) (_ , sorted) = sorted
-
-
-law-sort-length : {A : Type} {Eq : EqDict A} 
-                → (OrdA : OrdDict A Eq) → (xs : List A)
-                → length (sort OrdA xs) ≡ length xs
-law-sort-length OrdA [] = prefl
-law-sort-length OrdA (x ∷ xs) = law-insert-length-cong OrdA x (sort OrdA xs) (x ∷ xs) (cong suc (law-sort-length OrdA xs))
-
-
-law-sort-sorted : {A : Type} {EqA : EqDict A} → (OrdA : OrdDict A EqA) → (xs : List A) → IsSorted OrdA (sort OrdA xs)
-law-sort-sorted OrdA [] = tt
-law-sort-sorted OrdA (x ∷ []) = tt
-law-sort-sorted OrdA (x ∷ y ∷ xs) = law-sorted-insert OrdA x (insert OrdA y (sort OrdA xs)) (law-sorted-insert OrdA y (sort OrdA xs) (law-sort-sorted OrdA xs))
-
-law-insert-sorted : {A : Type} {EqA : EqDict A} 
-                  → (OrdA : OrdDict A EqA) 
-                  → (x : A) → (xs : List A)
-                  → IsSorted OrdA (x ∷ xs)
-                  → insert OrdA x xs ≡ x ∷ xs
-law-insert-sorted OrdA x [] sorted = prefl
-law-insert-sorted OrdA x (y ∷ xs) sorted with OrdDict.ordDec OrdA x y 
-law-insert-sorted OrdA x (y ∷ xs) sorted | yes _ = prefl
-law-insert-sorted OrdA x (y ∷ xs) (x≤y , sorted) | no ¬x≤y = ⊥-elim (¬x≤y x≤y)
-
-law-sort-idempotence : {A : Type} {EqA : EqDict A} → (OrdA : OrdDict A EqA) → (xs : List A) → IsSorted OrdA xs → sort OrdA xs ≡ xs
-law-sort-idempotence OrdA [] sorted = prefl
-law-sort-idempotence OrdA (x ∷ []) sorted = prefl
-law-sort-idempotence OrdA (x ∷ y ∷ xs) (x≤y , sorted) = begin
-  insert OrdA x (insert OrdA y (sort OrdA xs)) 
-    ≡⟨ cong (λ X → insert OrdA x (insert OrdA y X)) (law-sort-idempotence OrdA xs (law-sorted-forget OrdA y xs sorted)) ⟩ 
-  insert OrdA x (insert OrdA y xs) 
-    ≡⟨ cong (insert OrdA x) (law-insert-sorted OrdA y xs sorted) ⟩ 
-  insert OrdA x (y ∷ xs) 
-    ≡⟨ law-insert-sorted OrdA x (y ∷ xs) (x≤y , sorted) ⟩ 
-  x ∷ y ∷ xs ∎
-
-proof-irr-sorted : {A : Type} {EqA : EqDict A} → (OrdA : OrdDict A EqA) → (xs : List A) → (sa sb : IsSorted OrdA xs) → sa ≡ sb 
-proof-irr-sorted OrdA [] tt tt = prefl
-proof-irr-sorted OrdA (x ∷ []) tt tt = prefl
-proof-irr-sorted OrdA (x ∷ y ∷ xs) (p₁ , sa) (p₂ , sb) = cong₂ _,_ (proof-irrelevance p₁ p₂) (proof-irr-sorted OrdA (y ∷ xs) sa sb)
-
-
-
-HaskEndomorphism : Category
-HaskEndomorphism = endomorphismCategory Hask
-
-HaskEndomorphismInclusionFunctor : Functor HaskEndomorphism Hask
-HaskEndomorphismInclusionFunctor = record 
-  { F₀ = idF
-  ; F₁ = F₁
-  ; id = prefl
-  ; dist = λ {a} {b} {c} {f} {g} → dist {a} {b} {c} {f} {g}
-  } where
-    F₁ : {a b : Category.Obj HaskEndomorphism} 
-       → Category.Hom HaskEndomorphism a b → Category.Hom Hask (idF a) (idF b)
-    F₁ (f , prefl)= f
-    
-    _∘Hask_ = Category._∘_ Hask
-    _∘Endo_ = Category._∘_ HaskEndomorphism
-    
-    dist : {a b c : Category.Obj HaskEndomorphism}
-         → {f : Category.Hom HaskEndomorphism a b}
-         → {g : Category.Hom HaskEndomorphism b c}
-         → F₁ (g ∘Endo f) ≡ (F₁ g) ∘Hask (F₁ f)
-    dist {f = f , prefl} {g , prefl} = prefl
-
-ListFunctor = Applicative.functor $ Monad.applicative monadList
-
-listMap = Functor.fmap ListFunctor
-
-eqListSet : {A : Type} {EqA : EqDict A} 
-          → (OrdA : OrdDict A EqA)
-          → (s₀ s₁ : List A) 
-          → (sorted₀ : IsSorted OrdA s₀) → (sorted₁ : IsSorted OrdA s₁)
-          → (s₀ ≡ s₁)
-          → listSet s₀ sorted₀ ≡ listSet s₁ sorted₁
-eqListSet OrdA s₀ .s₀ sorted₀ sorted₁ prefl = cong (listSet s₀) (proof-irr-sorted OrdA s₀ sorted₀ sorted₁)
-
-law-swap-insert-insert : {A : Type} {EqA : EqDict A} 
-                       → (OrdA : OrdDict A EqA) 
-                       → (x y : A) → (xs : List A) 
-                       → insert OrdA x (insert OrdA y xs) ≡ insert OrdA y (insert OrdA x xs)
-law-swap-insert-insert OrdA x y [] with OrdDict.ordDec OrdA x y
-law-swap-insert-insert OrdA x y [] | yes x≤y with OrdDict.ordDec OrdA y x
-law-swap-insert-insert OrdA x y [] | yes x≤y | yes y≤x = {!!}
-law-swap-insert-insert OrdA x y [] | yes x≤y | no ¬y≤x = prefl
-law-swap-insert-insert OrdA x y [] | no ¬x≤y with OrdDict.ordDec OrdA y x
-law-swap-insert-insert OrdA x y [] | no ¬x≤y | yes y≤x = prefl
-law-swap-insert-insert OrdA x y [] | no ¬x≤y | no ¬y≤x with OrdDict.ordTotal OrdA x y
-law-swap-insert-insert OrdA x y [] | no ¬x≤y | no ¬y≤x | inj₁ x≤y = ⊥-elim (¬x≤y x≤y)
-law-swap-insert-insert OrdA x y [] | no ¬x≤y | no ¬y≤x | inj₂ y≤x = ⊥-elim (¬y≤x y≤x)
-law-swap-insert-insert OrdA x y (z ∷ xs) with OrdDict.ordDec OrdA x y | OrdDict.ordDec OrdA y x
-law-swap-insert-insert OrdA x y (z ∷ xs) | yes x≤y | yes y≤x = {!!}
-law-swap-insert-insert OrdA x y (z ∷ xs) | yes x≤y | no ¬y≤x with OrdDict.ordDec OrdA x z | OrdDict.ordDec OrdA y z 
-law-swap-insert-insert OrdA x y (z ∷ xs) | yes x≤y | no ¬y≤x | yes x≤z | yes y≤z = {!!}
-law-swap-insert-insert OrdA x y (z ∷ xs) | yes x≤y | no ¬y≤x | yes x≤z | no ¬y≤z = {!!}
-law-swap-insert-insert OrdA x y (z ∷ xs) | yes x≤y | no ¬y≤x | no ¬x≤z | yes y≤z = ⊥-elim (¬x≤z (OrdDict.ordTrans OrdA x y z x≤y y≤z))
-law-swap-insert-insert OrdA x y (z ∷ xs) | yes x≤y | no ¬y≤x | no ¬x≤z | no ¬y≤z = {!!}
-law-swap-insert-insert OrdA x y (z ∷ xs) | no ¬x≤y | yes y≤x = {!!}
-law-swap-insert-insert OrdA x y (z ∷ xs) | no ¬x≤y | no ¬y≤x with OrdDict.ordTotal OrdA x y
-law-swap-insert-insert OrdA x y (z ∷ xs) | no ¬x≤y | no ¬y≤x | inj₁ x≤y = ⊥-elim (¬x≤y x≤y)
-law-swap-insert-insert OrdA x y (z ∷ xs) | no ¬x≤y | no ¬y≤x | inj₂ y≤x = ⊥-elim (¬y≤x y≤x)
-
-
-law-swap-insert-sort : {A : Type} {EqA : EqDict A} 
-                     → (OrdA : OrdDict A EqA) 
-                     → (x : A) → (xs : List A) 
-                     → insert OrdA x (sort OrdA xs) ≡ sort OrdA (insert OrdA x xs)
-law-swap-insert-sort OrdA x [] = prefl
-law-swap-insert-sort OrdA x (y ∷ xs) with OrdDict.ordDec OrdA x y
-law-swap-insert-sort OrdA x (y ∷ xs) | yes x≤y = prefl
-law-swap-insert-sort OrdA x (y ∷ xs) | no ¬x≤y = begin
-  insert OrdA x (insert OrdA y (sort OrdA xs))  
-    ≡⟨ law-swap-insert-insert OrdA x y (sort OrdA xs) ⟩
-  insert OrdA y (insert OrdA x (sort OrdA xs)) 
-    ≡⟨ cong (insert OrdA y) (law-swap-insert-sort OrdA x xs) ⟩
-  insert OrdA y (sort OrdA (insert OrdA x xs)) ∎
-
-ListSetFunctor : Functor HaskOrd Hask
-ListSetFunctor = functor F₀ F₁ (λ {a} → id {a}) (λ {a} {b} {c} {f} {g} → dist {a} {b} {c} {f} {g})
-  where
-    F₀ : Category.Obj HaskOrd → Category.Obj Hask
-    F₀ A = ListSet A
-    
-    F₁ : {a b : Category.Obj HaskOrd} → Category.Hom HaskOrd a b → Category.Hom Hask (F₀ a) (F₀ b)
-    F₁ f (listSet xs _) = mkListSet (listMap f xs)
-    
-    _∘H_ = Category._∘_ Hask
-
-    id : {A : Category.Obj HaskOrd} → F₁ (Category.id HaskOrd {A}) ≡ Category.id Hask {F₀ A}
-    id {A , EqA , OrdA} = funExt helperId
-      where
-        helperId : (s : ListSet (A , EqA , OrdA)) 
-                 → F₁ (Category.id HaskOrd {A , EqA , OrdA}) s ≡ Category.id Hask {F₀ (A , EqA , OrdA)} s
-        helperId (listSet s sorted) = begin
-          F₁ (Category.id HaskOrd {A , EqA , OrdA}) (listSet s sorted) 
-            ≡⟨ prefl ⟩
-          F₁ idF (listSet s sorted) 
-            ≡⟨ prefl ⟩
-          mkListSet (listMap idF s)
-            ≡⟨ cong mkListSet (cong (λ X → X s) (Functor.lawId ListFunctor)) ⟩
-          mkListSet s
-            ≡⟨ prefl ⟩
-          listSet (sort OrdA s) (law-sort-sorted OrdA s)
-            ≡⟨ eqListSet OrdA (sort OrdA s) s (law-sort-sorted OrdA s) sorted (law-sort-idempotence OrdA s sorted) ⟩
-          listSet s sorted ∎ 
-    
-    dist : {A B C : Category.Obj HaskOrd} 
-         → {f : Category.Hom HaskOrd A B} → {g : Category.Hom HaskOrd B C}
-         → F₁ (g ∘H f) ≡ F₁ g ∘H F₁ f
-    dist {A , EqA , OrdA} {B , EqB , OrdB} {C , EqC , OrdC} {f} {g} = funExt helper
-      where
-        helper' : (s : List A) → sort OrdC (listMap (g ∘H f) s) ≡ sort OrdC (listMap g (sort OrdB (listMap f s)))
-        helper' [] = prefl
-        helper' (x ∷ xs) = begin
-          insert OrdC ((g ∘H f) x) (sort OrdC (listMap (g ∘H f) xs))
-            ≡⟨ prefl ⟩
-          insert OrdC (g (f x)) (sort OrdC (listMap (g ∘H f) xs))
-            ≡⟨ cong (insert OrdC (g (f x))) (helper' xs) ⟩
-          insert OrdC (g (f x)) (sort OrdC (listMap g (sort OrdB (listMap f xs))))
-            ≡⟨ {!!} ⟩
-          sort OrdC (listMap g (insert OrdB (f x) (sort OrdB (listMap f xs)))) ∎
-        
-        helper : (s : ListSet (A , EqA , OrdA)) → F₁ (g ∘H f) s ≡ (F₁ g ∘H F₁ f) s
-        helper (listSet s sorted) = begin
-          mkListSet (listMap (g ∘H f) s) 
-            ≡⟨ prefl ⟩
-          listSet (sort OrdC (listMap (g ∘H f) s)) (law-sort-sorted OrdC (listMap (g ∘H f) s))
-            ≡⟨ eqListSet OrdC (sort OrdC (listMap (g ∘H f) s)) (sort OrdC (listMap g (sort OrdB (listMap f s)))) (law-sort-sorted OrdC (listMap (g ∘H f) s)) (law-sort-sorted OrdC (listMap g (sort OrdB (listMap f s)))) (helper' s) ⟩
-          listSet (sort OrdC (listMap g (sort OrdB (listMap f s)))) (law-sort-sorted OrdC (listMap g (sort OrdB (listMap f s))))
-            ≡⟨ prefl ⟩
-          mkListSet (listMap g (sort OrdB (listMap f s)))
-            ≡⟨ prefl ⟩
-          F₁ g (listSet (sort OrdB (listMap f s)) (law-sort-sorted OrdB (listMap f s)))
-            ≡⟨ prefl ⟩
-          (F₁ g ∘H F₁ f) (listSet s sorted) ∎
-
-listSetMap : {A B : Category.Obj HaskOrd} → (proj₁ A → proj₁ B) → ListSet A  → ListSet B
-listSetMap = Functor.F₁ ListSetFunctor
-
--- law-sort-idempotence : {A : Type} {EqA : EqDict A} → (OrdA : OrdDict A EqA) → (xs : List A) → IsSorted OrdA xs → sort OrdA xs ≡ xs
--- proof-irr-sorted : {A : Type} {EqA : EqDict A} → (OrdA : OrdDict A EqA) → (xs : List A) → (sa sb : IsSorted OrdA xs) → sa ≡ sb
- 
--}
+    ctFuncId : {α : Σ Type ObjCts} → setmap {α = α} {α} (idF , ctId {proj₁ α} {proj₂ α}) ≡ idF
+    ctFuncId {α , OrdA} = funExt helper
+      where helper : (x : ListSet (α , OrdA)) → setmap (idF , ctId {α} {OrdA}) x ≡ idF x
+            helper (listSet xs sorted noDup) = begin
+              setmap {α = α , OrdA} (idF , ctId {α} {OrdA}) (listSet xs sorted noDup)
+                ≡⟨ refl ⟩
+              listSet (nub OrdA (sort OrdA (map idF xs))) (law-nub-preserve-sorted OrdA (sort OrdA (map idF xs)) (law-sort-sorted OrdA (map idF xs))) {!!}
+                ≡⟨ cong (λ X → listSet (nub OrdA (sort OrdA X)) (law-nub-preserve-sorted OrdA (sort OrdA X) (law-sort-sorted OrdA X)) {!!}) (map-id xs) ⟩
+              listSet (nub OrdA (sort OrdA xs)) (law-nub-preserve-sorted OrdA (sort OrdA xs) (law-sort-sorted OrdA xs)) {!!}
+                ≡⟨ cong₂dep (λ X Y → listSet (nub OrdA X) (law-nub-preserve-sorted OrdA X Y) {!!}) (law-sort-preserve-sorted OrdA {!xs!} {!!}) {!!} ⟩
+              listSet (nub OrdA xs) (law-nub-preserve-sorted OrdA xs (subst (IsSortedList OrdA) (law-sort-preserve-sorted OrdA xs sorted) (law-sort-sorted OrdA xs))) {!!}
+                ≡⟨ {!!} ⟩
+              listSet xs sorted noDup
+                ≡⟨ refl ⟩
+              idF (listSet xs sorted noDup) ∎
