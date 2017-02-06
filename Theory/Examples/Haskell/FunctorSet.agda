@@ -8,7 +8,7 @@ open import Data.Unit hiding ( _≤_ ; _≟_ ; total )
 open import Data.Empty
 open import Data.List
 open import Data.List.Any hiding ( map )
-open import Data.List.Properties using ( map-id )
+open import Data.List.Properties using ( map-id ; map-compose )
 open import Data.Nat renaming ( _>_ to _>ℕ_ ; _<_ to _<ℕ_ ; _≤_ to _≤ℕ_ ; _≥_ to _≥ℕ_ ) hiding ( _⊔_ ; _≟_ )
 open import Data.Product hiding ( map )
 open import Data.Sum hiding ( map )
@@ -45,6 +45,7 @@ record EqInstance {ℓ : Level} (A : Type) : Set (lsuc ℓ) where
   field
     _==_ : A → A → Set ℓ
     isDecEquivalence : IsDecEquivalence {A = A} _==_
+    proof-irr-eq : {a b : A} → ProofIrrelevance (a == b)
 
   dec-eq = IsDecEquivalence._≟_ isDecEquivalence
     
@@ -56,8 +57,9 @@ record OrdInstance {ℓEq ℓOrd : Level} (A : Type) : Set (lsuc ℓEq ⊔ lsuc 
   field
     _≤_ : A → A → Set ℓOrd
     eqInstance : EqInstance {ℓ = ℓEq} A
+    proof-irr-ord : {a b : A} → ProofIrrelevance (a ≤ b)
   
-  open EqInstance eqInstance public using (_==_ ; dec-eq ; trans-eq ; sym-eq ; refl-eq)
+  open EqInstance eqInstance public using (_==_ ; dec-eq ; trans-eq ; sym-eq ; refl-eq ; proof-irr-eq)
   
   field
     isDecTotalOrder : IsDecTotalOrder {A = A} _==_ _≤_
@@ -94,12 +96,33 @@ law-IsSortedList-forget-elem : {ℓEq : Level} {A : Type}
 law-IsSortedList-forget-elem OrdA x [] tt = tt
 law-IsSortedList-forget-elem OrdA x (y ∷ xs) (x≤y , sorted) = sorted
 
+proof-irr-IsSortedList : {ℓEq : Level} {A : Type} → (OrdA : OrdInstance {ℓEq} A) → (xs : List A) → ProofIrrelevance (IsSortedList OrdA xs)
+proof-irr-IsSortedList OrdA [] sortedX sortedY = refl
+proof-irr-IsSortedList OrdA (x ∷ []) sortedX sortedY = refl
+proof-irr-IsSortedList OrdA (x ∷ y ∷ xs) (x≤y , sortedX) (x≤y' , sortedY) with OrdInstance.proof-irr-ord OrdA x≤y x≤y'
+proof-irr-IsSortedList OrdA (x ∷ y ∷ xs) (x≤y , sortedX) (.x≤y , sortedY) | refl = cong (λ X → x≤y , X) (proof-irr-IsSortedList OrdA (y ∷ xs) sortedX sortedY)
+
+
+proof-irr-IsNoDupList : {ℓEq ℓOrd : Level} {A : Type} → (OrdA : OrdInstance {ℓEq} {ℓOrd} A) → (xs : List A) → ProofIrrelevance (IsNoDupList OrdA xs)
+proof-irr-IsNoDupList OrdA [] noDupX noDupY = refl
+proof-irr-IsNoDupList OrdA (x ∷ xs) (¬x∈xs , noDupX) (¬x∈xs' , noDupY) with proof-irr-¬ ¬x∈xs ¬x∈xs'
+proof-irr-IsNoDupList OrdA (x ∷ xs) (¬x∈xs , noDupX) (.¬x∈xs , noDupY) | refl = cong (λ X → ¬x∈xs , X) (proof-irr-IsNoDupList OrdA xs noDupX noDupY)
+
 -------------------------------------------------------------------------------
 -- Definition of ordered sets in form of lists
 -------------------------------------------------------------------------------
 
 data ListSet (A : Σ Type OrdInstance) : Type where
   listSet : (xs : List (proj₁ A)) → IsSortedList (proj₂ A) xs → IsNoDupList (proj₂ A) xs → ListSet A
+
+eqListSet : {A : Type} → (OrdA : OrdInstance A) → (xs ys : List A)
+          → (sortedX : IsSortedList OrdA xs) → (sortedY : IsSortedList OrdA ys)
+          → (noDupX  : IsNoDupList OrdA xs)  → (noDupY : IsNoDupList OrdA ys)
+          → xs ≡ ys
+          → listSet xs sortedX noDupX ≡ listSet ys sortedY noDupY
+eqListSet OrdA xs .xs sortedX sortedY noDupX noDupY refl with proof-irr-IsSortedList OrdA xs sortedX sortedY
+eqListSet OrdA xs .xs sortedX .sortedX noDupX noDupY refl | refl with proof-irr-IsNoDupList OrdA xs noDupX noDupY
+eqListSet OrdA xs .xs sortedX .sortedX noDupX .noDupX refl | refl | refl = refl
 
 insert : {ℓEq ℓOrd : Level} {A : Type} → (OrdA : OrdInstance {ℓEq} {ℓOrd} A) → A → List A → List A
 insert OrdA x [] = x ∷ []
@@ -235,11 +258,17 @@ law-nub-preserve-sorted OrdA (y ∷ x ∷ z ∷ xs) (y≤x , sorted) | p | no ¬
 law-nub-preserve-sorted OrdA (y ∷ x ∷ z ∷ xs) (y≤x , sorted) | p | no ¬y==x | yes x==z | yes y==z = ⊥-elim (¬y==x (OrdInstance.trans-eq OrdA y==z (OrdInstance.sym-eq OrdA x==z)))
 law-nub-preserve-sorted OrdA (y ∷ x ∷ z ∷ xs) (y≤x , x≤z , sorted) | p | no ¬y==x | yes x==z | no ¬y==z = law-nub-preserve-sorted' OrdA y z xs ¬y==z (OrdInstance.trans OrdA y≤x x≤z) p
 
-mkListSet : {α : Σ Type (OrdInstance {lzero})} → List (proj₁ α) → ListSet α
-mkListSet {α , OrdA} xs = listSet (nub OrdA (sort OrdA xs)) (law-nub-preserve-sorted OrdA (sort OrdA xs) (law-sort-sorted OrdA xs)) {!!}
-  --where sortRes = sort OrdA xs
+law-sort-nub-interchange : {ℓEq : Level} {A : Type} → (OrdA : OrdInstance {ℓEq} A)
+                         → (xs : List A) → IsSortedList OrdA xs
+                         → sort OrdA (nub OrdA xs) ≡ nub OrdA (sort {ℓEq} OrdA xs)
+law-sort-nub-interchange OrdA xs sorted = {!!}
 
-setmap : {α β : Σ Type (OrdInstance)} → (Σ (proj₁ α → proj₁ β) (λ _ → ⊤)) → ListSet α → ListSet β
+mkListSet : {α : Σ Type (OrdInstance {lzero})} → List (proj₁ α) → ListSet α
+mkListSet {α , OrdA} xs = listSet (nub OrdA (sort OrdA xs))
+                                  (law-nub-preserve-sorted OrdA (sort OrdA xs) (law-sort-sorted OrdA xs))
+                                  (law-nub-no-dup OrdA (sort OrdA xs) (law-sort-sorted OrdA xs))
+
+setmap : {α β : Σ Type OrdInstance} → (Σ (proj₁ α → proj₁ β) (λ _ → ⊤)) → ListSet α → ListSet β
 setmap {α , OrdA} {β , OrdB} (f , tt) (listSet xs sorted noDup) = mkListSet (map f xs)
 
 FunctorListSet : ConstrainedFunctor
@@ -254,7 +283,7 @@ FunctorListSet = record
   ; F = F
   ; ctMap = setmap
   ; ctFuncId = ctFuncId
-  ; ctFuncComp = {!!}
+  ; ctFuncComp = ctFuncComp
   ; ctObjProofIrr = {!!}
   ; ctHomProofIrr = {!!}
   } where
@@ -266,6 +295,9 @@ FunctorListSet = record
     
     Obj : Set (lsuc lzero)
     Obj = Σ Type ObjCts
+
+    Hom : Obj → Obj → Set lzero
+    Hom α β = Σ (proj₁ α → proj₁ β) (HomCts (proj₂ α) (proj₂ β))
     
     F : Obj → Type
     F (α , OrdA) = ListSet (α , OrdA)
@@ -294,18 +326,53 @@ FunctorListSet = record
           → (f' : HomCts α' β' f) → _∘Ct_ {α} {α} {β} {f} {idF} {α'} {α'} {β'} f' (ctId {α} {α'}) ≡ f'
     ctIdL tt = refl
     
-    ctFuncId : {α : Σ Type ObjCts} → setmap {α = α} {α} (idF , ctId {proj₁ α} {proj₂ α}) ≡ idF
+    ctFuncId : {α : Obj} → setmap {α = α} {α} (idF , ctId {proj₁ α} {proj₂ α}) ≡ idF
     ctFuncId {α , OrdA} = funExt helper
       where helper : (x : ListSet (α , OrdA)) → setmap (idF , ctId {α} {OrdA}) x ≡ idF x
-            helper (listSet xs sorted noDup) = begin
-              setmap {α = α , OrdA} (idF , ctId {α} {OrdA}) (listSet xs sorted noDup)
-                ≡⟨ refl ⟩
-              listSet (nub OrdA (sort OrdA (map idF xs))) (law-nub-preserve-sorted OrdA (sort OrdA (map idF xs)) (law-sort-sorted OrdA (map idF xs))) {!!}
-                ≡⟨ cong (λ X → listSet (nub OrdA (sort OrdA X)) (law-nub-preserve-sorted OrdA (sort OrdA X) (law-sort-sorted OrdA X)) {!!}) (map-id xs) ⟩
-              listSet (nub OrdA (sort OrdA xs)) (law-nub-preserve-sorted OrdA (sort OrdA xs) (law-sort-sorted OrdA xs)) {!!}
-                ≡⟨ cong₂dep (λ X Y → listSet (nub OrdA X) (law-nub-preserve-sorted OrdA X Y) {!!}) (law-sort-preserve-sorted OrdA {!xs!} {!!}) {!!} ⟩
-              listSet (nub OrdA xs) (law-nub-preserve-sorted OrdA xs (subst (IsSortedList OrdA) (law-sort-preserve-sorted OrdA xs sorted) (law-sort-sorted OrdA xs))) {!!}
-                ≡⟨ {!!} ⟩
-              listSet xs sorted noDup
-                ≡⟨ refl ⟩
-              idF (listSet xs sorted noDup) ∎
+            helper (listSet xs sorted noDup) = eqListSet OrdA (nub OrdA (sort OrdA (map idF xs))) xs
+              (law-nub-preserve-sorted OrdA (sort OrdA (map idF xs)) (law-sort-sorted OrdA (map idF xs))) sorted
+              (law-nub-no-dup OrdA (sort OrdA (map idF xs)) (law-sort-sorted OrdA (map idF xs))) noDup
+              (trans (trans (cong (nub OrdA ∘F sort OrdA) (map-id xs))
+                            (cong (nub OrdA) (law-sort-preserve-sorted OrdA xs sorted)))
+                     (law-nub-preserve-no-dup OrdA xs noDup))
+
+    ctFuncComp : {α β γ : Obj} {f : Hom α β} {g : Hom β γ}
+               → setmap {α = α} {γ} (proj₁ g ∘F proj₁ f , _∘Ct_ {proj₁ α} {proj₁ β} {proj₁ γ} {proj₁ g} {proj₁ f} {proj₂ α} {proj₂ β} {proj₂ γ} (proj₂ g) (proj₂ f))
+               ≡ setmap {α = β} {γ} g ∘F setmap f
+    ctFuncComp {α , OrdA} {β , OrdB} {γ , OrdC} {f , tt} {g , tt} = funExt helper
+      where
+        
+        helper : (x : ListSet (α , OrdA)) → setmap (g ∘F f , tt) x ≡ (setmap (g , tt) ∘F setmap (f , tt)) x
+        helper (listSet xs sorted noDup) = begin
+          setmap {α , OrdA} {γ , OrdC} (g ∘F f , tt) (listSet xs sorted noDup)
+            ≡⟨ refl ⟩
+          listSet (nub OrdC (sort OrdC (map (g ∘F f) xs)))
+                  (law-nub-preserve-sorted OrdC (sort OrdC (map (g ∘F f) xs)) (law-sort-sorted OrdC (map (g ∘F f) xs)))
+                  (law-nub-no-dup OrdC (sort OrdC (map (g ∘F f) xs)) (law-sort-sorted OrdC (map (g ∘F f) xs)))
+            ≡⟨ eqListSet OrdC (nub OrdC (sort OrdC (map (g ∘F f) xs))) (nub OrdC (sort OrdC (map g (nub OrdB (sort OrdB (map f xs))))))
+                         (law-nub-preserve-sorted OrdC (sort OrdC (map (g ∘F f) xs)) (law-sort-sorted OrdC (map (g ∘F f) xs)))
+                         (law-nub-preserve-sorted OrdC (sort OrdC (map g (nub OrdB (sort OrdB (map f xs))))) (law-sort-sorted OrdC (map g (nub OrdB (sort OrdB (map f xs))))))
+                         (law-nub-no-dup OrdC (sort OrdC (map (g ∘F f) xs)) (law-sort-sorted OrdC (map (g ∘F f) xs)))
+                         (law-nub-no-dup OrdC (sort OrdC (map g (nub OrdB (sort OrdB (map f xs))))) (law-sort-sorted OrdC (map g (nub OrdB (sort OrdB (map f xs))))))
+                         helper' ⟩
+          listSet (nub OrdC (sort OrdC (map g (nub OrdB (sort OrdB (map f xs))))))
+                  (law-nub-preserve-sorted OrdC (sort OrdC (map g (nub OrdB (sort OrdB (map f xs))))) (law-sort-sorted OrdC (map g (nub OrdB (sort OrdB (map f xs))))))
+                  (law-nub-no-dup OrdC (sort OrdC (map g (nub OrdB (sort OrdB (map f xs))))) (law-sort-sorted OrdC (map g (nub OrdB (sort OrdB (map f xs))))))
+            ≡⟨ refl ⟩
+          setmap {β , OrdB} {γ , OrdC} (g , tt) (setmap {α , OrdA} {β , OrdB} (f , tt) (listSet xs sorted noDup))
+            ≡⟨ refl ⟩
+          (setmap {β , OrdB} {γ , OrdC} (g , tt) ∘F setmap {α , OrdA} {β , OrdB} (f , tt)) (listSet xs sorted noDup) ∎
+            where
+              helper' : nub OrdC (sort OrdC (map (g ∘F f) xs)) ≡ nub OrdC (sort OrdC (map g (nub OrdB (sort OrdB (map f xs)))))
+              helper' = begin
+                nub OrdC (sort OrdC (map (g ∘F f) xs))
+                  ≡⟨ cong (nub OrdC ∘F sort OrdC) (map-compose xs) ⟩
+                nub OrdC (sort OrdC (map g (map f xs)))
+                  ≡⟨ {!!} ⟩
+                nub OrdC (nub OrdC (sort OrdC (sort OrdC (map g (map f xs)))))
+                  ≡⟨ {!!} ⟩
+                nub OrdC (sort OrdC (nub OrdC (map g (sort OrdB (map f xs)))))
+                  ≡⟨ {!!} ⟩
+                nub OrdC (sort OrdC (nub OrdC (map g (sort OrdB (map f xs)))))
+                  ≡⟨ {!!} ⟩
+                nub OrdC (sort OrdC (map g (nub OrdB (sort OrdB (map f xs))))) ∎
