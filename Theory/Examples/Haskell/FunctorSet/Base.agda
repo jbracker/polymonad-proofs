@@ -49,6 +49,11 @@ record OrdInstance {ℓEq ℓOrd : Level} (A : Type) : Set (lsuc ℓEq ⊔ lsuc 
   
   open Relation.Binary.IsDecTotalOrder isDecTotalOrder public
   
+  total-contr : {x y : A} → ¬ (x ≤ y) → ¬ (y ≤ x) → ⊥
+  total-contr {x} {y} x≤y y≤x with total x y
+  total-contr ¬x≤y ¬y≤x | inj₁ x≤y = ¬x≤y x≤y
+  total-contr ¬x≤y ¬y≤x | inj₂ y≤x = ¬y≤x y≤x
+
   excluded-middle-ord : {x y : A} → ¬ (x ≤ y) → (y ≤ x)
   excluded-middle-ord {x} {y} ¬x≤y with total x y
   excluded-middle-ord {x} {y} ¬x≤y | inj₁ x≤y = ⊥-elim (¬x≤y x≤y)
@@ -59,9 +64,9 @@ record OrdInstance {ℓEq ℓOrd : Level} (A : Type) : Set (lsuc ℓEq ⊔ lsuc 
 -- Definition of predicates on lists
 -------------------------------------------------------------------------------
 
-IsSortedList : {ℓEq : Level} {A : Type} → OrdInstance {ℓEq} A → List A → Set lzero
-IsSortedList OrdA [] = ⊤
-IsSortedList OrdA (x ∷ []) = ⊤
+IsSortedList : {ℓEq ℓOrd : Level} {A : Type} → OrdInstance {ℓEq} {ℓOrd} A → List A → Set ℓOrd
+IsSortedList OrdA [] = Lift ⊤
+IsSortedList OrdA (x ∷ []) = Lift ⊤
 IsSortedList OrdA (x ∷ y ∷ xs) = (x ≤ y) × IsSortedList OrdA (y ∷ xs)
   where _≤_ = OrdInstance._≤_ OrdA
 
@@ -84,13 +89,19 @@ IsNoDupList : {ℓEq ℓOrd : Level} {A : Type} → OrdInstance {ℓEq} {ℓOrd}
 IsNoDupList OrdA [] = Lift ⊤
 IsNoDupList OrdA (x ∷ xs) = ¬ (InList OrdA x xs) × IsNoDupList OrdA xs
 
-law-IsSortedList-forget-elem : {ℓEq : Level} {A : Type} 
-                             → (OrdA : OrdInstance {ℓEq} A) → (x : A) → (xs : List A) 
-                             → IsSortedList OrdA (x ∷ xs) → IsSortedList OrdA xs
-law-IsSortedList-forget-elem OrdA x [] tt = tt
-law-IsSortedList-forget-elem OrdA x (y ∷ xs) (x≤y , sorted) = sorted
+IsSortedList-forget-elem : {ℓEq ℓOrd : Level} {A : Type} 
+                         → (OrdA : OrdInstance {ℓEq} {ℓOrd} A) → (x : A) → (xs : List A) 
+                         → IsSortedList OrdA (x ∷ xs) → IsSortedList OrdA xs
+IsSortedList-forget-elem OrdA x [] (lift tt) = lift tt
+IsSortedList-forget-elem OrdA x (y ∷ xs) (x≤y , sorted) = sorted
 
-proof-irr-IsSortedList : {ℓEq : Level} {A : Type} → (OrdA : OrdInstance {ℓEq} A) → (xs : List A) → ProofIrrelevance (IsSortedList OrdA xs)
+IsSortedList-replace-elem : {ℓEq ℓOrd : Level} {A : Type} → (OrdA : OrdInstance {ℓEq} {ℓOrd} A) 
+                          → (z x : A) → (xs : List A) 
+                          → OrdInstance._≤_ OrdA x z → IsSortedList OrdA (z ∷ xs) → IsSortedList OrdA (x ∷ xs)
+IsSortedList-replace-elem OrdA z x [] x≤z (lift tt) = lift tt
+IsSortedList-replace-elem OrdA z x (y ∷ xs) x≤z (z≤y , sorted) = OrdInstance.trans OrdA x≤z z≤y , sorted
+
+proof-irr-IsSortedList : {ℓEq ℓOrd : Level} {A : Type} → (OrdA : OrdInstance {ℓEq} {ℓOrd} A) → (xs : List A) → ProofIrrelevance (IsSortedList OrdA xs)
 proof-irr-IsSortedList OrdA [] sortedX sortedY = refl
 proof-irr-IsSortedList OrdA (x ∷ []) sortedX sortedY = refl
 proof-irr-IsSortedList OrdA (x ∷ y ∷ xs) (x≤y , sortedX) (x≤y' , sortedY) with OrdInstance.proof-irr-ord OrdA x≤y x≤y'
