@@ -68,6 +68,18 @@ IsSortedList OrdA (x ∷ y ∷ xs) = (x ≤ y) × IsSortedList OrdA (y ∷ xs)
 InList : {ℓEq ℓOrd : Level} {A : Type} → (OrdA : OrdInstance {ℓEq} {ℓOrd} A) → A → List A → Set ℓEq
 InList {ℓEq} {ℓOrd} {A} OrdA x xs = Any (OrdInstance._==_ OrdA x) xs
 
+¬InList-forget-elem : {ℓEq ℓOrd : Level} {A : Type} → (OrdA : OrdInstance {ℓEq} {ℓOrd} A)
+                    → (y x : A) (xs : List A)
+                    → ¬ (InList OrdA y (x ∷ xs)) → ¬ (InList OrdA y xs)
+¬InList-forget-elem OrdA y x xs ¬y∈x∷xs y∈xs = ¬y∈x∷xs (there y∈xs)
+
+InList-forget-elem : {ℓEq ℓOrd : Level} {A : Type} → (OrdA : OrdInstance {ℓEq} {ℓOrd} A)
+                    → (y x : A) (xs : List A)
+                    → ¬ (OrdInstance._==_ OrdA y x)
+                    → InList OrdA y (x ∷ xs) → InList OrdA y xs
+InList-forget-elem OrdA y x xs ¬y==x (here y==x) = ⊥-elim (¬y==x y==x)
+InList-forget-elem OrdA y x xs ¬y==x (there y∈x∷xs) = y∈x∷xs
+
 IsNoDupList : {ℓEq ℓOrd : Level} {A : Type} → OrdInstance {ℓEq} {ℓOrd} A → List A → Set (ℓEq ⊔ ℓOrd)
 IsNoDupList OrdA [] = Lift ⊤
 IsNoDupList OrdA (x ∷ xs) = ¬ (InList OrdA x xs) × IsNoDupList OrdA xs
