@@ -54,6 +54,9 @@ record OrdInstance {ℓEq ℓOrd : Level} (A : Type) : Set (lsuc ℓEq ⊔ lsuc 
   total-contr ¬x≤y ¬y≤x | inj₁ x≤y = ¬x≤y x≤y
   total-contr ¬x≤y ¬y≤x | inj₂ y≤x = ¬y≤x y≤x
 
+  sym-not-eq : {x y : A} → ¬ (x == y) → ¬ (y == x)
+  sym-not-eq {x} {y} ¬x==y y==x = ¬x==y (sym-eq y==x)
+
   excluded-middle-ord : {x y : A} → ¬ (x ≤ y) → (y ≤ x)
   excluded-middle-ord {x} {y} ¬x≤y with total x y
   excluded-middle-ord {x} {y} ¬x≤y | inj₁ x≤y = ⊥-elim (¬x≤y x≤y)
@@ -70,6 +73,18 @@ IsSortedList OrdA (x ∷ []) = Lift ⊤
 IsSortedList OrdA (x ∷ y ∷ xs) = (x ≤ y) × IsSortedList OrdA (y ∷ xs)
   where _≤_ = OrdInstance._≤_ OrdA
 
+IsSortedList-forget-elem : {ℓEq ℓOrd : Level} {A : Type} 
+                         → (OrdA : OrdInstance {ℓEq} {ℓOrd} A) → (x : A) → (xs : List A) 
+                         → IsSortedList OrdA (x ∷ xs) → IsSortedList OrdA xs
+IsSortedList-forget-elem OrdA x [] (lift tt) = lift tt
+IsSortedList-forget-elem OrdA x (y ∷ xs) (x≤y , sorted) = sorted
+
+IsSortedList-replace-elem : {ℓEq ℓOrd : Level} {A : Type} → (OrdA : OrdInstance {ℓEq} {ℓOrd} A) 
+                          → (z x : A) → (xs : List A) 
+                          → OrdInstance._≤_ OrdA x z → IsSortedList OrdA (z ∷ xs) → IsSortedList OrdA (x ∷ xs)
+IsSortedList-replace-elem OrdA z x [] x≤z (lift tt) = lift tt
+IsSortedList-replace-elem OrdA z x (y ∷ xs) x≤z (z≤y , sorted) = OrdInstance.trans OrdA x≤z z≤y , sorted
+
 InList : {ℓEq ℓOrd : Level} {A : Type} → (OrdA : OrdInstance {ℓEq} {ℓOrd} A) → A → List A → Set ℓEq
 InList {ℓEq} {ℓOrd} {A} OrdA x xs = Any (OrdInstance._==_ OrdA x) xs
 
@@ -77,6 +92,16 @@ InList {ℓEq} {ℓOrd} {A} OrdA x xs = Any (OrdInstance._==_ OrdA x) xs
                     → (y x : A) (xs : List A)
                     → ¬ (InList OrdA y (x ∷ xs)) → ¬ (InList OrdA y xs)
 ¬InList-forget-elem OrdA y x xs ¬y∈x∷xs y∈xs = ¬y∈x∷xs (there y∈xs)
+
+¬InList-prepend-elem : {ℓEq ℓOrd : Level} {A : Type} → (OrdA : OrdInstance {ℓEq} {ℓOrd} A)
+                              → (y x : A) → (xs : List A)
+                              → ¬ (OrdInstance._==_ OrdA y x)
+                              → ¬ InList OrdA y xs
+                              → ¬ InList OrdA y (x ∷ xs)
+¬InList-prepend-elem OrdA y x [] ¬y==x ¬y∈[] (here y==x) = ¬y==x y==x
+¬InList-prepend-elem OrdA y x [] ¬y==x ¬y∈[] (there ())
+¬InList-prepend-elem OrdA y x (z ∷ xs) ¬y==x ¬y∈z∷xs (here y==x) = ¬y==x y==x
+¬InList-prepend-elem OrdA y x (z ∷ xs) ¬y==x ¬y∈z∷xs (there y∈z∷xs) = ¬y∈z∷xs y∈z∷xs
 
 InList-forget-elem : {ℓEq ℓOrd : Level} {A : Type} → (OrdA : OrdInstance {ℓEq} {ℓOrd} A)
                     → (y x : A) (xs : List A)
@@ -89,17 +114,9 @@ IsNoDupList : {ℓEq ℓOrd : Level} {A : Type} → OrdInstance {ℓEq} {ℓOrd}
 IsNoDupList OrdA [] = Lift ⊤
 IsNoDupList OrdA (x ∷ xs) = ¬ (InList OrdA x xs) × IsNoDupList OrdA xs
 
-IsSortedList-forget-elem : {ℓEq ℓOrd : Level} {A : Type} 
-                         → (OrdA : OrdInstance {ℓEq} {ℓOrd} A) → (x : A) → (xs : List A) 
-                         → IsSortedList OrdA (x ∷ xs) → IsSortedList OrdA xs
-IsSortedList-forget-elem OrdA x [] (lift tt) = lift tt
-IsSortedList-forget-elem OrdA x (y ∷ xs) (x≤y , sorted) = sorted
-
-IsSortedList-replace-elem : {ℓEq ℓOrd : Level} {A : Type} → (OrdA : OrdInstance {ℓEq} {ℓOrd} A) 
-                          → (z x : A) → (xs : List A) 
-                          → OrdInstance._≤_ OrdA x z → IsSortedList OrdA (z ∷ xs) → IsSortedList OrdA (x ∷ xs)
-IsSortedList-replace-elem OrdA z x [] x≤z (lift tt) = lift tt
-IsSortedList-replace-elem OrdA z x (y ∷ xs) x≤z (z≤y , sorted) = OrdInstance.trans OrdA x≤z z≤y , sorted
+-------------------------------------------------------------------------------
+-- Proof irrelevancy for sorted and no duplicate list
+-------------------------------------------------------------------------------
 
 proof-irr-IsSortedList : {ℓEq ℓOrd : Level} {A : Type} → (OrdA : OrdInstance {ℓEq} {ℓOrd} A) → (xs : List A) → ProofIrrelevance (IsSortedList OrdA xs)
 proof-irr-IsSortedList OrdA [] sortedX sortedY = refl
@@ -116,6 +133,10 @@ proof-irr-IsNoDupList OrdA (x ∷ xs) (¬x∈xs , noDupX) (.¬x∈xs , noDupY) |
 -------------------------------------------------------------------------------
 -- Definition of ordered sets in form of lists
 -------------------------------------------------------------------------------
+
+private
+  Obj : {ℓEq ℓOrd : Level} → Set (lsuc (ℓOrd ⊔ ℓEq))
+  Obj {ℓEq} {ℓOrd} = Σ Type (OrdInstance {ℓEq} {ℓOrd})
 
 data ListSet (A : Σ Type OrdInstance) : Type where
   listSet : (xs : List (proj₁ A)) → IsSortedList (proj₂ A) xs → IsNoDupList (proj₂ A) xs → ListSet A
