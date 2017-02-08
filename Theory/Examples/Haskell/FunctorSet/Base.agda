@@ -62,6 +62,64 @@ record OrdInstance {ℓEq ℓOrd : Level} (A : Type) : Set (lsuc ℓEq ⊔ lsuc 
   excluded-middle-ord {x} {y} ¬x≤y | inj₁ x≤y = ⊥-elim (¬x≤y x≤y)
   excluded-middle-ord {x} {y} ¬x≤y | inj₂ y≤x = y≤x
 
+-------------------------------------------------------------------------------
+-- Eq instance of lists in Haskell
+-------------------------------------------------------------------------------
+
+EqList : {A : Type} → EqInstance A → EqInstance (List A)
+EqList {A} EqA = record 
+  { _==_ = _==_
+  ; isDecEquivalence = record 
+    { isEquivalence = record 
+      { refl = λ {xs} → lrefl {xs} 
+      ; sym = λ {xs} {ys} → lsym {xs} {ys} 
+      ; trans = λ {xs} {ys} {zs} → ltrans {xs} {ys} {zs}
+      } 
+    ; _≟_ = _=?=_
+    }
+  ; proof-irr-eq = λ {xs} {ys} → proof-irr {xs} {ys}
+  } where
+    _=A=_ = EqInstance._==_ EqA
+    
+    _==_ : List A → List A → Set lzero
+    [] == [] = ⊤
+    [] == (x ∷ ys) = ⊥
+    (x ∷ xs) == [] = ⊥
+    (x ∷ xs) == (y ∷ ys) = (x =A= y) × (xs == ys)
+    
+    lrefl : {xs : List A} → xs == xs
+    lrefl {[]} = tt
+    lrefl {x ∷ xs} = EqInstance.refl-eq EqA {x} , lrefl {xs}
+    
+    lsym : {xs ys : List A} → xs == ys → ys == xs
+    lsym {[]} {[]} tt = tt
+    lsym {[]} {x ∷ ys} ()
+    lsym {x ∷ xs} {[]} ()
+    lsym {x ∷ xs} {y ∷ ys} (x==y , xs==ys) = EqInstance.sym-eq EqA x==y , lsym {xs} {ys} xs==ys
+    
+    ltrans : {xs ys zs : List A} → xs == ys → ys == zs → xs == zs
+    ltrans {[]} {[]} {[]} tt tt = tt
+    ltrans {[]} {[]} {z ∷ zs} tt ()
+    ltrans {[]} {y ∷ ys} () ys==zs
+    ltrans {x ∷ xs} {[]} () ys==zs
+    ltrans {x ∷ xs} {y ∷ ys} {[]} (x==y , xs==ys) ()
+    ltrans {x ∷ xs} {y ∷ ys} {z ∷ zs} (x==y , xs==ys) (y==z , ys==zs) = EqInstance.trans-eq EqA x==y y==z , ltrans {xs} {ys} {zs} xs==ys ys==zs
+    
+    _=?=_ : (x y : List A) → Dec (x == y)
+    [] =?= [] = yes tt
+    [] =?= (x ∷ ys) = no (λ ())
+    (x ∷ xs) =?= [] = no (λ ())
+    (x ∷ xs) =?= (y ∷ ys) with EqInstance.dec-eq EqA x y | xs =?= ys
+    (x ∷ xs) =?= (y ∷ ys) | yes x==y | yes xs==ys = yes (x==y , xs==ys)
+    (x ∷ xs) =?= (y ∷ ys) | yes x==y | no ¬xs==ys = no (¬xs==ys ∘F proj₂)
+    (x ∷ xs) =?= (y ∷ ys) | no ¬x==y | xs=?=ys    = no (¬x==y   ∘F proj₁)
+    
+    proof-irr : {xs ys : List A} → ProofIrrelevance (xs == ys)
+    proof-irr {[]} {[]} tt tt = refl
+    proof-irr {[]} {y ∷ ys} () eqYs
+    proof-irr {x ∷ xs} {[]} () eqXs
+    proof-irr {x ∷ xs} {y ∷ ys} (eqX , eqXs) (eqY , eqYs) with EqInstance.proof-irr-eq EqA eqX eqY | proof-irr {xs} {ys} eqXs eqYs
+    proof-irr {x ∷ xs} {y ∷ ys} (eqX , eqXs) (.eqX , .eqXs) | refl | refl = refl
 
 -------------------------------------------------------------------------------
 -- Definition of predicates on lists
