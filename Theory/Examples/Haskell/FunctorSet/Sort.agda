@@ -25,27 +25,22 @@ insert OrdA x (y ∷ ys) with OrdInstance.dec-ord OrdA x y
 insert OrdA x (y ∷ ys) | yes x≤y = x ∷ y ∷ ys
 insert OrdA x (y ∷ ys) | no ¬x≤y = y ∷ insert OrdA x ys
 
-private
-  insert-preserves-sorted' : {ℓEq ℓOrd : Level} {A : Type}
-                           → (OrdA : OrdInstance {ℓEq} {ℓOrd} A)
-                           → (x z : A) → (xs : List A)
-                           → IsSortedList OrdA (x ∷ xs)
-                           → (IsSortedList OrdA (x ∷ insert OrdA z xs)) 
-                           ⊎ (IsSortedList OrdA (z ∷ x ∷ xs))
-  insert-preserves-sorted' OrdA x z [] (lift tt) with OrdInstance.dec-ord OrdA x z 
-  insert-preserves-sorted' OrdA x z [] (lift tt) | yes x≤z = inj₁ $ x≤z , lift tt
-  insert-preserves-sorted' OrdA x z [] (lift tt) | no ¬x≤z with OrdInstance.total OrdA x z
-  insert-preserves-sorted' OrdA x z [] (lift tt) | no ¬x≤z | inj₁ x≤z = ⊥-elim (¬x≤z x≤z)
-  insert-preserves-sorted' OrdA x z [] (lift tt) | no ¬x≤z | inj₂ z≤x = inj₂ $ z≤x , lift tt
-  insert-preserves-sorted' OrdA x z (y ∷ xs) (x≤y , sorted[y∷xs]) with OrdInstance.dec-ord OrdA x z
-  insert-preserves-sorted' OrdA x z (y ∷ xs) (x≤y , sorted[y∷xs]) | yes x≤z with OrdInstance.dec-ord OrdA z y
-  insert-preserves-sorted' OrdA x z (y ∷ xs) (x≤y , sorted[y∷xs]) | yes x≤z | yes z≤y = inj₁ $ x≤z , z≤y , sorted[y∷xs]
-  insert-preserves-sorted' OrdA x z (y ∷ xs) (x≤y , sorted[y∷xs]) | yes x≤z | no ¬z≤y with insert-preserves-sorted' OrdA y z xs sorted[y∷xs]
-  insert-preserves-sorted' OrdA x z (y ∷ xs) (x≤y , sorted[y∷xs]) | yes x≤z | no ¬z≤y | inj₁ p = inj₁ $ x≤y , p
-  insert-preserves-sorted' OrdA x z (y ∷ xs) (x≤y , sorted[y∷xs]) | yes x≤z | no ¬z≤y | inj₂ (z≤y , _) = ⊥-elim (¬z≤y z≤y)
-  insert-preserves-sorted' OrdA x z (y ∷ xs) (x≤y , sorted[y∷xs]) | no ¬x≤z with OrdInstance.total OrdA x z
-  insert-preserves-sorted' OrdA x z (y ∷ xs) (x≤y , sorted[y∷xs]) | no ¬x≤z | inj₁ x≤z = ⊥-elim (¬x≤z x≤z)
-  insert-preserves-sorted' OrdA x z (y ∷ xs) (x≤y , sorted[y∷xs]) | no ¬x≤z | inj₂ z≤x = inj₂ $ z≤x , x≤y , sorted[y∷xs]
+insert-preserves-sorted' : {ℓEq ℓOrd : Level} {A : Type}
+                         → (OrdA : OrdInstance {ℓEq} {ℓOrd} A)
+                         → (x z : A) → (xs : List A)
+                         → (OrdInstance._≤_ OrdA x z)
+                         → IsSortedList OrdA (x ∷ xs)
+                         → IsSortedList OrdA (x ∷ insert OrdA z xs)
+insert-preserves-sorted' OrdA x z [] x≤z (lift tt) with OrdInstance.dec-ord OrdA x z 
+insert-preserves-sorted' OrdA x z [] x≤z (lift tt) | yes _ = x≤z , lift tt
+insert-preserves-sorted' OrdA x z [] x≤z (lift tt) | no ¬x≤z = ⊥-elim (¬x≤z x≤z)
+insert-preserves-sorted' OrdA x z (y ∷ xs) x≤z (x≤y , sorted[y∷xs]) with OrdInstance.dec-ord OrdA x z
+insert-preserves-sorted' OrdA x z (y ∷ xs) x≤z (x≤y , sorted[y∷xs]) | yes _ with OrdInstance.dec-ord OrdA z y
+insert-preserves-sorted' OrdA x z (y ∷ xs) x≤z (x≤y , sorted[y∷xs]) | yes _ | yes z≤y = x≤z , z≤y , sorted[y∷xs]
+insert-preserves-sorted' OrdA x z (y ∷ xs) x≤z (x≤y , sorted[y∷xs]) | yes _ | no ¬z≤y 
+  = x≤y 
+  , insert-preserves-sorted' OrdA y z xs (OrdInstance.excluded-middle-ord OrdA ¬z≤y) sorted[y∷xs]
+insert-preserves-sorted' OrdA x z (y ∷ xs) x≤z (x≤y , sorted[y∷xs]) | no ¬x≤z = ⊥-elim (¬x≤z x≤z)
 
 insert-preserves-sorted : {ℓEq ℓOrd : Level} {A : Type} → (OrdA : OrdInstance {ℓEq} {ℓOrd} A) 
                         → (x : A) → (xs : List A) 
@@ -62,10 +57,22 @@ insert-preserves-sorted OrdA x (y ∷ z ∷ xs) (y≤z , sorted[z∷xs]) | no ¬
 insert-preserves-sorted OrdA x (y ∷ z ∷ xs) (y≤z , sorted[z∷xs]) | no ¬x≤y | inj₁ x≤y = ⊥-elim (¬x≤y x≤y)
 insert-preserves-sorted OrdA x (y ∷ z ∷ xs) (y≤z , sorted[z∷xs]) | no ¬x≤y | inj₂ y≤x with OrdInstance.dec-ord OrdA x z
 insert-preserves-sorted OrdA x (y ∷ z ∷ xs) (y≤z , sorted[z∷xs]) | no ¬x≤y | inj₂ y≤x | yes x≤z = y≤x , x≤z , sorted[z∷xs]
-insert-preserves-sorted OrdA x (y ∷ z ∷ xs) (y≤z , sorted[z∷xs]) | no ¬x≤y | inj₂ y≤x | no ¬x≤z with insert-preserves-sorted' OrdA z x xs sorted[z∷xs]
-insert-preserves-sorted OrdA x (y ∷ z ∷ xs) (y≤z , sorted[z∷xs]) | no ¬x≤y | inj₂ y≤x | no ¬x≤z | inj₁ p = y≤z , p
-insert-preserves-sorted OrdA x (y ∷ z ∷ xs) (y≤z , sorted[z∷xs]) | no ¬x≤y | inj₂ y≤x | no ¬x≤z | inj₂ (x≤z , _) = ⊥-elim (¬x≤z x≤z) 
+insert-preserves-sorted OrdA x (y ∷ z ∷ xs) (y≤z , sorted[z∷xs]) | no ¬x≤y | inj₂ y≤x | no ¬x≤z with insert-preserves-sorted' OrdA z x xs (OrdInstance.excluded-middle-ord OrdA ¬x≤z) sorted[z∷xs]
+insert-preserves-sorted OrdA x (y ∷ z ∷ xs) (y≤z , sorted[z∷xs]) | no ¬x≤y | inj₂ y≤x | no ¬x≤z | p = y≤z , p
 
+insert-preserves-missing-elem : {ℓEq ℓOrd : Level} {A : Type} → (OrdA : OrdInstance {ℓEq} {ℓOrd} A) 
+                              → (x y : A) → (xs : List A) 
+                              → ¬ (OrdInstance._==_ OrdA x y)
+                              → ¬ InList OrdA x xs
+                              → ¬ InList OrdA x (insert OrdA y xs)
+insert-preserves-missing-elem OrdA x y [] ¬y==x ¬x∈xs (here y==x) = ¬y==x y==x
+insert-preserves-missing-elem OrdA x y [] ¬y==x ¬x∈xs (there ())
+insert-preserves-missing-elem OrdA x y (z ∷ xs) ¬y==x ¬x∈xs x∈insxs with OrdInstance.dec-ord OrdA y z
+insert-preserves-missing-elem OrdA x y (z ∷ xs) ¬y==x ¬x∈xs x∈insxs | yes y≤z 
+  = ¬x∈xs (InList-forget-elem OrdA x y (z ∷ xs) ¬y==x x∈insxs)
+insert-preserves-missing-elem OrdA x y (z ∷ xs) ¬y==x ¬x∈xs (here x==z) | no ¬y≤z = ¬x∈xs (here x==z)
+insert-preserves-missing-elem OrdA x y (z ∷ xs) ¬y==x ¬x∈xs (there x∈insxs) | no ¬y≤z 
+  = insert-preserves-missing-elem OrdA x y xs ¬y==x (¬InList-forget-elem OrdA x z xs ¬x∈xs) x∈insxs
 
 insert-smallest-in-front' : {ℓEq ℓOrd : Level} {A : Type} → (OrdA : OrdInstance {ℓEq} {ℓOrd} A)
                           → (x y : A) → (xs : List A)

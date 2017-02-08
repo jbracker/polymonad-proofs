@@ -27,45 +27,67 @@ remove OrdA y (x ∷ xs) with OrdInstance.dec-eq OrdA y x
 remove OrdA y (x ∷ xs) | yes y==x = remove OrdA y xs
 remove OrdA y (x ∷ xs) | no ¬y==x = x ∷ remove OrdA y xs
 
-private
-  remove-produces-missing-elem : {ℓEq ℓOrd : Level} {A : Type} → (OrdA : OrdInstance {ℓEq} {ℓOrd} A)
-                               → (x : A) → (xs : List A) → ¬ (InList OrdA x (remove OrdA x xs))
-  remove-produces-missing-elem OrdA y [] ()
-  remove-produces-missing-elem OrdA y (x ∷ xs) y∈xs with OrdInstance.dec-eq OrdA y x
-  remove-produces-missing-elem OrdA y (x ∷ xs) y∈xs | yes y==x = remove-produces-missing-elem OrdA y xs y∈xs
-  remove-produces-missing-elem OrdA y (x ∷ xs) (here y==x) | no ¬y==x = ¬y==x y==x
-  remove-produces-missing-elem OrdA y (x ∷ xs) (there y∈xs) | no ¬y==x = remove-produces-missing-elem OrdA y xs y∈xs
 
-private
-  remove-preserves-missing-elem : {ℓEq ℓOrd : Level} {A : Type} → (OrdA : OrdInstance {ℓEq} {ℓOrd} A)
-                          → (y x : A) → (xs : List A) → ¬ (InList OrdA x xs) → ¬ InList OrdA x (remove OrdA y xs)
-  remove-preserves-missing-elem OrdA y x [] ¬x∈xs = ¬x∈xs
-  remove-preserves-missing-elem OrdA y x (x' ∷ xs) ¬x∈xs x∈remxs with OrdInstance.dec-eq OrdA y x' | OrdInstance.dec-eq OrdA x x'
-  remove-preserves-missing-elem OrdA y x (x' ∷ xs) ¬x∈xs x∈remxs | yes y==x' | yes x==x' = ¬x∈xs (here x==x')
-  remove-preserves-missing-elem OrdA y x (x' ∷ xs) ¬x∈xs x∈remxs | yes y==x' | no ¬x==x' =
-    remove-preserves-missing-elem OrdA y x xs (¬InList-forget-elem OrdA x x' xs ¬x∈xs) x∈remxs
-  remove-preserves-missing-elem OrdA y x (x' ∷ xs) ¬x∈xs x∈remxs | no ¬y==x' | yes x==x' = ¬x∈xs (here x==x')
-  remove-preserves-missing-elem OrdA y x (x' ∷ xs) ¬x∈xs x∈remxs | no ¬y==x' | no ¬x==x' = 
-    remove-preserves-missing-elem OrdA y x xs (¬InList-forget-elem OrdA x x' xs ¬x∈xs) (InList-forget-elem OrdA x x' (remove OrdA y xs) ¬x==x' x∈remxs)
+remove-produces-missing-elem : {ℓEq ℓOrd : Level} {A : Type} → (OrdA : OrdInstance {ℓEq} {ℓOrd} A)
+                             → (x : A) → (xs : List A) → ¬ (InList OrdA x (remove OrdA x xs))
+remove-produces-missing-elem OrdA y [] ()
+remove-produces-missing-elem OrdA y (x ∷ xs) y∈xs with OrdInstance.dec-eq OrdA y x
+remove-produces-missing-elem OrdA y (x ∷ xs) y∈xs | yes y==x = remove-produces-missing-elem OrdA y xs y∈xs
+remove-produces-missing-elem OrdA y (x ∷ xs) (here y==x) | no ¬y==x = ¬y==x y==x
+remove-produces-missing-elem OrdA y (x ∷ xs) (there y∈xs) | no ¬y==x = remove-produces-missing-elem OrdA y xs y∈xs
 
-private
-  remove-preserves-no-dup : {ℓEq ℓOrd : Level} {A : Type} → (OrdA : OrdInstance {ℓEq} {ℓOrd} A)
-                          → (x : A) → (xs : List A)
-                          → IsNoDupList OrdA xs → IsNoDupList OrdA (remove OrdA x xs)
-  remove-preserves-no-dup OrdA y [] noDup = lift tt
-  remove-preserves-no-dup OrdA y (x ∷ xs) noDup with OrdInstance.dec-eq OrdA y x
-  remove-preserves-no-dup OrdA y (x ∷ xs) noDup | yes y==x = remove-preserves-no-dup OrdA y xs (proj₂ noDup)
-  remove-preserves-no-dup OrdA y (x ∷ xs) noDup | no ¬y==x = remove-preserves-missing-elem OrdA y x xs (proj₁ noDup)
-                                                           , remove-preserves-no-dup OrdA y xs (proj₂ noDup)
+remove-preserves-existing-elem : {ℓEq ℓOrd : Level} {A : Type} → (OrdA : OrdInstance {ℓEq} {ℓOrd} A)
+                               → (y x : A) → (xs : List A)
+                               → InList OrdA x (remove OrdA y xs) → InList OrdA x xs
+remove-preserves-existing-elem OrdA y x [] ()
+remove-preserves-existing-elem OrdA y x (z ∷ xs) x∈remxs with OrdInstance.dec-eq OrdA y z
+remove-preserves-existing-elem OrdA y x (z ∷ xs) x∈remxs | yes y==z = there (remove-preserves-existing-elem OrdA y x xs x∈remxs)
+remove-preserves-existing-elem OrdA y x (z ∷ xs) (here x==z) | no ¬y==z = here x==z
+remove-preserves-existing-elem OrdA y x (z ∷ xs) (there x∈remxs) | no ¬y==z = there (remove-preserves-existing-elem OrdA y x xs x∈remxs)
 
-private
-  remove-removing-missing-elem : {ℓEq ℓOrd : Level} {A : Type} → (OrdA : OrdInstance {ℓEq} {ℓOrd} A)
-                               → (x : A) → (ys : List A)
-                               → ¬ (InList OrdA x ys) → remove OrdA x ys ≡ ys
-  remove-removing-missing-elem OrdA x [] ¬x∈ys = refl
-  remove-removing-missing-elem OrdA x (y ∷ ys) ¬x∈ys with OrdInstance.dec-eq OrdA x y
-  remove-removing-missing-elem OrdA x (y ∷ ys) ¬x∈ys | yes x==y = ⊥-elim (¬x∈ys (here x==y))
-  remove-removing-missing-elem OrdA x (y ∷ ys) ¬x∈ys | no ¬x==y = cong (λ X → y ∷ X) (remove-removing-missing-elem OrdA x ys (¬InList-forget-elem OrdA x y ys ¬x∈ys))
+remove-preserves-missing-elem : {ℓEq ℓOrd : Level} {A : Type} → (OrdA : OrdInstance {ℓEq} {ℓOrd} A)
+                              → (y x : A) → (xs : List A)
+                              → ¬ (InList OrdA x xs) → ¬ InList OrdA x (remove OrdA y xs)
+remove-preserves-missing-elem OrdA y x [] ¬x∈xs = ¬x∈xs
+remove-preserves-missing-elem OrdA y x (x' ∷ xs) ¬x∈xs x∈remxs with OrdInstance.dec-eq OrdA y x' | OrdInstance.dec-eq OrdA x x'
+remove-preserves-missing-elem OrdA y x (x' ∷ xs) ¬x∈xs x∈remxs | yes y==x' | yes x==x' = ¬x∈xs (here x==x')
+remove-preserves-missing-elem OrdA y x (x' ∷ xs) ¬x∈xs x∈remxs | yes y==x' | no ¬x==x' =
+  remove-preserves-missing-elem OrdA y x xs (¬InList-forget-elem OrdA x x' xs ¬x∈xs) x∈remxs
+remove-preserves-missing-elem OrdA y x (x' ∷ xs) ¬x∈xs x∈remxs | no ¬y==x' | yes x==x' = ¬x∈xs (here x==x')
+remove-preserves-missing-elem OrdA y x (x' ∷ xs) ¬x∈xs x∈remxs | no ¬y==x' | no ¬x==x' = 
+  remove-preserves-missing-elem OrdA y x xs (¬InList-forget-elem OrdA x x' xs ¬x∈xs) (InList-forget-elem OrdA x x' (remove OrdA y xs) ¬x==x' x∈remxs)
+
+remove-preserves-missing-elem' : {ℓEq ℓOrd : Level} {A : Type} → (OrdA : OrdInstance {ℓEq} {ℓOrd} A)
+                               → (z y x : A) → (xs : List A)
+                               → ¬ (OrdInstance._==_ OrdA x z)
+                               → ¬ (InList OrdA x xs) → ¬ InList OrdA x (z ∷ remove OrdA y xs)
+remove-preserves-missing-elem' OrdA z y x [] ¬x==z ¬x∈z∷xs x∈z∷xs = ¬x∈z∷xs (InList-forget-elem OrdA x z [] ¬x==z x∈z∷xs)
+remove-preserves-missing-elem' OrdA z y x (z' ∷ xs) ¬x==z ¬x∈z∷xs x∈xs with OrdInstance.dec-eq OrdA y z'
+remove-preserves-missing-elem' OrdA z y x (z' ∷ xs) ¬x==z ¬x∈z∷xs (here x==z) | yes y==z' = ¬x==z x==z
+remove-preserves-missing-elem' OrdA z y x (z' ∷ xs) ¬x==z ¬x∈z∷xs (there x∈remxs) | yes y==z' 
+  = ¬x∈z∷xs (there (remove-preserves-existing-elem OrdA y x xs x∈remxs))
+remove-preserves-missing-elem' OrdA z y x (z' ∷ xs) ¬x==z ¬x∈z∷xs (here x==z) | no ¬y==z' = ¬x==z x==z
+remove-preserves-missing-elem' OrdA z y x (z' ∷ xs) ¬x==z ¬x∈z∷xs (there x∈xs) | no ¬y==z' with OrdInstance.dec-eq OrdA  x z'
+remove-preserves-missing-elem' OrdA z y x (z' ∷ xs) ¬x==z ¬x∈z∷xs (there x∈xs) | no ¬y==z' | yes x==z' = ¬x∈z∷xs (here x==z')
+remove-preserves-missing-elem' OrdA z y x (z' ∷ xs) ¬x==z ¬x∈z∷xs (there x∈xs) | no ¬y==z' | no ¬x==z' 
+  = ¬x∈z∷xs (there (remove-preserves-existing-elem OrdA y x xs (InList-forget-elem OrdA x z' (remove OrdA y xs) ¬x==z' x∈xs)))
+
+remove-preserves-no-dup : {ℓEq ℓOrd : Level} {A : Type} → (OrdA : OrdInstance {ℓEq} {ℓOrd} A)
+                        → (x : A) → (xs : List A)
+                        → IsNoDupList OrdA xs → IsNoDupList OrdA (remove OrdA x xs)
+remove-preserves-no-dup OrdA y [] noDup = lift tt
+remove-preserves-no-dup OrdA y (x ∷ xs) noDup with OrdInstance.dec-eq OrdA y x
+remove-preserves-no-dup OrdA y (x ∷ xs) noDup | yes y==x = remove-preserves-no-dup OrdA y xs (proj₂ noDup)
+remove-preserves-no-dup OrdA y (x ∷ xs) noDup | no ¬y==x = remove-preserves-missing-elem OrdA y x xs (proj₁ noDup)
+                                                         , remove-preserves-no-dup OrdA y xs (proj₂ noDup)
+            
+remove-removing-missing-elem : {ℓEq ℓOrd : Level} {A : Type} → (OrdA : OrdInstance {ℓEq} {ℓOrd} A)
+                             → (x : A) → (ys : List A)
+                             → ¬ (InList OrdA x ys) → remove OrdA x ys ≡ ys
+remove-removing-missing-elem OrdA x [] ¬x∈ys = refl
+remove-removing-missing-elem OrdA x (y ∷ ys) ¬x∈ys with OrdInstance.dec-eq OrdA x y
+remove-removing-missing-elem OrdA x (y ∷ ys) ¬x∈ys | yes x==y = ⊥-elim (¬x∈ys (here x==y))
+remove-removing-missing-elem OrdA x (y ∷ ys) ¬x∈ys | no ¬x==y = cong (λ X → y ∷ X) (remove-removing-missing-elem OrdA x ys (¬InList-forget-elem OrdA x y ys ¬x∈ys))
 
 private
   remove-keeps-not-removed-elem : {ℓEq ℓOrd : Level} {A : Type} → (OrdA : OrdInstance {ℓEq} {ℓOrd} A)
