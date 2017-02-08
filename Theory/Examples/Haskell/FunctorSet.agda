@@ -38,52 +38,65 @@ open import Theory.Examples.HaskellFunctorToFunctor
 open import Theory.Examples.Haskell.FunctorSet.Base
 open import Theory.Examples.Haskell.FunctorSet.Sort
 open import Theory.Examples.Haskell.FunctorSet.Nub
+open import Theory.Examples.Haskell.FunctorSet.NubAndSort
 
-[insert∘nub∘remove]≡[nub∘insert] : {ℓEq ℓOrd : Level} {A : Type} → (OrdA : OrdInstance {ℓEq} {ℓOrd} A)
-                                 → (x : A) → (xs : List A) 
-                                 → IsSortedList OrdA xs 
-                                 → insert OrdA x (nub OrdA (remove OrdA x xs)) ≡ nub OrdA (insert OrdA x xs)
-[insert∘nub∘remove]≡[nub∘insert] OrdA x [] sorted = refl
-[insert∘nub∘remove]≡[nub∘insert] OrdA x (y ∷ xs) sorted with OrdInstance.dec-eq OrdA x y
-[insert∘nub∘remove]≡[nub∘insert] OrdA x (y ∷ xs) sorted | yes x==y  with OrdInstance.dec-ord OrdA x y
-[insert∘nub∘remove]≡[nub∘insert] OrdA x (y ∷ xs) sorted | yes x==y | yes x≤y with OrdInstance.dec-eq OrdA x y
-[insert∘nub∘remove]≡[nub∘insert] OrdA x (y ∷ xs) sorted | yes x==y | yes x≤y | yes _ = begin
-  insert OrdA x (nub OrdA (remove OrdA x xs)) 
-    ≡⟨ [insert∘nub∘remove]≡[nub∘insert] OrdA x xs (IsSortedList-forget-elem OrdA y xs sorted) ⟩
-  nub OrdA (insert OrdA x xs)
-    ≡⟨ {!!} ⟩
-  x ∷ remove OrdA x (remove OrdA y (nub OrdA xs)) ∎
-[insert∘nub∘remove]≡[nub∘insert] OrdA x (y ∷ xs) sorted | yes x==y | yes x≤y | no ¬x==y = ⊥-elim (¬x==y x==y)
-[insert∘nub∘remove]≡[nub∘insert] OrdA x (y ∷ xs) sorted | yes x==y | no ¬x≤y = begin
-  insert OrdA x (nub OrdA (remove OrdA x xs)) 
-    ≡⟨ [insert∘nub∘remove]≡[nub∘insert] OrdA x xs (IsSortedList-forget-elem OrdA y xs sorted) ⟩
-  nub OrdA (insert OrdA x xs)
-    ≡⟨ {!!} ⟩
-  y ∷ remove OrdA y (nub OrdA (insert OrdA x xs)) ∎
-[insert∘nub∘remove]≡[nub∘insert] OrdA x (y ∷ xs) sorted | no ¬x==y with OrdInstance.dec-ord OrdA x y
-[insert∘nub∘remove]≡[nub∘insert] OrdA x (y ∷ xs) sorted | no ¬x==y | yes x≤y with OrdInstance.dec-eq OrdA x y
-[insert∘nub∘remove]≡[nub∘insert] OrdA x (y ∷ xs) sorted | no ¬x==y | yes x≤y | yes x==y = ⊥-elim (¬x==y x==y)
-[insert∘nub∘remove]≡[nub∘insert] OrdA x (y ∷ xs) sorted | no ¬x==y | yes x≤y | no _ = 
-  cong (λ X → x ∷ y ∷ X) $ trans (cong (remove OrdA y) (nub-remove-interchange OrdA x xs)) (remove-interchange OrdA y x (nub OrdA xs))
-[insert∘nub∘remove]≡[nub∘insert] OrdA x (y ∷ xs) sorted | no ¬x==y | no ¬x≤y = cong (λ X → y ∷ X) $ begin
-  insert OrdA x (remove OrdA y (nub OrdA (remove OrdA x xs)))
-    ≡⟨ {!!} ⟩
-  remove OrdA y (nub OrdA (insert OrdA x xs)) ∎
+--insert∘map≡map∘insert
 
-[sort∘nub]≡[nub∘sort] : {ℓEq ℓOrd : Level} {A : Type} → (OrdA : OrdInstance {ℓEq} {ℓOrd} A)
-                      → (xs : List A) → IsSortedList OrdA xs
-                      → sort OrdA (nub OrdA xs) ≡ nub OrdA (sort {ℓEq} OrdA xs)
-[sort∘nub]≡[nub∘sort] OrdA [] sorted = refl
-[sort∘nub]≡[nub∘sort] OrdA (x ∷ xs) sorted = begin
-  insert OrdA x (sort OrdA (remove OrdA x (nub OrdA xs)))
-    ≡⟨ cong (insert OrdA x) (sort-sorting-sorted OrdA (remove OrdA x (nub OrdA xs)) (remove-preserves-sorted OrdA x (nub OrdA xs) (nub-preserves-sorted OrdA xs (IsSortedList-forget-elem OrdA x xs sorted)))) ⟩
-  insert OrdA x (remove OrdA x (nub OrdA xs))
-    ≡⟨ cong (insert OrdA x) (sym $ nub-remove-interchange OrdA x xs) ⟩
-  insert OrdA x (nub OrdA (remove OrdA x xs))
-    ≡⟨ [insert∘nub∘remove]≡[nub∘insert] OrdA x xs (IsSortedList-forget-elem OrdA x xs sorted) ⟩
-  nub OrdA (insert OrdA x xs)
-    ≡⟨ cong (nub OrdA ∘F insert OrdA x) (sym (sort-sorting-sorted OrdA xs (IsSortedList-forget-elem OrdA x xs sorted))) ⟩
-  nub OrdA (insert OrdA x (sort OrdA xs)) ∎
+map-insert-remove-ignore : {ℓEqA ℓOrdA ℓEqB ℓOrdB : Level} {A B : Type} 
+                         → (OrdA : OrdInstance {ℓEqA} {ℓOrdA} A) → (OrdB : OrdInstance {ℓEqB} {ℓOrdB} B)
+                         → (g : A → B) → (x : A) → (xs : List A)
+                         → ({z y : A} → OrdInstance._==_ OrdA z y → OrdInstance._==_ OrdB (g z) (g y))
+                         → map g (insert OrdA x (remove OrdA x xs)) ≡ insert OrdB (g x) (remove OrdB (g x) (map g xs))
+map-insert-remove-ignore OrdA OrdB g x [] eqConsistent = refl
+map-insert-remove-ignore OrdA OrdB g x (y ∷ xs) eqConsistent with OrdInstance.dec-eq OrdA x y
+map-insert-remove-ignore OrdA OrdB g x (y ∷ xs) eqConsistent | yes x==y with OrdInstance.dec-eq OrdB (g x) (g y)
+map-insert-remove-ignore OrdA OrdB g x (y ∷ xs) eqConsistent | yes x==y | yes gx==gy = map-insert-remove-ignore OrdA OrdB g x xs eqConsistent
+map-insert-remove-ignore OrdA OrdB g x (y ∷ xs) eqConsistent | yes x==y | no ¬gx==gy = ⊥-elim (¬gx==gy (eqConsistent x==y))
+map-insert-remove-ignore OrdA OrdB g x (y ∷ xs) eqConsistent | no ¬x==y with OrdInstance.dec-eq OrdB (g x) (g y)
+map-insert-remove-ignore OrdA OrdB g x (y ∷ xs) eqConsistent | no ¬x==y | yes gx==gy with OrdInstance.dec-ord OrdA x y
+map-insert-remove-ignore OrdA OrdB g x (y ∷ xs) eqConsistent | no ¬x==y | yes gx==gy | yes x≤y = {!!}
+map-insert-remove-ignore OrdA OrdB g x (y ∷ xs) eqConsistent | no ¬x==y | yes gx==gy | no ¬x≤y = {!!}
+map-insert-remove-ignore OrdA OrdB g x (y ∷ xs) eqConsistent | no ¬x==y | no ¬gx==gy = {!!}
+
+map-nub-sort-ignore : {ℓEqA ℓOrdA ℓEqB ℓOrdB : Level} {A B : Type} 
+                    → (OrdA : OrdInstance {ℓEqA} {ℓOrdA} A) → (OrdB : OrdInstance {ℓEqB} {ℓOrdB} B)
+                    → (g : A → B) → (xs : List A) 
+                    → nub OrdB (sort OrdB (map g (nub OrdA (sort OrdA xs)))) ≡ nub OrdB (sort OrdB (map g xs))
+map-nub-sort-ignore OrdA OrdB g [] = refl
+map-nub-sort-ignore OrdA OrdB g (x ∷ xs) = begin
+  nub OrdB (sort OrdB (map g (nub OrdA (insert OrdA x (sort OrdA xs)))))
+    ≡⟨ cong (nub OrdB ∘F sort OrdB ∘F map g) (nub∘insert≡insert∘remove∘nub OrdA x (sort OrdA xs) {!!}) ⟩
+  nub OrdB (sort OrdB (map g (insert OrdA x (remove OrdA x (nub OrdA (sort OrdA xs))))))
+    ≡⟨ {!!} ⟩
+  nub OrdB (insert OrdB (g x) (sort OrdB (map g xs))) ∎
+
+module Test {ℓEqA ℓOrdA ℓEqB ℓOrdB : Level} {A B : Type} (OrdA : OrdInstance {ℓEqA} {ℓOrdA} A) (OrdB : OrdInstance {ℓEqB} {ℓOrdB} B) where
+  
+  private
+    _=A=_ = OrdInstance._==_ OrdA
+    _=B=_ = OrdInstance._==_ OrdB
+  
+  map-sort-insert-shift : (g : A → B) → (x : A) → (xs : List A) 
+                        → sort OrdB (map g (insert OrdA x xs)) =A= insert OrdB (g x) (sort OrdB (map g xs))
+  map-sort-insert-shift g x [] = refl
+  map-sort-insert-shift g x (y ∷ xs) with OrdInstance.dec-ord OrdA x y
+  map-sort-insert-shift g x (y ∷ xs) | yes x≤y = refl
+  map-sort-insert-shift g x (y ∷ []) | no ¬x≤y with OrdInstance.dec-ord OrdB (g y) (g x) | OrdInstance.dec-ord OrdB (g x) (g y)
+  map-sort-insert-shift g x (y ∷ []) | no ¬x≤y | yes gy≤gx | yes gx≤gy = {!!}
+  map-sort-insert-shift g x (y ∷ []) | no ¬x≤y | yes gy≤gx | no ¬gx≤gy = refl
+  map-sort-insert-shift g x (y ∷ []) | no ¬x≤y | no ¬gy≤gx | yes gx≤gy = refl
+  map-sort-insert-shift g x (y ∷ []) | no ¬x≤y | no ¬gy≤gx | no ¬gx≤gy = ⊥-elim (OrdInstance.total-contr OrdB ¬gx≤gy ¬gy≤gx)
+  map-sort-insert-shift g x (y ∷ x₁ ∷ xs) | no ¬x≤y = {!!}
+
+map-sort-ignore : {ℓEqA ℓOrdA ℓEqB ℓOrdB : Level} {A B : Type} 
+                → (OrdA : OrdInstance {ℓEqA} {ℓOrdA} A) → (OrdB : OrdInstance {ℓEqB} {ℓOrdB} B)
+                → (g : A → B) → (xs : List A) 
+                → sort OrdB (map g (sort OrdA xs)) ≡ sort OrdB (map g xs)
+map-sort-ignore OrdA OrdB g [] = refl
+map-sort-ignore OrdA OrdB g (x ∷ xs) = begin
+  sort OrdB (map g (insert OrdA x (sort OrdA xs))) 
+    ≡⟨ {!!} ⟩
+  insert OrdB (g x) (sort OrdB (map g xs)) ∎
 
 mkListSet : {α : Σ Type (OrdInstance {lzero})} → List (proj₁ α) → ListSet α
 mkListSet {α , OrdA} xs = listSet (nub OrdA (sort OrdA xs))
@@ -163,7 +176,6 @@ FunctorListSet = record
                ≡ setmap {α = β} {γ} g ∘F setmap f
     ctFuncComp {α , OrdA} {β , OrdB} {γ , OrdC} {f , tt} {g , tt} = funExt helper
       where
-        
         helper : (x : ListSet (α , OrdA)) → setmap (g ∘F f , tt) x ≡ (setmap (g , tt) ∘F setmap (f , tt)) x
         helper (listSet xs sorted noDup) = begin
           setmap {α , OrdA} {γ , OrdC} (g ∘F f , tt) (listSet xs sorted noDup)
@@ -190,14 +202,6 @@ FunctorListSet = record
                 nub OrdC (sort OrdC (map (g ∘F f) xs))
                   ≡⟨ cong (nub OrdC ∘F sort OrdC) (map-compose xs) ⟩
                 nub OrdC (sort OrdC (map g (map f xs)))
-                  ≡⟨ {!nub-shrink!} ⟩
-                nub OrdC (sort OrdC (sort OrdC (map g (map f xs))))
-                  ≡⟨ sym (nub-shrink OrdC (sort OrdC (sort OrdC (map g (map f xs))))) ⟩
-                nub OrdC (nub OrdC (sort OrdC (sort OrdC (map g (map f xs)))))
-                  ≡⟨ {!!} ⟩
-                nub OrdC (sort OrdC (nub OrdC (map g (sort OrdB (map f xs)))))
-                  ≡⟨ {!!} ⟩
-                nub OrdC (sort OrdC (nub OrdC (map g (sort OrdB (map f xs)))))
-                  ≡⟨ {!!} ⟩
+                  ≡⟨ sym (map-nub-sort-ignore OrdB OrdC g (map f xs)) ⟩
                 nub OrdC (sort OrdC (map g (nub OrdB (sort OrdB (map f xs))))) ∎
 
