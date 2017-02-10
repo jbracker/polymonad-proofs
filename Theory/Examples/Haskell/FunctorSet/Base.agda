@@ -224,20 +224,13 @@ module Monotonic {ℓEqA ℓOrdA ℓEqB ℓOrdB : Level} {A B : Type} (OrdA : Or
 -- Lemmas for monotonicity
 -------------------------------------------------------------------------------
   
-  monotonic-preserves-equality : (f : A → B) → Monotonic f
-                               → (a b : A) → a =A= b → f a =B= f b
+  monotonic-preserves-equality : (f : A → B) → Monotonic f → (a b : A) 
+                               → a =A= b → f a =B= f b
   monotonic-preserves-equality f mon-f a b a==b with OrdInstance.dec-ord OrdA a b | OrdInstance.dec-ord OrdA b a
   monotonic-preserves-equality f mon-f a b a==b | yes a≤b | yes b≤a = OrdInstance.antisym-ord OrdB (mon-f a b a≤b) (mon-f b a b≤a)
   monotonic-preserves-equality f mon-f a b a==b | yes a≤b | no ¬b≤a = ⊥-elim (OrdInstance.eq-contr OrdA a==b (inj₂ ¬b≤a))
   monotonic-preserves-equality f mon-f a b a==b | no ¬a≤b | yes b≤a = ⊥-elim (OrdInstance.eq-contr OrdA a==b (inj₁ ¬a≤b))
   monotonic-preserves-equality f mon-f a b a==b | no ¬a≤b | no ¬b≤a = ⊥-elim (OrdInstance.total-contr OrdA ¬a≤b ¬b≤a)
-
-  monotonic-preserves-sorted : (f : A → B) → Monotonic f
-                             → (xs : List A) → (IsSortedList OrdA xs) → (IsSortedList OrdB (mapList f xs))
-  monotonic-preserves-sorted f mon-f [] sorted = lift tt
-  monotonic-preserves-sorted f mon-f (x ∷ []) sorted = lift tt
-  monotonic-preserves-sorted f mon-f (x ∷ y ∷ xs) (x≤y , sorted) = mon-f x y x≤y , monotonic-preserves-sorted f mon-f (y ∷ xs) sorted
-
 
 open Monotonic public
 
