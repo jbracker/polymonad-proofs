@@ -135,6 +135,7 @@ EqList {A} EqA = record
     proof-irr {x ∷ xs} {[]} () eqXs
     proof-irr {x ∷ xs} {y ∷ ys} (eqX , eqXs) (eqY , eqYs) with EqInstance.proof-irr-eq EqA eqX eqY | proof-irr {xs} {ys} eqXs eqYs
     proof-irr {x ∷ xs} {y ∷ ys} (eqX , eqXs) (.eqX , .eqXs) | refl | refl = refl
+    
 
 -------------------------------------------------------------------------------
 -- Definition of predicates on lists
@@ -207,9 +208,10 @@ module ListProperties {ℓEq ℓOrd : Level} {A : Type} (OrdA : OrdInstance {ℓ
 
 module Monotonic {ℓEqA ℓOrdA ℓEqB ℓOrdB : Level} {A B : Type} (OrdA : OrdInstance {ℓEqA} {ℓOrdA} A) (OrdB : OrdInstance {ℓEqB} {ℓOrdB} B) where
   
-  open ListProperties
-
   private
+    open ListProperties
+    open OrdInstance
+    
     _=A=_ = OrdInstance._==_ OrdA
     _=B=_ = OrdInstance._==_ OrdB
     _≤A_ = OrdInstance._≤_ OrdA
@@ -224,14 +226,29 @@ module Monotonic {ℓEqA ℓOrdA ℓEqB ℓOrdB : Level} {A B : Type} (OrdA : Or
 -- Lemmas for monotonicity
 -------------------------------------------------------------------------------
   
-  monotonic-preserves-equality : (f : A → B) → Monotonic f → (a b : A) 
-                               → a =A= b → f a =B= f b
-  monotonic-preserves-equality f mon-f a b a==b with OrdInstance.dec-ord OrdA a b | OrdInstance.dec-ord OrdA b a
-  monotonic-preserves-equality f mon-f a b a==b | yes a≤b | yes b≤a = OrdInstance.antisym-ord OrdB (mon-f a b a≤b) (mon-f b a b≤a)
-  monotonic-preserves-equality f mon-f a b a==b | yes a≤b | no ¬b≤a = ⊥-elim (OrdInstance.eq-contr OrdA a==b (inj₂ ¬b≤a))
-  monotonic-preserves-equality f mon-f a b a==b | no ¬a≤b | yes b≤a = ⊥-elim (OrdInstance.eq-contr OrdA a==b (inj₁ ¬a≤b))
-  monotonic-preserves-equality f mon-f a b a==b | no ¬a≤b | no ¬b≤a = ⊥-elim (OrdInstance.total-contr OrdA ¬a≤b ¬b≤a)
+  monotonic-preserves-equality : (f : A → B)
+                               → Monotonic f
+                               → (a b : A) → a =A= b → f a =B= f b
+  monotonic-preserves-equality f mon-f a b a==b with dec-ord OrdA a b | dec-ord OrdA b a
+  monotonic-preserves-equality f mon-f a b a==b | yes a≤b | yes b≤a = antisym-ord OrdB (mon-f a b a≤b) (mon-f b a b≤a)
+  monotonic-preserves-equality f mon-f a b a==b | yes a≤b | no ¬b≤a = ⊥-elim (eq-contr OrdA a==b (inj₂ ¬b≤a))
+  monotonic-preserves-equality f mon-f a b a==b | no ¬a≤b | yes b≤a = ⊥-elim (eq-contr OrdA a==b (inj₁ ¬a≤b))
+  monotonic-preserves-equality f mon-f a b a==b | no ¬a≤b | no ¬b≤a = ⊥-elim (total-contr OrdA ¬a≤b ¬b≤a)
 
+  {-
+  monotonic-preserves-neg-eq : (f : A → B)
+                             → Monotonic f
+                             → (a b : A) → ¬ (a =A= b) → ¬ (f a =B= f b)
+  monotonic-preserves-neg-eq f mon-f a b ¬a==b fa==fb with dec-ord OrdB (f a) (f b) | dec-ord OrdB (f b) (f a)
+  monotonic-preserves-neg-eq f mon-f a b ¬a==b fa==fb | yes fa≤fb | yes fb≤fa with dec-ord OrdA a b | dec-ord OrdA b a
+  monotonic-preserves-neg-eq f mon-f a b ¬a==b fa==fb | yes fa≤fb | yes fb≤fa | yes a≤b | yes b≤a = ¬a==b (antisym-ord OrdA a≤b b≤a)
+  monotonic-preserves-neg-eq f mon-f a b ¬a==b fa==fb | yes fa≤fb | yes fb≤fa | yes a≤b | no ¬b≤a = {!!}
+  monotonic-preserves-neg-eq f mon-f a b ¬a==b fa==fb | yes fa≤fb | yes fb≤fa | no ¬a≤b | yes b≤a = {!!}
+  monotonic-preserves-neg-eq f mon-f a b ¬a==b fa==fb | yes fa≤fb | yes fb≤fa | no ¬a≤b | no ¬b≤a = total-contr OrdA ¬b≤a ¬a≤b
+  monotonic-preserves-neg-eq f mon-f a b ¬a==b fa==fb | yes fa≤fb | no ¬fb≤fa = eq-contr OrdB fa==fb (inj₂ ¬fb≤fa)
+  monotonic-preserves-neg-eq f mon-f a b ¬a==b fa==fb | no ¬fa≤fb | yes fb≤fa = eq-contr OrdB fa==fb (inj₁ ¬fa≤fb)
+  monotonic-preserves-neg-eq f mon-f a b ¬a==b fa==fb | no ¬fa≤fb | no ¬fb≤fa = total-contr OrdB ¬fa≤fb ¬fb≤fa
+  -}
 open Monotonic public
 
 -- Composing two monotonic functions produces a monotonic function.
