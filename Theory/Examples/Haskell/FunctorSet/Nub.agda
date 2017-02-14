@@ -3,7 +3,7 @@ open import Function renaming ( _∘_ to _∘F_ ; id to idF )
 open import Level renaming ( suc to lsuc ; zero to lzero)
 open import Data.Unit hiding ( _≤_ ; _≟_ ; total )
 open import Data.Empty
-open import Data.List
+open import Data.List renaming ( map to mapList )
 open import Data.List.Any hiding ( map )
 open import Data.Product hiding ( map )
 open import Data.Sum hiding ( map )
@@ -83,6 +83,10 @@ remove-removing-missing-elem x [] ¬x∈ys = refl
 remove-removing-missing-elem x (y ∷ ys) ¬x∈ys with dec-eq x y
 remove-removing-missing-elem x (y ∷ ys) ¬x∈ys | yes x==y = ⊥-elim (¬x∈ys (here x==y))
 remove-removing-missing-elem x (y ∷ ys) ¬x∈ys | no ¬x==y = cong (λ X → y ∷ X) (remove-removing-missing-elem x ys (¬InList-forget-elem x y ys ¬x∈ys))
+
+remove-removing-missing-elem' : (x : A) → (xs ys : List A)
+                              → ¬ (InList x xs) → ys ≡ xs → remove x ys ≡ xs
+remove-removing-missing-elem' x xs .xs ¬x∈xs refl = remove-removing-missing-elem x xs ¬x∈xs
 
 private
   remove-keeps-not-removed-elem : (y x : A) → (xs : List A) 
@@ -207,3 +211,7 @@ nub-shrink (x ∷ xs) = cong (λ X → x ∷ X) (trans (cong (remove x) (nub-rem
                                                 (trans (remove-shrink x x (nub (nub xs)) (OrdInstance.refl-eq OrdA)) 
                                                         (cong (remove x) (nub-shrink xs))))
 
+nub-map-id : (xs : List A) → IsNoDupList xs → nub (mapList idF xs) ≡ xs
+nub-map-id [] noDup = refl
+nub-map-id (x ∷ xs) (¬x∈xs , noDup) 
+  = cong (λ X → x ∷ X) (remove-removing-missing-elem' x xs (nub (mapList idF xs)) ¬x∈xs (nub-map-id xs noDup))

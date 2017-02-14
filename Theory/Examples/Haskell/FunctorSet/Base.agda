@@ -13,6 +13,7 @@ open import Relation.Nullary
 open import Relation.Binary using ( IsDecEquivalence ; IsEquivalence ; IsDecTotalOrder ; IsPreorder )
 open import Relation.Binary.PropositionalEquality
 
+open import Utilities
 open import Haskell
 open import ProofIrrelevance
 
@@ -226,6 +227,13 @@ module Monotonic {ℓEqA ℓOrdA ℓEqB ℓOrdB : Level} {A B : Type} (OrdA : Or
 -- Lemmas for monotonicity
 -------------------------------------------------------------------------------
   
+  -- (monotonic-preserves-sorted OrdA OrdB f mon-f xs sorted)
+  monotonic-preserves-sorted : (f : A → B) → Monotonic f
+                             → (xs : List A) → IsSortedList OrdA xs → IsSortedList OrdB (mapList f xs)
+  monotonic-preserves-sorted f mon-f [] sorted = lift tt
+  monotonic-preserves-sorted f mon-f (x ∷ []) sorted = lift tt
+  monotonic-preserves-sorted f mon-f (x ∷ y ∷ xs) (x≤y , sorted) = mon-f x y x≤y , monotonic-preserves-sorted f mon-f (y ∷ xs) sorted
+  
   monotonic-preserves-equality : (f : A → B)
                                → Monotonic f
                                → (a b : A) → a =A= b → f a =B= f b
@@ -234,21 +242,10 @@ module Monotonic {ℓEqA ℓOrdA ℓEqB ℓOrdB : Level} {A B : Type} (OrdA : Or
   monotonic-preserves-equality f mon-f a b a==b | yes a≤b | no ¬b≤a = ⊥-elim (eq-contr OrdA a==b (inj₂ ¬b≤a))
   monotonic-preserves-equality f mon-f a b a==b | no ¬a≤b | yes b≤a = ⊥-elim (eq-contr OrdA a==b (inj₁ ¬a≤b))
   monotonic-preserves-equality f mon-f a b a==b | no ¬a≤b | no ¬b≤a = ⊥-elim (total-contr OrdA ¬a≤b ¬b≤a)
-
-  {-
-  monotonic-preserves-neg-eq : (f : A → B)
-                             → Monotonic f
-                             → (a b : A) → ¬ (a =A= b) → ¬ (f a =B= f b)
-  monotonic-preserves-neg-eq f mon-f a b ¬a==b fa==fb with dec-ord OrdB (f a) (f b) | dec-ord OrdB (f b) (f a)
-  monotonic-preserves-neg-eq f mon-f a b ¬a==b fa==fb | yes fa≤fb | yes fb≤fa with dec-ord OrdA a b | dec-ord OrdA b a
-  monotonic-preserves-neg-eq f mon-f a b ¬a==b fa==fb | yes fa≤fb | yes fb≤fa | yes a≤b | yes b≤a = ¬a==b (antisym-ord OrdA a≤b b≤a)
-  monotonic-preserves-neg-eq f mon-f a b ¬a==b fa==fb | yes fa≤fb | yes fb≤fa | yes a≤b | no ¬b≤a = {!!}
-  monotonic-preserves-neg-eq f mon-f a b ¬a==b fa==fb | yes fa≤fb | yes fb≤fa | no ¬a≤b | yes b≤a = {!!}
-  monotonic-preserves-neg-eq f mon-f a b ¬a==b fa==fb | yes fa≤fb | yes fb≤fa | no ¬a≤b | no ¬b≤a = total-contr OrdA ¬b≤a ¬a≤b
-  monotonic-preserves-neg-eq f mon-f a b ¬a==b fa==fb | yes fa≤fb | no ¬fb≤fa = eq-contr OrdB fa==fb (inj₂ ¬fb≤fa)
-  monotonic-preserves-neg-eq f mon-f a b ¬a==b fa==fb | no ¬fa≤fb | yes fb≤fa = eq-contr OrdB fa==fb (inj₁ ¬fa≤fb)
-  monotonic-preserves-neg-eq f mon-f a b ¬a==b fa==fb | no ¬fa≤fb | no ¬fb≤fa = total-contr OrdB ¬fa≤fb ¬fb≤fa
-  -}
+  
+  proof-irr-monotonic : (f : A → B) → ProofIrrelevance (Monotonic f)
+  proof-irr-monotonic f mon-f mon-f' = funExt (λ x → funExt (λ y → funExt (λ x≤y → proof-irr-ord OrdB (mon-f x y x≤y) (mon-f' x y x≤y))))
+  
 open Monotonic public
 
 -- Composing two monotonic functions produces a monotonic function.
