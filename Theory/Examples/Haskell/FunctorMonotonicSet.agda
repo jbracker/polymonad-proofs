@@ -84,6 +84,8 @@ map {α , OrdA} {β , OrdB} (f , mon-f) (listSet xs sorted noDup) =
           (nub-produces-no-dup OrdB (mapList f xs))
 
 -- The constrained functor for Sets in Haskell.
+-- The requirement of proof irrelevance for OrdInstance is in one-to-one correspondance with the
+-- type class system that Haskell uses in that it there can be only one class instance per type.
 FunctorListSet : ({ℓEq ℓOrd : Level} → (A : Type) → ProofIrrelevance (OrdInstance {ℓEq} {ℓOrd} A))
                → ConstrainedFunctor
 FunctorListSet unique-ord-instances = record
