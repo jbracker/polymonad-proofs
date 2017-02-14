@@ -113,8 +113,13 @@ only-cat-theory:
 	$(AGDA_TC) Theory/Examples/Functor.agda
 	$(AGDA_TC) Theory/Examples/TwoCategory.agda
 	# Haskell Examples
-	# $(AGDA_TC) Theory/Examples/Haskell/FunctorSet.agda
 	$(AGDA_TC) Theory/Examples/Haskell/FunctorEndomorphisms.agda
+	$(AGDA_TC) Theory/Examples/Haskell/FunctorSet/Base.agda
+	$(AGDA_TC) Theory/Examples/Haskell/FunctorSet/Nub.agda
+	$(AGDA_TC) Theory/Examples/Haskell/FunctorSet/Sort.agda
+	$(AGDA_TC) Theory/Examples/Haskell/FunctorSet/NubAndSort.agda
+	# $(AGDA_TC) Theory/Examples/Haskell/FunctorSet/ListMap.agda # Discontinued approach
+	$(AGDA_TC) Theory/Examples/Haskell/FunctorMonotonicSet.agda
 	# Functor (Categorical) <===> Functor (Haskell)
 	$(AGDA_TC) Theory/Examples/FunctorToHaskellFunctor.agda
 	$(AGDA_TC) Theory/Examples/HaskellFunctorToFunctor.agda
