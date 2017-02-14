@@ -17,7 +17,7 @@ open import ProofIrrelevance
 
 open import Theory.Examples.Haskell.FunctorSet.Base
 
-module Theory.Examples.Haskell.FunctorSet.TreeSet {A : Type} (OrdA : OrdInstance {lzero} {lzero} A) where
+module Theory.Examples.Haskell.FunctorSet.ListSet {A : Type} (OrdA : OrdInstance {lzero} {lzero} A) where
 
 private
   open module LP = ListProperties OrdA
