@@ -94,6 +94,7 @@ only-cat-theory:
 	$(AGDA_TC) Theory/Triple.agda
 	$(AGDA_TC) Theory/ProofIrrelevance.agda
 	$(AGDA_TC) Theory/Category.agda
+	$(AGDA_TC) Theory/Isomorphism.agda
 	$(AGDA_TC) Theory/Subcategory.agda
 	$(AGDA_TC) Theory/Functor.agda
 	$(AGDA_TC) Theory/ConstrainedFunctor.agda
