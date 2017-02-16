@@ -174,18 +174,18 @@ rightExtendFunctor F E e = record
 -------------------------------------------------------------------------------
 -- Propositional Equality of Functors
 -------------------------------------------------------------------------------
-propFunctorEq : {Cℓ₀ Cℓ₁ Dℓ₀ Dℓ₁ : Level} {C : Category {Cℓ₀} {Cℓ₁}} {D : Category {Dℓ₀} {Dℓ₁}} 
-              → {F₀ G₀ : Obj C → Obj D}
-              → {F₁ : (a b : Obj C) → Hom C a b → Hom D (F₀ a) (F₀ b)}
-              → {G₁ : (a b : Obj C) → Hom C a b → Hom D (G₀ a) (G₀ b)}
-              → {idF : {a : Obj C} → F₁ a a (id C) ≡ id D}
-              → {idG : {a : Obj C} → G₁ a a (id C) ≡ id D}
-              → {composeF : ∀ {a b c} {f : Hom C a b} {g : Hom C b c} → F₁ a c (_∘_ C g f) ≡ _∘_ D (F₁ b c g) (F₁ a b f)}
-              → {composeG : ∀ {a b c} {f : Hom C a b} {g : Hom C b c} → G₁ a c (_∘_ C g f) ≡ _∘_ D (G₁ b c g) (G₁ a b f)}
-              → (eq₀ : F₀ ≡ G₀)
-              → (eq₁ : F₁ ≡ subst₂ (λ X Y → (a b : Obj C) → Hom C a b → Hom D (X a) (Y b)) (sym eq₀) (sym eq₀) G₁ )
-              → functor {C = C} {D = D} F₀ (λ {a b} → F₁ a b) idF composeF ≡ functor {C = C} {D = D} G₀ (λ {a b} → G₁ a b) idG composeG
-propFunctorEq {F₀ = F₀} {F₁ = F₁} {idF = idF} {idG} {composeF} {composeG} refl refl = cong₂ (functor F₀ (λ {a b} → F₁ a b)) p1 p2
+functor-eq : {Cℓ₀ Cℓ₁ Dℓ₀ Dℓ₁ : Level} {C : Category {Cℓ₀} {Cℓ₁}} {D : Category {Dℓ₀} {Dℓ₁}} 
+           → {F₀ G₀ : Obj C → Obj D}
+           → {F₁ : (a b : Obj C) → Hom C a b → Hom D (F₀ a) (F₀ b)}
+           → {G₁ : (a b : Obj C) → Hom C a b → Hom D (G₀ a) (G₀ b)}
+           → {idF : {a : Obj C} → F₁ a a (id C) ≡ id D}
+           → {idG : {a : Obj C} → G₁ a a (id C) ≡ id D}
+           → {composeF : ∀ {a b c} {f : Hom C a b} {g : Hom C b c} → F₁ a c (_∘_ C g f) ≡ _∘_ D (F₁ b c g) (F₁ a b f)}
+           → {composeG : ∀ {a b c} {f : Hom C a b} {g : Hom C b c} → G₁ a c (_∘_ C g f) ≡ _∘_ D (G₁ b c g) (G₁ a b f)}
+           → (eq₀ : F₀ ≡ G₀)
+           → (eq₁ : F₁ ≡ subst₂ (λ X Y → (a b : Obj C) → Hom C a b → Hom D (X a) (Y b)) (sym eq₀) (sym eq₀) G₁ )
+           → functor {C = C} {D = D} F₀ (λ {a b} → F₁ a b) idF composeF ≡ functor {C = C} {D = D} G₀ (λ {a b} → G₁ a b) idG composeG
+functor-eq {F₀ = F₀} {F₁ = F₁} {idF = idF} {idG} {composeF} {composeG} refl refl = cong₂ (functor F₀ (λ {a b} → F₁ a b)) p1 p2
   where
     p1 = funExtImplicit (λ a → proof-irrelevance (idF {a}) (idG {a}))
     p2 = funExtImplicit 
