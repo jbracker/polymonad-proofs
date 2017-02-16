@@ -94,7 +94,7 @@ SupermonadC→Supermonad {ℓ₀} {ℓ₁} {C = C} {F = F} uniqueHom smc = recor
       { FunctorCts = ConstrainedFunctor.FunctorCts (SupermonadC.functor smc f)
       ; fmap = ConstrainedFunctor.fmap (SupermonadC.functor smc f)
       ; lawId = ConstrainedFunctor.lawId (SupermonadC.functor smc f)
-      ; lawDist = ConstrainedFunctor.lawDist (SupermonadC.functor smc f)
+      ; lawCompose = ConstrainedFunctor.lawCompose (SupermonadC.functor smc f)
       }
     
     fmap :  (M : HomIx) → {α β : Type} → ConstrainedFunctor.FunctorCts (functor M) α β → ( (α → β) → (F (proj₂ (proj₂ M)) α → F (proj₂ (proj₂ M)) β) )

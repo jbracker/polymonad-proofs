@@ -35,7 +35,7 @@ EffectMonad→Functor : ∀ {ℓ}
 EffectMonad→Functor {Eff = Eff} {monoid = monoid} M monad m = record 
   { fmap = fmap
   ; lawId = lawId
-  ; lawDist = lawDist
+  ; lawCompose = lawCompose
   } where
     _∙_ = Monoid._∙_ monoid
     ε = Monoid.ε monoid
@@ -89,10 +89,10 @@ EffectMonad→Functor {Eff = Eff} {monoid = monoid} M monad m = record
                     ≡ subst (λ X → M X β) outer ((subst (λ X → M X α) inner ma) >>= f)
     assocSubstShift refl refl refl ma f = refl
     
-    lawDist : ∀ {α β γ : Type} 
-            → (f : β → γ) → (g : α → β) 
-            → fmap (f ∘ g) ≡ fmap f ∘ fmap g
-    lawDist {β = β} {γ = γ} f g = funExt (λ ma → begin
+    lawCompose : ∀ {α β γ : Type} 
+               → (f : β → γ) → (g : α → β) 
+               → fmap (f ∘ g) ≡ fmap f ∘ fmap g
+    lawCompose {β = β} {γ = γ} f g = funExt (λ ma → begin
       fmap (f ∘ g) ma 
         ≡⟨ refl ⟩
       subst₂ M (monLawIdR m) refl (ma >>= (return ∘ (f ∘ g)))

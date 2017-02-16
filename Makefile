@@ -8,6 +8,10 @@ AGDA = agda
 # Especially the Polymonad.Union proof runs out of stack space quickly.
 AGDA_TC = $(AGDA) -v 0 +RTS -K40m -RTS
 
+DEP_GRAPH_FILE = dep-graph.dot
+
+AGDA_DEP_GRAPH = $(AGDA) --dependency-graph=$(DEP_GRAPH_FILE)
+
 all: type-check
 
 type-check: | only-base only-haskell only-hicks only-hicks only-parameterized only-supermonads only-cat-theory
@@ -149,3 +153,5 @@ clean:
 	$(REMOVE) MorphMonad/*.agdai
 
 
+dep-graph: $(AGDA_DEP_GRAPH) *.agda
+	

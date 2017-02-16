@@ -62,7 +62,7 @@ monadId = record
     functorId = record 
       { fmap = fmapId
       ; lawId = λ {α} → refl 
-      ; lawDist = λ {α} {β} {γ} f g → refl }
+      ; lawCompose = λ {α} {β} {γ} f g → refl }
 
     applicative : Applicative Identity
     applicative = record

@@ -32,7 +32,7 @@ IxMonad→Functor : ∀ {ℓ}
 IxMonad→Functor Ixs M monad i j = record 
   { fmap = fmap 
   ; lawId = lawId 
-  ; lawDist = lawDist
+  ; lawCompose = lawCompose
   } where
     F = IxMonadTC i j
     
@@ -53,10 +53,10 @@ IxMonad→Functor Ixs M monad i j = record
             ≡⟨ lawIdL monad ma ⟩
           identity ma ∎
         
-    lawDist : ∀ {α β γ : Type} 
-            → (f : β → γ) → (g : α → β) 
-            → fmap (f ∘ g) ≡ fmap f ∘ fmap g
-    lawDist {α = α} f g = funExt lawDist'
+    lawCompose : ∀ {α β γ : Type} 
+               → (f : β → γ) → (g : α → β) 
+               → fmap (f ∘ g) ≡ fmap f ∘ fmap g
+    lawCompose {α = α} f g = funExt lawDist'
       where
         lawDist' : (ma : M i j α)
                  → fmap (f ∘ g) ma ≡ (fmap f ∘ fmap g) ma
