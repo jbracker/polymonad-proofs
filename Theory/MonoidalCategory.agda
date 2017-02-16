@@ -38,7 +38,7 @@ module FunctorApplication {ℓC₀ ℓC₁ : Level} {C : Category {ℓC₀} {ℓ
                → {f : Hom (C ×C C ×C C) a b} {g : Hom (C ×C C ×C C) b c}
                → G₁ (g ∘CCC f) ≡ (G₁ g) ∘C (G₁ f)
       composeG {f = f₁ , f₂ , f₃} {g = g₁ , g₂ , g₃} 
-        = trans (cong (λ X → F₁ F (X ,' g₃ ∘C f₃)) (dist F)) (dist F)
+        = trans (cong (λ X → F₁ F (X ,' g₃ ∘C f₃)) (compose F)) (compose F)
   
   -- (_ ⊗ (_ ⊗ _)) ⇒ _
   associatorR : Functor (C ×C C) C → Functor (C ×C C ×C C) C 
@@ -57,7 +57,7 @@ module FunctorApplication {ℓC₀ ℓC₁ : Level} {C : Category {ℓC₀} {ℓ
                → {f : Hom (C ×C C ×C C) a b} {g : Hom (C ×C C ×C C) b c}
                → G₁ (g ∘CCC f) ≡ (G₁ g) ∘C (G₁ f)
       composeG {f = f₁ , f₂ , f₃} {g = g₁ , g₂ , g₃} 
-        = trans (cong (λ X → F₁ F (g₁ ∘C f₁ ,' X)) (dist F)) (dist F)
+        = trans (cong (λ X → F₁ F (g₁ ∘C f₁ ,' X)) (compose F)) (compose F)
   
   -- (1 ⊗ _) ⇒ _
   unitorL : Obj C → Functor (C ×C C) C → Functor C C
@@ -73,7 +73,7 @@ module FunctorApplication {ℓC₀ ℓC₁ : Level} {C : Category {ℓC₀} {ℓ
       idG {a} = idF F
       composeG : {a b c : Obj C} {f : Hom C a b} {g : Hom C b c} 
                → G₁ ((C ∘ g) f) ≡ (C ∘ G₁ g) (G₁ f)
-      composeG {f = f} {g} = trans (cong (λ X → F₁ F (X ,' g ∘C f)) (sym (idL C))) (dist F)
+      composeG {f = f} {g} = trans (cong (λ X → F₁ F (X ,' g ∘C f)) (sym (idL C))) (compose F)
 
   -- (_ ⊗ 1) ⇒ _
   unitorR : Obj C → Functor (C ×C C) C → Functor C C
@@ -89,8 +89,10 @@ module FunctorApplication {ℓC₀ ℓC₁ : Level} {C : Category {ℓC₀} {ℓ
       idG {a} = idF F
       composeG : {a b c : Obj C} {f : Hom C a b} {g : Hom C b c} 
                → G₁ ((C ∘ g) f) ≡ (C ∘ G₁ g) (G₁ f)
-      composeG {f = f} {g} = trans (cong (λ X → F₁ F (g ∘C f ,' X)) (sym (idL C))) (dist F)
-      
+      composeG {f = f} {g} = trans (cong (λ X → F₁ F (g ∘C f ,' X)) (sym (idL C))) (compose F)
+
+open FunctorApplication public
+
 -------------------------------------------------------------------------------
 -- Definition of Monoidal Categories
 -------------------------------------------------------------------------------
@@ -111,8 +113,6 @@ record MonoidalCategory {ℓ₀ ℓ₁ : Level} (C : Category {ℓ₀} {ℓ₁})
   
   _⊗₁_ : {a b c d : Obj} → (f : Hom a b) → (g : Hom c d) → Hom (a ⊗₀ c) (b ⊗₀ d)
   _⊗₁_ f g = F₁ tensor (f ,' g)
-
-  open FunctorApplication
   
   field 
     associator : NaturalIsomorphism (associatorL tensor) (associatorR tensor)

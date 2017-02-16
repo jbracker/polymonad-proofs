@@ -13,9 +13,9 @@ record Functor (F : TyCon) : Set₁ where
     fmap : ∀ {α β : Type} → (α → β) → (F α → F β)
     
     lawId  : ∀ {α : Type} → fmap {α = α} identity ≡ identity
-    lawDist : ∀ {α β γ : Type} 
-            → (f : β → γ) → (g : α → β) 
-            → fmap (f ∘ g) ≡ fmap f ∘ fmap g
+    lawCompose : ∀ {α β γ : Type} 
+               → (f : β → γ) → (g : α → β) 
+               → fmap (f ∘ g) ≡ fmap f ∘ fmap g
 
 functorFromMonad : ∀ {M : TyCon}
                  → (_>>=_ : [ M , M ]▷ M)
@@ -33,7 +33,7 @@ functorFromMonad : ∀ {M : TyCon}
 functorFromMonad {M = M} _>>=_ return lawIdL lawIdR lawAssoc = record 
   { fmap = fmap 
   ; lawId = lawId 
-  ; lawDist = lawDist
+  ; lawCompose = lawCompose
   } where
     fmap : ∀ {α β : Type} → (α → β) → M α → M β
     fmap f x = x >>= (return ∘ f)
@@ -46,10 +46,10 @@ functorFromMonad {M = M} _>>=_ return lawIdL lawIdR lawAssoc = record
         ≡⟨ lawIdL ma ⟩
       identity ma ∎)
     
-    lawDist : ∀ {α β γ : Type} 
+    lawCompose : ∀ {α β γ : Type} 
             → (f : β → γ) → (g : α → β) 
             → fmap (f ∘ g) ≡ fmap f ∘ fmap g
-    lawDist f g = funExt (λ ma → begin 
+    lawCompose f g = funExt (λ ma → begin 
       fmap (f ∘ g) ma
         ≡⟨ refl ⟩
       ma >>= (λ x → return (f (g x)))

@@ -33,7 +33,7 @@ natTransCompositionHorzFunctor {A = A} {B} {C} = record
   { F₀ = F₀ 
   ; F₁ = F₁
   ; id = λ {F} → id {F}
-  ; dist = λ {F} {G} {H} {α} {β} → dist {F} {G} {H} {α} {β} 
+  ; compose = λ {F} {G} {H} {α} {β} → compose {F} {G} {H} {α} {β} 
   } where  
     open Category renaming ( id to idC )
     open NaturalTransformation
@@ -72,18 +72,18 @@ natTransCompositionHorzFunctor {A = A} {B} {C} = record
             ≡⟨ refl ⟩
           η Id⟨ [ proj₁' F ]∘[ proj₂' F ] ⟩ x ∎
         
-    dist : {F G H : Obj (Fun B C ×C Fun A B)}
+    compose : {F G H : Obj (Fun B C ×C Fun A B)}
          → {α : Hom (Fun B C ×C Fun A B) F G}
          → {β : Hom (Fun B C ×C Fun A B) G H}
          → F₁ ( ⟨ proj₁' β ⟩∘ᵥ⟨ proj₁' α ⟩ ,' ⟨ proj₂' β ⟩∘ᵥ⟨ proj₂' α ⟩ ) ≡ ⟨ F₁ β ⟩∘ᵥ⟨ F₁ α ⟩
-    dist {F ,' F'} {G ,' G'} {H ,' H'} {α = α₁ ,' α₂} {β = β₁ ,' β₂} = 
+    compose {F ,' F'} {G ,' G'} {H ,' H'} {α = α₁ ,' α₂} {β = β₁ ,' β₂} = 
       propNatTransEq refl refl $ funExt $ λ (x : Obj A) → begin
         η ⟨ ⟨ β₁ ⟩∘ᵥ⟨ α₁ ⟩ ⟩∘ₕ⟨ ⟨ β₂ ⟩∘ᵥ⟨ α₂ ⟩ ⟩ x
           ≡⟨ refl ⟩
         η ⟨ β₁ ⟩∘ᵥ⟨ α₁ ⟩ ([ H' ]₀ x) ∘C [ F ]₁ (η ⟨ β₂ ⟩∘ᵥ⟨ α₂ ⟩ x)
           ≡⟨ refl ⟩
         (η β₁ ([ H' ]₀ x) ∘C η α₁ ([ H' ]₀ x)) ∘C [ F ]₁ (η β₂ x ∘B η α₂ x)
-           ≡⟨ cong (λ X → (η β₁ ([ H' ]₀ x) ∘C η α₁ ([ H' ]₀ x)) ∘C X) (Functor.dist F) ⟩
+           ≡⟨ cong (λ X → (η β₁ ([ H' ]₀ x) ∘C η α₁ ([ H' ]₀ x)) ∘C X) (Functor.compose F) ⟩
         (η β₁ ([ H' ]₀ x) ∘C η α₁ ([ H' ]₀ x)) ∘C ([ F ]₁ (η β₂ x) ∘C [ F ]₁ (η α₂ x))
            ≡⟨ sym (assoc C) ⟩
         η β₁ ([ H' ]₀ x) ∘C (η α₁ ([ H' ]₀ x) ∘C ([ F ]₁ (η β₂ x) ∘C [ F ]₁ (η α₂ x)))
@@ -112,7 +112,7 @@ leftAssocTriFunctor {C = C} {D} {E} = record
   { F₀ = assocTripleL
   ; F₁ = assocTripleL
   ; id = refl
-  ; dist = refl
+  ; compose = refl
   }
 
 rightAssocTriFunctor 
@@ -123,7 +123,7 @@ rightAssocTriFunctor {C = C} {D} {E} = record
   { F₀ = assocTripleR
   ; F₁ = assocTripleR
   ; id = refl
-  ; dist = refl
+  ; compose = refl
   }
 
 A×B×C→[A×B]×C = leftAssocTriFunctor
@@ -141,7 +141,7 @@ biFunctor→triFunctor₁ {C = C} {D} {E} {J} {K} C×J→K D×E→J = record
   { F₀ = F₀
   ; F₁ = F₁ 
   ; id = idF 
-  ; dist = distF
+  ; compose = composeF
   } where
     open Category
     
@@ -169,17 +169,17 @@ biFunctor→triFunctor₁ {C = C} {D} {E} {J} {K} C×J→K D×E→J = record
     _∘CDE_ = _∘_ (C ×C (D ×C E))
     _∘DE_ = _∘_ (D ×C E)
     
-    distF : {a b c : Obj (C ×C (D ×C E))} {f : Hom (C ×C (D ×C E)) a b} {g : Hom (C ×C (D ×C E)) b c} 
+    composeF : {a b c : Obj (C ×C (D ×C E))} {f : Hom (C ×C (D ×C E)) a b} {g : Hom (C ×C (D ×C E)) b c} 
          → F₁ (((C ×C (D ×C E)) ∘ g) f) ≡ (K ∘ F₁ g) (F₁ f)
-    distF {f = fC ,' fDE} {g = gC ,' gDE} = begin
+    composeF {f = fC ,' fDE} {g = gC ,' gDE} = begin
       F₁ ((gC ,' gDE) ∘CDE (fC ,' fDE))
         ≡⟨ refl ⟩
       [ C×J→K ]₁ (gC ∘C fC ,' [ D×E→J ]₁ (gDE ∘DE fDE))
-        ≡⟨ cong (λ X → [ C×J→K ]₁ (gC ∘C fC ,' X)) (Functor.dist D×E→J) ⟩ 
+        ≡⟨ cong (λ X → [ C×J→K ]₁ (gC ∘C fC ,' X)) (Functor.compose D×E→J) ⟩ 
       [ C×J→K ]₁ (gC ∘C fC ,' [ D×E→J ]₁ gDE ∘J [ D×E→J ]₁ fDE)
         ≡⟨ refl ⟩ 
       [ C×J→K ]₁ ((gC ,' [ D×E→J ]₁ gDE) ∘CJ (fC ,' [ D×E→J ]₁ fDE))
-        ≡⟨ Functor.dist C×J→K ⟩ 
+        ≡⟨ Functor.compose C×J→K ⟩ 
       ([ C×J→K ]₁ (gC ,' [ D×E→J ]₁ gDE)) ∘K ([ C×J→K ]₁ (fC ,' [ D×E→J ]₁ fDE))
         ≡⟨ refl ⟩
       (F₁ (gC ,' gDE)) ∘K (F₁ (fC ,' fDE)) ∎
@@ -196,7 +196,7 @@ biFunctor→triFunctor₂ {C = C} {D} {E} {J} {K} C×D→J J×E→K = record
   { F₀ = F₀
   ; F₁ = F₁ 
   ; id = idF 
-  ; dist = distF
+  ; compose = composeF
   } where
     open Category
     
@@ -224,17 +224,17 @@ biFunctor→triFunctor₂ {C = C} {D} {E} {J} {K} C×D→J J×E→K = record
     _∘CDE_ = _∘_ ((C ×C D) ×C E)
     _∘CD_ = _∘_ (C ×C D)
     
-    distF : {a b c : Obj ((C ×C D) ×C E)} {f : Hom ((C ×C D) ×C E) a b} {g : Hom ((C ×C D) ×C E) b c} 
+    composeF : {a b c : Obj ((C ×C D) ×C E)} {f : Hom ((C ×C D) ×C E) a b} {g : Hom ((C ×C D) ×C E) b c} 
          → F₁ (g ∘CDE f) ≡ (F₁ g) ∘K (F₁ f)
-    distF {f = fCD ,' fE} {g = gCD ,' gE} = begin
+    composeF {f = fCD ,' fE} {g = gCD ,' gE} = begin
       F₁ ((gCD ,' gE) ∘CDE (fCD ,' fE))
         ≡⟨ refl ⟩
       [ J×E→K ]₁ ([ C×D→J ]₁ (gCD ∘CD fCD) ,' gE ∘E fE)
-        ≡⟨ cong (λ X → [ J×E→K ]₁ (X ,' gE ∘E fE)) (Functor.dist C×D→J) ⟩ 
+        ≡⟨ cong (λ X → [ J×E→K ]₁ (X ,' gE ∘E fE)) (Functor.compose C×D→J) ⟩ 
       [ J×E→K ]₁ ([ C×D→J ]₁ gCD ∘J [ C×D→J ]₁ fCD ,' gE ∘E  fE)
         ≡⟨ refl ⟩ 
       [ J×E→K ]₁ (([ C×D→J ]₁ gCD ,' gE) ∘JE ([ C×D→J ]₁ fCD ,' fE))
-        ≡⟨ Functor.dist J×E→K ⟩ 
+        ≡⟨ Functor.compose J×E→K ⟩ 
       ([ J×E→K ]₁ ([ C×D→J ]₁ gCD ,' gE)) ∘K ([ J×E→K ]₁ ([ C×D→J ]₁ fCD ,' fE))
         ≡⟨ refl ⟩
       (F₁ (gCD ,' gE)) ∘K (F₁ (fCD ,' fE)) ∎

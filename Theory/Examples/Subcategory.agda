@@ -60,7 +60,7 @@ EmbeddingFunctor→Subcategory {C = C} {D = D} EmbF (injF₀ , injF₁) = record
                → (f ∈ SubHom α β) → (g ∈ SubHom β γ)
                → ((g ∘D f) ∈ SubHom α γ)
     closedComp {._} {._} {._} ._ g ((x₁ , refl) , (y₁ , refl) , g₁ , refl) ((x₂ , Fx₂≡Fy₁) , (y₂ , refl) , g₂ , Fg₂≡Fg₁) with injF₀ x₂ y₁ Fx₂≡Fy₁
-    closedComp {._} {._} {._} ._ ._ ((x₁ , refl) , (y₁ , refl) , g₁ , refl) ((.y₁ , refl) , (y₂ , refl) , g₂ , refl) | refl = (x₁ , refl) , (y₂ , refl) , (g₂ ∘C g₁) , Functor.dist EmbF
+    closedComp {._} {._} {._} ._ ._ ((x₁ , refl) , (y₁ , refl) , g₁ , refl) ((.y₁ , refl) , (y₂ , refl) , g₂ , refl) | refl = (x₁ , refl) , (y₂ , refl) , (g₂ ∘C g₁) , Functor.compose EmbF
     
     closedId : {α : Category.Obj D}
              → (α ∈ SubObj) → (Category.id D ∈ SubHom α α)
@@ -80,7 +80,7 @@ EmbeddingFunctor→LiftSubcategory {ℓC₀} {ℓC₁} {ℓD₀} {ℓD₁} {C} {
       { F₀ = λ x → lift (Functor.F₀ EmbF x) 
       ; F₁ = λ f → lift (Functor.F₁ EmbF f) 
       ; id = λ {a} → cong lift (Functor.id EmbF {a}) 
-      ; dist = λ {a} {b} {c} {f} {g} → cong lift (Functor.dist EmbF {a} {b} {c} {f} {g}) 
+      ; compose = λ {a} {b} {c} {f} {g} → cong lift (Functor.compose EmbF {a} {b} {c} {f} {g}) 
       }
     
     LiftEmbF₀≡EmbF₀ : (x : Category.Obj C) → Functor.F₀ LiftEmbF x ≡ lift (Functor.F₀ EmbF x)

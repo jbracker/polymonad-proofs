@@ -141,7 +141,7 @@ functorTwoCategory {ℓObj} {ℓHom} = record
               η ([ comp ]₁ (α , [ comp ]₁ (β , γ))) x 
                 ≅⟨ refl ⟩
               η α ([ G' ]₀ ([ F' ]₀ x)) ∘D ([ H ]₁ ((η β ([ F' ]₀ x)) ∘C [ G ]₁ (η γ x)))
-                ≅⟨ hcong (λ X → η α ([ G' ]₀ ([ F' ]₀ x)) ∘D X) (≡-to-≅ $ Functor.dist H) ⟩
+                ≅⟨ hcong (λ X → η α ([ G' ]₀ ([ F' ]₀ x)) ∘D X) (≡-to-≅ $ Functor.compose H) ⟩
               η α ([ G' ]₀ ([ F' ]₀ x)) ∘D ( [ H ]₁ (η β ([ F' ]₀ x)) ∘D [ H ]₁ ([ G ]₁ (η γ x)) )
                 ≅⟨ ≡-to-≅ $ assoc D ⟩
               ( η α ([ G' ]₀ ([ F' ]₀ x)) ∘D [ H ]₁ (η β ([ F' ]₀ x)) ) ∘D [ H ]₁ ([ G ]₁ (η γ x)) -- η ⟨ α ⟩∘ₕ⟨ β ⟩ ([ F' ]₀ x)
@@ -205,7 +205,7 @@ functorTwoCategory {ℓObj} {ℓHom} = record
           idC D ∘D [ I ]₁ (η α ([ F ]₀ x) ∘C [ G ]₁ (idC B))
             ≅⟨ ≡-to-≅ $ idR D ⟩
           [ I ]₁ (η α ([ F ]₀ x) ∘C [ G ]₁ (idC B))
-            ≅⟨ ≡-to-≅ $ Functor.dist I ⟩
+            ≅⟨ ≡-to-≅ $ Functor.compose I ⟩
           [ I ]₁ (η α ([ F ]₀ x)) ∘D [ I ]₁ ([ G ]₁ (idC B))
             ≅⟨ hcong (λ X → X ∘D [ I ]₁ ([ G ]₁ (idC B))) (≡-to-≅ $ sym $ idR D) ⟩
           ( idC D ∘D [ I ]₁ (η α ([ F ]₀ x)) ) ∘D [ I ]₁ ([ G ]₁ (idC B))

@@ -32,7 +32,7 @@ diNatAtkeyFunctorConst D S x = record
   { F₀ = F₀
   ; F₁ = F₁ 
   ; id = refl
-  ; dist = sym $ Category.idL D
+  ; compose = sym $ Category.idL D
   } where
     F₀ : Obj (S op ×C S) → Obj D
     F₀ (s ,' s') = x
@@ -53,7 +53,7 @@ diNatAtkeyFunctorConst' {C = C} {D} {S} s₁ s₃ x F = record
   { F₀ = F₀
   ; F₁ = F₁ 
   ; id = Functor.id F
-  ; dist = λ {a} {b} {c} {f} {g} → dist {a} {b} {c} {f} {g}
+  ; compose = λ {a} {b} {c} {f} {g} → compose {a} {b} {c} {f} {g}
   } where
     _∘D_ = _∘_ D ; _∘C_ = _∘_ C ; _∘SS_ = _∘_ (S op ×C S) ; _∘S_ = _∘_ S ; _∘Sop_ = _∘_ (S op)
     
@@ -64,10 +64,10 @@ diNatAtkeyFunctorConst' {C = C} {D} {S} s₁ s₃ x F = record
        → Hom (S op ×C S) a b → Hom D (F₀ a) (F₀ b)
     F₁ (sf ,' sf') = [ F ]₁ (id (S op) {s₁} , id S {s₃} , id C {x})
     
-    dist : {a b c : Obj ((S op) ×C S)} 
+    compose : {a b c : Obj ((S op) ×C S)} 
          → {f : Hom ((S op) ×C S) a b} {g : Hom ((S op) ×C S) b c}
          → F₁ (g ∘SS f) ≡ F₁ g ∘D F₁ f
-    dist {f = sf ,' sf'} {g = sg ,' sg'} = begin
+    compose {f = sf ,' sf'} {g = sg ,' sg'} = begin
       F₁ ((sg ,' sg') ∘SS (sf ,' sf')) 
         ≡⟨ refl ⟩
       [ F ]₁ (id (S op) {s₁} , id S {s₃} , id C {x})
@@ -89,7 +89,7 @@ diNatAtkeyFunctor {S = S} {C} {D} x F = record
   { F₀ = F₀
   ; F₁ = F₁  
   ; id = Functor.id F
-  ; dist = dist
+  ; compose = compose
   } where
     F₀ : Obj ((S op) ×C S) → Obj D
     F₀ (s ,' s') = [ F ]₀ (s , s' , x)
@@ -103,16 +103,16 @@ diNatAtkeyFunctor {S = S} {C} {D} x F = record
     _∘D_ = _∘_ D
     _∘C_ = _∘_ C
     
-    dist : {a b c : Obj ((S op) ×C S)}
+    compose : {a b c : Obj ((S op) ×C S)}
          → {f : Hom (S op ×C S) a b} {g : Hom (S op ×C S) b c} 
          → F₁ (g ∘SS f) ≡ (F₁ g) ∘D (F₁ f)
-    dist {f = f ,' f'} {g = g ,' g'} = begin
+    compose {f = f ,' f'} {g = g ,' g'} = begin
       F₁ ((g ,' g') ∘SS (f ,' f')) 
         ≡⟨ refl ⟩
       [ F ]₁ ((g ∘Sop f) , (g' ∘S f') , id C {x}) 
         ≡⟨ cong (λ X → [ F ]₁ ((g ∘Sop f) , (g' ∘S f') , X)) (sym $ Category.idL C) ⟩
       [ F ]₁ ((g ∘Sop f) , (g' ∘S f') , (id C {x} ∘C id C {x})) 
-        ≡⟨ Functor.dist F ⟩
+        ≡⟨ Functor.compose F ⟩
       [ F ]₁ (g , g' , id C {x}) ∘D [ F ]₁ (f , f' , id C {x})
         ≡⟨ refl ⟩
       (F₁ (g ,' g')) ∘D (F₁ (f ,' f')) ∎
@@ -127,7 +127,7 @@ diNatAtkeyFunctorComp {S = S} {C} s₁ s₃ x F G = record
   { F₀ = F₀
   ; F₁ = F₁  
   ; id = idFunc
-  ; dist = dist
+  ; compose = compose
   } where
     _∘SS_ = _∘_ (S op ×C S) ; _∘C_ = _∘_ C
     _∘S_ = _∘_ S ; _∘Sop_ = _∘_ (S op)
@@ -148,20 +148,20 @@ diNatAtkeyFunctorComp {S = S} {C} s₁ s₃ x F G = record
         ≡⟨ Functor.id G ⟩
       id C ∎
 
-    dist : {a b c : Obj ((S op) ×C S)} 
+    compose : {a b c : Obj ((S op) ×C S)} 
          → {f : Hom ((S op) ×C S) a b} {g : Hom ((S op) ×C S) b c}
          → F₁ (g ∘SS f) ≡ F₁ g ∘C F₁ f
-    dist {f = sf ,' sf'} {g = sg ,' sg'} = begin
+    compose {f = sf ,' sf'} {g = sg ,' sg'} = begin
       F₁ ((sg ,' sg') ∘SS (sf ,' sf')) 
         ≡⟨ refl ⟩
       [ G ]₁ (id (S op) {s₁} , (sg' ∘S sf') , [ F ]₁ ((sg ∘Sop sf) , id S {s₃} , id C {x}))
         ≡⟨ cong₂ (λ X Y → [ G ]₁ (id (S op) {s₁} , (sg' ∘S sf') , [ F ]₁ ((sg ∘Sop sf) , X , Y))) (sym $ Category.idL S) (sym $ Category.idL C) ⟩
       [ G ]₁ (id (S op) {s₁} , (sg' ∘S sf') , [ F ]₁ ((sg ∘Sop sf) , (id S {s₃} ∘S id S {s₃}) , (id C {x} ∘C id C {x})))
-        ≡⟨ cong (λ X → [ G ]₁ (id (S op) {s₁} , (sg' ∘S sf') , X)) (Functor.dist F) ⟩
+        ≡⟨ cong (λ X → [ G ]₁ (id (S op) {s₁} , (sg' ∘S sf') , X)) (Functor.compose F) ⟩
       [ G ]₁ (id (S op) {s₁} , (sg' ∘S sf') , ([ F ]₁ (sg , id S {s₃} , id C {x}) ∘C [ F ]₁ (sf , id S {s₃} , id C {x})) )
         ≡⟨ cong (λ X → [ G ]₁ (X , (sg' ∘S sf') , ([ F ]₁ (sg , id S {s₃} , id C {x}) ∘C [ F ]₁ (sf , id S {s₃} , id C {x})) )) (sym $ Category.idL (S op)) ⟩
       [ G ]₁ ((id (S op) {s₁} ∘Sop id (S op) {s₁}) , (sg' ∘S sf') , ([ F ]₁ (sg , id S {s₃} , id C {x}) ∘C [ F ]₁ (sf , id S {s₃} , id C {x})) )
-        ≡⟨ Functor.dist G ⟩
+        ≡⟨ Functor.compose G ⟩
       ([ G ]₁ (id (S op) {s₁} , sg' , [ F ]₁ (sg , id S {s₃} , id C {x}))) ∘C ([ G ]₁ (id (S op) {s₁} , sf' , [ F ]₁ (sf , id S {s₃} , id C {x})))
         ≡⟨ refl ⟩
       F₁ (sg ,' sg') ∘C F₁ (sf ,' sf') ∎
@@ -179,7 +179,7 @@ natTransAtkeyFunctor {S = S} {C} {D} s s' F = record
   { F₀ = F₀
   ; F₁ = F₁  
   ; id = Functor.id F
-  ; dist = dist
+  ; compose = compose
   } where
     _∘C_ = _∘_ C ; _∘D_ = _∘_ D ; _∘S_ = _∘_ S
     
@@ -189,15 +189,15 @@ natTransAtkeyFunctor {S = S} {C} {D} s s' F = record
     F₁ : {a b : Obj C} → Hom C a b → Hom D (F₀ a) (F₀ b)
     F₁ f = [ F ]₁ (id S {s} , id S {s'} , f)
     
-    dist : {a b c : Obj C} 
+    compose : {a b c : Obj C} 
          → {f : Hom C a b} {g : Hom C b c}
          → F₁ (g ∘C f) ≡ (F₁ g) ∘D (F₁ f)
-    dist {a} {b} {c} {f} {g} = begin
+    compose {a} {b} {c} {f} {g} = begin
       -- F₁ (g ∘C f)
       [ F ]₁ (id S {s} , id S {s'} , (g ∘C f))
         ≡⟨ cong₂ (λ X Y → [ F ]₁ (X , Y , (g ∘C f))) (sym $ Category.idL S) (sym $ Category.idL S) ⟩
       [ F ]₁ ((id S {s} ∘S id S {s}) , (id S {s'} ∘S id S {s'}) , (g ∘C f))
-        ≡⟨ Functor.dist F ⟩
+        ≡⟨ Functor.compose F ⟩
       [ F ]₁ (id S {s} , id S {s'} , g) ∘D [ F ]₁ (id S {s} , id S {s'} , f) ∎
 
 natTransAtkeyFunctorFst : {ℓS₀ ℓS₁ ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} 
@@ -209,7 +209,7 @@ natTransAtkeyFunctorFst {S = S} {C} {D} s' x F = record
   { F₀ = F₀
   ; F₁ = F₁  
   ; id = Functor.id F
-  ; dist = dist
+  ; compose = compose
   } where
     _∘C_ = _∘_ C ; _∘D_ = _∘_ D ; _∘S_ = _∘_ S ; _∘Sop_ = _∘_ (S op)
     
@@ -219,14 +219,14 @@ natTransAtkeyFunctorFst {S = S} {C} {D} s' x F = record
     F₁ : {a b : Obj (S op)} → Hom (S op) a b → Hom D (F₀ a) (F₀ b)
     F₁ sf = [ F ]₁ (sf , id S {s'} , id C {x})
     
-    dist : {a b c : Obj (S op)} 
+    compose : {a b c : Obj (S op)} 
          → {sf : Hom (S op) a b} {sg : Hom (S op) b c}
          → F₁ (sg ∘Sop sf) ≡ (F₁ sg) ∘D (F₁ sf)
-    dist {a} {b} {c} {sf} {sg} = begin
+    compose {a} {b} {c} {sf} {sg} = begin
       [ F ]₁ ((sg ∘Sop sf) , id S {s'} , id C {x})
         ≡⟨ cong₂ (λ X Y → [ F ]₁ ((sg ∘Sop sf) , X , Y)) (sym $ Category.idL S) (sym $ Category.idL C) ⟩
       [ F ]₁ ((sg ∘Sop sf) , (id S {s'} ∘S id S {s'}) , (id C {x} ∘C id C {x}))
-        ≡⟨ Functor.dist F ⟩
+        ≡⟨ Functor.compose F ⟩
       [ F ]₁ (sg , id S {s'} , id C {x}) ∘D [ F ]₁ (sf , id S {s'} , id C {x}) ∎
 
 
@@ -239,7 +239,7 @@ natTransAtkeyFunctorSnd {S = S} {C} {D} s x F = record
   { F₀ = F₀
   ; F₁ = F₁  
   ; id = Functor.id F
-  ; dist = dist
+  ; compose = compose
   } where
     _∘C_ = _∘_ C ; _∘D_ = _∘_ D ; _∘S_ = _∘_ S ; _∘Sop_ = _∘_ (S op)
     
@@ -249,14 +249,14 @@ natTransAtkeyFunctorSnd {S = S} {C} {D} s x F = record
     F₁ : {a b : Obj S} → Hom S a b → Hom D (F₀ a) (F₀ b)
     F₁ sf' = [ F ]₁ (id (S op) {s} , sf' , id C {x})
     
-    dist : {a b c : Obj S} 
+    compose : {a b c : Obj S} 
          → {sf' : Hom S a b} {sg' : Hom S b c}
          → F₁ (sg' ∘S sf') ≡ (F₁ sg') ∘D (F₁ sf')
-    dist {a} {b} {c} {sf'} {sg'} = begin
+    compose {a} {b} {c} {sf'} {sg'} = begin
       [ F ]₁ (id (S op) {s} , (sg' ∘S sf') , id C {x})
         ≡⟨ cong₂ (λ X Y → [ F ]₁ (X , (sg' ∘S sf') , Y)) (sym $ Category.idL (S op)) (sym $ Category.idL C) ⟩
       [ F ]₁ ((id (S op) {s} ∘Sop id (S op) {s}) , (sg' ∘S sf') , (id C {x} ∘C id C {x}))
-        ≡⟨ Functor.dist F ⟩
+        ≡⟨ Functor.compose F ⟩
       [ F ]₁ (id (S op) {s} , sg' , id C {x}) ∘D [ F ]₁ (id (S op) {s} , sf' , id C {x}) ∎
 
 natTransAtkeyFunctorComp : {ℓS₀ ℓS₁ ℓC₀ ℓC₁ : Level} 
@@ -269,7 +269,7 @@ natTransAtkeyFunctorComp {S = S} {C} s₂ F G = record
   { F₀ = F₀
   ; F₁ = F₁  
   ; id = idFunc
-  ; dist = dist
+  ; compose = compose
   } where
     _∘C_ = _∘_ C ; _∘S_ = _∘_ S ; _∘Sop_ = _∘_ (S op)
     _∘SSC_ = _∘_ (S op ×C S ×C C)
@@ -291,20 +291,20 @@ natTransAtkeyFunctorComp {S = S} {C} s₂ F G = record
         ≡⟨ Functor.id G ⟩
       id C ∎
     
-    dist : {a b c : Obj ((S op) ×C S ×C C)}
-         → {f : Hom ((S op) ×C S ×C C) a b} {g : Hom ((S op) ×C S ×C C) b c}
-         → F₁ (g ∘SSC f) ≡ F₁ g ∘C F₁ f
-    dist {f = sf , sf' , f} {g = sg , sg' , g} = begin
+    compose : {a b c : Obj ((S op) ×C S ×C C)}
+            → {f : Hom ((S op) ×C S ×C C) a b} {g : Hom ((S op) ×C S ×C C) b c}
+            → F₁ (g ∘SSC f) ≡ F₁ g ∘C F₁ f
+    compose {f = sf , sf' , f} {g = sg , sg' , g} = begin
       F₁ ((sg , sg' , g) ∘SSC (sf , sf' , f)) 
         ≡⟨ refl ⟩
       [ G ]₁ ((sg ∘Sop sf) , id S {s₂} , [ F ]₁ (id (S op) {s₂} , (sg' ∘S sf') , (g ∘C f)))
         ≡⟨ cong (λ X → [ G ]₁ ((sg ∘Sop sf) , id S {s₂} , [ F ]₁ (X , (sg' ∘S sf') , (g ∘C f)))) (sym $ Category.idL (S op)) ⟩
       [ G ]₁ ((sg ∘Sop sf) , id S {s₂} , [ F ]₁ ((id (S op) {s₂} ∘Sop id (S op) {s₂})  , (sg' ∘S sf') , (g ∘C f)))
-        ≡⟨ cong (λ X → [ G ]₁ ((sg ∘Sop sf) , id S {s₂} , X)) (Functor.dist F) ⟩
+        ≡⟨ cong (λ X → [ G ]₁ ((sg ∘Sop sf) , id S {s₂} , X)) (Functor.compose F) ⟩
       [ G ]₁ ((sg ∘Sop sf) , id S {s₂} , ([ F ]₁ (id (S op) {s₂} , sg' , g) ∘C [ F ]₁ (id (S op) {s₂}  , sf' , f)))
         ≡⟨ cong (λ X → [ G ]₁ ((sg ∘Sop sf) , X , ([ F ]₁ (id (S op) {s₂} , sg' , g) ∘C [ F ]₁ (id (S op) {s₂}  , sf' , f)))) (sym $ Category.idL S) ⟩
       [ G ]₁ ((sg ∘Sop sf) , (id S {s₂} ∘S id S {s₂}) , ([ F ]₁ (id (S op) {s₂} , sg' , g) ∘C [ F ]₁ (id (S op) {s₂}  , sf' , f)))
-        ≡⟨ Functor.dist G ⟩
+        ≡⟨ Functor.compose G ⟩
       [ G ]₁ (sg , id S {s₂} , [ F ]₁ (id (S op) {s₂} , sg' , g)) ∘C [ G ]₁ (sf , id S {s₂} , [ F ]₁ (id (S op) {s₂}  , sf' , f)) 
         ≡⟨ refl ⟩
       F₁ (sg , sg' , g) ∘C F₁ (sf , sf' , f) ∎

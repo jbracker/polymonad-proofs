@@ -158,13 +158,13 @@ record StrictTwoCategory {ℓ₀ ℓ₁ ℓ₂ : Level} : Set (lsuc (ℓ₀ ⊔ 
                   → (θ ◁ f) ∘ᵥ (η ◁ f) ≡ (θ ∘ᵥ η) ◁ f
   whiskerRightDist {a} {b} {c} {f} {η = η} {θ} = 
     let _∘bc_ = Category._∘_ (HomCat b c)
-    in trans (sym (Functor.dist comp)) (cong (λ X → [ comp ]₁ (θ ∘bc η , X)) vIdL)
+    in trans (sym (Functor.compose comp)) (cong (λ X → [ comp ]₁ (θ ∘bc η , X)) vIdL)
 
   whiskerLeftDist : {a b c : Cell₀} {f g h : Cell₁ a b} {i : Cell₁ b c} {η : Cell₂ f g} {θ : Cell₂ g h}
                    → (i ▷ θ) ∘ᵥ (i ▷ η) ≡ i ▷ (θ ∘ᵥ η)
   whiskerLeftDist {a} {b} {c} {η = η} {θ} = 
     let _∘ab_ = Category._∘_ (HomCat a b)
-    in trans (sym (Functor.dist comp)) (cong (λ X → [ comp ]₁ (X , θ ∘ab η)) vIdL)
+    in trans (sym (Functor.compose comp)) (cong (λ X → [ comp ]₁ (X , θ ∘ab η)) vIdL)
   
   
   whiskerCoher1 : {a b c d : Cell₀} {f : Cell₁ a b} {g : Cell₁ b c} {h i : Cell₁ c d} {η : Cell₂ h i}
@@ -297,7 +297,7 @@ unitStrictTwoCategory = record
       { F₀ = F₀
       ; F₁ = F₁
       ; id = refl
-      ; dist = refl
+      ; compose = refl
       }
     
     id₁ : {a : ⊤} → Obj (HomCat a a)
@@ -348,7 +348,7 @@ Category→StrictTwoCategory {ℓ₀} {ℓ₁} C = record
       { F₀ = F₀
       ; F₁ = λ {x} {y} → F₁ {x} {y}
       ; id = refl
-      ; dist = refl
+      ; compose = refl
       } where
           F₀ : Obj (HomCat b c ×C HomCat a b) → Obj (HomCat a c)
           F₀ (g , f) = g ∘C f

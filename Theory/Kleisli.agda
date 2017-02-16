@@ -43,7 +43,7 @@ KleisliTriple→Functor {C = C} {T = T} km = record
   { F₀ = F₀
   ; F₁ = F₁
   ; id = idF
-  ; dist = distF
+  ; compose = composeF
   } where
     _∘_ = _∘C_ C
     kext = KleisliTriple.kext km
@@ -64,9 +64,9 @@ KleisliTriple→Functor {C = C} {T = T} km = record
         ≡⟨ KleisliTriple.idL km ⟩ 
       id ∎
     
-    distF : {a b c : Obj C} {f : Hom C a b} {g : Hom C b c} 
+    composeF : {a b c : Obj C} {f : Hom C a b} {g : Hom C b c} 
           → F₁ (g ∘ f) ≡ (F₁ g) ∘ (F₁ f)
-    distF {a = a} {b = b} {c = c} {f = f} {g = g} = begin
+    composeF {a = a} {b = b} {c = c} {f = f} {g = g} = begin
       F₁ (g ∘ f) 
         ≡⟨ refl ⟩
       kext ( η ∘ (g ∘ f) )
@@ -247,9 +247,9 @@ Monad→KleisliTriple {C = C} {T = T} m = record
       kext (kext l ∘ k) 
         ≡⟨ refl ⟩
       μ ∘ T₁ ((μ ∘ T₁ l) ∘ k)
-        ≡⟨ cong (λ X → μ ∘ X) (Functor.dist T) ⟩
+        ≡⟨ cong (λ X → μ ∘ X) (Functor.compose T) ⟩
       μ ∘ (T₁ (μ ∘ T₁ l) ∘ T₁ k)
-        ≡⟨ cong (λ X → μ ∘ (X ∘ T₁ k)) (Functor.dist T) ⟩
+        ≡⟨ cong (λ X → μ ∘ (X ∘ T₁ k)) (Functor.compose T) ⟩
       μ ∘ ((T₁ μ ∘ T₁ (T₁ l)) ∘ T₁ k)
         ≡⟨ assoc C ⟩
       (μ ∘ (T₁ μ ∘ T₁ (T₁ l))) ∘ T₁ k

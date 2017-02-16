@@ -101,6 +101,7 @@ only-cat-theory:
 	$(AGDA_TC) Theory/NaturalTransformation/Whisker.agda
 	$(AGDA_TC) Theory/NaturalIsomorphism.agda
 	$(AGDA_TC) Theory/DinaturalTransformation.agda
+	$(AGDA_TC) Theory/MonoidalCategory.agda
 	$(AGDA_TC) Theory/Monad.agda
 	$(AGDA_TC) Theory/AtkeyParameterizedMonad.agda
 	$(AGDA_TC) Theory/Kleisli.agda

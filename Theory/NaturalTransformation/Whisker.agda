@@ -56,11 +56,11 @@ rightWhiskerNatTrans {C = C} {D} {E} {G} {H} F α = record
   { η = λ x → [ F ]₁ (η α x)
   ; natural = λ {a} {b} {f} → begin
       [ F ]₁ ([ H ]₁ f) ∘E ([ F ]₁ (η α a)) 
-        ≡⟨ sym (dist F) ⟩
+        ≡⟨ sym (compose F) ⟩
       [ F ]₁ ([ H ]₁ f ∘D η α a)
         ≡⟨ cong (F₁ F) (natural α) ⟩
       [ F ]₁ (η α b ∘D [ G ]₁ f)
-        ≡⟨ dist F ⟩
+        ≡⟨ compose F ⟩
       [ F ]₁ (η α b) ∘E [ F ]₁ ([ G ]₁ f) ∎
   } where _∘E_ = _∘_ E ; _∘D_ = _∘_ D
 
@@ -83,7 +83,7 @@ rightWhiskerDist {C = C} {D} {E} {F} {G} {H} K α β =
     η [ K ]∘⟨ ⟨ β ⟩∘ᵥ⟨ α ⟩ ⟩ x 
       ≡⟨ refl ⟩
     [ K ]₁ (η β x ∘D η α x)
-      ≡⟨ dist K ⟩
+      ≡⟨ compose K ⟩
     [ K ]₁ (η β x) ∘E [ K ]₁ (η α x)
       ≡⟨ refl ⟩
     η ⟨ [ K ]∘⟨ β ⟩ ⟩∘ᵥ⟨ [ K ]∘⟨ α ⟩ ⟩ x ∎

@@ -114,7 +114,7 @@ Functor→LaxTwoFunctor {ℓ₀} {ℓ₁} {C} {D} F = record
         { F₀ = F₀
         ; F₁ = λ {a} {b} → F₁ {a} {b}
         ; id = refl
-        ; dist = refl
+        ; compose = refl
         } where
           F₀ : Obj (HomCat C' x y) → Obj (HomCat D' (P₀ x) (P₀ y))
           F₀ f = [ F ]₁ f

@@ -58,7 +58,7 @@ AtkeyParameterizedMonad→LaxTwoFunctor {ℓC₀} {ℓC₁} {ℓS₀} {ℓS₁} 
       { F₀ = F₀ 
       ; F₁ = λ {a} {b} → F₁ {a} {b}
       ; id = refl
-      ; dist = λ {a} {b} {c} {f} {g} → dist {a} {b} {c} {f} {g} 
+      ; compose = λ {a} {b} {c} {f} {g} → compose {a} {b} {c} {f} {g} 
       } where
         _∘SS_ = _∘_ (HomCat S2 s₁ s₂)
         _∘CC_ = _∘_ (HomCat FunTwoCat C C)
@@ -69,29 +69,29 @@ AtkeyParameterizedMonad→LaxTwoFunctor {ℓC₀} {ℓC₁} {ℓS₀} {ℓS₁} 
         F₀₁ : {a b : Obj C} → Hom C a b → Hom C (F₀₀ a) (F₀₀ b)
         F₀₁ f = [ M ]₁ (id (S op) {s₂} , id S {s₁} , f)
  
-        dist₀ : {a b c : Obj C} 
-              → {f : Hom C a b} {g : Hom C b c} 
-              → [ M ]₁ (id (S op) {s₂} , id S {s₁} , (g ∘C f)) 
-              ≡ [ M ]₁ (id (S op) {s₂} , id S {s₁} , g) ∘C [ M ]₁ (id (S op) {s₂} , id S {s₁} , f)
-        dist₀ {a} {b} {c} {f} {g} = begin
+        compose₀ : {a b c : Obj C} 
+                 → {f : Hom C a b} {g : Hom C b c} 
+                 → [ M ]₁ (id (S op) {s₂} , id S {s₁} , (g ∘C f)) 
+                 ≡ [ M ]₁ (id (S op) {s₂} , id S {s₁} , g) ∘C [ M ]₁ (id (S op) {s₂} , id S {s₁} , f)
+        compose₀ {a} {b} {c} {f} {g} = begin
           [ M ]₁ (id (S op) {s₂} , id S {s₁} , (g ∘C f)) 
             ≡⟨ cong₂ (λ X Y → [ M ]₁ (X , Y , (g ∘C f))) (sym $ idL (S op)) (sym $ idL S) ⟩
           [ M ]₁ ((id (S op) {s₂} ∘Sop id (S op) {s₂}) , (id S {s₁} ∘S id S {s₁}) , (g ∘C f))
-            ≡⟨ Functor.dist M ⟩
+            ≡⟨ Functor.compose M ⟩
           [ M ]₁ (id (S op) {s₂} , id S {s₁} , g) ∘C [ M ]₁ (id (S op) {s₂} , id S {s₁} , f) ∎
 
         F₀ : Hom S s₁ s₂ → Functor (P₀ s₁) (P₀ s₂)
-        F₀ f = functor F₀₀ F₀₁ (Functor.id M) dist₀
+        F₀ f = functor F₀₀ F₀₁ (Functor.id M) compose₀
         
         F₁ : {a b : Hom S s₁ s₂} 
            → Hom (HomCat S2 s₁ s₂) a b
            → Hom (HomCat FunTwoCat (P₀ s₁) (P₀ s₂)) (F₀ a) (F₀ b)
         F₁ {a} {b} tt = naturalTransformation (λ x → id C {[ F₀ a ]₀ x}) (trans (idL C) (sym $ idR C))
         
-        dist : {a b c : Hom S s₁ s₂}
-             → {f : Hom (HomCat S2 s₁ s₂) a b} {g : Hom (HomCat S2 s₁ s₂) b c}
-             → F₁ {a} {c} (_∘SS_ {a} {b} {c} g f) ≡ (F₁ {a} {b} g) ∘CC (F₁ {b} {c} f)
-        dist {a} {b} {c} {tt} {tt} = propNatTransEq refl refl $ funExt $ λ (x : Obj C) → sym (idR C)
+        compose : {a b c : Hom S s₁ s₂}
+                → {f : Hom (HomCat S2 s₁ s₂) a b} {g : Hom (HomCat S2 s₁ s₂) b c}
+                → F₁ {a} {c} (_∘SS_ {a} {b} {c} g f) ≡ (F₁ {a} {b} g) ∘CC (F₁ {b} {c} f)
+        compose {a} {b} {c} {tt} {tt} = propNatTransEq refl refl $ funExt $ λ (x : Obj C) → sym (idR C)
     
     η : {s : Obj S} → NatTrans Id[ C ] ([ P₁ {s} {s} ]₀ (id S {s}))
     η {s} = naturalTransformation (λ x → AtkeyParameterizedMonad.η monad {x} {s}) (AtkeyParameterizedMonad.naturalη monad {s})

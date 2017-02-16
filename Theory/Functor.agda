@@ -22,14 +22,17 @@ open Category hiding ( id )
 -------------------------------------------------------------------------------
 record Functor {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} (C : Category {ℓC₀} {ℓC₁}) (D : Category {ℓD₀} {ℓD₁}) : Set (ℓC₀ ⊔ ℓC₁ ⊔ ℓD₀ ⊔ ℓD₁) where
   constructor functor
+  
+  open Category hiding ( id )
+  
   field
     F₀ : Obj C → Obj D
     F₁ : ∀ {a b} → Hom C a b → Hom D (F₀ a) (F₀ b)
     
     id : ∀ {a} → F₁ {a} {a} (Category.id C) ≡ Category.id D
     
-    dist : ∀ {a b c} {f : Hom C a b} {g : Hom C b c} 
-         → F₁ (_∘_ C g f) ≡ _∘_ D (F₁ g) (F₁ f)
+    compose : ∀ {a b c} {f : Hom C a b} {g : Hom C b c} 
+            → F₁ (_∘_ C g f) ≡ _∘_ D (F₁ g) (F₁ f)
 
 [_]₀ : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} 
       → Functor C D → ( Obj C → Obj D )
@@ -67,7 +70,7 @@ idFunctor C = record
   { F₀ = idF 
   ; F₁ = idF 
   ; id = refl 
-  ; dist = refl
+  ; compose = refl
   }
 
 Id[_] : {ℓC₀ ℓC₁ : Level} → (C : Category {ℓC₀} {ℓC₁}) → Functor C C
@@ -82,7 +85,7 @@ compFunctor {C = C} {D = D} {E = E} F G = record
   { F₀ = F₀
   ; F₁ = F₁
   ; id = id
-  ; dist = dist
+  ; compose = compose
   } where
     F₀ : Obj C → Obj E
     F₀ a = [ F ]₀ ( [ G ]₀ a )
@@ -93,9 +96,9 @@ compFunctor {C = C} {D = D} {E = E} F G = record
     id : ∀ {a : Obj C} → F₁ {a = a} (Category.id C) ≡ Category.id E
     id = trans (cong (λ X → Functor.F₁ F X) (Functor.id G)) (Functor.id F)
     
-    dist : ∀ {a b c} {f : Hom C a b} {g : Hom C b c} 
+    compose : ∀ {a b c} {f : Hom C a b} {g : Hom C b c} 
          → F₁ (_∘_ C g f) ≡ _∘_ E (F₁ g) (F₁ f)
-    dist = trans (cong (λ X → Functor.F₁ F X) (Functor.dist G)) (Functor.dist F)
+    compose = trans (cong (λ X → Functor.F₁ F X) (Functor.compose G)) (Functor.compose F)
 
 [_]∘[_] = compFunctor
 
@@ -110,7 +113,7 @@ productFunctor {C = C} {D} {E} {K} F G = record
   { F₀ = P₀ 
   ; F₁ = P₁ 
   ; id = cong₂ (λ X Y → X , Y) (Functor.id F) (Functor.id G)
-  ; dist = cong₂ (λ X Y → X , Y) (Functor.dist F) (Functor.dist G)
+  ; compose = cong₂ (λ X Y → X , Y) (Functor.compose F) (Functor.compose G)
   } where
     C×E = C ×C E
     D×K = D ×C K
@@ -131,7 +134,7 @@ constFunctor C c = record
   { F₀ = F₀
   ; F₁ = F₁
   ; id = refl
-  ; dist = sym (Category.idL C)
+  ; compose = sym (Category.idL C)
   } where
     F₀ : Obj ⊤-Cat → Obj C
     F₀ tt = c
@@ -149,7 +152,7 @@ leftExtendFunctor E e F = record
   { F₀ = λ c → e , [ F ]₀ c
   ; F₁ = λ f → id E {e} , [ F ]₁ f
   ; id = cong₂ _,_ refl (Functor.id F)
-  ; dist = cong₂ _,_ (sym (Category.idL E)) (Functor.dist F)
+  ; compose = cong₂ _,_ (sym (Category.idL E)) (Functor.compose F)
   }
 
 -- ▷ = \rhd
@@ -162,7 +165,7 @@ rightExtendFunctor F E e = record
   { F₀ = λ c → [ F ]₀ c , e
   ; F₁ = λ f → [ F ]₁ f , id E {e}
   ; id = cong₂ _,_ (Functor.id F) refl
-  ; dist = cong₂ _,_ (Functor.dist F) (sym (Category.idR E))
+  ; compose = cong₂ _,_ (Functor.compose F) (sym (Category.idR E))
   }
 
 -- ◁ = \lhd
@@ -177,12 +180,12 @@ propFunctorEq : {Cℓ₀ Cℓ₁ Dℓ₀ Dℓ₁ : Level} {C : Category {Cℓ₀
               → {G₁ : (a b : Obj C) → Hom C a b → Hom D (G₀ a) (G₀ b)}
               → {idF : {a : Obj C} → F₁ a a (id C) ≡ id D}
               → {idG : {a : Obj C} → G₁ a a (id C) ≡ id D}
-              → {distF : ∀ {a b c} {f : Hom C a b} {g : Hom C b c} → F₁ a c (_∘_ C g f) ≡ _∘_ D (F₁ b c g) (F₁ a b f)}
-              → {distG : ∀ {a b c} {f : Hom C a b} {g : Hom C b c} → G₁ a c (_∘_ C g f) ≡ _∘_ D (G₁ b c g) (G₁ a b f)}
+              → {composeF : ∀ {a b c} {f : Hom C a b} {g : Hom C b c} → F₁ a c (_∘_ C g f) ≡ _∘_ D (F₁ b c g) (F₁ a b f)}
+              → {composeG : ∀ {a b c} {f : Hom C a b} {g : Hom C b c} → G₁ a c (_∘_ C g f) ≡ _∘_ D (G₁ b c g) (G₁ a b f)}
               → (eq₀ : F₀ ≡ G₀)
               → (eq₁ : F₁ ≡ subst₂ (λ X Y → (a b : Obj C) → Hom C a b → Hom D (X a) (Y b)) (sym eq₀) (sym eq₀) G₁ )
-              → functor {C = C} {D = D} F₀ (λ {a b} → F₁ a b) idF distF ≡ functor {C = C} {D = D} G₀ (λ {a b} → G₁ a b) idG distG
-propFunctorEq {F₀ = F₀} {F₁ = F₁} {idF = idF} {idG} {distF} {distG} refl refl = cong₂ (functor F₀ (λ {a b} → F₁ a b)) p1 p2
+              → functor {C = C} {D = D} F₀ (λ {a b} → F₁ a b) idF composeF ≡ functor {C = C} {D = D} G₀ (λ {a b} → G₁ a b) idG composeG
+propFunctorEq {F₀ = F₀} {F₁ = F₁} {idF = idF} {idG} {composeF} {composeG} refl refl = cong₂ (functor F₀ (λ {a b} → F₁ a b)) p1 p2
   where
     p1 = funExtImplicit (λ a → proof-irrelevance (idF {a}) (idG {a}))
     p2 = funExtImplicit 
@@ -190,5 +193,5 @@ propFunctorEq {F₀ = F₀} {F₁ = F₁} {idF = idF} {idG} {distF} {distG} refl
            (λ b → funExtImplicit
            (λ c → funExtImplicit
            (λ f → funExtImplicit
-           (λ g → proof-irrelevance (distF {a} {b} {c} {f} {g}) (distG {a} {b} {c} {f} {g})
+           (λ g → proof-irrelevance (composeF {a} {b} {c} {f} {g}) (composeG {a} {b} {c} {f} {g})
            ) ) ) ) )

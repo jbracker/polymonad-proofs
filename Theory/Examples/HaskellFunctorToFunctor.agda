@@ -15,7 +15,7 @@ open Category
 
 HaskellFunctor→Functor : {F : Type → Type}
                        → HaskellFunctor F → Functor (setCategory {lzero}) (setCategory {lzero})
-HaskellFunctor→Functor {F} func = functor F₀ F₁ (HaskellFunctor.lawId func) (λ {a} {b} {c} {f} {g} → HaskellFunctor.lawDist func g f) 
+HaskellFunctor→Functor {F} func = functor F₀ F₁ (HaskellFunctor.lawId func) (λ {a} {b} {c} {f} {g} → HaskellFunctor.lawCompose func g f) 
   where
     C = setCategory {lzero}
     

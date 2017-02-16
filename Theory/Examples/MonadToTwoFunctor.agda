@@ -63,7 +63,7 @@ Monad→LaxTwoFunctor {ℓC₀} {ℓC₁} {C} {M} monad = record
       { F₀ = F₀
       ; F₁ = F₁
       ; id = refl
-      ; dist = dist
+      ; compose = compose
       } where
         F₀ : ⊤ → Functor C C
         F₀ tt = M
@@ -73,12 +73,12 @@ Monad→LaxTwoFunctor {ℓC₀} {ℓC₁} {C} {M} monad = record
            → Hom (HomCat FunTwoCat (P₀ tt) (P₀ tt)) (F₀ a) (F₀ b)
         F₁ {tt} {tt} tt = naturalTransformation ηF naturalF
         
-        dist : {a b c : Obj (HomCat ⊤-TwoCat tt tt)}
-             → {f : Hom (HomCat ⊤-TwoCat tt tt) a b}
-             → {g : Hom (HomCat ⊤-TwoCat tt tt) b c} 
-             → F₁ ((HomCat ⊤-TwoCat tt tt ∘ g) f) 
-             ≡ _∘_ (HomCat FunTwoCat C C) (F₁ g) (F₁ f)
-        dist {tt} {tt} {tt} {tt} {tt} = 
+        compose : {a b c : Obj (HomCat ⊤-TwoCat tt tt)}
+                → {f : Hom (HomCat ⊤-TwoCat tt tt) a b}
+                → {g : Hom (HomCat ⊤-TwoCat tt tt) b c} 
+                → F₁ ((HomCat ⊤-TwoCat tt tt ∘ g) f) 
+                ≡ _∘_ (HomCat FunTwoCat C C) (F₁ g) (F₁ f)
+        compose {tt} {tt} {tt} {tt} {tt} = 
           propNatTransEq refl refl $ funExt $ λ (x : Obj C) → begin
             ηF x 
               ≡⟨ refl ⟩

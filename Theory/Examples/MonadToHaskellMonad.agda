@@ -83,7 +83,7 @@ Monad→HaskellMonad {M} monad = record
              → m >>= (λ x → k x >>= h) ≡ (m >>= k) >>= h
     lawAssoc {α} {β} {γ} m k h = begin
       (μ γ ∘F [ M ]₁ (λ x → (μ γ ∘F ([ M ]₁ h ∘F k)) x)) m 
-        ≡⟨ cong (λ X → (μ γ ∘F X) m) (Functor.dist M) ⟩
+        ≡⟨ cong (λ X → (μ γ ∘F X) m) (Functor.compose M) ⟩
       (μ γ ∘F ([ M ]₁ (μ γ) ∘F [ M ]₁ ([ M ]₁ h ∘F k))) m
         ≡⟨ refl ⟩ -- associativity of ∘F
       ((μ γ ∘F [ M ]₁ (μ γ)) ∘F [ M ]₁ ([ M ]₁ h ∘F k)) m
@@ -91,7 +91,7 @@ Monad→HaskellMonad {M} monad = record
       ((μ γ ∘F μ ([ M ]₀ γ)) ∘F [ M ]₁ ([ M ]₁ h ∘F k)) m
         ≡⟨ refl ⟩ -- associativity of ∘F
       (μ γ ∘F (μ ([ M ]₀ γ) ∘F [ M ]₁ ([ M ]₁ h ∘F k))) m
-        ≡⟨ cong (λ X → (μ γ ∘F (μ ([ M ]₀ γ) ∘F X)) m) (Functor.dist M) ⟩
+        ≡⟨ cong (λ X → (μ γ ∘F (μ ([ M ]₀ γ) ∘F X)) m) (Functor.compose M) ⟩
       (μ γ ∘F (μ ([ M ]₀ γ) ∘F ([ [ M ]∘[ M ] ]₁ h ∘F [ M ]₁ k))) m
         ≡⟨ refl ⟩ -- associativity of ∘F
       (μ γ ∘F ((μ ([ M ]₀ γ) ∘F [ [ M ]∘[ M ] ]₁ h) ∘F [ M ]₁ k)) m
@@ -108,7 +108,7 @@ Monad→HaskellMonad {M} monad = record
       ((μ β ∘F [ M ]₁ (η β)) ∘F [ M ]₁ f) x
         ≡⟨ refl ⟩ -- associativity of ∘F
       (μ β ∘F ([ M ]₁ (η β) ∘F [ M ]₁ f)) x
-        ≡⟨ cong (λ X → (μ β ∘F X) x) (sym $ Functor.dist M) ⟩
+        ≡⟨ cong (λ X → (μ β ∘F X) x) (sym $ Functor.compose M) ⟩
       (μ β ∘F ([ M ]₁ (η β ∘F f))) x ∎
     
     applicative : HaskellApplicative ([ M ]₀)

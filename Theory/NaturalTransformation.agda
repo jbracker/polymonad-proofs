@@ -128,11 +128,11 @@ compNaturalTransformationHorz {C = C} {D} {E} {G} {G'} {F} {F'} α β =  record
       (ηα ([ F' ]₀ b) ∘E [ G ]₁ ([ F' ]₁ f)) ∘E [ G ]₁ (ηβ a)
         ≡⟨ sym (Category.assoc E) ⟩ 
       ηα ([ F' ]₀ b) ∘E ([ G ]₁ ([ F' ]₁ f) ∘E [ G ]₁ (ηβ a))
-        ≡⟨ cong (λ X → ηα ([ F' ]₀ b) ∘E X) (sym (Functor.dist G)) ⟩ 
+        ≡⟨ cong (λ X → ηα ([ F' ]₀ b) ∘E X) (sym (Functor.compose G)) ⟩ 
       ηα ([ F' ]₀ b) ∘E [ G ]₁ ([ F' ]₁ f ∘D ηβ a)
         ≡⟨ cong (λ X → ηα ([ F' ]₀ b) ∘E [ G ]₁ X) (NaturalTransformation.natural β) ⟩ 
       ηα ([ F' ]₀ b) ∘E [ G ]₁ (ηβ b ∘D [ F ]₁ f)
-        ≡⟨ cong (λ X → ηα ([ F' ]₀ b) ∘E X) (Functor.dist G) ⟩
+        ≡⟨ cong (λ X → ηα ([ F' ]₀ b) ∘E X) (Functor.compose G) ⟩
       ηα ([ F' ]₀ b) ∘E ([ G ]₁ (ηβ b) ∘E [ G ]₁ ([ F ]₁ f))
         ≡⟨ Category.assoc E ⟩ 
       (ηα ([ F' ]₀ b) ∘E [ G ]₁ (ηβ b)) ∘E [ G ]₁ ([ F ]₁ f)

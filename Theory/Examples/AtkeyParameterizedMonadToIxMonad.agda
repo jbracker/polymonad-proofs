@@ -112,7 +112,7 @@ AtkeyParameterizedMonad→IxMonad S F monad = record
       (μ monad ∘F ([ F ]₁ ( id (S op) , id S , (μ monad ∘F ([ F ]₁ (id (S op) , id S , g)) ∘F f)) ) ) m
         ≡⟨ cong₂ (λ X Y → (μ monad ∘F ([ F ]₁ (X , Y , (μ monad ∘F ([ F ]₁ (id (S op) , id S , g)) ∘F f)) ) ) m) (sym $ Category.idL (S op)) (sym $ Category.idL S) ⟩
       (μ monad ∘F ([ F ]₁ ( (id (S op) ∘Sop id (S op)) , (id S ∘S id S) , (μ monad ∘F ([ F ]₁ (id (S op) , id S , g)) ∘F f)) ) ) m
-        ≡⟨ cong (λ X → (μ monad ∘F X) m) (Functor.dist F) ⟩
+        ≡⟨ cong (λ X → (μ monad ∘F X) m) (Functor.compose F) ⟩
       (μ monad ∘F ([ F ]₁ ( id (S op) , id S , μ monad ) ∘F [ F ]₁ (id (S op) , id S , ([ F ]₁ (id (S op) , id S , g) ∘F f)))) m
         ≡⟨ refl ⟩ -- associativity of ∘F
       ( (μ monad ∘F [ F ]₁ (id (S op) , id S , μ monad) ) ∘F [ F ]₁ (id (S op) , id S , ([ F ]₁ (id (S op) , id S , g) ∘F f))) m
@@ -122,7 +122,7 @@ AtkeyParameterizedMonad→IxMonad S F monad = record
       (μ monad ∘F (μ monad ∘F [ F ]₁ (id (S op) , id S , ([ F ]₁ (id (S op) , id S , g) ∘F f)))) m
         ≡⟨ cong₂ (λ X Y → (μ monad ∘F (μ monad ∘F [ F ]₁ (X , Y , ([ F ]₁ (id (S op) , id S , g) ∘F f)))) m) (sym $ Category.idL (S op)) (sym $ Category.idL S) ⟩
       (μ monad ∘F (μ monad ∘F [ F ]₁ ((id (S op) ∘Sop id (S op)) , (id S ∘S id S) , ([ F ]₁ (id (S op) , id S , g) ∘F f)))) m
-        ≡⟨ cong (λ X → (μ monad ∘F (μ monad ∘F X)) m) (Functor.dist F) ⟩
+        ≡⟨ cong (λ X → (μ monad ∘F (μ monad ∘F X)) m) (Functor.compose F) ⟩
       (μ monad ∘F (μ monad ∘F ([ F ]₁ (id (S op) , id S , ([ F ]₁ (id (S op) , id S , g))) ∘F [ F ]₁ (id (S op) , id S , f)))) m
         ≡⟨ refl ⟩ -- associativity of ∘F
       (μ monad ∘F ((μ monad ∘F [ F ]₁ (id (S op) , id S , ([ F ]₁ (id (S op) , id S , g))) ) ∘F [ F ]₁ (id (S op) , id S , f))) m
