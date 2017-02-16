@@ -21,7 +21,7 @@ record NaturalIsomorphism {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level}
   field
     natTrans : NaturalTransformation F G
 
-  open NaturalTransformation natTrans
+  open NaturalTransformation natTrans public
   
   open Category hiding ( idL ; idR )
   open Functor hiding ( id )
