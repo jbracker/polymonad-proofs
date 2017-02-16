@@ -243,10 +243,10 @@ functorCompIdR : {ℓA₀ ℓA₁ ℓB₀ ℓB₁ : Level}
                → {A : Category {ℓA₀} {ℓA₁}} {B : Category {ℓB₀} {ℓB₁}} 
                → (F : Functor A B)
                → [ Id[ B ] ]∘[ F ] ≡ F
-functorCompIdR F = propFunctorEq refl refl
+functorCompIdR F = functor-eq refl refl
 
 functorCompIdL : {ℓA₀ ℓA₁ ℓB₀ ℓB₁ : Level} 
                → {A : Category {ℓA₀} {ℓA₁}} {B : Category {ℓB₀} {ℓB₁}} 
                → (F : Functor A B)
                → [ F ]∘[ Id[ A ] ] ≡ F
-functorCompIdL F = propFunctorEq refl refl
+functorCompIdL F = functor-eq refl refl

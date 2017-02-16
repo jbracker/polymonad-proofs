@@ -75,10 +75,10 @@ catCategory {ℓ₀} {ℓ₁} = record
   } where
     assoc : {a b c d : Category} {f : Functor a b} {g : Functor b c} {h : Functor c d} 
           → [ h ]∘[ [ g ]∘[ f ] ] ≡ [ [ h ]∘[ g ] ]∘[ f ]
-    assoc = propFunctorEq refl refl
+    assoc = functor-eq refl refl
     
     idR : {a b : Category} {f : Functor a b} → [ Id[ b ] ]∘[ f ] ≡ f
-    idR = propFunctorEq refl refl
+    idR = functor-eq refl refl
 
     idL : {a b : Category} {f : Functor a b} → [ f ]∘[ Id[ a ] ] ≡ f
     idL = refl

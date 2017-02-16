@@ -81,13 +81,13 @@ functorTwoCategory {ℓObj} {ℓHom} = record
                    → {A : Cell₀ {ℓA₀} {ℓA₁}} {B : Cell₀ {ℓB₀} {ℓB₁}} 
                    → {F : Cell₁ A B}
                    → [ id₁ ]∘[ F ] ≡ F
-    horizontalIdR₁ {A = A} {B} {F} = propFunctorEq refl refl
+    horizontalIdR₁ {A = A} {B} {F} = functor-eq refl refl
     
     horizontalAssoc₁ : ∀ {ℓA₀ ℓA₁ ℓB₀ ℓB₁ ℓC₀ ℓC₁ ℓD₀ ℓD₁}
                    → {A : Cell₀ {ℓA₀} {ℓA₁}} {B : Cell₀ {ℓB₀} {ℓB₁}} {C : Cell₀ {ℓC₀} {ℓC₁}} {D : Cell₀ {ℓD₀} {ℓD₁}}
                    → {F : Cell₁ A B} {G : Cell₁ B C} {H : Cell₁ C D} 
                    → [ H ]∘[ [ G ]∘[ F ] ] ≡ [ [ H ]∘[ G ] ]∘[ F ]
-    horizontalAssoc₁ {A = A} {B} {C} {D} {F} {G} {H} = propFunctorEq refl refl
+    horizontalAssoc₁ {A = A} {B} {C} {D} {F} {G} {H} = functor-eq refl refl
     
     horizontalIdL₂ : ∀ {ℓA₀ ℓA₁ ℓB₀ ℓB₁}
                    → {A : Cell₀ {ℓA₀} {ℓA₁}} {B : Cell₀ {ℓB₀} {ℓB₁}} 
