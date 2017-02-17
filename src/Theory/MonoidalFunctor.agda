@@ -2,9 +2,9 @@
 open import Level
 open import Data.Product
 open import Relation.Binary.PropositionalEquality
-open import Relation.Binary.HeterogeneousEquality using ( _≅_ ) renaming ( refl to hrefl )
+open import Relation.Binary.HeterogeneousEquality using ( _≅_ ; refl )
 
-open import Utilities
+open import Extensionality
 open import Congruence
 open import Theory.Category
 open import Theory.Isomorphism
@@ -33,7 +33,7 @@ record MonoidalFunctor {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level}
     ε : Hom D (unit D) (F₀ (unit C))
     iso-ε : Isomorphism D' ε
   
-  open Isomorphism iso-ε renaming ( inv to ε⁻¹ ; idL to ε-idL ; idR to ε-idR ) hiding ( f⁻¹ ) public 
+  open Isomorphism iso-ε renaming ( inv to ε⁻¹ ; left-id to ε-left-id ; right-id to ε-right-id ) hiding ( f⁻¹ ) public 
   
   private
     _⊗C₀_ = _⊗₀_ C
@@ -90,8 +90,8 @@ monoidal-functor-eq : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level}
                     → {right-unitality' : (x : Obj C) → ρ D (F₀ G x) ≡ _∘_ D (F₁ G (ρ C x)) (_∘_ D (η μ-NatIso' (x , unit C)) (_⊗₁_ D (cat-id D {F₀ G x}) ε'))}
                     → F ≡ G → ε ≅ ε' → iso-ε ≅ iso-ε' → μ-NatIso ≅ μ-NatIso'
                     → monoidalFunctor {C = C} {D} F ε iso-ε μ-NatIso assoc left-unitality right-unitality ≡ monoidalFunctor G ε' iso-ε' μ-NatIso' assoc' left-unitality' right-unitality'
-monoidal-functor-eq {F = F} {.F} {ε} {.ε} {iso-ε} {.iso-ε} {μ-NatIso} {.μ-NatIso} {assoc} {assoc'} {left-u} {left-u'} {right-u} {right-u'} refl hrefl hrefl hrefl 
+monoidal-functor-eq {F = F} {.F} {ε} {.ε} {iso-ε} {.iso-ε} {μ-NatIso} {.μ-NatIso} {assoc} {assoc'} {left-u} {left-u'} {right-u} {right-u'} refl refl refl refl 
   = cong₃ (monoidalFunctor F ε iso-ε μ-NatIso) 
-          (funExt (λ x → funExt (λ y → funExt (λ z → proof-irrelevance (assoc x y z) (assoc' x y z))))) 
-          (funExt (λ x → proof-irrelevance (left-u x) (left-u' x))) 
-          (funExt (λ x → proof-irrelevance (right-u x) (right-u' x)))
+          (fun-ext (λ x → fun-ext (λ y → fun-ext (λ z → proof-irrelevance (assoc x y z) (assoc' x y z))))) 
+          (fun-ext (λ x → proof-irrelevance (left-u x) (left-u' x))) 
+          (fun-ext (λ x → proof-irrelevance (right-u x) (right-u' x)))
