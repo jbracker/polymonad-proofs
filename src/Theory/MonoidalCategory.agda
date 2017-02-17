@@ -11,6 +11,7 @@ open import Theory.Triple
 open import Theory.Category
 open import Theory.Functor
 open import Theory.NaturalIsomorphism
+open import Theory.Examples.Functor
 
 module FunctorApplication {ℓC₀ ℓC₁ : Level} {C : Category {ℓC₀} {ℓC₁}} where
   
@@ -21,43 +22,16 @@ module FunctorApplication {ℓC₀ ℓC₁ : Level} {C : Category {ℓC₀} {ℓ
     _∘CCC_ = _∘_ (C ×C C ×C C)
     _∘C_ = _∘_ C
   
+  open Theory.Examples.Functor.TripleAssociation
+  open Theory.Examples.Functor.BiFunctorAssociation
+  
   -- ((_ ⊗ _) ⊗ _) ⇒ _
   leftAssociator : Functor (C ×C C) C → Functor (C ×C C ×C C) C
-  leftAssociator F = functor G₀ G₁ idG composeG
-    where
-      G₀ : Obj (C ×C C ×C C) → Obj C
-      G₀ (a , b , c) = F₀ F (F₀ F (a ,' b) ,' c)
-      
-      G₁ : {a b : Obj (C ×C C ×C C)} → Hom (C ×C C ×C C) a b → Hom C (G₀ a) (G₀ b)
-      G₁ (f , g , h) = F₁ F (F₁ F (f ,' g) ,' h)
-      
-      idG : {a : Obj (C ×C C ×C C)} → G₁ {a} {a} (idC (C ×C C ×C C)) ≡ idC C
-      idG = trans (cong (λ X → F₁ F (X ,' idC C)) (idF F)) (idF F)
-      
-      composeG : {a b c : Obj (C ×C C ×C C)} 
-               → {f : Hom (C ×C C ×C C) a b} {g : Hom (C ×C C ×C C) b c}
-               → G₁ (g ∘CCC f) ≡ (G₁ g) ∘C (G₁ f)
-      composeG {f = f₁ , f₂ , f₃} {g = g₁ , g₂ , g₃} 
-        = trans (cong (λ X → F₁ F (X ,' g₃ ∘C f₃)) (compose F)) (compose F)
+  leftAssociator F = [ biAssocFunctorL F F ]∘[ assocFunctorL ]
   
   -- (_ ⊗ (_ ⊗ _)) ⇒ _
   rightAssociator : Functor (C ×C C) C → Functor (C ×C C ×C C) C 
-  rightAssociator F = functor G₀ G₁ idG composeG
-    where
-      G₀ : Obj (C ×C C ×C C) → Obj C
-      G₀ (a , b , c) = F₀ F (a ,' F₀ F (b ,' c))
-     
-      G₁ : {a b : Obj (C ×C C ×C C)} → Hom (C ×C C ×C C) a b → Hom C (G₀ a) (G₀ b)
-      G₁ (f , g , h) = F₁ F (f ,' F₁ F (g ,' h))
-      
-      idG : {a : Obj (C ×C C ×C C)} → G₁ {a} {a} (idC (C ×C C ×C C)) ≡ idC C
-      idG = trans (cong (λ X → F₁ F (idC C ,' X)) (idF F)) (idF F)
-      
-      composeG : {a b c : Obj (C ×C C ×C C)} 
-               → {f : Hom (C ×C C ×C C) a b} {g : Hom (C ×C C ×C C) b c}
-               → G₁ (g ∘CCC f) ≡ (G₁ g) ∘C (G₁ f)
-      composeG {f = f₁ , f₂ , f₃} {g = g₁ , g₂ , g₃} 
-        = trans (cong (λ X → F₁ F (g₁ ∘C f₁ ,' X)) (compose F)) (compose F)
+  rightAssociator F = [ biAssocFunctorR F F ]∘[ assocFunctorR ]
   
   -- (1 ⊗ _) ⇒ _
   leftUnitor : Obj C → Functor (C ×C C) C → Functor C C
