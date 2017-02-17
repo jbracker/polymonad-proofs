@@ -8,6 +8,8 @@ open import Relation.Binary.PropositionalEquality
 
 -- Local
 open import ProofIrrelevance
+open import Congruence
+open import Extensionality
 open import Theory.Category hiding ( category )
 
 module Theory.Subcategory where
@@ -40,7 +42,36 @@ record Subcategory {ℓ₀ ℓ₁ : Level} (C : Category {ℓ₀} {ℓ₁}) : Se
 open Subcategory
 
 -------------------------------------------------------------------------------
--- Properyies of Subcategories
+-- Equality of Subcategories
+-------------------------------------------------------------------------------
+
+subcategory-eq : {ℓ₀ ℓ₁ : Level} {C : Category {ℓ₀} {ℓ₁}}
+               → {SubObjA : PropSubsetOf (Obj C)}
+               → {SubObjB : PropSubsetOf (Obj C)}
+               → {SubHomA : (a : Obj C) → (b : Obj C) → PropSubsetOf (Hom C a b)}
+               → {SubHomB : (a : Obj C) → (b : Obj C) → PropSubsetOf (Hom C a b)}
+               → {closed-morphisms-A : {a b : Obj C} → (f : Hom C a b) → f ∈ SubHomA a b → a ∈ SubObjA × b ∈ SubObjA}
+               → {closed-morphisms-B : {a b : Obj C} → (f : Hom C a b) → f ∈ SubHomB a b → a ∈ SubObjB × b ∈ SubObjB}
+               → {closed-composition-A : {a b c : Obj C} → (f : Hom C a b) → (g : Hom C b c) → f ∈ SubHomA a b → g ∈ SubHomA b c → (comp C g f) ∈ SubHomA a c}
+               → {closed-composition-B : {a b c : Obj C} → (f : Hom C a b) → (g : Hom C b c) → f ∈ SubHomB a b → g ∈ SubHomB b c → (comp C g f) ∈ SubHomB a c}
+               → {closed-id-A : {a : Obj C} → a ∈ SubObjA → id C ∈ SubHomA a a}
+               → {closed-id-B : {a : Obj C} → a ∈ SubObjB → id C ∈ SubHomB a a}
+               → SubObjA ≡ SubObjB
+               → SubHomA ≡ SubHomB
+               → subcategory {C = C} SubObjA SubHomA closed-morphisms-A closed-composition-A closed-id-A
+               ≡ subcategory {C = C} SubObjB SubHomB closed-morphisms-B closed-composition-B closed-id-B
+subcategory-eq {C = C} {SubObjA} {.SubObjA} {SubHomA} {.SubHomA} {closed-morph-A} {closed-morph-B} {closed-comp-A} {closed-comp-B} {closed-id-A} {closed-id-B} refl refl
+  = cong₃ (subcategory SubObjA SubHomA) 
+          (implicit-fun-ext (λ a → implicit-fun-ext (λ b → fun-ext (λ f → fun-ext (λ f∈S → 
+            proof-irr-× (proof-irr-PropSubset SubObjA a) (proof-irr-PropSubset SubObjA b) (closed-morph-A f f∈S) (closed-morph-B f f∈S)))))) 
+          (implicit-fun-ext (λ a → implicit-fun-ext (λ b → implicit-fun-ext (λ c → 
+            fun-ext (λ f → fun-ext (λ g → fun-ext (λ f∈S → fun-ext (λ g∈S → 
+              proof-irr-PropSubset (SubHomA a c) (comp C g f) (closed-comp-A f g f∈S g∈S) (closed-comp-B f g f∈S g∈S))))))))) 
+          (implicit-fun-ext (λ a → fun-ext (λ a∈S → 
+            proof-irr-PropSubset (SubHomA a a) (id C) (closed-id-A a∈S) (closed-id-B a∈S))))
+
+-------------------------------------------------------------------------------
+-- Properties of Subcategories
 -------------------------------------------------------------------------------
 
 Subcategory→Category : {ℓ₀ ℓ₁ : Level} {C : Category {ℓ₀} {ℓ₁}} 
