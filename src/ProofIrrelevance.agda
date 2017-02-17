@@ -55,6 +55,11 @@ proof-irr-× : {ℓA ℓB : Level} {A : Set ℓA} {B : Set ℓB}
             → ProofIrrelevance (A × B)
 proof-irr-× proof-irr-A proof-irr-B a b = proof-irr-Σ proof-irr-A (λ _ → proof-irr-B) a b
 
+-- Proofs of proof irrelevance are irrelevant.
+proof-irr-ProofIrrelevance : {ℓA : Level} {A : Set ℓA} → ProofIrrelevance (ProofIrrelevance A)
+proof-irr-ProofIrrelevance proof-irr-A proof-irr-A' 
+  = fun-ext (λ a → fun-ext (λ b → proof-irrelevance (proof-irr-A a b) (proof-irr-A' a b)))
+
 -------------------------------------------------------------------------------
 -- Definition of Propositions which are sets that are proof irrelevant
 -------------------------------------------------------------------------------
