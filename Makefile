@@ -95,7 +95,6 @@ only-supermonads:
 
 only-cat-theory:
 	$(AGDA_TC) $(SOURCE_DIR)/Theory/Triple.agda
-	$(AGDA_TC) $(SOURCE_DIR)/Theory/ProofIrrelevance.agda
 	$(AGDA_TC) $(SOURCE_DIR)/Theory/Category.agda
 	$(AGDA_TC) $(SOURCE_DIR)/Theory/Isomorphism.agda
 	$(AGDA_TC) $(SOURCE_DIR)/Theory/Subcategory.agda
