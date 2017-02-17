@@ -9,8 +9,7 @@ open import Theory.Category
 
 module Theory.Isomorphism where
 
-
-open Category hiding ( idL ; idR )
+open Category using ( Obj ; Hom )
 
 -------------------------------------------------------------------------------
 -- Definition of what is means for a morphism to be isomorphic with a 2-sided inverse.
@@ -18,15 +17,14 @@ open Category hiding ( idL ; idR )
 record Isomorphism {ℓ₀ ℓ₁ : Level} (C : Category {ℓ₀} {ℓ₁}) {a b : Obj C} (f : Hom C a b) : Set ℓ₁ where
   constructor isomorphism
   
-  private
-    _∘C_ = _∘_ C
+  open Category C hiding ( left-id ; right-id ; Obj ; Hom )
   
   field
     f⁻¹ : Hom C b a
     
-    idL : f ∘C f⁻¹ ≡ id C {b}
+    left-id : f ∘ f⁻¹ ≡ id {b}
 
-    idR : f⁻¹ ∘C f ≡ id C {a}
+    right-id : f⁻¹ ∘ f ≡ id {a}
 
   inv : Hom C b a
   inv = f⁻¹
@@ -34,14 +32,20 @@ record Isomorphism {ℓ₀ ℓ₁ : Level} (C : Category {ℓ₀} {ℓ₁}) {a b
 -------------------------------------------------------------------------------
 -- Equality of isomorphisms
 -------------------------------------------------------------------------------
-isomorphism-eq : {ℓ₀ ℓ₁ : Level} 
-               → {C : Category {ℓ₀} {ℓ₁}}
-               → {a b : Obj C}
-               → {f : Hom C a b}
-               → {inv : Hom C b a} {inv' : Hom C b a}
-               → {idL : _∘_ C f inv ≡ id C {b}} → {idL' : _∘_ C f inv' ≡ id C {b}}
-               → {idR : _∘_ C inv f ≡ id C {a}} → {idR' : _∘_ C inv' f ≡ id C {a}}
-               → inv ≡ inv'
-               → isomorphism {C = C} inv idL idR ≡ isomorphism inv' idL' idR'
-isomorphism-eq {inv = inv} {.inv} {idL} {idL'} {idR} {idR'} refl 
-  = cong₂ (isomorphism inv) (proof-irrelevance idL idL') (proof-irrelevance idR idR')
+
+private
+  module Equality {ℓ₀ ℓ₁ : Level} {C : Category {ℓ₀} {ℓ₁}} {a b : Obj C} {f : Hom C a b} where
+    open Category C hiding ( Obj ; Hom )
+  
+    isomorphism-eq : {inv₀ : Hom C b a} 
+                   → {inv₁ : Hom C b a}
+                   → {left-id₀ : f ∘ inv₀ ≡ id {b}} 
+                   → {left-id₁ : f ∘ inv₁ ≡ id {b}}
+                   → {right-id₀ : inv₀ ∘ f ≡ id {a}}
+                   → {right-id₁ : inv₁ ∘ f ≡ id {a}}
+                   → inv₀ ≡ inv₁
+                   → isomorphism {C = C} inv₀ left-id₀ right-id₀ ≡ isomorphism inv₁ left-id₁ right-id₁
+    isomorphism-eq {inv₀ = inv} {.inv} {idL} {idL'} {idR} {idR'} refl 
+      = cong₂ (isomorphism inv) (proof-irrelevance idL idL') (proof-irrelevance idR idR')
+
+open Equality using ( isomorphism-eq ) public
