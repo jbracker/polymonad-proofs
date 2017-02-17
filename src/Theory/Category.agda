@@ -12,7 +12,7 @@ open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning
 
 -- Local
-open import Utilities
+open import Extensionality
 open import Congruence
 open import Substitution
 open import Theory.Triple
@@ -69,23 +69,23 @@ category-eq {ℓ₀} {ℓ₁} {ObjC} {.ObjC} {HomC} {.HomC}  {_∘C_} {._∘C_} 
   = cong₃ (category ObjC HomC _∘C_ idC) p1 p2 p3
   where
     p1 : (λ {a} {b} {c} {d} {f} {g} {h} → assocC {a} {b} {c} {d} {f} {g} {h}) ≡ assocD
-    p1 = funExtImplicit $ λ a → 
-         funExtImplicit $ λ b → 
-         funExtImplicit $ λ c → 
-         funExtImplicit $ λ d → 
-         funExtImplicit $ λ f → 
-         funExtImplicit $ λ g → 
-         funExtImplicit $ λ h → 
+    p1 = implicit-fun-ext $ λ a → 
+         implicit-fun-ext $ λ b → 
+         implicit-fun-ext $ λ c → 
+         implicit-fun-ext $ λ d → 
+         implicit-fun-ext $ λ f → 
+         implicit-fun-ext $ λ g → 
+         implicit-fun-ext $ λ h → 
          proof-irrelevance (assocC {a} {b} {c} {d} {f} {g} {h}) (assocD {a} {b} {c} {d} {f} {g} {h})
     p2 : (λ {a} {b} {f} → idRC {a} {b} {f}) ≡ (λ {a} {b} {f} → idRD {a} {b} {f})
-    p2 = funExtImplicit $ λ a →
-         funExtImplicit $ λ b →
-         funExtImplicit $ λ f →
+    p2 = implicit-fun-ext $ λ a →
+         implicit-fun-ext $ λ b →
+         implicit-fun-ext $ λ f →
          proof-irrelevance (idRC {a} {b} {f}) (idRD {a} {b} {f})
     p3 : (λ {a} {b} {f} → idLC {a} {b} {f}) ≡ (λ {a} {b} {f} → idLD {a} {b} {f})
-    p3 = funExtImplicit $ λ a →
-         funExtImplicit $ λ b →
-         funExtImplicit $ λ f →
+    p3 = implicit-fun-ext $ λ a →
+         implicit-fun-ext $ λ b →
+         implicit-fun-ext $ λ f →
          proof-irrelevance (idLC {a} {b} {f}) (idLD {a} {b} {f})
 
 -------------------------------------------------------------------------------
