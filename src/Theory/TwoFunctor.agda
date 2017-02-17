@@ -23,7 +23,7 @@ open import Theory.TwoCategory
 -- Definition of 2-Functors
 -------------------------------------------------------------------------------
 
-open Category hiding ( idL ; idR ; assoc ) renaming ( id to idC )
+open Category hiding ( left-id ; right-id ; assoc ) renaming ( id to idC )
 open StrictTwoCategory
 
 record LaxTwoFunctor {ℓC₀ ℓC₁ ℓC₂ ℓD₀ ℓD₁ ℓD₂ : Level} 

@@ -22,7 +22,7 @@ open import Theory.Examples.Functor
 -- Definition of 2-Categories
 -------------------------------------------------------------------------------
 
-open Category hiding ( idL ; idR ; assoc ) renaming ( id to idC )
+open Category hiding ( left-id ; right-id ; assoc ) renaming ( id to idC )
 
 record StrictTwoCategory {ℓ₀ ℓ₁ ℓ₂ : Level} : Set (lsuc (ℓ₀ ⊔ ℓ₁ ⊔ ℓ₂)) where
   field
@@ -108,10 +108,10 @@ record StrictTwoCategory {ℓ₀ ℓ₁ ℓ₂ : Level} : Set (lsuc (ℓ₀ ⊔ 
   id→functor {a} = constFunctor (HomCat a a) (id₁ {a})
 
   vIdL : {a b : Cell₀} {f g : Cell₁ a b} {θ : Cell₂ f g} → θ ∘ᵥ id₂ ≡ θ
-  vIdL {a} {b} = Category.idL (HomCat a b)
+  vIdL {a} {b} = Category.left-id (HomCat a b)
 
   vIdR : {a b : Cell₀} {f g : Cell₁ a b} {θ : Cell₂ f g} → id₂ ∘ᵥ θ ≡ θ
-  vIdR {a} {b} = Category.idR (HomCat a b)
+  vIdR {a} {b} = Category.right-id (HomCat a b)
   
   vAssoc : {a b : Cell₀} {f g h i : Cell₁ a b} {η : Cell₂ f g} {θ : Cell₂ g h} {ι : Cell₂ h i}
                 → ι ∘ᵥ (θ ∘ᵥ η) ≡ (ι ∘ᵥ θ) ∘ᵥ η
@@ -315,9 +315,9 @@ Category→StrictTwoCategory {ℓ₀} {ℓ₁} C = record
   ; HomCat = HomCat
   ; comp = comp
   ; id₁ = id₁
-  ; horizontalIdR₁ = Category.idR C
+  ; horizontalIdR₁ = Category.right-id C
   ; horizontalIdR₂ = refl
-  ; horizontalIdL₁ = Category.idL C
+  ; horizontalIdL₁ = Category.left-id C
   ; horizontalIdL₂ = refl
   ; horizontalAssoc₁ = Category.assoc C
   ; horizontalAssoc₂ = refl
@@ -338,8 +338,8 @@ Category→StrictTwoCategory {ℓ₀} {ℓ₁} C = record
       ; _∘_ = λ tt tt → tt
       ; id = tt
       ; assoc = refl
-      ; idL = refl
-      ; idR = refl
+      ; left-id = refl
+      ; right-id = refl
       }
     
     comp : {a b c : Cell₀} 
@@ -367,6 +367,6 @@ StrictTwoCategory→Category TwoCat = record
   ; _∘_ = λ f g → [ StrictTwoCategory.comp TwoCat ]₀ (f , g)
   ; id = StrictTwoCategory.id₁ TwoCat
   ; assoc = StrictTwoCategory.horizontalAssoc₁ TwoCat
-  ; idL = StrictTwoCategory.horizontalIdL₁ TwoCat
-  ; idR = StrictTwoCategory.horizontalIdR₁ TwoCat
+  ; left-id = StrictTwoCategory.horizontalIdL₁ TwoCat
+  ; right-id = StrictTwoCategory.horizontalIdR₁ TwoCat
   } 
