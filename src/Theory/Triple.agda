@@ -24,3 +24,13 @@ assocTripleR (a , b , c) = a ,' (b ,' c)
 assocTripleL : {ℓ₀ ℓ₁ ℓ₂ : Level} {A : Set ℓ₀} {B : Set ℓ₁} {C : Set ℓ₂} 
        → A × B × C → (A ×' B) ×' C
 assocTripleL (a , b , c) = (a ,' b) ,' c
+
+-- Unassociate the triple to the right from standard tuples/products
+unassocTripleR : {ℓ₀ ℓ₁ ℓ₂ : Level} {A : Set ℓ₀} {B : Set ℓ₁} {C : Set ℓ₂} 
+               → A ×' (B ×' C) → A × B × C 
+unassocTripleR (a ,' (b ,' c)) = a , b , c
+
+-- Unassociate the triple to the left from standard tuples/products
+unassocTripleL : {ℓ₀ ℓ₁ ℓ₂ : Level} {A : Set ℓ₀} {B : Set ℓ₁} {C : Set ℓ₂} 
+             → (A ×' B) ×' C → A × B × C
+unassocTripleL ((a ,' b) ,' c) = a , b , c
