@@ -5,13 +5,11 @@ module Theory.Examples.Category where
 open import Level renaming ( suc to lsuc ; zero to lzero )
 open import Function renaming ( id to idF ; _∘_ to _∘F_ )
 open import Data.Product
-open import Data.Sum
-open import Data.Unit
-open import Data.Empty
+open import Relation.Binary.HeterogeneousEquality renaming ( cong to hcong )
 open import Relation.Binary.PropositionalEquality
-open ≡-Reasoning
 
-open import Utilities
+--open import Utilities
+open import Extensionality
 open import Theory.Category
 open import Theory.Functor
 open import Theory.NaturalTransformation
@@ -24,8 +22,8 @@ setCategory {ℓ₀ = ℓ₀} = record
   ; _∘_ = λ f g → f ∘F g
   ; id = idF
   ; assoc = refl
-  ; idL = refl
-  ; idR = refl
+  ; left-id = refl
+  ; right-id = refl
   }
 
 -- Category that only contains the endomorphisms of the given category.
@@ -36,8 +34,8 @@ endomorphismCategory {ℓ₀} {ℓ₁} C = record
   ; _∘_ = λ {a} {b} {c} → _∘_ {a} {b} {c}
   ; id = λ {a} → id {a}
   ; assoc = assoc
-  ; idL = idL
-  ; idR = idR
+  ; left-id = idL
+  ; right-id = idR
   } where
     Obj : Set ℓ₀
     Obj = Category.Obj C
@@ -57,10 +55,10 @@ endomorphismCategory {ℓ₀} {ℓ₁} C = record
     assoc {f = f , refl} {g , refl} {h , refl} = cong (λ X → X , refl) (Category.assoc C {f = f} {g} {h})
     
     idL : {a b : Obj} {f : Hom a b} → f ∘ id ≡ f
-    idL {f = f , refl} = cong (λ X → X , refl) (Category.idL C {f = f})
+    idL {f = f , refl} = cong (λ X → X , refl) (Category.left-id C {f = f})
     
     idR : {a b : Obj} {f : Hom a b} → id ∘ f ≡ f
-    idR {f = f , refl} = cong (λ X → X , refl) (Category.idR C {f = f})
+    idR {f = f , refl} = cong (λ X → X , refl) (Category.right-id C {f = f})
 
 -- Category of categories and functors.
 catCategory : {ℓ₀ ℓ₁ : Level} → Category {ℓ₀ = lsuc (ℓ₀ ⊔ ℓ₁)} {ℓ₁ = ℓ₀ ⊔ ℓ₁}
@@ -70,8 +68,8 @@ catCategory {ℓ₀} {ℓ₁} = record
   ; _∘_ = [_]∘[_]
   ; id = λ {C} → Id[ C ]
   ; assoc = λ {a b c d} {f} {g} {h} → assoc {a} {b} {c} {d} {f} {g} {h}
-  ; idL = idL
-  ; idR = idR
+  ; left-id = idL
+  ; right-id = idR
   } where
     assoc : {a b c d : Category} {f : Functor a b} {g : Functor b c} {h : Functor c d} 
           → [ h ]∘[ [ g ]∘[ f ] ] ≡ [ [ h ]∘[ g ] ]∘[ f ]
@@ -90,7 +88,7 @@ functorCategory C D = record
   ; Hom = NaturalTransformation {C = C} {D}
   ; _∘_ = λ {F} {G} {H} → ⟨_⟩∘ᵥ⟨_⟩ {C = C} {D} {F} {G} {H}
   ; id = λ {F} → Id⟨ F ⟩
-  ; assoc = propNatTransEq refl refl $ funExt $ λ _ → Category.assoc D
-  ; idL = propNatTransEq refl refl $ funExt $ λ _ → Category.idL D
-  ; idR = propNatTransEq refl refl $ funExt $ λ _ → Category.idR D
+  ; assoc = natural-transformation-eq $ fun-ext $ λ _ → Category.assoc D
+  ; left-id = natural-transformation-eq $ fun-ext $ λ _ → Category.left-id D
+  ; right-id = natural-transformation-eq $ fun-ext $ λ _ → Category.right-id D
   }

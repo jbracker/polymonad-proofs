@@ -22,9 +22,9 @@ EmbeddingFunctor→Subcategory : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} {C : 
 EmbeddingFunctor→Subcategory {C = C} {D = D} EmbF (injF₀ , injF₁) = record 
   { SubObj = SubObj
   ; SubHom = SubHom
-  ; closedMorphs = closedMorphs
-  ; closedComp = closedComp
-  ; closedId = closedId
+  ; closed-morphisms = closedMorphs
+  ; closed-composition = closedComp
+  ; closed-id = closedId
   } where
 
     _∘D_ = Category._∘_ D
