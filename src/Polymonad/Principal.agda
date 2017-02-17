@@ -11,17 +11,10 @@ open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning
 
 -- Local
+open import Utilities
 open import Haskell
 open import Polymonad.Definition
 open import Identity
-
--- Formalization of a subsets for a given set.
-SubsetOf : ∀ {n} → Set n → Set (lsuc n)
-SubsetOf {n = n} X = X → Set n
-
--- An element is in the subset, if the subset predicate is true.
-_∈_ : ∀ {n} {X : Set n} → (x : X) → (S : SubsetOf X) → Set n
-x ∈ S = S x
 
 -- Predicate describing a principal polymonad.
 -- This deviates from Hicks original definition in that F may not be empty.
