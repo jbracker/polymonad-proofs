@@ -1,17 +1,18 @@
- 
-module Theory.NaturalIsomorphism where
 
+-- StdLib
 open import Level renaming ( zero to lzero ; suc to lsuc )
 open import Relation.Binary.PropositionalEquality
 
-open import Utilities
+-- Local
+open import Extensionality
 open import Theory.Isomorphism
 open import Theory.Category
 open import Theory.Functor
 open import Theory.NaturalTransformation
 
+module Theory.NaturalIsomorphism where
   
-open Category hiding ( idL ; idR )
+open Category
 
 -------------------------------------------------------------------------------
 -- Definition of a natural isomorphism: 
@@ -25,9 +26,9 @@ record NaturalIsomorphism {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level}
                           (F : Functor C D) (G : Functor C D) : Set (ℓC₀ ⊔ ℓC₁ ⊔ ℓD₀ ⊔ ℓD₁) where
   constructor naturalIsomorphism
   field
-    natTrans : NaturalTransformation F G
+    natural-transformation : NaturalTransformation F G
 
-  open NaturalTransformation natTrans public
+  open NaturalTransformation natural-transformation public
   open Functor hiding ( id )
   private
     _∘D_ = _∘_ D
@@ -52,4 +53,4 @@ natural-isomorphism-eq : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level}
                        → {iso iso' : {x : Obj C} → (f : Hom D ([ F ]₀ x) ([ G ]₀ x)) → Isomorphism D f}
                        → nat ≡ nat' → ({x : Obj C} → (f : Hom D ([ F ]₀ x) ([ G ]₀ x)) → iso f ≡ iso' f)
                        → naturalIsomorphism nat iso ≡ naturalIsomorphism nat' iso'
-natural-isomorphism-eq refl iso-eq = cong₂ naturalIsomorphism refl (funExtImplicit (λ x → funExt (λ f → iso-eq {x} f)))
+natural-isomorphism-eq refl iso-eq = cong₂ naturalIsomorphism refl (implicit-fun-ext (λ x → fun-ext (λ f → iso-eq {x} f)))
