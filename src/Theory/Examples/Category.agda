@@ -5,11 +5,13 @@ module Theory.Examples.Category where
 open import Level renaming ( suc to lsuc ; zero to lzero )
 open import Function renaming ( id to idF ; _∘_ to _∘F_ )
 open import Data.Product
+open import Relation.Binary using ( Preorder )
 open import Relation.Binary.HeterogeneousEquality renaming ( cong to hcong )
 open import Relation.Binary.PropositionalEquality
 
 --open import Utilities
 open import Extensionality
+open import ProofIrrelevance
 open import Theory.Category
 open import Theory.Functor
 open import Theory.NaturalTransformation
@@ -92,3 +94,36 @@ functorCategory C D = record
   ; left-id = natural-transformation-eq $ fun-ext $ λ _ → Category.left-id D
   ; right-id = natural-transformation-eq $ fun-ext $ λ _ → Category.right-id D
   }
+
+-- Category formed by a preorder
+preorderCategory : {ℓC ℓEq ℓOrd : Level} 
+                 → (P : Preorder ℓC ℓEq ℓOrd) 
+                 → ((a b : Preorder.Carrier P) → ProofIrrelevance (Preorder._∼_ P a b))
+                 → Category
+preorderCategory P proof-irr-≤ = record
+  { Obj = Preorder.Carrier P
+  ; Hom = _≤_
+  ; _∘_ = _∘_
+  ; id = id
+  ; assoc = assoc
+  ; left-id = idL
+  ; right-id = idR
+  } where
+    _≤_ = Preorder._∼_ P
+    
+    id = Preorder.refl P
+    
+    ptrans = Preorder.trans P
+    
+    _∘_ : {a b c : Preorder.Carrier P} → b ≤ c → a ≤ b → a ≤ c
+    _∘_ b≤c a≤b = Preorder.trans P a≤b b≤c
+    
+    assoc : {a b c d : Preorder.Carrier P} {f : a ≤ b} {g : b ≤ c} {h : c ≤ d} 
+          → h ∘ (g ∘ f) ≡ (h ∘ g) ∘ f
+    assoc {a} {b} {c} {d} {f} {g} {h} = proof-irr-≤ a d (ptrans (ptrans f g) h) (ptrans f (ptrans g h))
+    
+    idR : {a b : Preorder.Carrier P} {f : a ≤ b} → id ∘ f ≡ f
+    idR {a} {b} {f} = proof-irr-≤ a b (ptrans f id) f
+
+    idL : {a b : Preorder.Carrier P} {f : a ≤ b} → f ∘ id ≡ f
+    idL {a} {b} {f} = proof-irr-≤ a b (ptrans id f) f
