@@ -4,28 +4,49 @@ module ProofIrrelevance where
 -- Stdlib
 open import Level renaming ( suc to lsuc ; zero to lzero )
 open import Data.Empty
+open import Data.Unit
 open import Data.Product
 open import Relation.Nullary
 open import Relation.Binary.PropositionalEquality
 
-open import Utilities using ( funExt )
+open import Extensionality
+
+-------------------------------------------------------------------------------
+-- Definition of proof irrelevance
+-------------------------------------------------------------------------------
 
 -- A proof irrelevant type is given if you know that any two proof can be made equal.
 ProofIrrelevance : {ℓ : Level} → Set ℓ → Set ℓ
 ProofIrrelevance P = (x y : P) → x ≡ y
 
+-------------------------------------------------------------------------------
+-- Proof irrelevance of certain predefined types
+-------------------------------------------------------------------------------
+
 -- Proofs of the empty type are irrelevant.
 proof-irr-⊥ : ProofIrrelevance ⊥
 proof-irr-⊥ () ()
 
+-- Proofs of the unit type are irrelevant.
+proof-irr-⊤ : ProofIrrelevance ⊤
+proof-irr-⊤ tt tt = refl
+
+-- Proofs of lifted types are irrelevant if the lifted type has irrelevant proofs.
+proof-irr-Lift : {ℓA ℓL : Level} {A : Set ℓA} 
+               → ProofIrrelevance A → ProofIrrelevance (Lift {ℓ = ℓL} A)
+proof-irr-Lift proof-irr-A (lift a) (lift b) = cong lift (proof-irr-A a b)
+
 -- Proofs of the negation of any proposition are irrelevant (if we have function extensionality).
 proof-irr-¬ : {ℓ : Level} {A : Set ℓ} → ProofIrrelevance (¬ A)
-proof-irr-¬ ¬a ¬b = funExt (λ x → proof-irr-⊥ (¬a x) (¬b x))
+proof-irr-¬ ¬a ¬b = fun-ext (λ x → proof-irr-⊥ (¬a x) (¬b x))
 
+-------------------------------------------------------------------------------
+-- Definition of Propositions which are sets that are proof irrelevant
+-------------------------------------------------------------------------------
 
 -- A proof irrelevant set carries it proof irrelevance around with itself.
 PropSet : (ℓ : Level) → Set (lsuc ℓ)
-PropSet ℓ = ∃ λ (P : Set ℓ) → ProofIrrelevance P
+PropSet ℓ = Σ (Set ℓ) ProofIrrelevance
 
 -- A definition of subset that has proof irrelevance.
 PropSubsetOf : ∀ {ℓ} → Set ℓ → Set (lsuc ℓ)
@@ -37,4 +58,4 @@ x ∈ S = proj₁ (S x)
 
 -- Get the proof irrelevance for the proofs that elements are in a subset.
 proof-irr-PropSubset : ∀ {ℓ} {X : Set ℓ} → (S : PropSubsetOf X) → (x : X) → ProofIrrelevance (x ∈ S)
-proof-irr-PropSubset{ℓ} {X} S x x∈S y∈S = proj₂ (S x) x∈S y∈S
+proof-irr-PropSubset {ℓ} {X} S x x∈S y∈S = proj₂ (S x) x∈S y∈S
