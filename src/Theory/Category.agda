@@ -9,6 +9,7 @@ open import Data.Sum
 open import Data.Unit
 open import Data.Empty
 open import Relation.Binary.PropositionalEquality
+open import Relation.Binary.HeterogeneousEquality hiding ( cong ; cong₂ ; subst ; trans ; sym ; proof-irrelevance ) renaming ( refl to hrefl )
 open ≡-Reasoning
 
 -- Local
@@ -59,33 +60,24 @@ category-eq : ∀ {ℓ₀ ℓ₁}
             → {idRD : {a b : ObjD} {f : HomD a b} → idD ∘D f ≡ f}
             → {idLC : {a b : ObjC} {f : HomC a b} → f ∘C idC ≡ f}
             → {idLD : {a b : ObjD} {f : HomD a b} → f ∘D idD ≡ f}
-            → (objEq  : ObjC ≡ ObjD)
-            → (homEq  : subst (λ X → (X → X → Set ℓ₁)) objEq HomC ≡ HomD)
-            → (compEq : (λ {a} {b} {c} →  _∘C_ {a} {b} {c}) 
-              ≡ (λ {a} {b} {c} f g → subst₃ (λ X Y Z → X → Y → Z) (category-hom-eq objEq homEq) (category-hom-eq objEq homEq) (category-hom-eq objEq homEq) (_∘D_ {subst idF objEq a} {subst idF objEq b} {subst idF objEq c}) f g) ) 
-            → (idEq   : (λ {a} → idC {a}) ≡ (λ {a} → subst idF (category-hom-eq objEq homEq) (idD {subst idF objEq a})) )
+            → ObjC ≡ ObjD
+            → HomC ≅ HomD
+            → (λ {a} {b} {c} → _∘C_ {a} {b} {c}) ≅ (λ {a} {b} {c} → _∘D_ {a} {b} {c})
+            → (λ {a} → idC {a}) ≅ (λ {a} → idD {a})
             → category ObjC HomC _∘C_ idC assocC idRC idLC ≡ category ObjD HomD _∘D_ idD assocD idRD idLD
-category-eq {ℓ₀} {ℓ₁} {ObjC} {.ObjC} {HomC} {.HomC}  {_∘C_} {._∘C_} {idC} {.idC} {assocC} {assocD} {idRC} {idRD} {idLC} {idLD} refl refl refl refl 
+category-eq {ℓ₀} {ℓ₁} {ObjC} {.ObjC} {HomC} {.HomC}  {_∘C_} {._∘C_} {idC} {.idC} {assocC} {assocD} {idRC} {idRD} {idLC} {idLD} refl hrefl hrefl hrefl 
   = cong₃ (category ObjC HomC _∘C_ idC) p1 p2 p3
   where
     p1 : (λ {a} {b} {c} {d} {f} {g} {h} → assocC {a} {b} {c} {d} {f} {g} {h}) ≡ assocD
-    p1 = implicit-fun-ext $ λ a → 
-         implicit-fun-ext $ λ b → 
-         implicit-fun-ext $ λ c → 
-         implicit-fun-ext $ λ d → 
-         implicit-fun-ext $ λ f → 
-         implicit-fun-ext $ λ g → 
+    p1 = implicit-fun-ext $ λ a → implicit-fun-ext $ λ b → implicit-fun-ext $ λ c → 
+         implicit-fun-ext $ λ d → implicit-fun-ext $ λ f → implicit-fun-ext $ λ g → 
          implicit-fun-ext $ λ h → 
          proof-irrelevance (assocC {a} {b} {c} {d} {f} {g} {h}) (assocD {a} {b} {c} {d} {f} {g} {h})
     p2 : (λ {a} {b} {f} → idRC {a} {b} {f}) ≡ (λ {a} {b} {f} → idRD {a} {b} {f})
-    p2 = implicit-fun-ext $ λ a →
-         implicit-fun-ext $ λ b →
-         implicit-fun-ext $ λ f →
+    p2 = implicit-fun-ext $ λ a → implicit-fun-ext $ λ b → implicit-fun-ext $ λ f →
          proof-irrelevance (idRC {a} {b} {f}) (idRD {a} {b} {f})
     p3 : (λ {a} {b} {f} → idLC {a} {b} {f}) ≡ (λ {a} {b} {f} → idLD {a} {b} {f})
-    p3 = implicit-fun-ext $ λ a →
-         implicit-fun-ext $ λ b →
-         implicit-fun-ext $ λ f →
+    p3 = implicit-fun-ext $ λ a → implicit-fun-ext $ λ b → implicit-fun-ext $ λ f →
          proof-irrelevance (idLC {a} {b} {f}) (idLD {a} {b} {f})
 
 -------------------------------------------------------------------------------
