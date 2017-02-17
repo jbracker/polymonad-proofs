@@ -1,22 +1,19 @@
 
-module Theory.Category where
-
 -- Stdlib
 open import Level renaming ( suc to lsuc ; zero to lzero )
 open import Function renaming ( id to idF ; _∘_ to _∘F_ )
 open import Data.Product renaming ( _,_ to _,'_ ; _×_ to _×'_ )
-open import Data.Sum
 open import Data.Unit
-open import Data.Empty
-open import Relation.Binary.PropositionalEquality
 open import Relation.Binary.HeterogeneousEquality hiding ( cong ; cong₂ ; subst ; trans ; sym ; proof-irrelevance ) renaming ( refl to hrefl )
+open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning
 
 -- Local
 open import Extensionality
 open import Congruence
-open import Substitution
 open import Theory.Triple
+
+module Theory.Category where
 
 -------------------------------------------------------------------------------
 -- Definition of Categories
@@ -32,8 +29,8 @@ record Category {ℓ₀ ℓ₁ : Level} : Set (lsuc (ℓ₀ ⊔ ℓ₁)) where
     
     assoc : {a b c d : Obj} {f : Hom a b} {g : Hom b c} {h : Hom c d} 
           → h ∘ (g ∘ f) ≡ (h ∘ g) ∘ f
-    idR : {a b : Obj} {f : Hom a b} → id ∘ f ≡ f
-    idL : {a b : Obj} {f : Hom a b} → f ∘ id ≡ f
+    right-id : {a b : Obj} {f : Hom a b} → id ∘ f ≡ f
+    left-id  : {a b : Obj} {f : Hom a b} → f ∘ id ≡ f
 
 -------------------------------------------------------------------------------
 -- Propositional equality of categories
@@ -56,16 +53,16 @@ category-eq : ∀ {ℓ₀ ℓ₁}
             → {idD : {a : ObjD} → HomD a a}
             → {assocC : {a b c d : ObjC} {f : HomC a b} {g : HomC b c} {h : HomC c d} → h ∘C (g ∘C f) ≡ (h ∘C g) ∘C f}
             → {assocD : {a b c d : ObjD} {f : HomD a b} {g : HomD b c} {h : HomD c d} → h ∘D (g ∘D f) ≡ (h ∘D g) ∘D f}
-            → {idRC : {a b : ObjC} {f : HomC a b} → idC ∘C f ≡ f}
-            → {idRD : {a b : ObjD} {f : HomD a b} → idD ∘D f ≡ f}
-            → {idLC : {a b : ObjC} {f : HomC a b} → f ∘C idC ≡ f}
-            → {idLD : {a b : ObjD} {f : HomD a b} → f ∘D idD ≡ f}
+            → {right-idC : {a b : ObjC} {f : HomC a b} → idC ∘C f ≡ f}
+            → {right-idD : {a b : ObjD} {f : HomD a b} → idD ∘D f ≡ f}
+            → {left-idC : {a b : ObjC} {f : HomC a b} → f ∘C idC ≡ f}
+            → {left-idD : {a b : ObjD} {f : HomD a b} → f ∘D idD ≡ f}
             → ObjC ≡ ObjD
             → HomC ≅ HomD
             → (λ {a} {b} {c} → _∘C_ {a} {b} {c}) ≅ (λ {a} {b} {c} → _∘D_ {a} {b} {c})
             → (λ {a} → idC {a}) ≅ (λ {a} → idD {a})
-            → category ObjC HomC _∘C_ idC assocC idRC idLC ≡ category ObjD HomD _∘D_ idD assocD idRD idLD
-category-eq {ℓ₀} {ℓ₁} {ObjC} {.ObjC} {HomC} {.HomC}  {_∘C_} {._∘C_} {idC} {.idC} {assocC} {assocD} {idRC} {idRD} {idLC} {idLD} refl hrefl hrefl hrefl 
+            → category ObjC HomC _∘C_ idC assocC right-idC left-idC ≡ category ObjD HomD _∘D_ idD assocD right-idD left-idD
+category-eq {ℓ₀} {ℓ₁} {ObjC} {.ObjC} {HomC} {.HomC}  {_∘C_} {._∘C_} {idC} {.idC} {assocC} {assocD} {right-idC} {right-idD} {left-idC} {left-idD} refl hrefl hrefl hrefl 
   = cong₃ (category ObjC HomC _∘C_ idC) p1 p2 p3
   where
     p1 : (λ {a} {b} {c} {d} {f} {g} {h} → assocC {a} {b} {c} {d} {f} {g} {h}) ≡ assocD
@@ -73,12 +70,12 @@ category-eq {ℓ₀} {ℓ₁} {ObjC} {.ObjC} {HomC} {.HomC}  {_∘C_} {._∘C_} 
          implicit-fun-ext $ λ d → implicit-fun-ext $ λ f → implicit-fun-ext $ λ g → 
          implicit-fun-ext $ λ h → 
          proof-irrelevance (assocC {a} {b} {c} {d} {f} {g} {h}) (assocD {a} {b} {c} {d} {f} {g} {h})
-    p2 : (λ {a} {b} {f} → idRC {a} {b} {f}) ≡ (λ {a} {b} {f} → idRD {a} {b} {f})
+    p2 : (λ {a} {b} {f} → right-idC {a} {b} {f}) ≡ (λ {a} {b} {f} → right-idD {a} {b} {f})
     p2 = implicit-fun-ext $ λ a → implicit-fun-ext $ λ b → implicit-fun-ext $ λ f →
-         proof-irrelevance (idRC {a} {b} {f}) (idRD {a} {b} {f})
-    p3 : (λ {a} {b} {f} → idLC {a} {b} {f}) ≡ (λ {a} {b} {f} → idLD {a} {b} {f})
+         proof-irrelevance (right-idC {a} {b} {f}) (right-idD {a} {b} {f})
+    p3 : (λ {a} {b} {f} → left-idC {a} {b} {f}) ≡ (λ {a} {b} {f} → left-idD {a} {b} {f})
     p3 = implicit-fun-ext $ λ a → implicit-fun-ext $ λ b → implicit-fun-ext $ λ f →
-         proof-irrelevance (idLC {a} {b} {f}) (idLD {a} {b} {f})
+         proof-irrelevance (left-idC {a} {b} {f}) (left-idD {a} {b} {f})
 
 -------------------------------------------------------------------------------
 -- The Unit Category
@@ -92,8 +89,8 @@ unitCategory = record
   ; _∘_ = λ _ _ → tt
   ; id = tt
   ; assoc = refl
-  ; idL = refl
-  ; idR = refl
+  ; left-id = refl
+  ; right-id = refl
   }
 
 ⊤-Cat = unitCategory
@@ -108,10 +105,10 @@ liftCategory {ℓC₀} {ℓC₁} {ℓL₀} {ℓL₁} C = record
   { Obj = ObjL
   ; Hom = HomL
   ; _∘_ = _∘L_
-  ; id = idLift
+  ; id = left-idift
   ; assoc = assocL
-  ; idR = trans shiftL (cong lift (idR C))
-  ; idL = trans shiftL (cong lift (idL C))
+  ; right-id = trans shiftL (cong lift (right-id C))
+  ; left-id = trans shiftL (cong lift (left-id C))
   } where
     ObjL : Set (ℓC₀ ⊔ ℓL₀)
     ObjL = Lift {ℓ = ℓL₀} (Obj C)
@@ -124,8 +121,8 @@ liftCategory {ℓC₀} {ℓC₁} {ℓL₀} {ℓL₁} C = record
     _∘L_ : {a b c : ObjL} → HomL b c → HomL a b → HomL a c
     _∘L_ (lift f) (lift g) = lift (f ∘C g)
     
-    idLift : {a : ObjL} → HomL a a
-    idLift = lift (id C)
+    left-idift : {a : ObjL} → HomL a a
+    left-idift = lift (id C)
     
     shiftL :  {a b c : Obj C} {f : Hom C a b} {g : Hom C b c} 
            → lift g ∘L lift f ≡ lift (g ∘C f)
@@ -156,8 +153,8 @@ productCategory {ℓC₀} {ℓC₁} {ℓD₀} {ℓD₁} C D = record
   ; _∘_ = _∘P_
   ; id = idP
   ; assoc = cong₂ _,'_ (assoc C) (assoc D)
-  ; idL = cong₂ _,'_ (idL C) (idL D)
-  ; idR = cong₂ _,'_ (idR C) (idR D)
+  ; left-id = cong₂ _,'_ (left-id C) (left-id D)
+  ; right-id = cong₂ _,'_ (right-id C) (right-id D)
   } where
     ObjP = Obj C ×' Obj D
 
@@ -187,8 +184,8 @@ dualCategory {ℓC₀} {ℓC₁} C = record
   ; _∘_ = λ {a} {b} {c} f g → _∘_ C g f
   ; id = id C
   ; assoc = sym $ assoc C
-  ; idR = idL C
-  ; idL = idR C
+  ; right-id = left-id C
+  ; left-id = right-id C
   }
 
 _op = dualCategory
@@ -203,8 +200,8 @@ tripleCategory {ℓC₀} {ℓC₁} {ℓD₀} {ℓD₁} {ℓE₀} {ℓE₁} C D E
   ; _∘_ = _∘P_
   ; id = idP
   ; assoc = cong₃ _,_,_ (assoc C) (assoc D) (assoc E)
-  ; idL = cong₃ _,_,_ (idL C) (idL D) (idL E)
-  ; idR = cong₃ _,_,_ (idR C) (idR D) (idR E)
+  ; left-id = cong₃ _,_,_ (left-id C) (left-id D) (left-id E)
+  ; right-id = cong₃ _,_,_ (right-id C) (right-id D) (right-id E)
   } where
     ObjP = Obj C × Obj D × Obj E
 
