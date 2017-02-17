@@ -15,7 +15,7 @@ open import Relation.Binary.HeterogeneousEquality
 open ≡-Reasoning 
 
 -- Local
-open import Utilities
+open import Extensionality
 open import Theory.Category
 open import Theory.Functor
 
@@ -48,7 +48,7 @@ idNaturalTransformation : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level}
                         → (F : Functor C D) → NaturalTransformation F F
 idNaturalTransformation {C = C} {D = D} F = record 
   { η = λ x → Category.id D {[ F ]₀ x}
-  ; natural = trans (idL D) (sym (idR D))
+  ; natural = trans (left-id D) (sym (right-id D))
   }
 
 Id⟨_⟩ = idNaturalTransformation
@@ -171,44 +171,28 @@ subst₂-replace α .α refl x = refl
 -- Propositional Equality of Natural Transformations
 -------------------------------------------------------------------------------
 
-propNatTransEq : {Cℓ₀ Cℓ₁ Dℓ₀ Dℓ₁ : Level} 
-               → {C : Category {Cℓ₀} {Cℓ₁}} {D : Category {Dℓ₀} {Dℓ₁}} 
-               → {F₀ G₀ F₁ G₁ : Functor C D}
-               → {η₀ : (x : Obj C) → Hom D ([ F₀ ]₀ x) ([ G₀ ]₀ x)}
-               → {η₁ : (x : Obj C) → Hom D ([ F₁ ]₀ x) ([ G₁ ]₀ x)}
-               → {nat₀ : {a b : Obj C} {f : Hom C a b} → ( _∘_ D ([ G₀ ]₁ f) (η₀ a) ) ≡ ( _∘_ D (η₀ b) ([ F₀ ]₁ f) )}
-               → {nat₁ : {a b : Obj C} {f : Hom C a b} → ( _∘_ D ([ G₁ ]₁ f) (η₁ a) ) ≡ ( _∘_ D (η₁ b) ([ F₁ ]₁ f) )}
-               → (eq₀ : F₀ ≡ F₁)
-               → (eq₁ : G₀ ≡ G₁)
-               → (eq₂ : subst₂ (λ F G → (x : Obj C) → Hom D ([ F ]₀ x) ([ G ]₀ x)) eq₀ eq₁ η₀ ≡ η₁)
-               → subst₂ (λ F G → NaturalTransformation F G) eq₀ eq₁ (naturalTransformation {F = F₀} {G = G₀} η₀ (nat₀)) 
-               ≡ naturalTransformation {F = F₁} {G = G₁} η₁ nat₁
-propNatTransEq {nat₀ = nat₀} {nat₁} refl refl refl with p
-  where
-    p = funExtImplicit 
-          (λ a → funExtImplicit 
-          (λ b → funExtImplicit 
-          (λ f → proof-irrelevance (nat₀ {a} {b} {f}) (nat₁ {a} {b} {f})
-          ) ) )
-propNatTransEq {F₀ = functor F₀ F₁ idF distF} {functor G₀ G₁ idG distG} {functor .F₀ .F₁ .idF .distF} {functor .G₀ .G₁ .idG .distG} refl refl refl | refl = refl
+natural-transformation-eq : {Cℓ₀ Cℓ₁ Dℓ₀ Dℓ₁ : Level} 
+                          → {C : Category {Cℓ₀} {Cℓ₁}} {D : Category {Dℓ₀} {Dℓ₁}} 
+                          → {F G : Functor C D}
+                          → {η₀ : (x : Obj C) → Hom D ([ F ]₀ x) ([ G ]₀ x)}
+                          → {η₁ : (x : Obj C) → Hom D ([ F ]₀ x) ([ G ]₀ x)}
+                          → {nat₀ : {a b : Obj C} {f : Hom C a b} → ( _∘_ D ([ G ]₁ f) (η₀ a) ) ≡ ( _∘_ D (η₀ b) ([ F ]₁ f) )}
+                          → {nat₁ : {a b : Obj C} {f : Hom C a b} → ( _∘_ D ([ G ]₁ f) (η₁ a) ) ≡ ( _∘_ D (η₁ b) ([ F ]₁ f) )}
+                          → η₀ ≡ η₁
+                          → naturalTransformation {F = F} {G = G} η₀ nat₀ ≡ naturalTransformation {F = F} {G = G} η₁ nat₁
+natural-transformation-eq {η₀ = η₀} {.η₀} {nat₀} {nat₁} refl 
+  = cong (naturalTransformation η₀) 
+  $ implicit-fun-ext (λ a → implicit-fun-ext (λ b → implicit-fun-ext (λ f → proof-irrelevance (nat₀ {a} {b} {f}) (nat₁ {a} {b} {f}) ) ) )
 
-hetNatTransEq : {Cℓ₀ Cℓ₁ Dℓ₀ Dℓ₁ : Level} 
-              → {C : Category {Cℓ₀} {Cℓ₁}} {D : Category {Dℓ₀} {Dℓ₁}} 
-              → {F₀ G₀ F₁ G₁ : Functor C D}
-              → {η₀ : (x : Obj C) → Hom D ([ F₀ ]₀ x) ([ G₀ ]₀ x)}
-              → {η₁ : (x : Obj C) → Hom D ([ F₁ ]₀ x) ([ G₁ ]₀ x)}
-              → {nat₀ : {a b : Obj C} {f : Hom C a b} → ( _∘_ D ([ G₀ ]₁ f) (η₀ a) ) ≅ ( _∘_ D (η₀ b) ([ F₀ ]₁ f) )}
-              → {nat₁ : {a b : Obj C} {f : Hom C a b} → ( _∘_ D ([ G₁ ]₁ f) (η₁ a) ) ≅ ( _∘_ D (η₁ b) ([ F₁ ]₁ f) )}
-              → (eq₀ : F₀ ≅ F₁)
-              → (eq₁ : G₀ ≅ G₁)
-              → (eq₂ : η₀ ≅ η₁)
-              → naturalTransformation {F = F₀} {G = G₀} η₀ (≅-to-≡ nat₀) ≅ naturalTransformation {F = F₁} {G = G₁} η₁ (≅-to-≡ nat₁)
-hetNatTransEq {nat₀ = nat₀} {nat₁} refl refl refl with p
-  where
-    p = hFunExtImplicit 
-          (λ a → hFunExtImplicit 
-          (λ b → hFunExtImplicit 
-          (λ f → ≡-to-≅ (hproof-irrelevance (nat₀ {a} {b} {f}) (nat₁ {a} {b} {f}))
-          ) ) )
-hetNatTransEq {F₀ = functor F₀ F₁ idF distF} {functor G₀ G₁ idG distG} {functor .F₀ .F₁ .idF .distF} {functor .G₀ .G₁ .idG .distG} refl refl refl | refl = refl
-
+het-natrural-transformation-eq : {Cℓ₀ Cℓ₁ Dℓ₀ Dℓ₁ : Level} 
+                               → {C : Category {Cℓ₀} {Cℓ₁}} {D : Category {Dℓ₀} {Dℓ₁}} 
+                               → {F G : Functor C D}
+                               → {η₀ : (x : Obj C) → Hom D ([ F ]₀ x) ([ G ]₀ x)}
+                               → {η₁ : (x : Obj C) → Hom D ([ F ]₀ x) ([ G ]₀ x)}
+                               → {nat₀ : {a b : Obj C} {f : Hom C a b} → ( _∘_ D ([ G ]₁ f) (η₀ a) ) ≅ ( _∘_ D (η₀ b) ([ F ]₁ f) )}
+                               → {nat₁ : {a b : Obj C} {f : Hom C a b} → ( _∘_ D ([ G ]₁ f) (η₁ a) ) ≅ ( _∘_ D (η₁ b) ([ F ]₁ f) )}
+                               → η₀ ≅ η₁
+                               → naturalTransformation {F = F} {G = G} η₀ (≅-to-≡ nat₀) ≅ naturalTransformation {F = F} {G = G} η₁ (≅-to-≡ nat₁)
+het-natrural-transformation-eq {η₀ = η₀} {.η₀} {nat₀} {nat₁} refl 
+  with het-implicit-fun-ext (λ a → het-implicit-fun-ext (λ b → het-implicit-fun-ext (λ f → ≡-to-≅ (hproof-irrelevance (nat₀ {a} {b} {f}) (nat₁ {a} {b} {f})) ) ) )
+het-natrural-transformation-eq {η₀ = η₀} {.η₀} {nat₀} {.nat₀} refl | refl = refl
