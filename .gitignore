@@ -11,6 +11,7 @@
 *.tmp
 *.log
 *.kate-swp
+.#*
 
 # Build products
 *.ibc
