@@ -14,6 +14,7 @@ open ≡-Reasoning
 
 -- Local
 open import Utilities
+open import Extensionality
 open import Theory.Triple
 open import Theory.Category
 open import Theory.Functor
@@ -51,7 +52,7 @@ natTransCompositionHorzFunctor {A = A} {B} {C} = record
       F₁ {F = F} {G = F} (idC (Fun B C ×C Fun A B)) 
         ≡⟨ refl ⟩
       ⟨ Id⟨ proj₁' F ⟩ ⟩∘ₕ⟨ Id⟨ proj₂' F ⟩ ⟩ 
-        ≡⟨ propNatTransEq refl refl lemma ⟩
+        ≡⟨ natural-transformation-eq lemma ⟩
       Id⟨ [ proj₁' F ]∘[ proj₂' F ] ⟩
         ≡⟨ refl ⟩
       Category.id (Fun A C) {a = [ proj₁' F ]∘[ proj₂' F ]} ∎
@@ -59,13 +60,13 @@ natTransCompositionHorzFunctor {A = A} {B} {C} = record
         _∘C_ = _∘_ C
         
         lemma : η ⟨ Id⟨ proj₁' F ⟩ ⟩∘ₕ⟨ Id⟨ proj₂' F ⟩ ⟩ ≡ η Id⟨ [ proj₁' F ]∘[ proj₂' F ] ⟩
-        lemma = funExt $ λ (x : Obj A) → begin 
+        lemma = fun-ext $ λ (x : Obj A) → begin 
           η ⟨ Id⟨ proj₁' F ⟩ ⟩∘ₕ⟨ Id⟨ proj₂' F ⟩ ⟩ x
             ≡⟨ refl ⟩
           η Id⟨ proj₁' F ⟩ ([ proj₂' F ]₀ x) ∘C [ proj₁' F ]₁ (η Id⟨ proj₂' F ⟩ x)
             ≡⟨ refl ⟩
           idC C ∘C [ proj₁' F ]₁ (idC B)
-            ≡⟨ idR C ⟩
+            ≡⟨ right-id C ⟩
           [ proj₁' F ]₁ (idC B)
             ≡⟨ Functor.id (proj₁' F) ⟩
           idC C
@@ -77,7 +78,7 @@ natTransCompositionHorzFunctor {A = A} {B} {C} = record
          → {β : Hom (Fun B C ×C Fun A B) G H}
          → F₁ ( ⟨ proj₁' β ⟩∘ᵥ⟨ proj₁' α ⟩ ,' ⟨ proj₂' β ⟩∘ᵥ⟨ proj₂' α ⟩ ) ≡ ⟨ F₁ β ⟩∘ᵥ⟨ F₁ α ⟩
     compose {F ,' F'} {G ,' G'} {H ,' H'} {α = α₁ ,' α₂} {β = β₁ ,' β₂} = 
-      propNatTransEq refl refl $ funExt $ λ (x : Obj A) → begin
+      natural-transformation-eq $ fun-ext $ λ (x : Obj A) → begin
         η ⟨ ⟨ β₁ ⟩∘ᵥ⟨ α₁ ⟩ ⟩∘ₕ⟨ ⟨ β₂ ⟩∘ᵥ⟨ α₂ ⟩ ⟩ x
           ≡⟨ refl ⟩
         η ⟨ β₁ ⟩∘ᵥ⟨ α₁ ⟩ ([ H' ]₀ x) ∘C [ F ]₁ (η ⟨ β₂ ⟩∘ᵥ⟨ α₂ ⟩ x)
