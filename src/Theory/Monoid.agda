@@ -20,8 +20,8 @@ record Monoid {ℓ} (C : Set ℓ) : Set ℓ where
     ε : C
     _∙_ : C → C → C
     
-    idL : {m : C} → m ∙ ε ≡ m
-    idR : {m : C} → ε ∙ m ≡ m
+    right-id : {m : C} → m ∙ ε ≡ m
+    left-id : {m : C} → ε ∙ m ≡ m
     assoc : {m n o : C} → m ∙ (n ∙ o) ≡ (m ∙ n) ∙ o
   
   carrier : Set ℓ
@@ -34,7 +34,7 @@ Monoid→Category {ℓ = ℓ} monoid = record
   ; _∘_ = Monoid._∙_ monoid
   ; id = Monoid.ε monoid
   ; assoc = Monoid.assoc monoid
-  ; idL = Monoid.idL monoid
-  ; idR = Monoid.idR monoid
+  ; left-id = Monoid.right-id monoid
+  ; right-id = Monoid.left-id monoid
   }
     
