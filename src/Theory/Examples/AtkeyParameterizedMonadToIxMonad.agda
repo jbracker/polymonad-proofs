@@ -23,7 +23,7 @@ open import Theory.Triple
 open import Theory.Category
 open import Theory.Functor
 open import Theory.NaturalTransformation
-open import Theory.Monad
+open import Theory.Monad hiding ( monad )
 open import Theory.TwoCategory
 open import Theory.TwoFunctor
 open import Theory.AtkeyParameterizedMonad
@@ -110,7 +110,7 @@ AtkeyParameterizedMonad→IxMonad S F monad = record
       m >>= (λ x → f x >>= g) 
         ≡⟨ refl ⟩
       (μ monad ∘F ([ F ]₁ ( id (S op) , id S , (μ monad ∘F ([ F ]₁ (id (S op) , id S , g)) ∘F f)) ) ) m
-        ≡⟨ cong₂ (λ X Y → (μ monad ∘F ([ F ]₁ (X , Y , (μ monad ∘F ([ F ]₁ (id (S op) , id S , g)) ∘F f)) ) ) m) (sym $ Category.idL (S op)) (sym $ Category.idL S) ⟩
+        ≡⟨ cong₂ (λ X Y → (μ monad ∘F ([ F ]₁ (X , Y , (μ monad ∘F ([ F ]₁ (id (S op) , id S , g)) ∘F f)) ) ) m) (sym $ Category.left-id (S op)) (sym $ Category.left-id S) ⟩
       (μ monad ∘F ([ F ]₁ ( (id (S op) ∘Sop id (S op)) , (id S ∘S id S) , (μ monad ∘F ([ F ]₁ (id (S op) , id S , g)) ∘F f)) ) ) m
         ≡⟨ cong (λ X → (μ monad ∘F X) m) (Functor.compose F) ⟩
       (μ monad ∘F ([ F ]₁ ( id (S op) , id S , μ monad ) ∘F [ F ]₁ (id (S op) , id S , ([ F ]₁ (id (S op) , id S , g) ∘F f)))) m
@@ -120,7 +120,7 @@ AtkeyParameterizedMonad→IxMonad S F monad = record
       ( (μ monad ∘F μ monad) ∘F [ F ]₁ (id (S op) , id S , ([ F ]₁ (id (S op) , id S , g) ∘F f))) m
         ≡⟨ refl ⟩ -- associativity of ∘F
       (μ monad ∘F (μ monad ∘F [ F ]₁ (id (S op) , id S , ([ F ]₁ (id (S op) , id S , g) ∘F f)))) m
-        ≡⟨ cong₂ (λ X Y → (μ monad ∘F (μ monad ∘F [ F ]₁ (X , Y , ([ F ]₁ (id (S op) , id S , g) ∘F f)))) m) (sym $ Category.idL (S op)) (sym $ Category.idL S) ⟩
+        ≡⟨ cong₂ (λ X Y → (μ monad ∘F (μ monad ∘F [ F ]₁ (X , Y , ([ F ]₁ (id (S op) , id S , g) ∘F f)))) m) (sym $ Category.left-id (S op)) (sym $ Category.left-id S) ⟩
       (μ monad ∘F (μ monad ∘F [ F ]₁ ((id (S op) ∘Sop id (S op)) , (id S ∘S id S) , ([ F ]₁ (id (S op) , id S , g) ∘F f)))) m
         ≡⟨ cong (λ X → (μ monad ∘F (μ monad ∘F X)) m) (Functor.compose F) ⟩
       (μ monad ∘F (μ monad ∘F ([ F ]₁ (id (S op) , id S , ([ F ]₁ (id (S op) , id S , g))) ∘F [ F ]₁ (id (S op) , id S , f)))) m

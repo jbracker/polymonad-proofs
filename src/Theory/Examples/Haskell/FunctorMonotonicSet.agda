@@ -18,7 +18,7 @@ open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning
 
 
-open import Utilities renaming ( _∈_ to _∈'_ )
+open import Extensionality
 open import Congruence
 open import Substitution
 open import Haskell
@@ -92,16 +92,16 @@ FunctorListSet unique-ord-instances = record
   { ObjCts = ObjCts
   ; HomCts = HomCts
   ; _∘Ct_ = λ {α} {β} {γ} {f} {g} {α'} {β'} {γ'} → _∘Ct_ {α} {β} {γ} {f} {g} {α'} {β'} {γ'}
-  ; ctId = λ {α} {α'} → ctId {α} {α'}
-  ; ctAssoc = λ {α} {β} {γ} {δ} {α'} {β'} {γ'} {δ'} {f} {g} {h} → ctAssoc {α} {β} {γ} {δ} {α'} {β'} {γ'} {δ'} {f} {g} {h}
-  ; ctIdR = λ {α} {β} {α'} {β'} {f} → ctIdR {α} {β} {α'} {β'} {f}
-  ; ctIdL = λ {α} {β} {α'} {β'} {f} → ctIdL {α} {β} {α'} {β'} {f}
+  ; idCt = λ {α} {α'} → ctId {α} {α'}
+  ; constraint-assoc = λ {α} {β} {γ} {δ} {α'} {β'} {γ'} {δ'} {f} {g} {h} → ctAssoc {α} {β} {γ} {δ} {α'} {β'} {γ'} {δ'} {f} {g} {h}
+  ; constraint-right-id = λ {α} {β} {α'} {β'} {f} → ctIdR {α} {β} {α'} {β'} {f}
+  ; constraint-left-id = λ {α} {β} {α'} {β'} {f} → ctIdL {α} {β} {α'} {β'} {f}
   ; F = F
-  ; ctMap = map
-  ; ctFuncId = ctFuncId
-  ; ctFuncComp = ctFuncComp
-  ; ctObjProofIrr = λ {α} → unique-ord-instances {lzero} {lzero} α
-  ; ctHomProofIrr = λ {α} {β} {αCts} {βCts} {f} → proof-irr-monotonic {A = α} {β} αCts βCts f
+  ; map = map
+  ; functor-id = ctFuncId
+  ; functor-compose = ctFuncComp
+  ; proof-irr-ObjCts = λ {α} → unique-ord-instances {lzero} {lzero} α
+  ; proof-irr-HomCts = λ {α} {β} {αCts} {βCts} {f} → proof-irr-monotonic {A = α} {β} αCts βCts f
   } where
     ObjCts : Type → Set (lsuc lzero)
     ObjCts = OrdInstance
@@ -143,7 +143,7 @@ FunctorListSet unique-ord-instances = record
     ctIdL mon-f = refl
     
     ctFuncId : {α : Obj} → map {α = α} {α} (idF , ctId {proj₁ α} {proj₂ α}) ≡ idF
-    ctFuncId {α , OrdA} = funExt helper
+    ctFuncId {α , OrdA} = fun-ext helper
       where helper : (x : ListSet (α , OrdA)) → map (idF , ctId {α} {OrdA}) x ≡ idF x
             helper (listSet xs sorted noDup) = eqListSet OrdA (nub OrdA (mapList idF xs)) xs
               (nub-preserves-sorted OrdA (mapList idF xs) (monotonic-preserves-sorted OrdA OrdA idF (ctId {α' = OrdA}) xs sorted)) sorted
@@ -153,7 +153,7 @@ FunctorListSet unique-ord-instances = record
     ctFuncComp : {α β γ : Obj} {f : Hom α β} {g : Hom β γ}
                → map {α = α} {γ} (proj₁ g ∘F proj₁ f , _∘Ct_ {proj₁ α} {proj₁ β} {proj₁ γ} {proj₁ g} {proj₁ f} {proj₂ α} {proj₂ β} {proj₂ γ} (proj₂ g) (proj₂ f))
                ≡ map {α = β} {γ} g ∘F map f
-    ctFuncComp {α , OrdA} {β , OrdB} {γ , OrdC} {f , mon-f} {g , mon-g} = funExt helper
+    ctFuncComp {α , OrdA} {β , OrdB} {γ , OrdC} {f , mon-f} {g , mon-g} = fun-ext helper
       where
         helper : (xs : ListSet (α , OrdA)) → map (g ∘F f , monotonic-composition OrdA OrdB OrdC g f mon-g mon-f) xs ≡ (map (g , mon-g) ∘F map (f , mon-f)) xs
         helper (listSet xs sorted noDup) = eqListSet OrdC 

@@ -16,7 +16,7 @@ open ≡-Reasoning hiding ( _≅⟨_⟩_ )
 --open ≅-Reasoning hiding ( _≡⟨_⟩_ ) renaming ( begin_ to hbegin_ ; _∎ to _∎h)
 
 -- Local
-open import Utilities
+open import Extensionality
 open import Haskell
 open import Haskell.Monad renaming ( Monad to HaskellMonad )
 open import Haskell.Applicative renaming ( Applicative to HaskellApplicative )
@@ -24,7 +24,7 @@ open import Haskell.Functor renaming ( Functor to HaskellFunctor )
 open import Theory.Category
 open import Theory.Functor
 open import Theory.NaturalTransformation renaming ( NaturalTransformation to NatTrans )
-open import Theory.Monad
+open import Theory.Monad hiding ( monad )
 open import Theory.Examples.Category
 open import Theory.Examples.HaskellFunctorToFunctor
 
@@ -34,9 +34,9 @@ HaskellMonad→Monad : {M : Type → Type}
 HaskellMonad→Monad {M} monad = record 
   { η = NatTrans-η
   ; μ = NatTrans-μ
-  ; μCoher = μCoher
-  ; ηCoherL = ηCoherL
-  ; ηCoherR = ηCoherR
+  ; μ-coher = μCoher
+  ; η-left-coher = ηCoherL
+  ; η-right-coher = ηCoherR
   } where
     C = setCategory {lzero}
     F = HaskellFunctor→Functor (Applicative.functor (Monad.applicative monad))
@@ -63,7 +63,7 @@ HaskellMonad→Monad {M} monad = record
     
     naturalη : {α β : Obj C} {f : Hom C α β} 
              → [ F ]₁ f ∘C η α ≡ η β ∘C [ Id[ C ] ]₁ f
-    naturalη {α} {β} {f} = funExt $ λ (x : α) → begin
+    naturalη {α} {β} {f} = fun-ext $ λ (x : α) → begin
       fmap f (return x)
         ≡⟨ lawMonadFmap f (return x) ⟩
       return x >>= (return ∘C f)
@@ -75,7 +75,7 @@ HaskellMonad→Monad {M} monad = record
 
     naturalμ : {α β : Obj C} {f : Hom C α β}
              → [ F ]₁ f ∘C μ α ≡ μ β ∘C [ [ F ]∘[ F ] ]₁ f
-    naturalμ {α} {β} {f} = funExt $ λ (mma : M (M α)) → begin 
+    naturalμ {α} {β} {f} = fun-ext $ λ (mma : M (M α)) → begin 
       fmap f (join mma)
         ≡⟨ refl ⟩
       fmap f (mma >>= idF)
@@ -83,11 +83,11 @@ HaskellMonad→Monad {M} monad = record
       (mma >>= idF) >>= (return ∘C f)
         ≡⟨ sym $ lawAssoc mma idF (return ∘C f) ⟩
       mma >>= (λ ma → ma >>= (return ∘C f))
-        ≡⟨ cong (λ X → mma >>= X) (funExt $ λ ma → sym $ lawIdR (ma >>= (return ∘C f)) idF) ⟩
+        ≡⟨ cong (λ X → mma >>= X) (fun-ext $ λ ma → sym $ lawIdR (ma >>= (return ∘C f)) idF) ⟩
       mma >>= (λ ma → return (ma >>= (return ∘C f)) >>= idF)
         ≡⟨ lawAssoc mma (λ ma → return (ma >>= (return ∘C f))) idF ⟩
       (mma >>= (λ ma → return (ma >>= (return ∘C f)))) >>= idF
-        ≡⟨ cong (λ X → (mma >>= X) >>= idF) (funExt $ λ ma → cong (λ X → return X) (sym $ lawMonadFmap f ma)) ⟩
+        ≡⟨ cong (λ X → (mma >>= X) >>= idF) (fun-ext $ λ ma → cong (λ X → return X) (sym $ lawMonadFmap f ma)) ⟩
       (mma >>= (λ ma → return (fmap f ma))) >>= idF
         ≡⟨ refl ⟩
       (mma >>= (return ∘C (fmap f))) >>= idF
@@ -101,7 +101,7 @@ HaskellMonad→Monad {M} monad = record
 
     μCoher : {α : Obj C} 
            → μ α ∘C [ F ]₁ (μ α) ≡ μ α ∘C μ ([ F ]₀ α)
-    μCoher {α} = funExt $ λ (mma : M (M (M α))) → begin
+    μCoher {α} = fun-ext $ λ (mma : M (M (M α))) → begin
       join (fmap (join {α}) mma)
         ≡⟨ refl ⟩
       fmap (join {α}) mma >>= idF
@@ -111,7 +111,7 @@ HaskellMonad→Monad {M} monad = record
       (mma >>= (λ ma → return (ma >>= idF))) >>= idF
         ≡⟨ sym $ lawAssoc mma (λ x → return (x >>= idF)) idF ⟩
       mma >>= (λ ma → return (ma >>= idF) >>= idF)
-        ≡⟨ cong (λ X → mma >>= X) (funExt $ λ ma → lawIdR (ma >>= idF) idF) ⟩
+        ≡⟨ cong (λ X → mma >>= X) (fun-ext $ λ ma → lawIdR (ma >>= idF) idF) ⟩
       mma >>= (λ ma → ma >>= idF)
         ≡⟨ lawAssoc mma idF idF ⟩
       (mma >>= idF) >>= idF
@@ -120,7 +120,7 @@ HaskellMonad→Monad {M} monad = record
     
     ηCoherL : {α : Obj C} 
             → μ α ∘C [ F ]₁ (η α) ≡ NatTrans.η Id⟨ F ⟩ α
-    ηCoherL {α} = funExt $ λ (ma : M α) → begin
+    ηCoherL {α} = fun-ext $ λ (ma : M α) → begin
       join {α} (fmap (return {α}) ma)
         ≡⟨ refl ⟩
       fmap (return {α}) ma >>= idF
@@ -128,14 +128,14 @@ HaskellMonad→Monad {M} monad = record
       (ma >>= (return ∘C return)) >>= idF
         ≡⟨ sym $ lawAssoc ma (return ∘C return) idF ⟩
       ma >>= (λ a → return (return a) >>= idF)
-        ≡⟨ cong (λ X → ma >>= X) (funExt $ λ a → lawIdR (return a) idF) ⟩
+        ≡⟨ cong (λ X → ma >>= X) (fun-ext $ λ a → lawIdR (return a) idF) ⟩
       ma >>= return
         ≡⟨ lawIdL ma ⟩
       ma ∎
     
     ηCoherR : {α : Obj C} 
             → μ α ∘C η ([ F ]₀ α) ≡ NatTrans.η Id⟨ F ⟩ α
-    ηCoherR {α} = funExt $ λ (ma : M α) → begin
+    ηCoherR {α} = fun-ext $ λ (ma : M α) → begin
       join {α} (return {M α} ma)
         ≡⟨ refl ⟩
       return {M α} ma >>= idF

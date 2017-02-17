@@ -4,7 +4,7 @@ open import Function
 open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning
 
-open import Utilities
+open import Extensionality
 open import Haskell 
 open import Identity
 
@@ -39,7 +39,7 @@ functorFromMonad {M = M} _>>=_ return lawIdL lawIdR lawAssoc = record
     fmap f x = x >>= (return ∘ f)
 
     lawId : ∀ {α : Type} → fmap {α = α} identity ≡ identity
-    lawId = funExt (λ ma → begin
+    lawId = fun-ext (λ ma → begin
       fmap identity ma 
         ≡⟨ refl ⟩
       ma >>= return
@@ -49,11 +49,11 @@ functorFromMonad {M = M} _>>=_ return lawIdL lawIdR lawAssoc = record
     lawCompose : ∀ {α β γ : Type} 
             → (f : β → γ) → (g : α → β) 
             → fmap (f ∘ g) ≡ fmap f ∘ fmap g
-    lawCompose f g = funExt (λ ma → begin 
+    lawCompose f g = fun-ext (λ ma → begin 
       fmap (f ∘ g) ma
         ≡⟨ refl ⟩
       ma >>= (λ x → return (f (g x)))
-        ≡⟨ cong (λ X → ma >>= X) (funExt (λ x → sym (lawIdR (g x) (return ∘ f)))) ⟩
+        ≡⟨ cong (λ X → ma >>= X) (fun-ext (λ x → sym (lawIdR (g x) (return ∘ f)))) ⟩
       ma >>= (λ x → return (g x) >>= (return ∘ f))
         ≡⟨ lawAssoc ma (return ∘ g) (return ∘ f) ⟩
       (ma >>= (return ∘ g)) >>= (return ∘ f)

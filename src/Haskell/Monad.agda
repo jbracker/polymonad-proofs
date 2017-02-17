@@ -5,7 +5,7 @@ open import Function renaming ( id to idF )
 open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning
 
-open import Utilities
+open import Extensionality
 open import Haskell
 open import Haskell.Functor
 open import Haskell.Applicative
@@ -68,7 +68,7 @@ lawMonadFunctorComp m g f ma = begin
   (mBind m) ma (λ a → (mReturn m) (f (g a))) 
     ≡⟨ refl ⟩
   (mBind m) ma (λ x → (λ a' → (mReturn m) (f a')) (g x) ) 
-    ≡⟨ cong (λ X → (mBind m) ma X) (sym (funExt (λ x → mLawIdR m (g x) (λ a' → (mReturn m) (f a'))))) ⟩
+    ≡⟨ cong (λ X → (mBind m) ma X) (sym (fun-ext (λ x → mLawIdR m (g x) (λ a' → (mReturn m) (f a'))))) ⟩
   (mBind m) ma (λ x → (mBind m) ((mReturn m) (g x)) (λ a' → (mReturn m) (f a'))) 
     ≡⟨ refl ⟩
   (mBind m) ma (λ x → (mBind m) ((λ a → (mReturn m) (g a)) x) (λ a' → (mReturn m) (f a'))) 
@@ -89,7 +89,7 @@ commuteFmapBind monad m f g = begin
   (m >>= f) >>= (return ∘ g)
     ≡⟨ sym (lawAssoc m f (return ∘ g)) ⟩
   m >>= (λ x → f x >>= (return ∘ g)) 
-    ≡⟨ cong (λ X → m >>= X) (funExt (λ x → sym (lawMonadFmap g (f x)))) ⟩
+    ≡⟨ cong (λ X → m >>= X) (fun-ext (λ x → sym (lawMonadFmap g (f x)))) ⟩
   m >>= (λ x → fmap (functor applicative) g (f x)) ∎
 
 decomposeFmapIntro : {α β γ : Type} {M : TyCon}
@@ -98,7 +98,7 @@ decomposeFmapIntro : {α β γ : Type} {M : TyCon}
                    → m >>= (g ∘ f) ≡ fmap (functor applicative) f m >>= g
 decomposeFmapIntro monad m f g = begin
   m >>= (g ∘ f) 
-    ≡⟨ cong (λ X → m >>= X) (funExt (λ x → sym (lawIdR (f x) g))) ⟩
+    ≡⟨ cong (λ X → m >>= X) (fun-ext (λ x → sym (lawIdR (f x) g))) ⟩
   m >>= (λ x → return (f x) >>= g)
     ≡⟨ lawAssoc m (return ∘ f) g ⟩
   (m >>= (return ∘ f)) >>= g

@@ -16,12 +16,12 @@ open ≡-Reasoning hiding ( _≅⟨_⟩_ )
 open ≅-Reasoning hiding ( _≡⟨_⟩_ ) renaming ( begin_ to hbegin_ ; _∎ to _∎h)
 
 -- Local
-open import Utilities
+open import Extensionality
 open import Haskell
 open import Theory.Category
 open import Theory.Functor
 open import Theory.NaturalTransformation
-open import Theory.Monad
+open import Theory.Monad hiding ( monad )
 open import Theory.TwoCategory
 open import Theory.Examples.TwoCategory
 open import Theory.TwoFunctor 
@@ -38,7 +38,7 @@ Monad→LaxTwoFunctor {ℓC₀} {ℓC₁} {C} {M} monad = record
   ; μ = μP
   ; laxFunId₁ = λ {x} {y} {f} → laxFunId₁ {x} {y} {f}
   ; laxFunId₂ = λ {x} {y} {f} → laxFunId₂ {x} {y} {f}
-  ; laxFunAssoc = λ {x} {y} {z} {w} {f} {g} {h} → propNatTransEq refl refl $ funExt $ laxFunAssoc {x} {y} {z} {w} {f} {g} {h}
+  ; laxFunAssoc = λ {x} {y} {z} {w} {f} {g} {h} → natural-transformation-eq $ fun-ext $ laxFunAssoc {x} {y} {z} {w} {f} {g} {h}
   } where
     open Category
     open NaturalTransformation
@@ -56,7 +56,7 @@ Monad→LaxTwoFunctor {ℓC₀} {ℓC₁} {C} {M} monad = record
     ηF x = Category.id C
         
     naturalF : {a b : Obj C} {f : Hom C a b} → [ M ]₁ f ∘C ηF a ≡ ηF b ∘C [ M ]₁ f
-    naturalF {a} {b} {f} = trans (idL C) (sym (idR C))
+    naturalF {a} {b} {f} = trans (left-id C) (sym (right-id C))
 
     P₁ : {x y : Cell₀ ⊤-TwoCat} → Functor (HomCat ⊤-TwoCat x y) (HomCat FunTwoCat (P₀ x) (P₀ y))
     P₁ {tt} {tt} = record
@@ -79,11 +79,11 @@ Monad→LaxTwoFunctor {ℓC₀} {ℓC₁} {C} {M} monad = record
                 → F₁ ((HomCat ⊤-TwoCat tt tt ∘ g) f) 
                 ≡ _∘_ (HomCat FunTwoCat C C) (F₁ g) (F₁ f)
         compose {tt} {tt} {tt} {tt} {tt} = 
-          propNatTransEq refl refl $ funExt $ λ (x : Obj C) → begin
+          natural-transformation-eq $ fun-ext $ λ (x : Obj C) → begin
             ηF x 
               ≡⟨ refl ⟩
             Category.id C
-              ≡⟨ sym (idL C) ⟩
+              ≡⟨ sym (left-id C) ⟩
             Category.id C ∘C Category.id C
               ≡⟨ refl ⟩ 
             η ⟨ F₁ tt ⟩∘ᵥ⟨ F₁ tt ⟩ x ∎
@@ -100,15 +100,15 @@ Monad→LaxTwoFunctor {ℓC₀} {ℓC₁} {C} {M} monad = record
               → {f : Cell₁ ⊤-TwoCat x y}
               → [ P₁ ]₁ (λ' ⊤-TwoCat f) ∘V (μP ∘V ((id₂ FunTwoCat {f = M}) ∘H2 ηP)) 
               ≡ λ' FunTwoCat ([ P₁ ]₀ f)
-    laxFunId₁ {tt} {tt} {tt} = propNatTransEq refl refl $ funExt $ λ (x : Obj C) → begin
+    laxFunId₁ {tt} {tt} {tt} = natural-transformation-eq $ fun-ext $ λ (x : Obj C) → begin
       η ([ P₁ ]₁ (λ' ⊤-TwoCat tt) ∘V (μP ∘V ((id₂ FunTwoCat {f = M}) ∘H2 ηP))) x
         ≡⟨ refl ⟩ 
       Category.id C ∘C (η μP x ∘C (Category.id C ∘C [ M ]₁ (η ηP x)))
-        ≡⟨ cong (λ X → ηF x ∘C (η μP x ∘C X)) (idR C) ⟩ 
+        ≡⟨ cong (λ X → ηF x ∘C (η μP x ∘C X)) (right-id C) ⟩ 
       Category.id C ∘C (η μP x ∘C [ M ]₁ (η ηP x))
-        ≡⟨ idR C ⟩ 
+        ≡⟨ right-id C ⟩ 
       η (Monad.μ monad) x ∘C [ M ]₁ (η (Monad.η monad) x)
-        ≡⟨ Monad.ηCoherL monad ⟩
+        ≡⟨ Monad.η-left-coher monad ⟩
       Category.id C
         ≡⟨ refl ⟩ 
       η (λ' FunTwoCat ([ P₁ ]₀ tt)) x ∎
@@ -116,15 +116,15 @@ Monad→LaxTwoFunctor {ℓC₀} {ℓC₁} {C} {M} monad = record
     laxFunId₂ : {x y : Cell₀ ⊤-TwoCat} 
               → {f : Cell₁ ⊤-TwoCat x y}
               → [ P₁ ]₁ (ρ ⊤-TwoCat f) ∘V (μP ∘V (ηP ∘H2 (id₂ FunTwoCat {f = M}))) ≡ ρ FunTwoCat ([ P₁ ]₀ f)
-    laxFunId₂ {tt} {tt} {tt} = propNatTransEq refl refl $ funExt $ λ (x : Obj C) → begin
+    laxFunId₂ {tt} {tt} {tt} = natural-transformation-eq $ fun-ext $ λ (x : Obj C) → begin
       η ([ P₁ ]₁ (ρ ⊤-TwoCat tt) ∘V (μP ∘V (ηP ∘H2 (id₂ FunTwoCat {f = M})))) x
         ≡⟨ refl ⟩
       Category.id C ∘C (η μP x ∘C (η ηP ([ M ]₀ x) ∘C Category.id C))
-        ≡⟨ idR C ⟩
+        ≡⟨ right-id C ⟩
       η μP x ∘C (η ηP ([ M ]₀ x) ∘C Category.id C)
-        ≡⟨ cong (λ X → η μP x ∘C X) (idL C) ⟩
+        ≡⟨ cong (λ X → η μP x ∘C X) (left-id C) ⟩
       η μP x ∘C η ηP ([ M ]₀ x)
-        ≡⟨ Monad.ηCoherR monad ⟩
+        ≡⟨ Monad.η-right-coher monad ⟩
       Category.id C -- η Id⟨ M ⟩ x
         ≡⟨ ≅-to-≡ $ subst₂-insert (sym (hIdR₁ FunTwoCat)) refl Id⟨ M ⟩ x ⟩
       η (subst₂ NaturalTransformation (sym (hIdR₁ FunTwoCat)) refl Id⟨ M ⟩) x
@@ -138,19 +138,19 @@ Monad→LaxTwoFunctor {ℓC₀} {ℓC₁} {C} {M} monad = record
                 ≡ η μP x ∘C (( η μP ([ M ]₀ x) ∘C [ M ]₁ ([ M ]₁ (Category.id C)) ) ∘C η (subst₂ NaturalTransformation refl (hAssoc₁ FunTwoCat {f = M} {M} {M}) Id⟨ [ M ]∘[ [ M ]∘[ M ] ] ⟩) x)
     laxFunAssoc {tt} {tt} {tt} {tt} {tt} {tt} {tt} x = begin 
       Category.id C ∘C (η μP x ∘C (Category.id C ∘C [ M ]₁ (η μP x) ))
-        ≡⟨ idR C ⟩
+        ≡⟨ right-id C ⟩
       η μP x ∘C (Category.id C ∘C [ M ]₁ (η μP x) )
-        ≡⟨ cong (λ X → η μP x ∘C X) (idR C) ⟩
+        ≡⟨ cong (λ X → η μP x ∘C X) (right-id C) ⟩
       η (Monad.μ monad) x ∘C [ M ]₁ (η (Monad.μ monad) x)
-        ≡⟨ Monad.μCoher monad ⟩
+        ≡⟨ Monad.μ-coher monad ⟩
       η (Monad.μ monad) x ∘C η (Monad.μ monad) ([ M ]₀ x)
-        ≡⟨ cong (λ X → η μP x ∘C X) (sym (idL C)) ⟩
+        ≡⟨ cong (λ X → η μP x ∘C X) (sym (left-id C)) ⟩
       η μP x ∘C ( η μP ([ M ]₀ x) ∘C Category.id C )
         ≡⟨ cong (λ X → η μP x ∘C ( η μP ([ M ]₀ x) ∘C X)) (sym (Functor.id M)) ⟩
       η μP x ∘C ( η μP ([ M ]₀ x) ∘C [ M ]₁ (Category.id C) )
         ≡⟨ cong (λ X → η μP x ∘C ( η μP ([ M ]₀ x) ∘C [ M ]₁ X )) (sym (Functor.id M)) ⟩
       η μP x ∘C ( η μP ([ M ]₀ x) ∘C [ M ]₁ ([ M ]₁ (Category.id C)) )
-        ≡⟨ cong (λ X → η μP x ∘C X) (sym (idL C)) ⟩
+        ≡⟨ cong (λ X → η μP x ∘C X) (sym (left-id C)) ⟩
       η μP x ∘C (( η μP ([ M ]₀ x) ∘C [ M ]₁ ([ M ]₁ (Category.id C)) ) ∘C Category.id C)
         ≡⟨ cong (λ X → η μP x ∘C (( η μP ([ M ]₀ x) ∘C [ M ]₁ ([ M ]₁ (Category.id C)) ) ∘C X)) (≅-to-≡ $ subst₂-insert refl (hAssoc₁ FunTwoCat {f = M} {M} {M}) Id⟨ [ M ]∘[ [ M ]∘[ M ] ] ⟩ x) ⟩
       η μP x ∘C (( η μP ([ M ]₀ x) ∘C [ M ]₁ ([ M ]₁ (Category.id C)) ) ∘C η (subst₂ NaturalTransformation refl (hAssoc₁ FunTwoCat {f = M} {M} {M}) Id⟨ [ M ]∘[ [ M ]∘[ M ] ] ⟩) x) ∎

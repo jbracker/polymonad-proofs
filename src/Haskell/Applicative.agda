@@ -5,7 +5,7 @@ open import Function hiding ( id ; _∘_ ) renaming ( _∘′_ to _∘_ )
 open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning
 
-open import Utilities
+open import Extensionality
 open import Identity
 open import Haskell 
 open import Haskell.Functor
@@ -95,17 +95,17 @@ applicativeFromMonad {M = M} _>>=_ return lawIdL lawIdR lawAssoc = record
       ( u >>= (λ x → return (_∘_ x) >>= (λ g → v >>= (return ∘ g)) ) ) >>= (λ f → w >>= (return ∘ f))
         ≡⟨ sym (lawAssoc u ((λ x → return (_∘_ x) >>= (λ g → v >>= (return ∘ g)) )) ((λ f → w >>= (return ∘ f)))) ⟩
       u >>= (λ f → (return (_∘_ f) >>= (λ g → v >>= (return ∘ g))) >>= (λ f → w >>= (return ∘ f)) )
-        ≡⟨ cong (λ X → u >>= X) (funExt (λ f → cong (λ X → X >>= (λ f → w >>= (return ∘ f))) (lawIdR ((_∘_ f)) ((λ g → v >>= (return ∘ g)))))) ⟩
+        ≡⟨ cong (λ X → u >>= X) (fun-ext (λ f → cong (λ X → X >>= (λ f → w >>= (return ∘ f))) (lawIdR ((_∘_ f)) ((λ g → v >>= (return ∘ g)))))) ⟩
       u >>= (λ f → (v >>= (λ g → return (f ∘ g))) >>= (λ h → w >>= (return ∘ h)) )
-        ≡⟨ cong (λ X → u >>= X) (funExt (λ f → sym (lawAssoc v (λ g → return (f ∘ g)) ((λ h → w >>= (return ∘ h)))))) ⟩
+        ≡⟨ cong (λ X → u >>= X) (fun-ext (λ f → sym (lawAssoc v (λ g → return (f ∘ g)) ((λ h → w >>= (return ∘ h)))))) ⟩
       u >>= (λ f → v >>= (λ g → return (f ∘ g) >>= (λ h → w >>= (return ∘ h)) ) )
-        ≡⟨ cong (λ X → u >>= X) (funExt (λ f → cong (λ X → v >>= X) (funExt (λ g → lawIdR (f ∘ g) ((λ h → w >>= (return ∘ h))))))) ⟩
+        ≡⟨ cong (λ X → u >>= X) (fun-ext (λ f → cong (λ X → v >>= X) (fun-ext (λ g → lawIdR (f ∘ g) ((λ h → w >>= (return ∘ h))))))) ⟩
       u >>= (λ f → v >>= (λ g → w >>= (return ∘ (f ∘ g)) ) )
-        ≡⟨ cong (λ X → u >>= X) (funExt (λ f → cong (λ X → v >>= X) (funExt (λ g → cong (λ X → w >>= X) (funExt (λ x → sym (lawIdR (g x) (return ∘ f)))))))) ⟩
+        ≡⟨ cong (λ X → u >>= X) (fun-ext (λ f → cong (λ X → v >>= X) (fun-ext (λ g → cong (λ X → w >>= X) (fun-ext (λ x → sym (lawIdR (g x) (return ∘ f)))))))) ⟩
       u >>= (λ f → v >>= (λ g → w >>= (λ x → return (g x) >>= (return ∘ f)) ) )
-        ≡⟨ cong (λ X → u >>= X) (funExt (λ f → cong (λ X → v >>= X) (funExt (λ g → lawAssoc w (return ∘ g) (return ∘ f))))) ⟩
+        ≡⟨ cong (λ X → u >>= X) (fun-ext (λ f → cong (λ X → v >>= X) (fun-ext (λ g → lawAssoc w (return ∘ g) (return ∘ f))))) ⟩
       u >>= (λ f → v >>= (λ g → (w >>= (return ∘ g)) >>= (return ∘ f) ) )
-        ≡⟨ cong (λ X → u >>= X) (funExt (λ f → lawAssoc v ((λ g → w >>= (return ∘ g))) (return ∘ f))) ⟩
+        ≡⟨ cong (λ X → u >>= X) (fun-ext (λ f → lawAssoc v ((λ g → w >>= (return ∘ g))) (return ∘ f))) ⟩
       apM u (apM v w) ∎
 
     lawHomomorphism : ∀ {α β : Type} 
@@ -127,7 +127,7 @@ applicativeFromMonad {M = M} _>>=_ return lawIdL lawIdR lawAssoc = record
       apM u (return x) 
         ≡⟨ refl ⟩
       u >>= (λ f → (return x) >>= (return ∘ f) )
-        ≡⟨ cong (λ X → u >>= X) (funExt (λ f → lawIdR x (return ∘ f))) ⟩
+        ≡⟨ cong (λ X → u >>= X) (fun-ext (λ f → lawIdR x (return ∘ f))) ⟩
       u >>= (λ f → (return ∘ f) x )
         ≡⟨ refl ⟩
       u >>= (return ∘ (λ f → f x))

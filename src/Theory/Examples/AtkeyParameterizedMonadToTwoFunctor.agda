@@ -16,7 +16,7 @@ open ≡-Reasoning hiding ( _≅⟨_⟩_ )
 open ≅-Reasoning hiding ( _≡⟨_⟩_ ) renaming ( begin_ to hbegin_ ; _∎ to _∎h)
 
 -- Local
-open import Utilities
+open import Extensionality
 open import Haskell
 open import Theory.Triple
 open import Theory.Category
@@ -43,7 +43,7 @@ AtkeyParameterizedMonad→LaxTwoFunctor {ℓC₀} {ℓC₁} {ℓS₀} {ℓS₁} 
   ; μ = λ {s₁} {s₂} {s₃} {f} {g} → μ {s₁} {s₂} {s₃} {f} {g}
   ; laxFunId₁ = λ {s₁} {s₂} {f} → laxFunId₁ {s₁} {s₂} {f}
   ; laxFunId₂ = λ {s₁} {s₂} {f} → laxFunId₂ {s₁} {s₂} {f}
-  ; laxFunAssoc = λ {s₀} {s₁} {s₂} {s₃} {f} {g} {h} → propNatTransEq refl refl $ funExt $ laxFunAssoc {s₀} {s₁} {s₂} {s₃} {f} {g} {h}
+  ; laxFunAssoc = λ {s₀} {s₁} {s₂} {s₃} {f} {g} {h} → natural-transformation-eq $ fun-ext $ laxFunAssoc {s₀} {s₁} {s₂} {s₃} {f} {g} {h}
   } where
     FunTwoCat = functorTwoCategory {ℓC₀} {ℓC₁}
     S2 = Category→StrictTwoCategory S
@@ -75,7 +75,7 @@ AtkeyParameterizedMonad→LaxTwoFunctor {ℓC₀} {ℓC₁} {ℓS₀} {ℓS₁} 
                  ≡ [ M ]₁ (id (S op) {s₂} , id S {s₁} , g) ∘C [ M ]₁ (id (S op) {s₂} , id S {s₁} , f)
         compose₀ {a} {b} {c} {f} {g} = begin
           [ M ]₁ (id (S op) {s₂} , id S {s₁} , (g ∘C f)) 
-            ≡⟨ cong₂ (λ X Y → [ M ]₁ (X , Y , (g ∘C f))) (sym $ idL (S op)) (sym $ idL S) ⟩
+            ≡⟨ cong₂ (λ X Y → [ M ]₁ (X , Y , (g ∘C f))) (sym $ left-id (S op)) (sym $ left-id S) ⟩
           [ M ]₁ ((id (S op) {s₂} ∘Sop id (S op) {s₂}) , (id S {s₁} ∘S id S {s₁}) , (g ∘C f))
             ≡⟨ Functor.compose M ⟩
           [ M ]₁ (id (S op) {s₂} , id S {s₁} , g) ∘C [ M ]₁ (id (S op) {s₂} , id S {s₁} , f) ∎
@@ -86,12 +86,12 @@ AtkeyParameterizedMonad→LaxTwoFunctor {ℓC₀} {ℓC₁} {ℓS₀} {ℓS₁} 
         F₁ : {a b : Hom S s₁ s₂} 
            → Hom (HomCat S2 s₁ s₂) a b
            → Hom (HomCat FunTwoCat (P₀ s₁) (P₀ s₂)) (F₀ a) (F₀ b)
-        F₁ {a} {b} tt = naturalTransformation (λ x → id C {[ F₀ a ]₀ x}) (trans (idL C) (sym $ idR C))
+        F₁ {a} {b} tt = naturalTransformation (λ x → id C {[ F₀ a ]₀ x}) (trans (left-id C) (sym $ right-id C))
         
         compose : {a b c : Hom S s₁ s₂}
                 → {f : Hom (HomCat S2 s₁ s₂) a b} {g : Hom (HomCat S2 s₁ s₂) b c}
                 → F₁ {a} {c} (_∘SS_ {a} {b} {c} g f) ≡ (F₁ {a} {b} g) ∘CC (F₁ {b} {c} f)
-        compose {a} {b} {c} {tt} {tt} = propNatTransEq refl refl $ funExt $ λ (x : Obj C) → sym (idR C)
+        compose {a} {b} {c} {tt} {tt} = natural-transformation-eq $ fun-ext $ λ (x : Obj C) → sym (right-id C)
     
     η : {s : Obj S} → NatTrans Id[ C ] ([ P₁ {s} {s} ]₀ (id S {s}))
     η {s} = naturalTransformation (λ x → AtkeyParameterizedMonad.η monad {x} {s}) (AtkeyParameterizedMonad.naturalη monad {s})
@@ -103,16 +103,16 @@ AtkeyParameterizedMonad→LaxTwoFunctor {ℓC₀} {ℓC₁} {ℓS₀} {ℓS₁} 
     laxFunId₁ : {s₁ s₂ : Obj S} {f : Hom S s₁ s₂}
               → ⟨ Functor.F₁ (P₁ {s₁} {s₂}) {f} {f} (λ' S2 f) ⟩∘ᵥ⟨ ⟨ μ {s₁} {s₁} {s₂} {id S {s₁}} {f} ⟩∘ᵥ⟨ ⟨ id₂ FunTwoCat {C} {C} {[ P₁ {s₁} {s₂} ]₀ f} ⟩∘ₕ⟨ η {s₁} ⟩ ⟩ ⟩
               ≡ λ' FunTwoCat ([ P₁ {s₁} {s₂} ]₀ f)
-    laxFunId₁ {s₁} {s₂} {f} = propNatTransEq refl refl $ funExt $ λ (x : Obj C) → begin
+    laxFunId₁ {s₁} {s₂} {f} = natural-transformation-eq $ fun-ext $ λ (x : Obj C) → begin
       NatTrans.η (⟨ Functor.F₁ (P₁ {s₁} {s₂}) {f} {f} (λ' S2 f) ⟩∘ᵥ⟨ ⟨ μ {s₁} {s₁} {s₂} {id S {s₁}} {f} ⟩∘ᵥ⟨ ⟨ id₂ FunTwoCat {C} {C} {[ P₁ {s₁} {s₂} ]₀ f} ⟩∘ₕ⟨ η {s₁} ⟩ ⟩ ⟩) x
         ≡⟨ refl ⟩
       id C {[ M ]₀ (s₂ , s₁ , x)} ∘C (NatTrans.η (μ {s₁} {s₁} {s₂} {id S {s₁}} {f}) x 
                                   ∘C (id C {[ M ]₀ (s₂ , s₁ , [ M ]₀ (s₁ , s₁ , x))}
                                   ∘C [ M ]₁ (id (S op) {s₂} , id S {s₁} , NatTrans.η (η {s₁}) x) ) )
-        ≡⟨ idR C ⟩
+        ≡⟨ right-id C ⟩
       NatTrans.η (μ {s₁} {s₁} {s₂} {id S {s₁}} {f}) x ∘C (Category.id C {[ M ]₀ (s₂ , s₁ , [ M ]₀ (s₁ , s₁ , x))}
                                                       ∘C [ M ]₁ (id (S op) {s₂} , id S {s₁} , NatTrans.η (η {s₁}) x) )
-        ≡⟨ cong (λ X → NatTrans.η (μ {s₁} {s₁} {s₂} {id S {s₁}} {f}) x ∘C X) (idR C) ⟩
+        ≡⟨ cong (λ X → NatTrans.η (μ {s₁} {s₁} {s₂} {id S {s₁}} {f}) x ∘C X) (right-id C) ⟩
       NatTrans.η (μ {s₁} {s₁} {s₂} {id S {s₁}} {f}) x ∘C [ M ]₁ (id (S op) {s₂} , id S {s₁} , NatTrans.η (η {s₁}) x)
         ≡⟨ refl ⟩
       AtkeyParameterizedMonad.μ monad {x} {s₂} {s₁} {s₁} ∘C [ M ]₁ (id (S op) {s₂} , id S {s₁} , AtkeyParameterizedMonad.η monad {x} {s₁})
@@ -128,16 +128,16 @@ AtkeyParameterizedMonad→LaxTwoFunctor {ℓC₀} {ℓC₁} {ℓS₀} {ℓS₁} 
     laxFunId₂ : {s₁ s₂ : Obj S} {f : Hom S s₁ s₂} 
       → ⟨ Functor.F₁ (P₁ {s₁} {s₂}) {f} {f} (ρ S2 f) ⟩∘ᵥ⟨ ⟨ μ {s₁} {s₂} {s₂} {f} {id S {s₂}} ⟩∘ᵥ⟨ ⟨ η {s₂} ⟩∘ₕ⟨ id₂ FunTwoCat {C} {C} {[ P₁ {s₁} {s₂} ]₀ f} ⟩ ⟩ ⟩
       ≡ ρ FunTwoCat ([ P₁ {s₁} {s₂} ]₀ f)
-    laxFunId₂ {s₁} {s₂} {f} = propNatTransEq refl refl $ funExt $ λ (x : Obj C) → begin
+    laxFunId₂ {s₁} {s₂} {f} = natural-transformation-eq $ fun-ext $ λ (x : Obj C) → begin
       NatTrans.η ⟨ Functor.F₁ (P₁ {s₁} {s₂}) {f} {f} (ρ S2 f) ⟩∘ᵥ⟨ ⟨ μ {s₁} {s₂} {s₂} {f} {id S {s₂}} ⟩∘ᵥ⟨ ⟨ η {s₂} ⟩∘ₕ⟨ id₂ FunTwoCat {C} {C} {[ P₁ {s₁} {s₂} ]₀ f} ⟩ ⟩ ⟩ x
         ≡⟨ refl ⟩
       id C {[ M ]₀ (s₂ , s₁ , x)} ∘C (NatTrans.η (μ {s₁} {s₂} {s₂} {f} {id S {s₂}}) x 
                                   ∘C (NatTrans.η (η {s₂}) ([ M ]₀ (s₂ , s₁ , x)) 
                                   ∘C Category.id C {[ M ]₀ (s₂ , s₁ , x)} ) )
-        ≡⟨ idR C ⟩
+        ≡⟨ right-id C ⟩
       NatTrans.η (μ {s₁} {s₂} {s₂} {f} {id S {s₂}}) x ∘C (NatTrans.η (η {s₂}) ([ M ]₀ (s₂ , s₁ , x)) 
                                                       ∘C Category.id C {[ M ]₀ (s₂ , s₁ , x)} )
-        ≡⟨ cong (λ X → NatTrans.η (μ {s₁} {s₂} {s₂} {f} {id S {s₂}}) x ∘C X) (idL C) ⟩
+        ≡⟨ cong (λ X → NatTrans.η (μ {s₁} {s₂} {s₂} {f} {id S {s₂}}) x ∘C X) (left-id C) ⟩
       NatTrans.η (μ {s₁} {s₂} {s₂} {f} {id S {s₂}}) x ∘C NatTrans.η (η {s₂}) ([ M ]₀ (s₂ , s₁ , x))
         ≡⟨ refl ⟩
       AtkeyParameterizedMonad.μ monad {x} {s₂} {s₂} {s₁} ∘C AtkeyParameterizedMonad.η monad {[ M ]₀ (s₂ , s₁ , x)} {s₂}
@@ -166,17 +166,17 @@ AtkeyParameterizedMonad→LaxTwoFunctor {ℓC₀} {ℓC₁} {ℓS₀} {ℓS₁} 
         ∘C ( AtkeyParameterizedMonad.μ monad {x} {s₃} {s₂} {s₀}
         ∘C ( id C {[ M ]₀ (s₃ , s₂ , ([ M ]₀ (s₂ , s₀ , x)))} 
         ∘C [ M ]₁ (id (S op) {s₃} , id S {s₂} , AtkeyParameterizedMonad.μ monad {x} {s₂} {s₁} {s₀}) ) )
-        ≡⟨ idR C ⟩ 
+        ≡⟨ right-id C ⟩ 
       AtkeyParameterizedMonad.μ monad {x} {s₃} {s₂} {s₀}
         ∘C ( id C {[ M ]₀ (s₃ , s₂ , ([ M ]₀ (s₂ , s₀ , x)))} 
         ∘C [ M ]₁ (id (S op) {s₃} , id S {s₂} , AtkeyParameterizedMonad.μ monad {x} {s₂} {s₁} {s₀}) )
-        ≡⟨ cong (λ X → AtkeyParameterizedMonad.μ monad {x} {s₃} {s₂} {s₀} ∘C X) (idR C) ⟩ 
+        ≡⟨ cong (λ X → AtkeyParameterizedMonad.μ monad {x} {s₃} {s₂} {s₀} ∘C X) (right-id C) ⟩ 
       AtkeyParameterizedMonad.μ monad {x} {s₃} {s₂} {s₀}
         ∘C [ M ]₁ (id (S op) {s₃} , id S {s₂} , AtkeyParameterizedMonad.μ monad {x} {s₂} {s₁} {s₀})
         ≡⟨ AtkeyParameterizedMonad.assoc monad ⟩ 
       AtkeyParameterizedMonad.μ monad {x} {s₃} {s₁} {s₀}
         ∘C AtkeyParameterizedMonad.μ monad {[ M ]₀ (s₁ , s₀ , x)} {s₃} {s₂} {s₁}
-        ≡⟨ cong (λ X → AtkeyParameterizedMonad.μ monad {x} {s₃} {s₁} {s₀} ∘C X) (sym $ idL C) ⟩ 
+        ≡⟨ cong (λ X → AtkeyParameterizedMonad.μ monad {x} {s₃} {s₁} {s₀} ∘C X) (sym $ left-id C) ⟩ 
       AtkeyParameterizedMonad.μ monad {x} {s₃} {s₁} {s₀}
         ∘C ( AtkeyParameterizedMonad.μ monad {[ M ]₀ (s₁ , s₀ , x)} {s₃} {s₂} {s₁} ∘C id C )
         ≡⟨ cong (λ X → AtkeyParameterizedMonad.μ monad {x} {s₃} {s₁} {s₀} ∘C ( AtkeyParameterizedMonad.μ monad {[ M ]₀ (s₁ , s₀ , x)} {s₃} {s₂} {s₁} ∘C X)) (sym $ Functor.id M) ⟩ 
@@ -185,7 +185,7 @@ AtkeyParameterizedMonad→LaxTwoFunctor {ℓC₀} {ℓC₁} {ℓS₀} {ℓS₁} 
         ≡⟨ cong (λ X → AtkeyParameterizedMonad.μ monad {x} {s₃} {s₁} {s₀} ∘C ( AtkeyParameterizedMonad.μ monad {[ M ]₀ (s₁ , s₀ , x)} {s₃} {s₂} {s₁} ∘C [ M ]₁ (id (S op) {s₃} , id S {s₂} , X ) )) (sym $ Functor.id M) ⟩ 
       AtkeyParameterizedMonad.μ monad {x} {s₃} {s₁} {s₀}
         ∘C ( AtkeyParameterizedMonad.μ monad {[ M ]₀ (s₁ , s₀ , x)} {s₃} {s₂} {s₁} ∘C [ M ]₁ (id (S op) {s₃} , id S {s₂} , [ M ]₁ (id (S op) {s₂} , id S {s₁} , id C {[ M ]₀ (s₁ , s₀ , x)} ) ) )
-        ≡⟨ cong (λ X → AtkeyParameterizedMonad.μ monad {x} {s₃} {s₁} {s₀} ∘C X) (sym $ idL C) ⟩ 
+        ≡⟨ cong (λ X → AtkeyParameterizedMonad.μ monad {x} {s₃} {s₁} {s₀} ∘C X) (sym $ left-id C) ⟩ 
       AtkeyParameterizedMonad.μ monad {x} {s₃} {s₁} {s₀}
         ∘C ( ( AtkeyParameterizedMonad.μ monad {[ M ]₀ (s₁ , s₀ , x)} {s₃} {s₂} {s₁} ∘C [ M ]₁ (id (S op) {s₃} , id S {s₂} , [ M ]₁ (id (S op) {s₂} , id S {s₁} , id C {[ M ]₀ (s₁ , s₀ , x)} ) ) )
         ∘C Category.id C {[ [ [ P₁ {s₂} {s₃} ]₀ h ]∘[ [ [ P₁ {s₁} {s₂} ]₀ g ]∘[ [ P₁ {s₀} {s₁} ]₀ f ] ] ]₀ x} )

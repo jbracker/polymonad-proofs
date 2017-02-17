@@ -13,7 +13,7 @@ open import Relation.Nullary
 open import Relation.Binary using ( IsDecEquivalence ; IsEquivalence ; IsDecTotalOrder ; IsPreorder )
 open import Relation.Binary.PropositionalEquality
 
-open import Utilities
+open import Extensionality
 open import Haskell
 open import ProofIrrelevance
 
@@ -244,7 +244,7 @@ module Monotonic {ℓEqA ℓOrdA ℓEqB ℓOrdB : Level} {A B : Type} (OrdA : Or
   monotonic-preserves-equality f mon-f a b a==b | no ¬a≤b | no ¬b≤a = ⊥-elim (total-contr OrdA ¬a≤b ¬b≤a)
   
   proof-irr-monotonic : (f : A → B) → ProofIrrelevance (Monotonic f)
-  proof-irr-monotonic f mon-f mon-f' = funExt (λ x → funExt (λ y → funExt (λ x≤y → proof-irr-ord OrdB (mon-f x y x≤y) (mon-f' x y x≤y))))
+  proof-irr-monotonic f mon-f mon-f' = fun-ext (λ x → fun-ext (λ y → fun-ext (λ x≤y → proof-irr-ord OrdB (mon-f x y x≤y) (mon-f' x y x≤y))))
   
 open Monotonic public
 

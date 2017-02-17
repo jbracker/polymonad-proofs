@@ -16,7 +16,7 @@ open ≡-Reasoning hiding ( _≅⟨_⟩_ )
 -- open ≅-Reasoning hiding ( _≡⟨_⟩_ ) renaming ( begin_ to hbegin_ ; _∎ to _∎h)
 
 -- Local
-open import Utilities
+open import Extensionality
 open import Haskell
 open import Theory.Category
 open import Theory.Functor
@@ -33,9 +33,9 @@ LaxTwoFunctor→Monad : ∀ {ℓC₀ ℓC₁}
 LaxTwoFunctor→Monad {ℓC₀} {ℓC₁} F = record 
   { η = ηNat
   ; μ = μNat
-  ; μCoher = μCoher
-  ; ηCoherL = ηCoherL
-  ; ηCoherR = ηCoherR
+  ; μ-coher = μCoher
+  ; η-left-coher = ηCoherL
+  ; η-right-coher = ηCoherR
   } where
     FunTwoCat = functorTwoCategory {ℓC₀} {ℓC₁}
     
@@ -74,9 +74,9 @@ LaxTwoFunctor→Monad {ℓC₀} {ℓC₁} F = record
            → μ x ∘C [ M ]₁ (μ x) ≡ μ x ∘C μ ([ M ]₀ x)
     μCoher {x} = begin
       μ x ∘C [ M ]₁ (μ x) 
-        ≡⟨ cong (λ X → μ x ∘C X) (sym $ idR C) ⟩
+        ≡⟨ cong (λ X → μ x ∘C X) (sym $ right-id C) ⟩
       μ x ∘C (id C ∘C [ M ]₁ (μ x) )
-        ≡⟨ sym $ idR C ⟩
+        ≡⟨ sym $ right-id C ⟩
       id C ∘C (μ x ∘C (id C ∘C [ M ]₁ (μ x) ))
         ≡⟨ refl ⟩
       natη Id⟨ M ⟩ x ∘C (μ x ∘C (id C ∘C [ M ]₁ (μ x) ))
@@ -88,13 +88,13 @@ LaxTwoFunctor→Monad {ℓC₀} {ℓC₁} F = record
       μ x ∘C (( μ ([ M ]₀ x) ∘C [ M ]₁ ([ M ]₁ (id C)) ) ∘C natη (subst₂ NaturalTransformation refl (hAssoc₁ FunTwoCat {f = M} {M} {M}) Id⟨ [ M ]∘[ [ M ]∘[ M ] ] ⟩) x)
         ≡⟨ cong (λ X → μ x ∘C (( μ ([ M ]₀ x) ∘C [ M ]₁ ([ M ]₁ (id C)) ) ∘C X)) (sym $ ≅-to-≡ $ subst₂-insert refl (hAssoc₁ FunTwoCat {f = M} {M} {M}) Id⟨ [ M ]∘[ [ M ]∘[ M ] ] ⟩ x) ⟩
       μ x ∘C (( μ ([ M ]₀ x) ∘C [ M ]₁ ([ M ]₁ (id C)) ) ∘C id C)
-        ≡⟨ cong (λ X → μ x ∘C X) (idL C) ⟩
+        ≡⟨ cong (λ X → μ x ∘C X) (left-id C) ⟩
       μ x ∘C ( μ ([ M ]₀ x) ∘C [ M ]₁ ([ M ]₁ (id C)) )
         ≡⟨ cong (λ X → μ x ∘C ( μ ([ M ]₀ x) ∘C [ M ]₁ X )) (Functor.id M) ⟩
       μ x ∘C ( μ ([ M ]₀ x) ∘C [ M ]₁ (id C) )
         ≡⟨ cong (λ X → μ x ∘C ( μ ([ M ]₀ x) ∘C X)) (Functor.id M) ⟩
       μ x ∘C ( μ ([ M ]₀ x) ∘C id C )
-        ≡⟨ cong (λ X → μ x ∘C X) (idL C) ⟩
+        ≡⟨ cong (λ X → μ x ∘C X) (left-id C) ⟩
       μ x ∘C μ ([ M ]₀ x) ∎
 
     laxFunId₁ : (x : Obj C)
@@ -106,9 +106,9 @@ LaxTwoFunctor→Monad {ℓC₀} {ℓC₁} F = record
             → μ x ∘C [ M ]₁ (η x) ≡ η⟨ Id⟨ M ⟩ ⟩ x
     ηCoherL {x} = begin
       μ x ∘C [ M ]₁ (η x) 
-        ≡⟨ sym $ idR C ⟩ 
+        ≡⟨ sym $ right-id C ⟩ 
       id C ∘C (μ x ∘C [ M ]₁ (η x))
-        ≡⟨ cong (λ X → id C ∘C (μ x ∘C X)) (sym $ idR C) ⟩ 
+        ≡⟨ cong (λ X → id C ∘C (μ x ∘C X)) (sym $ right-id C) ⟩ 
       id C ∘C (μ x ∘C (id C ∘C [ M ]₁ (η x)))
         ≡⟨ refl ⟩
       natη Id⟨ M ⟩ x ∘C (μ x ∘C (id C ∘C [ M ]₁ (η x)))
@@ -128,9 +128,9 @@ LaxTwoFunctor→Monad {ℓC₀} {ℓC₁} F = record
             → μ x ∘C η ([ M ]₀ x) ≡ η⟨ Id⟨ M ⟩ ⟩ x
     ηCoherR {x} = begin
       μ x ∘C η ([ M ]₀ x) 
-        ≡⟨ cong (λ X → μ x ∘C X) (sym $ idL C) ⟩
+        ≡⟨ cong (λ X → μ x ∘C X) (sym $ left-id C) ⟩
       μ x ∘C (η ([ M ]₀ x) ∘C id C)
-        ≡⟨ sym $ idR C ⟩
+        ≡⟨ sym $ right-id C ⟩
       id C ∘C (μ x ∘C (η ([ M ]₀ x) ∘C id C))
         ≡⟨ refl ⟩
       natη Id⟨ M ⟩ x ∘C (μ x ∘C (η ([ M ]₀ x) ∘C id C))

@@ -16,7 +16,7 @@ open ≡-Reasoning hiding ( _≅⟨_⟩_ )
 --open ≅-Reasoning hiding ( _≡⟨_⟩_ ) renaming ( begin_ to hbegin_ ; _∎ to _∎h)
 
 -- Local
-open import Utilities
+open import Extensionality
 open import Haskell
 open import Haskell.Monad renaming ( Monad to HaskellMonad )
 open import Haskell.Applicative renaming ( Applicative to HaskellApplicative )
@@ -24,7 +24,7 @@ open import Haskell.Functor renaming ( Functor to HaskellFunctor )
 open import Theory.Category
 open import Theory.Functor
 open import Theory.NaturalTransformation renaming ( NaturalTransformation to NatTrans )
-open import Theory.Monad
+open import Theory.Monad hiding ( monad )
 open import Theory.Examples.Category
 open import Theory.Examples.FunctorToHaskellFunctor
 
@@ -67,7 +67,7 @@ Monad→HaskellMonad {M} monad = record
       (μ β ∘F (η ([ M ]₀ β) ∘F [ Id[ C ] ]₁ k)) a 
         ≡⟨ refl ⟩ -- associativity of ∘F
       ((μ β ∘F η ([ M ]₀ β)) ∘F [ Id[ C ] ]₁ k) a 
-        ≡⟨ cong (λ X → (X ∘F [ Id[ C ] ]₁ k) a) (Monad.ηCoherR monad) ⟩
+        ≡⟨ cong (λ X → (X ∘F [ Id[ C ] ]₁ k) a) (Monad.η-right-coher monad) ⟩
       ((NatTrans.η Id⟨ M ⟩ β) ∘F [ Id[ C ] ]₁ k) a 
         ≡⟨ refl ⟩
       k a ∎
@@ -76,7 +76,7 @@ Monad→HaskellMonad {M} monad = record
            → m >>= return ≡ m
     lawIdL {α} m = begin
       (μ α ∘F [ M ]₁ (η α)) m 
-        ≡⟨ cong (λ X → X m) (Monad.ηCoherL monad) ⟩
+        ≡⟨ cong (λ X → X m) (Monad.η-left-coher monad) ⟩
       m ∎
     
     lawAssoc : {α β γ : Type} (m : [ M ]₀ α) (k : α → [ M ]₀ β) (h : β → [ M ]₀ γ) 
@@ -87,7 +87,7 @@ Monad→HaskellMonad {M} monad = record
       (μ γ ∘F ([ M ]₁ (μ γ) ∘F [ M ]₁ ([ M ]₁ h ∘F k))) m
         ≡⟨ refl ⟩ -- associativity of ∘F
       ((μ γ ∘F [ M ]₁ (μ γ)) ∘F [ M ]₁ ([ M ]₁ h ∘F k)) m
-        ≡⟨ cong (λ X → (X ∘F [ M ]₁ ([ M ]₁ h ∘F k)) m) (Monad.μCoher monad) ⟩
+        ≡⟨ cong (λ X → (X ∘F [ M ]₁ ([ M ]₁ h ∘F k)) m) (Monad.μ-coher monad) ⟩
       ((μ γ ∘F μ ([ M ]₀ γ)) ∘F [ M ]₁ ([ M ]₁ h ∘F k)) m
         ≡⟨ refl ⟩ -- associativity of ∘F
       (μ γ ∘F (μ ([ M ]₀ γ) ∘F [ M ]₁ ([ M ]₁ h ∘F k))) m
@@ -104,7 +104,7 @@ Monad→HaskellMonad {M} monad = record
                  → fmap f x ≡ x >>= (return ∘F f)
     lawMonadFmap {α} {β} f x = begin
       [ M ]₁ f x 
-        ≡⟨ cong (λ X → (X ∘F [ M ]₁ f) x) (sym $ Monad.ηCoherL monad) ⟩
+        ≡⟨ cong (λ X → (X ∘F [ M ]₁ f) x) (sym $ Monad.η-left-coher monad) ⟩
       ((μ β ∘F [ M ]₁ (η β)) ∘F [ M ]₁ f) x
         ≡⟨ refl ⟩ -- associativity of ∘F
       (μ β ∘F ([ M ]₁ (η β) ∘F [ M ]₁ f)) x
@@ -143,25 +143,25 @@ Monad→HaskellMonad {M} monad = record
           (u >>= (λ x → (return ∘F _∘F_) x >>= (λ g → fmap g v))) >>= (λ h → fmap h w) 
             ≡⟨ sym $ lawAssoc u (λ x → ((return ∘F _∘F_) x >>= (λ g → fmap g v))) (λ h → fmap h w) ⟩
           u >>= (λ f → (return (_∘F_ f) >>= (λ g → fmap g v)) >>= (λ h → fmap h w) )
-            ≡⟨ cong (λ X → u >>= X) (funExt (λ f → cong (λ X → X >>= (λ h → fmap h w)) (lawIdR (_∘F_ f) (λ g → fmap g v)))) ⟩
+            ≡⟨ cong (λ X → u >>= X) (fun-ext (λ f → cong (λ X → X >>= (λ h → fmap h w)) (lawIdR (_∘F_ f) (λ g → fmap g v)))) ⟩
           u >>= (λ f → fmap (_∘F_ f) v >>= (λ h → fmap h w) )
-            ≡⟨ cong (λ X → u >>= X) (funExt (λ f → cong (λ X → X >>= (λ h → fmap h w)) (lawMonadFmap (_∘F_ f) v))) ⟩
+            ≡⟨ cong (λ X → u >>= X) (fun-ext (λ f → cong (λ X → X >>= (λ h → fmap h w)) (lawMonadFmap (_∘F_ f) v))) ⟩
           u >>= (λ f → (v >>= (return ∘F (_∘F_ f))) >>= (λ h → fmap h w) )
-            ≡⟨ cong (λ X → u >>= X) (funExt (λ f → sym $ lawAssoc v (return ∘F (_∘′_ f)) (λ h → fmap h w))) ⟩
+            ≡⟨ cong (λ X → u >>= X) (fun-ext (λ f → sym $ lawAssoc v (return ∘F (_∘′_ f)) (λ h → fmap h w))) ⟩
           u >>= (λ f → v >>= (λ g → return (f ∘F g) >>= (λ h → fmap h w) ) )
-            ≡⟨ cong (λ X → u >>= X) (funExt (λ f → cong (λ X → v >>= X) (funExt (λ g → lawIdR (f ∘F g) (λ h → fmap h w))))) ⟩
+            ≡⟨ cong (λ X → u >>= X) (fun-ext (λ f → cong (λ X → v >>= X) (fun-ext (λ g → lawIdR (f ∘F g) (λ h → fmap h w))))) ⟩
           u >>= (λ f → v >>= (λ g → fmap (f ∘F g) w))
-            ≡⟨ cong (λ X → u >>= X) (funExt (λ f → cong (λ X → v >>= X) (funExt (λ g → lawMonadFmap (f ∘F g) w)))) ⟩
+            ≡⟨ cong (λ X → u >>= X) (fun-ext (λ f → cong (λ X → v >>= X) (fun-ext (λ g → lawMonadFmap (f ∘F g) w)))) ⟩
           u >>= (λ f → v >>= (λ g → w >>= (return ∘F (f ∘F g))))
-            ≡⟨ cong (λ X → u >>= X) (funExt (λ f → cong (λ X → v >>= X) (funExt (λ g → cong (λ X → w >>= X) (funExt (λ x → sym $ lawIdR (g x) (return ∘F f))))))) ⟩
+            ≡⟨ cong (λ X → u >>= X) (fun-ext (λ f → cong (λ X → v >>= X) (fun-ext (λ g → cong (λ X → w >>= X) (fun-ext (λ x → sym $ lawIdR (g x) (return ∘F f))))))) ⟩
           u >>= (λ f → v >>= (λ g → w >>= (λ x → (return ∘F g) x >>= (return ∘F f))))
-            ≡⟨ cong (λ X → u >>= X) (funExt (λ f → cong (λ X → v >>= X) (funExt (λ g → lawAssoc w (return ∘F g) (return ∘F f))))) ⟩
+            ≡⟨ cong (λ X → u >>= X) (fun-ext (λ f → cong (λ X → v >>= X) (fun-ext (λ g → lawAssoc w (return ∘F g) (return ∘F f))))) ⟩
           u >>= (λ f → v >>= (λ g → (w >>= (return ∘F g)) >>= (return ∘F f)))
-            ≡⟨ cong (λ X → u >>= X) (funExt (λ f → cong (λ X → v >>= X) (funExt (λ g → cong (λ X → X >>= (return ∘F f)) (sym $ lawMonadFmap g w))))) ⟩
+            ≡⟨ cong (λ X → u >>= X) (fun-ext (λ f → cong (λ X → v >>= X) (fun-ext (λ g → cong (λ X → X >>= (return ∘F f)) (sym $ lawMonadFmap g w))))) ⟩
           u >>= (λ f → v >>= (λ g → fmap g w >>= (return ∘F f)))
-            ≡⟨ cong (λ X → u >>= X) (funExt (λ f → lawAssoc v (λ g → fmap g w) (return ∘F f))) ⟩
+            ≡⟨ cong (λ X → u >>= X) (fun-ext (λ f → lawAssoc v (λ g → fmap g w) (return ∘F f))) ⟩
           u >>= (λ f → (v >>= (λ g → fmap g w)) >>= (return ∘F f))
-            ≡⟨ cong (λ X → u >>= X) (funExt (λ f → sym $ lawMonadFmap f (v >>= (λ g → fmap g w)))) ⟩
+            ≡⟨ cong (λ X → u >>= X) (fun-ext (λ f → sym $ lawMonadFmap f (v >>= (λ g → fmap g w)))) ⟩
           u >>= (λ f → fmap f (v >>= (λ g → fmap g w))) ∎
 
         lawHomomorphism : {α β : Type} (x : α) (f : α → β)
@@ -179,9 +179,9 @@ Monad→HaskellMonad {M} monad = record
                        → u <*> return x ≡ return (λ f → f x) <*> u
         lawInterchange {α} {β} u x = begin
           u >>= (λ f → fmap f (return x)) 
-            ≡⟨ cong (λ X → u >>= X) (funExt $ λ f → lawMonadFmap f (return x)) ⟩
+            ≡⟨ cong (λ X → u >>= X) (fun-ext $ λ f → lawMonadFmap f (return x)) ⟩
           u >>= (λ f → return x >>= (return ∘F f)) 
-            ≡⟨ cong (λ X → u >>= X) (funExt $ λ f → lawIdR x (return ∘F f)) ⟩
+            ≡⟨ cong (λ X → u >>= X) (fun-ext $ λ f → lawIdR x (return ∘F f)) ⟩
           u >>= (λ f → return (f x))
             ≡⟨ refl ⟩
           u >>= (return ∘F (λ f → f x))

@@ -8,7 +8,7 @@ open import Data.Product
 open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning
 
-open import Utilities
+open import Extensionality
 open import Congruence
 open import ProofIrrelevance
 open import Haskell
@@ -28,16 +28,16 @@ FunctorEndomorphisms = record
   { ObjCts = ObjCts
   ; HomCts = HomCts
   ; _∘Ct_ = flip trans
-  ; ctId = refl
-  ; ctAssoc = λ {α} {β} {γ} {δ} {α'} {β'} {γ'} {δ'} {f} {g} {h} → assoc {f = f} {g} {h}
-  ; ctIdR = λ {α} {β} {α'} {β'} {f} → idR {f = f}
-  ; ctIdL = λ {α} {β} {α'} {β'} {f} → idL {f = f}
+  ; idCt = refl
+  ; constraint-assoc = λ {α} {β} {γ} {δ} {α'} {β'} {γ'} {δ'} {f} {g} {h} → assoc {f = f} {g} {h}
+  ; constraint-right-id = λ {α} {β} {α'} {β'} {f} → idR {f = f}
+  ; constraint-left-id = λ {α} {β} {α'} {β'} {f} → idL {f = f}
   ; F = F
-  ; ctMap = ctMap
-  ; ctFuncId = ctFuncId
-  ; ctFuncComp = λ {α} {β} {γ} {f} {g} → ctFuncComp {α} {β} {γ} {f} {g}
-  ; ctObjProofIrr = λ {α} → ctObjProofIrr {α}
-  ; ctHomProofIrr = λ {α} {β} {α'} {β'} {f} → ctHomProofIrr {f = f}
+  ; map = ctMap
+  ; functor-id = ctFuncId
+  ; functor-compose = λ {α} {β} {γ} {f} {g} → ctFuncComp {α} {β} {γ} {f} {g}
+  ; proof-irr-ObjCts = λ {α} → ctObjProofIrr {α}
+  ; proof-irr-HomCts = λ {α} {β} {α'} {β'} {f} → ctHomProofIrr {f = f}
   } where
     ObjCts : Type → Set lzero
     ObjCts _ = Lift ⊤
@@ -72,13 +72,13 @@ FunctorEndomorphisms = record
     ctMap (f , refl) x = endomap f x
     
     ctFuncId : {α : Obj} → endomap {α = proj₁ α} idF ≡ idF
-    ctFuncId {α , lift tt} = funExt helper
+    ctFuncId {α , lift tt} = fun-ext helper
       where helper : (x : Endo α) → endomap idF x ≡ idF x
             helper (endo f) = refl
     
     ctFuncComp : {α β γ : Obj} {f : Hom α β} {g : Hom β γ}
                → ctMap (proj₁ g ∘F proj₁ f , flip trans (proj₂ g) (proj₂ f)) ≡ ctMap g ∘F ctMap f
-    ctFuncComp {α , lift tt} {.α , lift tt} {.α , lift tt} {f , refl} {g , refl} = funExt helper
+    ctFuncComp {α , lift tt} {.α , lift tt} {.α , lift tt} {f , refl} {g , refl} = fun-ext helper
       where helper : (x : Endo α) → endomap (g ∘F f) x ≡ (endomap g ∘F endomap f) x
             helper (endo h) = refl
     
