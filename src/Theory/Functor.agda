@@ -5,12 +5,9 @@ module Theory.Functor where
 open import Level
 open import Function renaming ( _∘_ to _∘F_ ; id to idF )
 open import Data.Product
-open import Data.Sum
 open import Data.Unit
-open import Data.Empty
 open import Relation.Binary.HeterogeneousEquality hiding ( trans ; sym ; cong ; cong₂ ; subst ; proof-irrelevance ) renaming ( refl to hrefl )
 open import Relation.Binary.PropositionalEquality
-open ≡-Reasoning 
 
 -- Local
 open import Utilities
