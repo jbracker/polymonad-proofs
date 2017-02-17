@@ -4,11 +4,6 @@ module Theory.NaturalTransformation where
 -- Stdlib
 open import Level
 open import Function hiding ( _∘_ )
-open import Data.Product
-open import Data.Sum
-open import Data.Unit
-open import Data.Empty
-open import Relation.Binary.Core
 open import Relation.Binary.PropositionalEquality
 open import Relation.Binary.HeterogeneousEquality
   renaming ( sym to hsym ; trans to htrans ; cong to hcong ; subst₂ to hsubst₂ ; proof-irrelevance to hproof-irrelevance )
@@ -56,7 +51,6 @@ Id⟨_⟩ = idNaturalTransformation
 -------------------------------------------------------------------------------
 -- Vertical Composition of Natural Transformations
 -------------------------------------------------------------------------------
-
 compNaturalTransformationVert : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} 
                               → {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}}
                               → {F G H : Functor C D}
@@ -168,7 +162,7 @@ subst₂-replace : ∀ {ℓA₀ ℓA₁ ℓB₀ ℓB₁}
 subst₂-replace α .α refl x = refl
 
 -------------------------------------------------------------------------------
--- Propositional Equality of Natural Transformations
+-- Equality of Natural Transformations
 -------------------------------------------------------------------------------
 
 natural-transformation-eq : {Cℓ₀ Cℓ₁ Dℓ₀ Dℓ₁ : Level} 
