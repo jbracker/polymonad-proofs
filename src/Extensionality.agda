@@ -1,7 +1,7 @@
 
 -- Stdlib
 open import Level renaming ( suc to lsuc )
-open import Relation.Binary.HeterogeneousEquality renaming ( trans to htrans ; cong to hcong ; subst to hsubst ; subst₂ to hsubst₂ ; sym to hsym ) -- ≅
+open import Relation.Binary.HeterogeneousEquality renaming ( trans to htrans ; cong to hcong ; subst to hsubst ; subst₂ to hsubst₂ ; sym to hsym ; Extensionality to HetExtensionality ) -- ≅
 open import Relation.Binary.PropositionalEquality -- ≡
 
 module Extensionality where
@@ -13,8 +13,7 @@ module Extensionality where
 -- We can assume function extensionality is true, because we are modelling
 -- and proving things for Haskell.
 postulate
-  fun-ext : {ℓA ℓB : Level} {A : Set ℓA} {B : A → Set ℓB} {f g : (a : A) → B a} 
-          → ((x : A) → f x ≡ g x) → f ≡ g
+  fun-ext : {ℓA ℓB : Level} → Extensionality ℓA ℓB
 
 -- Function extensionality for implicit arguments
 implicit-fun-ext : {ℓA ℓB : Level} {A : Set ℓA} {B : A → Set ℓB} {f g : {a : A} → B a} 
