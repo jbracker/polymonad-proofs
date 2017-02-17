@@ -22,8 +22,8 @@ module FunctorApplication {ℓC₀ ℓC₁ : Level} {C : Category {ℓC₀} {ℓ
     _∘C_ = _∘_ C
   
   -- ((_ ⊗ _) ⊗ _) ⇒ _
-  associatorL : Functor (C ×C C) C → Functor (C ×C C ×C C) C
-  associatorL F = functor G₀ G₁ idG composeG
+  leftAssociator : Functor (C ×C C) C → Functor (C ×C C ×C C) C
+  leftAssociator F = functor G₀ G₁ idG composeG
     where
       G₀ : Obj (C ×C C ×C C) → Obj C
       G₀ (a , b , c) = F₀ F (F₀ F (a ,' b) ,' c)
@@ -41,8 +41,8 @@ module FunctorApplication {ℓC₀ ℓC₁ : Level} {C : Category {ℓC₀} {ℓ
         = trans (cong (λ X → F₁ F (X ,' g₃ ∘C f₃)) (compose F)) (compose F)
   
   -- (_ ⊗ (_ ⊗ _)) ⇒ _
-  associatorR : Functor (C ×C C) C → Functor (C ×C C ×C C) C 
-  associatorR F = functor G₀ G₁ idG composeG
+  rightAssociator : Functor (C ×C C) C → Functor (C ×C C ×C C) C 
+  rightAssociator F = functor G₀ G₁ idG composeG
     where
       G₀ : Obj (C ×C C ×C C) → Obj C
       G₀ (a , b , c) = F₀ F (a ,' F₀ F (b ,' c))
@@ -60,8 +60,8 @@ module FunctorApplication {ℓC₀ ℓC₁ : Level} {C : Category {ℓC₀} {ℓ
         = trans (cong (λ X → F₁ F (g₁ ∘C f₁ ,' X)) (compose F)) (compose F)
   
   -- (1 ⊗ _) ⇒ _
-  unitorL : Obj C → Functor (C ×C C) C → Functor C C
-  unitorL e F = functor G₀ G₁ idG composeG
+  leftUnitor : Obj C → Functor (C ×C C) C → Functor C C
+  leftUnitor e F = functor G₀ G₁ idG composeG
     where
       G₀ : Obj C → Obj C
       G₀ x = F₀ F (e ,' x)
@@ -73,11 +73,11 @@ module FunctorApplication {ℓC₀ ℓC₁ : Level} {C : Category {ℓC₀} {ℓ
       idG {a} = idF F
       composeG : {a b c : Obj C} {f : Hom C a b} {g : Hom C b c} 
                → G₁ ((C ∘ g) f) ≡ (C ∘ G₁ g) (G₁ f)
-      composeG {f = f} {g} = trans (cong (λ X → F₁ F (X ,' g ∘C f)) (sym (idL C))) (compose F)
+      composeG {f = f} {g} = trans (cong (λ X → F₁ F (X ,' g ∘C f)) (sym (left-id C))) (compose F)
 
   -- (_ ⊗ 1) ⇒ _
-  unitorR : Obj C → Functor (C ×C C) C → Functor C C
-  unitorR e F = functor G₀ G₁ idG composeG
+  rightUnitor : Obj C → Functor (C ×C C) C → Functor C C
+  rightUnitor e F = functor G₀ G₁ idG composeG
     where
       G₀ : Obj C → Obj C
       G₀ x = F₀ F (x ,' e)
@@ -89,7 +89,7 @@ module FunctorApplication {ℓC₀ ℓC₁ : Level} {C : Category {ℓC₀} {ℓ
       idG {a} = idF F
       composeG : {a b c : Obj C} {f : Hom C a b} {g : Hom C b c} 
                → G₁ ((C ∘ g) f) ≡ (C ∘ G₁ g) (G₁ f)
-      composeG {f = f} {g} = trans (cong (λ X → F₁ F (g ∘C f ,' X)) (sym (idL C))) (compose F)
+      composeG {f = f} {g} = trans (cong (λ X → F₁ F (g ∘C f ,' X)) (sym (left-id C))) (compose F)
 
 open FunctorApplication public
 
@@ -115,11 +115,11 @@ record MonoidalCategory {ℓ₀ ℓ₁ : Level} (C : Category {ℓ₀} {ℓ₁})
   _⊗₁_ f g = F₁ tensor (f ,' g)
   
   field 
-    associator : NaturalIsomorphism (associatorL tensor) (associatorR tensor)
+    associator : NaturalIsomorphism (leftAssociator tensor) (rightAssociator tensor)
     
-    left-unitor : NaturalIsomorphism (unitorL unit tensor) Id[ C ]
+    left-unitor : NaturalIsomorphism (leftUnitor unit tensor) Id[ C ]
     
-    right-unitor : NaturalIsomorphism (unitorR unit tensor) Id[ C ]
+    right-unitor : NaturalIsomorphism (rightUnitor unit tensor) Id[ C ]
     
   open NaturalIsomorphism using ( η )
   
