@@ -60,6 +60,13 @@ proof-irr-ProofIrrelevance : {ℓA : Level} {A : Set ℓA} → ProofIrrelevance 
 proof-irr-ProofIrrelevance proof-irr-A proof-irr-A' 
   = fun-ext (λ a → fun-ext (λ b → proof-irrelevance (proof-irr-A a b) (proof-irr-A' a b)))
 
+-- Reexport proof irrelevance for propositional and heterogeneous equality.
+open import Relation.Binary.PropositionalEquality as PE
+proof-irr-≡ = PE.proof-irrelevance
+
+open import Relation.Binary.HeterogeneousEquality as HE
+proof-irr-≅ = HE.proof-irrelevance
+
 -------------------------------------------------------------------------------
 -- Definition of Propositions which are sets that are proof irrelevant
 -------------------------------------------------------------------------------
