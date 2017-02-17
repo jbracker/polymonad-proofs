@@ -14,6 +14,7 @@ open ≡-Reasoning
 
 -- Local
 open import Utilities
+open import Extensionality
 open import Theory.Category
 open import Theory.Functor
 open import Theory.NaturalTransformation
@@ -79,7 +80,7 @@ rightWhiskerDist
   → (β : NaturalTransformation G H)
   → [ K ]∘⟨ ⟨ β ⟩∘ᵥ⟨ α ⟩ ⟩ ≡ ⟨ [ K ]∘⟨ β ⟩ ⟩∘ᵥ⟨ [ K ]∘⟨ α ⟩ ⟩
 rightWhiskerDist {C = C} {D} {E} {F} {G} {H} K α β =
-  propNatTransEq refl refl $ funExt $ λ (x : Obj C) → begin
+  natural-transformation-eq $ fun-ext $ λ (x : Obj C) → begin
     η [ K ]∘⟨ ⟨ β ⟩∘ᵥ⟨ α ⟩ ⟩ x 
       ≡⟨ refl ⟩
     [ K ]₁ (η β x ∘D η α x)
@@ -99,7 +100,7 @@ leftWhiskerDist
   → (β : NaturalTransformation G H)
   → ⟨ ⟨ β ⟩∘ᵥ⟨ α ⟩ ⟩∘[ K ] ≡ ⟨ ⟨ β ⟩∘[ K ] ⟩∘ᵥ⟨ ⟨ α ⟩∘[ K ] ⟩
 leftWhiskerDist {B = B} K α β =
-  propNatTransEq refl refl $ funExt $ λ (x : Obj B) → refl
+  natural-transformation-eq $ fun-ext $ λ (x : Obj B) → refl
 
 
 leftWhiskerId₁
@@ -109,7 +110,7 @@ leftWhiskerId₁
   → (K : Functor B C)
   → ⟨ Id⟨ F ⟩ ⟩∘[ K ] ≡ Id⟨ [ F ]∘[ K ] ⟩
 leftWhiskerId₁ {B = B} K = 
-  propNatTransEq refl refl $ funExt $ λ (x : Obj B) → refl
+  natural-transformation-eq $ fun-ext $ λ (x : Obj B) → refl
 
 
 leftWhiskerId₂
@@ -120,13 +121,13 @@ leftWhiskerId₂
   → (α : NaturalTransformation F G)
   → ⟨ α ⟩∘ₕ⟨ Id⟨ K ⟩ ⟩ ≡ ⟨ α ⟩∘[ K ]
 leftWhiskerId₂ {B = B} {C} {D} {F} {G} K α = 
-  propNatTransEq refl refl $ funExt $ λ (x : Obj B) → begin
+  natural-transformation-eq $ fun-ext $ λ (x : Obj B) → begin
     η ⟨ α ⟩∘ₕ⟨ Id⟨ K ⟩ ⟩ x 
       ≡⟨ refl ⟩
     η α ([ K ]₀ x) ∘D [ F ]₁ (Category.id C) 
       ≡⟨ cong (λ X → η α ([ K ]₀ x) ∘D X) (Functor.id F) ⟩
     η α ([ K ]₀ x) ∘D Category.id D 
-      ≡⟨ idL D ⟩
+      ≡⟨ left-id D ⟩
     η α ([ K ]₀ x)
       ≡⟨ refl ⟩
     η ⟨ α ⟩∘[ K ] x ∎
@@ -139,7 +140,7 @@ rightWhiskerId₁
   → (K : Functor D E)
   → [ K ]∘⟨ Id⟨ F ⟩ ⟩ ≡ Id⟨ [ K ]∘[ F ] ⟩
 rightWhiskerId₁ {C = C} K = 
-  propNatTransEq refl refl $ funExt $ λ (x : Obj C) → Functor.id K
+  natural-transformation-eq $ fun-ext $ λ (x : Obj C) → Functor.id K
 
 
 rightWhiskerId₂
@@ -150,7 +151,7 @@ rightWhiskerId₂
   → (α : NaturalTransformation F G)
   → ⟨ Id⟨ K ⟩ ⟩∘ₕ⟨ α ⟩ ≡ [ K ]∘⟨ α ⟩
 rightWhiskerId₂ {C = C} {D} {E} {F} {G} K α = 
-  propNatTransEq refl refl $ funExt $ λ (x : Obj C) → idR E
+  natural-transformation-eq $ fun-ext $ λ (x : Obj C) → right-id E
 
 
 whiskerCompositionHorzEq 
@@ -162,7 +163,7 @@ whiskerCompositionHorzEq
   → (β : NaturalTransformation H K)
   → ⟨ [ K ]∘⟨ α ⟩ ⟩∘ᵥ⟨ ⟨ β ⟩∘[ F ] ⟩ ≡ ⟨ ⟨ β ⟩∘[ G ] ⟩∘ᵥ⟨ [ H ]∘⟨ α ⟩ ⟩
 whiskerCompositionHorzEq {C = C} {D} {E} {F} {G} {H} {K} α β = 
-  propNatTransEq refl refl $ funExt $ λ (x : Obj C) → begin
+  natural-transformation-eq $ fun-ext $ λ (x : Obj C) → begin
     η ⟨ [ K ]∘⟨ α ⟩ ⟩∘ᵥ⟨ ⟨ β ⟩∘[ F ] ⟩ x
       ≡⟨ refl ⟩ 
     [ K ]₁ (η α x) ∘E η β ([ F ]₀ x)
