@@ -17,22 +17,26 @@ open import Theory.Functor
 open import Theory.NaturalTransformation 
 open import Theory.Monad
 
-open Category hiding ( idR ; idL ) renaming ( _∘_ to _∘C_ ; id to idC )
+open Category using ( Obj ; Hom )
 
 -- -----------------------------------------------------------------------------
 -- Definition of a Kleisli monad/triple
 -- -----------------------------------------------------------------------------
 record KleisliTriple {ℓC₀ ℓC₁ : Level} {C : Category {ℓC₀} {ℓC₁}} (T : Obj C → Obj C) : Set (ℓC₀ ⊔ ℓC₁) where
+  open Category C hiding ( Obj ; Hom ; left-id ; right-id )
+  
   field
     η : {a : Obj C} → (Hom C a (T a))
     kext : {a b : Obj C} → (Hom C a (T b)) → (Hom C (T a) (T b))
+  
+  field
+    right-id : {a b : Obj C} {k : Hom C a (T b)} 
+            → kext k ∘ η ≡ k
     
-    idR : {a b : Obj C} {k : Hom C a (T b)} 
-        → _∘C_ C (kext k) η ≡ k
-    idL : {a : Obj C} → kext η ≡ idC C {a = T a}
+    left-id : {a : Obj C} → kext η ≡ id {a = T a}
     
     coher : {a b c : Obj C} {k : Hom C a (T b)} {l : Hom C b (T c)} 
-          → kext ( _∘C_ C (kext l) k ) ≡ _∘C_ C (kext l) (kext k)
+          → kext ( kext l ∘ k ) ≡ kext l ∘ kext k
 
 -- -----------------------------------------------------------------------------
 -- Every Kleisli triple gives rise to a functor
@@ -45,10 +49,9 @@ KleisliTriple→Functor {C = C} {T = T} km = record
   ; id = idF
   ; compose = composeF
   } where
-    _∘_ = _∘C_ C
+    open Category C hiding ( Obj ; Hom )
     kext = KleisliTriple.kext km
     η = KleisliTriple.η km
-    id = idC C
     F₀ = T
     
     F₁ : {a b : Obj C} → Hom C a b → Hom C (F₀ a) (F₀ b)
@@ -59,9 +62,9 @@ KleisliTriple→Functor {C = C} {T = T} km = record
       F₁ {a = a} id
         ≡⟨ refl ⟩ 
       kext (η ∘ id)
-        ≡⟨ cong (λ X → kext X) (Category.idL C) ⟩ 
+        ≡⟨ cong (λ X → kext X) (Category.left-id C) ⟩ 
       kext η
-        ≡⟨ KleisliTriple.idL km ⟩ 
+        ≡⟨ KleisliTriple.left-id km ⟩ 
       id ∎
     
     composeF : {a b c : Obj C} {f : Hom C a b} {g : Hom C b c} 
@@ -70,11 +73,11 @@ KleisliTriple→Functor {C = C} {T = T} km = record
       F₁ (g ∘ f) 
         ≡⟨ refl ⟩
       kext ( η ∘ (g ∘ f) )
-        ≡⟨ cong (λ X → kext X) (assoc C) ⟩
+        ≡⟨ cong (λ X → kext X) assoc ⟩
       kext ( (η ∘ g) ∘ f )
-        ≡⟨ cong (λ X → kext (X ∘ f)) (sym (KleisliTriple.idR km)) ⟩
+        ≡⟨ cong (λ X → kext (X ∘ f)) (sym (KleisliTriple.right-id km)) ⟩
       kext ( (kext (η ∘ g) ∘ η) ∘ f )
-        ≡⟨ cong (λ X → kext X) (sym (assoc C)) ⟩
+        ≡⟨ cong (λ X → kext X) (sym assoc) ⟩
       kext ( kext (η ∘ g) ∘ (η ∘ f) )
         ≡⟨ KleisliTriple.coher km ⟩
       kext (η ∘ g) ∘ kext (η ∘ f)
@@ -89,14 +92,13 @@ KleisliTriple→Monad : {ℓC₀ ℓC₁ : Level} {C : Category {ℓC₀} {ℓC�
 KleisliTriple→Monad {C = C} {T = T} km = record 
   { η = ηNatTrans 
   ; μ = μNatTrans 
-  ; μCoher = μCoher 
-  ; ηCoherL = ηCoherL 
-  ; ηCoherR = ηCoherR
+  ; μ-coher = μCoher 
+  ; η-left-coher = ηCoherL 
+  ; η-right-coher = ηCoherR
   } where
+    open Category C hiding ( Obj ; Hom )
     TF = KleisliTriple→Functor km
     IdC = Id[ C ]
-    _∘_ = _∘C_ C
-    id = idC C
     kext = KleisliTriple.kext km
     ηk = KleisliTriple.η km
     
@@ -114,13 +116,13 @@ KleisliTriple→Monad {C = C} {T = T} km = record
       kext (ηk ∘ f) ∘ kext id
         ≡⟨ sym (KleisliTriple.coher km) ⟩
       kext (kext (ηk ∘ f) ∘ id)
-        ≡⟨ cong (λ X → kext X) (Category.idL C) ⟩
+        ≡⟨ cong (λ X → kext X) (Category.left-id C) ⟩
       kext (kext (ηk ∘ f))
-        ≡⟨ cong (λ X → kext X) (sym (Category.idR C)) ⟩
+        ≡⟨ cong (λ X → kext X) (sym (Category.right-id C)) ⟩
       kext (id ∘ kext (ηk ∘ f))
-        ≡⟨ cong (λ X → kext (X ∘ kext (ηk ∘ f))) (sym (KleisliTriple.idR km)) ⟩
+        ≡⟨ cong (λ X → kext (X ∘ kext (ηk ∘ f))) (sym (KleisliTriple.right-id km)) ⟩
       kext ((kext id ∘ ηk) ∘ kext (ηk ∘ f))
-        ≡⟨ cong (λ X → kext X) (sym (assoc C)) ⟩
+        ≡⟨ cong (λ X → kext X) (sym assoc) ⟩
       kext (kext id ∘ (ηk ∘ kext (ηk ∘ f)))
         ≡⟨ KleisliTriple.coher km ⟩
       kext id ∘ kext (ηk ∘ kext (ηk ∘ f))
@@ -133,7 +135,7 @@ KleisliTriple→Monad {C = C} {T = T} km = record
       ([ TF ]₁ f) ∘ η a 
         ≡⟨ refl ⟩ 
       kext (η b ∘ f) ∘ η a
-        ≡⟨ KleisliTriple.idR km ⟩ 
+        ≡⟨ KleisliTriple.right-id km ⟩ 
       η b ∘ f
         ≡⟨ refl ⟩ 
       η b ∘ ([ IdC ]₁ f) ∎
@@ -145,13 +147,13 @@ KleisliTriple→Monad {C = C} {T = T} km = record
       kext id ∘ kext (ηk ∘ kext id)
         ≡⟨ sym (KleisliTriple.coher km) ⟩ 
       kext (kext id ∘ (ηk ∘ kext id))
-        ≡⟨ cong kext (assoc C) ⟩ 
+        ≡⟨ cong kext assoc ⟩ 
       kext ((kext id ∘ ηk) ∘ kext id)
-        ≡⟨ cong (λ X → kext (X ∘ kext id)) (KleisliTriple.idR km) ⟩ 
+        ≡⟨ cong (λ X → kext (X ∘ kext id)) (KleisliTriple.right-id km) ⟩ 
       kext (id ∘ kext id)
-        ≡⟨ cong kext (Category.idR C) ⟩ 
+        ≡⟨ cong kext (Category.right-id C) ⟩ 
       kext (kext id)
-        ≡⟨ cong kext (sym (Category.idL C)) ⟩ 
+        ≡⟨ cong kext (sym (Category.left-id C)) ⟩ 
       kext (kext id ∘ id)
         ≡⟨ KleisliTriple.coher km ⟩ 
       kext id ∘ kext id
@@ -165,19 +167,19 @@ KleisliTriple→Monad {C = C} {T = T} km = record
       kext id ∘ kext (ηk ∘ ηk) 
         ≡⟨ sym (KleisliTriple.coher km) ⟩
       kext (kext id ∘ (ηk ∘ ηk))
-        ≡⟨ cong kext (assoc C) ⟩
+        ≡⟨ cong kext assoc ⟩
       kext ((kext id ∘ ηk) ∘ ηk)
-        ≡⟨ cong (λ X → kext (X ∘ ηk)) (KleisliTriple.idR km) ⟩
+        ≡⟨ cong (λ X → kext (X ∘ ηk)) (KleisliTriple.right-id km) ⟩
       kext (id ∘ ηk)
-        ≡⟨ cong kext (Category.idR C) ⟩
+        ≡⟨ cong kext (Category.right-id C) ⟩
       kext ηk
-        ≡⟨ KleisliTriple.idL km ⟩
+        ≡⟨ KleisliTriple.left-id km ⟩
       id
         ≡⟨ refl ⟩
       η⟨ Id⟨ TF ⟩ ⟩ x ∎
     
     ηCoherR : {x : Obj C} → μ x ∘ (η ([ TF ]₀ x)) ≡ η⟨ Id⟨ TF ⟩ ⟩ x
-    ηCoherR {x = x} = KleisliTriple.idR km
+    ηCoherR {x = x} = KleisliTriple.right-id km
     
     μNatTrans : NaturalTransformation [ TF ]∘[ TF ] TF
     μNatTrans = record 
@@ -199,12 +201,11 @@ Monad→KleisliTriple : {ℓC₀ ℓC₁ : Level} {C : Category {ℓC₀} {ℓC�
 Monad→KleisliTriple {C = C} {T = T} m = record 
   { η = η 
   ; kext = kext
-  ; idR = idR
-  ; idL = idL
+  ; right-id = idR
+  ; left-id  = idL
   ; coher = coher 
   } where
-    _∘_ = _∘C_ C
-    id = idC C
+    open Category C hiding ( Obj ; Hom )
     
     T₀ : Obj C → Obj C
     T₀ a = [ T ]₀ a
@@ -227,19 +228,19 @@ Monad→KleisliTriple {C = C} {T = T} m = record
       kext k ∘ η 
         ≡⟨ refl ⟩
       (μ ∘ T₁ k) ∘ η 
-        ≡⟨ sym (assoc C) ⟩
+        ≡⟨ sym assoc ⟩
       μ ∘ (T₁ k ∘ η)
         ≡⟨ cong (λ X → μ ∘ X) (NaturalTransformation.natural (Monad.η m)) ⟩
       μ ∘ (η ∘ k)
-        ≡⟨ assoc C ⟩
+        ≡⟨ assoc ⟩
       (μ ∘ η) ∘ k
-        ≡⟨ cong (λ X → X ∘ k) (Monad.ηCoherR m) ⟩
+        ≡⟨ cong (λ X → X ∘ k) (Monad.η-right-coher m) ⟩
       id ∘ k
-        ≡⟨ Category.idR C ⟩
+        ≡⟨ Category.right-id C ⟩
       k ∎
       
     idL : {a : Obj C} → kext {a = a} η ≡ id
-    idL = Monad.ηCoherL m
+    idL = Monad.η-left-coher m
     
     coher : {a b c : Obj C} {k : Hom C a (T₀ b)} {l : Hom C b (T₀ c)}
           → kext (kext l ∘ k) ≡ kext l ∘ kext k
@@ -251,21 +252,21 @@ Monad→KleisliTriple {C = C} {T = T} m = record
       μ ∘ (T₁ (μ ∘ T₁ l) ∘ T₁ k)
         ≡⟨ cong (λ X → μ ∘ (X ∘ T₁ k)) (Functor.compose T) ⟩
       μ ∘ ((T₁ μ ∘ T₁ (T₁ l)) ∘ T₁ k)
-        ≡⟨ assoc C ⟩
+        ≡⟨ assoc ⟩
       (μ ∘ (T₁ μ ∘ T₁ (T₁ l))) ∘ T₁ k
-        ≡⟨ cong (λ X → X ∘ T₁ k) (assoc C) ⟩
+        ≡⟨ cong (λ X → X ∘ T₁ k) assoc ⟩
       ((μ ∘ T₁ μ) ∘ T₁ (T₁ l)) ∘ T₁ k
-        ≡⟨ cong (λ X → (X ∘ T₁ (T₁ l)) ∘ T₁ k) (Monad.μCoher m) ⟩
+        ≡⟨ cong (λ X → (X ∘ T₁ (T₁ l)) ∘ T₁ k) (Monad.μ-coher m) ⟩
       ((μ ∘ μ) ∘ T₁ (T₁ l)) ∘ T₁ k
-        ≡⟨ cong (λ X → X ∘ T₁ k) (sym (assoc C)) ⟩
+        ≡⟨ cong (λ X → X ∘ T₁ k) (sym assoc) ⟩
       (μ ∘ (μ ∘ T₁ (T₁ l))) ∘ T₁ k
-        ≡⟨ sym (assoc C) ⟩
+        ≡⟨ sym assoc ⟩
       μ ∘ ((μ ∘ T₁ (T₁ l)) ∘ T₁ k)
         ≡⟨ cong (λ X → μ ∘ (X ∘ T₁ k)) (sym (NaturalTransformation.natural (Monad.μ m))) ⟩
       μ ∘ ((T₁ l ∘ μ) ∘ T₁ k)
-        ≡⟨ cong (λ X → μ ∘ X) (sym (assoc C)) ⟩
+        ≡⟨ cong (λ X → μ ∘ X) (sym assoc) ⟩
       μ ∘ (T₁ l ∘ (μ ∘ T₁ k))
-        ≡⟨ assoc C ⟩
+        ≡⟨ assoc ⟩
       (μ ∘ T₁ l) ∘ (μ ∘ T₁ k)
         ≡⟨ refl ⟩
       kext l ∘ kext k ∎
