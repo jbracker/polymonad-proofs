@@ -1,4 +1,4 @@
- 
+
 module Haskell where
 
 -- StdLib
