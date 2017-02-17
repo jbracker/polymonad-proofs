@@ -29,11 +29,11 @@ monadMaybe : Monad Maybe
 monadMaybe = record
   { _>>=_ = _>>=_
   ; return = return
-  ; applicative = applicativeFromMonad _>>=_ return lawIdL lawIdR lawAssoc
-  ; lawIdR = lawIdR
-  ; lawIdL = lawIdL
-  ; lawAssoc = lawAssoc
-  ; lawMonadFmap = λ f x → refl
+  ; applicative = applicativeFromMonad _>>=_ return law-right-id law-left-id law-assoc
+  ; law-right-id = law-right-id
+  ; law-left-id = law-left-id
+  ; law-assoc = law-assoc
+  ; law-monad-fmap = λ f x → refl
   } where
     _>>=_ : ∀ {α β : Type} → Maybe α → (α → Maybe β) → Maybe β
     _>>=_ = bindMaybe
@@ -41,19 +41,19 @@ monadMaybe = record
     return : ∀ {α : Type} → α → Maybe α
     return = Just
     
-    lawIdR : ∀ {α β : Type} 
+    law-left-id : ∀ {α β : Type} 
            → (a : α) → (k : α → Maybe β) 
            → return a >>= k ≡ k a
-    lawIdR a k = refl
+    law-left-id a k = refl
     
-    lawIdL : ∀ {α : Type} 
+    law-right-id : ∀ {α : Type} 
            → (m : Maybe α)
            → m >>= return ≡ m
-    lawIdL (Just x) = refl
-    lawIdL Nothing = refl
+    law-right-id (Just x) = refl
+    law-right-id Nothing = refl
     
-    lawAssoc : ∀ {α β γ : Type} 
+    law-assoc : ∀ {α β γ : Type} 
              → (m : Maybe α) → (k : α → Maybe β) → (h : β → Maybe γ) 
              → m >>= (λ x → k x >>= h) ≡ (m >>= k) >>= h
-    lawAssoc (Just x) k h = refl
-    lawAssoc Nothing k h = refl
+    law-assoc (Just x) k h = refl
+    law-assoc Nothing k h = refl

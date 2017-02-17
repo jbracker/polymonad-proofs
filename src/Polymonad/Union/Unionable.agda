@@ -38,7 +38,7 @@ polymonadUnionableUnion {TyCons₁} {TyCons₂} {pm₁} {pm₂} upm₁ upm₂ = 
     TyCons = IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)
     
     lawEqBindId : ∀ {α β : Type} → (b : B[ idTC , idTC ] pm ▷ idTC) 
-                → substBind (lawId pm) (lawId pm) (lawId pm) (pmBind pm {idTC} {idTC} {idTC} b) {α} {β} ≡ bindId {α} {β}
+                → substBind (law-id pm) (law-id pm) (law-id pm) (pmBind pm {idTC} {idTC} {idTC} b) {α} {β} ≡ bindId {α} {β}
     lawEqBindId b = upmLawEqBindId upm₁ b
     
     lawEqIdBinds : B[ idTC , idTC ] pm ▷ idTC ≡ IdBinds

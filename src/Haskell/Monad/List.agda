@@ -22,11 +22,11 @@ monadList : Monad List
 monadList = record
   { _>>=_ = _>>=_
   ; return = return
-  ; applicative = applicativeFromMonad _>>=_ return lawIdL lawIdR lawAssoc
-  ; lawIdR = lawIdR
-  ; lawIdL = lawIdL
-  ; lawAssoc = lawAssoc
-  ; lawMonadFmap = λ f a → refl
+  ; applicative = applicativeFromMonad _>>=_ return law-right-id law-left-id law-assoc
+  ; law-right-id = law-right-id
+  ; law-left-id = law-left-id
+  ; law-assoc = law-assoc
+  ; law-monad-fmap = λ f a → refl
   } where
     _>>=_ : ∀ {α β : Type} → List α → (α → List β) → List β
     _>>=_ = bindList
@@ -34,34 +34,34 @@ monadList = record
     return : ∀ {α : Type} → α → List α
     return x = x ∷ []
     
-    lawIdR : ∀ {α β : Type} 
+    law-left-id : ∀ {α β : Type} 
            → (a : α) → (k : α → List β) 
            → return a >>= k ≡ k a
-    lawIdR a k = begin
+    law-left-id a k = begin
       return a >>= k
         ≡⟨ refl ⟩
       k a ++ []
         ≡⟨ xs++Nil≡xs (k a) ⟩
       k a ∎
     
-    lawIdL : ∀ {α : Type} 
+    law-right-id : ∀ {α : Type} 
            → (m : List α)
            → m >>= return ≡ m
-    lawIdL (x ∷ xs) = cong (_∷_ x) (lawIdL xs)
-    lawIdL [] = refl
+    law-right-id (x ∷ xs) = cong (_∷_ x) (law-right-id xs)
+    law-right-id [] = refl
     
-    lawAssoc : ∀ {α β γ : Type} 
+    law-assoc : ∀ {α β γ : Type} 
              → (m : List α) → (k : α → List β) → (h : β → List γ) 
              → m >>= (λ x → k x >>= h) ≡ (m >>= k) >>= h
-    lawAssoc (x ∷ xs) k h = begin
+    law-assoc (x ∷ xs) k h = begin
       (x ∷ xs) >>= (λ y → k y >>= h)
         ≡⟨ refl ⟩
       (k x >>= h) ++ (xs >>= (λ y → k y >>= h))
-        ≡⟨ cong (_++_ (bindList (k x) h)) (lawAssoc xs k h) ⟩
+        ≡⟨ cong (_++_ (bindList (k x) h)) (law-assoc xs k h) ⟩
       (k x >>= h) ++ ((xs >>= k) >>= h)
         ≡⟨ distributiveConcat (k x) (xs >>= k) h ⟩
       (k x ++ (xs >>= k)) >>= h
         ≡⟨ refl ⟩
       ((x ∷ xs) >>= k) >>= h ∎
-    lawAssoc [] k h = refl
+    law-assoc [] k h = refl
     

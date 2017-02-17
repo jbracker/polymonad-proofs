@@ -19,17 +19,17 @@ open import Haskell.Monad
 open import Identity
 
 open Functor
-open Applicative
+open Applicative hiding ( fmap )
 
 monadId : Monad Identity
 monadId = record
   { _>>=_ = _>>=_
   ; return = return
   ; applicative = applicative
-  ; lawIdR = lawIdR
-  ; lawIdL = lawIdL
-  ; lawAssoc = lawAssoc
-  ; lawMonadFmap = lawMonadFmap
+  ; law-right-id = law-right-id
+  ; law-left-id = law-left-id
+  ; law-assoc = law-assoc
+  ; law-monad-fmap = law-monad-fmap
   } where
     _>>=_ : ∀ {α β : Type} → Identity α → (α → Identity β) → Identity β
     _>>=_ = bindId
@@ -37,20 +37,20 @@ monadId = record
     return : ∀ {α : Type} → α → Identity α
     return = identity
     
-    lawIdR : ∀ {α β : Type} 
+    law-left-id : ∀ {α β : Type} 
            → (a : α) → (k : α → Identity β) 
            → return a >>= k ≡ k a
-    lawIdR a k = refl
+    law-left-id a k = refl
     
-    lawIdL : ∀ {α : Type} 
+    law-right-id : ∀ {α : Type} 
            → (m : Identity α)
            → m >>= return ≡ m
-    lawIdL m = refl
+    law-right-id m = refl
     
-    lawAssoc : ∀ {α β γ : Type} 
+    law-assoc : ∀ {α β γ : Type} 
              → (m : Identity α) → (k : α → Identity β) → (h : β → Identity γ) 
              → m >>= (λ x → k x >>= h) ≡ (m >>= k) >>= h
-    lawAssoc m k h = refl
+    law-assoc m k h = refl
 
     fmapId : ∀ {α β : Type} → (α → β) → Identity α → Identity β
     fmapId f ma = ma >>= (return ∘ f)
@@ -61,22 +61,22 @@ monadId = record
     functorId : Functor Identity
     functorId = record 
       { fmap = fmapId
-      ; lawId = λ {α} → refl 
-      ; lawCompose = λ {α} {β} {γ} f g → refl }
+      ; law-id = λ {α} → refl 
+      ; law-compose = λ {α} {β} {γ} f g → refl }
 
     applicative : Applicative Identity
     applicative = record
       { pure = return
       ; _<*>_ = apId
       ; functor = functorId
-      ; lawId = λ {α} v → refl
-      ; lawComposition = λ {α} {β} {γ} u v w → refl
-      ; lawHomomorphism = λ x f → refl
-      ; lawInterchange = λ {α} {β} u x → refl
-      ; lawApplicativeFmap = λ {α} {β} f x → refl
+      ; law-id = λ {α} v → refl
+      ; law-composition = λ {α} {β} {γ} u v w → refl
+      ; law-homomorphism = λ x f → refl
+      ; law-interchange = λ {α} {β} u x → refl
+      ; law-applicative-fmap = λ {α} {β} f x → refl
       }
 
-    lawMonadFmap : ∀ {α β : Type} 
+    law-monad-fmap : ∀ {α β : Type} 
                  → (f : α → β) → (x : Identity α) 
                  → fmap (functor applicative) f x ≡ x >>= (return ∘ f)
-    lawMonadFmap f x = refl
+    law-monad-fmap f x = refl

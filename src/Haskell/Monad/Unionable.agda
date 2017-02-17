@@ -35,7 +35,7 @@ Monad→UnionablePolymonad {M = M'} monad = record
     open Polymonad
     
     lawEqBindId : ∀ {α β : Type} → (b : B[ idTC , idTC ] pm ▷ idTC) 
-                → substBind (lawId pm) (lawId pm) (lawId pm) (bind pm {M = idTC} {N = idTC} {P = idTC} b) {α} {β} ≡ bindId {α} {β}
+                → substBind (law-id pm) (law-id pm) (law-id pm) (bind pm {M = idTC} {N = idTC} {P = idTC} b) {α} {β} ≡ bindId {α} {β}
     lawEqBindId IdentB = refl
     
     lawEqIdBinds : B[ idTC , idTC ] pm ▷ idTC ≡ IdBinds

@@ -15,20 +15,20 @@ open ≡-Reasoning
 open import Utilities
 open import Haskell
 open import Identity
-open import Haskell.Monad renaming ( mBind to monadBind ; mReturn to monadReturn )
+open import Haskell.Monad
 
 record IxMonad {n} (Ixs : Set n) (M : Ixs → Ixs → TyCon) : Set (n ⊔ lsuc lzero) where
   field
     _>>=_ : ∀ {α β : Type} {i j k : Ixs} → M i j α → (α → M j k β) → M i k β
     return : ∀ {α : Type} {i : Ixs} → α → M i i α
     
-    lawIdR : ∀ {α β : Type} {i j : Ixs}
+    law-right-id : ∀ {α β : Type} {i j : Ixs}
            → (a : α) → (k : α → M i j β) 
            → return a >>= k ≡ k a
-    lawIdL : ∀ {α : Type} {i j : Ixs}
+    law-left-id : ∀ {α : Type} {i j : Ixs}
            → (m : M i j α)
            → m >>= return ≡ m
-    lawAssoc : ∀ {α β γ : Type} {i j k l : Ixs}
+    law-assoc : ∀ {α β γ : Type} {i j k l : Ixs}
              → (m : M i j α) → (f : α → M j k β) → (g : β → M k l γ)
              → m >>= (λ x → f x >>= g) ≡ (m >>= f) >>= g
   
@@ -49,7 +49,7 @@ data IxMonadBinds {n} (Ixs : Set n) : (M N P : IdTyCons ⊎ IxMonadTyCons Ixs) �
   ApplyB   : ∀ {i j} → IxMonadBinds Ixs idTC (inj₂ (IxMonadTC i j)) (inj₂ (IxMonadTC i j))
   ReturnB  : ∀ {i} → IxMonadBinds Ixs idTC idTC (inj₂ (IxMonadTC i i)) 
 
-open IxMonad renaming (bind to mBind; return to mReturn; lawIdR to mLawIdR ; lawIdL to mLawIdL ; lawAssoc to mLawAssoc ) hiding (_>>=_)
+open IxMonad renaming (bind to mBind; return to mReturn; law-right-id to mLawIdR ; law-left-id to mLawIdL ; law-assoc to mLawAssoc ) hiding (_>>=_)
 
 bindMonad : ∀ {n} {Ixs : Set n} {M : Ixs → Ixs → TyCon} {i j k} → (m : IxMonad Ixs M)
           → [ M i j , M j k ]▷ M i k

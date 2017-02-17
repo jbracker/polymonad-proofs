@@ -19,7 +19,7 @@ open import Utilities
 open import Haskell
 open import Identity
 open import Haskell.Applicative
-open import Haskell.Monad renaming ( mBind to monadBind ; mReturn to monadReturn )
+open import Haskell.Monad
 open import Haskell.Monad.Polymonad
 open import Haskell.Monad.Principal
 open import Haskell.Monad.Unionable
@@ -29,7 +29,9 @@ open import Polymonad.Unionable
 open import Haskell.Parameterized.IndexedMonad
 open import Haskell.Parameterized.PhantomIndices
 
-open IxMonad renaming (bind to mBind; return to mReturn; lawIdR to mLawIdR ; lawIdL to mLawIdL ; lawAssoc to mLawAssoc ) hiding (_>>=_)
+open Monad hiding ( _>>=_ ; law-right-id ; law-left-id ; law-assoc ) renaming ( bind to monadBind ; return to monadReturn )
+
+open IxMonad renaming (bind to mBind; return to mReturn; law-right-id to mLawIdR ; law-left-id to mLawIdL ; law-assoc to mLawAssoc ) hiding (_>>=_)
 
 LiftM : ∀ {ℓ} {Ixs : Set ℓ} → (M : Ixs → Ixs → TyCon) → (Ixs → Ixs → Lift {ℓ = suc ℓ} TyCon)
 LiftM M I J = lift (M I J)
@@ -63,11 +65,11 @@ PhantomIxMonad→Monad : ∀ {Ixs} {M : Ixs → Ixs → TyCon} → Ixs → (K : 
 PhantomIxMonad→Monad {Ixs = Ixs} {M = IxM} i K ixMonad = record
   { _>>=_ = _>>=_
   ; return = return
-  ; applicative = applicativeFromMonad _>>=_ return lawIdL lawIdR lawAssoc
-  ; lawIdR = lawIdR
-  ; lawIdL = lawIdL
-  ; lawAssoc = lawAssoc
-  ; lawMonadFmap = λ f x → refl
+  ; applicative = applicativeFromMonad _>>=_ return law-right-id law-left-id law-assoc
+  ; law-right-id = law-right-id
+  ; law-left-id = law-left-id
+  ; law-assoc = law-assoc
+  ; law-monad-fmap = λ f x → refl
   } where
       ixReturn : ∀ {α} → α → IxM i i α
       ixReturn = IxMonad.return ixMonad
@@ -142,10 +144,10 @@ PhantomIxMonad→Monad {Ixs = Ixs} {M = IxM} i K ixMonad = record
           ≡⟨ subst²≡id' Mij≡K (\X → (α → X α)) ixReturn ⟩
         ixReturn ∎
 
-      lawIdR : ∀ {α β : Type} 
+      law-left-id : ∀ {α β : Type} 
            → (a : α) → (k : α → M β) 
            → return a >>= k ≡ k a
-      lawIdR {α = α} {β = β} a k = begin
+      law-left-id {α = α} {β = β} a k = begin
         return a >>= k 
           ≡⟨ id≡Mij→K∘K→Mij K {i = i} {j = i} ⟩
         Mij→K (K→Mij (return a >>= k)) 
@@ -153,17 +155,17 @@ PhantomIxMonad→Monad {Ixs = Ixs} {M = IxM} i K ixMonad = record
         Mij→K (K→Mij (return a) >>=ix (subst (λ X → (α → X β)) (sym Mij≡K) k)) 
           ≡⟨ cong (λ X → Mij→K (X >>=ix (subst (λ X → (α → X β)) (sym Mij≡K) k))) (commuteReturnK→Mij a) ⟩
         Mij→K (ixReturn a >>=ix (subst (λ X → (α → X β)) (sym Mij≡K) k))
-          ≡⟨ cong (λ X → Mij→K X) (IxMonad.lawIdR ixMonad a (subst (λ X → (α → X β)) (sym Mij≡K) k)) ⟩
+          ≡⟨ cong (λ X → Mij→K X) (IxMonad.law-right-id ixMonad a (subst (λ X → (α → X β)) (sym Mij≡K) k)) ⟩
         Mij→K (subst (λ X → (α → X β)) (sym Mij≡K) k a)
           ≡⟨ (cong (λ X → Mij→K X) (sym (shiftFunSubst' (sym Mij≡K) a k))) ⟩
         Mij→K (subst (λ X → X β) (sym Mij≡K) (k a))
           ≡⟨ sym (id≡Mij→K∘K→Mij K) ⟩
         k a ∎
       
-      lawIdL : ∀ {α : Type} 
+      law-right-id : ∀ {α : Type} 
            → (m : M α)
            → m >>= return ≡ m
-      lawIdL {α = α} m = begin
+      law-right-id {α = α} m = begin
         m >>= return 
           ≡⟨ id≡Mij→K∘K→Mij K {i = i} {j = i} ⟩
         Mij→K (K→Mij (m >>= return)) 
@@ -171,15 +173,15 @@ PhantomIxMonad→Monad {Ixs = Ixs} {M = IxM} i K ixMonad = record
         Mij→K (K→Mij m >>=ix (subst (λ X → (α → X α)) (sym Mij≡K) return)) 
           ≡⟨ cong (λ X → Mij→K (K→Mij m >>=ix X)) commuteReturnK→Mij' ⟩
         Mij→K (K→Mij m >>=ix ixReturn) 
-          ≡⟨ cong (λ X → Mij→K X) (IxMonad.lawIdL ixMonad (K→Mij m)) ⟩
+          ≡⟨ cong (λ X → Mij→K X) (IxMonad.law-left-id ixMonad (K→Mij m)) ⟩
         Mij→K (K→Mij m)
           ≡⟨ sym (id≡Mij→K∘K→Mij K) ⟩
         m ∎
       
-      lawAssoc : ∀ {α β γ : Type} 
+      law-assoc : ∀ {α β γ : Type} 
              → (m : M α) → (k : α → M β) → (h : β → M γ) 
              → m >>= (λ x → k x >>= h) ≡ (m >>= k) >>= h
-      lawAssoc {α = α} {β = β} {γ = γ} m k h = begin
+      law-assoc {α = α} {β = β} {γ = γ} m k h = begin
         m >>= (λ x → k x >>= h) 
           ≡⟨ id≡Mij→K∘K→Mij K {i = i} {j = i} ⟩
         Mij→K (K→Mij (m >>= (λ x → k x >>= h))) 
@@ -187,7 +189,7 @@ PhantomIxMonad→Monad {Ixs = Ixs} {M = IxM} i K ixMonad = record
         Mij→K (K→Mij m >>=ix subst (λ X → (α → X γ)) (sym Mij≡K) (λ x → k x >>= h)) 
           ≡⟨ cong (λ X → Mij→K (K→Mij m >>=ix X)) (commuteBindK→Mij' k h) ⟩
         Mij→K (K→Mij m >>=ix (λ x → (subst (λ X → (α → X β)) (sym Mij≡K) k) x >>=ix (subst (λ X → (β → X γ)) (sym Mij≡K) h))) 
-          ≡⟨ cong (λ X → Mij→K X) (IxMonad.lawAssoc ixMonad (K→Mij m) ((subst (λ X → (α → X β)) (sym Mij≡K) k)) ((subst (λ X → (β → X γ)) (sym Mij≡K) h))) ⟩
+          ≡⟨ cong (λ X → Mij→K X) (IxMonad.law-assoc ixMonad (K→Mij m) ((subst (λ X → (α → X β)) (sym Mij≡K) k)) ((subst (λ X → (β → X γ)) (sym Mij≡K) h))) ⟩
         Mij→K ((K→Mij m >>=ix (subst (λ X → (α → X β)) (sym Mij≡K) k)) >>=ix (subst (λ X → (β → X γ)) (sym Mij≡K) h))
           ≡⟨ cong (λ X → Mij→K (X >>=ix (subst (λ X → (β → X γ)) (sym Mij≡K) h))) (sym (commuteBindK→Mij m k)) ⟩
         Mij→K (K→Mij (m >>= k) >>=ix (subst (λ X → (β → X γ)) (sym Mij≡K) h))

@@ -32,7 +32,7 @@ polymonadUnion {TyCons₁} {TyCons₂} {pm₁} {pm₂} upm₁ upm₂ = record
   { B[_,_]▷_ = B[_,_]▷_
   ; ⟨_⟩ = ⟨_⟩
   ; bind = λ {M} {N} {P} → bind {M} {N} {P}
-  ; lawId = lawId
+  ; law-id = law-id
   ; lawFunctor1 = lawFunctor1
   ; lawFunctor2 = lawFunctor2
   ; lawMorph1 = lawMorph1 
@@ -40,7 +40,7 @@ polymonadUnion {TyCons₁} {TyCons₂} {pm₁} {pm₂} upm₁ upm₂ = record
   ; lawMorph3 = lawMorph3
   ; lawDiamond1 = lawDiamond1 
   ; lawDiamond2 = lawDiamond2
-  ; lawAssoc = lawAssoc
+  ; law-assoc = law-assoc
   ; lawClosure = lawClosure 
   } where
       TyCons = IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)
@@ -60,8 +60,8 @@ polymonadUnion {TyCons₁} {TyCons₂} {pm₁} {pm₂} upm₁ upm₂ = record
       idMorph¬∃₁ = upmIdMorph¬∃ upm₁
       idMorph¬∃₂ = upmIdMorph¬∃ upm₂
       
-      lawId₁ = pmLawId pm₁
-      lawId₂ = pmLawId pm₂
+      law-id₁ = pmLawId pm₁
+      law-id₂ = pmLawId pm₂
 
       ⟨_⟩ : TyCons → TyCon
       ⟨ inj₁ IdentTC ⟩ = Identity
@@ -171,13 +171,13 @@ polymonadUnion {TyCons₁} {TyCons₂} {pm₁} {pm₂} upm₁ upm₂ = record
       bind {inj₂ (inj₂ M₂)} {inj₂ (inj₂ N₂)} {inj₂ (inj₁ P₁)} () 
       bind {inj₂ (inj₂ M₂)} {inj₂ (inj₂ N₂)} {inj₂ (inj₂ P₂)} t  = substBind (eqTC₂ (inj₂ M₂)) (eqTC₂ (inj₂ N₂)) (eqTC₂ (inj₂ P₂)) (pmBind pm₂ t)
       
-      lawId : ⟨ Id ⟩ ≡ Identity
-      lawId = pmLawId polymonadId
+      law-id : ⟨ Id ⟩ ≡ Identity
+      law-id = pmLawId polymonadId
 
       eqIdSubst : {Id : TyCon}
                 → {α : Type}
                 → (eqId' : Id ≡ Identity)
-                → id lawId ≡ subst (λ N → (α → N α)) eqId' (id eqId')
+                → id law-id ≡ subst (λ N → (α → N α)) eqId' (id eqId')
       eqIdSubst refl = refl
       
       lawFunctor1 : (M : TyCons) → B[ M , Id ]▷ M
@@ -188,15 +188,15 @@ polymonadUnion {TyCons₁} {TyCons₂} {pm₁} {pm₂} upm₁ upm₂ = record
       lawFunctor2 : (M : TyCons) 
                   → (b : B[ M , Id ]▷ M) 
                   → {α : Type} (m : ⟨ M ⟩ α) 
-                  → bind {M} {Id} {M} b m (id lawId) ≡ m
+                  → bind {M} {Id} {M} b m (id law-id) ≡ m
       lawFunctor2 (inj₁ IdentTC  ) b₁ m = 
         let proof₁ = pmLawFunctor2 pm₁ idTC b₁
             M = inj₁ IdentTC
             eqM = eqId₁
         in begin
-              bind {M} {Id} {M} b₁ m (id lawId)  
-                ≡⟨ cong (λ x → x m (id lawId)) (eqBindId₁ b₁) ⟩
-              bindId m (id lawId) 
+              bind {M} {Id} {M} b₁ m (id law-id)  
+                ≡⟨ cong (λ x → x m (id law-id)) (eqBindId₁ b₁) ⟩
+              bindId m (id law-id) 
                 ≡⟨ refl ⟩
               m ∎
       lawFunctor2 (inj₂ (inj₁ M₁)) b₁ {α = α} m = 
@@ -204,15 +204,15 @@ polymonadUnion {TyCons₁} {TyCons₂} {pm₁} {pm₂} upm₁ upm₂ = record
             M = inj₂ (inj₁ M₁)
             eqM = eqTC₁ (inj₂ M₁)
         in begin
-              bind {M} {Id} {M} b₁ m (id lawId)
+              bind {M} {Id} {M} b₁ m (id law-id)
                 ≡⟨ cong (λ x → bind {M} {Id} {M} b₁ m x) (eqIdSubst eqId₁) ⟩
-              bind {M} {Id} {M} b₁ m (subst (λ N → (α → N α)) eqId₁ (id lawId₁)) 
+              bind {M} {Id} {M} b₁ m (subst (λ N → (α → N α)) eqId₁ (id law-id₁)) 
                 ≡⟨ refl ⟩
-              substBind refl eqId₁ refl (pmBind pm₁ b₁) m (subst (λ N → (α → N α)) eqId₁ (id lawId₁)) 
-                ≡⟨ substBindInwardEq (pmBind pm₁ b₁) eqM eqId₁ eqM m (subst (λ N → (α → N α)) eqId₁ (id lawId₁)) ⟩
-              subst (λ P → P α) eqM (pmBind pm₁ b₁ (subst (λ M → M α) eqM m) (subst (λ N → (α → N α)) (sym eqId₁) (subst (λ N → (α → N α)) eqId₁ (id lawId₁)) ) )
-                ≡⟨ cong (λ q → subst (λ P → P α) eqM (pmBind pm₁ b₁ (subst (λ M → M α) eqM m) q)) (subst²≡id' eqId₁ (λ N → (α → N α)) (id lawId₁)) ⟩
-              subst (λ P → P α) eqM (pmBind pm₁ b₁ (subst (λ M → M α) eqM m) (id lawId₁))
+              substBind refl eqId₁ refl (pmBind pm₁ b₁) m (subst (λ N → (α → N α)) eqId₁ (id law-id₁)) 
+                ≡⟨ substBindInwardEq (pmBind pm₁ b₁) eqM eqId₁ eqM m (subst (λ N → (α → N α)) eqId₁ (id law-id₁)) ⟩
+              subst (λ P → P α) eqM (pmBind pm₁ b₁ (subst (λ M → M α) eqM m) (subst (λ N → (α → N α)) (sym eqId₁) (subst (λ N → (α → N α)) eqId₁ (id law-id₁)) ) )
+                ≡⟨ cong (λ q → subst (λ P → P α) eqM (pmBind pm₁ b₁ (subst (λ M → M α) eqM m) q)) (subst²≡id' eqId₁ (λ N → (α → N α)) (id law-id₁)) ⟩
+              subst (λ P → P α) eqM (pmBind pm₁ b₁ (subst (λ M → M α) eqM m) (id law-id₁))
                 ≡⟨ cong (λ x → subst (λ P → P α) eqM x) (proof₁ (subst (λ M → M α) eqM m)) ⟩ -- pmBind pm₁ b₁ m (pmId→ pm₁) ≡ m
               subst (λ P → P α) eqM (subst (λ M → M α) eqM m)
                 ≡⟨ refl ⟩
@@ -222,15 +222,15 @@ polymonadUnion {TyCons₁} {TyCons₂} {pm₁} {pm₂} upm₁ upm₂ = record
             M = inj₂ (inj₂ M₂)
             eqM = eqTC₂ (inj₂ M₂)
         in begin
-              bind {M} {Id} {M} b₂ m (id lawId) 
+              bind {M} {Id} {M} b₂ m (id law-id) 
                 ≡⟨ cong (λ x → bind {M} {Id} {M} b₂ m x) (eqIdSubst eqId₂) ⟩
-              bind {M} {Id} {M} b₂ m (subst (λ N → (α → N α)) eqId₂ (id lawId₂)) 
+              bind {M} {Id} {M} b₂ m (subst (λ N → (α → N α)) eqId₂ (id law-id₂)) 
                 ≡⟨ refl ⟩
-              substBind refl eqId₂ refl (pmBind pm₂ b₂) m (subst (λ N → (α → N α)) eqId₂ (id lawId₂)) 
-                ≡⟨ substBindInwardEq (pmBind pm₂ b₂) eqM eqId₂ eqM m (subst (λ N → (α → N α)) eqId₂ (id lawId₂)) ⟩
-              subst (λ P → P α) eqM (pmBind pm₂ b₂ (subst (λ M → M α) eqM m) (subst (λ N → (α → N α)) (sym eqId₂) (subst (λ N → (α → N α)) eqId₂ (id lawId₂)) ) )
-                ≡⟨ cong (λ q → subst (λ P → P α) eqM (pmBind pm₂ b₂ (subst (λ M → M α) eqM m) q)) (subst²≡id' eqId₂ (λ N → (α → N α)) (id lawId₂)) ⟩
-              subst (λ P → P α) eqM (pmBind pm₂ b₂ (subst (λ M → M α) eqM m) (id lawId₂))
+              substBind refl eqId₂ refl (pmBind pm₂ b₂) m (subst (λ N → (α → N α)) eqId₂ (id law-id₂)) 
+                ≡⟨ substBindInwardEq (pmBind pm₂ b₂) eqM eqId₂ eqM m (subst (λ N → (α → N α)) eqId₂ (id law-id₂)) ⟩
+              subst (λ P → P α) eqM (pmBind pm₂ b₂ (subst (λ M → M α) eqM m) (subst (λ N → (α → N α)) (sym eqId₂) (subst (λ N → (α → N α)) eqId₂ (id law-id₂)) ) )
+                ≡⟨ cong (λ q → subst (λ P → P α) eqM (pmBind pm₂ b₂ (subst (λ M → M α) eqM m) q)) (subst²≡id' eqId₂ (λ N → (α → N α)) (id law-id₂)) ⟩
+              subst (λ P → P α) eqM (pmBind pm₂ b₂ (subst (λ M → M α) eqM m) (id law-id₂))
                 ≡⟨ cong (λ x → subst (λ P → P α) eqM x) (proof₂ (subst (λ M → M α) eqM m)) ⟩ -- pmBind pm₂ b₂ m (pmId→ pm₂) ≡ m
               subst (λ P → P α) eqM (subst (λ M → M α) eqM m)
                 ≡⟨ refl ⟩
@@ -266,12 +266,12 @@ polymonadUnion {TyCons₁} {TyCons₂} {pm₁} {pm₂} upm₁ upm₂ = record
                       → (eqBind₁ : B[ TC₁→TC M , TC₁→TC injIdTC ]▷ TC₁→TC P ≡ B[ M , injIdTC ] pm₁ ▷ P)
                       → (eqBind₂ : B[ TC₁→TC injIdTC , TC₁→TC M ]▷ TC₁→TC P ≡ B[ injIdTC , M ] pm₁ ▷ P)
                       → ∀ {α β : Type} (v : α) (f : α → ⟨ TC₁→TC M ⟩ β) 
-                      → ( bind {TC₁→TC M} {TC₁→TC injIdTC} {TC₁→TC P} b₁ (f v) (subst (λ X → (β → X β)) eqId₁ (id lawId₁)) 
-                        ≡ substBind (eqTC₁ M) eqId₁ (eqTC₁ P) (pmBind pm₁ (subst (λ x → x) eqBind₁ b₁)) (f v) (subst (λ X → (β → X β)) eqId₁ (id lawId₁)) )
-                      → ( substBind eqId₁ (eqTC₁ M) (eqTC₁ P) (pmBind pm₁ (subst (λ x → x) eqBind₂ b₂)) ((subst (λ X → (α → X α)) eqId₁ (id lawId₁)) v) f 
-                        ≡ bind {TC₁→TC injIdTC} {TC₁→TC M} {TC₁→TC P} b₂ ((subst (λ X → (α → X α)) eqId₁ (id lawId₁)) v) f )
-                      → ( (bind {TC₁→TC M} {TC₁→TC injIdTC} {TC₁→TC P} b₁) (f v) (id lawId)
-                        ≡ (bind {TC₁→TC injIdTC} {TC₁→TC M} {TC₁→TC P} b₂) (id lawId v) f )
+                      → ( bind {TC₁→TC M} {TC₁→TC injIdTC} {TC₁→TC P} b₁ (f v) (subst (λ X → (β → X β)) eqId₁ (id law-id₁)) 
+                        ≡ substBind (eqTC₁ M) eqId₁ (eqTC₁ P) (pmBind pm₁ (subst (λ x → x) eqBind₁ b₁)) (f v) (subst (λ X → (β → X β)) eqId₁ (id law-id₁)) )
+                      → ( substBind eqId₁ (eqTC₁ M) (eqTC₁ P) (pmBind pm₁ (subst (λ x → x) eqBind₂ b₂)) ((subst (λ X → (α → X α)) eqId₁ (id law-id₁)) v) f 
+                        ≡ bind {TC₁→TC injIdTC} {TC₁→TC M} {TC₁→TC P} b₂ ((subst (λ X → (α → X α)) eqId₁ (id law-id₁)) v) f )
+                      → ( (bind {TC₁→TC M} {TC₁→TC injIdTC} {TC₁→TC P} b₁) (f v) (id law-id)
+                        ≡ (bind {TC₁→TC injIdTC} {TC₁→TC M} {TC₁→TC P} b₂) (id law-id v) f )
       lawMorph3Proof₁ M P b₁ b₂ eqBind₁ eqBind₂ {α = α} {β = β} v f eqSubstBind₁ eqSubstBind₂ =
         let bind₁ = bind {TC₁→TC M} {TC₁→TC injIdTC} {TC₁→TC P} b₁
             bind₂ = bind {TC₁→TC injIdTC} {TC₁→TC M} {TC₁→TC P} b₂
@@ -282,29 +282,29 @@ polymonadUnion {TyCons₁} {TyCons₂} {pm₁} {pm₂} upm₁ upm₂ = record
             pmb₁ = pmBind pm (subst (λ x → x) eqBind₁ b₁)
             pmb₂ = pmBind pm (subst (λ x → x) eqBind₂ b₂)
         in begin
-          bind₁ (f v) (id lawId)
+          bind₁ (f v) (id law-id)
             ≡⟨ cong (bind₁ (f v)) (eqIdSubst eqId) ⟩
-          bind₁ (f v) (subst (λ X → (β → X β)) eqId (id lawId₁))
+          bind₁ (f v) (subst (λ X → (β → X β)) eqId (id law-id₁))
             ≡⟨ eqSubstBind₁ ⟩
-          substBind eqM eqId eqP pmb₁ (f v) (subst (λ X → (β → X β)) eqId (id lawId₁)) 
-            ≡⟨ substBindInwardEq pmb₁ eqM eqId eqP (f v) (subst (λ X → (β → X β)) eqId (id lawId₁)) ⟩
-          subst (λ X → X β) eqP (pmb₁ (subst (λ X → X β) (sym eqM) (f v)) (subst (λ N → (β → N β)) (sym eqId) (subst (λ X → (β → X β)) eqId (id lawId₁))) ) 
-            ≡⟨ cong (λ x → subst (λ X → X β) eqP (pmb₁ (subst (λ X → X β) (sym eqM) (f v)) x )) (subst²≡id' eqId (λ X → (β → X β)) (id lawId₁)) ⟩
-          subst (λ X → X β) eqP (pmb₁ (subst (λ X → X β) (sym eqM) (f v)) (id lawId₁) )
+          substBind eqM eqId eqP pmb₁ (f v) (subst (λ X → (β → X β)) eqId (id law-id₁)) 
+            ≡⟨ substBindInwardEq pmb₁ eqM eqId eqP (f v) (subst (λ X → (β → X β)) eqId (id law-id₁)) ⟩
+          subst (λ X → X β) eqP (pmb₁ (subst (λ X → X β) (sym eqM) (f v)) (subst (λ N → (β → N β)) (sym eqId) (subst (λ X → (β → X β)) eqId (id law-id₁))) ) 
+            ≡⟨ cong (λ x → subst (λ X → X β) eqP (pmb₁ (subst (λ X → X β) (sym eqM) (f v)) x )) (subst²≡id' eqId (λ X → (β → X β)) (id law-id₁)) ⟩
+          subst (λ X → X β) eqP (pmb₁ (subst (λ X → X β) (sym eqM) (f v)) (id law-id₁) )
             ≡⟨ cong (subst (λ X → X β) eqP) (pmLawMorph3 pm M P (subst (λ x → x) eqBind₁ b₁) (subst (λ x → x) eqBind₂ b₂) v ((λ x → subst (λ M → M β) (sym eqM) (f x)))) ⟩
-          subst (λ X → X β) eqP (pmb₂ ((id lawId₁) v) (λ x → subst (λ X → X β) (sym eqM) (f x)) )
-            ≡⟨ cong (λ x → subst (λ X → X β) eqP (pmb₂ ((id lawId₁) v) x) ) (shiftFunSubst (sym eqM) f) ⟩
-          subst (λ X → X β) eqP (pmb₂ ((id lawId₁) v) (subst (λ X → (α → X β)) (sym eqM) f)) 
-            ≡⟨ cong (λ x → subst (λ X → X β) eqP (pmb₂ x (subst (λ X → (α → X β)) (sym eqM) f))) (sym (subst²≡id' eqId (λ X → X α) ((id lawId₁) v))) ⟩
-          subst (λ X → X β) eqP (pmb₂ (subst (λ X → X α) (sym eqId) (subst (λ X → (X α)) eqId ((id lawId₁) v))) (subst (λ X → (α → X β)) (sym eqM) f)) 
-            ≡⟨ cong (λ x → subst (λ X → X β) eqP (pmb₂ (subst (λ X → X α) (sym eqId) x) (subst (λ X → (α → X β)) (sym eqM) f)) ) (sym (shiftApplySubst eqId v (id lawId₁))) ⟩
-          subst (λ X → X β) eqP (pmb₂ (subst (λ X → X α) (sym eqId) ((subst (λ X → (α → X α)) eqId (id lawId₁)) v)) (subst (λ X → (α → X β)) (sym eqM) f)) 
-            ≡⟨ sym (substBindInwardEq pmb₂ eqId eqM eqP ((subst (λ X → (α → X α)) eqId (id lawId₁)) v) f) ⟩
-          substBind eqId eqM eqP pmb₂ ((subst (λ X → (α → X α)) eqId (id lawId₁)) v) f 
+          subst (λ X → X β) eqP (pmb₂ ((id law-id₁) v) (λ x → subst (λ X → X β) (sym eqM) (f x)) )
+            ≡⟨ cong (λ x → subst (λ X → X β) eqP (pmb₂ ((id law-id₁) v) x) ) (shiftFunSubst (sym eqM) f) ⟩
+          subst (λ X → X β) eqP (pmb₂ ((id law-id₁) v) (subst (λ X → (α → X β)) (sym eqM) f)) 
+            ≡⟨ cong (λ x → subst (λ X → X β) eqP (pmb₂ x (subst (λ X → (α → X β)) (sym eqM) f))) (sym (subst²≡id' eqId (λ X → X α) ((id law-id₁) v))) ⟩
+          subst (λ X → X β) eqP (pmb₂ (subst (λ X → X α) (sym eqId) (subst (λ X → (X α)) eqId ((id law-id₁) v))) (subst (λ X → (α → X β)) (sym eqM) f)) 
+            ≡⟨ cong (λ x → subst (λ X → X β) eqP (pmb₂ (subst (λ X → X α) (sym eqId) x) (subst (λ X → (α → X β)) (sym eqM) f)) ) (sym (shiftApplySubst eqId v (id law-id₁))) ⟩
+          subst (λ X → X β) eqP (pmb₂ (subst (λ X → X α) (sym eqId) ((subst (λ X → (α → X α)) eqId (id law-id₁)) v)) (subst (λ X → (α → X β)) (sym eqM) f)) 
+            ≡⟨ sym (substBindInwardEq pmb₂ eqId eqM eqP ((subst (λ X → (α → X α)) eqId (id law-id₁)) v) f) ⟩
+          substBind eqId eqM eqP pmb₂ ((subst (λ X → (α → X α)) eqId (id law-id₁)) v) f 
             ≡⟨ eqSubstBind₂ ⟩
-          bind₂ ((subst (λ X → (α → X α)) eqId (id lawId₁)) v) f
+          bind₂ ((subst (λ X → (α → X α)) eqId (id law-id₁)) v) f
             ≡⟨ cong (λ x → bind₂ (x v) f) (sym (eqIdSubst eqId)) ⟩
-          bind₂ (id lawId v) f ∎
+          bind₂ (id law-id v) f ∎
 
       lawMorph3Proof₂ : (M P : IdTyCons ⊎ TyCons₂)
                       → (b₁ : B[ TC₂→TC M , TC₂→TC injIdTC ]▷ TC₂→TC P) 
@@ -312,12 +312,12 @@ polymonadUnion {TyCons₁} {TyCons₂} {pm₁} {pm₂} upm₁ upm₂ = record
                       → (eqBind₁ : B[ TC₂→TC M , TC₂→TC injIdTC ]▷ TC₂→TC P ≡ B[ M , injIdTC ] pm₂ ▷ P)
                       → (eqBind₂ : B[ TC₂→TC injIdTC , TC₂→TC M ]▷ TC₂→TC P ≡ B[ injIdTC , M ] pm₂ ▷ P)
                       → ∀ {α β : Type} (v : α) (f : α → ⟨ TC₂→TC M ⟩ β) 
-                      → ( bind {TC₂→TC M} {TC₂→TC injIdTC} {TC₂→TC P} b₁ (f v) (subst (λ X → (β → X β)) eqId₂ (id lawId₂)) 
-                        ≡ substBind (eqTC₂ M) eqId₂ (eqTC₂ P) (pmBind pm₂ (subst (λ x → x) eqBind₁ b₁)) (f v) (subst (λ X → (β → X β)) eqId₂ (id lawId₂)) )
-                      → ( substBind eqId₂ (eqTC₂ M) (eqTC₂ P) (pmBind pm₂ (subst (λ x → x) eqBind₂ b₂)) ((subst (λ X → (α → X α)) eqId₂ (id lawId₂)) v) f 
-                        ≡ bind {TC₂→TC injIdTC} {TC₂→TC M} {TC₂→TC P} b₂ ((subst (λ X → (α → X α)) eqId₂ (id lawId₂)) v) f )
-                      → ( (bind {TC₂→TC M} {TC₂→TC injIdTC} {TC₂→TC P} b₁) (f v) (id lawId)
-                        ≡ (bind {TC₂→TC injIdTC} {TC₂→TC M} {TC₂→TC P} b₂) (id lawId v) f )
+                      → ( bind {TC₂→TC M} {TC₂→TC injIdTC} {TC₂→TC P} b₁ (f v) (subst (λ X → (β → X β)) eqId₂ (id law-id₂)) 
+                        ≡ substBind (eqTC₂ M) eqId₂ (eqTC₂ P) (pmBind pm₂ (subst (λ x → x) eqBind₁ b₁)) (f v) (subst (λ X → (β → X β)) eqId₂ (id law-id₂)) )
+                      → ( substBind eqId₂ (eqTC₂ M) (eqTC₂ P) (pmBind pm₂ (subst (λ x → x) eqBind₂ b₂)) ((subst (λ X → (α → X α)) eqId₂ (id law-id₂)) v) f 
+                        ≡ bind {TC₂→TC injIdTC} {TC₂→TC M} {TC₂→TC P} b₂ ((subst (λ X → (α → X α)) eqId₂ (id law-id₂)) v) f )
+                      → ( (bind {TC₂→TC M} {TC₂→TC injIdTC} {TC₂→TC P} b₁) (f v) (id law-id)
+                        ≡ (bind {TC₂→TC injIdTC} {TC₂→TC M} {TC₂→TC P} b₂) (id law-id v) f )
       lawMorph3Proof₂ M P b₁ b₂ eqBind₁ eqBind₂ {α = α} {β = β} v f eqSubstBind₁ eqSubstBind₂ =
         let bind₁ = bind {TC₂→TC M} {TC₂→TC injIdTC} {TC₂→TC P} b₁
             bind₂ = bind {TC₂→TC injIdTC} {TC₂→TC M} {TC₂→TC P} b₂
@@ -328,33 +328,33 @@ polymonadUnion {TyCons₁} {TyCons₂} {pm₁} {pm₂} upm₁ upm₂ = record
             pmb₁ = pmBind pm (subst (λ x → x) eqBind₁ b₁)
             pmb₂ = pmBind pm (subst (λ x → x) eqBind₂ b₂)
         in begin
-          bind₁ (f v) (id lawId)
+          bind₁ (f v) (id law-id)
             ≡⟨ cong (bind₁ (f v)) (eqIdSubst eqId) ⟩
-          bind₁ (f v) (subst (λ X → (β → X β)) eqId (id lawId₂))
+          bind₁ (f v) (subst (λ X → (β → X β)) eqId (id law-id₂))
             ≡⟨ eqSubstBind₁ ⟩
-          substBind eqM eqId eqP pmb₁ (f v) (subst (λ X → (β → X β)) eqId (id lawId₂)) 
-            ≡⟨ substBindInwardEq pmb₁ eqM eqId eqP (f v) (subst (λ X → (β → X β)) eqId (id lawId₂)) ⟩
-          subst (λ X → X β) eqP (pmb₁ (subst (λ X → X β) (sym eqM) (f v)) (subst (λ N → (β → N β)) (sym eqId) (subst (λ X → (β → X β)) eqId (id lawId₂))) ) 
-            ≡⟨ cong (λ x → subst (λ X → X β) eqP (pmb₁ (subst (λ X → X β) (sym eqM) (f v)) x )) (subst²≡id' eqId (λ X → (β → X β)) (id lawId₂)) ⟩
-          subst (λ X → X β) eqP (pmb₁ (subst (λ X → X β) (sym eqM) (f v)) (id lawId₂) )
+          substBind eqM eqId eqP pmb₁ (f v) (subst (λ X → (β → X β)) eqId (id law-id₂)) 
+            ≡⟨ substBindInwardEq pmb₁ eqM eqId eqP (f v) (subst (λ X → (β → X β)) eqId (id law-id₂)) ⟩
+          subst (λ X → X β) eqP (pmb₁ (subst (λ X → X β) (sym eqM) (f v)) (subst (λ N → (β → N β)) (sym eqId) (subst (λ X → (β → X β)) eqId (id law-id₂))) ) 
+            ≡⟨ cong (λ x → subst (λ X → X β) eqP (pmb₁ (subst (λ X → X β) (sym eqM) (f v)) x )) (subst²≡id' eqId (λ X → (β → X β)) (id law-id₂)) ⟩
+          subst (λ X → X β) eqP (pmb₁ (subst (λ X → X β) (sym eqM) (f v)) (id law-id₂) )
             ≡⟨ cong (subst (λ X → X β) eqP) (pmLawMorph3 pm M P (subst (λ x → x) eqBind₁ b₁) (subst (λ x → x) eqBind₂ b₂) v ((λ x → subst (λ M → M β) (sym eqM) (f x)))) ⟩
-          subst (λ X → X β) eqP (pmb₂ ((id lawId₂) v) (λ x → subst (λ X → X β) (sym eqM) (f x)) )
-            ≡⟨ cong (λ x → subst (λ X → X β) eqP (pmb₂ ((id lawId₂) v) x) ) (shiftFunSubst (sym eqM) f) ⟩
-          subst (λ X → X β) eqP (pmb₂ ((id lawId₂) v) (subst (λ X → (α → X β)) (sym eqM) f)) 
-            ≡⟨ cong (λ x → subst (λ X → X β) eqP (pmb₂ x (subst (λ X → (α → X β)) (sym eqM) f))) (sym (subst²≡id' eqId (λ X → X α) ((id lawId₂) v))) ⟩
-          subst (λ X → X β) eqP (pmb₂ (subst (λ X → X α) (sym eqId) (subst (λ X → (X α)) eqId ((id lawId₂) v))) (subst (λ X → (α → X β)) (sym eqM) f)) 
-            ≡⟨ cong (λ x → subst (λ X → X β) eqP (pmb₂ (subst (λ X → X α) (sym eqId) x) (subst (λ X → (α → X β)) (sym eqM) f)) ) (sym (shiftApplySubst eqId v (id lawId₂))) ⟩
-          subst (λ X → X β) eqP (pmb₂ (subst (λ X → X α) (sym eqId) ((subst (λ X → (α → X α)) eqId (id lawId₂)) v)) (subst (λ X → (α → X β)) (sym eqM) f)) 
-            ≡⟨ sym (substBindInwardEq pmb₂ eqId eqM eqP ((subst (λ X → (α → X α)) eqId (id lawId₂)) v) f) ⟩
-          substBind eqId eqM eqP pmb₂ ((subst (λ X → (α → X α)) eqId (id lawId₂)) v) f 
+          subst (λ X → X β) eqP (pmb₂ ((id law-id₂) v) (λ x → subst (λ X → X β) (sym eqM) (f x)) )
+            ≡⟨ cong (λ x → subst (λ X → X β) eqP (pmb₂ ((id law-id₂) v) x) ) (shiftFunSubst (sym eqM) f) ⟩
+          subst (λ X → X β) eqP (pmb₂ ((id law-id₂) v) (subst (λ X → (α → X β)) (sym eqM) f)) 
+            ≡⟨ cong (λ x → subst (λ X → X β) eqP (pmb₂ x (subst (λ X → (α → X β)) (sym eqM) f))) (sym (subst²≡id' eqId (λ X → X α) ((id law-id₂) v))) ⟩
+          subst (λ X → X β) eqP (pmb₂ (subst (λ X → X α) (sym eqId) (subst (λ X → (X α)) eqId ((id law-id₂) v))) (subst (λ X → (α → X β)) (sym eqM) f)) 
+            ≡⟨ cong (λ x → subst (λ X → X β) eqP (pmb₂ (subst (λ X → X α) (sym eqId) x) (subst (λ X → (α → X β)) (sym eqM) f)) ) (sym (shiftApplySubst eqId v (id law-id₂))) ⟩
+          subst (λ X → X β) eqP (pmb₂ (subst (λ X → X α) (sym eqId) ((subst (λ X → (α → X α)) eqId (id law-id₂)) v)) (subst (λ X → (α → X β)) (sym eqM) f)) 
+            ≡⟨ sym (substBindInwardEq pmb₂ eqId eqM eqP ((subst (λ X → (α → X α)) eqId (id law-id₂)) v) f) ⟩
+          substBind eqId eqM eqP pmb₂ ((subst (λ X → (α → X α)) eqId (id law-id₂)) v) f 
             ≡⟨ eqSubstBind₂ ⟩
-          bind₂ ((subst (λ X → (α → X α)) eqId (id lawId₂)) v) f
+          bind₂ ((subst (λ X → (α → X α)) eqId (id law-id₂)) v) f
             ≡⟨ cong (λ x → bind₂ (x v) f) (sym (eqIdSubst eqId)) ⟩
-          bind₂ (id lawId v) f ∎
+          bind₂ (id law-id v) f ∎
 
       lawMorph3 : ∀ (M P : TyCons) (b₁ : B[ M , Id ]▷ P) (b₂ : B[ Id , M ]▷ P)
                 → ∀ {α β : Type} (v : α) (f : α → ⟨ M ⟩ β) 
-                → (bind {M} {Id} {P} b₁) (f v) (id lawId) ≡ (bind {Id} {M} {P} b₂) (id lawId v) f
+                → (bind {M} {Id} {P} b₁) (f v) (id law-id) ≡ (bind {Id} {M} {P} b₂) (id law-id v) f
       lawMorph3 (inj₁ IdentTC  ) (inj₁ IdentTC  ) b₁ b₂ {α = α} {β = β} v f = lawMorph3Proof₁ idTC   idTC         b₁ b₂ refl refl {α = α} {β = β} v f refl refl
       lawMorph3 (inj₁ IdentTC  ) (inj₂ (inj₁ P₁)) b₁ b₂ {α = α} {β = β} v f = lawMorph3Proof₁ idTC   (inj₂ P₁)    b₁ b₂ refl refl {α = α} {β = β} v f refl refl 
       lawMorph3 (inj₁ IdentTC  ) (inj₂ (inj₂ P₂)) b₁ b₂ {α = α} {β = β} v f = lawMorph3Proof₂ idTC   (inj₂ P₂)    b₁ b₂ refl refl {α = α} {β = β} v f refl refl
@@ -865,7 +865,7 @@ polymonadUnion {TyCons₁} {TyCons₂} {pm₁} {pm₂} upm₁ upm₂ = record
       lawClosure (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ S₂)) (inj₂ (inj₂ T₂)) (inj₂ (inj₂ U₂)) (b₁ , b₂ , b₃ , b₄) = lawClosureProof₂ (b₁ , b₂ , b₃ , b₄)
       
       abstract
-        lawAssocProof₁ :  ∀ (M N P R T S : IdTyCons ⊎ TyCons₁)
+        law-assocProof₁ :  ∀ (M N P R T S : IdTyCons ⊎ TyCons₁)
                        → (b₁ : B[ TC₁→TC M , TC₁→TC N ]▷ TC₁→TC P) (b₂ : B[ TC₁→TC P , TC₁→TC R ]▷ TC₁→TC T) 
                        → (b₃ : B[ TC₁→TC N , TC₁→TC R ]▷ TC₁→TC S) (b₄ : B[ TC₁→TC M , TC₁→TC S ]▷ TC₁→TC T)
                        → (eqBind₁ : B[ TC₁→TC M , TC₁→TC N ]▷ TC₁→TC P ≡ B[ M , N ] pm₁ ▷ P)
@@ -883,7 +883,7 @@ polymonadUnion {TyCons₁} {TyCons₂} {pm₁} {pm₂} upm₁ upm₂ = record
                                        ≡ substBind (eqTC₁ M) (eqTC₁ S) (eqTC₁ T) (pmBind pm₁ (subst (λ x → x) eqBind₄ b₄)) m x)
                        → (bind {TC₁→TC P} {TC₁→TC R} {TC₁→TC T} b₂) ((bind {TC₁→TC M} {TC₁→TC N} {TC₁→TC P} b₁) m f) g 
                        ≡ (bind {TC₁→TC M} {TC₁→TC S} {TC₁→TC T} b₄) m (λ x → (bind {TC₁→TC N} {TC₁→TC R} {TC₁→TC S}  b₃) (f x) g)
-        lawAssocProof₁ M N P R T S b₁ b₂ b₃ b₄ eqBind₁ eqBind₂ eqBind₃ eqBind₄ {α = α} {β = β} {γ = γ} m f g eqSubstBind₁ eqSubstBind₂ eqSubstBind₃ eqSubstBind₄ =
+        law-assocProof₁ M N P R T S b₁ b₂ b₃ b₄ eqBind₁ eqBind₂ eqBind₃ eqBind₄ {α = α} {β = β} {γ = γ} m f g eqSubstBind₁ eqSubstBind₂ eqSubstBind₃ eqSubstBind₄ =
           let bind₁ = bind {TC₁→TC M} {TC₁→TC N} {TC₁→TC P} b₁
               bind₂ = bind {TC₁→TC P} {TC₁→TC R} {TC₁→TC T} b₂
               bind₃ = bind {TC₁→TC N} {TC₁→TC R} {TC₁→TC S} b₃
@@ -957,39 +957,39 @@ polymonadUnion {TyCons₁} {TyCons₂} {pm₁} {pm₂} upm₁ upm₂ = record
             ≡⟨ cong (λ X → bind₄ m X) (sym eqSubstBind₃) ⟩
           bind₄ m (λ x → bind₃ (f x) g) ∎
         
-        lawAssocHelp1 : (b : B[ idTC , idTC ]▷ idTC) 
+        law-assocHelp1 : (b : B[ idTC , idTC ]▷ idTC) 
                               → ∀ {α β : Type} (m : ⟨ idTC ⟩ α) (f : α → ⟨ idTC ⟩ β) 
                               → substBind eqId₁ eqId₁ eqId₁ (pmBind pm₁ b) m f
                               ≡ substBind eqId₂ eqId₂ eqId₂ (pmBind pm₂ (subst (λ x → x) eqIdBind b)) m f
-        lawAssocHelp1 b {α = α} {β = β} m f = begin
+        law-assocHelp1 b {α = α} {β = β} m f = begin
           substBind eqId₁ eqId₁ eqId₁ (pmBind pm₁ b) m f ≡⟨ cong (λ x → x m f) (eqBindId₁ b) ⟩
           bindId m f ≡⟨ sym (cong (λ x → x m f) (eqBindId₂ ((subst (λ x → x) eqIdBind b)))) ⟩
           substBind eqId₂ eqId₂ eqId₂ (pmBind pm₂ (subst (λ x → x) eqIdBind b)) m f ∎
         
-        lawAssocHelp2 : (b : B[ idTC , idTC ]▷ idTC) 
+        law-assocHelp2 : (b : B[ idTC , idTC ]▷ idTC) 
                       → ∀ {α β : Type} (f : α → ⟨ idTC ⟩ β) 
                       → ( (x : ⟨ idTC ⟩ α) → substBind eqId₁ eqId₁ eqId₁ (pmBind pm₁ b) x f
                                            ≡ substBind eqId₂ eqId₂ eqId₂ (pmBind pm₂ (subst (λ x → x) eqIdBind b)) x f)
-        lawAssocHelp2 b f x = lawAssocHelp1 b x f
+        law-assocHelp2 b f x = law-assocHelp1 b x f
 
-        lawAssocHelp3 : (b : B[ idTC , idTC ]▷ idTC) 
+        law-assocHelp3 : (b : B[ idTC , idTC ]▷ idTC) 
                               → ∀ {α β γ : Type} (f : α → ⟨ idTC ⟩ β) (g : β → ⟨ idTC ⟩ γ)
                               → (λ x → substBind eqId₁ eqId₁ eqId₁ (pmBind pm₁ b) (f x) g)
                               ≡ (λ x → substBind eqId₂ eqId₂ eqId₂ (pmBind pm₂ (subst (λ x → x) eqIdBind b)) (f x) g)
-        lawAssocHelp3 b {α = α} {β = β} {γ = γ} f g = begin
+        law-assocHelp3 b {α = α} {β = β} {γ = γ} f g = begin
           (λ x → substBind eqId₁ eqId₁ eqId₁ (pmBind pm₁ b) (f x) g) ≡⟨ cong (λ bind → (λ x → bind (f x) g)) (eqBindId₁ b) ⟩
           (λ x → bindId (f x) g) ≡⟨ sym (cong (λ bind x → bind (f x) g) (eqBindId₂ ((subst (λ x → x) eqIdBind b)))) ⟩
           (λ x → substBind eqId₂ eqId₂ eqId₂ (pmBind pm₂ (subst (λ x → x) eqIdBind b)) (f x) g) ∎
         
-        lawAssocHelp4 : (b : B[ idTC , idTC ]▷ idTC) 
+        law-assocHelp4 : (b : B[ idTC , idTC ]▷ idTC) 
                       → ∀ {α β : Type} (m : ⟨ idTC ⟩ α) 
                       → ( (x : α → ⟨ idTC ⟩ β) → substBind eqId₁ eqId₁ eqId₁ (pmBind pm₁ b) m x
                                                ≡ substBind eqId₂ eqId₂ eqId₂ (pmBind pm₂ (subst (λ x → x) eqIdBind b)) m x )
-        lawAssocHelp4 b m x = lawAssocHelp1 b m x
+        law-assocHelp4 b m x = law-assocHelp1 b m x
 
 
         
-        lawAssocProof₂ :  ∀ (M N P R T S : IdTyCons ⊎ TyCons₂)
+        law-assocProof₂ :  ∀ (M N P R T S : IdTyCons ⊎ TyCons₂)
                        → (b₁ : B[ TC₂→TC M , TC₂→TC N ]▷ TC₂→TC P) (b₂ : B[ TC₂→TC P , TC₂→TC R ]▷ TC₂→TC T) 
                        → (b₃ : B[ TC₂→TC N , TC₂→TC R ]▷ TC₂→TC S) (b₄ : B[ TC₂→TC M , TC₂→TC S ]▷ TC₂→TC T)
                        → (eqBind₁ : B[ TC₂→TC M , TC₂→TC N ]▷ TC₂→TC P ≡ B[ M , N ] pm₂ ▷ P)
@@ -1007,7 +1007,7 @@ polymonadUnion {TyCons₁} {TyCons₂} {pm₁} {pm₂} upm₁ upm₂ = record
                                        ≡ substBind (eqTC₂ M) (eqTC₂ S) (eqTC₂ T) (pmBind pm₂ (subst (λ x → x) eqBind₄ b₄)) m x)
                        → (bind {TC₂→TC P} {TC₂→TC R} {TC₂→TC T} b₂) ((bind {TC₂→TC M} {TC₂→TC N} {TC₂→TC P} b₁) m f) g 
                        ≡ (bind {TC₂→TC M} {TC₂→TC S} {TC₂→TC T} b₄) m (λ x → (bind {TC₂→TC N} {TC₂→TC R} {TC₂→TC S}  b₃) (f x) g)
-        lawAssocProof₂ M N P R T S b₁ b₂ b₃ b₄ eqBind₁ eqBind₂ eqBind₃ eqBind₄ {α = α} {β = β} {γ = γ} m f g eqSubstBind₁ eqSubstBind₂ eqSubstBind₃ eqSubstBind₄ = 
+        law-assocProof₂ M N P R T S b₁ b₂ b₃ b₄ eqBind₁ eqBind₂ eqBind₃ eqBind₄ {α = α} {β = β} {γ = γ} m f g eqSubstBind₁ eqSubstBind₂ eqSubstBind₃ eqSubstBind₄ = 
           let bind₁ = bind {TC₂→TC M} {TC₂→TC N} {TC₂→TC P} b₁
               bind₂ = bind {TC₂→TC P} {TC₂→TC R} {TC₂→TC T} b₂
               bind₃ = bind {TC₂→TC N} {TC₂→TC R} {TC₂→TC S} b₃
@@ -1081,420 +1081,420 @@ polymonadUnion {TyCons₁} {TyCons₂} {pm₁} {pm₂} upm₁ upm₂ = record
             ≡⟨ cong (λ X → bind₄ m X) (sym eqSubstBind₃) ⟩
           bind₄ m (λ x → bind₃ (f x) g) ∎
       
-      lawAssoc : ∀ (M N P R T S : TyCons) 
+      law-assoc : ∀ (M N P R T S : TyCons) 
                → (b₁ : B[ M , N ]▷ P) (b₂ : B[ P , R ]▷ T) 
                → (b₃ : B[ N , R ]▷ S) (b₄ : B[ M , S ]▷ T)
                → ∀ {α β γ : Type} (m : ⟨ M ⟩ α) (f : α → ⟨ N ⟩ β) (g : β → ⟨ R ⟩ γ)
                → (bind {P} {R} {T} b₂) ((bind {M} {N} {P} b₁) m f) g ≡ (bind {M} {S} {T} b₄) m (λ x → (bind {N} {R} {S}  b₃) (f x) g)
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g =
-        lawAssocProof₁ idTC idTC idTC idTC idTC idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g =
-        lawAssocProof₁ idTC idTC idTC idTC idTC (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g =
-        lawAssocProof₂ idTC idTC idTC idTC idTC (inj₂ S₂) b₁ b₂ b₃ b₄ eqIdBind eqIdBind refl refl m f g (lawAssocHelp1 b₁ m f) (lawAssocHelp2 b₂ g) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ idTC idTC idTC idTC (inj₂ T₁) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g =
-        lawAssocProof₁ idTC idTC idTC idTC (inj₂ T₁) (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ () m f g
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g =
-        lawAssocProof₂ idTC idTC idTC idTC (inj₂ T₂) idTC b₁ b₂ b₃ b₄ eqIdBind refl eqIdBind refl m f g (lawAssocHelp1 b₁ m f) (λ x → refl) (lawAssocHelp3 b₃ f g) (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ () m f g
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g =
-        lawAssocProof₂ idTC idTC idTC idTC (inj₂ T₂) (inj₂ S₂) b₁ b₂ b₃ b₄ eqIdBind refl refl refl m f g (lawAssocHelp1 b₁ m f) (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g =
-        lawAssocProof₁ idTC idTC idTC (inj₂ R₁) idTC idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g =
-        lawAssocProof₁ idTC idTC idTC (inj₂ R₁) idTC (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ () b₄ m f g
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₂ (inj₁ T₁)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g =
-        lawAssocProof₁ idTC idTC idTC (inj₂ R₁) (inj₂ T₁) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₂ (inj₁ T₁)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ idTC idTC idTC (inj₂ R₁) (inj₂ T₁) (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₂ (inj₁ T₁)) (inj₂ (inj₂ S₂)) b₁ b₂ () () m f g
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₂ (inj₂ T₂)) S b₁ () b₃ b₄ m f g
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ idTC idTC idTC (inj₂ R₂) idTC idTC b₁ b₂ b₃ b₄ eqIdBind refl refl eqIdBind m f g (lawAssocHelp1 b₁ m f) (λ x → refl) refl (lawAssocHelp4 b₄ m)
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ () b₄ m f g
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ idTC idTC idTC (inj₂ R₂) idTC (inj₂ S₂) b₁ b₂ b₃ b₄ eqIdBind refl refl refl m f g (lawAssocHelp1 b₁ m f) (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₂ (inj₁ T₁)) S b₁ () b₃ b₄ m f g
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ idTC idTC idTC (inj₂ R₂) (inj₂ T₂) idTC b₁ b₂ b₃ b₄ eqIdBind refl refl refl m f g (lawAssocHelp1 b₁ m f) (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₂ (inj₂ T₂)) (inj₂ (inj₁ S₁)) b₁ b₂ () () m f g
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₂ (inj₂ T₂)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g =
-        lawAssocProof₂ idTC idTC idTC (inj₂ R₂) (inj₂ T₂) (inj₂ S₂) b₁ b₂ b₃ b₄ eqIdBind refl refl refl m f g (lawAssocHelp1 b₁ m f) (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g =
-        lawAssocProof₁ idTC idTC (inj₂ P₁) idTC idTC idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ idTC idTC (inj₂ P₁) idTC idTC (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g with idMorph¬∃₁ (inj₁ (P₁ , refl)) b₂
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g | ()
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g =
-        lawAssocProof₁ idTC idTC (inj₂ P₁) idTC (inj₂ T₁) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ idTC idTC (inj₂ P₁) idTC (inj₂ T₁) (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ () m f g
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) S b₁ () b₃ b₄ m f g
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g =
-        lawAssocProof₁ idTC idTC (inj₂ P₁) (inj₂ R₁) idTC idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ idTC idTC (inj₂ P₁) (inj₂ R₁) idTC (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ () b₄ m f g
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₂ (inj₁ T₁)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ idTC idTC (inj₂ P₁) (inj₂ R₁) (inj₂ T₁) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₂ (inj₁ T₁)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ idTC idTC (inj₂ P₁) (inj₂ R₁) (inj₂ T₁) (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₂ (inj₁ T₁)) (inj₂ (inj₂ S₂)) b₁ b₂ () () m f g
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₂ (inj₂ T₂)) S b₁ () b₃ b₄ m f g
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) S b₁ () b₃ b₄ m f g
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₂ (inj₂ R₂)) (inj₂ (inj₁ T₁)) S b₁ () b₃ b₄ m f g
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₂ (inj₂ R₂)) (inj₂ (inj₂ T₂)) S b₁ () b₃ b₄ m f g
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g =
-        lawAssocProof₂ idTC idTC (inj₂ P₂) idTC idTC idTC b₁ b₂ b₃ b₄ refl refl eqIdBind eqIdBind m f g refl (λ x → refl) (lawAssocHelp3 b₃ f g) (lawAssocHelp4 b₄ m)
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g with idMorph¬∃₂ (inj₁ (P₂ , refl)) b₂
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g | ()
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ idTC idTC (inj₂ P₂) idTC idTC (inj₂ S₂) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) S b₁ () b₃ b₄ m f g
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g =
-        lawAssocProof₂ idTC idTC (inj₂ P₂) idTC (inj₂ T₂) idTC b₁ b₂ b₃ b₄ refl refl eqIdBind refl m f g refl (λ x → refl) (lawAssocHelp3 b₃ f g) (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ () m f g
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ idTC idTC (inj₂ P₂) idTC (inj₂ T₂) (inj₂ S₂) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) S b₁() b₃ b₄ m f g
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₂ (inj₁ R₁)) (inj₂ (inj₁ T₁)) S b₁ () b₃ b₄ m f g
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₂ (inj₁ R₁)) (inj₂ (inj₂ T₂)) S b₁ () b₃ b₄ m f g
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g =
-        lawAssocProof₂ idTC idTC (inj₂ P₂) (inj₂ R₂) idTC idTC b₁ b₂ b₃ b₄ refl refl refl eqIdBind m f g refl (λ x → refl) refl (lawAssocHelp4 b₄ m)
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ () b₄ m f g
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ idTC idTC (inj₂ P₂) (inj₂ R₂) idTC (inj₂ S₂) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₂ (inj₁ T₁)) S b₁ () b₃ b₄ m f g
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ idTC idTC (inj₂ P₂) (inj₂ R₂) (inj₂ T₂) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₂ (inj₂ T₂)) (inj₂ (inj₁ S₁)) b₁ b₂ () () m f g
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₂ (inj₂ T₂)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ idTC idTC (inj₂ P₂) (inj₂ R₂) (inj₂ T₂) (inj₂ S₂) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ idTC (inj₂ N₁) idTC idTC idTC idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ idTC (inj₂ N₁) idTC idTC (inj₂ T₁) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g with idMorph¬∃₁ (inj₁ (N₁ , refl)) b₃
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g | ()
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ idTC (inj₂ N₁) idTC idTC idTC (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ idTC (inj₂ N₁) idTC idTC (inj₂ T₁) (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ () m f g
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₁ IdentTC) T (inj₂ (inj₂ S₂)) b₁ b₂ () b₄ m f g
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ idTC (inj₂ N₁) idTC (inj₂ R₁) idTC idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₂ (inj₁ T₁)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ idTC (inj₂ N₁) idTC (inj₂ R₁) (inj₂ T₁) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ () b₃ b₄ m f g
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ idTC (inj₂ N₁) idTC (inj₂ R₁) idTC (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₂ (inj₁ T₁)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ idTC (inj₂ N₁) idTC (inj₂ R₁) (inj₂ T₁) (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₂ (inj₂ T₂)) (inj₂ (inj₁ S₁)) b₁ () b₃ () m f g
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) T (inj₂ (inj₂ S₂)) b₁ b₂ () b₄ m f g
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) T (inj₁ IdentTC) b₁ b₂ () b₄ m f g
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) T (inj₂ (inj₁ S₁)) b₁ b₂ () b₄ m f g
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) T (inj₂ (inj₂ S₂)) b₁ b₂ () b₄ m f g
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ idTC (inj₂ N₁) (inj₂ P₁) idTC idTC idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ idTC (inj₂ N₁) (inj₂ P₁) idTC (inj₂ T₁) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ () b₃ b₄ m f g
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ idTC (inj₂ N₁) (inj₂ P₁) idTC idTC (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ idTC (inj₂ N₁) (inj₂ P₁) idTC (inj₂ T₁) (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₂ (inj₁ S₁)) b₁ () b₃ () m f g
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) T (inj₂ (inj₂ S₂)) b₁ b₂ () b₄ m f g
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ idTC (inj₂ N₁) (inj₂ P₁) (inj₂ R₁) idTC idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₂ (inj₁ T₁)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ idTC (inj₂ N₁) (inj₂ P₁) (inj₂ R₁) (inj₂ T₁) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ () b₃ b₄ m f g
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ idTC (inj₂ N₁) (inj₂ P₁) (inj₂ R₁) idTC (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₂ (inj₁ T₁)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ idTC (inj₂ N₁) (inj₂ P₁) (inj₂ R₁) (inj₂ T₁) (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₂ (inj₂ T₂)) (inj₂ (inj₁ S₁)) b₁ () b₃ () m f g
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) T (inj₂ (inj₂ S₂)) b₁ b₂ () b₄ m f g
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₂ (inj₂ R₂)) T (inj₁ IdentTC) b₁ b₂ () b₄ m f g
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₂ (inj₂ R₂)) T (inj₂ (inj₁ S₁)) b₁ b₂ () b₄ m f g
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₂ (inj₂ R₂)) T (inj₂ (inj₂ S₂)) b₁ b₂ () b₄ m f g
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₂ (inj₂ P₂)) R T S () b₂ b₃ b₄ m f g
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ idTC (inj₂ N₂) idTC idTC idTC idTC b₁ b₂ b₃ b₄ refl eqIdBind refl eqIdBind m f g refl (lawAssocHelp2 b₂ g) refl (lawAssocHelp4 b₄ m)
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g with idMorph¬∃₂ (inj₁ (N₂ , refl)) b₃
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g | ()
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ idTC (inj₂ N₂) idTC idTC (inj₂ T₂) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₁ IdentTC) T (inj₂ (inj₁ S₁)) b₁ b₂ () b₄ m f g
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ idTC (inj₂ N₂) idTC idTC idTC (inj₂ S₂) b₁ b₂ b₃ b₄ refl eqIdBind refl refl m f g refl (lawAssocHelp2 b₂ g) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ () m f g
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ idTC (inj₂ N₂) idTC idTC (inj₂ T₂) (inj₂ S₂) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) T (inj₁ IdentTC) b₁ b₂ () b₄ m f g
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) T (inj₂ (inj₁ S₁)) b₁ b₂ () b₄ m f g
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) T (inj₂ (inj₂ S₂)) b₁ b₂ () b₄ m f g
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ idTC (inj₂ N₂) idTC (inj₂ R₂) idTC idTC b₁ b₂ b₃ b₄ refl refl refl eqIdBind m f g refl (λ x → refl) refl (lawAssocHelp4 b₄ m)
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₂ (inj₁ T₁)) (inj₁ IdentTC) b₁ () b₃ b₄ m f g
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ idTC (inj₂ N₂) idTC (inj₂ R₂) (inj₂ T₂) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) T (inj₂ (inj₁ S₁)) b₁ b₂ () b₄ m f g
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ idTC (inj₂ N₂) idTC (inj₂ R₂) idTC (inj₂ S₂) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₂ (inj₁ T₁)) (inj₂ (inj₂ S₂)) b₁ () b₃ () m f g
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₂ (inj₂ T₂)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ idTC (inj₂ N₂) idTC (inj₂ R₂) (inj₂ T₂) (inj₂ S₂) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₂ (inj₁ P₁)) R T S () b₂ b₃ b₄ m f g
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ idTC (inj₂ N₂) (inj₂ P₂) idTC idTC idTC b₁ b₂ b₃ b₄ refl refl refl eqIdBind m f g refl (λ x → refl) refl (lawAssocHelp4 b₄ m)
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ () b₄ m f g
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ idTC (inj₂ N₂) (inj₂ P₂) idTC idTC (inj₂ S₂) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) S b₁ () b₃ b₄ m f g
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ idTC (inj₂ N₂) (inj₂ P₂) idTC (inj₂ T₂) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₂ (inj₁ S₁)) b₁ b₂ () () m f g
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ idTC (inj₂ N₂) (inj₂ P₂) idTC (inj₂ T₂) (inj₂ S₂) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₁ IdentTC) b₁ () () b₄ m f g
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ () () b₄ m f g
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ () () b₄ m f g
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₂ (inj₁ R₁)) (inj₂ (inj₁ T₁)) S b₁ () b₃ b₄ m f g
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₂ (inj₁ R₁)) (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ () () b₄ m f g
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₂ (inj₁ R₁)) (inj₂ (inj₂ T₂)) (inj₂ (inj₁ S₁)) b₁ () () () m f g
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₂ (inj₁ R₁)) (inj₂ (inj₂ T₂)) (inj₂ (inj₂ S₂)) b₁ () () b₄ m f g
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ idTC (inj₂ N₂) (inj₂ P₂) (inj₂ R₂) idTC idTC b₁ b₂ b₃ b₄ refl refl refl eqIdBind m f g refl (λ x → refl) refl (lawAssocHelp4 b₄ m)
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ () b₄ m f g
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ idTC (inj₂ N₂) (inj₂ P₂) (inj₂ R₂) idTC (inj₂ S₂) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₂ (inj₁ T₁)) S b₁ () b₃ b₄ m f g
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ idTC (inj₂ N₂) (inj₂ P₂) (inj₂ R₂) (inj₂ T₂) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₂ (inj₂ T₂)) (inj₂ (inj₁ S₁)) b₁ b₂ () () m f g
-      lawAssoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₂ (inj₂ T₂)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ idTC (inj₂ N₂) (inj₂ P₂) (inj₂ R₂) (inj₂ T₂) (inj₂ S₂) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ (inj₂ M₁) idTC idTC idTC idTC idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ (inj₂ M₁) idTC idTC (inj₂ R₁) idTC idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g with idMorph¬∃₁ (inj₁ (M₁ , refl)) b₁
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g | ()
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ (inj₂ M₁) idTC idTC idTC idTC (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ (inj₂ M₁) idTC idTC (inj₂ R₁) idTC (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ () b₄ m f g
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₁ IdentTC) R (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ () m f g
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ (inj₂ M₁) idTC idTC idTC (inj₂ T₁) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₂ (inj₁ T₁)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ (inj₂ M₁) idTC idTC (inj₂ R₁) (inj₂ T₁) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₂ (inj₁ T₁)) (inj₁ IdentTC) b₁ () b₃ b₄ m f g
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ (inj₂ M₁) idTC idTC idTC (inj₂ T₁) (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₂ (inj₁ T₁)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ (inj₂ M₁) idTC idTC (inj₂ R₁) (inj₂ T₁) (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₂ (inj₁ T₁)) (inj₂ (inj₁ S₁)) b₁ () () b₄ m f g
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₁ IdentTC) R (inj₂ (inj₁ T₁)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ () m f g
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₁ IdentTC) R (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ b₂ b₃ () m f g
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₁ IdentTC) R (inj₂ (inj₂ T₂)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ () m f g
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₁ IdentTC) R (inj₂ (inj₂ T₂)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ () m f g
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ (inj₂ M₁) idTC (inj₂ P₁) idTC idTC idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ (inj₂ M₁) idTC (inj₂ P₁) idTC idTC (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ () m f g
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ (inj₂ M₁) idTC (inj₂ P₁) idTC (inj₂ T₁) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ (inj₂ M₁) idTC (inj₂ P₁) idTC (inj₂ T₁) (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ () m f g
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) S b₁ () b₃ b₄ m f g
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ (inj₂ M₁) idTC (inj₂ P₁) (inj₂ R₁) idTC idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ (inj₂ M₁) idTC (inj₂ P₁) (inj₂ R₁) idTC (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ () () m f g
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₂ (inj₁ T₁)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ (inj₂ M₁) idTC (inj₂ P₁) (inj₂ R₁) (inj₂ T₁) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₂ (inj₁ T₁)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ (inj₂ M₁) idTC (inj₂ P₁) (inj₂ R₁) (inj₂ T₁) (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₂ (inj₁ T₁)) (inj₂ (inj₂ S₂)) b₁ b₂ () () m f g
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₂ (inj₂ T₂)) S b₁ () b₃ b₄ m f g
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) S b₁ () b₃ b₄ m f g
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₂ (inj₂ R₂)) (inj₂ (inj₁ T₁)) S b₁ () b₃ b₄ m f g
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₂ (inj₂ R₂)) (inj₂ (inj₂ T₂)) S b₁ () b₃ b₄ m f g
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) R T S () b₂ b₃ b₄ m f g
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ (inj₂ M₁) (inj₂ N₁) idTC idTC idTC idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ (inj₂ M₁) (inj₂ N₁) idTC (inj₂ R₁) idTC idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ () b₄ m f g
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ (inj₂ M₁) (inj₂ N₁) idTC idTC idTC (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ (inj₂ M₁) (inj₂ N₁) idTC (inj₂ R₁) idTC (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ () b₄ m f g
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) R (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ () m f g
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ (inj₂ M₁) (inj₂ N₁) idTC idTC (inj₂ T₁) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₂ (inj₁ T₁)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ (inj₂ M₁) (inj₂ N₁) idTC (inj₂ R₁) (inj₂ T₁) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₂ (inj₁ T₁)) (inj₁ IdentTC) b₁ () () b₄ m f g
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ (inj₂ M₁) (inj₂ N₁) idTC idTC (inj₂ T₁) (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₂ (inj₁ T₁)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ (inj₂ M₁) (inj₂ N₁) idTC (inj₂ R₁) (inj₂ T₁) (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₂ (inj₁ T₁)) (inj₂ (inj₁ S₁)) b₁ () () b₄ m f g
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) R (inj₂ (inj₁ T₁)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ () m f g
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) R (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ b₂ b₃ () m f g
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) R (inj₂ (inj₂ T₂)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ () m f g
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) R (inj₂ (inj₂ T₂)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ () m f g
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ (inj₂ M₁) (inj₂ N₁) (inj₂ P₁) idTC idTC idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ (inj₂ M₁) (inj₂ N₁) (inj₂ P₁) idTC idTC (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ () () m f g
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ (inj₂ M₁) (inj₂ N₁) (inj₂ P₁) idTC (inj₂ T₁) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ (inj₂ M₁) (inj₂ N₁) (inj₂ P₁) idTC (inj₂ T₁) (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) (inj₂ (inj₂ S₂)) b₁ b₂ () () m f g
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) S b₁ () b₃ b₄ m f g
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ (inj₂ M₁) (inj₂ N₁) (inj₂ P₁) (inj₂ R₁) idTC idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ (inj₂ M₁) (inj₂ N₁) (inj₂ P₁) (inj₂ R₁) idTC (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ () () m f g
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₂ (inj₁ T₁)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ (inj₂ M₁) (inj₂ N₁) (inj₂ P₁) (inj₂ R₁) (inj₂ T₁) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₂ (inj₁ T₁)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₁ (inj₂ M₁) (inj₂ N₁) (inj₂ P₁) (inj₂ R₁) (inj₂ T₁) (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₂ (inj₁ T₁)) (inj₂ (inj₂ S₂)) b₁ b₂ () () m f g
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₂ (inj₂ T₂)) S b₁ () b₃ b₄ m f g
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) S b₁ () b₃ b₄ m f g
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₂ (inj₂ R₂)) (inj₂ (inj₁ T₁)) S b₁ () b₃ b₄ m f g
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₂ (inj₂ R₂)) (inj₂ (inj₂ T₂)) S b₁ () b₃ b₄ m f g
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₂ (inj₂ P₂)) R T S () b₂ b₃ b₄ m f g
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) R T S () b₂ b₃ b₄ m f g
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₂ (inj₂ N₂)) (inj₂ (inj₁ P₁)) R T S () b₂ b₃ b₄ m f g
-      lawAssoc (inj₂ (inj₁ M₁)) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) R T S () b₂ b₃ b₄ m f g
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ (inj₂ M₂) idTC idTC idTC idTC idTC b₁ b₂ b₃ b₄ refl eqIdBind eqIdBind refl m f g refl (lawAssocHelp2 b₂ g) (lawAssocHelp3 b₃ f g) (λ x → refl)
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g with idMorph¬∃₂ (inj₁ (M₂ , refl)) b₁
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g | ()
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ (inj₂ M₂) idTC idTC (inj₂ R₂) idTC idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₁ IdentTC) R (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ () m f g
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ (inj₂ M₂) idTC idTC idTC idTC (inj₂ S₂) b₁ b₂ b₃ b₄ refl eqIdBind refl refl m f g refl (lawAssocHelp2 b₂ g) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ () b₄ m f g
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ (inj₂ M₂) idTC idTC (inj₂ R₂) idTC (inj₂ S₂) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₁ IdentTC) R (inj₂ (inj₁ T₁)) (inj₁ IdentTC) b₁ b₂ b₃ () m f g
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₁ IdentTC) R (inj₂ (inj₁ T₁)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ () m f g
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₁ IdentTC) R (inj₂ (inj₁ T₁)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ () m f g
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ (inj₂ M₂) idTC idTC idTC (inj₂ T₂) idTC b₁ b₂ b₃ b₄ refl refl eqIdBind refl m f g refl (λ x → refl) (lawAssocHelp3 b₃ f g) (λ x → refl)
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ () b₃ b₄ m f g
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ (inj₂ M₂) idTC idTC (inj₂ R₂) (inj₂ T₂) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₁ IdentTC) R (inj₂ (inj₂ T₂)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ () m f g
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ (inj₂ M₂) idTC idTC idTC (inj₂ T₂) (inj₂ S₂) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₂ (inj₂ T₂)) (inj₂ (inj₂ S₂)) b₁ () () b₄ m f g
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₂ (inj₂ T₂)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ (inj₂ M₂) idTC idTC (inj₂ R₂) (inj₂ T₂) (inj₂ S₂) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) R T S () b₂ b₃ b₄ m f g
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ (inj₂ M₂) idTC (inj₂ P₂) idTC idTC idTC b₁ b₂ b₃ b₄ refl refl eqIdBind refl m f g refl (λ x → refl) (lawAssocHelp3 b₃ f g) (λ x → refl)
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ () m f g
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ (inj₂ M₂) idTC (inj₂ P₂) idTC idTC (inj₂ S₂) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) S b₁ () b₃ b₄ m f g
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ (inj₂ M₂) idTC (inj₂ P₂) idTC (inj₂ T₂) idTC b₁ b₂ b₃ b₄ refl refl eqIdBind refl m f g refl (λ x → refl) (lawAssocHelp3 b₃ f g) (λ x → refl)
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ () m f g
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ (inj₂ M₂) idTC (inj₂ P₂) idTC (inj₂ T₂) (inj₂ S₂) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) S b₁ () b₃ b₄ m f g
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₂ (inj₁ R₁)) (inj₂ (inj₁ T₁)) S b₁ () b₃ b₄ m f g
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₂ (inj₁ R₁)) (inj₂ (inj₂ T₂)) S b₁ () b₃ b₄ m f g
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ (inj₂ M₂) idTC (inj₂ P₂) (inj₂ R₂) idTC idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ () () m f g
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ (inj₂ M₂) idTC (inj₂ P₂) (inj₂ R₂) idTC (inj₂ S₂) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₂ (inj₁ T₁)) S b₁ () b₃ b₄ m f g
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ (inj₂ M₂) idTC (inj₂ P₂) (inj₂ R₂) (inj₂ T₂) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₂ (inj₂ T₂)) (inj₂ (inj₁ S₁)) b₁ b₂ () () m f g
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₂ (inj₂ T₂)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ (inj₂ M₂) idTC (inj₂ P₂) (inj₂ R₂) (inj₂ T₂) (inj₂ S₂) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) R T S () b₂ b₃ b₄ m f g
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) R T S () b₂ b₃ b₄ m f g
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₂ (inj₁ N₁)) (inj₂ (inj₂ P₂)) R T S () b₂ b₃ b₄ m f g
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ (inj₂ M₂) (inj₂ N₂) idTC idTC idTC idTC b₁ b₂ b₃ b₄ refl eqIdBind refl refl m f g refl (lawAssocHelp2 b₂ g) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ () b₄ m f g
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ (inj₂ M₂) (inj₂ N₂) idTC (inj₂ R₂) idTC idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) R (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ () m f g
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ (inj₂ M₂) (inj₂ N₂) idTC idTC idTC (inj₂ S₂) b₁ b₂ b₃ b₄ refl eqIdBind refl refl m f g refl (lawAssocHelp2 b₂ g) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ () b₄ m f g
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ (inj₂ M₂) (inj₂ N₂) idTC (inj₂ R₂) idTC (inj₂ S₂) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) R (inj₂ (inj₁ T₁)) (inj₁ IdentTC) b₁ b₂ b₃ () m f g
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) R (inj₂ (inj₁ T₁)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ () m f g
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) R (inj₂ (inj₁ T₁)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ () m f g
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ (inj₂ M₂) (inj₂ N₂) idTC idTC (inj₂ T₂) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ () () b₄ m f g
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ (inj₂ M₂) (inj₂ N₂) idTC (inj₂ R₂) (inj₂ T₂) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) R (inj₂ (inj₂ T₂)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ () m f g
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ (inj₂ M₂) (inj₂ N₂) idTC idTC (inj₂ T₂) (inj₂ S₂) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₂ (inj₂ T₂)) (inj₂ (inj₂ S₂)) b₁ () () b₄ m f g
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₂ (inj₂ T₂)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ (inj₂ M₂) (inj₂ N₂) idTC (inj₂ R₂) (inj₂ T₂) (inj₂ S₂) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₂ (inj₁ P₁)) R T S () b₂ b₃ b₄ m f g
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ (inj₂ M₂) (inj₂ N₂) (inj₂ P₂) idTC idTC idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ () () m f g
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ (inj₂ M₂) (inj₂ N₂) (inj₂ P₂) idTC idTC (inj₂ S₂) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) S b₁ () b₃ b₄ m f g
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ (inj₂ M₂) (inj₂ N₂) (inj₂ P₂) idTC (inj₂ T₂) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₂ (inj₁ S₁)) b₁ b₂ () () m f g
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ (inj₂ M₂) (inj₂ N₂) (inj₂ P₂) idTC (inj₂ T₂) (inj₂ S₂) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) S b₁ () b₃ b₄ m f g
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₂ (inj₁ R₁)) (inj₂ (inj₁ T₁)) S b₁ () b₃ b₄ m f g
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₂ (inj₁ R₁)) (inj₂ (inj₂ T₂)) S b₁ () b₃ b₄ m f g
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ (inj₂ M₂) (inj₂ N₂) (inj₂ P₂) (inj₂ R₂) idTC idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ () () m f g
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ (inj₂ M₂) (inj₂ N₂) (inj₂ P₂) (inj₂ R₂) idTC (inj₂ S₂) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₂ (inj₁ T₁)) S b₁ () b₃ b₄ m f g
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ (inj₂ M₂) (inj₂ N₂) (inj₂ P₂) (inj₂ R₂) (inj₂ T₂) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₂ (inj₂ T₂)) (inj₂ (inj₁ S₁)) b₁ b₂ () () m f g
-      lawAssoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₂ (inj₂ T₂)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
-        lawAssocProof₂ (inj₂ M₂) (inj₂ N₂) (inj₂ P₂) (inj₂ R₂) (inj₂ T₂) (inj₂ S₂) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g =
+        law-assocProof₁ idTC idTC idTC idTC idTC idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g =
+        law-assocProof₁ idTC idTC idTC idTC idTC (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g =
+        law-assocProof₂ idTC idTC idTC idTC idTC (inj₂ S₂) b₁ b₂ b₃ b₄ eqIdBind eqIdBind refl refl m f g (law-assocHelp1 b₁ m f) (law-assocHelp2 b₂ g) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ idTC idTC idTC idTC (inj₂ T₁) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g =
+        law-assocProof₁ idTC idTC idTC idTC (inj₂ T₁) (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ () m f g
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g =
+        law-assocProof₂ idTC idTC idTC idTC (inj₂ T₂) idTC b₁ b₂ b₃ b₄ eqIdBind refl eqIdBind refl m f g (law-assocHelp1 b₁ m f) (λ x → refl) (law-assocHelp3 b₃ f g) (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ () m f g
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g =
+        law-assocProof₂ idTC idTC idTC idTC (inj₂ T₂) (inj₂ S₂) b₁ b₂ b₃ b₄ eqIdBind refl refl refl m f g (law-assocHelp1 b₁ m f) (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g =
+        law-assocProof₁ idTC idTC idTC (inj₂ R₁) idTC idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g =
+        law-assocProof₁ idTC idTC idTC (inj₂ R₁) idTC (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ () b₄ m f g
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₂ (inj₁ T₁)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g =
+        law-assocProof₁ idTC idTC idTC (inj₂ R₁) (inj₂ T₁) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₂ (inj₁ T₁)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ idTC idTC idTC (inj₂ R₁) (inj₂ T₁) (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₂ (inj₁ T₁)) (inj₂ (inj₂ S₂)) b₁ b₂ () () m f g
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₂ (inj₂ T₂)) S b₁ () b₃ b₄ m f g
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ idTC idTC idTC (inj₂ R₂) idTC idTC b₁ b₂ b₃ b₄ eqIdBind refl refl eqIdBind m f g (law-assocHelp1 b₁ m f) (λ x → refl) refl (law-assocHelp4 b₄ m)
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ () b₄ m f g
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ idTC idTC idTC (inj₂ R₂) idTC (inj₂ S₂) b₁ b₂ b₃ b₄ eqIdBind refl refl refl m f g (law-assocHelp1 b₁ m f) (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₂ (inj₁ T₁)) S b₁ () b₃ b₄ m f g
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ idTC idTC idTC (inj₂ R₂) (inj₂ T₂) idTC b₁ b₂ b₃ b₄ eqIdBind refl refl refl m f g (law-assocHelp1 b₁ m f) (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₂ (inj₂ T₂)) (inj₂ (inj₁ S₁)) b₁ b₂ () () m f g
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₂ (inj₂ T₂)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g =
+        law-assocProof₂ idTC idTC idTC (inj₂ R₂) (inj₂ T₂) (inj₂ S₂) b₁ b₂ b₃ b₄ eqIdBind refl refl refl m f g (law-assocHelp1 b₁ m f) (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g =
+        law-assocProof₁ idTC idTC (inj₂ P₁) idTC idTC idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ idTC idTC (inj₂ P₁) idTC idTC (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g with idMorph¬∃₁ (inj₁ (P₁ , refl)) b₂
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g | ()
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g =
+        law-assocProof₁ idTC idTC (inj₂ P₁) idTC (inj₂ T₁) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ idTC idTC (inj₂ P₁) idTC (inj₂ T₁) (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ () m f g
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) S b₁ () b₃ b₄ m f g
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g =
+        law-assocProof₁ idTC idTC (inj₂ P₁) (inj₂ R₁) idTC idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ idTC idTC (inj₂ P₁) (inj₂ R₁) idTC (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ () b₄ m f g
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₂ (inj₁ T₁)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ idTC idTC (inj₂ P₁) (inj₂ R₁) (inj₂ T₁) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₂ (inj₁ T₁)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ idTC idTC (inj₂ P₁) (inj₂ R₁) (inj₂ T₁) (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₂ (inj₁ T₁)) (inj₂ (inj₂ S₂)) b₁ b₂ () () m f g
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₂ (inj₂ T₂)) S b₁ () b₃ b₄ m f g
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) S b₁ () b₃ b₄ m f g
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₂ (inj₂ R₂)) (inj₂ (inj₁ T₁)) S b₁ () b₃ b₄ m f g
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₂ (inj₂ R₂)) (inj₂ (inj₂ T₂)) S b₁ () b₃ b₄ m f g
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g =
+        law-assocProof₂ idTC idTC (inj₂ P₂) idTC idTC idTC b₁ b₂ b₃ b₄ refl refl eqIdBind eqIdBind m f g refl (λ x → refl) (law-assocHelp3 b₃ f g) (law-assocHelp4 b₄ m)
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g with idMorph¬∃₂ (inj₁ (P₂ , refl)) b₂
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g | ()
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ idTC idTC (inj₂ P₂) idTC idTC (inj₂ S₂) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) S b₁ () b₃ b₄ m f g
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g =
+        law-assocProof₂ idTC idTC (inj₂ P₂) idTC (inj₂ T₂) idTC b₁ b₂ b₃ b₄ refl refl eqIdBind refl m f g refl (λ x → refl) (law-assocHelp3 b₃ f g) (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ () m f g
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ idTC idTC (inj₂ P₂) idTC (inj₂ T₂) (inj₂ S₂) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) S b₁() b₃ b₄ m f g
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₂ (inj₁ R₁)) (inj₂ (inj₁ T₁)) S b₁ () b₃ b₄ m f g
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₂ (inj₁ R₁)) (inj₂ (inj₂ T₂)) S b₁ () b₃ b₄ m f g
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g =
+        law-assocProof₂ idTC idTC (inj₂ P₂) (inj₂ R₂) idTC idTC b₁ b₂ b₃ b₄ refl refl refl eqIdBind m f g refl (λ x → refl) refl (law-assocHelp4 b₄ m)
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ () b₄ m f g
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ idTC idTC (inj₂ P₂) (inj₂ R₂) idTC (inj₂ S₂) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₂ (inj₁ T₁)) S b₁ () b₃ b₄ m f g
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ idTC idTC (inj₂ P₂) (inj₂ R₂) (inj₂ T₂) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₂ (inj₂ T₂)) (inj₂ (inj₁ S₁)) b₁ b₂ () () m f g
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₂ (inj₂ T₂)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ idTC idTC (inj₂ P₂) (inj₂ R₂) (inj₂ T₂) (inj₂ S₂) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ idTC (inj₂ N₁) idTC idTC idTC idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ idTC (inj₂ N₁) idTC idTC (inj₂ T₁) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g with idMorph¬∃₁ (inj₁ (N₁ , refl)) b₃
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g | ()
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ idTC (inj₂ N₁) idTC idTC idTC (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ idTC (inj₂ N₁) idTC idTC (inj₂ T₁) (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ () m f g
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₁ IdentTC) T (inj₂ (inj₂ S₂)) b₁ b₂ () b₄ m f g
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ idTC (inj₂ N₁) idTC (inj₂ R₁) idTC idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₂ (inj₁ T₁)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ idTC (inj₂ N₁) idTC (inj₂ R₁) (inj₂ T₁) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ () b₃ b₄ m f g
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ idTC (inj₂ N₁) idTC (inj₂ R₁) idTC (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₂ (inj₁ T₁)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ idTC (inj₂ N₁) idTC (inj₂ R₁) (inj₂ T₁) (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₂ (inj₂ T₂)) (inj₂ (inj₁ S₁)) b₁ () b₃ () m f g
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) T (inj₂ (inj₂ S₂)) b₁ b₂ () b₄ m f g
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) T (inj₁ IdentTC) b₁ b₂ () b₄ m f g
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) T (inj₂ (inj₁ S₁)) b₁ b₂ () b₄ m f g
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) T (inj₂ (inj₂ S₂)) b₁ b₂ () b₄ m f g
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ idTC (inj₂ N₁) (inj₂ P₁) idTC idTC idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ idTC (inj₂ N₁) (inj₂ P₁) idTC (inj₂ T₁) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ () b₃ b₄ m f g
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ idTC (inj₂ N₁) (inj₂ P₁) idTC idTC (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ idTC (inj₂ N₁) (inj₂ P₁) idTC (inj₂ T₁) (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₂ (inj₁ S₁)) b₁ () b₃ () m f g
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) T (inj₂ (inj₂ S₂)) b₁ b₂ () b₄ m f g
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ idTC (inj₂ N₁) (inj₂ P₁) (inj₂ R₁) idTC idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₂ (inj₁ T₁)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ idTC (inj₂ N₁) (inj₂ P₁) (inj₂ R₁) (inj₂ T₁) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ () b₃ b₄ m f g
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ idTC (inj₂ N₁) (inj₂ P₁) (inj₂ R₁) idTC (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₂ (inj₁ T₁)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ idTC (inj₂ N₁) (inj₂ P₁) (inj₂ R₁) (inj₂ T₁) (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₂ (inj₂ T₂)) (inj₂ (inj₁ S₁)) b₁ () b₃ () m f g
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) T (inj₂ (inj₂ S₂)) b₁ b₂ () b₄ m f g
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₂ (inj₂ R₂)) T (inj₁ IdentTC) b₁ b₂ () b₄ m f g
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₂ (inj₂ R₂)) T (inj₂ (inj₁ S₁)) b₁ b₂ () b₄ m f g
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₂ (inj₂ R₂)) T (inj₂ (inj₂ S₂)) b₁ b₂ () b₄ m f g
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₁ N₁)) (inj₂ (inj₂ P₂)) R T S () b₂ b₃ b₄ m f g
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ idTC (inj₂ N₂) idTC idTC idTC idTC b₁ b₂ b₃ b₄ refl eqIdBind refl eqIdBind m f g refl (law-assocHelp2 b₂ g) refl (law-assocHelp4 b₄ m)
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g with idMorph¬∃₂ (inj₁ (N₂ , refl)) b₃
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g | ()
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ idTC (inj₂ N₂) idTC idTC (inj₂ T₂) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₁ IdentTC) T (inj₂ (inj₁ S₁)) b₁ b₂ () b₄ m f g
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ idTC (inj₂ N₂) idTC idTC idTC (inj₂ S₂) b₁ b₂ b₃ b₄ refl eqIdBind refl refl m f g refl (law-assocHelp2 b₂ g) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ () m f g
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ idTC (inj₂ N₂) idTC idTC (inj₂ T₂) (inj₂ S₂) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) T (inj₁ IdentTC) b₁ b₂ () b₄ m f g
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) T (inj₂ (inj₁ S₁)) b₁ b₂ () b₄ m f g
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) T (inj₂ (inj₂ S₂)) b₁ b₂ () b₄ m f g
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ idTC (inj₂ N₂) idTC (inj₂ R₂) idTC idTC b₁ b₂ b₃ b₄ refl refl refl eqIdBind m f g refl (λ x → refl) refl (law-assocHelp4 b₄ m)
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₂ (inj₁ T₁)) (inj₁ IdentTC) b₁ () b₃ b₄ m f g
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ idTC (inj₂ N₂) idTC (inj₂ R₂) (inj₂ T₂) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) T (inj₂ (inj₁ S₁)) b₁ b₂ () b₄ m f g
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ idTC (inj₂ N₂) idTC (inj₂ R₂) idTC (inj₂ S₂) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₂ (inj₁ T₁)) (inj₂ (inj₂ S₂)) b₁ () b₃ () m f g
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₂ (inj₂ T₂)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ idTC (inj₂ N₂) idTC (inj₂ R₂) (inj₂ T₂) (inj₂ S₂) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₂ (inj₁ P₁)) R T S () b₂ b₃ b₄ m f g
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ idTC (inj₂ N₂) (inj₂ P₂) idTC idTC idTC b₁ b₂ b₃ b₄ refl refl refl eqIdBind m f g refl (λ x → refl) refl (law-assocHelp4 b₄ m)
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ () b₄ m f g
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ idTC (inj₂ N₂) (inj₂ P₂) idTC idTC (inj₂ S₂) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) S b₁ () b₃ b₄ m f g
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ idTC (inj₂ N₂) (inj₂ P₂) idTC (inj₂ T₂) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₂ (inj₁ S₁)) b₁ b₂ () () m f g
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ idTC (inj₂ N₂) (inj₂ P₂) idTC (inj₂ T₂) (inj₂ S₂) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₁ IdentTC) b₁ () () b₄ m f g
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ () () b₄ m f g
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ () () b₄ m f g
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₂ (inj₁ R₁)) (inj₂ (inj₁ T₁)) S b₁ () b₃ b₄ m f g
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₂ (inj₁ R₁)) (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ () () b₄ m f g
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₂ (inj₁ R₁)) (inj₂ (inj₂ T₂)) (inj₂ (inj₁ S₁)) b₁ () () () m f g
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₂ (inj₁ R₁)) (inj₂ (inj₂ T₂)) (inj₂ (inj₂ S₂)) b₁ () () b₄ m f g
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ idTC (inj₂ N₂) (inj₂ P₂) (inj₂ R₂) idTC idTC b₁ b₂ b₃ b₄ refl refl refl eqIdBind m f g refl (λ x → refl) refl (law-assocHelp4 b₄ m)
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ () b₄ m f g
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ idTC (inj₂ N₂) (inj₂ P₂) (inj₂ R₂) idTC (inj₂ S₂) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₂ (inj₁ T₁)) S b₁ () b₃ b₄ m f g
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ idTC (inj₂ N₂) (inj₂ P₂) (inj₂ R₂) (inj₂ T₂) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₂ (inj₂ T₂)) (inj₂ (inj₁ S₁)) b₁ b₂ () () m f g
+      law-assoc (inj₁ IdentTC) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₂ (inj₂ T₂)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ idTC (inj₂ N₂) (inj₂ P₂) (inj₂ R₂) (inj₂ T₂) (inj₂ S₂) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ (inj₂ M₁) idTC idTC idTC idTC idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ (inj₂ M₁) idTC idTC (inj₂ R₁) idTC idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g with idMorph¬∃₁ (inj₁ (M₁ , refl)) b₁
+      law-assoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g | ()
+      law-assoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ (inj₂ M₁) idTC idTC idTC idTC (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ (inj₂ M₁) idTC idTC (inj₂ R₁) idTC (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ () b₄ m f g
+      law-assoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₁ IdentTC) R (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ () m f g
+      law-assoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ (inj₂ M₁) idTC idTC idTC (inj₂ T₁) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₂ (inj₁ T₁)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ (inj₂ M₁) idTC idTC (inj₂ R₁) (inj₂ T₁) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₂ (inj₁ T₁)) (inj₁ IdentTC) b₁ () b₃ b₄ m f g
+      law-assoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ (inj₂ M₁) idTC idTC idTC (inj₂ T₁) (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₂ (inj₁ T₁)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ (inj₂ M₁) idTC idTC (inj₂ R₁) (inj₂ T₁) (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₂ (inj₁ T₁)) (inj₂ (inj₁ S₁)) b₁ () () b₄ m f g
+      law-assoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₁ IdentTC) R (inj₂ (inj₁ T₁)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ () m f g
+      law-assoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₁ IdentTC) R (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ b₂ b₃ () m f g
+      law-assoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₁ IdentTC) R (inj₂ (inj₂ T₂)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ () m f g
+      law-assoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₁ IdentTC) R (inj₂ (inj₂ T₂)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ () m f g
+      law-assoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ (inj₂ M₁) idTC (inj₂ P₁) idTC idTC idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ (inj₂ M₁) idTC (inj₂ P₁) idTC idTC (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ () m f g
+      law-assoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ (inj₂ M₁) idTC (inj₂ P₁) idTC (inj₂ T₁) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ (inj₂ M₁) idTC (inj₂ P₁) idTC (inj₂ T₁) (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ () m f g
+      law-assoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) S b₁ () b₃ b₄ m f g
+      law-assoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ (inj₂ M₁) idTC (inj₂ P₁) (inj₂ R₁) idTC idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ (inj₂ M₁) idTC (inj₂ P₁) (inj₂ R₁) idTC (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ () () m f g
+      law-assoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₂ (inj₁ T₁)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ (inj₂ M₁) idTC (inj₂ P₁) (inj₂ R₁) (inj₂ T₁) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₂ (inj₁ T₁)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ (inj₂ M₁) idTC (inj₂ P₁) (inj₂ R₁) (inj₂ T₁) (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₂ (inj₁ T₁)) (inj₂ (inj₂ S₂)) b₁ b₂ () () m f g
+      law-assoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₂ (inj₂ T₂)) S b₁ () b₃ b₄ m f g
+      law-assoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) S b₁ () b₃ b₄ m f g
+      law-assoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₂ (inj₂ R₂)) (inj₂ (inj₁ T₁)) S b₁ () b₃ b₄ m f g
+      law-assoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) (inj₂ (inj₂ R₂)) (inj₂ (inj₂ T₂)) S b₁ () b₃ b₄ m f g
+      law-assoc (inj₂ (inj₁ M₁)) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) R T S () b₂ b₃ b₄ m f g
+      law-assoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ (inj₂ M₁) (inj₂ N₁) idTC idTC idTC idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ (inj₂ M₁) (inj₂ N₁) idTC (inj₂ R₁) idTC idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ () b₄ m f g
+      law-assoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ (inj₂ M₁) (inj₂ N₁) idTC idTC idTC (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ (inj₂ M₁) (inj₂ N₁) idTC (inj₂ R₁) idTC (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ () b₄ m f g
+      law-assoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) R (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ () m f g
+      law-assoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ (inj₂ M₁) (inj₂ N₁) idTC idTC (inj₂ T₁) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₂ (inj₁ T₁)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ (inj₂ M₁) (inj₂ N₁) idTC (inj₂ R₁) (inj₂ T₁) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₂ (inj₁ T₁)) (inj₁ IdentTC) b₁ () () b₄ m f g
+      law-assoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ (inj₂ M₁) (inj₂ N₁) idTC idTC (inj₂ T₁) (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₂ (inj₁ T₁)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ (inj₂ M₁) (inj₂ N₁) idTC (inj₂ R₁) (inj₂ T₁) (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₂ (inj₁ T₁)) (inj₂ (inj₁ S₁)) b₁ () () b₄ m f g
+      law-assoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) R (inj₂ (inj₁ T₁)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ () m f g
+      law-assoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) R (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ b₂ b₃ () m f g
+      law-assoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) R (inj₂ (inj₂ T₂)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ () m f g
+      law-assoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) R (inj₂ (inj₂ T₂)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ () m f g
+      law-assoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ (inj₂ M₁) (inj₂ N₁) (inj₂ P₁) idTC idTC idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ (inj₂ M₁) (inj₂ N₁) (inj₂ P₁) idTC idTC (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ () () m f g
+      law-assoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ (inj₂ M₁) (inj₂ N₁) (inj₂ P₁) idTC (inj₂ T₁) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ (inj₂ M₁) (inj₂ N₁) (inj₂ P₁) idTC (inj₂ T₁) (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) (inj₂ (inj₂ S₂)) b₁ b₂ () () m f g
+      law-assoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) S b₁ () b₃ b₄ m f g
+      law-assoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ (inj₂ M₁) (inj₂ N₁) (inj₂ P₁) (inj₂ R₁) idTC idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ (inj₂ M₁) (inj₂ N₁) (inj₂ P₁) (inj₂ R₁) idTC (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ () () m f g
+      law-assoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₂ (inj₁ T₁)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ (inj₂ M₁) (inj₂ N₁) (inj₂ P₁) (inj₂ R₁) (inj₂ T₁) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₂ (inj₁ T₁)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₁ (inj₂ M₁) (inj₂ N₁) (inj₂ P₁) (inj₂ R₁) (inj₂ T₁) (inj₂ S₁) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₂ (inj₁ T₁)) (inj₂ (inj₂ S₂)) b₁ b₂ () () m f g
+      law-assoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₂ (inj₁ R₁)) (inj₂ (inj₂ T₂)) S b₁ () b₃ b₄ m f g
+      law-assoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) S b₁ () b₃ b₄ m f g
+      law-assoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₂ (inj₂ R₂)) (inj₂ (inj₁ T₁)) S b₁ () b₃ b₄ m f g
+      law-assoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) (inj₂ (inj₂ R₂)) (inj₂ (inj₂ T₂)) S b₁ () b₃ b₄ m f g
+      law-assoc (inj₂ (inj₁ M₁)) (inj₂ (inj₁ N₁)) (inj₂ (inj₂ P₂)) R T S () b₂ b₃ b₄ m f g
+      law-assoc (inj₂ (inj₁ M₁)) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) R T S () b₂ b₃ b₄ m f g
+      law-assoc (inj₂ (inj₁ M₁)) (inj₂ (inj₂ N₂)) (inj₂ (inj₁ P₁)) R T S () b₂ b₃ b₄ m f g
+      law-assoc (inj₂ (inj₁ M₁)) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) R T S () b₂ b₃ b₄ m f g
+      law-assoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ (inj₂ M₂) idTC idTC idTC idTC idTC b₁ b₂ b₃ b₄ refl eqIdBind eqIdBind refl m f g refl (law-assocHelp2 b₂ g) (law-assocHelp3 b₃ f g) (λ x → refl)
+      law-assoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g with idMorph¬∃₂ (inj₁ (M₂ , refl)) b₁
+      law-assoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g | ()
+      law-assoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ (inj₂ M₂) idTC idTC (inj₂ R₂) idTC idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₁ IdentTC) R (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ () m f g
+      law-assoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ (inj₂ M₂) idTC idTC idTC idTC (inj₂ S₂) b₁ b₂ b₃ b₄ refl eqIdBind refl refl m f g refl (law-assocHelp2 b₂ g) refl (λ x → refl)
+      law-assoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ () b₄ m f g
+      law-assoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ (inj₂ M₂) idTC idTC (inj₂ R₂) idTC (inj₂ S₂) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₁ IdentTC) R (inj₂ (inj₁ T₁)) (inj₁ IdentTC) b₁ b₂ b₃ () m f g
+      law-assoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₁ IdentTC) R (inj₂ (inj₁ T₁)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ () m f g
+      law-assoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₁ IdentTC) R (inj₂ (inj₁ T₁)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ () m f g
+      law-assoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ (inj₂ M₂) idTC idTC idTC (inj₂ T₂) idTC b₁ b₂ b₃ b₄ refl refl eqIdBind refl m f g refl (λ x → refl) (law-assocHelp3 b₃ f g) (λ x → refl)
+      law-assoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ () b₃ b₄ m f g
+      law-assoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ (inj₂ M₂) idTC idTC (inj₂ R₂) (inj₂ T₂) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₁ IdentTC) R (inj₂ (inj₂ T₂)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ () m f g
+      law-assoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ (inj₂ M₂) idTC idTC idTC (inj₂ T₂) (inj₂ S₂) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₂ (inj₂ T₂)) (inj₂ (inj₂ S₂)) b₁ () () b₄ m f g
+      law-assoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₂ (inj₂ T₂)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ (inj₂ M₂) idTC idTC (inj₂ R₂) (inj₂ T₂) (inj₂ S₂) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₂ (inj₁ P₁)) R T S () b₂ b₃ b₄ m f g
+      law-assoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ (inj₂ M₂) idTC (inj₂ P₂) idTC idTC idTC b₁ b₂ b₃ b₄ refl refl eqIdBind refl m f g refl (λ x → refl) (law-assocHelp3 b₃ f g) (λ x → refl)
+      law-assoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ () m f g
+      law-assoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ (inj₂ M₂) idTC (inj₂ P₂) idTC idTC (inj₂ S₂) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) S b₁ () b₃ b₄ m f g
+      law-assoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ (inj₂ M₂) idTC (inj₂ P₂) idTC (inj₂ T₂) idTC b₁ b₂ b₃ b₄ refl refl eqIdBind refl m f g refl (λ x → refl) (law-assocHelp3 b₃ f g) (λ x → refl)
+      law-assoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ () m f g
+      law-assoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ (inj₂ M₂) idTC (inj₂ P₂) idTC (inj₂ T₂) (inj₂ S₂) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) S b₁ () b₃ b₄ m f g
+      law-assoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₂ (inj₁ R₁)) (inj₂ (inj₁ T₁)) S b₁ () b₃ b₄ m f g
+      law-assoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₂ (inj₁ R₁)) (inj₂ (inj₂ T₂)) S b₁ () b₃ b₄ m f g
+      law-assoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ (inj₂ M₂) idTC (inj₂ P₂) (inj₂ R₂) idTC idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ () () m f g
+      law-assoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ (inj₂ M₂) idTC (inj₂ P₂) (inj₂ R₂) idTC (inj₂ S₂) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₂ (inj₁ T₁)) S b₁ () b₃ b₄ m f g
+      law-assoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ (inj₂ M₂) idTC (inj₂ P₂) (inj₂ R₂) (inj₂ T₂) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₂ (inj₂ T₂)) (inj₂ (inj₁ S₁)) b₁ b₂ () () m f g
+      law-assoc (inj₂ (inj₂ M₂)) (inj₁ IdentTC) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₂ (inj₂ T₂)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ (inj₂ M₂) idTC (inj₂ P₂) (inj₂ R₂) (inj₂ T₂) (inj₂ S₂) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₂ M₂)) (inj₂ (inj₁ N₁)) (inj₁ IdentTC) R T S () b₂ b₃ b₄ m f g
+      law-assoc (inj₂ (inj₂ M₂)) (inj₂ (inj₁ N₁)) (inj₂ (inj₁ P₁)) R T S () b₂ b₃ b₄ m f g
+      law-assoc (inj₂ (inj₂ M₂)) (inj₂ (inj₁ N₁)) (inj₂ (inj₂ P₂)) R T S () b₂ b₃ b₄ m f g
+      law-assoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ (inj₂ M₂) (inj₂ N₂) idTC idTC idTC idTC b₁ b₂ b₃ b₄ refl eqIdBind refl refl m f g refl (law-assocHelp2 b₂ g) refl (λ x → refl)
+      law-assoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ () b₄ m f g
+      law-assoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ (inj₂ M₂) (inj₂ N₂) idTC (inj₂ R₂) idTC idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) R (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ () m f g
+      law-assoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ (inj₂ M₂) (inj₂ N₂) idTC idTC idTC (inj₂ S₂) b₁ b₂ b₃ b₄ refl eqIdBind refl refl m f g refl (law-assocHelp2 b₂ g) refl (λ x → refl)
+      law-assoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ () b₄ m f g
+      law-assoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ (inj₂ M₂) (inj₂ N₂) idTC (inj₂ R₂) idTC (inj₂ S₂) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) R (inj₂ (inj₁ T₁)) (inj₁ IdentTC) b₁ b₂ b₃ () m f g
+      law-assoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) R (inj₂ (inj₁ T₁)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ () m f g
+      law-assoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) R (inj₂ (inj₁ T₁)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ () m f g
+      law-assoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ (inj₂ M₂) (inj₂ N₂) idTC idTC (inj₂ T₂) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ () () b₄ m f g
+      law-assoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ (inj₂ M₂) (inj₂ N₂) idTC (inj₂ R₂) (inj₂ T₂) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) R (inj₂ (inj₂ T₂)) (inj₂ (inj₁ S₁)) b₁ b₂ b₃ () m f g
+      law-assoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ (inj₂ M₂) (inj₂ N₂) idTC idTC (inj₂ T₂) (inj₂ S₂) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₂ (inj₁ R₁)) (inj₂ (inj₂ T₂)) (inj₂ (inj₂ S₂)) b₁ () () b₄ m f g
+      law-assoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₁ IdentTC) (inj₂ (inj₂ R₂)) (inj₂ (inj₂ T₂)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ (inj₂ M₂) (inj₂ N₂) idTC (inj₂ R₂) (inj₂ T₂) (inj₂ S₂) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₂ (inj₁ P₁)) R T S () b₂ b₃ b₄ m f g
+      law-assoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ (inj₂ M₂) (inj₂ N₂) (inj₂ P₂) idTC idTC idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ () () m f g
+      law-assoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ (inj₂ M₂) (inj₂ N₂) (inj₂ P₂) idTC idTC (inj₂ S₂) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₂ (inj₁ T₁)) S b₁ () b₃ b₄ m f g
+      law-assoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ (inj₂ M₂) (inj₂ N₂) (inj₂ P₂) idTC (inj₂ T₂) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₂ (inj₁ S₁)) b₁ b₂ () () m f g
+      law-assoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₁ IdentTC) (inj₂ (inj₂ T₂)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ (inj₂ M₂) (inj₂ N₂) (inj₂ P₂) idTC (inj₂ T₂) (inj₂ S₂) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₂ (inj₁ R₁)) (inj₁ IdentTC) S b₁ () b₃ b₄ m f g
+      law-assoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₂ (inj₁ R₁)) (inj₂ (inj₁ T₁)) S b₁ () b₃ b₄ m f g
+      law-assoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₂ (inj₁ R₁)) (inj₂ (inj₂ T₂)) S b₁ () b₃ b₄ m f g
+      law-assoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ (inj₂ M₂) (inj₂ N₂) (inj₂ P₂) (inj₂ R₂) idTC idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₂ (inj₁ S₁)) b₁ b₂ () () m f g
+      law-assoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₁ IdentTC) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ (inj₂ M₂) (inj₂ N₂) (inj₂ P₂) (inj₂ R₂) idTC (inj₂ S₂) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₂ (inj₁ T₁)) S b₁ () b₃ b₄ m f g
+      law-assoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₂ (inj₂ T₂)) (inj₁ IdentTC) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ (inj₂ M₂) (inj₂ N₂) (inj₂ P₂) (inj₂ R₂) (inj₂ T₂) idTC b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
+      law-assoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₂ (inj₂ T₂)) (inj₂ (inj₁ S₁)) b₁ b₂ () () m f g
+      law-assoc (inj₂ (inj₂ M₂)) (inj₂ (inj₂ N₂)) (inj₂ (inj₂ P₂)) (inj₂ (inj₂ R₂)) (inj₂ (inj₂ T₂)) (inj₂ (inj₂ S₂)) b₁ b₂ b₃ b₄ m f g = 
+        law-assocProof₂ (inj₂ M₂) (inj₂ N₂) (inj₂ P₂) (inj₂ R₂) (inj₂ T₂) (inj₂ S₂) b₁ b₂ b₃ b₄ refl refl refl refl m f g refl (λ x → refl) refl (λ x → refl)
 
 

@@ -71,21 +71,21 @@ record Supermonad {ℓ} (TyCons : Set ℓ) : Set (lsuc ℓ) where
                     → r₁ ≡ r₂
     
     -- The supermonad version of the right identity law.
-    lawIdR : {α β : Type} 
+    law-right-id : {α β : Type} 
            → (M N : TyCons)
            → (b : Binds M N N α β) → (r : Returns M α)
            → (a : α) → (k : α → ⟨ N ⟩ β)
            → bind b (return r a) k ≡ k a
     
     -- The supermonad version of the left identity law.
-    lawIdL : {α : Type} 
+    law-left-id : {α : Type} 
            → (M N : TyCons)
            → (b : Binds M N M α α) → (r : Returns N α)
            → (m : ⟨ M ⟩ α)
            → bind b m (return r) ≡ m
     
     -- The supermonad version of the associativity law.
-    lawAssoc : {α β γ : Type} 
+    law-assoc : {α β γ : Type} 
              → (M N P S T : TyCons)
              → (b₁ : Binds M N P α γ) → (b₂ : Binds S T N β γ)
              → (b₃ : Binds N T P β γ) → (b₄ : Binds M S N α β)
@@ -93,7 +93,7 @@ record Supermonad {ℓ} (TyCons : Set ℓ) : Set (lsuc ℓ) where
              → bind b₁ m (λ x → bind b₂ (f x) g) ≡ bind b₃ (bind b₄ m f) g
     
     -- The supermonad version of the monad-functor relationship.
-    lawMonadFmap : {α β : Type}
+    law-monad-fmap : {α β : Type}
                  → (M N : TyCons)
                  → (fcts : ConstrainedFunctor.FunctorCts (functor M) α β)
                  → (b : Binds M N M α β) → (r : Returns N β)

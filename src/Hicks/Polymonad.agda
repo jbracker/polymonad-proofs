@@ -32,11 +32,11 @@ record HicksPolymonad {l : Level} (TyCons : Set l) (Id : TyCons) : Set (lsuc l) 
     bind : {M N P : TyCons} → B[ M , N ]▷ P → [ ⟨ M ⟩ , ⟨ N ⟩ ]▷ ⟨ P ⟩
     
     -- Law of the Id type constructor: Id τ = τ
-    lawId : ⟨ Id ⟩ ≡ Identity
+    law-id : ⟨ Id ⟩ ≡ Identity
     
     -- Functor law from the definition:
     lawFunctor : ∀ (M : TyCons) → ∃ λ(b : B[ M , Id ]▷ M) 
-               → ∀ {α : Type} (m : ⟨ M ⟩ α) → (bind b) m (id lawId) ≡ m
+               → ∀ {α : Type} (m : ⟨ M ⟩ α) → (bind b) m (id law-id) ≡ m
     
     -- Paired morphism law from the definition:
     -- ∃ b₁:(M,Id)▷N ∈ Σ ⇔ ∃ b₂:(Id,M)▷N ∈ Σ
@@ -51,7 +51,7 @@ record HicksPolymonad {l : Level} (TyCons : Set l) (Id : TyCons) : Set (lsuc l) 
     -- Equation of the paired morphism law:
     lawMorph3 : ∀ (M N : TyCons) (b₁ : B[ M , Id ]▷ N) (b₂ : B[ Id , M ]▷ N)
               → ∀ {α β : Type} (v : α) (f : α → ⟨ M ⟩ β) 
-              → (bind b₁) (f v) (id lawId) ≡ (bind b₂) ((id lawId) v) f
+              → (bind b₁) (f v) (id law-id) ≡ (bind b₂) ((id law-id) v) f
     
     -- Diamond law from the definition:
     -- ( ∃ P, b₁, b₂ . { b₁:(M,N)▷P, b₂:(P,R)▷T } ⊆ Σ ) ⇔
@@ -70,7 +70,7 @@ record HicksPolymonad {l : Level} (TyCons : Set l) (Id : TyCons) : Set (lsuc l) 
     -- ∀ b₁, b₂, b₃, b₄ . 
     -- "If" { b₁:(M,N)▷P, b₂:(P,R)▷T, b₃:(N,R)▷S, b₄:(M,S)▷T } ⊆ Σ
     -- "then" b₂ (b₁ m f) g = b₄ m (λ x . b₃ (f x) g)
-    lawAssoc : ∀ (M N P R T S : TyCons) 
+    law-assoc : ∀ (M N P R T S : TyCons) 
              → (b₁ : B[ M , N ]▷ P) → (b₂ : B[ P , R ]▷ T) 
              → (b₃ : B[ N , R ]▷ S) → (b₄ : B[ M , S ]▷ T)
              → ∀ {α β γ : Type} (m : ⟨ M ⟩ α) (f : α → ⟨ N ⟩ β) (g : β → ⟨ R ⟩ γ)

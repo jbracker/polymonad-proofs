@@ -22,22 +22,22 @@ record ConstrainedMonad {ℓ : Level} (M : TyCon) : Set (lsuc ℓ) where
     
     functor : ConstrainedFunctor {ℓ = ℓ} M
     
-    lawIdR : ∀ {α β : Type}
+    law-right-id : ∀ {α β : Type}
            → (bcts : BindCts α β) → (rcts : ReturnCts α)
            → (a : α) → (k : α → M β) 
            → (bind bcts) (return rcts a) k ≡ k a
-    lawIdL : ∀ {α : Type}
+    law-left-id : ∀ {α : Type}
            → (bcts : BindCts α α) → (rcts : ReturnCts α)
            → (m : M α)
            → (bind bcts) m (return rcts) ≡ m
-    lawAssoc : ∀ {α β γ : Type}
+    law-assoc : ∀ {α β γ : Type}
              → (cts-αγ : BindCts α γ)
              → (cts-βγ : BindCts β γ)
              → (cts-αβ : BindCts α β)
              → (m : M α) → (k : α → M β) → (h : β → M γ)
              → (bind cts-αγ) m (λ x → (bind cts-βγ) (k x) h) ≡ (bind cts-βγ) ((bind cts-αβ) m k) h
     
-    lawMonadFmap : ∀ {α β : Type}
+    law-monad-fmap : ∀ {α β : Type}
                  → (fcts : FunctorCts functor α β)
                  → (bcts : BindCts α β)
                  → (rcts : ReturnCts β)

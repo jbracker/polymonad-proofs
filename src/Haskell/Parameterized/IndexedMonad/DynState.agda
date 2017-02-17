@@ -43,9 +43,9 @@ DynStateMonad : IxMonad Type DynState
 DynStateMonad = record
   { _>>=_ = λ ma f → DynStateCon (λ i → let j , a = runDynState ma i in runDynState (f a) j)
   ; return = λ a → DynStateCon (λ s → s , a)
-  ; lawIdR = λ a k → refl
-  ; lawIdL = λ m → refl
-  ; lawAssoc = λ m f g → refl 
+  ; law-right-id = λ a k → refl
+  ; law-left-id = λ m → refl
+  ; law-assoc = λ m f g → refl 
   }
 
 -- -----------------------------------------------------------------------------

@@ -28,13 +28,13 @@ record EffectMonad {n} (Effect : Set n) {{effectMonoid : Monoid Effect}} (M : Ef
     _>>=_ : ∀ {α β : Type} {i j : Effect} → M i α → (α → M j β) → M (i ∙ j) β
     return : ∀ {α : Type} → α → M ε α
     
-    lawIdL : ∀ {α β : Type} {i : Effect}
+    law-left-id : ∀ {α β : Type} {i : Effect}
            → (a : α) → (k : α → M i β) 
            → return a >>= k ≡ subst₂ M (sym (left-id {m = i})) refl (k a)
-    lawIdR : ∀ {α : Type} {i : Effect}
+    law-right-id : ∀ {α : Type} {i : Effect}
            → (m : M i α)
            → m >>= return ≡ subst₂ M (sym (right-id {m = i})) refl m
-    lawAssoc : ∀ {α β γ : Type} {i j k : Effect}
+    law-assoc : ∀ {α β γ : Type} {i j k : Effect}
              → (m : M i α) → (f : α → M j β) → (g : β → M k γ)
              → m >>= (λ x → f x >>= g) ≡ subst₂ M (sym $ monLawAssoc {m = i} {j} {k}) refl ((m >>= f) >>= g)
   
@@ -46,7 +46,7 @@ record EffectMonad {n} (Effect : Set n) {{effectMonoid : Monoid Effect}} (M : Ef
               → subst₂ M (monLawAssoc {m = i} {j} {k}) refl (m >>= (λ x → f x >>= g)) ≡ (m >>= f) >>= g
   symLawAssoc {α} {β} {γ} {i} {j} {k} m f g = begin
     subst₂ M (monLawAssoc {m = i} {j} {k}) refl (m >>= (λ x → f x >>= g))
-      ≡⟨ cong (λ X → subst₂ M (monLawAssoc {m = i} {j} {k}) refl X) (lawAssoc m f g) ⟩
+      ≡⟨ cong (λ X → subst₂ M (monLawAssoc {m = i} {j} {k}) refl X) (law-assoc m f g) ⟩
     subst₂ M (monLawAssoc {m = i} {j} {k}) refl (subst₂ M (sym $ monLawAssoc {m = i} {j} {k}) refl ((m >>= f) >>= g))
       ≡⟨ subst₂²≡id1 (monLawAssoc {m = i} {j} {k}) refl M ((m >>= f) >>= g) ⟩
     (m >>= f) >>= g ∎
@@ -60,7 +60,7 @@ data EffMonadBinds {n} (Effect : Set n) {{effectMonoid : Monoid Effect}} : (M N 
   ApplyB   : ∀ {i} → EffMonadBinds Effect idTC (inj₂ (EffMonadTC i)) (inj₂ (EffMonadTC i))
   ReturnB  : EffMonadBinds Effect idTC idTC (inj₂ (EffMonadTC ε)) 
 
-open EffectMonad renaming (_>>=_ to mBind; return to mReturn; lawAssoc to mLawAssoc)
+open EffectMonad renaming (_>>=_ to mBind; return to mReturn; law-assoc to mLawAssoc)
 
 bindMonad : ∀ {n} {Effect : Set n} {M : Effect → TyCon} {i j : Effect} {{effMonoid : Monoid Effect}} → (m : EffectMonad Effect M)
           → [ M i , M j ]▷ M (i ∙ j)

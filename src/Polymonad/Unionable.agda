@@ -25,7 +25,7 @@ open Polymonad
 record UnionablePolymonad {TyCons : Set} (pm : Polymonad (IdTyCons ⊎ TyCons) idTC) : Set₁ where
   field
     -- Every bind operator that only involves the identity is equivalent to the identity bind operator.
-    lawEqBindId : ∀ {α β : Type} → (b : B[ idTC , idTC ] pm ▷ idTC) → substBind (lawId pm) (lawId pm) (lawId pm) (pmBind pm b) {α} {β} ≡ bindId {α} {β}
+    lawEqBindId : ∀ {α β : Type} → (b : B[ idTC , idTC ] pm ▷ idTC) → substBind (law-id pm) (law-id pm) (law-id pm) (pmBind pm b) {α} {β} ≡ bindId {α} {β}
     
     -- There is only one identity bind operators in this polymonad and it can be identified usind the IdBinds datatype.
     lawEqIdBinds : B[ idTC , idTC ] pm ▷ idTC ≡ IdBinds
@@ -41,7 +41,7 @@ upmPolymonad : ∀ {TyCons : Set} {pm : Polymonad (IdTyCons ⊎ TyCons) idTC} �
 upmPolymonad {pm = pm} upm = pm
 
 upmLawEqId : ∀ {TyCons : Set} {pm : Polymonad (IdTyCons ⊎ TyCons) idTC} → UnionablePolymonad pm → ⟨ pm ▷ idTC ⟩ ≡ Identity
-upmLawEqId {pm = pm} upm = lawId pm
+upmLawEqId {pm = pm} upm = law-id pm
 
 upmLawEqBindId = UnionablePolymonad.lawEqBindId
 upmLawEqIdBinds = UnionablePolymonad.lawEqIdBinds

@@ -19,8 +19,8 @@ record ConstrainedFunctor {ℓ : Level} (F : TyCon) : Set (lsuc ℓ) where
 
     fmap : ∀ {α β : Type} → FunctorCts α β → ( (α → β) → (F α → F β) )
     
-    lawId  : ∀ {α : Type} → (cts : FunctorCts α α) → fmap {α = α} cts identity ≡ identity
-    lawCompose : ∀ {α β γ : Type} 
+    law-id  : ∀ {α : Type} → (cts : FunctorCts α α) → fmap {α = α} cts identity ≡ identity
+    law-compose : ∀ {α β γ : Type} 
                → (cts-αγ : FunctorCts α γ)
                → (cts-αβ : FunctorCts α β)
                → (cts-βγ : FunctorCts β γ)
@@ -31,8 +31,8 @@ Functor→ConstrainedFunctor : ∀ {ℓ} → (F : TyCon) → Functor F → Const
 Functor→ConstrainedFunctor {ℓ} F functor = record 
   { FunctorCts = FunctorCts 
   ; fmap = fmap 
-  ; lawId = lawId 
-  ; lawCompose = lawCompose
+  ; law-id = law-id 
+  ; law-compose = law-compose
   } where
     FunctorCts : Type → Type → Set ℓ
     FunctorCts _ _ = Lift ⊤
@@ -40,14 +40,14 @@ Functor→ConstrainedFunctor {ℓ} F functor = record
     fmap : ∀ {α β : Type} → FunctorCts α β → (α → β) → (F α → F β)
     fmap (lift tt) f ma = Functor.fmap functor f ma
     
-    lawId  : ∀ {α : Type} → (cts : FunctorCts α α) 
+    law-id  : ∀ {α : Type} → (cts : FunctorCts α α) 
            → fmap {α = α} cts identity ≡ identity
-    lawId (lift tt) = Functor.lawId functor
+    law-id (lift tt) = Functor.law-id functor
     
-    lawCompose : ∀ {α β γ : Type} 
+    law-compose : ∀ {α β γ : Type} 
                → (cts-αγ : FunctorCts α γ)
                → (cts-αβ : FunctorCts α β)
                → (cts-βγ : FunctorCts β γ)
                → (f : β → γ) → (g : α → β) 
                → fmap cts-αγ (f ∘ g) ≡ fmap cts-βγ f ∘ fmap cts-αβ g 
-    lawCompose (lift tt) (lift tt) (lift tt) f g = Functor.lawCompose functor f g
+    law-compose (lift tt) (lift tt) (lift tt) f g = Functor.law-compose functor f g

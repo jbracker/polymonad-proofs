@@ -31,8 +31,8 @@ IxMonad→Functor : ∀ {ℓ}
                 → ∀ (i j : Ixs) → Functor (M i j)
 IxMonad→Functor Ixs M monad i j = record 
   { fmap = fmap 
-  ; lawId = lawId 
-  ; lawCompose = lawCompose
+  ; law-id = law-id 
+  ; law-compose = law-compose
   } where
     F = IxMonadTC i j
     
@@ -42,21 +42,21 @@ IxMonad→Functor Ixs M monad i j = record
     fmap : ∀ {α β : Type} → (α → β) → M i j α → M i j β
     fmap f ma = ma >>= (return ∘ f)
         
-    lawId : ∀ {α : Type} → fmap {α = α} identity ≡ identity
-    lawId = fun-ext lawId'
+    law-id : ∀ {α : Type} → fmap {α = α} identity ≡ identity
+    law-id = fun-ext law-id'
       where
-        lawId' : {α : Type} → (ma : M i j α) → fmap {α = α} identity ma ≡ identity ma 
-        lawId' ma = begin
+        law-id' : {α : Type} → (ma : M i j α) → fmap {α = α} identity ma ≡ identity ma 
+        law-id' ma = begin
           fmap identity ma 
             ≡⟨ refl ⟩
           ma >>= return
-            ≡⟨ lawIdL monad ma ⟩
+            ≡⟨ law-left-id monad ma ⟩
           identity ma ∎
         
-    lawCompose : ∀ {α β γ : Type} 
+    law-compose : ∀ {α β γ : Type} 
                → (f : β → γ) → (g : α → β) 
                → fmap (f ∘ g) ≡ fmap f ∘ fmap g
-    lawCompose {α = α} f g = fun-ext lawDist'
+    law-compose {α = α} f g = fun-ext lawDist'
       where
         lawDist' : (ma : M i j α)
                  → fmap (f ∘ g) ma ≡ (fmap f ∘ fmap g) ma
@@ -64,9 +64,9 @@ IxMonad→Functor Ixs M monad i j = record
           fmap (f ∘ g) ma
             ≡⟨ refl ⟩
           ma >>= (λ x → return (f (g x)))
-            ≡⟨ cong (λ X → ma >>= X) (fun-ext (λ x → sym (lawIdR monad (g x) (return ∘ f)))) ⟩
+            ≡⟨ cong (λ X → ma >>= X) (fun-ext (λ x → sym (law-right-id monad (g x) (return ∘ f)))) ⟩
           ma >>= (λ x → return (g x) >>= (return ∘ f))
-            ≡⟨ lawAssoc monad ma (return ∘ g) (return ∘ f) ⟩
+            ≡⟨ law-assoc monad ma (return ∘ g) (return ∘ f) ⟩
           (ma >>= (return ∘ g)) >>= (return ∘ f)
             ≡⟨ refl ⟩
           (fmap f ∘ fmap g) ma ∎

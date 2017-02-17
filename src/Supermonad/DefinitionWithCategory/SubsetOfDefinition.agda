@@ -42,10 +42,10 @@ SupermonadC→Supermonad {ℓ₀} {ℓ₁} {C = C} {F = F} uniqueHom smc = recor
   ; lawSingleTyCon = lawSingleTyCon
   ; lawUniqueBind = λ {α} {β} → lawUniqueBind {α} {β}
   ; lawUniqueReturn = λ {α} {M} → lawUniqueReturn {α} {M}
-  ; lawIdR = lawIdR
-  ; lawIdL = lawIdL
-  ; lawAssoc = lawAssoc
-  ; lawMonadFmap = lawMonadFmap
+  ; law-right-id = law-right-id
+  ; law-left-id = law-left-id
+  ; law-assoc = law-assoc
+  ; law-monad-fmap = law-monad-fmap
   }
   where
     _∘_ = comp C
@@ -93,20 +93,20 @@ SupermonadC→Supermonad {ℓ₀} {ℓ₁} {C = C} {F = F} uniqueHom smc = recor
     functor (a , b , f) = record 
       { FunctorCts = ConstrainedFunctor.FunctorCts (SupermonadC.functor smc f)
       ; fmap = ConstrainedFunctor.fmap (SupermonadC.functor smc f)
-      ; lawId = ConstrainedFunctor.lawId (SupermonadC.functor smc f)
-      ; lawCompose = ConstrainedFunctor.lawCompose (SupermonadC.functor smc f)
+      ; law-id = ConstrainedFunctor.law-id (SupermonadC.functor smc f)
+      ; law-compose = ConstrainedFunctor.law-compose (SupermonadC.functor smc f)
       }
     
     fmap :  (M : HomIx) → {α β : Type} → ConstrainedFunctor.FunctorCts (functor M) α β → ( (α → β) → (F (proj₂ (proj₂ M)) α → F (proj₂ (proj₂ M)) β) )
     fmap (a , b , f) = ConstrainedFunctor.fmap (SupermonadC.functor smc f)
     
-    lawMonadFmap : {α β : Type} (M N : HomIx)
+    law-monad-fmap : {α β : Type} (M N : HomIx)
                  → (fcts : ConstrainedFunctor.FunctorCts (functor M) α β)
                  → (b : Binds M N M α β) (r : Returns N β) 
                  → (k : α → β) (m : ⟨ M ⟩ α) 
                  → bind b m ((return r) ∘F k) ≡ fmap M fcts k m
-    lawMonadFmap {α} {β} (a , b , f) (.b , .b , g) fcts (lift (refl , refl , refl , g∘f≡f)) (lift refl) k m with uniqueHom g
-    lawMonadFmap {α} {β} (a , b , f) (.b , .b , .(id C {b})) fcts (lift (refl , refl , refl , g∘f≡f)) (lift refl) k m | refl = begin
+    law-monad-fmap {α} {β} (a , b , f) (.b , .b , g) fcts (lift (refl , refl , refl , g∘f≡f)) (lift refl) k m with uniqueHom g
+    law-monad-fmap {α} {β} (a , b , f) (.b , .b , .(id C {b})) fcts (lift (refl , refl , refl , g∘f≡f)) (lift refl) k m | refl = begin
       bind (lift (refl , refl , refl , g∘f≡f)) m (ret ∘F k)
         ≡⟨ cong (λ X → bind (lift (refl , refl , refl , X)) m (ret ∘F k)) (proof-irrelevance g∘f≡f (catIdR C {f = f})) ⟩
       bind (lift (refl , refl , refl , catIdR C {f = f})) m (ret ∘F k)
@@ -128,10 +128,10 @@ SupermonadC→Supermonad {ℓ₀} {ℓ₁} {C = C} {F = F} uniqueHom smc = recor
                     → (r₁ r₂ : Returns M α) → r₁ ≡ r₂
     lawUniqueReturn (lift refl) (lift refl) = refl
     
-    lawIdR : {α β : Type} → (M N : HomIx) → (b : Binds M N N α β) → (r : Returns M α) 
+    law-right-id : {α β : Type} → (M N : HomIx) → (b : Binds M N N α β) → (r : Returns M α) 
            → (a : α) (k : α → ⟨ N ⟩ β) → bind b (return r a) k ≡ k a
-    lawIdR {α} {β} (a , .a , f) (.a , b , g) (lift (refl , refl , refl , f∘g≡g)) (lift refl) x k with uniqueHom f
-    lawIdR {α} {β} (a , .a , .(id C {a})) (.a , b , g) (lift (refl , refl , refl , f∘g≡g)) (lift refl) x k | refl = begin
+    law-right-id {α} {β} (a , .a , f) (.a , b , g) (lift (refl , refl , refl , f∘g≡g)) (lift refl) x k with uniqueHom f
+    law-right-id {α} {β} (a , .a , .(id C {a})) (.a , b , g) (lift (refl , refl , refl , f∘g≡g)) (lift refl) x k | refl = begin
       bind (lift (refl , refl , refl , f∘g≡g)) (ret x) k
         ≡⟨ bindReplace f∘g≡g (lift (refl , refl , refl , f∘g≡g)) (ret x) k ⟩
       subst (λ X → F X β) f∘g≡g (ret x >>= k)
@@ -140,13 +140,13 @@ SupermonadC→Supermonad {ℓ₀} {ℓ₁} {C = C} {F = F} uniqueHom smc = recor
         ≡⟨ SupermonadC.right-id smc x k ⟩
       k x ∎
     
-    lawIdL : {α : Type} 
+    law-left-id : {α : Type} 
            → (M N : HomIx)
            → (b : Binds M N M α α) → (r : Returns N α)
            → (m : ⟨ M ⟩ α) 
            → bind b m (return r) ≡ m
-    lawIdL {α} (a , b , f) (.b , .b , g) (lift (refl , refl , refl , g∘f≡f)) (lift refl) m with uniqueHom g
-    lawIdL {α} (a , b , f) (.b , .b , .(id C {b})) (lift (refl , refl , refl , g∘f≡f)) (lift refl) m | refl = begin
+    law-left-id {α} (a , b , f) (.b , .b , g) (lift (refl , refl , refl , g∘f≡f)) (lift refl) m with uniqueHom g
+    law-left-id {α} (a , b , f) (.b , .b , .(id C {b})) (lift (refl , refl , refl , g∘f≡f)) (lift refl) m | refl = begin
       bind (lift (refl , refl , refl , g∘f≡f)) m ret 
         ≡⟨ bindReplace g∘f≡f (lift (refl , refl , refl , g∘f≡f)) m ret ⟩
       subst (λ X → F X α) g∘f≡f (m >>= ret) 
@@ -155,16 +155,16 @@ SupermonadC→Supermonad {ℓ₀} {ℓ₁} {C = C} {F = F} uniqueHom smc = recor
         ≡⟨ SupermonadC.left-id smc m ⟩
       m ∎
     
-    lawAssoc : {α β γ : Type} 
+    law-assoc : {α β γ : Type} 
              → (M N P S T : HomIx)
              → (b₁ : Binds M N P α γ) → (b₂ : Binds S T N β γ)
              → (b₃ : Binds N T P β γ) → (b₄ : Binds M S N α β) 
              → (m : ⟨ M ⟩ α) → (f : α → ⟨ S ⟩ β) → (g : β → ⟨ T ⟩ γ)
              → bind b₁ m (λ x → bind b₂ (f x) g) ≡ bind b₃ (bind b₄ m f) g
-    lawAssoc {α} {β} {γ} (a1 , .a1 , f1) (.a1 , b2 , .(f5 ∘ f4)) (.a1 , .b2 , .((f5 ∘ f4) ∘ f1)) (.a1 , .b2 , f4) (.b2 , .b2 , f5) 
+    law-assoc {α} {β} {γ} (a1 , .a1 , f1) (.a1 , b2 , .(f5 ∘ f4)) (.a1 , .b2 , .((f5 ∘ f4) ∘ f1)) (.a1 , .b2 , f4) (.b2 , .b2 , f5) 
              (lift (refl , refl , refl , refl)) (lift (refl , refl , refl , refl)) (lift (refl , refl , refl , f4∘f1≡f5∘f4)) (lift (refl , refl , refl , f5∘f5∘f4≡f5∘f4∘f1))
              m k l with uniqueHom f1 | uniqueHom f5
-    lawAssoc {α} {β} {γ} (a1 , .a1 , .(id C {a = a1})) (.a1 , b2 , .(id C {a = b2} ∘ f4)) (.a1 , .b2 , .((id C {a = b2} ∘ f4) ∘ id C {a = a1})) (.a1 , .b2 , f4) (.b2 , .b2 , .(id C {a = b2})) 
+    law-assoc {α} {β} {γ} (a1 , .a1 , .(id C {a = a1})) (.a1 , b2 , .(id C {a = b2} ∘ f4)) (.a1 , .b2 , .((id C {a = b2} ∘ f4) ∘ id C {a = a1})) (.a1 , .b2 , f4) (.b2 , .b2 , .(id C {a = b2})) 
              (lift (refl , refl , refl , refl)) (lift (refl , refl , refl , refl)) (lift (refl , refl , refl , f5∘f5∘f4≡f5∘f4∘f1)) (lift (refl , refl , refl , f4∘f1≡f5∘f4))
              m k l | refl | refl = begin
       m >>= (λ x → k x >>= l)

@@ -38,17 +38,17 @@ HicksPolymonad⇒Polymonad hpm = record
   { B[_,_]▷_ = HicksPolymonad.B[_,_]▷_ hpm
   ; ⟨_⟩      = HicksPolymonad.⟨_⟩ hpm
   ; bind     = HicksPolymonad.bind hpm
-  ; lawId    = HicksPolymonad.lawId hpm
+  ; law-id    = HicksPolymonad.law-id hpm
   ; lawFunctor1 = λ M → proj₁ (HicksPolymonad.lawFunctor hpm M)
   ; lawFunctor2 = λ M b m → trans 
-      (cong (λ X → X m (id (HicksPolymonad.lawId hpm))) (uniqueFunctor hpm M b (proj₁ (HicksPolymonad.lawFunctor hpm M)))) 
+      (cong (λ X → X m (id (HicksPolymonad.law-id hpm))) (uniqueFunctor hpm M b (proj₁ (HicksPolymonad.lawFunctor hpm M)))) 
       (proj₂ (HicksPolymonad.lawFunctor hpm M) m)
   ; lawMorph1   = HicksPolymonad.lawMorph1 hpm
   ; lawMorph2   = HicksPolymonad.lawMorph2 hpm
   ; lawMorph3   = HicksPolymonad.lawMorph3 hpm
   ; lawDiamond1 = HicksPolymonad.lawDiamond1 hpm
   ; lawDiamond2 = HicksPolymonad.lawDiamond2 hpm
-  ; lawAssoc    = HicksPolymonad.lawAssoc hpm
+  ; law-assoc    = HicksPolymonad.law-assoc hpm
   ; lawClosure  = HicksPolymonad.lawClosure hpm
   }
 
@@ -59,13 +59,13 @@ Polymonad⇒HicksPolymonad pm = record
   { B[_,_]▷_ = B[_,_]▷_ pm
   ; ⟨_⟩ = ⟨_⟩ pm
   ; bind = bind pm
-  ; lawId = lawId pm
+  ; law-id = law-id pm
   ; lawFunctor = λ M → let b = lawFunctor1 pm M in b , (λ m → lawFunctor2 pm M b m)
   ; lawMorph1 = lawMorph1 pm
   ; lawMorph2 = lawMorph2 pm
   ; lawMorph3 = lawMorph3 pm
   ; lawDiamond1 = lawDiamond1 pm
   ; lawDiamond2 = lawDiamond2 pm
-  ; lawAssoc = lawAssoc pm
+  ; law-assoc = law-assoc pm
   ; lawClosure = lawClosure pm
   }

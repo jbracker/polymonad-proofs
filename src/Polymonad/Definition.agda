@@ -31,14 +31,14 @@ record Polymonad {l : Level} (TyCons : Set l) (Id : TyCons) : Set (lsuc l) where
     bind : {M N P : TyCons} → B[ M , N ]▷ P → [ ⟨ M ⟩ , ⟨ N ⟩ ]▷ ⟨ P ⟩
     
     -- Law of the Id type constructor: Id τ = τ
-    lawId : ⟨ Id ⟩ ≡ Identity
+    law-id : ⟨ Id ⟩ ≡ Identity
     
     -- Functor law from the definition:
     -- There exists a functor bind-operation for each type constructor:
     lawFunctor1 : ∀ (M : TyCons) → B[ M , Id ]▷ M 
     -- Every bind-operation in shape of a functor needs to be an identity:
     lawFunctor2 : ∀ (M : TyCons) → ∀ (b : B[ M , Id ]▷ M)
-                → ∀ {α : Type} (m : ⟨ M ⟩ α) → (bind b) m (id lawId) ≡ m
+                → ∀ {α : Type} (m : ⟨ M ⟩ α) → (bind b) m (id law-id) ≡ m
     
     -- Paired morphism law from the definition:
     -- ∃ b₁:(M,Id)▷N ∈ Σ ⇔ ∃ b₂:(Id,M)▷N ∈ Σ
@@ -53,7 +53,7 @@ record Polymonad {l : Level} (TyCons : Set l) (Id : TyCons) : Set (lsuc l) where
     -- Equation of the paired morphism law:
     lawMorph3 : ∀ (M N : TyCons) (b₁ : B[ M , Id ]▷ N) (b₂ : B[ Id , M ]▷ N)
               → ∀ {α β : Type} (v : α) (f : α → ⟨ M ⟩ β) 
-              → (bind b₁) (f v) (id lawId) ≡ (bind b₂) ((id lawId) v) f
+              → (bind b₁) (f v) (id law-id) ≡ (bind b₂) ((id law-id) v) f
     
     -- Diamond law from the definition:
     -- ( ∃ P, b₁, b₂ . { b₁:(M,N)▷P, b₂:(P,R)▷T } ⊆ Σ ) ⇔
@@ -72,7 +72,7 @@ record Polymonad {l : Level} (TyCons : Set l) (Id : TyCons) : Set (lsuc l) where
     -- ∀ b₁, b₂, b₃, b₄ . 
     -- "If" { b₁:(M,N)▷P, b₂:(P,R)▷T, b₃:(N,R)▷S, b₄:(M,S)▷T } ⊆ Σ
     -- "then" b₂ (b₁ m f) g = b₄ m (λ x . b₃ (f x) g)
-    lawAssoc : ∀ (M N P R T S : TyCons) 
+    law-assoc : ∀ (M N P R T S : TyCons) 
              → (b₁ : B[ M , N ]▷ P) → (b₂ : B[ P , R ]▷ T) 
              → (b₃ : B[ N , R ]▷ S) → (b₄ : B[ M , S ]▷ T)
              → ∀ {α β γ : Type} (m : ⟨ M ⟩ α) (f : α → ⟨ N ⟩ β) (g : β → ⟨ R ⟩ γ)
@@ -109,7 +109,7 @@ B[ M , N ] pm ▷ P = Polymonad.B[_,_]▷_ pm M N P
 pmBind = Polymonad.bind
 
 -- Access to the identity law.
-pmLawId = Polymonad.lawId
+pmLawId = Polymonad.law-id
 
 -- Access to the functor law.
 pmLawFunctor1 = Polymonad.lawFunctor1
@@ -124,7 +124,7 @@ pmLawMorph3 = Polymonad.lawMorph3
 pmLawDiamond1 = Polymonad.lawDiamond1
 pmLawDiamond2 = Polymonad.lawDiamond2
 
-pmLawAssoc = Polymonad.lawAssoc
+pmLawAssoc = Polymonad.law-assoc
 
 pmLawClosure = Polymonad.lawClosure
 

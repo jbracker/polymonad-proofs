@@ -21,7 +21,7 @@ open import Polymonad.Unionable
 open import Haskell.Parameterized.IndexedMonad
 open import Haskell.Parameterized.IndexedMonad.Polymonad
 
-open IxMonad renaming (bind to mBind; return to mReturn; lawAssoc to mLawAssoc)
+open IxMonad renaming (bind to mBind; return to mReturn; law-assoc to mLawAssoc)
 open Polymonad
 
 IxMonad→UnionablePolymonad : ∀ {Ixs : Set} {M : Ixs → Ixs → TyCon} 
@@ -38,7 +38,7 @@ IxMonad→UnionablePolymonad {Ixs = Ixs} {M = M'} monad = record
     
     lawEqBindId : {α β : Type}
       → (b : B[ idTC , idTC ] pm ▷ idTC)
-      → substBind (lawId pm) (lawId pm) (lawId pm) (bind pm {M = idTC} {N = idTC} {P = idTC} b) {α = α} {β = β} ≡ bindId {α = α} {β = β}
+      → substBind (law-id pm) (law-id pm) (law-id pm) (bind pm {M = idTC} {N = idTC} {P = idTC} b) {α = α} {β = β} ≡ bindId {α = α} {β = β}
     lawEqBindId IdentB = refl
     
     idMorph¬∃ : {M N : TyCons} 

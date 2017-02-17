@@ -97,7 +97,7 @@ polymonadMaybeList {M₁ = M₁} {M₂ = M₂} monad₁ monad₂ functorMorph ap
   { B[_,_]▷_ = B[_,_]▷_
   ; ⟨_⟩ = ⟨_⟩
   ; bind = {!!} --λ {m} {n} {p} b → bind m n p b
-  ; lawId = {!!} --lawId
+  ; law-id = {!!} --law-id
   ; lawFunctor1 = {!!} --lawFunctor1
   ; lawFunctor2 = {!!} --lawFunctor2
   ; lawMorph1 = {!!} --lawMorph1 
@@ -105,7 +105,7 @@ polymonadMaybeList {M₁ = M₁} {M₂ = M₂} monad₁ monad₂ functorMorph ap
   ; lawMorph3 = {!!} --lawMorph3
   ; lawDiamond1 = {!!} --lawDiamond1 
   ; lawDiamond2 = {!!} --lawDiamond2
-  ; lawAssoc = {!!} --lawAssoc
+  ; law-assoc = {!!} --law-assoc
   ; lawClosure = {!!} --lawClosure
   } where
     TyCons = IdTyCons ⊎ (MonadTyCons ⊎ MonadTyCons)
@@ -184,8 +184,8 @@ polymonadMaybeList {M₁ = M₁} {M₂ = M₂} monad₁ monad₂ functorMorph ap
     bind (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₁ MonadTC)) ()
     bind (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) MonadB = bindMonad monad₂
 
-    lawId : ⟨ Id ⟩ ≡ Identity
-    lawId = refl
+    law-id : ⟨ Id ⟩ ≡ Identity
+    law-id = refl
  
     lawFunctor1 : ∀ (M : TyCons) → B[ M , Id ]▷ M
     lawFunctor1 (inj₁ IdentTC) = IdentB
@@ -193,7 +193,7 @@ polymonadMaybeList {M₁ = M₁} {M₂ = M₂} monad₁ monad₂ functorMorph ap
     lawFunctor1 (inj₂ (inj₂ MonadTC)) = FunctorB
     
     lawFunctor2 : ∀ (M : TyCons) → (b : B[ M , Id ]▷ M) 
-                → ∀ {α : Type} (m : ⟨ M ⟩ α) → (bind M Id M b) m (id lawId) ≡ m
+                → ∀ {α : Type} (m : ⟨ M ⟩ α) → (bind M Id M b) m (id law-id) ≡ m
     lawFunctor2 (inj₁ IdentTC) IdentB m = refl
     lawFunctor2 (inj₂ (inj₁ MonadTC)) FunctorB m = pmLawFunctor2 pm₁ (inj₂ MonadTC) FunctorB m
     lawFunctor2 (inj₂ (inj₂ MonadTC)) FunctorB m = pmLawFunctor2 pm₂ (inj₂ MonadTC) FunctorB m
@@ -224,7 +224,7 @@ polymonadMaybeList {M₁ = M₁} {M₂ = M₂} monad₁ monad₂ functorMorph ap
 
     lawMorph3 : ∀ (M N : TyCons) (b₁ : B[ M , Id ]▷ N) (b₂ : B[ Id , M ]▷ N)
               → ∀ {α β : Type} (v : α) (f : α → ⟨ M ⟩ β) 
-              → (bind M Id N b₁) (f v) (id lawId) ≡ (bind Id M N b₂) (id lawId v) f
+              → (bind M Id N b₁) (f v) (id law-id) ≡ (bind Id M N b₂) (id law-id v) f
     lawMorph3 (inj₁ IdentTC) (inj₁ IdentTC) IdentB IdentB v f = refl
     lawMorph3 (inj₁ IdentTC) (inj₂ (inj₁ MonadTC)) ReturnB ReturnB v f = refl
     lawMorph3 (inj₁ IdentTC) (inj₂ (inj₂ MonadTC)) ReturnB ReturnB v f = refl
@@ -428,24 +428,24 @@ polymonadMaybeList {M₁ = M₁} {M₂ = M₂} monad₁ monad₂ functorMorph ap
     lawDiamond2 (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC)) (inj₂ (inj₂ MonadTC) , MonadB , MonadB) = inj₂ (inj₂ MonadTC) , MonadB , MonadB
 
 {-
-    lawIdRF : ∀ {M : TyCon} 
+    law-right-idF : ∀ {M : TyCon} 
             → (monad : Monad M) 
             → ∀ {α β γ : Type} 
             → (f : α → β) → (k : β → M γ) 
             → (λ x → mBind monad (mReturn monad (f x)) k) ≡ (λ x → k (f x))
-    lawIdRF monad f k = fun-ext (λ x → mLawIdR monad (f x) k)
+    law-right-idF monad f k = fun-ext (λ x → mLawIdR monad (f x) k)
     
-    lawAssoc : ∀ (M N P R T S : TyCons) 
+    law-assoc : ∀ (M N P R T S : TyCons) 
                (b₁ : B[ M , N ]▷ P) (b₂ : B[ P , R ]▷ T) 
                (b₃ : B[ N , R ]▷ S) (b₄ : B[ M , S ]▷ T)
              → ∀ {α β γ : Type} (m : ⟨ M ⟩ α) (f : α → ⟨ N ⟩ β) (g : β → ⟨ R ⟩ γ)
              → (bind P R T b₂) ((bind M N P b₁) m f) g ≡ (bind M S T b₄) m (λ x → (bind N R S b₃) (f x) g)
-    lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) IdentB IdentB IdentB IdentB m f g = refl
-    lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ MonadTC) (inj₁ IdentTC) (inj₁ IdentTC) IdentB () () IdentB m f g
-    lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) R (inj₁ IdentTC) (inj₂ MonadTC) IdentB b₂ b₃ () m f g
-    lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ MonadTC) (inj₁ IdentTC) IdentB ReturnB IdentB ReturnB m f g = refl
-    lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ MonadTC) (inj₂ MonadTC) (inj₁ IdentTC) IdentB ApplyB () ReturnB m f g
-    lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ MonadTC) (inj₂ MonadTC) IdentB ReturnB ReturnB ApplyB m f g = begin
+    law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) IdentB IdentB IdentB IdentB m f g = refl
+    law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ MonadTC) (inj₁ IdentTC) (inj₁ IdentTC) IdentB () () IdentB m f g
+    law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) R (inj₁ IdentTC) (inj₂ MonadTC) IdentB b₂ b₃ () m f g
+    law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ MonadTC) (inj₁ IdentTC) IdentB ReturnB IdentB ReturnB m f g = refl
+    law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ MonadTC) (inj₂ MonadTC) (inj₁ IdentTC) IdentB ApplyB () ReturnB m f g
+    law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ MonadTC) (inj₂ MonadTC) IdentB ReturnB ReturnB ApplyB m f g = begin
       bindReturn monad (bindId m f) g 
         ≡⟨ refl ⟩
       mReturn monad (g (f m))
@@ -453,7 +453,7 @@ polymonadMaybeList {M₁ = M₁} {M₂ = M₂} monad₁ monad₂ functorMorph ap
       mBind monad (mReturn monad m) (λ x → mReturn monad (g (f x)))
         ≡⟨ refl ⟩
       bindApply monad m (λ x → bindReturn monad (f x) g) ∎
-    lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ MonadTC) (inj₂ MonadTC) (inj₂ MonadTC) IdentB ApplyB ApplyB ApplyB m f g = begin
+    law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ MonadTC) (inj₂ MonadTC) (inj₂ MonadTC) IdentB ApplyB ApplyB ApplyB m f g = begin
       bindApply monad (bindId m f) g
         ≡⟨ refl ⟩
       mBind monad (mReturn monad (f m)) g
@@ -461,10 +461,10 @@ polymonadMaybeList {M₁ = M₁} {M₂ = M₂} monad₁ monad₂ functorMorph ap
       mBind monad (mReturn monad m) (λ x → mBind monad (mReturn monad (f x)) g)
         ≡⟨ refl ⟩
       bindApply monad m (λ x → bindApply monad (f x) g) ∎
-    lawAssoc (inj₁ IdentTC) (inj₂ MonadTC) (inj₁ IdentTC) R T S () b₂ b₃ b₄ m f g
-    lawAssoc (inj₂ MonadTC) N (inj₁ IdentTC) R T S () b₂ b₃ b₄ m f g
-    lawAssoc M N (inj₂ MonadTC) R (inj₁ IdentTC) S b₁ () b₃ b₄ m f g
-    lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ MonadTC) (inj₁ IdentTC) (inj₂ MonadTC) (inj₁ IdentTC) ReturnB FunctorB IdentB ReturnB m f g = begin
+    law-assoc (inj₁ IdentTC) (inj₂ MonadTC) (inj₁ IdentTC) R T S () b₂ b₃ b₄ m f g
+    law-assoc (inj₂ MonadTC) N (inj₁ IdentTC) R T S () b₂ b₃ b₄ m f g
+    law-assoc M N (inj₂ MonadTC) R (inj₁ IdentTC) S b₁ () b₃ b₄ m f g
+    law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ MonadTC) (inj₁ IdentTC) (inj₂ MonadTC) (inj₁ IdentTC) ReturnB FunctorB IdentB ReturnB m f g = begin
       bindFunctor monad (bindReturn monad m f) g
         ≡⟨ refl ⟩
       mBind monad (mReturn  monad (f m)) (λ a → mReturn monad (g a))
@@ -472,19 +472,19 @@ polymonadMaybeList {M₁ = M₁} {M₂ = M₂} monad₁ monad₂ functorMorph ap
       mReturn monad (g (f m))
         ≡⟨ refl ⟩
       bindReturn monad m (λ x → bindId (f x) g) ∎
-    lawAssoc (inj₂ MonadTC) (inj₁ IdentTC) (inj₂ MonadTC) (inj₁ IdentTC) (inj₂ MonadTC) (inj₁ IdentTC) FunctorB FunctorB IdentB FunctorB m f g = begin
+    law-assoc (inj₂ MonadTC) (inj₁ IdentTC) (inj₂ MonadTC) (inj₁ IdentTC) (inj₂ MonadTC) (inj₁ IdentTC) FunctorB FunctorB IdentB FunctorB m f g = begin
       bindFunctor monad (bindFunctor monad m f) g 
         ≡⟨ refl ⟩
       mBind monad (mBind monad m (λ a → mReturn monad (f a))) (λ a → mReturn monad (g a))
         ≡⟨ sym (mLawAssoc monad m (λ a → mReturn monad (f a)) ((λ a → mReturn monad (g a)))) ⟩
       mBind monad m (λ a → mBind monad (mReturn monad (f a)) (λ a → mReturn monad (g a)) )
-        ≡⟨ cong (λ x → mBind monad m x) (lawIdRF monad f (λ a → mReturn monad (g a))) ⟩
+        ≡⟨ cong (λ x → mBind monad m x) (law-right-idF monad f (λ a → mReturn monad (g a))) ⟩
       mBind monad m (λ a → mReturn monad (g (f a)))
         ≡⟨ refl ⟩
       bindFunctor monad m (λ x → bindId (f x) g) ∎
-    lawAssoc M (inj₁ IdentTC) (inj₂ MonadTC) (inj₂ MonadTC) (inj₂ MonadTC) (inj₁ IdentTC) b₁ b₂ () b₄ m f g
-    lawAssoc M (inj₂ MonadTC) (inj₂ MonadTC) R (inj₂ MonadTC) (inj₁ IdentTC) b₁ b₂ () b₄ m f g
-    lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ MonadTC) (inj₁ IdentTC) (inj₂ MonadTC) (inj₂ MonadTC) ReturnB FunctorB ReturnB ApplyB m f g = begin
+    law-assoc M (inj₁ IdentTC) (inj₂ MonadTC) (inj₂ MonadTC) (inj₂ MonadTC) (inj₁ IdentTC) b₁ b₂ () b₄ m f g
+    law-assoc M (inj₂ MonadTC) (inj₂ MonadTC) R (inj₂ MonadTC) (inj₁ IdentTC) b₁ b₂ () b₄ m f g
+    law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ MonadTC) (inj₁ IdentTC) (inj₂ MonadTC) (inj₂ MonadTC) ReturnB FunctorB ReturnB ApplyB m f g = begin
       bindFunctor monad (bindReturn monad m f) g 
         ≡⟨ refl ⟩
       mBind monad (mReturn monad (f m)) (λ a → mReturn monad (g a))
@@ -494,7 +494,7 @@ polymonadMaybeList {M₁ = M₁} {M₂ = M₂} monad₁ monad₂ functorMorph ap
       mBind monad (mReturn monad m) (λ x → mReturn monad (g (f x)))
         ≡⟨ refl ⟩
       bindApply monad m (λ x → bindReturn monad (f x) g) ∎
-    lawAssoc (inj₁ IdentTC) (inj₂ MonadTC) (inj₂ MonadTC) (inj₁ IdentTC) (inj₂ MonadTC) (inj₂ MonadTC) ApplyB FunctorB FunctorB ApplyB m f g = begin
+    law-assoc (inj₁ IdentTC) (inj₂ MonadTC) (inj₂ MonadTC) (inj₁ IdentTC) (inj₂ MonadTC) (inj₂ MonadTC) ApplyB FunctorB FunctorB ApplyB m f g = begin
       bindFunctor monad (bindApply monad m f) g 
         ≡⟨ refl ⟩
       mBind monad (mBind monad (mReturn monad m) f) (λ a → mReturn monad (g a)) 
@@ -504,7 +504,7 @@ polymonadMaybeList {M₁ = M₁} {M₂ = M₂} monad₁ monad₂ functorMorph ap
       mBind monad (mReturn monad m) (λ x → mBind monad (f x) (λ a → mReturn monad (g a)))
         ≡⟨ refl ⟩
       bindApply monad m (λ x → bindFunctor monad (f x) g) ∎
-    lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ MonadTC) (inj₂ MonadTC) (inj₂ MonadTC) (inj₂ MonadTC) ReturnB MonadB ApplyB ApplyB m f g = begin
+    law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ MonadTC) (inj₂ MonadTC) (inj₂ MonadTC) (inj₂ MonadTC) ReturnB MonadB ApplyB ApplyB m f g = begin
       bindMonad monad (bindReturn monad m f) g
         ≡⟨ refl ⟩
       mBind monad (mReturn monad (f m)) g
@@ -512,7 +512,7 @@ polymonadMaybeList {M₁ = M₁} {M₂ = M₂} monad₁ monad₂ functorMorph ap
       mBind monad (mReturn monad m) (λ x → mBind monad (mReturn monad (f x)) g)
         ≡⟨ refl ⟩
       bindApply monad m (λ x → bindApply monad (f x) g) ∎
-    lawAssoc (inj₁ IdentTC) (inj₂ MonadTC) (inj₂ MonadTC) (inj₂ MonadTC) (inj₂ MonadTC) (inj₂ MonadTC) ApplyB MonadB MonadB ApplyB m f g = begin
+    law-assoc (inj₁ IdentTC) (inj₂ MonadTC) (inj₂ MonadTC) (inj₂ MonadTC) (inj₂ MonadTC) (inj₂ MonadTC) ApplyB MonadB MonadB ApplyB m f g = begin
       bindMonad monad (bindApply monad m f) g 
         ≡⟨ refl ⟩
       mBind monad (mBind monad (mReturn monad m) f) g 
@@ -522,7 +522,7 @@ polymonadMaybeList {M₁ = M₁} {M₂ = M₂} monad₁ monad₂ functorMorph ap
       mBind monad (mReturn monad m) (λ x → mBind monad (f x) g)
         ≡⟨ refl ⟩
       bindApply monad m (λ x → bindMonad monad (f x) g) ∎
-    lawAssoc (inj₂ MonadTC) (inj₁ IdentTC) (inj₂ MonadTC) (inj₁ IdentTC) (inj₂ MonadTC) (inj₂ MonadTC) FunctorB FunctorB ReturnB MonadB m f g = begin
+    law-assoc (inj₂ MonadTC) (inj₁ IdentTC) (inj₂ MonadTC) (inj₁ IdentTC) (inj₂ MonadTC) (inj₂ MonadTC) FunctorB FunctorB ReturnB MonadB m f g = begin
       bindFunctor monad (bindFunctor monad m f) g 
         ≡⟨ refl ⟩
       mBind monad (mBind monad m (λ a → mReturn monad (f a))) (λ a → mReturn monad (g a)) 
@@ -532,7 +532,7 @@ polymonadMaybeList {M₁ = M₁} {M₂ = M₂} monad₁ monad₂ functorMorph ap
       mBind monad m (λ x → mReturn monad (g (f x)))
         ≡⟨ refl ⟩
       bindMonad monad m (λ x → bindReturn monad (f x) g) ∎
-    lawAssoc (inj₂ MonadTC) (inj₂ MonadTC) (inj₂ MonadTC) (inj₁ IdentTC) (inj₂ MonadTC) (inj₂ MonadTC) MonadB FunctorB FunctorB MonadB m f g = begin
+    law-assoc (inj₂ MonadTC) (inj₂ MonadTC) (inj₂ MonadTC) (inj₁ IdentTC) (inj₂ MonadTC) (inj₂ MonadTC) MonadB FunctorB FunctorB MonadB m f g = begin
       bindFunctor monad (bindMonad monad m f) g 
         ≡⟨ refl ⟩
       mBind monad (mBind monad m f) (λ a → mReturn monad (g a)) 
@@ -540,7 +540,7 @@ polymonadMaybeList {M₁ = M₁} {M₂ = M₂} monad₁ monad₂ functorMorph ap
       mBind monad m (λ x → mBind monad (f x) (λ a → mReturn monad (g a)))
         ≡⟨ refl ⟩
       bindMonad monad m (λ x → bindFunctor monad (f x) g) ∎
-    lawAssoc (inj₂ MonadTC) (inj₁ IdentTC) (inj₂ MonadTC) (inj₂ MonadTC) (inj₂ MonadTC) (inj₂ MonadTC) FunctorB MonadB ApplyB MonadB m f g = begin
+    law-assoc (inj₂ MonadTC) (inj₁ IdentTC) (inj₂ MonadTC) (inj₂ MonadTC) (inj₂ MonadTC) (inj₂ MonadTC) FunctorB MonadB ApplyB MonadB m f g = begin
       bindMonad monad (bindFunctor monad m f) g 
         ≡⟨ refl ⟩
       mBind monad (mBind monad m (λ a → mReturn monad (f a))) g 
@@ -548,7 +548,7 @@ polymonadMaybeList {M₁ = M₁} {M₂ = M₂} monad₁ monad₂ functorMorph ap
       mBind monad m (λ x → mBind monad (mReturn monad (f x)) g)
         ≡⟨ refl ⟩
       bindMonad monad m (λ x → bindApply monad (f x) g) ∎
-    lawAssoc (inj₂ MonadTC) (inj₂ MonadTC) (inj₂ MonadTC) (inj₂ MonadTC) (inj₂ MonadTC) (inj₂ MonadTC) MonadB MonadB MonadB MonadB m f g = begin
+    law-assoc (inj₂ MonadTC) (inj₂ MonadTC) (inj₂ MonadTC) (inj₂ MonadTC) (inj₂ MonadTC) (inj₂ MonadTC) MonadB MonadB MonadB MonadB m f g = begin
       bindMonad monad (bindMonad monad m f) g 
         ≡⟨ refl ⟩
       mBind monad (mBind monad m f) g

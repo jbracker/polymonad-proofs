@@ -50,10 +50,10 @@ HaskellMonad→Monad {M} monad = record
     return = HaskellMonad.return monad
     fmap = HaskellFunctor.fmap (HaskellApplicative.functor (HaskellMonad.applicative monad))
 
-    lawIdR = HaskellMonad.lawIdR monad
-    lawIdL = HaskellMonad.lawIdL monad
-    lawAssoc = HaskellMonad.lawAssoc monad
-    lawMonadFmap = HaskellMonad.lawMonadFmap monad
+    law-right-id = HaskellMonad.law-right-id monad
+    law-left-id = HaskellMonad.law-left-id monad
+    law-assoc = HaskellMonad.law-assoc monad
+    law-monad-fmap = HaskellMonad.law-monad-fmap monad
 
     η : (α : Obj C) → Hom C ([ Id[ C ] ]₀ α) ([ F ]₀ α)
     η α = return {α}
@@ -65,9 +65,9 @@ HaskellMonad→Monad {M} monad = record
              → [ F ]₁ f ∘C η α ≡ η β ∘C [ Id[ C ] ]₁ f
     naturalη {α} {β} {f} = fun-ext $ λ (x : α) → begin
       fmap f (return x)
-        ≡⟨ lawMonadFmap f (return x) ⟩
+        ≡⟨ law-monad-fmap f (return x) ⟩
       return x >>= (return ∘C f)
-        ≡⟨ lawIdR x (return ∘C f) ⟩
+        ≡⟨ law-left-id x (return ∘C f) ⟩
       return (f x) ∎
     
     NatTrans-η : NatTrans Id[ C ] F
@@ -79,19 +79,19 @@ HaskellMonad→Monad {M} monad = record
       fmap f (join mma)
         ≡⟨ refl ⟩
       fmap f (mma >>= idF)
-        ≡⟨ lawMonadFmap f (mma >>= idF) ⟩
+        ≡⟨ law-monad-fmap f (mma >>= idF) ⟩
       (mma >>= idF) >>= (return ∘C f)
-        ≡⟨ sym $ lawAssoc mma idF (return ∘C f) ⟩
+        ≡⟨ sym $ law-assoc mma idF (return ∘C f) ⟩
       mma >>= (λ ma → ma >>= (return ∘C f))
-        ≡⟨ cong (λ X → mma >>= X) (fun-ext $ λ ma → sym $ lawIdR (ma >>= (return ∘C f)) idF) ⟩
+        ≡⟨ cong (λ X → mma >>= X) (fun-ext $ λ ma → sym $ law-left-id (ma >>= (return ∘C f)) idF) ⟩
       mma >>= (λ ma → return (ma >>= (return ∘C f)) >>= idF)
-        ≡⟨ lawAssoc mma (λ ma → return (ma >>= (return ∘C f))) idF ⟩
+        ≡⟨ law-assoc mma (λ ma → return (ma >>= (return ∘C f))) idF ⟩
       (mma >>= (λ ma → return (ma >>= (return ∘C f)))) >>= idF
-        ≡⟨ cong (λ X → (mma >>= X) >>= idF) (fun-ext $ λ ma → cong (λ X → return X) (sym $ lawMonadFmap f ma)) ⟩
+        ≡⟨ cong (λ X → (mma >>= X) >>= idF) (fun-ext $ λ ma → cong (λ X → return X) (sym $ law-monad-fmap f ma)) ⟩
       (mma >>= (λ ma → return (fmap f ma))) >>= idF
         ≡⟨ refl ⟩
       (mma >>= (return ∘C (fmap f))) >>= idF
-        ≡⟨ cong (λ X → X >>= idF) (sym $ lawMonadFmap (fmap f) mma) ⟩
+        ≡⟨ cong (λ X → X >>= idF) (sym $ law-monad-fmap (fmap f) mma) ⟩
       (fmap (fmap f) mma) >>= idF
         ≡⟨ refl ⟩
       join (fmap (fmap f) mma) ∎
@@ -105,15 +105,15 @@ HaskellMonad→Monad {M} monad = record
       join (fmap (join {α}) mma)
         ≡⟨ refl ⟩
       fmap (join {α}) mma >>= idF
-        ≡⟨ cong (λ X → X >>= idF) (lawMonadFmap (join {α}) mma) ⟩
+        ≡⟨ cong (λ X → X >>= idF) (law-monad-fmap (join {α}) mma) ⟩
       (mma >>= (λ ma → return (join {α} ma))) >>= idF
         ≡⟨ refl ⟩
       (mma >>= (λ ma → return (ma >>= idF))) >>= idF
-        ≡⟨ sym $ lawAssoc mma (λ x → return (x >>= idF)) idF ⟩
+        ≡⟨ sym $ law-assoc mma (λ x → return (x >>= idF)) idF ⟩
       mma >>= (λ ma → return (ma >>= idF) >>= idF)
-        ≡⟨ cong (λ X → mma >>= X) (fun-ext $ λ ma → lawIdR (ma >>= idF) idF) ⟩
+        ≡⟨ cong (λ X → mma >>= X) (fun-ext $ λ ma → law-left-id (ma >>= idF) idF) ⟩
       mma >>= (λ ma → ma >>= idF)
-        ≡⟨ lawAssoc mma idF idF ⟩
+        ≡⟨ law-assoc mma idF idF ⟩
       (mma >>= idF) >>= idF
         ≡⟨ refl ⟩
       join {α} (join {M α} mma) ∎
@@ -124,13 +124,13 @@ HaskellMonad→Monad {M} monad = record
       join {α} (fmap (return {α}) ma)
         ≡⟨ refl ⟩
       fmap (return {α}) ma >>= idF
-        ≡⟨ cong (λ X → X >>= idF) (lawMonadFmap (return {α}) ma) ⟩
+        ≡⟨ cong (λ X → X >>= idF) (law-monad-fmap (return {α}) ma) ⟩
       (ma >>= (return ∘C return)) >>= idF
-        ≡⟨ sym $ lawAssoc ma (return ∘C return) idF ⟩
+        ≡⟨ sym $ law-assoc ma (return ∘C return) idF ⟩
       ma >>= (λ a → return (return a) >>= idF)
-        ≡⟨ cong (λ X → ma >>= X) (fun-ext $ λ a → lawIdR (return a) idF) ⟩
+        ≡⟨ cong (λ X → ma >>= X) (fun-ext $ λ a → law-left-id (return a) idF) ⟩
       ma >>= return
-        ≡⟨ lawIdL ma ⟩
+        ≡⟨ law-right-id ma ⟩
       ma ∎
     
     ηCoherR : {α : Obj C} 
@@ -139,5 +139,5 @@ HaskellMonad→Monad {M} monad = record
       join {α} (return {M α} ma)
         ≡⟨ refl ⟩
       return {M α} ma >>= idF
-        ≡⟨ lawIdR ma idF ⟩
+        ≡⟨ law-left-id ma idF ⟩
       ma ∎

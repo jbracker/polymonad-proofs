@@ -84,13 +84,13 @@ idTC = inj₁ IdentTC
 
 -- Identity Kleisli-arrow that is polymorphic over the identity type constructor.
 id : ∀ {τ : Type} {Id : TyCon} → Id ≡ Identity → τ → Id τ
-id {τ = τ} lawId x = subst (λ X → X τ) (sym lawId) x
+id {τ = τ} law-id x = subst (λ X → X τ) (sym law-id) x
 
 unId : ∀ {τ : Type} {Id : TyCon} → Id ≡ Identity → Id τ → τ
-unId {τ = τ} lawId x = subst (λ X → X τ) lawId x
+unId {τ = τ} law-id x = subst (λ X → X τ) law-id x
 
-X≡[id∘unId]X : ∀ {α : Type} {Id : TyCon} → (lawId : Id ≡ Identity) → (x : Id α) → x ≡ id lawId (unId lawId x)
-X≡[id∘unId]X {α = α} lawId x = sym (subst²≡id' lawId (λ X → X α) x)
+X≡[id∘unId]X : ∀ {α : Type} {Id : TyCon} → (law-id : Id ≡ Identity) → (x : Id α) → x ≡ id law-id (unId law-id x)
+X≡[id∘unId]X {α = α} law-id x = sym (subst²≡id' law-id (λ X → X α) x)
 
-X≡[id∘subst]X : ∀ {α : Type} {Id : TyCon} → (lawId : Id ≡ Identity) → (x : Id α) → x ≡ id lawId (subst (λ X → X α) lawId x)
+X≡[id∘subst]X : ∀ {α : Type} {Id : TyCon} → (law-id : Id ≡ Identity) → (x : Id α) → x ≡ id law-id (subst (λ X → X α) law-id x)
 X≡[id∘subst]X refl x = refl

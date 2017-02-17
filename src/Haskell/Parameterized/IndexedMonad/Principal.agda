@@ -23,7 +23,7 @@ open import Polymonad.Principal
 open import Haskell.Parameterized.IndexedMonad
 open import Haskell.Parameterized.IndexedMonad.Polymonad
 
-open IxMonad renaming (bind to mBind; return to mReturn; lawAssoc to mLawAssoc)
+open IxMonad renaming (bind to mBind; return to mReturn; law-assoc to mLawAssoc)
 open Polymonad.Polymonad
 
 -- -----------------------------------------------------------------------------

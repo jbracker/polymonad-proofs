@@ -56,8 +56,8 @@ Polymonad→Supermonad {ℓ = ℓ} TyCons Id pm ∃FunctorBind (n , ts , K , K�
       where
         functorB = pmBind pm (∃FunctorBind M)
 
-    lawIdFunc : ∀ {α : Type} {M : TyCons} → fmap {α = α} {M = M} identity ≡ identity
-    lawIdFunc = {!!}
+    law-idFunc : ∀ {α : Type} {M : TyCons} → fmap {α = α} {M = M} identity ≡ identity
+    law-idFunc = {!!}
 
     lawDistFunc : ∀ {α β γ : Type} {M : TyCons}
                 → (f : β → γ) → (g : α → β) 
@@ -67,7 +67,7 @@ Polymonad→Supermonad {ℓ = ℓ} TyCons Id pm ∃FunctorBind (n , ts , K , K�
     functor : (M : TyCons) → Functor ⟨ M ⟩
     functor M = record 
       { fmap = fmap
-      ; lawId = lawIdFunc
+      ; law-id = law-idFunc
       ; lawDist = lawDistFunc
       }
     
@@ -88,10 +88,10 @@ Polymonad→Supermonad {ℓ = ℓ} TyCons Id pm ∃FunctorBind (n , ts , K , K�
       ; lawSingleTyCon = {!!}
       ; lawUniqueBind = {!!}
       ; lawUniqueReturn = {!!}
-      ; lawIdR = {!!}
-      ; lawIdL = {!!}
-      ; lawAssoc = {!!}
-      ; lawMonadFmap = {!!}
+      ; law-right-id = {!!}
+      ; law-left-id = {!!}
+      ; law-assoc = {!!}
+      ; law-monad-fmap = {!!}
       }
 -}
 -- -----------------------------------------------------------------------------
@@ -106,7 +106,7 @@ Supermonad→Polymonad {ℓ = ℓ} SuperTyCons ucsm = record
   { B[_,_]▷_ = B[_,_]▷_
   ; ⟨_⟩ = ⟨_⟩
   ; bind = {!!} -- λ {M} {N} {P} b → bind M N P b
-  ; lawId = {!!} -- lawId
+  ; law-id = {!!} -- law-id
   ; lawFunctor1 = {!!} -- lawFunctor1
   ; lawFunctor2 = {!!} -- lawFunctor2
   ; lawMorph1 = {!!} -- lawMorph1
@@ -114,7 +114,7 @@ Supermonad→Polymonad {ℓ = ℓ} SuperTyCons ucsm = record
   ; lawMorph3 = {!!} -- lawMorph3
   ; lawDiamond1 = {!!} -- lawDiamond1
   ; lawDiamond2 = {!!} -- lawDiamond2
-  ; lawAssoc = {!!} -- lawAssoc
+  ; law-assoc = {!!} -- law-assoc
   ; lawClosure = {!!} -- lawClosure
   } where
     TyCons = IdTyCons ⊎ SuperTyCons
@@ -174,23 +174,23 @@ Supermonad→Polymonad {ℓ = ℓ} SuperTyCons ucsm = record
     bind (inj₂ M) (inj₂ N) (inj₁ IdentTC) (lift ())
     bind (inj₂ M) (inj₂ N) (inj₂ P) = bindB
     
-    lawId : ⟨ Id ⟩ ≡ Identity
-    lawId = refl
+    law-id : ⟨ Id ⟩ ≡ Identity
+    law-id = refl
     
     lawFunctor1 : ∀ (M : TyCons) → B[ M , Id ]▷ M
     lawFunctor1 (inj₁ IdentTC) = lift tt
     lawFunctor1 (inj₂ M) = {!!}
 
     lawFunctor2 : ∀ (M : TyCons) → ∀ (b : B[ M , Id ]▷ M)
-                → ∀ {α : Type} (m : ⟨ M ⟩ α) → (bind M Id M b) m (id lawId) ≡ m
+                → ∀ {α : Type} (m : ⟨ M ⟩ α) → (bind M Id M b) m (id law-id) ≡ m
     lawFunctor2 (inj₁ IdentTC) IdentB m = refl
     lawFunctor2 (inj₂ M) (r , b) m = begin
-      (bind (inj₂ M) Id (inj₂ M) (r , b)) m (id lawId)
+      (bind (inj₂ M) Id (inj₂ M) (r , b)) m (id law-id)
         ≡⟨ refl ⟩
-      (functorB r b) m (id lawId)
+      (functorB r b) m (id law-id)
         ≡⟨ refl ⟩
-      Functor.fmap (functor M) (id lawId) m
-        ≡⟨ cong (λ X → X m) (Functor.lawId (SuperMonad.functor monad M)) ⟩
+      Functor.fmap (functor M) (id law-id) m
+        ≡⟨ cong (λ X → X m) (Functor.law-id (SuperMonad.functor monad M)) ⟩
       m ∎
 -}
 
@@ -215,27 +215,27 @@ Supermonad→Polymonad {ℓ = ℓ} SuperTyCons ucsm = record
     
     lawMorph3 : ∀ (M N : TyCons) (b₁ : B[ M , Id ]▷ N) (b₂ : B[ Id , M ]▷ N)
               → ∀ {α β : Type} (v : α) (f : α → ⟨ M ⟩ β) 
-              → (bind M Id N b₁) (f v) (id lawId) ≡ (bind Id M N b₂) ((id lawId) v) f
+              → (bind M Id N b₁) (f v) (id law-id) ≡ (bind Id M N b₂) ((id law-id) v) f
     lawMorph3 (inj₁ IdentTC) (inj₁ IdentTC) IdentB IdentB v f = refl
     lawMorph3 (inj₁ IdentTC) (inj₂ M) b₁ b₂ v f with decR M
     lawMorph3 (inj₁ IdentTC) (inj₂ M) (ReturnB .M r₁) (ReturnB .M r₂) v f | yes rCompat = begin
-      bindReturn M monad r₁ (f v) (id lawId)
+      bindReturn M monad r₁ (f v) (id law-id)
         ≡⟨ refl ⟩
       SuperMonad.return monad r₁ (f v)
         ≡⟨ cong (λ X → SuperMonad.return monad X (f v)) {!!} ⟩
       SuperMonad.return monad r₂ (f v)
         ≡⟨ refl ⟩
-      bindReturn M monad r₂ (id lawId v) f ∎
+      bindReturn M monad r₂ (id law-id v) f ∎
     lawMorph3 (inj₁ IdentTC) (inj₂ M) (lift ()) (lift ()) v f | no ¬r
     lawMorph3 (inj₂ M) (inj₁ IdentTC) (lift ()) (lift ()) v f
     lawMorph3 (inj₂ M) (inj₂ .M) (FunctorB .M) (ApplyB .M) v f = begin
-      bindFunctor M monad (f v) (id lawId) 
+      bindFunctor M monad (f v) (id law-id) 
         ≡⟨ refl ⟩
-      Functor.fmap (SuperMonad.functor monad M) (id lawId) (f v)
-        ≡⟨ cong (λ X → X (f v)) (Functor.lawId (SuperMonad.functor monad M)) ⟩
+      Functor.fmap (SuperMonad.functor monad M) (id law-id) (f v)
+        ≡⟨ cong (λ X → X (f v)) (Functor.law-id (SuperMonad.functor monad M)) ⟩
       f v
         ≡⟨ refl ⟩
-      bindApply M monad (id lawId v) f ∎
+      bindApply M monad (id law-id v) f ∎
     
     lawDiamond1 : ∀ (M N R T : TyCons)
                 → (∃ λ(P : TyCons) → B[ M , N ]▷ P × B[ P , R ]▷ T)
@@ -281,51 +281,51 @@ Supermonad→Polymonad {ℓ = ℓ} SuperTyCons ucsm = record
     lawDiamond2 (inj₂ M) (inj₂ N) (inj₁ IdentTC) (inj₂ ._) (inj₂ .N , FunctorB .N , MonadB .M .N bCompat) = {!!}
     lawDiamond2 (inj₂ M) (inj₂ N) (inj₂ R) (inj₂ ._) (inj₂ ._ , MonadB .N .R bCompat₁ , MonadB .M ._ bCompat₂) = {!!}
     
-    lawAssoc : ∀ (M N P R T S : TyCons) 
+    law-assoc : ∀ (M N P R T S : TyCons) 
              → (b₁ : B[ M , N ]▷ P) → (b₂ : B[ P , R ]▷ T) 
              → (b₃ : B[ N , R ]▷ S) → (b₄ : B[ M , S ]▷ T)
              → ∀ {α β γ : Type} (m : ⟨ M ⟩ α) (f : α → ⟨ N ⟩ β) (g : β → ⟨ R ⟩ γ)
              → (bind P R T b₂) ((bind M N P b₁) m f) g ≡ (bind M S T b₄) m (λ x → (bind N R S b₃) (f x) g)
-    lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) IdentB IdentB IdentB IdentB m f g = refl
-    lawAssoc (inj₂ M) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (lift ()) IdentB IdentB (lift ()) m f g
-    lawAssoc M (inj₂ N) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) b₁ IdentB (lift ()) b₄ m f g
-    lawAssoc (inj₁ IdentTC) N (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ S) b₁ IdentB b₃ (lift ()) m f g
-    lawAssoc (inj₂ M) N (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ S) b₁ IdentB b₃ (lift ()) m f g
-    lawAssoc M N (inj₁ IdentTC) (inj₂ R) (inj₁ IdentTC) S b₁ (lift ()) b₃ b₄ m f g
-    lawAssoc M N (inj₂ P) (inj₁ IdentTC) (inj₁ IdentTC) S b₁ (lift ()) b₃ b₄ m f g
-    lawAssoc M N (inj₂ P) (inj₂ R) (inj₁ IdentTC) S b₁ (lift ()) b₃ b₄ m f g
-    lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ M) (inj₁ IdentTC) IdentB (ReturnB .M rCompat₁) IdentB (ReturnB .M rCompat₂) m f g
+    law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) IdentB IdentB IdentB IdentB m f g = refl
+    law-assoc (inj₂ M) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (lift ()) IdentB IdentB (lift ()) m f g
+    law-assoc M (inj₂ N) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) b₁ IdentB (lift ()) b₄ m f g
+    law-assoc (inj₁ IdentTC) N (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ S) b₁ IdentB b₃ (lift ()) m f g
+    law-assoc (inj₂ M) N (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ S) b₁ IdentB b₃ (lift ()) m f g
+    law-assoc M N (inj₁ IdentTC) (inj₂ R) (inj₁ IdentTC) S b₁ (lift ()) b₃ b₄ m f g
+    law-assoc M N (inj₂ P) (inj₁ IdentTC) (inj₁ IdentTC) S b₁ (lift ()) b₃ b₄ m f g
+    law-assoc M N (inj₂ P) (inj₂ R) (inj₁ IdentTC) S b₁ (lift ()) b₃ b₄ m f g
+    law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ M) (inj₁ IdentTC) IdentB (ReturnB .M rCompat₁) IdentB (ReturnB .M rCompat₂) m f g
       = {!!}
-    lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ R) (inj₂ .R) (inj₁ IdentTC) IdentB (ApplyB .R) (lift ()) (ReturnB .R rCompat) m f g
-    lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ M) (inj₂ .M) IdentB (ReturnB .M rCompat₁) (ReturnB .M rCompat₂) (ApplyB .M) m f g
+    law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ R) (inj₂ .R) (inj₁ IdentTC) IdentB (ApplyB .R) (lift ()) (ReturnB .R rCompat) m f g
+    law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ M) (inj₂ .M) IdentB (ReturnB .M rCompat₁) (ReturnB .M rCompat₂) (ApplyB .M) m f g
       = {!!}
-    lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ M) (inj₂ .M) (inj₂ .M) IdentB (ApplyB .M) (ApplyB .M) (ApplyB .M) m f g
+    law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ M) (inj₂ .M) (inj₂ .M) IdentB (ApplyB .M) (ApplyB .M) (ApplyB .M) m f g
       = {!!}
-    lawAssoc (inj₁ IdentTC) (inj₂ N) (inj₁ IdentTC) R (inj₂ T) S (lift ()) b₂ b₃ b₄ m f g
-    lawAssoc (inj₂ M) (inj₁ IdentTC) (inj₁ IdentTC) R (inj₂ T) S (lift ()) b₂ b₃ b₄ m f g
-    lawAssoc (inj₂ M) (inj₂ N) (inj₁ IdentTC) R (inj₂ T) S (lift ()) b₂ b₃ b₄ m f g
-    lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ M) (inj₁ IdentTC) (inj₂ .M) (inj₁ IdentTC) (ReturnB .M rCompat₁) (FunctorB .M) IdentB (ReturnB .M rCompat₂) m f g
+    law-assoc (inj₁ IdentTC) (inj₂ N) (inj₁ IdentTC) R (inj₂ T) S (lift ()) b₂ b₃ b₄ m f g
+    law-assoc (inj₂ M) (inj₁ IdentTC) (inj₁ IdentTC) R (inj₂ T) S (lift ()) b₂ b₃ b₄ m f g
+    law-assoc (inj₂ M) (inj₂ N) (inj₁ IdentTC) R (inj₂ T) S (lift ()) b₂ b₃ b₄ m f g
+    law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ M) (inj₁ IdentTC) (inj₂ .M) (inj₁ IdentTC) (ReturnB .M rCompat₁) (FunctorB .M) IdentB (ReturnB .M rCompat₂) m f g
       = {!!}
-    lawAssoc (inj₂ M) (inj₁ IdentTC) (inj₂ .M) (inj₁ IdentTC) (inj₂ .M) (inj₁ IdentTC) (FunctorB .M) (FunctorB .M) IdentB (FunctorB .M) m f g
+    law-assoc (inj₂ M) (inj₁ IdentTC) (inj₂ .M) (inj₁ IdentTC) (inj₂ .M) (inj₁ IdentTC) (FunctorB .M) (FunctorB .M) IdentB (FunctorB .M) m f g
       = {!!}
-    lawAssoc M (inj₁ IdentTC) (inj₂ P) (inj₂ R) (inj₂ T) (inj₁ IdentTC) b₁ b₂ (lift ()) b₄ m f g
-    lawAssoc M (inj₂ N) (inj₂ P) (inj₁ IdentTC) (inj₂ T) (inj₁ IdentTC) b₁ b₂ (lift ()) b₄ m f g
-    lawAssoc M (inj₂ N) (inj₂ P) (inj₂ R) (inj₂ T) (inj₁ IdentTC) b₁ b₂ (lift ()) b₄ m f g
-    lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ P) (inj₁ IdentTC) (inj₂ .P) (inj₂ .P) (ReturnB .P rCompat) (FunctorB .P) (ReturnB .P x) (ApplyB .P) m f g
+    law-assoc M (inj₁ IdentTC) (inj₂ P) (inj₂ R) (inj₂ T) (inj₁ IdentTC) b₁ b₂ (lift ()) b₄ m f g
+    law-assoc M (inj₂ N) (inj₂ P) (inj₁ IdentTC) (inj₂ T) (inj₁ IdentTC) b₁ b₂ (lift ()) b₄ m f g
+    law-assoc M (inj₂ N) (inj₂ P) (inj₂ R) (inj₂ T) (inj₁ IdentTC) b₁ b₂ (lift ()) b₄ m f g
+    law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ P) (inj₁ IdentTC) (inj₂ .P) (inj₂ .P) (ReturnB .P rCompat) (FunctorB .P) (ReturnB .P x) (ApplyB .P) m f g
       = {!!}
-    lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ P) (inj₂ R) (inj₂ ._) (inj₂ ._) (ReturnB .P rCompat) (MonadB .P .R bCompat) b₃ (ApplyB ._) m f g
+    law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ P) (inj₂ R) (inj₂ ._) (inj₂ ._) (ReturnB .P rCompat) (MonadB .P .R bCompat) b₃ (ApplyB ._) m f g
       = {!!}
-    lawAssoc (inj₁ IdentTC) (inj₂ M) (inj₂ .M) (inj₁ IdentTC) (inj₂ .M) (inj₂ .M) (ApplyB .M) (FunctorB .M) (FunctorB .M) (ApplyB .M) m f g
+    law-assoc (inj₁ IdentTC) (inj₂ M) (inj₂ .M) (inj₁ IdentTC) (inj₂ .M) (inj₂ .M) (ApplyB .M) (FunctorB .M) (FunctorB .M) (ApplyB .M) m f g
       = {!!}
-    lawAssoc (inj₁ IdentTC) (inj₂ N) (inj₂ .N) (inj₂ R) (inj₂ ._) (inj₂ ._) (ApplyB .N) (MonadB .N .R bCompat₁) (MonadB .N .R bCompat₂) (ApplyB ._) m f g
+    law-assoc (inj₁ IdentTC) (inj₂ N) (inj₂ .N) (inj₂ R) (inj₂ ._) (inj₂ ._) (ApplyB .N) (MonadB .N .R bCompat₁) (MonadB .N .R bCompat₂) (ApplyB ._) m f g
       = {!!}
-    lawAssoc (inj₂ M) (inj₁ IdentTC) (inj₂ .M) (inj₁ IdentTC) (inj₂ .M) (inj₂ S) (FunctorB .M) (FunctorB .M) (ReturnB .S rCompat) b₄ m f g
+    law-assoc (inj₂ M) (inj₁ IdentTC) (inj₂ .M) (inj₁ IdentTC) (inj₂ .M) (inj₂ S) (FunctorB .M) (FunctorB .M) (ReturnB .S rCompat) b₄ m f g
       = {!!}
-    lawAssoc (inj₂ M) (inj₁ IdentTC) (inj₂ .M) (inj₂ R) (inj₂ ._) (inj₂ .R) (FunctorB .M) (MonadB .M .R bCompat₁) (ApplyB .R) (MonadB .M .R bCompat₂) m f g
+    law-assoc (inj₂ M) (inj₁ IdentTC) (inj₂ .M) (inj₂ R) (inj₂ ._) (inj₂ .R) (FunctorB .M) (MonadB .M .R bCompat₁) (ApplyB .R) (MonadB .M .R bCompat₂) m f g
       = {!!}
-    lawAssoc (inj₂ M) (inj₂ N) (inj₂ ._) (inj₁ IdentTC) (inj₂ ._) (inj₂ .N) (MonadB .M .N bCompat₁) (FunctorB ._) (FunctorB .N) (MonadB .M .N bCompat₂) m f g
+    law-assoc (inj₂ M) (inj₂ N) (inj₂ ._) (inj₁ IdentTC) (inj₂ ._) (inj₂ .N) (MonadB .M .N bCompat₁) (FunctorB ._) (FunctorB .N) (MonadB .M .N bCompat₂) m f g
       = {!!}
-    lawAssoc (inj₂ M) (inj₂ N) (inj₂ ._) (inj₂ R) (inj₂ ._) (inj₂ ._) (MonadB .M .N bCompat₁) (MonadB ._ .R bCompat₂) (MonadB .N .R bCompat₃) b₄ m f g
+    law-assoc (inj₂ M) (inj₂ N) (inj₂ ._) (inj₂ R) (inj₂ ._) (inj₂ ._) (MonadB .M .N bCompat₁) (MonadB ._ .R bCompat₂) (MonadB .N .R bCompat₃) b₄ m f g
       = {!!}
 -}
    {-

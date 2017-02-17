@@ -48,10 +48,10 @@ ConstrainedMonad→Supermonad {ℓ = ℓ} M monad = record
   ; lawSingleTyCon = lawSingleTyCon
   ; lawUniqueBind = λ {α} {β} {M} {N} {P} → lawUniqueBind {α} {β} {M} {N} {P} 
   ; lawUniqueReturn = λ {α} {M} → lawUniqueReturn {α} {M}
-  ; lawIdR = lawIdR
-  ; lawIdL = lawIdL
-  ; lawAssoc = lawAssoc
-  ; lawMonadFmap = lawMonadFmap
+  ; law-right-id = law-right-id
+  ; law-left-id = law-left-id
+  ; law-assoc = law-assoc
+  ; law-monad-fmap = law-monad-fmap
   } where
     TyCons = Lift {ℓ = ℓ} MonadTyCons
     
@@ -96,43 +96,43 @@ ConstrainedMonad→Supermonad {ℓ = ℓ} M monad = record
                     → r₁ ≡ r₂
     lawUniqueReturn {M = lift MonadTC} r₁ r₂ = ConstrainedMonad.lawUniqueReturnCts monad r₁ r₂
     
-    lawIdR : {α β : Type} 
+    law-right-id : {α β : Type} 
            → (M N : TyCons)
            → (b : Binds M N N α β) → (r : Returns M α)
            → (a : α) → (k : α → ⟨ N ⟩ β)
            → bind {β = β} {M = M} b (return {M = M} r a) k ≡ k a
-    lawIdR (lift MonadTC) (lift MonadTC) bcts rcts a f = ConstrainedMonad.lawIdR monad bcts rcts a f
+    law-right-id (lift MonadTC) (lift MonadTC) bcts rcts a f = ConstrainedMonad.law-right-id monad bcts rcts a f
     
-    lawIdL : {α : Type} 
+    law-left-id : {α : Type} 
            → (M N : TyCons)
            → (b : Binds M N M α α) → (r : Returns N α)
            → (m : ⟨ M ⟩ α)
            → bind {α = α} {β = α} {M = M} b m (return {M = N} r) ≡ m
-    lawIdL (lift MonadTC) (lift MonadTC) bcts rcts m = ConstrainedMonad.lawIdL monad bcts rcts m
+    law-left-id (lift MonadTC) (lift MonadTC) bcts rcts m = ConstrainedMonad.law-left-id monad bcts rcts m
     
-    lawAssoc : {α β γ : Type} 
+    law-assoc : {α β γ : Type} 
              → (M N P S T : TyCons)
              → (b₁ : Binds M N P α γ) → (b₂ : Binds S T N β γ)
              → (b₃ : Binds N T P β γ) → (b₄ : Binds M S N α β)
              → (m : ⟨ M ⟩ α) → (f : α → ⟨ S ⟩ β) → (g : β → ⟨ T ⟩ γ)
              → bind {β = γ} {M = M} b₁ m (λ x → bind {β = γ} {M = S} b₂ (f x) g) 
                ≡ bind {β = γ} {M = N} b₃ (bind {β = β} {M = M} b₄ m f) g
-    lawAssoc {β = β} {γ = γ} (lift MonadTC) (lift MonadTC) (lift MonadTC) (lift MonadTC) (lift MonadTC) b₁ b₂ b₃ b₄ m f g 
+    law-assoc {β = β} {γ = γ} (lift MonadTC) (lift MonadTC) (lift MonadTC) (lift MonadTC) (lift MonadTC) b₁ b₂ b₃ b₄ m f g 
       with lawUniqueBind {β} {γ} {lift MonadTC} {lift MonadTC} {lift MonadTC} b₂ b₃
-    lawAssoc (lift MonadTC) (lift MonadTC) (lift MonadTC) (lift MonadTC) (lift MonadTC) b₁ b₂ .b₂ b₄ m f g | refl 
-      = ConstrainedMonad.lawAssoc monad b₁ b₂ b₄ m f g
+    law-assoc (lift MonadTC) (lift MonadTC) (lift MonadTC) (lift MonadTC) (lift MonadTC) b₁ b₂ .b₂ b₄ m f g | refl 
+      = ConstrainedMonad.law-assoc monad b₁ b₂ b₄ m f g
     
     functor : (M : TyCons) → ConstrainedFunctor ⟨ M ⟩
     functor (lift MonadTC) = (ConstrainedMonad.functor monad)
     
     open ConstrainedFunctor
     
-    lawMonadFmap : {α β : Type}
+    law-monad-fmap : {α β : Type}
                  → (M N : TyCons)
                  → (fcts : FunctorCts (functor M) α β)
                  → (b : Binds M N M α β) → (r : Returns N β)
                  → (f : α → β) → (m : ⟨ M ⟩ α)
                  → bind {β = β} {M = M} b m (return {M = N} r ∘ f) ≡ (fmap (functor M) fcts) f m
-    lawMonadFmap (lift MonadTC) (lift MonadTC) fcts bcts rcts f m = sym (ConstrainedMonad.lawMonadFmap monad fcts bcts rcts f m)
+    law-monad-fmap (lift MonadTC) (lift MonadTC) fcts bcts rcts f m = sym (ConstrainedMonad.law-monad-fmap monad fcts bcts rcts f m)
 
 

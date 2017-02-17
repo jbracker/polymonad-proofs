@@ -30,7 +30,7 @@ open import Haskell.Parameterized.IndexedMonad.DynState
 open import Haskell.Parameterized.IndexedMonad.Polymonad
 open import Haskell.Parameterized.PhantomIndices 
 
-open IxMonad renaming (bind to mBind; return to mReturn; lawIdR to mLawIdR ; lawIdL to mLawIdL ; lawAssoc to mLawAssoc ) hiding (_>>=_)
+open IxMonad renaming (bind to mBind; return to mReturn; law-right-id to mLawIdR ; law-left-id to mLawIdL ; law-assoc to mLawAssoc ) hiding (_>>=_)
 {-
 PhantomIxMonad→Monad : ∀ {Ixs} {M}
                      → ¬ (PhantomIndices (Ixs ∷ Ixs ∷ []) M) 

@@ -32,7 +32,7 @@ uniqueBind : ∀ {TyCons : Set} {Id : TyCons}
            → ∀ {α β} → bind pm b₁ {α} {β} ≡ bind pm b₂ {α} {β}
 uniqueBind {TyCons = TyCons} {Id = Id} pm M N P b₁ b₂ = fun-ext₂ proof
   where
-    lawId' = lawId pm
+    law-id' = law-id pm
 
     proof' : (M N S R T : TyCons) 
            → (b₁ b₂ : HB[ N , R ] pm ▷ S)
@@ -44,15 +44,15 @@ uniqueBind {TyCons = TyCons} {Id = Id} pm M N P b₁ b₂ = fun-ext₂ proof
         P , b₃ , b₄ = lawDiamond2 pm M N R T (S , b₁ , b₁')
       in begin
         (bind pm b₁') m (λ x → (bind pm b₁) (f x) g)
-          ≡⟨ sym (lawAssoc pm M N P R T S b₃ b₄ b₁ b₁' m f g) ⟩
+          ≡⟨ sym (law-assoc pm M N P R T S b₃ b₄ b₁ b₁' m f g) ⟩
         (bind pm b₄) ((bind pm b₃) m f) g
-          ≡⟨ lawAssoc pm M N P R T S b₃ b₄ b₂ b₂' m f g ⟩
+          ≡⟨ law-assoc pm M N P R T S b₃ b₄ b₂ b₂' m f g ⟩
         (bind pm b₂') m (λ x → (bind pm b₂) (f x) g) ∎
     
     mkFunctor : (N : TyCons) → HB[ N , Id ] pm ▷ N
     mkFunctor N = proj₁ (lawFunctor pm N)
     
-    functionAsFunctor : {α β : Type} → (N : TyCons) → (f : α → H⟨ pm ▷ N ⟩ β) → f ≡ (λ y → (bind pm (mkFunctor N)) (f y) (id lawId'))
+    functionAsFunctor : {α β : Type} → (N : TyCons) → (f : α → H⟨ pm ▷ N ⟩ β) → f ≡ (λ y → (bind pm (mkFunctor N)) (f y) (id law-id'))
     functionAsFunctor N f = let b , q = lawFunctor pm N in fun-ext (λ x → sym (q (f x)))
     
     proof : ∀ {α β} 
@@ -61,9 +61,9 @@ uniqueBind {TyCons = TyCons} {Id = Id} pm M N P b₁ b₂ = fun-ext₂ proof
     proof x f = begin
       bind pm b₁ x f
         ≡⟨ cong (λ X → bind pm b₁ x X) (functionAsFunctor N f) ⟩
-      bind pm b₁ x (λ y → (bind pm (mkFunctor N)) (f y) (id lawId'))
-        ≡⟨ proof' M N N Id P (mkFunctor N) (mkFunctor N) b₁ b₂ x f (id lawId') ⟩
-      bind pm b₂ x (λ y → (bind pm (mkFunctor N)) (f y) (id lawId'))
+      bind pm b₁ x (λ y → (bind pm (mkFunctor N)) (f y) (id law-id'))
+        ≡⟨ proof' M N N Id P (mkFunctor N) (mkFunctor N) b₁ b₂ x f (id law-id') ⟩
+      bind pm b₂ x (λ y → (bind pm (mkFunctor N)) (f y) (id law-id'))
         ≡⟨ sym (cong (λ X → bind pm b₂ x X) (functionAsFunctor N f)) ⟩
       bind pm b₂ x f ∎
 

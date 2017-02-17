@@ -18,7 +18,7 @@ open import Identity
 open import Polymonad.Definition
 open import Haskell.Parameterized.IndexedMonad
 
-open IxMonad renaming (bind to mBind; return to mReturn; lawAssoc to mLawAssoc)
+open IxMonad renaming (bind to mBind; return to mReturn; law-assoc to mLawAssoc)
 
 IxMonad→Polymonad : ∀ {n} {Ixs : Set n} {M : Ixs → Ixs → TyCon} 
                   → (monad : IxMonad Ixs M)
@@ -27,7 +27,7 @@ IxMonad→Polymonad {n = n} {Ixs = Ixs} {M = M'} monad = record
   { B[_,_]▷_ = B[_,_]▷_
   ; ⟨_⟩ = ⟨_⟩
   ; bind = λ {m} {n} {p} b → bind m n p b
-  ; lawId = lawId
+  ; law-id = law-id
   ; lawFunctor1 = lawFunctor1
   ; lawFunctor2 = lawFunctor2
   ; lawMorph1 = lawMorph1 
@@ -35,7 +35,7 @@ IxMonad→Polymonad {n = n} {Ixs = Ixs} {M = M'} monad = record
   ; lawMorph3 = lawMorph3
   ; lawDiamond1 = lawDiamond1 
   ; lawDiamond2 = lawDiamond2
-  ; lawAssoc = lawAssoc
+  ; law-assoc = law-assoc
   ; lawClosure = lawClosure
   } where
     TyCons = IdTyCons ⊎ IxMonadTyCons Ixs
@@ -64,17 +64,17 @@ IxMonad→Polymonad {n = n} {Ixs = Ixs} {M = M'} monad = record
     bind (inj₂ (IxMonadTC i j)) (inj₂ (IxMonadTC k l)) (inj₁ IdentTC) (lift ())
     bind (inj₂ (IxMonadTC i j)) (inj₂ (IxMonadTC .j l)) (inj₂ (IxMonadTC .i .l)) MonadB = bindMonad monad
     
-    lawId : ⟨ Id ⟩ ≡ Identity
-    lawId = refl
+    law-id : ⟨ Id ⟩ ≡ Identity
+    law-id = refl
     
     lawFunctor1 : ∀ (M : TyCons) → B[ M , Id ]▷ M
     lawFunctor1 (inj₁ IdentTC) = IdentB
     lawFunctor1 (inj₂ (IxMonadTC i j)) = FunctorB
     
     lawFunctor2 : ∀ (M : TyCons) → (b : B[ M , Id ]▷ M) 
-               → ∀ {α : Type} (m : ⟨ M ⟩ α) → (bind M Id M b) m (id lawId) ≡ m
+               → ∀ {α : Type} (m : ⟨ M ⟩ α) → (bind M Id M b) m (id law-id) ≡ m
     lawFunctor2 (inj₁ IdentTC) IdentB m = refl
-    lawFunctor2 (inj₂ (IxMonadTC i j)) FunctorB m = lawIdL monad m
+    lawFunctor2 (inj₂ (IxMonadTC i j)) FunctorB m = law-left-id monad m
 
     
     lawMorph1 : ∀ (M N : TyCons) 
@@ -93,22 +93,22 @@ IxMonad→Polymonad {n = n} {Ixs = Ixs} {M = M'} monad = record
     
     lawMorph3 : ∀ (M N : TyCons) (b₁ : B[ M , Id ]▷ N) (b₂ : B[ Id , M ]▷ N)
               → ∀ {α β : Type} (v : α) (f : α → ⟨ M ⟩ β) 
-              → (bind M Id N b₁) (f v) (id lawId) ≡ (bind Id M N b₂) (id lawId v) f
+              → (bind M Id N b₁) (f v) (id law-id) ≡ (bind Id M N b₂) (id law-id v) f
     lawMorph3 (inj₁ IdentTC) (inj₁ IdentTC) IdentB IdentB v f = refl
     lawMorph3 (inj₁ IdentTC) (inj₂ (IxMonadTC k .k)) ReturnB ReturnB v f = refl
     lawMorph3 (inj₂ (IxMonadTC i j)) (inj₁ IdentTC) (lift ()) b₂ v f
     lawMorph3 (inj₂ (IxMonadTC i j)) (inj₂ (IxMonadTC .i .j)) FunctorB ApplyB v f = begin
-      bindFunctor monad (f v) (id lawId) 
+      bindFunctor monad (f v) (id law-id) 
         ≡⟨ refl ⟩
-      mBind monad (f v) (λ a → mReturn monad (id lawId a))
+      mBind monad (f v) (λ a → mReturn monad (id law-id a))
         ≡⟨ refl ⟩
       mBind monad (f v) (mReturn monad)
-        ≡⟨ lawIdL monad (f v) ⟩
+        ≡⟨ law-left-id monad (f v) ⟩
       f v
-        ≡⟨ sym (lawIdR monad (id lawId v) f) ⟩
-      mBind monad (mReturn monad (id lawId v)) f
+        ≡⟨ sym (law-right-id monad (id law-id v) f) ⟩
+      mBind monad (mReturn monad (id law-id v)) f
         ≡⟨ refl ⟩
-      bindApply monad (id lawId v) f ∎
+      bindApply monad (id law-id v) f ∎
     
     lawDiamond1 : ∀ (M N R T : TyCons)
                 → (∃ λ(P : TyCons) → B[ M , N ]▷ P × B[ P , R ]▷ T)
@@ -183,112 +183,112 @@ IxMonad→Polymonad {n = n} {Ixs = Ixs} {M = M'} monad = record
     lawDiamond2 (inj₂ (IxMonadTC i j)) (inj₂ (IxMonadTC .j l)) (inj₂ (IxMonadTC .l n)) (inj₂ (IxMonadTC .i .n)) (inj₂ (IxMonadTC .j .n) , MonadB , MonadB) = inj₂ (IxMonadTC i l) , MonadB , MonadB
 
 
-    lawIdRF : ∀ {i j} {M : Ixs → Ixs → TyCon} 
+    law-right-idF : ∀ {i j} {M : Ixs → Ixs → TyCon} 
             → (monad : IxMonad Ixs M) 
             → ∀ {α β γ : Type} 
             → (f : α → β) → (k : β → M i j γ) 
             → (λ x → mBind monad (mReturn monad (f x)) k) ≡ (λ x → k (f x))
-    lawIdRF monad f k = fun-ext (λ x → lawIdR monad (f x) k)
+    law-right-idF monad f k = fun-ext (λ x → law-right-id monad (f x) k)
     
-    lawAssoc : ∀ (M N P R T S : TyCons) 
+    law-assoc : ∀ (M N P R T S : TyCons) 
                (b₁ : B[ M , N ]▷ P) (b₂ : B[ P , R ]▷ T) 
                (b₃ : B[ N , R ]▷ S) (b₄ : B[ M , S ]▷ T)
              → ∀ {α β γ : Type} (m : ⟨ M ⟩ α) (f : α → ⟨ N ⟩ β) (g : β → ⟨ R ⟩ γ)
              → (bind P R T b₂) ((bind M N P b₁) m f) g ≡ (bind M S T b₄) m (λ x → (bind N R S b₃) (f x) g)
-    lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) IdentB IdentB IdentB IdentB m f g = refl
-    lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (IxMonadTC i .i)) IdentB IdentB ReturnB (lift ()) m f g
-    lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (IxMonadTC i j)) (inj₁ IdentTC) S b₁ (lift ()) b₃ b₄ m f g
-    lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (IxMonadTC i .i)) (inj₁ IdentTC) IdentB ReturnB IdentB ReturnB m f g = refl
-    lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (IxMonadTC x x₁)) (inj₂ (IxMonadTC i j)) (inj₁ IdentTC) b₁ b₂ (lift ()) b₄ m f g
-    lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (IxMonadTC i .i)) (inj₂ (IxMonadTC .i .i)) IdentB ReturnB ReturnB ApplyB m f g = begin
+    law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) IdentB IdentB IdentB IdentB m f g = refl
+    law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (IxMonadTC i .i)) IdentB IdentB ReturnB (lift ()) m f g
+    law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (IxMonadTC i j)) (inj₁ IdentTC) S b₁ (lift ()) b₃ b₄ m f g
+    law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (IxMonadTC i .i)) (inj₁ IdentTC) IdentB ReturnB IdentB ReturnB m f g = refl
+    law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (IxMonadTC x x₁)) (inj₂ (IxMonadTC i j)) (inj₁ IdentTC) b₁ b₂ (lift ()) b₄ m f g
+    law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (IxMonadTC i .i)) (inj₂ (IxMonadTC .i .i)) IdentB ReturnB ReturnB ApplyB m f g = begin
       bindReturn monad (bindId m f) g 
         ≡⟨ refl ⟩
       mReturn monad (g (f m))
-        ≡⟨ sym (lawIdR monad m ((λ x → mReturn monad (g (f x))))) ⟩
+        ≡⟨ sym (law-right-id monad m ((λ x → mReturn monad (g (f x))))) ⟩
       mBind monad (mReturn monad m) (λ x → mReturn monad (g (f x)))
         ≡⟨ refl ⟩
       bindApply monad m (λ x → bindReturn monad (f x) g) ∎
-    lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (IxMonadTC k l)) (inj₂ (IxMonadTC .k .l)) (inj₂ (IxMonadTC .k .l)) IdentB ApplyB ApplyB ApplyB m f g = begin
+    law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (IxMonadTC k l)) (inj₂ (IxMonadTC .k .l)) (inj₂ (IxMonadTC .k .l)) IdentB ApplyB ApplyB ApplyB m f g = begin
       bindApply monad (bindId m f) g
         ≡⟨ refl ⟩
       mBind monad (mReturn monad (f m)) g
-        ≡⟨ sym (lawIdR monad m (λ x → mBind monad (mReturn monad (f x)) g)) ⟩
+        ≡⟨ sym (law-right-id monad m (λ x → mBind monad (mReturn monad (f x)) g)) ⟩
       mBind monad (mReturn monad m) (λ x → mBind monad (mReturn monad (f x)) g)
         ≡⟨ refl ⟩
       bindApply monad m (λ x → bindApply monad (f x) g) ∎
-    lawAssoc (inj₁ IdentTC) (inj₂ (IxMonadTC i j)) (inj₁ IdentTC) R T S (lift ()) b₂ b₃ b₄ m f g
-    lawAssoc (inj₂ (IxMonadTC i j)) N (inj₁ IdentTC) R T S (lift ()) b₂ b₃ b₄ m f g
-    lawAssoc M N (inj₂ (IxMonadTC i j)) (inj₁ IdentTC) (inj₁ IdentTC) S b₁ (lift ()) b₃ b₄ m f g
-    lawAssoc M N (inj₂ (IxMonadTC i j)) (inj₂ (IxMonadTC k l)) (inj₁ IdentTC) S b₁ (lift ()) b₃ b₄ m f g
-    lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (IxMonadTC i .i)) (inj₁ IdentTC) (inj₂ (IxMonadTC .i .i)) (inj₁ IdentTC) ReturnB FunctorB IdentB ReturnB m f g = begin
+    law-assoc (inj₁ IdentTC) (inj₂ (IxMonadTC i j)) (inj₁ IdentTC) R T S (lift ()) b₂ b₃ b₄ m f g
+    law-assoc (inj₂ (IxMonadTC i j)) N (inj₁ IdentTC) R T S (lift ()) b₂ b₃ b₄ m f g
+    law-assoc M N (inj₂ (IxMonadTC i j)) (inj₁ IdentTC) (inj₁ IdentTC) S b₁ (lift ()) b₃ b₄ m f g
+    law-assoc M N (inj₂ (IxMonadTC i j)) (inj₂ (IxMonadTC k l)) (inj₁ IdentTC) S b₁ (lift ()) b₃ b₄ m f g
+    law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (IxMonadTC i .i)) (inj₁ IdentTC) (inj₂ (IxMonadTC .i .i)) (inj₁ IdentTC) ReturnB FunctorB IdentB ReturnB m f g = begin
       bindFunctor monad (bindReturn monad m f) g
         ≡⟨ refl ⟩
       mBind monad (mReturn  monad (f m)) (λ a → mReturn monad (g a))
-        ≡⟨ lawIdR monad (f m) (λ a → mReturn monad (g a)) ⟩
+        ≡⟨ law-right-id monad (f m) (λ a → mReturn monad (g a)) ⟩
       mReturn monad (g (f m))
         ≡⟨ refl ⟩
       bindReturn monad m (λ x → bindId (f x) g) ∎
-    lawAssoc (inj₂ (IxMonadTC o p)) (inj₁ IdentTC) (inj₂ (IxMonadTC .o .p)) (inj₁ IdentTC) (inj₂ (IxMonadTC .o .p)) (inj₁ IdentTC) FunctorB FunctorB IdentB FunctorB m f g = begin
+    law-assoc (inj₂ (IxMonadTC o p)) (inj₁ IdentTC) (inj₂ (IxMonadTC .o .p)) (inj₁ IdentTC) (inj₂ (IxMonadTC .o .p)) (inj₁ IdentTC) FunctorB FunctorB IdentB FunctorB m f g = begin
       bindFunctor monad (bindFunctor monad m f) g 
         ≡⟨ refl ⟩
       mBind monad (mBind monad m (λ a → mReturn monad (f a))) (λ a → mReturn monad (g a))
         ≡⟨ sym (mLawAssoc monad m (λ a → mReturn monad (f a)) ((λ a → mReturn monad (g a)))) ⟩
       mBind monad m (λ a → mBind monad (mReturn monad (f a)) (λ a → mReturn monad (g a)) )
-        ≡⟨ cong (λ x → mBind monad m x) (lawIdRF monad f (λ a → mReturn monad (g a))) ⟩
+        ≡⟨ cong (λ x → mBind monad m x) (law-right-idF monad f (λ a → mReturn monad (g a))) ⟩
       mBind monad m (λ a → mReturn monad (g (f a)))
         ≡⟨ refl ⟩
       bindFunctor monad m (λ x → bindId (f x) g) ∎
-    lawAssoc M (inj₁ IdentTC) (inj₂ (IxMonadTC i j)) (inj₂ (IxMonadTC o p)) (inj₂ (IxMonadTC k l)) (inj₁ IdentTC) b₁ b₂ (lift ()) b₄ m f g
-    lawAssoc M (inj₂ (IxMonadTC o p)) (inj₂ (IxMonadTC i j)) R (inj₂ (IxMonadTC k l)) (inj₁ IdentTC) b₁ b₂ (lift ()) b₄ m f g
-    lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (IxMonadTC i .i)) (inj₁ IdentTC) (inj₂ (IxMonadTC .i .i)) (inj₂ (IxMonadTC .i .i)) ReturnB FunctorB ReturnB ApplyB m f g = begin
+    law-assoc M (inj₁ IdentTC) (inj₂ (IxMonadTC i j)) (inj₂ (IxMonadTC o p)) (inj₂ (IxMonadTC k l)) (inj₁ IdentTC) b₁ b₂ (lift ()) b₄ m f g
+    law-assoc M (inj₂ (IxMonadTC o p)) (inj₂ (IxMonadTC i j)) R (inj₂ (IxMonadTC k l)) (inj₁ IdentTC) b₁ b₂ (lift ()) b₄ m f g
+    law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (IxMonadTC i .i)) (inj₁ IdentTC) (inj₂ (IxMonadTC .i .i)) (inj₂ (IxMonadTC .i .i)) ReturnB FunctorB ReturnB ApplyB m f g = begin
       bindFunctor monad (bindReturn monad m f) g 
         ≡⟨ refl ⟩
       mBind monad (mReturn monad (f m)) (λ a → mReturn monad (g a))
-        ≡⟨ lawIdR monad (f m) (λ a → mReturn monad (g a)) ⟩
+        ≡⟨ law-right-id monad (f m) (λ a → mReturn monad (g a)) ⟩
       mReturn monad (g (f m))
-        ≡⟨ sym (lawIdR monad m ((λ x → mReturn monad (g (f x))))) ⟩
+        ≡⟨ sym (law-right-id monad m ((λ x → mReturn monad (g (f x))))) ⟩
       mBind monad (mReturn monad m) (λ x → mReturn monad (g (f x)))
         ≡⟨ refl ⟩
       bindApply monad m (λ x → bindReturn monad (f x) g) ∎
-    lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (IxMonadTC i .i)) (inj₂ (IxMonadTC .i y)) (inj₂ (IxMonadTC .i .y)) (inj₂ (IxMonadTC .i .y)) ReturnB MonadB ApplyB ApplyB m f g = begin
+    law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ (IxMonadTC i .i)) (inj₂ (IxMonadTC .i y)) (inj₂ (IxMonadTC .i .y)) (inj₂ (IxMonadTC .i .y)) ReturnB MonadB ApplyB ApplyB m f g = begin
       bindMonad monad (bindReturn monad m f) g
         ≡⟨ refl ⟩
       mBind monad (mReturn monad (f m)) g
-        ≡⟨ sym (lawIdR monad m ((λ x → mBind monad (mReturn monad (f x)) g))) ⟩
+        ≡⟨ sym (law-right-id monad m ((λ x → mBind monad (mReturn monad (f x)) g))) ⟩
       mBind monad (mReturn monad m) (λ x → mBind monad (mReturn monad (f x)) g)
         ≡⟨ refl ⟩
       bindApply monad m (λ x → bindApply monad (f x) g) ∎
-    lawAssoc (inj₁ IdentTC) (inj₂ (IxMonadTC x y)) (inj₂ (IxMonadTC .x .y)) (inj₁ IdentTC) (inj₂ (IxMonadTC .x .y)) (inj₂ (IxMonadTC .x .y)) ApplyB FunctorB FunctorB ApplyB m f g = begin
+    law-assoc (inj₁ IdentTC) (inj₂ (IxMonadTC x y)) (inj₂ (IxMonadTC .x .y)) (inj₁ IdentTC) (inj₂ (IxMonadTC .x .y)) (inj₂ (IxMonadTC .x .y)) ApplyB FunctorB FunctorB ApplyB m f g = begin
       bindFunctor monad (bindApply monad m f) g 
         ≡⟨ refl ⟩
       mBind monad (mBind monad (mReturn monad m) f) (λ a → mReturn monad (g a)) 
-        ≡⟨ cong (λ x → mBind monad x (λ a → mReturn monad (g a)) ) (lawIdR monad m f) ⟩
+        ≡⟨ cong (λ x → mBind monad x (λ a → mReturn monad (g a)) ) (law-right-id monad m f) ⟩
       mBind monad (f m) (λ a → mReturn monad (g a))
-        ≡⟨ sym (lawIdR monad m (λ x → mBind monad (f x) (λ a → mReturn monad (g a)))) ⟩
+        ≡⟨ sym (law-right-id monad m (λ x → mBind monad (f x) (λ a → mReturn monad (g a)))) ⟩
       mBind monad (mReturn monad m) (λ x → mBind monad (f x) (λ a → mReturn monad (g a)))
         ≡⟨ refl ⟩
       bindApply monad m (λ x → bindFunctor monad (f x) g) ∎
-    lawAssoc (inj₁ IdentTC) (inj₂ (IxMonadTC x y)) (inj₂ (IxMonadTC .x .y)) (inj₂ (IxMonadTC .y j)) (inj₂ (IxMonadTC .x .j)) (inj₂ (IxMonadTC .x .j)) ApplyB MonadB MonadB ApplyB m f g = begin
+    law-assoc (inj₁ IdentTC) (inj₂ (IxMonadTC x y)) (inj₂ (IxMonadTC .x .y)) (inj₂ (IxMonadTC .y j)) (inj₂ (IxMonadTC .x .j)) (inj₂ (IxMonadTC .x .j)) ApplyB MonadB MonadB ApplyB m f g = begin
       bindMonad monad (bindApply monad m f) g 
         ≡⟨ refl ⟩
       mBind monad (mBind monad (mReturn monad m) f) g 
-        ≡⟨ cong (λ x → mBind monad x g) (lawIdR monad m f) ⟩
+        ≡⟨ cong (λ x → mBind monad x g) (law-right-id monad m f) ⟩
       mBind monad (f m) g
-        ≡⟨ sym (lawIdR monad m ((λ x → mBind monad (f x) g))) ⟩
+        ≡⟨ sym (law-right-id monad m ((λ x → mBind monad (f x) g))) ⟩
       mBind monad (mReturn monad m) (λ x → mBind monad (f x) g)
         ≡⟨ refl ⟩
       bindApply monad m (λ x → bindMonad monad (f x) g) ∎
-    lawAssoc (inj₂ (IxMonadTC u v)) (inj₁ IdentTC) (inj₂ (IxMonadTC .u .v)) (inj₁ IdentTC) (inj₂ (IxMonadTC .u .v)) (inj₂ (IxMonadTC .v .v)) FunctorB FunctorB ReturnB MonadB m f g = begin
+    law-assoc (inj₂ (IxMonadTC u v)) (inj₁ IdentTC) (inj₂ (IxMonadTC .u .v)) (inj₁ IdentTC) (inj₂ (IxMonadTC .u .v)) (inj₂ (IxMonadTC .v .v)) FunctorB FunctorB ReturnB MonadB m f g = begin
       bindFunctor monad (bindFunctor monad m f) g 
         ≡⟨ refl ⟩
       mBind monad (mBind monad m (λ a → mReturn monad (f a))) (λ a → mReturn monad (g a)) 
         ≡⟨ sym (mLawAssoc monad m (λ a → mReturn monad (f a)) (λ a → mReturn monad (g a))) ⟩
       mBind monad m (λ x → mBind monad (mReturn monad (f x)) (λ a → mReturn monad (g a)) )
-        ≡⟨ cong (λ x → mBind monad m x) (fun-ext (λ x → lawIdR monad (f x) ((λ a → mReturn monad (g a))))) ⟩
+        ≡⟨ cong (λ x → mBind monad m x) (fun-ext (λ x → law-right-id monad (f x) ((λ a → mReturn monad (g a))))) ⟩
       mBind monad m (λ x → mReturn monad (g (f x)))
         ≡⟨ refl ⟩
       bindMonad monad m (λ x → bindReturn monad (f x) g) ∎
-    lawAssoc (inj₂ (IxMonadTC u v)) (inj₁ IdentTC) (inj₂ (IxMonadTC .u .v)) (inj₂ (IxMonadTC .v y)) (inj₂ (IxMonadTC .u .y)) (inj₂ (IxMonadTC .v .y)) FunctorB MonadB ApplyB MonadB m f g = begin
+    law-assoc (inj₂ (IxMonadTC u v)) (inj₁ IdentTC) (inj₂ (IxMonadTC .u .v)) (inj₂ (IxMonadTC .v y)) (inj₂ (IxMonadTC .u .y)) (inj₂ (IxMonadTC .v .y)) FunctorB MonadB ApplyB MonadB m f g = begin
       bindMonad monad (bindFunctor monad m f) g 
         ≡⟨ refl ⟩
       mBind monad (mBind monad m (λ a → mReturn monad (f a))) g 
@@ -296,7 +296,7 @@ IxMonad→Polymonad {n = n} {Ixs = Ixs} {M = M'} monad = record
       mBind monad m (λ x → mBind monad (mReturn monad (f x)) g)
         ≡⟨ refl ⟩
       bindMonad monad m (λ x → bindApply monad (f x) g) ∎
-    lawAssoc (inj₂ (IxMonadTC u v)) (inj₂ (IxMonadTC .v t)) (inj₂ (IxMonadTC .u .t)) (inj₁ IdentTC) (inj₂ (IxMonadTC .u .t)) (inj₂ (IxMonadTC .v .t)) MonadB FunctorB FunctorB MonadB m f g = begin
+    law-assoc (inj₂ (IxMonadTC u v)) (inj₂ (IxMonadTC .v t)) (inj₂ (IxMonadTC .u .t)) (inj₁ IdentTC) (inj₂ (IxMonadTC .u .t)) (inj₂ (IxMonadTC .v .t)) MonadB FunctorB FunctorB MonadB m f g = begin
       bindFunctor monad (bindMonad monad m f) g 
         ≡⟨ refl ⟩
       mBind monad (mBind monad m f) (λ a → mReturn monad (g a)) 
@@ -304,7 +304,7 @@ IxMonad→Polymonad {n = n} {Ixs = Ixs} {M = M'} monad = record
       mBind monad m (λ x → mBind monad (f x) (λ a → mReturn monad (g a)))
         ≡⟨ refl ⟩
       bindMonad monad m (λ x → bindFunctor monad (f x) g) ∎
-    lawAssoc (inj₂ (IxMonadTC u v)) (inj₂ (IxMonadTC .v t)) (inj₂ (IxMonadTC .u .t)) (inj₂ (IxMonadTC .t y)) (inj₂ (IxMonadTC .u .y)) (inj₂ (IxMonadTC .v .y)) MonadB MonadB MonadB MonadB m f g = begin
+    law-assoc (inj₂ (IxMonadTC u v)) (inj₂ (IxMonadTC .v t)) (inj₂ (IxMonadTC .u .t)) (inj₂ (IxMonadTC .t y)) (inj₂ (IxMonadTC .u .y)) (inj₂ (IxMonadTC .v .y)) MonadB MonadB MonadB MonadB m f g = begin
       bindMonad monad (bindMonad monad m f) g 
         ≡⟨ refl ⟩
       mBind monad (mBind monad m f) g

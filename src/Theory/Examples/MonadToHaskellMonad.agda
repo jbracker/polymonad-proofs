@@ -34,10 +34,10 @@ Monad→HaskellMonad {M} monad = record
   { _>>=_ = _>>=_
   ; return = return
   ; applicative = applicative
-  ; lawIdR = lawIdR
-  ; lawIdL = lawIdL
-  ; lawAssoc = lawAssoc
-  ; lawMonadFmap = lawMonadFmap
+  ; law-right-id = law-right-id
+  ; law-left-id = law-left-id
+  ; law-assoc = law-assoc
+  ; law-monad-fmap = law-monad-fmap
   } where
     C = setCategory {lzero}
     
@@ -59,9 +59,9 @@ Monad→HaskellMonad {M} monad = record
     _<*>_ : {α β : Type} → [ M ]₀ (α → β) → [ M ]₀ α → [ M ]₀ β
     _<*>_ mf ma = mf >>= (λ f → fmap f ma)
     
-    lawIdR : {α β : Type} (a : α) (k : α → [ M ]₀ β)
+    law-left-id : {α β : Type} (a : α) (k : α → [ M ]₀ β)
            → return a >>= k ≡ k a
-    lawIdR {α} {β} a k = begin 
+    law-left-id {α} {β} a k = begin 
       (μ β ∘F ([ M ]₁ k ∘F η α)) a 
         ≡⟨ cong (λ X → (μ β ∘F X) a) (NatTrans.natural (Monad.η monad)) ⟩ 
       (μ β ∘F (η ([ M ]₀ β) ∘F [ Id[ C ] ]₁ k)) a 
@@ -72,16 +72,16 @@ Monad→HaskellMonad {M} monad = record
         ≡⟨ refl ⟩
       k a ∎
     
-    lawIdL : {α : Type} (m : [ M ]₀ α) 
+    law-right-id : {α : Type} (m : [ M ]₀ α) 
            → m >>= return ≡ m
-    lawIdL {α} m = begin
+    law-right-id {α} m = begin
       (μ α ∘F [ M ]₁ (η α)) m 
         ≡⟨ cong (λ X → X m) (Monad.η-left-coher monad) ⟩
       m ∎
     
-    lawAssoc : {α β γ : Type} (m : [ M ]₀ α) (k : α → [ M ]₀ β) (h : β → [ M ]₀ γ) 
+    law-assoc : {α β γ : Type} (m : [ M ]₀ α) (k : α → [ M ]₀ β) (h : β → [ M ]₀ γ) 
              → m >>= (λ x → k x >>= h) ≡ (m >>= k) >>= h
-    lawAssoc {α} {β} {γ} m k h = begin
+    law-assoc {α} {β} {γ} m k h = begin
       (μ γ ∘F [ M ]₁ (λ x → (μ γ ∘F ([ M ]₁ h ∘F k)) x)) m 
         ≡⟨ cong (λ X → (μ γ ∘F X) m) (Functor.compose M) ⟩
       (μ γ ∘F ([ M ]₁ (μ γ) ∘F [ M ]₁ ([ M ]₁ h ∘F k))) m
@@ -100,9 +100,9 @@ Monad→HaskellMonad {M} monad = record
         ≡⟨ refl ⟩ -- associativity of ∘F
       (μ γ ∘F ([ M ]₁ h ∘F (μ β ∘F [ M ]₁ k))) m ∎
 
-    lawMonadFmap : {α β : Type} (f : α → β) (x : [ M ]₀ α) 
+    law-monad-fmap : {α β : Type} (f : α → β) (x : [ M ]₀ α) 
                  → fmap f x ≡ x >>= (return ∘F f)
-    lawMonadFmap {α} {β} f x = begin
+    law-monad-fmap {α} {β} f x = begin
       [ M ]₁ f x 
         ≡⟨ cong (λ X → (X ∘F [ M ]₁ f) x) (sym $ Monad.η-left-coher monad) ⟩
       ((μ β ∘F [ M ]₁ (η β)) ∘F [ M ]₁ f) x
@@ -116,81 +116,81 @@ Monad→HaskellMonad {M} monad = record
       { pure = return
       ; _<*>_ = _<*>_
       ; functor = Functor→HaskellFunctor M
-      ; lawId = lawId
-      ; lawComposition = lawComposition
-      ; lawHomomorphism = lawHomomorphism
-      ; lawInterchange = lawInterchange
-      ; lawApplicativeFmap = lawApplicativeFmap
+      ; law-id = law-id
+      ; law-composition = law-composition
+      ; law-homomorphism = law-homomorphism
+      ; law-interchange = law-interchange
+      ; law-applicative-fmap = law-applicative-fmap
       } where
-        lawId : {α : Type} (v : [ M ]₀ α)
+        law-id : {α : Type} (v : [ M ]₀ α)
               → return idF <*> v ≡ v
-        lawId {α} v = begin
+        law-id {α} v = begin
           return idF >>= (λ f → fmap f v)
-            ≡⟨ lawIdR idF (λ f → fmap f v) ⟩
+            ≡⟨ law-left-id idF (λ f → fmap f v) ⟩
           fmap idF v
             ≡⟨ cong (λ X → X v) (Functor.id M) ⟩
           v ∎
         
-        lawComposition : {α β γ : Type} (u : [ M ]₀ (β → γ)) (v : [ M ]₀ (α → β)) (w : [ M ]₀ α) 
+        law-composition : {α β γ : Type} (u : [ M ]₀ (β → γ)) (v : [ M ]₀ (α → β)) (w : [ M ]₀ α) 
                        → ((return _∘′_ <*> u) <*> v) <*> w ≡ u <*> (v <*> w)
-        lawComposition {α} {β} {γ} u v w = begin
+        law-composition {α} {β} {γ} u v w = begin
           ((return _∘′_ >>= (λ f → fmap f u)) >>= (λ g → fmap g v)) >>= (λ h → fmap h w) 
-            ≡⟨ cong (λ X → (X >>= (λ g → fmap g v)) >>= (λ h → fmap h w) ) (lawIdR _∘′_ (λ f → fmap f u)) ⟩
+            ≡⟨ cong (λ X → (X >>= (λ g → fmap g v)) >>= (λ h → fmap h w) ) (law-left-id _∘′_ (λ f → fmap f u)) ⟩
           ((fmap _∘′_ u) >>= (λ g → fmap g v)) >>= (λ h → fmap h w) 
-            ≡⟨ cong (λ X → (X >>= (λ g → fmap g v)) >>= (λ h → fmap h w)) (lawMonadFmap _∘′_ u) ⟩
+            ≡⟨ cong (λ X → (X >>= (λ g → fmap g v)) >>= (λ h → fmap h w)) (law-monad-fmap _∘′_ u) ⟩
           ((u >>= (return ∘F _∘′_)) >>= (λ g → fmap g v)) >>= (λ h → fmap h w) 
-            ≡⟨ cong (λ X → X >>= (λ h → fmap h w)) (sym $ lawAssoc u (return ∘F _∘′_) (λ g → fmap g v)) ⟩
+            ≡⟨ cong (λ X → X >>= (λ h → fmap h w)) (sym $ law-assoc u (return ∘F _∘′_) (λ g → fmap g v)) ⟩
           (u >>= (λ x → (return ∘F _∘F_) x >>= (λ g → fmap g v))) >>= (λ h → fmap h w) 
-            ≡⟨ sym $ lawAssoc u (λ x → ((return ∘F _∘F_) x >>= (λ g → fmap g v))) (λ h → fmap h w) ⟩
+            ≡⟨ sym $ law-assoc u (λ x → ((return ∘F _∘F_) x >>= (λ g → fmap g v))) (λ h → fmap h w) ⟩
           u >>= (λ f → (return (_∘F_ f) >>= (λ g → fmap g v)) >>= (λ h → fmap h w) )
-            ≡⟨ cong (λ X → u >>= X) (fun-ext (λ f → cong (λ X → X >>= (λ h → fmap h w)) (lawIdR (_∘F_ f) (λ g → fmap g v)))) ⟩
+            ≡⟨ cong (λ X → u >>= X) (fun-ext (λ f → cong (λ X → X >>= (λ h → fmap h w)) (law-left-id (_∘F_ f) (λ g → fmap g v)))) ⟩
           u >>= (λ f → fmap (_∘F_ f) v >>= (λ h → fmap h w) )
-            ≡⟨ cong (λ X → u >>= X) (fun-ext (λ f → cong (λ X → X >>= (λ h → fmap h w)) (lawMonadFmap (_∘F_ f) v))) ⟩
+            ≡⟨ cong (λ X → u >>= X) (fun-ext (λ f → cong (λ X → X >>= (λ h → fmap h w)) (law-monad-fmap (_∘F_ f) v))) ⟩
           u >>= (λ f → (v >>= (return ∘F (_∘F_ f))) >>= (λ h → fmap h w) )
-            ≡⟨ cong (λ X → u >>= X) (fun-ext (λ f → sym $ lawAssoc v (return ∘F (_∘′_ f)) (λ h → fmap h w))) ⟩
+            ≡⟨ cong (λ X → u >>= X) (fun-ext (λ f → sym $ law-assoc v (return ∘F (_∘′_ f)) (λ h → fmap h w))) ⟩
           u >>= (λ f → v >>= (λ g → return (f ∘F g) >>= (λ h → fmap h w) ) )
-            ≡⟨ cong (λ X → u >>= X) (fun-ext (λ f → cong (λ X → v >>= X) (fun-ext (λ g → lawIdR (f ∘F g) (λ h → fmap h w))))) ⟩
+            ≡⟨ cong (λ X → u >>= X) (fun-ext (λ f → cong (λ X → v >>= X) (fun-ext (λ g → law-left-id (f ∘F g) (λ h → fmap h w))))) ⟩
           u >>= (λ f → v >>= (λ g → fmap (f ∘F g) w))
-            ≡⟨ cong (λ X → u >>= X) (fun-ext (λ f → cong (λ X → v >>= X) (fun-ext (λ g → lawMonadFmap (f ∘F g) w)))) ⟩
+            ≡⟨ cong (λ X → u >>= X) (fun-ext (λ f → cong (λ X → v >>= X) (fun-ext (λ g → law-monad-fmap (f ∘F g) w)))) ⟩
           u >>= (λ f → v >>= (λ g → w >>= (return ∘F (f ∘F g))))
-            ≡⟨ cong (λ X → u >>= X) (fun-ext (λ f → cong (λ X → v >>= X) (fun-ext (λ g → cong (λ X → w >>= X) (fun-ext (λ x → sym $ lawIdR (g x) (return ∘F f))))))) ⟩
+            ≡⟨ cong (λ X → u >>= X) (fun-ext (λ f → cong (λ X → v >>= X) (fun-ext (λ g → cong (λ X → w >>= X) (fun-ext (λ x → sym $ law-left-id (g x) (return ∘F f))))))) ⟩
           u >>= (λ f → v >>= (λ g → w >>= (λ x → (return ∘F g) x >>= (return ∘F f))))
-            ≡⟨ cong (λ X → u >>= X) (fun-ext (λ f → cong (λ X → v >>= X) (fun-ext (λ g → lawAssoc w (return ∘F g) (return ∘F f))))) ⟩
+            ≡⟨ cong (λ X → u >>= X) (fun-ext (λ f → cong (λ X → v >>= X) (fun-ext (λ g → law-assoc w (return ∘F g) (return ∘F f))))) ⟩
           u >>= (λ f → v >>= (λ g → (w >>= (return ∘F g)) >>= (return ∘F f)))
-            ≡⟨ cong (λ X → u >>= X) (fun-ext (λ f → cong (λ X → v >>= X) (fun-ext (λ g → cong (λ X → X >>= (return ∘F f)) (sym $ lawMonadFmap g w))))) ⟩
+            ≡⟨ cong (λ X → u >>= X) (fun-ext (λ f → cong (λ X → v >>= X) (fun-ext (λ g → cong (λ X → X >>= (return ∘F f)) (sym $ law-monad-fmap g w))))) ⟩
           u >>= (λ f → v >>= (λ g → fmap g w >>= (return ∘F f)))
-            ≡⟨ cong (λ X → u >>= X) (fun-ext (λ f → lawAssoc v (λ g → fmap g w) (return ∘F f))) ⟩
+            ≡⟨ cong (λ X → u >>= X) (fun-ext (λ f → law-assoc v (λ g → fmap g w) (return ∘F f))) ⟩
           u >>= (λ f → (v >>= (λ g → fmap g w)) >>= (return ∘F f))
-            ≡⟨ cong (λ X → u >>= X) (fun-ext (λ f → sym $ lawMonadFmap f (v >>= (λ g → fmap g w)))) ⟩
+            ≡⟨ cong (λ X → u >>= X) (fun-ext (λ f → sym $ law-monad-fmap f (v >>= (λ g → fmap g w)))) ⟩
           u >>= (λ f → fmap f (v >>= (λ g → fmap g w))) ∎
 
-        lawHomomorphism : {α β : Type} (x : α) (f : α → β)
+        law-homomorphism : {α β : Type} (x : α) (f : α → β)
                         → return f <*> return x ≡ return (f x)
-        lawHomomorphism {α} {β} x f = begin
+        law-homomorphism {α} {β} x f = begin
           return f >>= (λ f → fmap f (return x)) 
-            ≡⟨ lawIdR f (λ f → fmap f (return x)) ⟩
+            ≡⟨ law-left-id f (λ f → fmap f (return x)) ⟩
           fmap f (return x) 
-            ≡⟨ lawMonadFmap f (return x) ⟩
+            ≡⟨ law-monad-fmap f (return x) ⟩
           return x >>= (return ∘F f)
-            ≡⟨ lawIdR x (return ∘F f) ⟩
+            ≡⟨ law-left-id x (return ∘F f) ⟩
           return (f x) ∎
         
-        lawInterchange : {α β : Type} (u : [ M ]₀ (α → β)) (x : α) 
+        law-interchange : {α β : Type} (u : [ M ]₀ (α → β)) (x : α) 
                        → u <*> return x ≡ return (λ f → f x) <*> u
-        lawInterchange {α} {β} u x = begin
+        law-interchange {α} {β} u x = begin
           u >>= (λ f → fmap f (return x)) 
-            ≡⟨ cong (λ X → u >>= X) (fun-ext $ λ f → lawMonadFmap f (return x)) ⟩
+            ≡⟨ cong (λ X → u >>= X) (fun-ext $ λ f → law-monad-fmap f (return x)) ⟩
           u >>= (λ f → return x >>= (return ∘F f)) 
-            ≡⟨ cong (λ X → u >>= X) (fun-ext $ λ f → lawIdR x (return ∘F f)) ⟩
+            ≡⟨ cong (λ X → u >>= X) (fun-ext $ λ f → law-left-id x (return ∘F f)) ⟩
           u >>= (λ f → return (f x))
             ≡⟨ refl ⟩
           u >>= (return ∘F (λ f → f x))
-            ≡⟨ sym $ lawMonadFmap (λ z → z x) u ⟩
+            ≡⟨ sym $ law-monad-fmap (λ z → z x) u ⟩
           fmap (λ f → f x) u
-            ≡⟨ sym $ lawIdR (λ f → f x) (λ g → fmap g u) ⟩
+            ≡⟨ sym $ law-left-id (λ f → f x) (λ g → fmap g u) ⟩
           return (λ f → f x) >>= (λ g → fmap g u) ∎
         
-        lawApplicativeFmap : {α β : Type} (f : α → β) (x : [ M ]₀ α)
+        law-applicative-fmap : {α β : Type} (f : α → β) (x : [ M ]₀ α)
                            → fmap f x ≡ return f <*> x
-        lawApplicativeFmap {α} {β} f x = sym $ lawIdR f (λ g → fmap g x)
+        law-applicative-fmap {α} {β} f x = sym $ law-left-id f (λ g → fmap g x)
 

@@ -13,6 +13,6 @@ Functor→HaskellFunctor : (F : Functor (setCategory {lzero}) (setCategory {lzer
                        → HaskellFunctor ([ F ]₀)
 Functor→HaskellFunctor F = record 
   { fmap = λ f ma → [ F ]₁ f ma
-  ; lawId = Functor.id F
-  ; lawCompose = λ f g → Functor.compose F
+  ; law-id = Functor.id F
+  ; law-compose = λ f g → Functor.compose F
   }

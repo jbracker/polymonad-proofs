@@ -32,7 +32,7 @@ polymonadId = record
   { B[_,_]▷_ = id[_,_]▷_
   ; ⟨_⟩ = id⟨_⟩
   ; bind = λ {M} {N} {P} → bind {M} {N} {P}
-  ; lawId = refl    
+  ; law-id = refl    
   ; lawFunctor1 = lawFunctor1
   ; lawFunctor2 = lawFunctor2
   ; lawMorph1 = lawMorph1
@@ -40,7 +40,7 @@ polymonadId = record
   ; lawMorph3 = lawMorph3
   ; lawDiamond1 = lawDiamond1 
   ; lawDiamond2 = lawDiamond2
-  ; lawAssoc = lawAssoc
+  ; law-assoc = law-assoc
   ; lawClosure = lawClosure 
   } where
       TyCons = IdTyCons ⊎ ⊥
@@ -119,18 +119,18 @@ polymonadId = record
       lawDiamond2 (inj₁ IdentTC) (inj₂ ()) R T
       lawDiamond2 (inj₂ ()) N R T
     
-      lawAssoc : ∀ (M N P R T S : TyCons) 
+      law-assoc : ∀ (M N P R T S : TyCons) 
                  (b₁ : id[ M , N ]▷ P) (b₂ : id[ P , R ]▷ T) 
                  (b₃ : id[ N , R ]▷ S) (b₄ : id[ M , S ]▷ T)
                → ∀ {a b c : Type} (m : id⟨ M ⟩ a) (f : a → id⟨ N ⟩ b) (g : b → id⟨ R ⟩ c)
                → (bind b₂) ((bind b₁) m f) g ≡ (bind b₄) m (λ x → (bind b₃) (f x) g)
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) IdentB IdentB IdentB IdentB m f g = refl
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ ())
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ ()) S
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ ()) T S
-      lawAssoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ ()) R T S
-      lawAssoc (inj₁ IdentTC) (inj₂ ()) P R T S
-      lawAssoc (inj₂ ()) N P R T S
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) IdentB IdentB IdentB IdentB m f g = refl
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ ())
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ ()) S
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ ()) T S
+      law-assoc (inj₁ IdentTC) (inj₁ IdentTC) (inj₂ ()) R T S
+      law-assoc (inj₁ IdentTC) (inj₂ ()) P R T S
+      law-assoc (inj₂ ()) N P R T S
       
       lawClosure : ∀ (M N P S T U : TyCons)
                  → ( id[ M , N  ]▷ P × id[ S , Id ]▷ M × id[ T , Id ]▷ N × id[ P , Id ]▷ U )

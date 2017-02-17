@@ -38,9 +38,9 @@ sessionIxMonad : IxMonad Session SessionM
 sessionIxMonad = record
   { _>>=_ = bind 
   ; return = return 
-  ; lawIdR = λ a k → refl 
-  ; lawIdL = λ m → refl 
-  ; lawAssoc = λ m f g → refl 
+  ; law-right-id = λ a k → refl 
+  ; law-left-id = λ m → refl 
+  ; law-assoc = λ m f g → refl 
   } where
     bind : ∀ {α β : Type} {i j k : Session} 
          → SessionM i j α 

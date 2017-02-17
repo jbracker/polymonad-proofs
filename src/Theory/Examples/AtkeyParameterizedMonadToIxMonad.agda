@@ -49,9 +49,9 @@ AtkeyParameterizedMonad→IxMonad
 AtkeyParameterizedMonad→IxMonad S F monad = record
   { _>>=_ = _>>=_
   ; return = return
-  ; lawIdR = lawIdR
-  ; lawIdL = lawIdL
-  ; lawAssoc = lawAssoc
+  ; law-right-id = law-right-id
+  ; law-left-id = law-left-id
+  ; law-assoc = law-assoc
   } where
     SetCat = setCategory {lzero}
     M = AtkeyFunctor→IxTyCon F
@@ -77,10 +77,10 @@ AtkeyParameterizedMonad→IxMonad S F monad = record
     
     open AtkeyParameterizedMonad
     
-    lawIdR : {α β : Type} {i j : Obj S} 
+    law-right-id : {α β : Type} {i j : Obj S} 
            → (a : α) (k : α → M i j β) 
            → return a >>= k ≡ k a
-    lawIdR {α} {β} {i} {j} a k = begin
+    law-right-id {α} {β} {i} {j} a k = begin
       return a >>= k 
         ≡⟨ refl ⟩
       μ monad ([ F ]₁ (id (S op) {i} , id S {i} , k) (η monad a))
@@ -93,20 +93,20 @@ AtkeyParameterizedMonad→IxMonad S F monad = record
         ≡⟨ cong (λ X → X (k a)) (AtkeyParameterizedMonad.right-id monad) ⟩
       k a ∎
     
-    lawIdL : {α : Type} {i j : Obj S}
+    law-left-id : {α : Type} {i j : Obj S}
            → (m : M i j α) 
            → m >>= return ≡ m
-    lawIdL {α} {i} {j} m = begin
+    law-left-id {α} {i} {j} m = begin
       m >>= return 
         ≡⟨ refl ⟩
       (μ monad ∘F [ F ]₁ (id (S op) {i} , id S {j} , η monad)) m
         ≡⟨ cong (λ X →  X m) (AtkeyParameterizedMonad.left-id monad) ⟩
       m ∎
 
-    lawAssoc : {α β γ : Type} {i j k l : Obj S}
+    law-assoc : {α β γ : Type} {i j k l : Obj S}
              → (m : M i j α) (f : α → M j k β) (g : β → M k l γ) 
              → m >>= (λ x → f x >>= g) ≡ (m >>= f) >>= g
-    lawAssoc m f g = begin
+    law-assoc m f g = begin
       m >>= (λ x → f x >>= g) 
         ≡⟨ refl ⟩
       (μ monad ∘F ([ F ]₁ ( id (S op) , id S , (μ monad ∘F ([ F ]₁ (id (S op) , id S , g)) ∘F f)) ) ) m
