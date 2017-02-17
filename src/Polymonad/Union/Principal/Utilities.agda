@@ -6,7 +6,7 @@ open import Data.Sum
 open import Data.Empty
 open import Relation.Binary.PropositionalEquality
 
-
+open import Utilities
 open import Identity
 open import Polymonad.Definition
 open import Polymonad.Unionable

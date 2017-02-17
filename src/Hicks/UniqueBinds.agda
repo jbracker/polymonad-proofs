@@ -12,7 +12,7 @@ open ≡-Reasoning
 -- Local
 open import Haskell
 open import Identity
-open import Utilities
+open import Extensionality
 open import Hicks.Polymonad
 
 -- Records
@@ -30,7 +30,7 @@ uniqueBind : ∀ {TyCons : Set} {Id : TyCons}
            → (b₁ : HB[ M , N ] pm ▷ P) 
            → (b₂ : HB[ M , N ] pm ▷ P)
            → ∀ {α β} → bind pm b₁ {α} {β} ≡ bind pm b₂ {α} {β}
-uniqueBind {TyCons = TyCons} {Id = Id} pm M N P b₁ b₂ = funExt₂ proof
+uniqueBind {TyCons = TyCons} {Id = Id} pm M N P b₁ b₂ = fun-ext₂ proof
   where
     lawId' = lawId pm
 
@@ -53,7 +53,7 @@ uniqueBind {TyCons = TyCons} {Id = Id} pm M N P b₁ b₂ = funExt₂ proof
     mkFunctor N = proj₁ (lawFunctor pm N)
     
     functionAsFunctor : {α β : Type} → (N : TyCons) → (f : α → H⟨ pm ▷ N ⟩ β) → f ≡ (λ y → (bind pm (mkFunctor N)) (f y) (id lawId'))
-    functionAsFunctor N f = let b , q = lawFunctor pm N in funExt (λ x → sym (q (f x)))
+    functionAsFunctor N f = let b , q = lawFunctor pm N in fun-ext (λ x → sym (q (f x)))
     
     proof : ∀ {α β} 
           → (x : H⟨ pm ▷ M ⟩ α) → (f : α → H⟨ pm ▷ N ⟩ β)

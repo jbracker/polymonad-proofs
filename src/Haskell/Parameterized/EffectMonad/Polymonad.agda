@@ -12,7 +12,7 @@ open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning
 
 -- Local
-open import Utilities
+open import Extensionality
 open import Haskell
 open import Identity
 open import Polymonad.Definition
@@ -75,10 +75,10 @@ EffectMonad→Polymonad {Effect = Effect} {M = M'} {{effMonoid = mon}} monad = r
     monCarrier = Monoid.carrier mon
 
     monLawIdR : (m : Effect) → m ∙ ε ≡ m
-    monLawIdR m = Monoid.idL mon {m}
+    monLawIdR m = Monoid.right-id mon {m}
     
     monLawIdL : (m : Effect) → ε ∙ m ≡ m
-    monLawIdL m = Monoid.idR mon {m}
+    monLawIdL m = Monoid.left-id mon {m}
     
     monLawAssoc : (m n o : Effect) → m ∙ (n ∙ o) ≡ (m ∙ n) ∙ o
     monLawAssoc m n o = Monoid.assoc mon {m = m} {n} {o}
@@ -356,7 +356,7 @@ EffectMonad→Polymonad {Effect = Effect} {M = M'} {{effMonoid = mon}} monad = r
         subst₂ M' (trans (monLawAssoc x ε ε) (trans (monLawIdR (x ∙ ε)) (monLawIdR x))) refl
                (mBind monad m (λ x → mBind monad (mReturn monad (f x)) (λ a → mReturn monad (g a))))
           ≡⟨ cong (λ X → subst₂ M' (trans (monLawAssoc x ε ε) (trans (monLawIdR (x ∙ ε)) (monLawIdR x))) refl (mBind monad m X)) 
-                  (funExt (λ x → lawIdL monad (f x) (λ a → mReturn monad (g a)))) ⟩
+                  (fun-ext (λ x → lawIdL monad (f x) (λ a → mReturn monad (g a)))) ⟩
         subst₂ M' (trans (monLawAssoc x ε ε) (trans (monLawIdR (x ∙ ε)) (monLawIdR x))) refl
                (mBind monad m (λ y → subst₂ M' (sym (monLawIdL ε)) refl (mReturn monad (g (f y)))))
           ≡⟨ cong (λ X → subst₂ M' (trans (monLawAssoc x ε ε) (trans (monLawIdR (x ∙ ε)) (monLawIdR x))) refl X) 
@@ -413,7 +413,7 @@ EffectMonad→Polymonad {Effect = Effect} {M = M'} {{effMonoid = mon}} monad = r
         subst₂ M' (monLawIdR x) refl (subst₂ M' (cong (λ X → X ∙ ε) (monLawIdR x)) refl 
                                              (subst₂ M' (monLawAssoc x ε ε) refl (mBind monad m (λ x → mBind monad (mReturn monad (f x)) (λ a → mReturn monad (g a))))))
           ≡⟨ cong (λ X → subst₂ M' (monLawIdR x) refl (subst₂ M' (cong (λ X → X ∙ ε) (monLawIdR x)) refl (subst₂ M' (monLawAssoc x ε ε) refl (mBind monad m X)))) 
-                  (funExt (λ x → lawIdL monad (f x) (λ a → mReturn monad (g a)))) ⟩
+                  (fun-ext (λ x → lawIdL monad (f x) (λ a → mReturn monad (g a)))) ⟩
         subst₂ M' (monLawIdR x) refl (subst₂ M' (cong (λ X → X ∙ ε) (monLawIdR x)) refl 
                                              (subst₂ M' (monLawAssoc x ε ε) refl (mBind monad m (λ a → subst₂ M' (sym (monLawIdL ε)) refl (mReturn monad (g (f a)))))))
           ≡⟨ cong (λ X → subst₂ M' (monLawIdR x) refl (subst₂ M' (cong (λ X → X ∙ ε) (monLawIdR x)) refl (subst₂ M' (monLawAssoc x ε ε) refl X))) 

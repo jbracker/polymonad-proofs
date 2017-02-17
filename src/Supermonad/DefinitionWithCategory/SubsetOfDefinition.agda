@@ -24,7 +24,7 @@ open import Theory.Category
 open import Supermonad.Definition
 open import Supermonad.DefinitionWithCategory
 
-open Category renaming ( idL to catIdL ; idR to catIdR ; assoc to catAssoc ; _∘_ to comp )
+open Category renaming ( left-id to catIdL ; right-id to catIdR ; assoc to catAssoc ; _∘_ to comp )
 
 SupermonadC→Supermonad : {ℓ₀ ℓ₁ : Level} {C : Category {ℓ₀} {ℓ₁}} {F : ∀ {a b} → Hom C a b → Type → Type}
                        → UniqueIdHomomorphisms C
@@ -137,7 +137,7 @@ SupermonadC→Supermonad {ℓ₀} {ℓ₁} {C = C} {F = F} uniqueHom smc = recor
       subst (λ X → F X β) f∘g≡g (ret x >>= k)
         ≡⟨ cong (λ Y → subst (λ X → F X β) Y (ret x >>= k)) (proof-irrelevance f∘g≡g (catIdL C {f = g})) ⟩
       subst (λ X → F X β) (catIdL C {f = g}) (ret x >>= k)
-        ≡⟨ SupermonadC.idR smc x k ⟩
+        ≡⟨ SupermonadC.right-id smc x k ⟩
       k x ∎
     
     lawIdL : {α : Type} 
@@ -152,7 +152,7 @@ SupermonadC→Supermonad {ℓ₀} {ℓ₁} {C = C} {F = F} uniqueHom smc = recor
       subst (λ X → F X α) g∘f≡f (m >>= ret) 
         ≡⟨ cong (λ Y → subst (λ X → F X α) Y (m >>= ret)) (proof-irrelevance g∘f≡f (catIdR C {f = f})) ⟩
       subst (λ X → F X α) (catIdR C {f = f}) (m >>= ret) 
-        ≡⟨ SupermonadC.idL smc m ⟩
+        ≡⟨ SupermonadC.left-id smc m ⟩
       m ∎
     
     lawAssoc : {α β γ : Type} 

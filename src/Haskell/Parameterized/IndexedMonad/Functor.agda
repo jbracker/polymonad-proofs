@@ -12,7 +12,7 @@ open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning
 
 -- Local
-open import Utilities
+open import Extensionality
 open import Haskell
 open import Identity
 open import Haskell.Functor
@@ -43,7 +43,7 @@ IxMonad→Functor Ixs M monad i j = record
     fmap f ma = ma >>= (return ∘ f)
         
     lawId : ∀ {α : Type} → fmap {α = α} identity ≡ identity
-    lawId = funExt lawId'
+    lawId = fun-ext lawId'
       where
         lawId' : {α : Type} → (ma : M i j α) → fmap {α = α} identity ma ≡ identity ma 
         lawId' ma = begin
@@ -56,7 +56,7 @@ IxMonad→Functor Ixs M monad i j = record
     lawCompose : ∀ {α β γ : Type} 
                → (f : β → γ) → (g : α → β) 
                → fmap (f ∘ g) ≡ fmap f ∘ fmap g
-    lawCompose {α = α} f g = funExt lawDist'
+    lawCompose {α = α} f g = fun-ext lawDist'
       where
         lawDist' : (ma : M i j α)
                  → fmap (f ∘ g) ma ≡ (fmap f ∘ fmap g) ma
@@ -64,7 +64,7 @@ IxMonad→Functor Ixs M monad i j = record
           fmap (f ∘ g) ma
             ≡⟨ refl ⟩
           ma >>= (λ x → return (f (g x)))
-            ≡⟨ cong (λ X → ma >>= X) (funExt (λ x → sym (lawIdR monad (g x) (return ∘ f)))) ⟩
+            ≡⟨ cong (λ X → ma >>= X) (fun-ext (λ x → sym (lawIdR monad (g x) (return ∘ f)))) ⟩
           ma >>= (λ x → return (g x) >>= (return ∘ f))
             ≡⟨ lawAssoc monad ma (return ∘ g) (return ∘ f) ⟩
           (ma >>= (return ∘ g)) >>= (return ∘ f)

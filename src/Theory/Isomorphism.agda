@@ -45,7 +45,7 @@ private
                    → {right-id₁ : inv₁ ∘ f ≡ id {a}}
                    → inv₀ ≡ inv₁
                    → isomorphism {C = C} inv₀ left-id₀ right-id₀ ≡ isomorphism inv₁ left-id₁ right-id₁
-    isomorphism-eq {inv₀ = inv} {.inv} {idL} {idL'} {idR} {idR'} refl 
-      = cong₂ (isomorphism inv) (proof-irrelevance idL idL') (proof-irrelevance idR idR')
+    isomorphism-eq {inv₀ = inv} {.inv} {left-id} {left-id'} {right-id} {right-id'} refl 
+      = cong₂ (isomorphism inv) (proof-irrelevance left-id left-id') (proof-irrelevance right-id right-id')
 
 open Equality using ( isomorphism-eq ) public

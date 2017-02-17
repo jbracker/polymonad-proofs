@@ -201,11 +201,11 @@ Monad→KleisliTriple : {ℓC₀ ℓC₁ : Level} {C : Category {ℓC₀} {ℓC�
 Monad→KleisliTriple {C = C} {T = T} m = record 
   { η = η 
   ; kext = kext
-  ; right-id = idR
-  ; left-id  = idL
+  ; right-id = right-id
+  ; left-id  = left-id
   ; coher = coher 
   } where
-    open Category C hiding ( Obj ; Hom )
+    open Category C hiding ( Obj ; Hom ; right-id ; left-id )
     
     T₀ : Obj C → Obj C
     T₀ a = [ T ]₀ a
@@ -222,9 +222,9 @@ Monad→KleisliTriple {C = C} {T = T} m = record
     kext : {a b : Obj C} → Hom C a (T₀ b) → Hom C (T₀ a) (T₀ b)
     kext f = μ ∘ T₁ f
     
-    idR : {a b : Obj C} {k : Hom C a (T₀ b)} 
+    right-id : {a b : Obj C} {k : Hom C a (T₀ b)} 
         → kext k ∘ η ≡ k
-    idR {a} {b} {k = k} = begin
+    right-id {a} {b} {k = k} = begin
       kext k ∘ η 
         ≡⟨ refl ⟩
       (μ ∘ T₁ k) ∘ η 
@@ -239,8 +239,8 @@ Monad→KleisliTriple {C = C} {T = T} m = record
         ≡⟨ Category.right-id C ⟩
       k ∎
       
-    idL : {a : Obj C} → kext {a = a} η ≡ id
-    idL = Monad.η-left-coher m
+    left-id : {a : Obj C} → kext {a = a} η ≡ id
+    left-id = Monad.η-left-coher m
     
     coher : {a b c : Obj C} {k : Hom C a (T₀ b)} {l : Hom C b (T₀ c)}
           → kext (kext l ∘ k) ≡ kext l ∘ kext k

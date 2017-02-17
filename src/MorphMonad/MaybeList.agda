@@ -433,7 +433,7 @@ polymonadMaybeList {M₁ = M₁} {M₂ = M₂} monad₁ monad₂ functorMorph ap
             → ∀ {α β γ : Type} 
             → (f : α → β) → (k : β → M γ) 
             → (λ x → mBind monad (mReturn monad (f x)) k) ≡ (λ x → k (f x))
-    lawIdRF monad f k = funExt (λ x → mLawIdR monad (f x) k)
+    lawIdRF monad f k = fun-ext (λ x → mLawIdR monad (f x) k)
     
     lawAssoc : ∀ (M N P R T S : TyCons) 
                (b₁ : B[ M , N ]▷ P) (b₂ : B[ P , R ]▷ T) 
@@ -528,7 +528,7 @@ polymonadMaybeList {M₁ = M₁} {M₂ = M₂} monad₁ monad₂ functorMorph ap
       mBind monad (mBind monad m (λ a → mReturn monad (f a))) (λ a → mReturn monad (g a)) 
         ≡⟨ sym (mLawAssoc monad m (λ a → mReturn monad (f a)) (λ a → mReturn monad (g a))) ⟩
       mBind monad m (λ x → mBind monad (mReturn monad (f x)) (λ a → mReturn monad (g a)) )
-        ≡⟨ cong (λ x → mBind monad m x) (funExt (λ x → mLawIdR monad (f x) ((λ a → mReturn monad (g a))))) ⟩
+        ≡⟨ cong (λ x → mBind monad m x) (fun-ext (λ x → mLawIdR monad (f x) ((λ a → mReturn monad (g a))))) ⟩
       mBind monad m (λ x → mReturn monad (g (f x)))
         ≡⟨ refl ⟩
       bindMonad monad m (λ x → bindReturn monad (f x) g) ∎

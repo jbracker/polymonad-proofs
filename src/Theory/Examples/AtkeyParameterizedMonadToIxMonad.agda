@@ -90,7 +90,7 @@ AtkeyParameterizedMonad→IxMonad S F monad = record
       (μ monad ∘F (η monad ∘F k)) a
         ≡⟨ refl ⟩
       (μ monad ∘F η monad) (k a)
-        ≡⟨ cong (λ X → X (k a)) (AtkeyParameterizedMonad.idR monad) ⟩
+        ≡⟨ cong (λ X → X (k a)) (AtkeyParameterizedMonad.right-id monad) ⟩
       k a ∎
     
     lawIdL : {α : Type} {i j : Obj S}
@@ -100,7 +100,7 @@ AtkeyParameterizedMonad→IxMonad S F monad = record
       m >>= return 
         ≡⟨ refl ⟩
       (μ monad ∘F [ F ]₁ (id (S op) {i} , id S {j} , η monad)) m
-        ≡⟨ cong (λ X →  X m) (AtkeyParameterizedMonad.idL monad) ⟩
+        ≡⟨ cong (λ X →  X m) (AtkeyParameterizedMonad.left-id monad) ⟩
       m ∎
 
     lawAssoc : {α β γ : Type} {i j k l : Obj S}

@@ -14,6 +14,7 @@ open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning
 
 -- Local
+open import Utilities
 open import Haskell
 open import Identity
 open import Polymonad.Definition

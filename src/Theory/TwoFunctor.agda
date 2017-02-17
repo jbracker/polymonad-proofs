@@ -144,8 +144,8 @@ Hask = record
   ; _∘_ = λ g f x → g (f x)
   ; id = λ x → x
   ; assoc = refl
-  ; idL = refl
-  ; idR = refl
+  ; left-id = refl
+  ; right-id = refl
   }
 -}
 {-
@@ -187,8 +187,8 @@ q = record
       ; _∘_ = λ {x} {y} {z} → _∘'_ {a} {b} {x} {y} {z}
       ; id = λ {F} → idHomCat {F}
       ; assoc = refl
-      ; idL = refl
-      ; idR = refl
+      ; left-id = refl
+      ; right-id = refl
       }
     
     fmap : {A B : Type} {G : Functor Hask Hask} → (A → B) → ([ G ]₀ A) → [ G ]₀ B
@@ -221,7 +221,7 @@ q = record
           (λ A GFA → fmap {[ F ]₀ A} {[ F ]₀ A} {G} (idHomCat {F} A) GFA)
             ≡⟨ refl ⟩
           (λ A GFA → Functor.F₁ G (idHomCat {F} A) GFA)
-            ≡⟨ funExt (λ A → Functor.id G) ⟩
+            ≡⟨ fun-ext (λ A → Functor.id G) ⟩
           (λ A GFA → GFA)
             ≡⟨ refl ⟩
           idC (HomCat' a c) {F₀ x} ∎
@@ -242,7 +242,7 @@ q = record
           (λ A GFA → (λ A GFA → g' A (f' A GFA)) ([ F'' ]₀ A) (Functor.F₁ G ((λ A GFA → g'' A (f'' A GFA)) A) GFA))
             ≡⟨ refl ⟩ 
           (λ A GFA → g' ([ F'' ]₀ A) (f' ([ F'' ]₀ A) (Functor.F₁ G (λ GFA → g'' A (f'' A GFA)) GFA)) )
-            ≡⟨ funExt (λ A → funExt (λ GFA → cong (λ X → g' ([ F'' ]₀ A) (f' ([ F'' ]₀ A) (X GFA))) (Functor.dist G))) ⟩
+            ≡⟨ fun-ext (λ A → fun-ext (λ GFA → cong (λ X → g' ([ F'' ]₀ A) (f' ([ F'' ]₀ A) (X GFA))) (Functor.dist G))) ⟩
           (λ A GFA → g' ([ F'' ]₀ A) (f' ([ F'' ]₀ A) (Functor.F₁ G (g'' A) (Functor.F₁ G (f'' A) GFA))) )
             ≡⟨ {!!} ⟩
           (λ A GFA → g' ([ F'' ]₀ A) (Functor.F₁ G' (g'' A) (f' ([ F' ]₀ A) (Functor.F₁ G (f'' A) GFA))) )

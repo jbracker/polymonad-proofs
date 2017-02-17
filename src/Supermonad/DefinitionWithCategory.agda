@@ -23,7 +23,7 @@ open import Haskell.Constrained.ConstrainedFunctor
 open import Theory.Category
 
 
-open Category renaming ( idL to catIdL ; idR to catIdR ; assoc to catAssoc ; _∘_ to comp )
+open Category renaming ( left-id to catIdL ; right-id to catIdR ; assoc to catAssoc ; _∘_ to comp )
 
 
 UniqueIdHomomorphisms : ∀ {ℓ₀ ℓ₁} → (C : Category {ℓ₀} {ℓ₁}) → Set (ℓ₁ ⊔ ℓ₀)
@@ -45,12 +45,12 @@ record SupermonadC {ℓ₀ ℓ₁ ℓF : Level} (C : Category {ℓ₀} {ℓ₁})
     functor : {a b : Obj C} (f : Hom C a b) → ConstrainedFunctor {ℓ = ℓF} (M f)
     
     -- The supermonad version of the right identity law.
-    idR : {α β : Type} {a b : Obj C} {j : Hom C a b}
+    right-id : {α β : Type} {a b : Obj C} {j : Hom C a b}
         → (a : α) → (k : α → M j β)
         → subst (λ X → M X β) (catIdL C) (return a >>= k) ≡ k a
     
     -- The supermonad version of the left identity law.
-    idL : {α : Type} {a b : Obj C} {i : Hom C a b}
+    left-id : {α : Type} {a b : Obj C} {i : Hom C a b}
         → (m : M i α)
         → subst (λ X → M X α) (catIdR C) (m >>= return) ≡ m
     

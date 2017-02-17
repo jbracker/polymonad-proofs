@@ -90,7 +90,7 @@ EffectMonad→Supermonad {n = n} Effect monoid M monad = record
     return {M = EffMonadTC ._} refl = return'
     
     fmap : ∀ {m : Monoid.carrier monoid} {α β : Type} → (α → β) → M m α → M m β
-    fmap {m = m} {β = β} f ma = subst₂ M (Monoid.idL monoid {m = m}) refl (ma >>= (return' ∘ f))
+    fmap {m = m} {β = β} f ma = subst₂ M (Monoid.right-id monoid {m = m}) refl (ma >>= (return' ∘ f))
     
     lawSingleTyCon : ∀ (M : TyCons) 
                    → ∃Indices tyConArgTys tyCon (λ X → Lift {ℓ = lsuc n} (⟨ M ⟩ ≡ X))
@@ -135,11 +135,11 @@ EffectMonad→Supermonad {n = n} Effect monoid M monad = record
         ≡⟨ bindSubstShift b (return' a) k ⟩
       subst (λ X → ⟨ EffMonadTC X ⟩ β) (sym b) (return' a >>= k)
         ≡⟨ cong (λ X → subst (λ X → ⟨ EffMonadTC X ⟩ β) (sym b) X) (EffectMonad.lawIdL monad a k) ⟩
-      subst (λ X → ⟨ EffMonadTC X ⟩ β) (sym b) (subst₂ M (sym (Monoid.idR monoid {m = x})) refl (k a))
-        ≡⟨ cong (λ X → subst (λ X → ⟨ EffMonadTC X ⟩ β) (sym b) X) (subst₂ToSubst (sym (Monoid.idR monoid {m = x})) (k a)) ⟩
-      subst (λ X → ⟨ EffMonadTC X ⟩ β) (sym b) (subst (λ X → ⟨ EffMonadTC X ⟩ β) (sym (Monoid.idR monoid {m = x})) (k a))
+      subst (λ X → ⟨ EffMonadTC X ⟩ β) (sym b) (subst₂ M (sym (Monoid.left-id monoid {m = x})) refl (k a))
+        ≡⟨ cong (λ X → subst (λ X → ⟨ EffMonadTC X ⟩ β) (sym b) X) (subst₂ToSubst (sym (Monoid.left-id monoid {m = x})) (k a)) ⟩
+      subst (λ X → ⟨ EffMonadTC X ⟩ β) (sym b) (subst (λ X → ⟨ EffMonadTC X ⟩ β) (sym (Monoid.left-id monoid {m = x})) (k a))
         ≡⟨ cong (λ Y → subst (λ X → ⟨ EffMonadTC X ⟩ β) (sym b) (subst (λ X → ⟨ EffMonadTC X ⟩ β) Y (k a))) 
-                (proof-irrelevance (sym (Monoid.idR monoid {m = x})) b) ⟩
+                (proof-irrelevance (sym (Monoid.left-id monoid {m = x})) b) ⟩
       subst (λ X → ⟨ EffMonadTC X ⟩ β) (sym b) (subst (λ X → ⟨ EffMonadTC X ⟩ β) b (k a))
         ≡⟨ subst²≡id' b (λ X → ⟨ EffMonadTC X ⟩ β) (k a) ⟩
       k a ∎
@@ -156,10 +156,10 @@ EffectMonad→Supermonad {n = n} Effect monoid M monad = record
         ≡⟨ bindSubstShift b m return' ⟩
       subst (λ X → ⟨ EffMonadTC X ⟩ α) (sym b) (m >>= return') 
         ≡⟨ cong (λ X → subst (λ X → ⟨ EffMonadTC X ⟩ α) (sym b) X) (EffectMonad.lawIdR monad m) ⟩
-      subst (λ X → ⟨ EffMonadTC X ⟩ α) (sym b) (subst₂ M (sym (Monoid.idL monoid {m = e})) refl m) 
-        ≡⟨ cong (λ Y → subst (λ X → ⟨ EffMonadTC X ⟩ α) (sym b) Y) (subst₂ToSubst (sym (Monoid.idL monoid {m = e})) m) ⟩
-      subst (λ X → ⟨ EffMonadTC X ⟩ α) (sym b) (subst (λ X → ⟨ EffMonadTC X ⟩ α) (sym (Monoid.idL monoid {m = e})) m) 
-        ≡⟨ cong (λ Y → subst (λ X → ⟨ EffMonadTC X ⟩ α) (sym b) (subst (λ X → ⟨ EffMonadTC X ⟩ α) Y m) ) (proof-irrelevance (sym (Monoid.idL monoid {m = e})) b) ⟩
+      subst (λ X → ⟨ EffMonadTC X ⟩ α) (sym b) (subst₂ M (sym (Monoid.right-id monoid {m = e})) refl m) 
+        ≡⟨ cong (λ Y → subst (λ X → ⟨ EffMonadTC X ⟩ α) (sym b) Y) (subst₂ToSubst (sym (Monoid.right-id monoid {m = e})) m) ⟩
+      subst (λ X → ⟨ EffMonadTC X ⟩ α) (sym b) (subst (λ X → ⟨ EffMonadTC X ⟩ α) (sym (Monoid.right-id monoid {m = e})) m) 
+        ≡⟨ cong (λ Y → subst (λ X → ⟨ EffMonadTC X ⟩ α) (sym b) (subst (λ X → ⟨ EffMonadTC X ⟩ α) Y m) ) (proof-irrelevance (sym (Monoid.right-id monoid {m = e})) b) ⟩
       subst (λ X → ⟨ EffMonadTC X ⟩ α) (sym b) (subst (λ X → ⟨ EffMonadTC X ⟩ α) b m) 
         ≡⟨ subst²≡id' b (λ X → ⟨ EffMonadTC X ⟩ α) m ⟩
       m ∎
@@ -215,10 +215,10 @@ EffectMonad→Supermonad {n = n} Effect monoid M monad = record
       subst (λ X → [ ⟨ EffMonadTC x ⟩ , ⟨ EffMonadTC ε ⟩ ]▷ ⟨ EffMonadTC X ⟩ ) (sym b) (_>>=_) ma (return' ∘ f)
         ≡⟨ bindSubstShift b ma (return' ∘ f) ⟩
       subst (λ X → ⟨ EffMonadTC X ⟩ β) (sym b) (ma >>= (return' ∘ f))
-        ≡⟨ cong (λ Y → subst (λ X → ⟨ EffMonadTC X ⟩ β) Y (ma >>= (return' ∘ f))) (proof-irrelevance (sym b) (Monoid.idL monoid {m = x})) ⟩
-      subst (λ X → ⟨ EffMonadTC X ⟩ β) (Monoid.idL monoid {m = x}) (ma >>= (return' ∘ f))
-        ≡⟨ sym (subst₂ToSubst (Monoid.idL monoid {m = x}) (ma >>= (return' ∘ f))) ⟩
-      subst₂ M (Monoid.idL monoid {m = x}) refl (ma >>= (return' ∘ f))
+        ≡⟨ cong (λ Y → subst (λ X → ⟨ EffMonadTC X ⟩ β) Y (ma >>= (return' ∘ f))) (proof-irrelevance (sym b) (Monoid.right-id monoid {m = x})) ⟩
+      subst (λ X → ⟨ EffMonadTC X ⟩ β) (Monoid.right-id monoid {m = x}) (ma >>= (return' ∘ f))
+        ≡⟨ sym (subst₂ToSubst (Monoid.right-id monoid {m = x}) (ma >>= (return' ∘ f))) ⟩
+      subst₂ M (Monoid.right-id monoid {m = x}) refl (ma >>= (return' ∘ f))
         ≡⟨ refl ⟩
       fmap f ma ∎
 

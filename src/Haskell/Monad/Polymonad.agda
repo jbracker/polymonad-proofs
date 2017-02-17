@@ -11,7 +11,7 @@ open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning
 
 -- Local
-open import Utilities
+open import Extensionality
 open import Haskell
 open import Polymonad.Definition
 open import Haskell.Applicative
@@ -182,7 +182,7 @@ Monad→Polymonad {M = M'} monad = record
             → ∀ {α β γ : Type} 
             → (f : α → β) → (k : β → M γ) 
             → (λ x → mBind monad (mReturn monad (f x)) k) ≡ (λ x → k (f x))
-    lawIdRF monad f k = funExt (λ x → mLawIdR monad (f x) k)
+    lawIdRF monad f k = fun-ext (λ x → mLawIdR monad (f x) k)
     
     lawAssoc : ∀ (M N P R T S : TyCons) 
                (b₁ : B[ M , N ]▷ P) (b₂ : B[ P , R ]▷ T) 
@@ -277,7 +277,7 @@ Monad→Polymonad {M = M'} monad = record
       mBind monad (mBind monad m (λ a → mReturn monad (f a))) (λ a → mReturn monad (g a)) 
         ≡⟨ sym (mLawAssoc monad m (λ a → mReturn monad (f a)) (λ a → mReturn monad (g a))) ⟩
       mBind monad m (λ x → mBind monad (mReturn monad (f x)) (λ a → mReturn monad (g a)) )
-        ≡⟨ cong (λ x → mBind monad m x) (funExt (λ x → mLawIdR monad (f x) ((λ a → mReturn monad (g a))))) ⟩
+        ≡⟨ cong (λ x → mBind monad m x) (fun-ext (λ x → mLawIdR monad (f x) ((λ a → mReturn monad (g a))))) ⟩
       mBind monad m (λ x → mReturn monad (g (f x)))
         ≡⟨ refl ⟩
       bindMonad monad m (λ x → bindReturn monad (f x) g) ∎
@@ -372,7 +372,7 @@ Polymonad→Monad {TyCons = TyCons} {Id = Id} pm (mTC , bindB , returnB) = mTC ,
       returnBind x id' >>= k
         ≡⟨ lawAssoc pm Id Id mTC mTC mTC mTC returnB bindB applyB applyB x id' k ⟩ -- Assoc
       apply x (λ y → apply (id' y) k)
-        ≡⟨ cong (λ X → apply x X) (funExt (λ y → sym (lawMorph3 pm mTC mTC functorB applyB y k))) ⟩ -- Paired
+        ≡⟨ cong (λ X → apply x X) (fun-ext (λ y → sym (lawMorph3 pm mTC mTC functorB applyB y k))) ⟩ -- Paired
       apply x (λ y → functor (k y) (id (lawId pm)))
         ≡⟨ sym (lawMorph3 pm mTC mTC functorB applyB a ((λ y → functor (k y) (id (lawId pm))))) ⟩ -- Paired
       functor ((λ y → functor (k y) (id (lawId pm))) a) (id (lawId pm))

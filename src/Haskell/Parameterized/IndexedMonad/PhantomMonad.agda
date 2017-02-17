@@ -14,6 +14,7 @@ open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning
 
 -- Local
+open import Extensionality
 open import Utilities
 open import Haskell
 open import Identity
@@ -108,7 +109,7 @@ PhantomIxMonad→Monad {Ixs = Ixs} {M = IxM} i K ixMonad = record
       commuteBindK→Mij' : {α β γ : Type} → (k : α → M β) → (h : β → M γ)
                         → subst (λ X → α → X γ) (sym Mij≡K) (λ x → k x >>= h) 
                         ≡ (λ x → subst (λ X → α → X β) (sym Mij≡K) k x >>=ix subst (λ X → β → X γ) (sym Mij≡K) h)
-      commuteBindK→Mij' {α = α} {β = β} {γ = γ} k h = funExt (λ a → begin
+      commuteBindK→Mij' {α = α} {β = β} {γ = γ} k h = fun-ext (λ a → begin
         subst (λ X → α → X γ) (sym Mij≡K) (λ x → k x >>= h) a
           ≡⟨ sym (shiftFunSubst' (sym Mij≡K) a (λ x → k x >>= h)) ⟩
         subst (λ X → X γ) (sym Mij≡K) ((λ x → k x >>= h) a)

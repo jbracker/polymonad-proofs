@@ -12,7 +12,7 @@ open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning
 
 -- Local
-open import Utilities
+open import Extensionality
 open import Haskell
 open import Identity
 open import Polymonad.Definition
@@ -188,7 +188,7 @@ IxMonad→Polymonad {n = n} {Ixs = Ixs} {M = M'} monad = record
             → ∀ {α β γ : Type} 
             → (f : α → β) → (k : β → M i j γ) 
             → (λ x → mBind monad (mReturn monad (f x)) k) ≡ (λ x → k (f x))
-    lawIdRF monad f k = funExt (λ x → lawIdR monad (f x) k)
+    lawIdRF monad f k = fun-ext (λ x → lawIdR monad (f x) k)
     
     lawAssoc : ∀ (M N P R T S : TyCons) 
                (b₁ : B[ M , N ]▷ P) (b₂ : B[ P , R ]▷ T) 
@@ -284,7 +284,7 @@ IxMonad→Polymonad {n = n} {Ixs = Ixs} {M = M'} monad = record
       mBind monad (mBind monad m (λ a → mReturn monad (f a))) (λ a → mReturn monad (g a)) 
         ≡⟨ sym (mLawAssoc monad m (λ a → mReturn monad (f a)) (λ a → mReturn monad (g a))) ⟩
       mBind monad m (λ x → mBind monad (mReturn monad (f x)) (λ a → mReturn monad (g a)) )
-        ≡⟨ cong (λ x → mBind monad m x) (funExt (λ x → lawIdR monad (f x) ((λ a → mReturn monad (g a))))) ⟩
+        ≡⟨ cong (λ x → mBind monad m x) (fun-ext (λ x → lawIdR monad (f x) ((λ a → mReturn monad (g a))))) ⟩
       mBind monad m (λ x → mReturn monad (g (f x)))
         ≡⟨ refl ⟩
       bindMonad monad m (λ x → bindReturn monad (f x) g) ∎

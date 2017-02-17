@@ -359,10 +359,10 @@ record AtkeyParameterizedMonad {ℓC₀ ℓC₁ ℓS₀ ℓS₁ : Level} (C : Ca
            → μ {x} {s₀} {s₁} {s₃} ∘C [ T ]₁ (id S {s₀} , id S {s₁} , μ {x} {s₁} {s₂} {s₃}) 
            ≡ μ {x} {s₀} {s₂} {s₃} ∘C μ {[ T ]₀ (s₂ , s₃ , x)} {s₀} {s₁} {s₂}
     
-    idL : {x : Obj C} {s₁ s₂ : Obj S}
+    left-id : {x : Obj C} {s₁ s₂ : Obj S}
         → μ {x} {s₁} {s₂} {s₂} ∘C [ T ]₁ (id (S op) {s₁} , id S {s₂} , η {x} {s₂}) ≡ id C {[ T ]₀ (s₁ , s₂ , x)}
     
-    idR : {x : Obj C} {s₁ s₂ : Obj S}
+    right-id : {x : Obj C} {s₁ s₂ : Obj S}
         → μ {x} {s₁} {s₁} {s₂} ∘C η {[ T ]₀ (s₁ , s₂ , x)} {s₁} ≡ id C {[ T ]₀ (s₁ , s₂ , x)}
   
   NatTrans-η : (s : Obj S) → NaturalTransformation Id[ C ] (natTransAtkeyFunctor s s T)

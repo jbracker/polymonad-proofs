@@ -116,7 +116,7 @@ AtkeyParameterizedMonad→LaxTwoFunctor {ℓC₀} {ℓC₁} {ℓS₀} {ℓS₁} 
       NatTrans.η (μ {s₁} {s₁} {s₂} {id S {s₁}} {f}) x ∘C [ M ]₁ (id (S op) {s₂} , id S {s₁} , NatTrans.η (η {s₁}) x)
         ≡⟨ refl ⟩
       AtkeyParameterizedMonad.μ monad {x} {s₂} {s₁} {s₁} ∘C [ M ]₁ (id (S op) {s₂} , id S {s₁} , AtkeyParameterizedMonad.η monad {x} {s₁})
-        ≡⟨ AtkeyParameterizedMonad.idL monad {x} {s₂} {s₁} ⟩
+        ≡⟨ AtkeyParameterizedMonad.left-id monad {x} {s₂} {s₁} ⟩
       id C {[ [ P₁ {s₁} {s₂} ]₀ f ]₀ x}
         ≡⟨ refl ⟩
       NatTrans.η Id⟨ [ P₁ {s₁} {s₂} ]₀ f ⟩ x
@@ -141,7 +141,7 @@ AtkeyParameterizedMonad→LaxTwoFunctor {ℓC₀} {ℓC₁} {ℓS₀} {ℓS₁} 
       NatTrans.η (μ {s₁} {s₂} {s₂} {f} {id S {s₂}}) x ∘C NatTrans.η (η {s₂}) ([ M ]₀ (s₂ , s₁ , x))
         ≡⟨ refl ⟩
       AtkeyParameterizedMonad.μ monad {x} {s₂} {s₂} {s₁} ∘C AtkeyParameterizedMonad.η monad {[ M ]₀ (s₂ , s₁ , x)} {s₂}
-        ≡⟨ AtkeyParameterizedMonad.idR monad {x} {s₂} {s₁}  ⟩
+        ≡⟨ AtkeyParameterizedMonad.right-id monad {x} {s₂} {s₁}  ⟩
       id C {[ M ]₀ (s₂ , s₁ , x)}
         ≡⟨ refl ⟩
       NatTrans.η Id⟨ [ P₁ {s₁} {s₂} ]₀ f ⟩ x

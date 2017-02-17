@@ -30,8 +30,8 @@ FunctorEndomorphisms = record
   ; _∘Ct_ = flip trans
   ; idCt = refl
   ; constraint-assoc = λ {α} {β} {γ} {δ} {α'} {β'} {γ'} {δ'} {f} {g} {h} → assoc {f = f} {g} {h}
-  ; constraint-right-id = λ {α} {β} {α'} {β'} {f} → idR {f = f}
-  ; constraint-left-id = λ {α} {β} {α'} {β'} {f} → idL {f = f}
+  ; constraint-right-id = λ {α} {β} {α'} {β'} {f} → right-id {f = f}
+  ; constraint-left-id = λ {α} {β} {α'} {β'} {f} → left-id {f = f}
   ; F = F
   ; map = ctMap
   ; functor-id = ctFuncId
@@ -57,13 +57,13 @@ FunctorEndomorphisms = record
           → flip trans h' (flip trans g' f') ≡ flip trans (flip trans h' g') f'
     assoc refl refl refl = refl
     
-    idR : {α β : Type} {α' : ObjCts α} {β' : ObjCts β} {f : α → β}
+    right-id : {α β : Type} {α' : ObjCts α} {β' : ObjCts β} {f : α → β}
         → (f' : HomCts α' β' f) → flip trans refl f' ≡ f'
-    idR refl = refl
+    right-id refl = refl
     
-    idL : {α β : Type} {α' : ObjCts α} {β' : ObjCts β} {f : α → β}
+    left-id : {α β : Type} {α' : ObjCts α} {β' : ObjCts β} {f : α → β}
         → (f' : HomCts α' β' f) → flip trans f' refl ≡ f'
-    idL refl = refl
+    left-id refl = refl
     
     F : Obj → Type
     F (α , _) = Endo α

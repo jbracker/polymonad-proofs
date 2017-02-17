@@ -10,6 +10,7 @@ open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning
 
 -- Local
+open import Extensionality
 open import Haskell
 open import Polymonad.Definition
 open import Identity
@@ -30,7 +31,7 @@ uniqueBind : ∀ {TyCons : Set} {Id : TyCons}
            → (b₁ : B[ M , N ] pm ▷ P) 
            → (b₂ : B[ M , N ] pm ▷ P)
            → ∀ {α β} → bind pm b₁ {α} {β} ≡ bind pm b₂ {α} {β}
-uniqueBind {TyCons = TyCons} {Id = Id} pm M N P b₁ b₂ = funExt₂ proof
+uniqueBind {TyCons = TyCons} {Id = Id} pm M N P b₁ b₂ = fun-ext₂ proof
   where
     lawId' = lawId pm
 
@@ -53,7 +54,7 @@ uniqueBind {TyCons = TyCons} {Id = Id} pm M N P b₁ b₂ = funExt₂ proof
     mkFunctor N = lawFunctor1 pm N
     
     functionAsFunctor : {α β : Type} → (N : TyCons) → (f : α → ⟨ pm ▷ N ⟩ β) → f ≡ (λ y → (bind pm (mkFunctor N)) (f y) (id lawId'))
-    functionAsFunctor N f = let q = lawFunctor2 pm N (lawFunctor1 pm N) in funExt (λ x → sym (q (f x)))
+    functionAsFunctor N f = let q = lawFunctor2 pm N (lawFunctor1 pm N) in fun-ext (λ x → sym (q (f x)))
     
     proof : ∀ {α β} 
           → (x : ⟨ pm ▷ M ⟩ α) → (f : α → ⟨ pm ▷ N ⟩ β)

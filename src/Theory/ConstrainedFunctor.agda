@@ -69,17 +69,17 @@ record ConstrainedFunctor {ℓ₀ ℓ₁ : Level} : Set (lsuc ℓ₀ ⊔ lsuc �
   
   -- The category of constraints that restrict our constrained functor.
   ConstraintCategory : Category
-  ConstraintCategory = category Obj Hom _∘_ id assoc idR idL
+  ConstraintCategory = category Obj Hom _∘_ id assoc right-id left-id
     where
       assoc : {α β γ δ : Obj} {f : Hom α β} {g : Hom β γ} {h : Hom γ δ} → h ∘ (g ∘ f) ≡ (h ∘ g) ∘ f
       assoc {α , α'} {β , β'} {γ , γ'} {δ , δ'} {f , f'} {g , g'} {h , h'} = 
         cong (λ X → h ∘F (g ∘F f) , X) (constraint-assoc {α} {β} {γ} {δ} {α'} {β'} {γ'} {δ'} {f} {g} {h} f' g' h')
     
-      idR : {α β : Obj} {f : Hom α β} → id ∘ f ≡ f
-      idR {α , α'} {β , β'} {f , f'} = cong (λ X → f , X) (constraint-right-id f')
+      right-id : {α β : Obj} {f : Hom α β} → id ∘ f ≡ f
+      right-id {α , α'} {β , β'} {f , f'} = cong (λ X → f , X) (constraint-right-id f')
     
-      idL : {α β : Obj} {f : Hom α β} → f ∘ id ≡ f
-      idL {α , α'} {β , β'} {f , f'} = cong (λ X → f , X) (constraint-left-id f')
+      left-id : {α β : Obj} {f : Hom α β} → f ∘ id ≡ f
+      left-id {α , α'} {β , β'} {f , f'} = cong (λ X → f , X) (constraint-left-id f')
   
   -- The embedding of the constrained category into Haskell.
   -- Inside of Haskell the constraint information (that is lost by the embedding) 

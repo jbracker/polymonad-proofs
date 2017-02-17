@@ -84,8 +84,8 @@ IxMonad→AtkeyParameterizedMonad S M monad = record
   ; naturalμ₂ = {!!}
   ; dinaturalμ = {!!}
   ; assoc = {!!}
-  ; idL = {!!}
-  ; idR = {!!}
+  ; left-id = {!!}
+  ; right-id = {!!}
   } where
     join = IxMonad.join monad
     return = IxMonad.return monad

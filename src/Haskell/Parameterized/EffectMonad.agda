@@ -20,7 +20,7 @@ open import Theory.Monoid
 -- TODO: This is still unfinished work, since the constraints that can be applied to the monoid
 -- elements are not modelled at all right now.
 
-open Monoid {{...}} renaming ( idR to monLawIdL ; idL to monLawIdR ; assoc to monLawAssoc ; carrier to monCarrier )
+open Monoid {{...}} renaming ( assoc to monLawAssoc ; carrier to monCarrier )
 --open Monoid
 
 record EffectMonad {n} (Effect : Set n) {{effectMonoid : Monoid Effect}} (M : Effect → TyCon) : Set (lsuc n) where
@@ -30,10 +30,10 @@ record EffectMonad {n} (Effect : Set n) {{effectMonoid : Monoid Effect}} (M : Ef
     
     lawIdL : ∀ {α β : Type} {i : Effect}
            → (a : α) → (k : α → M i β) 
-           → return a >>= k ≡ subst₂ M (sym (monLawIdL {m = i})) refl (k a)
+           → return a >>= k ≡ subst₂ M (sym (left-id {m = i})) refl (k a)
     lawIdR : ∀ {α : Type} {i : Effect}
            → (m : M i α)
-           → m >>= return ≡ subst₂ M (sym (monLawIdR {m = i})) refl m
+           → m >>= return ≡ subst₂ M (sym (right-id {m = i})) refl m
     lawAssoc : ∀ {α β γ : Type} {i j k : Effect}
              → (m : M i α) → (f : α → M j β) → (g : β → M k γ)
              → m >>= (λ x → f x >>= g) ≡ subst₂ M (sym $ monLawAssoc {m = i} {j} {k}) refl ((m >>= f) >>= g)
@@ -68,11 +68,11 @@ bindMonad m = mBind m
 
 bindFunctor : ∀ {n} {Effect : Set n}  {M : Effect → TyCon} {i : Effect} {{effMonoid : Monoid Effect}} → (m : EffectMonad Effect M)
             → [ M i , Identity ]▷ M i
-bindFunctor {M = M} {i = i} m ma f = subst₂ M (monLawIdR {m = i}) refl (mBind m ma (λ a → mReturn m (f a)))
+bindFunctor {M = M} {i = i} m ma f = subst₂ M (right-id {m = i}) refl (mBind m ma (λ a → mReturn m (f a)))
 
 bindApply : ∀ {n} {Effect : Set n}  {M : Effect → TyCon} {i : Effect} {{effMonoid : Monoid Effect}} → (m : EffectMonad Effect M)
           → [ Identity , M i ]▷ M i
-bindApply {M = M} {i = i} m ma f = subst₂ M (monLawIdL {m = i}) refl (mBind m (mReturn m ma) f)
+bindApply {M = M} {i = i} m ma f = subst₂ M (left-id {m = i}) refl (mBind m (mReturn m ma) f)
 
 bindReturn : ∀ {n} {Effect : Set n} {M : Effect → TyCon} {{effMonoid : Monoid Effect}} → (m : EffectMonad Effect M)
            → [ Identity , Identity ]▷ M ε
