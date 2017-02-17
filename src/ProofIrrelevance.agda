@@ -10,6 +10,7 @@ open import Relation.Nullary
 open import Relation.Binary.PropositionalEquality
 
 open import Extensionality
+open import Congruence
 
 -------------------------------------------------------------------------------
 -- Definition of proof irrelevance
@@ -39,6 +40,20 @@ proof-irr-Lift proof-irr-A (lift a) (lift b) = cong lift (proof-irr-A a b)
 -- Proofs of the negation of any proposition are irrelevant (if we have function extensionality).
 proof-irr-¬ : {ℓ : Level} {A : Set ℓ} → ProofIrrelevance (¬ A)
 proof-irr-¬ ¬a ¬b = fun-ext (λ x → proof-irr-⊥ (¬a x) (¬b x))
+
+-- Proofs of dependent products are irrelevant if the proofs of their components are irrelevant.
+proof-irr-Σ : {ℓA ℓB : Level} {A : Set ℓA} {B : A → Set ℓB}
+            → ProofIrrelevance A → ((a : A) → ProofIrrelevance (B a))
+            → ProofIrrelevance (Σ A B)
+proof-irr-Σ proof-irr-A proof-irr-B (a₁ , b₁) (a₂ , b₂) with proof-irr-A a₁ a₂
+proof-irr-Σ proof-irr-A proof-irr-B (a₁ , b₁) (.a₁ , b₂) | refl with proof-irr-B a₁ b₁ b₂
+proof-irr-Σ proof-irr-A proof-irr-B (a₁ , b₁) (.a₁ , .b₁) | refl | refl = refl
+
+-- Proofs of non-dependent products are irrelevant if the proofs of their components are irrelevant.
+proof-irr-× : {ℓA ℓB : Level} {A : Set ℓA} {B : Set ℓB}
+            → ProofIrrelevance A → ProofIrrelevance B
+            → ProofIrrelevance (A × B)
+proof-irr-× proof-irr-A proof-irr-B a b = proof-irr-Σ proof-irr-A (λ _ → proof-irr-B) a b
 
 -------------------------------------------------------------------------------
 -- Definition of Propositions which are sets that are proof irrelevant
