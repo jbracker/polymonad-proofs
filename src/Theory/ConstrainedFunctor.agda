@@ -4,11 +4,12 @@ module Theory.ConstrainedFunctor where
 open import Function renaming ( _∘_ to _∘F_ ; id to idF )
 open import Level renaming ( suc to lsuc ; zero to lzero)
 open import Data.Unit
-open import Data.Product
+open import Data.Product hiding ( map )
 open import Relation.Binary.PropositionalEquality
 
 open import Haskell
 open import Utilities
+open import ProofIrrelevance
 open import Theory.Category
 open import Theory.Subcategory
 open import Theory.Functor
@@ -22,23 +23,23 @@ record ConstrainedFunctor {ℓ₀ ℓ₁ : Level} : Set (lsuc ℓ₀ ⊔ lsuc �
     HomCts : {α β : Type} → ObjCts α → ObjCts β → (α → β) → Set ℓ₁
     
     _∘Ct_ : {α β γ : Type} {f : β → γ} {g : α → β} {α' : ObjCts α} {β' : ObjCts β} {γ' : ObjCts γ}
-         → HomCts β' γ' f → HomCts α' β' g → HomCts α' γ' (f ∘F g)
+          → HomCts β' γ' f → HomCts α' β' g → HomCts α' γ' (f ∘F g)
     
-    ctId : {α : Type} {α' : ObjCts α} → HomCts α' α' idF
+    idCt : {α : Type} {α' : ObjCts α} → HomCts α' α' idF
     
-    ctAssoc : {α β γ δ : Type}
-            → {α' : ObjCts α} {β' : ObjCts β} {γ' : ObjCts γ} {δ' : ObjCts δ}
-            → {f : α → β} {g : β → γ} {h : γ → δ}
-            → (f' : HomCts α' β' f) (g' : HomCts β' γ' g) (h' : HomCts γ' δ' h) 
-            → h' ∘Ct (g' ∘Ct f') ≡ (h' ∘Ct g') ∘Ct f'
+    constraint-assoc : {α β γ δ : Type}
+                     → {α' : ObjCts α} {β' : ObjCts β} {γ' : ObjCts γ} {δ' : ObjCts δ}
+                     → {f : α → β} {g : β → γ} {h : γ → δ}
+                     → (f' : HomCts α' β' f) (g' : HomCts β' γ' g) (h' : HomCts γ' δ' h) 
+                     → h' ∘Ct (g' ∘Ct f') ≡ (h' ∘Ct g') ∘Ct f'
     
-    ctIdR : {α β : Type} {α' : ObjCts α} {β' : ObjCts β}
-          → {f : α → β} → (f' : HomCts α' β' f)
-          → ctId {β} {β'} ∘Ct f' ≡ f'
+    constraint-right-id : {α β : Type} {α' : ObjCts α} {β' : ObjCts β}
+                        → {f : α → β} → (f' : HomCts α' β' f)
+                        → idCt {β} {β'} ∘Ct f' ≡ f'
     
-    ctIdL : {α β : Type} {α' : ObjCts α} {β' : ObjCts β}
-          → {f : α → β} → (f' : HomCts α' β' f)
-          → f' ∘Ct ctId {α} {α'} ≡ f'
+    constraint-left-id : {α β : Type} {α' : ObjCts α} {β' : ObjCts β}
+                       → {f : α → β} → (f' : HomCts α' β' f)
+                       → f' ∘Ct idCt {α} {α'} ≡ f'
   
   Obj : Set (lsuc lzero ⊔ ℓ₀)
   Obj = Σ Type ObjCts
@@ -50,21 +51,20 @@ record ConstrainedFunctor {ℓ₀ ℓ₁ : Level} : Set (lsuc ℓ₀ ⊔ lsuc �
   _∘_ f g = proj₁ f ∘F  proj₁ g , proj₂ f ∘Ct proj₂ g
   
   id : {α : Obj} → Hom α α
-  id = idF , ctId
+  id = idF , idCt
   
   field
     F : Obj → Type
     
-    ctMap : {α β : Obj} → Hom α β → F α → F β
+    map : {α β : Obj} → Hom α β → F α → F β
     
-    ctFuncId : {α : Obj} → ctMap {α} {α} id ≡ idF
+    functor-id : {α : Obj} → map {α} {α} id ≡ idF
     
-    ctFuncComp : {α β γ : Obj} {f : Hom α β} {g : Hom β γ} → ctMap (g ∘ f) ≡ ctMap g ∘F ctMap f
+    functor-compose : {α β γ : Obj} {f : Hom α β} {g : Hom β γ} → map (g ∘ f) ≡ map g ∘F map f
     
-    ctObjProofIrr : {α : Type} → (αCts αCts' : ObjCts α) → αCts ≡ αCts'
+    proof-irr-ObjCts : {α : Type} → ProofIrrelevance (ObjCts α)
     
-    ctHomProofIrr : {α β : Type} {αCts : ObjCts α} {βCts : ObjCts β} {f : α → β} 
-                  → (fCts fCts' : HomCts αCts βCts f) → fCts ≡ fCts'
+    proof-irr-HomCts : {α β : Type} {αCts : ObjCts α} {βCts : ObjCts β} {f : α → β} → ProofIrrelevance (HomCts αCts βCts f)
   
   
   -- The category of constraints that restrict our constrained functor.
@@ -73,13 +73,13 @@ record ConstrainedFunctor {ℓ₀ ℓ₁ : Level} : Set (lsuc ℓ₀ ⊔ lsuc �
     where
       assoc : {α β γ δ : Obj} {f : Hom α β} {g : Hom β γ} {h : Hom γ δ} → h ∘ (g ∘ f) ≡ (h ∘ g) ∘ f
       assoc {α , α'} {β , β'} {γ , γ'} {δ , δ'} {f , f'} {g , g'} {h , h'} = 
-        cong (λ X → h ∘F (g ∘F f) , X) (ctAssoc {α} {β} {γ} {δ} {α'} {β'} {γ'} {δ'} {f} {g} {h} f' g' h')
+        cong (λ X → h ∘F (g ∘F f) , X) (constraint-assoc {α} {β} {γ} {δ} {α'} {β'} {γ'} {δ'} {f} {g} {h} f' g' h')
     
       idR : {α β : Obj} {f : Hom α β} → id ∘ f ≡ f
-      idR {α , α'} {β , β'} {f , f'} = cong (λ X → f , X) (ctIdR f')
+      idR {α , α'} {β , β'} {f , f'} = cong (λ X → f , X) (constraint-right-id f')
     
       idL : {α β : Obj} {f : Hom α β} → f ∘ id ≡ f
-      idL {α , α'} {β , β'} {f , f'} = cong (λ X → f , X) (ctIdL f')
+      idL {α , α'} {β , β'} {f , f'} = cong (λ X → f , X) (constraint-left-id f')
   
   -- The embedding of the constrained category into Haskell.
   -- Inside of Haskell the constraint information (that is lost by the embedding) 
@@ -91,14 +91,14 @@ record ConstrainedFunctor {ℓ₀ ℓ₁ : Level} : Set (lsuc ℓ₀ ⊔ lsuc �
   IsInjectiveEmbedding = IsInjectiveF₀ , IsInjectiveF₁
     where
       IsInjectiveF₀ : IsInjective (Functor.F₀ EmbeddingFunctor)
-      IsInjectiveF₀ (α , αCts) (.α , βCts) refl = cong (λ X → α , X) (ctObjProofIrr αCts βCts)
+      IsInjectiveF₀ (α , αCts) (.α , βCts) refl = cong (λ X → α , X) (proof-irr-ObjCts αCts βCts)
       
       IsInjectiveF₁ : (α β : Obj) → IsInjective (Functor.F₁ EmbeddingFunctor)
-      IsInjectiveF₁ (α , αCts) (β , βCts) (f , fCts) (.f , gCts) refl = cong (λ X → f , X) (ctHomProofIrr fCts gCts)
+      IsInjectiveF₁ (α , αCts) (β , βCts) (f , fCts) (.f , gCts) refl = cong (λ X → f , X) (proof-irr-HomCts fCts gCts)
   
   -- The actual constrained functor.
   CtFunctor : Functor ConstraintCategory Hask
-  CtFunctor = functor F ctMap ctFuncId ctFuncComp
+  CtFunctor = functor F map functor-id functor-compose
   
   -- Proof that the embedding of the 'ConstraintCategory' actually provides a subcategory of Haskell.
   ConstrainedSubcategory : Subcategory (liftCategory Hask)
