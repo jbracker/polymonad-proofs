@@ -34,28 +34,6 @@ IsInjective : {ℓA ℓB : Level} {A : Set ℓA} {B : Set ℓB}
 IsInjective {A = A} {B = B} F = (x y : A) → F x ≡ F y → x ≡ y
 
 --------------------------------------------------------------------------------
--- Function Extensionality
---------------------------------------------------------------------------------
-
--- We can assume function extensionality is true, because we are modelling
--- and proving things for Haskell.
-postulate
-  funExt : ∀ {l k} {A : Set l} {B : A → Set k} {f g : (a : A) → B a} → ((x : A) → f x ≡ g x) → f ≡ g
-
-
-hFunExt : ∀ {l k} {A : Set l} {B : A → Set k} {f g : (a : A) → B a} → ((x : A) → f x ≅ g x) → f ≅ g
-hFunExt p = ≡-to-≅ (funExt (λ x → ≅-to-≡ (p x)))
-
-funExtImplicit : ∀ {l k} {A : Set l} {B : A → Set k} {f g : {a : A} → B a} → ((x : A) → f {x} ≡ g {x}) → (λ {a} → f {a}) ≡ (λ {a} → g {a})
-funExtImplicit {f = f} {g = g} p = cong (λ X → (λ {a} → X a)) (funExt p)
-
-hFunExtImplicit : ∀ {l k} {A : Set l} {B : A → Set k} {f g : {a : A} → B a} → ((x : A) → f {x} ≅ g {x}) → (λ {a} → f {a}) ≅ (λ {a} → g {a})
-hFunExtImplicit {f = f} {g = g} p = hcong (λ X → (λ {a} → X a)) (hFunExt p)
-
-funExt₂ : ∀ {l k n} {A : Set l} {B : A → Set k} {C : (a : A) → B a → Set n} {f g : (a : A) → (b : B a) → C a b} → ((a : A) → (b : B a) → f a b ≡ g a b) → f ≡ g
-funExt₂ {f = f} {g = g} p = funExt (λ a → funExt (p a))
-
---------------------------------------------------------------------------------
 -- Utilities
 --------------------------------------------------------------------------------
 
