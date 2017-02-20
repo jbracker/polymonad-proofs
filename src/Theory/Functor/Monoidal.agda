@@ -7,12 +7,12 @@ open import Relation.Binary.HeterogeneousEquality using ( _≅_ ; refl )
 open import Extensionality
 open import Congruence
 open import Theory.Category
+open import Theory.Category.Monoidal
 open import Theory.Isomorphism
-open import Theory.MonoidalCategory
 open import Theory.Functor
 open import Theory.NaturalIsomorphism
 
-module Theory.MonoidalFunctor where
+module Theory.Functor.Monoidal where
 
 -------------------------------------------------------------------------------
 -- Definition of a monoidal functor: 

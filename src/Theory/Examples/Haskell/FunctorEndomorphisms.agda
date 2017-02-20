@@ -12,7 +12,7 @@ open import Extensionality
 open import Congruence
 open import ProofIrrelevance
 open import Haskell
-open import Theory.ConstrainedFunctor
+open import Theory.Functor.Constrained
 
 -- The functor of endomorphisms.
 data Endo (α : Type) : Type where

@@ -1,5 +1,5 @@
  
-module Theory.ConstrainedFunctor where
+module Theory.Functor.Constrained where
 
 open import Function renaming ( _∘_ to _∘F_ ; id to idF )
 open import Level renaming ( suc to lsuc ; zero to lzero)

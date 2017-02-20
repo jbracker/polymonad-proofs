@@ -30,7 +30,7 @@ open import ProofIrrelevance
 open import Theory.Category
 open import Theory.Subcategory
 open import Theory.Functor
-open import Theory.ConstrainedFunctor
+open import Theory.Functor.Constrained
 open import Theory.Examples.Subcategory
 open import Theory.Examples.Category
 open import Theory.Examples.HaskellFunctorToFunctor
