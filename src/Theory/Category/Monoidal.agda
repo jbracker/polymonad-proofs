@@ -1,5 +1,5 @@
  
-module Theory.MonoidalCategory where
+module Theory.Category.Monoidal where
 
 open import Level renaming ( zero to lzero ; suc to lsuc )
 open import Data.Product renaming ( _,_ to _,'_ )
