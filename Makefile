@@ -15,8 +15,12 @@ define agda-files-in-root
 	$(shell find $(SOURCE_DIR)/*.agda | grep -vxF -f "make-ignore")
 endef
 
-define agda-in
-	$(shell find $(SOURCE_DIR)/$(1) -type f -name "*.agda" | grep -vxF -f "make-ignore" | sed -e 's/\.agda\>/.agdai/g')
+define agda-type-check
+	$(AGDA_TC) $(1) && echo "Checked $(1)"
+endef
+
+define agda-check-all-in
+	$(foreach agda_file,$(1),$(call agda-type-check,$(agda_file)) &&) true
 endef
 
 all: type-check
@@ -24,32 +28,23 @@ all: type-check
 type-check: only-base only-haskell only-hicks only-hicks only-polymonad only-supermonad only-theory
 	
 only-base: 
-	$(foreach agda_file,$(call agda-files-in-root),$(AGDA_TC) $(agda_file) &&) true
-	#
+	@$(call agda-check-all-in,$(call agda-files-in-root))
 
 only-haskell:
-	$(foreach agda_file,$(call agda-files-in,Haskell),$(AGDA_TC) $(agda_file) &&) true
-	#
+	@$(call agda-check-all-in,$(call agda-files-in,Haskell))
 
 only-hicks: 
-	$(foreach agda_file,$(call agda-files-in,Hicks),$(AGDA_TC) $(agda_file) &&) true
-	#
+	@$(call agda-check-all-in,$(call agda-files-in,Hicks))
 
 only-polymonad: 
-	$(foreach agda_file,$(call agda-files-in,Polymonad),$(AGDA_TC) $(agda_file) &&) true
-	#
+	@$(call agda-check-all-in,$(call agda-files-in,Polymonad))
 
 only-supermonad: 
-	$(foreach agda_file,$(call agda-files-in,Supermonad),$(AGDA_TC) $(agda_file) &&) true
-	#
+	@$(call agda-check-all-in,$(call agda-files-in,Supermonad))
 
 only-theory: 
-	$(foreach agda_file,$(call agda-files-in,Theory),$(AGDA_TC) $(agda_file) &&) true
-	#
+	@$(call agda-check-all-in,$(call agda-files-in,Theory))
 
 clean:
 	find $(SOURCE_DIR) -type f -name "*.agdai" -delete 
 	find $(SOURCE_DIR) -type f -name "*.agda~" -delete
-
-%.agdai: %.agda
-	$(AGDA_TC) $<
