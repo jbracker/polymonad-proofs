@@ -17,7 +17,7 @@ open import Theory.Functor
 open import Theory.NaturalTransformation
 
 -- Category of sets and functions.
-setCategory : {ℓ₀ : Level} → Category {ℓ₀ = lsuc ℓ₀}
+setCategory : {ℓ₀ : Level} → Category {ℓ₀ = lsuc ℓ₀} {ℓ₀}
 setCategory {ℓ₀ = ℓ₀} = record
   { Obj = Set ℓ₀
   ; Hom = λ a b → (a → b)
