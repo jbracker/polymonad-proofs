@@ -1,5 +1,5 @@
 
-module Theory.Examples.Subcategory where
+module Theory.Category.Subcategory.Examples where
 
 open import Level renaming ( suc to lsuc ; zero to lzero)
 open import Data.Product

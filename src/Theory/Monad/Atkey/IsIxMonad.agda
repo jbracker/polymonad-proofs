@@ -1,5 +1,5 @@
 
-module Theory.Examples.AtkeyParameterizedMonadToIxMonad where
+module Theory.Monad.Atkey.IsIxMonad where
 
 -- Stdlib
 open import Level renaming ( suc to lsuc ; zero to lzero )

@@ -1,5 +1,5 @@
 
-module Theory.Examples.TwoCategory where
+module Theory.TwoCategory.Examples where
 
 -- Stdlib
 open import Level renaming ( suc to lsuc ; zero to lzero )
@@ -24,7 +24,7 @@ open import Theory.Monad
 open import Theory.TwoCategory
 open import Theory.TwoFunctor
 
-open import Theory.Examples.Category
+open import Theory.Category.Examples
 
 open NaturalTransformation
 
@@ -62,8 +62,8 @@ functorTwoCategory {ℓObj} {ℓHom} = record
           → Cell₁ A B → Cell₁ A B → Set (ℓB₁ ⊔ ℓB₀ ⊔ ℓA₁ ⊔ ℓA₀)
     Cell₂ {A = A} {B} F G = NaturalTransformation F G
     
-    open import Theory.Examples.Category renaming ( functorCategory to Fun )
-    open import Theory.Examples.Functor renaming ( natTransCompositionHorzFunctor to CompFunc )
+    open import Theory.Category.Examples renaming ( functorCategory to Fun )
+    open import Theory.Functor.Examples renaming ( natTransCompositionHorzFunctor to CompFunc )
     
     HomCat : ∀ {ℓA₀ ℓA₁ ℓB₀ ℓB₁} 
            → Cell₀ {ℓA₀} {ℓA₁} → Cell₀ {ℓB₀} {ℓB₁} → Category

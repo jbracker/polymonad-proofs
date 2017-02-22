@@ -15,8 +15,8 @@ open ≡-Reasoning
 open import Utilities
 open import Theory.Category
 open import Theory.Functor
+open import Theory.Functor.Examples
 open import Theory.Natural.Transformation
-open import Theory.Examples.Functor
 
 -------------------------------------------------------------------------------
 -- Definition of 2-Categories

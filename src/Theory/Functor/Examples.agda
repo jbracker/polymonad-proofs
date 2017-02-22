@@ -1,5 +1,5 @@
 
-module Theory.Examples.Functor where 
+module Theory.Functor.Examples where 
 
 -- Stdlib
 open import Level renaming ( suc to lsuc ; zero to lzero )
@@ -21,7 +21,7 @@ open import Theory.Functor
 open import Theory.Natural.Transformation
 open import Theory.Natural.Transformation.Whisker
 
-open import Theory.Examples.Category renaming ( functorCategory to Fun )
+open import Theory.Category.Examples renaming ( functorCategory to Fun )
 
 -------------------------------------------------------------------------------
 -- Horizontal composition functor for natural transformations.

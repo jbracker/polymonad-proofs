@@ -1,5 +1,5 @@
 
-module Theory.Examples.AtkeyParameterizedMonadToTwoFunctor where
+module Theory.Monad.Atkey.IsTwoFunctor where
 
 -- Stdlib
 open import Level renaming ( suc to lsuc ; zero to lzero )

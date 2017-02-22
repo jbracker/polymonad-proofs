@@ -8,7 +8,7 @@ open ≡-Reasoning
 
 -- Local
 open import Utilities
-open import Theory.Examples.Category
+open import Theory.Category.Examples
 
 --------------------------------------------------------------------------------
 -- Type Synonyms

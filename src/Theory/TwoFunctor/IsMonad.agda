@@ -1,5 +1,5 @@
 
-module Theory.Examples.TwoFunctorToMonad where
+module Theory.TwoFunctor.IsMonad where
 
 -- Stdlib
 open import Level renaming ( suc to lsuc ; zero to lzero )
@@ -23,7 +23,7 @@ open import Theory.Functor
 open import Theory.Natural.Transformation
 open import Theory.Monad
 open import Theory.TwoCategory
-open import Theory.Examples.TwoCategory
+open import Theory.TwoCategory.Examples
 open import Theory.TwoFunctor 
 
 open StrictTwoCategory

@@ -1,5 +1,5 @@
 
-module Theory.Examples.MonadToHaskellMonad where
+module Theory.Monad.Properties.IsHaskellMonad where
 
 -- Stdlib
 open import Level renaming ( suc to lsuc ; zero to lzero )
@@ -26,7 +26,7 @@ open import Theory.Functor
 open import Theory.Natural.Transformation renaming ( NaturalTransformation to NatTrans )
 open import Theory.Monad hiding ( monad )
 open import Theory.Examples.Category
-open import Theory.Examples.FunctorToHaskellFunctor
+open import Theory.Functor.Properties.IsHaskellFunctor
 
 Monad→HaskellMonad : {M : Functor (setCategory {lzero}) (setCategory {lzero})}
                    → Monad M → HaskellMonad ([ M ]₀)

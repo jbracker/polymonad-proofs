@@ -1,5 +1,5 @@
 
-module Theory.Examples.Category where 
+module Theory.Category.Examples where 
 
 -- Stdlib
 open import Level renaming ( suc to lsuc ; zero to lzero )
@@ -110,9 +110,7 @@ preorderCategory P proof-irr-≤ = record
   ; right-id = right-id
   } where
     _≤_ = Preorder._∼_ P
-    
     id = Preorder.refl P
-    
     ptrans = Preorder.trans P
     
     _∘_ : {a b c : Preorder.Carrier P} → b ≤ c → a ≤ b → a ≤ c

@@ -1,5 +1,5 @@
 
-module Theory.Examples.MonadToTwoFunctor where
+module Theory.Monad.Properties.IsTwoFunctor where
 
 -- Stdlib
 open import Level renaming ( suc to lsuc ; zero to lzero )

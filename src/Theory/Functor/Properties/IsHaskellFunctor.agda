@@ -1,5 +1,5 @@
 
-module Theory.Examples.FunctorToHaskellFunctor where
+module Theory.Functor.Properties.IsHaskellFunctor where
 
 -- Stdlib
 open import Level renaming ( suc to lsuc ; zero to lzero )
