@@ -27,8 +27,8 @@ open import Theory.Monad hiding ( monad )
 open import Theory.TwoCategory
 open import Theory.TwoFunctor
 open import Theory.Monad.Atkey
-open import Theory.Examples.Category
-open import Theory.Examples.TwoCategory
+open import Theory.Category.Examples
+open import Theory.TwoCategory.Examples
 
 open StrictTwoCategory
 open Category 

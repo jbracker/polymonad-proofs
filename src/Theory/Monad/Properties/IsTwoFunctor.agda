@@ -23,7 +23,7 @@ open import Theory.Functor
 open import Theory.Natural.Transformation
 open import Theory.Monad hiding ( monad )
 open import Theory.TwoCategory
-open import Theory.Examples.TwoCategory
+open import Theory.TwoCategory.Examples
 open import Theory.TwoFunctor 
 
 open StrictTwoCategory

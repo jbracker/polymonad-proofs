@@ -10,8 +10,8 @@ open import Relation.Binary.HeterogeneousEquality using ( _≅_ )
 open import Theory.Triple
 open import Theory.Category
 open import Theory.Functor
+open import Theory.Functor.Examples
 open import Theory.Natural.Isomorphism
-open import Theory.Examples.Functor
 
 module FunctorApplication {ℓC₀ ℓC₁ : Level} {C : Category {ℓC₀} {ℓC₁}} where
   
@@ -22,8 +22,8 @@ module FunctorApplication {ℓC₀ ℓC₁ : Level} {C : Category {ℓC₀} {ℓ
     _∘CCC_ = _∘_ (C ×C C ×C C)
     _∘C_ = _∘_ C
   
-  open Theory.Examples.Functor.TripleAssociation
-  open Theory.Examples.Functor.BiFunctorAssociation
+  open Theory.Functor.Examples.TripleAssociation
+  open Theory.Functor.Examples.BiFunctorAssociation
   
   -- ((_ ⊗ _) ⊗ _) ⇒ _
   leftAssociator : Functor (C ×C C) C → Functor (C ×C C ×C C) C

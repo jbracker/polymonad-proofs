@@ -11,7 +11,7 @@ open import Extensionality
 
 open import Theory.Category
 open import Theory.Category.Isomorphism
-open import Theory.Examples.Category renaming ( functorCategory to FunctorCat )
+open import Theory.Category.Examples renaming ( functorCategory to FunctorCat )
 
 open import Theory.Functor
 

@@ -24,7 +24,7 @@ open import Theory.Functor
 open import Theory.Natural.Transformation renaming (NaturalTransformation to NatTrans)
 open import Theory.Monad.Atkey
 open import Theory.TwoCategory
-open import Theory.Examples.TwoCategory
+open import Theory.TwoCategory.Examples
 open import Theory.TwoFunctor 
 
 open Category

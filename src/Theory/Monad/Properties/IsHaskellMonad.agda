@@ -25,7 +25,7 @@ open import Theory.Category
 open import Theory.Functor
 open import Theory.Natural.Transformation renaming ( NaturalTransformation to NatTrans )
 open import Theory.Monad hiding ( monad )
-open import Theory.Examples.Category
+open import Theory.Category.Examples
 open import Theory.Functor.Properties.IsHaskellFunctor
 
 Monad→HaskellMonad : {M : Functor (setCategory {lzero}) (setCategory {lzero})}

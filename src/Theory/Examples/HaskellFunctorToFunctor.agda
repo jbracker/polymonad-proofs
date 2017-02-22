@@ -8,8 +8,8 @@ open import Level renaming ( suc to lsuc ; zero to lzero )
 open import Haskell
 open import Haskell.Functor renaming ( Functor to HaskellFunctor )
 open import Theory.Category
+open import Theory.Category.Examples
 open import Theory.Functor
-open import Theory.Examples.Category
 
 open Category
 
