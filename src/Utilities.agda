@@ -108,18 +108,3 @@ curry-∃∃← (a , b) = (a , (b , tt))
 ∀¬→¬∃ : (A : Set) → (P : A → Set) → (∀ (a : A) → ¬ P a) → ¬ (∃ λ(a : A) → P a)
 ∀¬→¬∃ A P p (a , pa) = p a pa
 
---------------------------------------------------------------------------------
--- Bijections
---------------------------------------------------------------------------------
-
--- Bijections
-record _↔_ {ℓ₁ ℓ₂} (α : Set ℓ₁) (β : Set ℓ₂) : Set (ℓ₁ ⊔ ℓ₂) where
-  field
-    f : α → β
-    f⁻¹ : β → α
-    
-    lawInjective  : (a₁ a₂ : α) → f a₁ ≡ f a₂ → a₁ ≡ a₂
-    lawSurjective : (b : β) → f (f⁻¹ b) ≡ b
-    
-    lawInjective⁻¹  : (b₁ b₂ : β) → f⁻¹ b₁ ≡ f⁻¹ b₂ → b₁ ≡ b₂
-    lawSurjective⁻¹ : (a : α) → f⁻¹ (f a) ≡ a
