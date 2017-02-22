@@ -11,124 +11,32 @@ open import Extensionality
 
 open import Theory.Category
 open import Theory.Category.Isomorphism
-open import Theory.Category.Examples renaming ( functorCategory to FunctorCat )
+open import Theory.Category.Examples renaming ( setCategory to SetCat' ; functorCategory to FunctorCat )
 
 open import Theory.Functor
 
 open import Theory.Natural.Transformation
 open import Theory.Natural.Isomorphism
 
-
 module Theory.Yoneda {ℓ₀ ℓ₁ : Level} {C : Category {ℓ₀} {ℓ₁}} where
 
 open Category
 open Functor hiding ( id )
 
+import Theory.Yoneda.HomFunctor
+open Theory.Yoneda.HomFunctor {ℓ₀} {ℓ₁} {C}
+
+import Theory.Yoneda.Bijection
+open Theory.Yoneda.Bijection {ℓ₀} {ℓ₁} {C}
+
 private
-  SetCat = setCategory {ℓ₁}
+  SetCat = SetCat' {ℓ₁}
   _∘C_ = _∘_ C
   _∘Cop_ = _∘_ (C op)
   _∘Set_ = _∘_ SetCat
+  _∘Set'_ = _∘_ (SetCat' {suc ℓ₁ ⊔ ℓ₀})
   _∘Func_ = _∘_ (FunctorCat C SetCat)
   _∘CSet×C_ = _∘_ $ FunctorCat C SetCat ×C C
-
--- Definition of the Hom-Functor Hom[A,-] from C to Set.
-Hom[_,-] : (a : Obj C) → Functor C SetCat
-Hom[_,-] a = functor HomF₀ HomF₁ id-HomF compose-HomF
-  where
-    HomF₀ : Obj C → Obj SetCat
-    HomF₀ x = Hom C a x
-    
-    HomF₁ : {x y : Obj C} → Hom C x y → Hom SetCat (HomF₀ x) (HomF₀ y)
-    HomF₁ f = λ g → f ∘C g
-    
-    id-HomF : {a : Obj C} → HomF₁ (id C {a}) ≡ id SetCat
-    id-HomF {a} = begin
-      HomF₁ (id C) 
-        ≡⟨ refl ⟩
-      ( λ g → id C ∘C g )
-        ≡⟨ fun-ext (λ g → right-id C {f = g}) ⟩
-      ( λ g → g )
-        ≡⟨ refl ⟩
-      id SetCat ∎
-    
-    compose-HomF : {a b c : Obj C} {f : Hom C a b} {g : Hom C b c} 
-                 → HomF₁ (g ∘C f) ≡ (HomF₁ g) ∘Set (HomF₁ f)
-    compose-HomF {f = f} {g} = begin
-      HomF₁ (g ∘C f) 
-        ≡⟨ refl ⟩
-      ( λ h → (g ∘C f) ∘C h )
-        ≡⟨ fun-ext (λ h → sym (assoc C {f = h} {f} {g})) ⟩ 
-      ( λ h → g ∘C (f ∘C h) )
-        ≡⟨ refl ⟩ 
-      (HomF₁ g) ∘Set (HomF₁ f) ∎
-
-yoneda→ : (F : Functor C SetCat) → (A : Obj C) → NaturalTransformation Hom[ A ,-] F → F₀ F A
-yoneda→ F A (naturalTransformation η natural) = η A (id C {A})
-
-yoneda← : (F : Functor C SetCat) → (A : Obj C) → F₀ F A → NaturalTransformation Hom[ A ,-] F
-yoneda← F A FA = naturalTransformation η natural-η
-  where
-    η : (x : Obj C) → Hom SetCat ([ Hom[ A ,-] ]₀ x) ([ F ]₀ x)
-    η x f = (F₁ F f) FA
-    
-    -- h A f = λ g → f ∘C g
-    natural-η : {a b : Obj C} {f : Hom C a b} → ([ F ]₁ f) ∘Set (η a) ≡ (η b) ∘Set ([ Hom[ A ,-] ]₁ f)
-    natural-η {a} {b} {f} = begin
-      ([ F ]₁ f) ∘Set (η a) 
-        ≡⟨ refl ⟩
-      ( λ g → ([ F ]₁ f) (([ F ]₁ g) FA) )
-        ≡⟨ fun-ext (λ g → cong (λ P → P FA) (sym $ compose F)) ⟩
-      ( λ g → ([ F ]₁ (f ∘C g)) FA )
-        ≡⟨ refl ⟩
-      (η b) ∘Set ([ Hom[ A ,-] ]₁ f) ∎
-
-yoneda-left-id : (F : Functor C SetCat) → (A : Obj C) → yoneda→ F A ∘F yoneda← F A ≡ (λ x → x)
-yoneda-left-id F A = fun-ext p
-  where
-    p : (FA : F₀ F A) → (yoneda→ F A ∘F yoneda← F A) FA ≡ FA
-    p FA with yoneda← F A FA 
-    p FA | naturalTransformation η natural = begin
-      F₁ F (id C) FA 
-        ≡⟨ cong (λ P → P FA) (Functor.id F) ⟩
-      FA ∎
-
-yoneda-right-id : (F : Functor C SetCat) → (A : Obj C) → yoneda← F A ∘F yoneda→ F A ≡ (λ x → x)
-yoneda-right-id F A = fun-ext $ λ NatTrans → natural-transformation-eq (p NatTrans)
-  where
-    p : (NatTrans : NaturalTransformation Hom[ A ,-] F) → NaturalTransformation.η (yoneda← F A (yoneda→ F A NatTrans)) ≡ NaturalTransformation.η NatTrans
-    p (naturalTransformation η natural) = fun-ext $ λ x → fun-ext $ λ f → begin
-      NaturalTransformation.η (yoneda← F A (yoneda→ F A (naturalTransformation η natural))) x f
-        ≡⟨ refl ⟩
-      ([ F ]₁ f ∘Set η A) (id C {A})
-        ≡⟨ cong (λ P → P (id C {A})) (natural {A} {x} {f}) ⟩
-      (η x ∘Set ([ Hom[ A ,-] ]₁ f)) (id C {A})
-        ≡⟨ refl ⟩
-      η x (f ∘C (id C {A}))
-        ≡⟨ cong (η x) (left-id C) ⟩
-      η x f ∎
-
-{-
-Obj→Functor : (F : Functor C SetCat) → (A : Obj C) → Functor (FunctorCat C SetCat ×C C ) SetCat
-Obj→Functor F A = functor ObjF₀ ObjF₁ refl refl
-  where
-    ObjF₀ : Obj (FunctorCat C SetCat ×C C) → Obj SetCat
-    ObjF₀ (G , x) = F₀ F A
-    
-    ObjF₁ : {x y : Obj (FunctorCat C SetCat ×C C)}
-          → Hom (FunctorCat C SetCat ×C C) x y → Hom SetCat (ObjF₀ x) (ObjF₀ y)
-    ObjF₁ {G , x} {H , y} (NatTrans , f) = id SetCat {F₀ F A}
-
-NatTrans→Functor : (F : Functor C SetCat) → (A : Obj C) → NaturalTransformation Hom[ A ,-] F → Functor (FunctorCat C SetCat ×C C ) SetCat
-NatTrans→Functor F A (naturalTransformation η natural) = functor NatTransF₀ NatTransF₁ {!!} {!!}
-  where
-    NatTransF₀ : Obj (FunctorCat C SetCat ×C C) → Obj SetCat
-    NatTransF₀ (G , x) = F₀ G A
-    -- yoneda→ F A (naturalTransformation η natural) = η A (id C {A})
-    NatTransF₁ : {x y : Obj (FunctorCat C SetCat ×C C)}
-               → Hom (FunctorCat C SetCat ×C C) x y → Hom SetCat (NatTransF₀ x) (NatTransF₀ y)
-    NatTransF₁ {G , x} {H , y} (NatTrans , f) = {!!}
--}
 
 YonedaEmbedding : Functor (C op) (FunctorCat C SetCat)
 YonedaEmbedding = functor EmbF₀ EmbF₁ id-Emb compose-Emb
@@ -167,3 +75,89 @@ YonedaEmbedding = functor EmbF₀ EmbF₁ id-Emb compose-Emb
       NaturalTransformation.η (EmbF₁ g) X (NaturalTransformation.η (EmbF₁ f) X h)
         ≡⟨ refl ⟩
       NaturalTransformation.η (EmbF₁ g ∘Func EmbF₁ f) X h ∎
+
+yonedaObjFunctor : Functor (FunctorCat C SetCat ×C C ) (SetCat' {suc ℓ₁ ⊔ ℓ₀})
+yonedaObjFunctor = functor ObjF₀ ObjF₁ (λ {a} → id-ObjF {a}) (λ {a} {b} {c} {f} {g} → compose-ObjF {a} {b} {c} {f} {g})
+  where
+    open NaturalTransformation
+    
+    ObjF₀ : Obj (FunctorCat C SetCat ×C C) → Obj (SetCat' {suc ℓ₁ ⊔ ℓ₀})
+    ObjF₀ (F , a) = Lift ([ F ]₀ a)
+    
+    ObjF₁ : {x y : Obj (FunctorCat C SetCat ×C C)}
+          → Hom (FunctorCat C SetCat ×C C) x y → Hom (SetCat' {suc ℓ₁ ⊔ ℓ₀}) (ObjF₀ x) (ObjF₀ y)
+    ObjF₁ {F , a} {G , b} (Φ , f) = lift ∘F ([ G ]₁ f ∘F η Φ a) ∘F lower -- same as 'η Φ b ∘ [ F ]₁ f' due to naturality 
+    
+    id-ObjF : {a : Obj (FunctorCat C SetCat ×C C)} → ObjF₁ {a} {a} (id (FunctorCat C SetCat ×C C)) ≡ id (SetCat' {suc ℓ₁ ⊔ ℓ₀})
+    id-ObjF {F , a} = cong (λ P → lift ∘F P ∘F lower) $ begin
+      [ F ]₁ (id C {a}) ∘F η Id⟨ F ⟩ a
+        ≡⟨ refl ⟩
+      [ F ]₁ (id C {a}) ∘F id SetCat {[ F ]₀ a}
+        ≡⟨ left-id SetCat ⟩
+      [ F ]₁ (id C {a})
+        ≡⟨ Functor.id F ⟩
+      id SetCat ∎
+    
+    compose-ObjF : {a b c : Obj (FunctorCat C SetCat ×C C)}
+                 → {f : Hom (FunctorCat C SetCat ×C C) a b} {g : Hom (FunctorCat C SetCat ×C C) b c}
+                 → ObjF₁ (g ∘CSet×C f) ≡ ObjF₁ g ∘Set' ObjF₁ f
+    compose-ObjF {F , a} {G , b} {H , c} {Φ , f} {Ψ , g} = cong (λ P → lift ∘F P ∘F lower) $ begin
+      [ H ]₁ (g ∘C f) ∘F η ⟨ Ψ ⟩∘ᵥ⟨ Φ ⟩ a
+        ≡⟨ cong (λ P → P ∘F η ⟨ Ψ ⟩∘ᵥ⟨ Φ ⟩ a) (compose H) ⟩
+      ([ H ]₁ g ∘F [ H ]₁ f) ∘F η ⟨ Ψ ⟩∘ᵥ⟨ Φ ⟩ a
+        ≡⟨ sym (assoc SetCat {f = η ⟨ Ψ ⟩∘ᵥ⟨ Φ ⟩ a} {[ H ]₁ f} {[ H ]₁ g}) ⟩
+      [ H ]₁ g ∘F ([ H ]₁ f ∘F η ⟨ Ψ ⟩∘ᵥ⟨ Φ ⟩ a)
+        ≡⟨ cong (λ P → [ H ]₁ g ∘F P) (natural ⟨ Ψ ⟩∘ᵥ⟨ Φ ⟩) ⟩
+      [ H ]₁ g ∘F (η ⟨ Ψ ⟩∘ᵥ⟨ Φ ⟩ b ∘F [ F ]₁ f)
+        ≡⟨ refl ⟩
+      [ H ]₁ g ∘F (η Ψ b ∘F (η Φ b ∘F [ F ]₁ f))
+        ≡⟨ cong (λ P → [ H ]₁ g ∘F (η Ψ b ∘F P)) (sym (natural Φ)) ⟩
+      [ H ]₁ g ∘F (η Ψ b ∘F ([ G ]₁ f ∘F η Φ a))
+        ≡⟨ assoc SetCat {f = [ G ]₁ f ∘F η Φ a} {η Ψ b} {[ H ]₁ g} ⟩
+      ([ H ]₁ g ∘F η Ψ b) ∘F ([ G ]₁ f ∘F η Φ a) ∎
+
+yonedaNatTransFunctor : Functor (FunctorCat C SetCat ×C C ) (SetCat' {suc ℓ₁ ⊔ ℓ₀})
+yonedaNatTransFunctor = functor NatTransF₀ NatTransF₁ id-NatTransF (λ {a} {b} {c} {f} {g} → compose-NatTransF {a} {b} {c} {f} {g})
+  where
+    NatTransF₀ : Obj (FunctorCat C SetCat ×C C) → Obj (SetCat' {ℓ₀ ⊔ suc ℓ₁})
+    NatTransF₀ (F , a) = NaturalTransformation Hom[ a ,-] F
+    
+    NatTransF₁ : {x y : Obj (FunctorCat C SetCat ×C C)}
+               → Hom (FunctorCat C SetCat ×C C) x y → Hom (SetCat' {ℓ₀ ⊔ suc ℓ₁}) (NatTransF₀ x) (NatTransF₀ y)
+    NatTransF₁ {F , a} {G , b} (Φ , f) Ψ = Φ ∘Func (Ψ ∘Func [ YonedaEmbedding ]₁ f)
+
+    id-NatTransF : {a : Obj (FunctorCat C SetCat ×C C)} → NatTransF₁ {a} {a} (id (FunctorCat C SetCat ×C C)) ≡ id SetCat'
+    id-NatTransF {F , a} = begin
+      NatTransF₁ (id (FunctorCat C SetCat ×C C))
+        ≡⟨ refl ⟩
+      (λ Ψ → Id⟨ F ⟩ ∘Func (Ψ ∘Func [ YonedaEmbedding ]₁ (id C {a})))
+        ≡⟨ fun-ext (λ Ψ → right-id (FunctorCat C SetCat)) ⟩
+      (λ Ψ → Ψ ∘Func [ YonedaEmbedding ]₁ (id C {a}))
+        ≡⟨ fun-ext (λ Ψ → cong (λ P → Ψ ∘Func P) (Functor.id YonedaEmbedding)) ⟩
+      (λ Ψ → Ψ ∘Func id (FunctorCat C SetCat))
+        ≡⟨ fun-ext (λ Ψ → left-id (FunctorCat C SetCat)) ⟩
+      (λ Ψ → Ψ)
+        ≡⟨ refl ⟩
+      id SetCat' ∎ 
+    
+    compose-NatTransF : {a b c : Obj (FunctorCat C SetCat ×C C)}
+                      → {f : Hom (FunctorCat C SetCat ×C C) a b} {g : Hom (FunctorCat C SetCat ×C C) b c}
+                      → NatTransF₁ (g ∘CSet×C f) ≡ NatTransF₁ g ∘Set' NatTransF₁ f
+    compose-NatTransF {F , a} {G , b} {H , c} {Φ , f} {Ψ , g} = begin
+      NatTransF₁ ((Ψ , g) ∘CSet×C (Φ , f)) 
+        ≡⟨ refl ⟩
+      (λ Θ → (Ψ ∘Func Φ) ∘Func (Θ ∘Func [ YonedaEmbedding ]₁ (g ∘C f)) )
+        ≡⟨ fun-ext (λ Θ → cong (λ P → (Ψ ∘Func Φ) ∘Func (Θ ∘Func P)) (compose YonedaEmbedding)) ⟩
+      (λ Θ → (Ψ ∘Func Φ) ∘Func (Θ ∘Func ([ YonedaEmbedding ]₁ f ∘Func [ YonedaEmbedding ]₁ g)))
+        ≡⟨ fun-ext (λ Θ → cong (λ P → (Ψ ∘Func Φ) ∘Func P) (assoc (FunctorCat C SetCat) {f = [ YonedaEmbedding ]₁ g} {[ YonedaEmbedding ]₁ f} {Θ})) ⟩
+      (λ Θ → (Ψ ∘Func Φ) ∘Func ((Θ ∘Func [ YonedaEmbedding ]₁ f) ∘Func [ YonedaEmbedding ]₁ g))
+        ≡⟨ fun-ext (λ Θ → assoc (FunctorCat C SetCat) {f = [ YonedaEmbedding ]₁ g} {Θ ∘Func [ YonedaEmbedding ]₁ f} {Ψ ∘Func Φ}) ⟩
+      (λ Θ → ((Ψ ∘Func Φ) ∘Func (Θ ∘Func [ YonedaEmbedding ]₁ f)) ∘Func [ YonedaEmbedding ]₁ g)
+        ≡⟨ fun-ext (λ Θ → cong (λ P → P ∘Func [ YonedaEmbedding ]₁ g) (sym (assoc (FunctorCat C SetCat) {f = Θ ∘Func [ YonedaEmbedding ]₁ f} {Φ} {Ψ}))) ⟩
+      (λ Θ → (Ψ ∘Func (Φ ∘Func (Θ ∘Func [ YonedaEmbedding ]₁ f))) ∘Func [ YonedaEmbedding ]₁ g)
+        ≡⟨ fun-ext (λ Θ → sym (assoc (FunctorCat C SetCat) {f = [ YonedaEmbedding ]₁ g} {Φ ∘Func (Θ ∘Func [ YonedaEmbedding ]₁ f)} {Ψ})) ⟩
+      (λ Θ → Ψ ∘Func ((Φ ∘Func (Θ ∘Func [ YonedaEmbedding ]₁ f)) ∘Func [ YonedaEmbedding ]₁ g))
+        ≡⟨ refl ⟩
+      (λ Θ → Ψ ∘Func (Θ ∘Func [ YonedaEmbedding ]₁ g)) ∘F (λ Θ → Φ ∘Func (Θ ∘Func [ YonedaEmbedding ]₁ f))
+        ≡⟨ refl ⟩
+      NatTransF₁ (Ψ , g) ∘Set' NatTransF₁ (Φ , f) ∎
