@@ -10,7 +10,7 @@ open import Relation.Binary.HeterogeneousEquality using ( _≅_ )
 open import Theory.Triple
 open import Theory.Category
 open import Theory.Functor
-open import Theory.NaturalIsomorphism
+open import Theory.Natural.Isomorphism
 open import Theory.Examples.Functor
 
 module FunctorApplication {ℓC₀ ℓC₁ : Level} {C : Category {ℓC₀} {ℓC₁}} where

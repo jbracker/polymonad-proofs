@@ -14,7 +14,7 @@ open import Extensionality
 open import ProofIrrelevance
 open import Theory.Category
 open import Theory.Functor
-open import Theory.NaturalTransformation
+open import Theory.Natural.Transformation
 
 -- Category of sets and functions.
 setCategory : {ℓ₀ : Level} → Category {ℓ₀ = lsuc ℓ₀} {ℓ₀}

@@ -10,14 +10,14 @@ open ≡-Reasoning
 open import Extensionality
 
 open import Theory.Category
+open import Theory.Category.Isomorphism
 open import Theory.Examples.Category renaming ( functorCategory to FunctorCat )
 
 open import Theory.Functor
 
-open import Theory.NaturalTransformation
-open import Theory.NaturalIsomorphism
+open import Theory.Natural.Transformation
+open import Theory.Natural.Isomorphism
 
-open import Theory.Isomorphism
 
 module Theory.Yoneda {ℓ₀ ℓ₁ : Level} {C : Category {ℓ₀} {ℓ₁}} where
 
@@ -167,7 +167,3 @@ YonedaEmbedding = functor EmbF₀ EmbF₁ id-Emb compose-Emb
       NaturalTransformation.η (EmbF₁ g) X (NaturalTransformation.η (EmbF₁ f) X h)
         ≡⟨ refl ⟩
       NaturalTransformation.η (EmbF₁ g ∘Func EmbF₁ f) X h ∎
-{-
-yoneda← : (F : Functor C SetCat) → (A : Obj C) → F₀ F A → NaturalTransformation (HomFunctor A) F
-yoneda← F A FA
--}

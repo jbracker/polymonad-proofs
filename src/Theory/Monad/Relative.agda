@@ -1,5 +1,5 @@
 
-module Theory.RelativeMonad where
+module Theory.Monad.Relative where
 
 -- Stdlib
 open import Level
@@ -39,7 +39,7 @@ record RelativeMonad {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} {C : Category {�
 -- -----------------------------------------------------------------------------
 -- Relative monads on endofunctors are equivalent to kleisli triples
 -- -----------------------------------------------------------------------------
-open import Theory.Kleisli
+open import Theory.Monad.Kleisli
 
 RelativeMonad→KleisliTriple : {ℓC₀ ℓC₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {T : Obj C → Obj C} 
                             → RelativeMonad T Id[ C ] → KleisliTriple {C = C} T

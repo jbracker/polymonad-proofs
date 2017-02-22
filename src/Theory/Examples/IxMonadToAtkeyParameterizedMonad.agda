@@ -22,11 +22,11 @@ open import Haskell.Parameterized.IndexedMonad
 open import Theory.Triple
 open import Theory.Category
 open import Theory.Functor
-open import Theory.NaturalTransformation
-open import Theory.Monad
+open import Theory.Natural.Transformation
+open import Theory.Monad hiding ( monad )
 open import Theory.TwoCategory
 open import Theory.TwoFunctor
-open import Theory.AtkeyParameterizedMonad
+open import Theory.Monad.Atkey
 open import Theory.Examples.Category
 open import Theory.Examples.TwoCategory
 
@@ -43,7 +43,7 @@ IxMonad→AtkeyFunctor S M monad = record
   { F₀ = F₀
   ; F₁ = F₁
   ; id = {!!}
-  ; dist = {!!}
+  ; compose = {!!}
   } where
     C = setCategory {lzero}
     

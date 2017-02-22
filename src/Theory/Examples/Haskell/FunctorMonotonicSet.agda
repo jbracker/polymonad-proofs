@@ -28,7 +28,7 @@ open import Haskell.Monad
 open import Haskell.Monad.List
 open import ProofIrrelevance
 open import Theory.Category
-open import Theory.Subcategory
+open import Theory.Category.Subcategory
 open import Theory.Functor
 open import Theory.Functor.Constrained
 open import Theory.Examples.Subcategory

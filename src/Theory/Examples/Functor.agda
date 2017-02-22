@@ -18,8 +18,8 @@ open import Extensionality
 open import Theory.Triple
 open import Theory.Category
 open import Theory.Functor
-open import Theory.NaturalTransformation
-open import Theory.NaturalTransformation.Whisker
+open import Theory.Natural.Transformation
+open import Theory.Natural.Transformation.Whisker
 
 open import Theory.Examples.Category renaming ( functorCategory to Fun )
 

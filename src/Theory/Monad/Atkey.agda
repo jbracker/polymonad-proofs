@@ -1,5 +1,5 @@
 
-module Theory.AtkeyParameterizedMonad where
+module Theory.Monad.Atkey where
 
 -- Stdlib
 open import Level renaming ( suc to lsuc ; zero to lzero )
@@ -14,8 +14,8 @@ open ≡-Reasoning
 open import Theory.Triple
 open import Theory.Category
 open import Theory.Functor
-open import Theory.NaturalTransformation
-open import Theory.DinaturalTransformation
+open import Theory.Natural.Transformation
+open import Theory.Natural.DinaturalTransformation
 
 open Category hiding (assoc ; left-id ; right-id )
 

@@ -1,5 +1,5 @@
 
-module Theory.Kleisli where
+module Theory.Monad.Kleisli where
 
 -- Stdlib
 open import Level
@@ -14,7 +14,7 @@ open ≡-Reasoning
 -- Local
 open import Theory.Category
 open import Theory.Functor
-open import Theory.NaturalTransformation 
+open import Theory.Natural.Transformation 
 open import Theory.Monad
 
 open Category using ( Obj ; Hom )

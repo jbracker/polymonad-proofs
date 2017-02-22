@@ -1,5 +1,5 @@
 
-module Theory.DinaturalTransformation where
+module Theory.Natural.DinaturalTransformation where
 
 -- Stdlib
 open import Level

@@ -12,7 +12,7 @@ open import Congruence
 open import Extensionality
 open import Theory.Category hiding ( category )
 
-module Theory.Subcategory where
+module Theory.Category.Subcategory where
 
 open Category renaming ( _∘_ to comp )
 

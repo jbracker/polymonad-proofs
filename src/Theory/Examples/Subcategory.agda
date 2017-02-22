@@ -10,7 +10,7 @@ open import Utilities renaming ( _∈_ to _∈'_ )
 open import Haskell
 open import ProofIrrelevance
 open import Theory.Category
-open import Theory.Subcategory
+open import Theory.Category.Subcategory
 open import Theory.Functor
 
 -- Define the subcategory of D in terms of C's embedding into D through a functor.

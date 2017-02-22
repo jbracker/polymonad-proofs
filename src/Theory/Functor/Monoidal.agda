@@ -8,10 +8,10 @@ open import Extensionality
 open import Congruence
 open import Theory.Category
 open import Theory.Category.Monoidal
-open import Theory.Isomorphism
+open import Theory.Category.Isomorphism
 open import Theory.Functor
-open import Theory.NaturalIsomorphism
-open import Theory.NaturalTransformation
+open import Theory.Natural.Isomorphism
+open import Theory.Natural.Transformation
 
 module Theory.Functor.Monoidal {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} 
                                {C' : Category {ℓC₀} {ℓC₁}} {D' : Category {ℓD₀} {ℓD₁}} where

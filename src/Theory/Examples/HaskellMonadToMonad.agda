@@ -23,7 +23,7 @@ open import Haskell.Applicative renaming ( Applicative to HaskellApplicative )
 open import Haskell.Functor renaming ( Functor to HaskellFunctor )
 open import Theory.Category
 open import Theory.Functor
-open import Theory.NaturalTransformation renaming ( NaturalTransformation to NatTrans )
+open import Theory.Natural.Transformation renaming ( NaturalTransformation to NatTrans )
 open import Theory.Monad hiding ( monad )
 open import Theory.Examples.Category
 open import Theory.Examples.HaskellFunctorToFunctor

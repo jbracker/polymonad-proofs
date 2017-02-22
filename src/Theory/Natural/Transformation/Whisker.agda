@@ -1,5 +1,5 @@
 
-module Theory.NaturalTransformation.Whisker where
+module Theory.Natural.Transformation.Whisker where
 
 -- Stdlib
 open import Level
@@ -17,7 +17,7 @@ open import Utilities
 open import Extensionality
 open import Theory.Category
 open import Theory.Functor
-open import Theory.NaturalTransformation
+open import Theory.Natural.Transformation
 
 open Category
 open Functor 

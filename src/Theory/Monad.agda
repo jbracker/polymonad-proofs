@@ -15,7 +15,7 @@ open import Congruence
 open import Extensionality
 open import Theory.Category
 open import Theory.Functor
-open import Theory.NaturalTransformation
+open import Theory.Natural.Transformation
 
 -------------------------------------------------------------------------------
 -- Definition of Monads

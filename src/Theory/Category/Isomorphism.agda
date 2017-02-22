@@ -7,7 +7,7 @@ open import Substitution
 open import Congruence
 open import Theory.Category
 
-module Theory.Isomorphism where
+module Theory.Category.Isomorphism where
 
 open Category using ( Obj ; Hom )
 

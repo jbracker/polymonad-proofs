@@ -15,7 +15,7 @@ open ≡-Reasoning
 open import Utilities
 open import Theory.Category
 open import Theory.Functor
-open import Theory.NaturalTransformation
+open import Theory.Natural.Transformation
 open import Theory.Examples.Functor
 
 -------------------------------------------------------------------------------

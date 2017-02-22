@@ -5,12 +5,12 @@ open import Relation.Binary.PropositionalEquality
 
 -- Local
 open import Extensionality
-open import Theory.Isomorphism
 open import Theory.Category
+open import Theory.Category.Isomorphism
 open import Theory.Functor
-open import Theory.NaturalTransformation
+open import Theory.Natural.Transformation
 
-module Theory.NaturalIsomorphism where
+module Theory.Natural.Isomorphism where
   
 open Category
 

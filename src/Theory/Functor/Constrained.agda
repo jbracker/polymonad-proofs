@@ -11,7 +11,7 @@ open import Haskell
 open import Utilities
 open import ProofIrrelevance
 open import Theory.Category
-open import Theory.Subcategory
+open import Theory.Category.Subcategory
 open import Theory.Functor
 open import Theory.Examples.Subcategory
 open import Theory.Examples.Category

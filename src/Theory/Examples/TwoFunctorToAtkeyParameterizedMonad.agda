@@ -21,8 +21,8 @@ open import Haskell
 open import Theory.Triple
 open import Theory.Category
 open import Theory.Functor
-open import Theory.NaturalTransformation
-open import Theory.AtkeyParameterizedMonad
+open import Theory.Natural.Transformation
+open import Theory.Monad.Atkey
 open import Theory.TwoCategory
 open import Theory.Examples.TwoCategory
 open import Theory.TwoFunctor
