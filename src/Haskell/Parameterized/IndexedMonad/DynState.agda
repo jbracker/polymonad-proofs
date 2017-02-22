@@ -76,19 +76,6 @@ NonPhantomIndices : ∀ {ℓ} {n} (ts : Vec (Set ℓ) n) → (M : ParamTyCon ts)
 NonPhantomIndices {ℓ = ℓ} ts M = ∃Indices ts M (λ X → ∃Indices ts M (λ Y → Lift {ℓ = lsuc ℓ} (¬ X ≡ Y)))
 -}
 
-Equivalenz→Bijection : ∀ {ℓ} {α β : Set ℓ} → α ≡ β → α ↔ β
-Equivalenz→Bijection refl = record
-  { f   = λ x → x
-  ; f⁻¹ = λ x → x
-  ; lawInjective    = λ a₁ a₂ x → x
-  ; lawSurjective   = λ b → refl
-  ; lawInjective⁻¹  = λ b₁ b₂ x → x
-  ; lawSurjective⁻¹ = λ a → refl
-  }
-
---Equivalenz→Isomorphism : ∀ {ℓ} {α β : Set ℓ} → α ≡ β → β
-
-
 {-
 DynState→¬PhantomIndices : ∀ (i j : Type) → ¬ i ≡ j → ¬ PhantomIndices (Type ∷ Type ∷ []) LiftDynState
 DynState→¬PhantomIndices i j ¬i≡j pa = ¬i≡j (proj₂ {!pa!})
