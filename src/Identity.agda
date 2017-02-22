@@ -12,6 +12,7 @@ open ≡-Reasoning
 
 -- Local
 open import Utilities
+open import Bijection using ( _↔_ )
 open import Haskell
 
 --------------------------------------------------------------------------------
@@ -40,29 +41,15 @@ idC→id (identityC x) = x
 
 -- Show that the relationship between both identities is indeed an isomorphism,
 -- i.e., both representations are interchangable.
-identityBijection : ∀ {α} → Identity α ↔ IdentityC α
-identityBijection {α = α} = record
+identity-bijection : ∀ {α} → Identity α ↔ IdentityC α
+identity-bijection {α = α} = record
   { f   = id→idC
-  ; f⁻¹ = idC→id
-  ; lawInjective    = λ a₁ a₂ prf → cong (λ X → idC→id X) prf
-  ; lawSurjective   = surjective
-  ; lawInjective⁻¹  = injective⁻¹
-  ; lawSurjective⁻¹ = λ a → refl
+  ; inv = idC→id
+  ; right-id = right-id
+  ; left-id = λ a → refl
   } where
-      surjective : ∀ (a : IdentityC α) → id→idC (idC→id a) ≡ a
-      surjective (identityC a) = refl
-      
-      injective⁻¹ : (b₁ b₂ : IdentityC α) → idC→id b₁ ≡ idC→id b₂ → b₁ ≡ b₂
-      injective⁻¹ (identityC b₁) (identityC b₂) prf = begin
-        identityC b₁ 
-          ≡⟨ refl ⟩
-        id→idC (idC→id (identityC b₁))
-          ≡⟨ cong (λ X → id→idC X) prf ⟩
-        id→idC (idC→id (identityC b₂))
-          ≡⟨ refl ⟩
-        identityC b₂ ∎
-
-
+      right-id : (b : IdentityC α) → id→idC (idC→id b) ≡ b
+      right-id (identityC b) = refl
 
 -- Enumeration of identity type constructors for the pure identity polymonad.
 data IdTyCons : Set where
