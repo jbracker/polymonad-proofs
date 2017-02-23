@@ -18,7 +18,7 @@ open import Theory.Functor
 open import Theory.Natural.Transformation
 open import Theory.Natural.Isomorphism
 
-module Theory.Yoneda {ℓ₀ ℓ₁ : Level} {C : Category {ℓ₀} {ℓ₁}} where
+module Theory.Yoneda.Isomorphism {ℓ₀ ℓ₁ : Level} {C : Category {ℓ₀} {ℓ₁}} where
 
 open Category
 open Functor hiding ( id )
@@ -29,6 +29,9 @@ open Theory.Yoneda.HomFunctor {ℓ₀} {ℓ₁} {C}
 import Theory.Yoneda.Bijection
 open Theory.Yoneda.Bijection {ℓ₀} {ℓ₁} {C}
 
+import Theory.Yoneda.Embedding
+open Theory.Yoneda.Embedding {ℓ₀} {ℓ₁} {C}
+
 private
   SetCat = SetCat' {ℓ₁}
   _∘C_ = _∘_ C
@@ -37,44 +40,6 @@ private
   _∘Set'_ = _∘_ (SetCat' {suc ℓ₁ ⊔ ℓ₀})
   _∘Func_ = _∘_ (FunctorCat C SetCat)
   _∘CSet×C_ = _∘_ $ FunctorCat C SetCat ×C C
-
-YonedaEmbedding : Functor (C op) (FunctorCat C SetCat)
-YonedaEmbedding = functor EmbF₀ EmbF₁ id-Emb compose-Emb
-  where
-    EmbF₀ : Obj (C op) → Obj (FunctorCat C SetCat)
-    EmbF₀ A = Hom[ A ,-]
-    
-    EmbF₁ : {a b : Obj C} → Hom (C op) a b → Hom (FunctorCat C SetCat) Hom[ a ,-] Hom[ b ,-]
-    EmbF₁ {a} {b} f = yoneda← Hom[ b ,-] a f
-    
-    id-Emb : {a : Obj (C op)} → EmbF₁ {a} {a} (id (C op)) ≡ id (FunctorCat C SetCat)
-    id-Emb {A} = natural-transformation-eq $ fun-ext $ λ X → fun-ext $ λ f → begin
-      NaturalTransformation.η (yoneda← Hom[ A ,-] A (id (C op))) X f 
-        ≡⟨ refl ⟩
-      (F₁ Hom[ A ,-] f) (id (C op) {A})
-        ≡⟨ refl ⟩
-      f ∘C id (C op)
-        ≡⟨ left-id C ⟩
-      f
-        ≡⟨ refl ⟩
-      id SetCat f ∎
-    
-    compose-Emb : {a b c : Obj (C op)} {f : Hom (C op) a b} {g : Hom (C op) b c}
-                → EmbF₁ (g ∘Cop f) ≡ (EmbF₁ g) ∘Func (EmbF₁ f)
-    compose-Emb {a} {b} {c} {f} {g} = natural-transformation-eq $ fun-ext $ λ X → fun-ext $ λ h → begin
-      NaturalTransformation.η (EmbF₁ (g ∘Cop f)) X h
-        ≡⟨ refl ⟩
-      (F₁ Hom[ c ,-] h) (g ∘Cop f)
-        ≡⟨ refl ⟩
-      (g ∘Cop f) ∘Cop h
-        ≡⟨ sym (assoc (C op)) ⟩
-      g ∘Cop (f ∘Cop h) 
-        ≡⟨ refl ⟩
-      (F₁ Hom[ c ,-] ((F₁ Hom[ b ,-] h) f)) g
-        ≡⟨ refl ⟩
-      NaturalTransformation.η (EmbF₁ g) X (NaturalTransformation.η (EmbF₁ f) X h)
-        ≡⟨ refl ⟩
-      NaturalTransformation.η (EmbF₁ g ∘Func EmbF₁ f) X h ∎
 
 yonedaObjFunctor : Functor (FunctorCat C SetCat ×C C ) (SetCat' {suc ℓ₁ ⊔ ℓ₀})
 yonedaObjFunctor = functor ObjF₀ ObjF₁ (λ {a} → id-ObjF {a}) (λ {a} {b} {c} {f} {g} → compose-ObjF {a} {b} {c} {f} {g})
