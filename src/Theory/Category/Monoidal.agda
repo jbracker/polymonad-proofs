@@ -13,60 +13,6 @@ open import Theory.Functor
 open import Theory.Functor.Examples
 open import Theory.Natural.Isomorphism
 
-module FunctorApplication {ℓC₀ ℓC₁ : Level} {C : Category {ℓC₀} {ℓC₁}} where
-  
-  open Category renaming ( id to idC )
-  open Functor renaming ( id to idF )
-  
-  private
-    _∘CCC_ = _∘_ (C ×C C ×C C)
-    _∘C_ = _∘_ C
-  
-  open Theory.Functor.Examples.TripleAssociation
-  open Theory.Functor.Examples.BiFunctorAssociation
-  
-  -- ((_ ⊗ _) ⊗ _) ⇒ _
-  leftAssociator : Functor (C ×C C) C → Functor (C ×C C ×C C) C
-  leftAssociator F = [ biAssocFunctorL F F ]∘[ assocFunctorL ]
-  
-  -- (_ ⊗ (_ ⊗ _)) ⇒ _
-  rightAssociator : Functor (C ×C C) C → Functor (C ×C C ×C C) C 
-  rightAssociator F = [ biAssocFunctorR F F ]∘[ assocFunctorR ]
-  
-  -- (1 ⊗ _) ⇒ _
-  leftUnitor : Obj C → Functor (C ×C C) C → Functor C C
-  leftUnitor e F = functor G₀ G₁ idG composeG
-    where
-      G₀ : Obj C → Obj C
-      G₀ x = F₀ F (e ,' x)
-      
-      G₁ : {a b : Obj C} → Hom C a b → Hom C (G₀ a) (G₀ b)
-      G₁ f = F₁ F (idC C {e} ,' f)
-      
-      idG : {a : Obj C} → G₁ (idC C {a}) ≡ idC C {G₀ a}
-      idG {a} = idF F
-      composeG : {a b c : Obj C} {f : Hom C a b} {g : Hom C b c} 
-               → G₁ ((C ∘ g) f) ≡ (C ∘ G₁ g) (G₁ f)
-      composeG {f = f} {g} = trans (cong (λ X → F₁ F (X ,' g ∘C f)) (sym (left-id C))) (compose F)
-
-  -- (_ ⊗ 1) ⇒ _
-  rightUnitor : Obj C → Functor (C ×C C) C → Functor C C
-  rightUnitor e F = functor G₀ G₁ idG composeG
-    where
-      G₀ : Obj C → Obj C
-      G₀ x = F₀ F (x ,' e)
-      
-      G₁ : {a b : Obj C} → Hom C a b → Hom C (G₀ a) (G₀ b)
-      G₁ f = F₁ F (f ,' idC C {e})
-      
-      idG : {a : Obj C} → G₁ (idC C {a}) ≡ idC C {G₀ a}
-      idG {a} = idF F
-      composeG : {a b c : Obj C} {f : Hom C a b} {g : Hom C b c} 
-               → G₁ ((C ∘ g) f) ≡ (C ∘ G₁ g) (G₁ f)
-      composeG {f = f} {g} = trans (cong (λ X → F₁ F (g ∘C f ,' X)) (sym (left-id C))) (compose F)
-
-open FunctorApplication public
-
 -------------------------------------------------------------------------------
 -- Definition of Monoidal Categories
 -------------------------------------------------------------------------------
@@ -88,12 +34,15 @@ record MonoidalCategory {ℓ₀ ℓ₁ : Level} (C : Category {ℓ₀} {ℓ₁})
   _⊗₁_ : {a b c d : Obj} → (f : Hom a b) → (g : Hom c d) → Hom (a ⊗₀ c) (b ⊗₀ d)
   _⊗₁_ f g = F₁ tensor (f ,' g)
   
+  open Theory.Functor.Examples.Associator
+  open Theory.Functor.Examples.BiFunctorApplication
+  
   field 
     associator : NaturalIsomorphism (leftAssociator tensor) (rightAssociator tensor)
     
-    left-unitor : NaturalIsomorphism (leftUnitor unit tensor) Id[ C ]
+    left-unitor : NaturalIsomorphism ([ unit ,-] tensor) Id[ C ]
     
-    right-unitor : NaturalIsomorphism (rightUnitor unit tensor) Id[ C ]
+    right-unitor : NaturalIsomorphism ([-, unit ] tensor) Id[ C ]
     
   open NaturalIsomorphism using ( η )
   
