@@ -2,10 +2,11 @@
 open import Level
 open import Function
 
+open import Data.Sum
 open import Data.Product
 
 open import Relation.Binary.Core using ( IsEquivalence )
-open import Relation.Binary.PropositionalEquality using ( _≡_ ; proof-irrelevance ) renaming ( refl to prefl ; trans to ptrans ; cong to pcong ; cong₂ to pcong₂ )
+open import Relation.Binary.PropositionalEquality using ( _≡_ ; proof-irrelevance ) renaming ( refl to prefl ; sym to psym ; trans to ptrans ; cong to pcong ; cong₂ to pcong₂ )
 open import Relation.Binary.HeterogeneousEquality using ( _≅_ ) renaming ( refl to hrefl )
 
 open import Extensionality
@@ -64,19 +65,49 @@ open Bijection
 --------------------------------------------------------------------------------
 -- Propositional equality of bijections
 --------------------------------------------------------------------------------
-bijection-eq : {ℓA ℓB : Level} {A : Set ℓA} {B : Set ℓB}
-             → {f₀ : A → B} → {f₁ : A → B}
-             → {inv₀ : B → A} → {inv₁ : B → A}
-             → {right-id₀ : (b : B) → f₀ (inv₀ b) ≡ b}
-             → {right-id₁ : (b : B) → f₁ (inv₁ b) ≡ b}
-             → {left-id₀ : (a : A) → inv₀ (f₀ a) ≡ a}
-             → {left-id₁ : (a : A) → inv₁ (f₁ a) ≡ a}
-             → f₀ ≡ f₁ → inv₀ ≡ inv₁
-             → bijection f₀ inv₀ right-id₀ left-id₀ ≡ bijection f₁ inv₁ right-id₁ left-id₁
-bijection-eq {f₀ = f} {.f} {inv} {.inv} {right-id₀} {right-id₁} {left-id₀} {left-id₁} prefl prefl 
-  = pcong₂ (bijection f inv) 
-           (fun-ext (λ b → proof-irrelevance (right-id₀ b) (right-id₁ b))) 
-           (fun-ext (λ a → proof-irrelevance (left-id₀  a) (left-id₁  a)))
+private
+  module Equality {ℓA ℓB : Level} {A : Set ℓA} {B : Set ℓB} where
+    
+    unique-inverse : (A↔B₀ A↔B₁ : A ↔ B) → f A↔B₀ ≡ f A↔B₁ → inv A↔B₀ ≡ inv A↔B₁
+    unique-inverse (bijection f  inv₀ right-id₀ left-id₀) 
+                   (bijection .f inv₁ right-id₁ left-id₁)
+                   prefl = fun-ext inv-eq
+      where
+        inv-eq : (b : B) → inv₀ b ≡ inv₁ b
+        inv-eq b with law-surjective (bijection f inv₀ right-id₀ left-id₀) b
+        inv-eq .(f a) | a , prefl = ptrans (left-id₀ a) (psym $ left-id₁ a)
+    
+    unique-function : (A↔B₀ A↔B₁ : A ↔ B) → inv A↔B₀ ≡ inv A↔B₁ → f A↔B₀ ≡ f A↔B₁
+    unique-function (bijection f₀ inv  right-id₀ left-id₀) 
+                    (bijection f₁ .inv right-id₁ left-id₁)
+                    prefl = fun-ext f-eq
+      where
+        f-eq : (a : A) → f₀ a ≡ f₁ a
+        f-eq a with law-surjective-inv (bijection f₀ inv right-id₀ left-id₀) a
+        f-eq .(inv b) | b , prefl = ptrans (right-id₀ b) (psym $ right-id₁ b)
+    
+    bijection-eq : {f₀ : A → B} → {f₁ : A → B}
+                 → {inv₀ : B → A} → {inv₁ : B → A}
+                 → {right-id₀ : (b : B) → f₀ (inv₀ b) ≡ b}
+                 → {right-id₁ : (b : B) → f₁ (inv₁ b) ≡ b}
+                 → {left-id₀ : (a : A) → inv₀ (f₀ a) ≡ a}
+                 → {left-id₁ : (a : A) → inv₁ (f₁ a) ≡ a}
+                 → (f₀ ≡ f₁) ⊎ (inv₀ ≡ inv₁)
+                 → bijection f₀ inv₀ right-id₀ left-id₀ ≡ bijection f₁ inv₁ right-id₁ left-id₁
+    bijection-eq {f₀ = f } {.f} {inv₀} {inv₁} {right-id₀} {right-id₁} {left-id₀} {left-id₁} (inj₁ prefl) 
+      with unique-inverse (bijection f inv₀ right-id₀ left-id₀) (bijection f inv₁ right-id₁ left-id₁) prefl
+    bijection-eq {f₀ = f } {.f} {inv } {.inv} {right-id₀} {right-id₁} {left-id₀} {left-id₁} (inj₁ prefl) | prefl 
+      = pcong₂ (bijection f inv) 
+               (fun-ext (λ b → proof-irrelevance (right-id₀ b) (right-id₁ b))) 
+               (fun-ext (λ a → proof-irrelevance (left-id₀  a) (left-id₁  a)))
+    bijection-eq {f₀ = f₀} {f₁} {inv } {.inv} {right-id₀} {right-id₁} {left-id₀} {left-id₁} (inj₂ prefl)
+      with unique-function (bijection f₀ inv right-id₀ left-id₀) (bijection f₁ inv right-id₁ left-id₁) prefl
+    bijection-eq {f₀ = f } {.f} {inv } {.inv} {right-id₀} {right-id₁} {left-id₀} {left-id₁} (inj₂ prefl) | prefl
+      = pcong₂ (bijection f inv) 
+               (fun-ext (λ b → proof-irrelevance (right-id₀ b) (right-id₁ b))) 
+               (fun-ext (λ a → proof-irrelevance (left-id₀  a) (left-id₁  a)))
+
+open Equality public
 
 --------------------------------------------------------------------------------
 -- Definition of the equivalence created by bijections
