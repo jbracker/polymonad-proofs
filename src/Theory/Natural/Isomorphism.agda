@@ -2,6 +2,7 @@
 -- StdLib
 open import Level renaming ( zero to lzero ; suc to lsuc )
 open import Relation.Binary.PropositionalEquality
+open import Relation.Binary.HeterogeneousEquality
 
 -- Local
 open import Extensionality
@@ -34,11 +35,11 @@ record NaturalIsomorphism {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level}
     _∘D_ = _∘_ D
   
   field
-    isomorphic : {x : Obj C} → (f : Hom D ([ F ]₀ x) ([ G ]₀ x)) → Isomorphism D f
+    isomorphic : (x : Obj C) → Isomorphism D (η x)
   
   private
-    module Isomorphic {x : Obj C} (f : Hom D ([ F ]₀ x) ([ G ]₀ x)) where
-      iso = isomorphic {x} f
+    module Isomorphic (x : Obj C) where
+      iso = isomorphic x
       open Isomorphism iso hiding ( f⁻¹ ) public
   
   open Isomorphic public
@@ -49,8 +50,9 @@ record NaturalIsomorphism {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level}
 natural-isomorphism-eq : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} 
                        → {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}}
                        → {F : Functor C D} {G : Functor C D}
-                       → {nat nat' : NaturalTransformation F G}
-                       → {iso iso' : {x : Obj C} → (f : Hom D ([ F ]₀ x) ([ G ]₀ x)) → Isomorphism D f}
-                       → nat ≡ nat' → ({x : Obj C} → (f : Hom D ([ F ]₀ x) ([ G ]₀ x)) → iso f ≡ iso' f)
-                       → naturalIsomorphism nat iso ≡ naturalIsomorphism nat' iso'
-natural-isomorphism-eq refl iso-eq = cong₂ naturalIsomorphism refl (implicit-fun-ext (λ x → fun-ext (λ f → iso-eq {x} f)))
+                       → {nat₀ nat₁ : NaturalTransformation F G}
+                       → {iso₀ : (x : Obj C) → Isomorphism D (NaturalTransformation.η nat₀ x)}
+                       → {iso₁ : (x : Obj C) → Isomorphism D (NaturalTransformation.η nat₁ x)}
+                       → nat₀ ≡ nat₁ → iso₀ ≅ iso₁
+                       → naturalIsomorphism nat₀ iso₀ ≡ naturalIsomorphism nat₁ iso₁
+natural-isomorphism-eq {nat₀ = nat} {.nat} {iso} {.iso} refl refl = refl
