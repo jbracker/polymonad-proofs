@@ -1,8 +1,10 @@
 
 -- StdLib
 open import Level renaming ( zero to lzero ; suc to lsuc )
+open import Function using ( _$_ )
+
 open import Relation.Binary.PropositionalEquality
-open import Relation.Binary.HeterogeneousEquality
+open import Relation.Binary.HeterogeneousEquality hiding ( cong ; sym )
 
 -- Local
 open import Extensionality
@@ -29,7 +31,7 @@ record NaturalIsomorphism {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level}
   field
     natural-transformation : NaturalTransformation F G
 
-  open NaturalTransformation natural-transformation public
+  open NaturalTransformation natural-transformation renaming ( natural to η-natural ) public
   open Functor hiding ( id )
   private
     _∘D_ = _∘_ D
@@ -39,10 +41,34 @@ record NaturalIsomorphism {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level}
   
   private
     module Isomorphic (x : Obj C) where
-      iso = isomorphic x
+      private iso = isomorphic x
       open Isomorphism iso hiding ( f⁻¹ ) public
+  open Isomorphic renaming ( left-id to inv-left-id ; right-id to inv-right-id ) public
   
-  open Isomorphic public
+  open ≡-Reasoning
+  
+  inv-natural : {a b : Obj C} {f : Hom C a b} → [ F ]₁ f ∘D inv a ≡ inv b ∘D [ G ]₁ f
+  inv-natural {a} {b} {f} = begin
+    [ F ]₁ f ∘D inv a
+      ≡⟨ sym $ right-id D ⟩
+    id D ∘D ([ F ]₁ f ∘D inv a)
+      ≡⟨ cong (λ X → X ∘D ([ F ]₁ f ∘D inv a)) (sym $ inv-right-id b) ⟩
+    (inv b ∘D η b) ∘D ([ F ]₁ f ∘D inv a)
+      ≡⟨ sym $ assoc D ⟩
+    inv b ∘D (η b ∘D ([ F ]₁ f ∘D inv a))
+      ≡⟨ cong (λ X → inv b ∘D X) (assoc D) ⟩
+    inv b ∘D ((η b ∘D [ F ]₁ f) ∘D inv a)
+      ≡⟨ cong (λ X → inv b ∘D (X ∘D inv a)) (sym $ η-natural) ⟩
+    inv b ∘D (([ G ]₁ f ∘D η a) ∘D inv a)
+      ≡⟨ cong (λ X → inv b ∘D X) (sym $ assoc D) ⟩
+    inv b ∘D ([ G ]₁ f ∘D (η a ∘D inv a))
+      ≡⟨ cong (λ X → inv b ∘D ([ G ]₁ f ∘D X)) (inv-left-id a) ⟩
+    inv b ∘D ([ G ]₁ f ∘D id D)
+      ≡⟨ cong (λ X → inv b ∘D X) (left-id D) ⟩
+    inv b ∘D [ G ]₁ f ∎
+  
+  inv-natural-transformation : NaturalTransformation G F
+  inv-natural-transformation = naturalTransformation inv inv-natural
 
 -------------------------------------------------------------------------------
 -- Equality of natural isomorphisms
