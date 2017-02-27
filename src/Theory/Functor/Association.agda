@@ -131,6 +131,7 @@ module BiFunctor {ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓE₀ ℓE₁ ℓJ₀ ℓJ�
 module Associator {ℓC₀ ℓC₁ : Level} {C : Category {ℓC₀} {ℓC₁}} where
   open Triple
   open BiFunctor
+  open import Theory.Functor.Composition
   
   -- ((_ ⊗ _) ⊗ _) ⇒ _
   leftAssociator : Functor (C ×C C) C → Functor (C ×C C ×C C) C

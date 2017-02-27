@@ -18,6 +18,7 @@ open import Extensionality
 open import Theory.Triple
 open import Theory.Category
 open import Theory.Functor
+open import Theory.Functor.Composition
 open import Theory.Natural.Transformation
 open import Theory.Natural.Transformation.Whisker
 

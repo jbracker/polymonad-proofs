@@ -10,6 +10,7 @@ open import Theory.Category
 open import Theory.Category.Monoidal
 open import Theory.Category.Isomorphism
 open import Theory.Functor
+open import Theory.Functor.Composition
 open import Theory.Natural.Isomorphism
 open import Theory.Natural.Transformation
 

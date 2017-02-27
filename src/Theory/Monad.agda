@@ -15,6 +15,7 @@ open import Congruence
 open import Extensionality
 open import Theory.Category
 open import Theory.Functor
+open import Theory.Functor.Composition
 open import Theory.Natural.Transformation
 
 -------------------------------------------------------------------------------
