@@ -171,6 +171,34 @@ module BiFunctorApplication {ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓE₀ ℓE₁ : L
   [-,_] = rightObjApply
 
 -------------------------------------------------------------------------------
+-- Application of objects to trifunctors
+-------------------------------------------------------------------------------
+module TriFunctorApplication {ℓA₀ ℓA₁ ℓB₀ ℓB₁ ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} 
+                             {A : Category {ℓA₀} {ℓA₁}}
+                             {B : Category {ℓB₀} {ℓB₁}}
+                             {C : Category {ℓC₀} {ℓC₁}} 
+                             {D : Category {ℓD₀} {ℓD₁}} where
+  open Category
+  private
+    _∘A_ = _∘_ A
+    _∘B_ = _∘_ B
+    _∘C_ = _∘_ C
+    _∘D_ = _∘_ D
+
+  [-,_,_]_ : Obj B → Obj C → Functor (A ×C B ×C C) D → Functor A D
+  [-,_,_]_ b c (functor F₀ F₁ functor-id compose) = functor ObjF HomF functor-id composeF
+    where
+      ObjF : Obj A → Obj D
+      ObjF a = F₀ (a , b , c)
+
+      HomF : {x y : Obj A} → Hom A x y → Hom D (ObjF x) (ObjF y)
+      HomF {x} {y} f = F₁ (f , id B , id C)
+
+      composeF : {x y z : Obj A} {f : Hom A x y} {g : Hom A y z}
+               → HomF (g ∘A f) ≡ HomF g ∘D HomF f
+      composeF = {!!}
+      
+-------------------------------------------------------------------------------
 -- Tri-Functors that map Triples into associated tuples/products
 -------------------------------------------------------------------------------
 
