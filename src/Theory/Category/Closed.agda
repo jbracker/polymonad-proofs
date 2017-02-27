@@ -7,7 +7,7 @@ open import Relation.Binary.PropositionalEquality
 
 open import Theory.Category hiding ( category )
 open import Theory.Functor
-import Theory.Functor.Examples
+import Theory.Functor.Application
 open import Theory.Natural.Isomorphism
 open import Theory.Natural.Transformation
 
@@ -24,7 +24,7 @@ record ClosedCategory {ℓ₀ ℓ₁ : Level} (C : Category {ℓ₀} {ℓ₁}) :
     
     I : Obj C
   
-  open Theory.Functor.Examples.BiFunctorApplication
+  open Theory.Functor.Application.BiFunctor
   
   field
     i : NaturalIsomorphism Id[ C ] ([ I ,-] InternalHom)

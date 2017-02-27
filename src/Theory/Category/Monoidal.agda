@@ -10,7 +10,8 @@ open import Relation.Binary.HeterogeneousEquality using ( _≅_ )
 open import Theory.Triple
 open import Theory.Category
 open import Theory.Functor
-open import Theory.Functor.Examples
+import Theory.Functor.Association
+import Theory.Functor.Application
 open import Theory.Natural.Isomorphism
 
 -------------------------------------------------------------------------------
@@ -34,8 +35,8 @@ record MonoidalCategory {ℓ₀ ℓ₁ : Level} (C : Category {ℓ₀} {ℓ₁})
   _⊗₁_ : {a b c d : Obj} → (f : Hom a b) → (g : Hom c d) → Hom (a ⊗₀ c) (b ⊗₀ d)
   _⊗₁_ f g = F₁ tensor (f ,' g)
   
-  open Theory.Functor.Examples.Associator
-  open Theory.Functor.Examples.BiFunctorApplication
+  open Theory.Functor.Association.Associator
+  open Theory.Functor.Application.BiFunctor
   
   field 
     associator : NaturalIsomorphism (leftAssociator tensor) (rightAssociator tensor)
