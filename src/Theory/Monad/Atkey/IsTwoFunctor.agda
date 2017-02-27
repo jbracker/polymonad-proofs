@@ -21,6 +21,7 @@ open import Haskell
 open import Theory.Triple
 open import Theory.Category
 open import Theory.Functor
+open import Theory.Functor.Composition
 open import Theory.Natural.Transformation renaming (NaturalTransformation to NatTrans)
 open import Theory.Monad.Atkey
 open import Theory.TwoCategory

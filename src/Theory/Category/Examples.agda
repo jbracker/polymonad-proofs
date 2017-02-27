@@ -14,6 +14,7 @@ open import Extensionality
 open import ProofIrrelevance
 open import Theory.Category
 open import Theory.Functor
+open import Theory.Functor.Composition
 open import Theory.Natural.Transformation
 
 -- Category of sets and functions.
