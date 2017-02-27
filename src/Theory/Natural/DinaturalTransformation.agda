@@ -37,4 +37,5 @@ record DinaturalTransformation {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level}
     α : (c : Obj C) → Hom D ([ F ]₀ (c , c)) ([ G ]₀ (c , c))
     
     dinatural : {a b : Obj C} {f : Hom C a b} 
-              → [ G ]₁ (id C {a} , f) ∘D (α a ∘D ([ F ]₁ (f , id C {a}))) ≡ [ G ]₁ (f , id C {b}) ∘D (α b ∘D [ F ]₁ (id C {b} , f))
+              → [ G ]₁ (id C {a} , f) ∘D (α a ∘D [ F ]₁ (f , id C {a}))
+              ≡ [ G ]₁ (f , id C {b}) ∘D (α b ∘D [ F ]₁ (id C {b} , f))
