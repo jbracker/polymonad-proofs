@@ -60,6 +60,11 @@ module BiFunctor {ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓE₀ ℓE₁ : Level}
           ≡⟨ compose ⟩
         F₁ (g , id D {x}) ∘E F₁ (f , id D {x}) ∎
   
+  [_,_]_ : Obj C → Obj D → Functor (C ×C D) E → Functor ⊤-Cat E
+  [ c , d ] (functor F₀ F₁ functor-id compose)
+    = functor (λ _ → F₀ (c , d)) (λ _ → F₁ (id C , id D)) functor-id
+    $ λ {x} {y} {z} {f} {g} → trans (cong₂ (λ X Y → F₁ (X , Y)) (sym $ left-id C) (sym $ left-id D)) compose
+  
 -------------------------------------------------------------------------------
 -- Application of objects to trifunctors
 -------------------------------------------------------------------------------
