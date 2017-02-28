@@ -9,7 +9,7 @@ open import Relation.Binary.PropositionalEquality
 
 open import Theory.Category hiding ( category )
 open import Theory.Functor
-import Theory.Functor.Application
+open import Theory.Functor.Application
 import Theory.Functor.Composition
 open import Theory.Natural.Isomorphism
 open import Theory.Natural.Transformation
@@ -17,30 +17,6 @@ open import Theory.Natural.DinaturalTransformation
 open import Theory.Natural.ExtranaturalTransformation
 
 module Theory.Category.Closed where
-
-invert : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}}
-       → Functor C D → Functor (C op) (D op)
-invert (functor F₀ F₁ id compose) = functor F₀ F₁ id compose
-
-invert' : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}}
-        → Functor (C op) (D op) → Functor C D
-invert' (functor F₀ F₁ id compose) = functor F₀ F₁ id compose
-
-
-leftId : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}}
-       → Functor (⊤-Cat ×C C) D → Functor C D
-leftId (functor F₀ F₁ id compose)
-  = functor (λ x → F₀ (tt ,' x)) (λ f → F₁ (tt ,' f)) id compose
-
-rightId : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}}
-        → Functor (C ×C ⊤-Cat) D → Functor C D
-rightId (functor F₀ F₁ id compose)
-  = functor (λ x → F₀ (x ,' tt)) (λ f → F₁ (f ,' tt)) id compose
-
-constToAny : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} (C : Category {ℓC₀} {ℓC₁}) {D : Category {ℓD₀} {ℓD₁}}
-           → Functor ⊤-Cat D → Functor C D
-constToAny C (functor F₀ F₁ id compose) = functor (λ _ → F₀ tt) (λ _ → F₁ tt) id compose
-
 
 record ClosedCategory {ℓC₀ ℓC₁ : Level} (C : Category {ℓC₀} {ℓC₁}) : Set (lsuc (ℓC₀ ⊔ ℓC₁)) where
   constructor closedCategory
@@ -72,7 +48,7 @@ record ClosedCategory {ℓC₀ ℓC₁ : Level} (C : Category {ℓC₀} {ℓC₁
     j : (a : Obj C) → Hom C I [ a , a ]₀
 
     j-extranatural-a : {a a' : Obj C} (f : Hom C a a') 
-                   → [ f , id C ]₁ ∘C (j a') ≡ [ id (C op) , f ]₁ ∘C (j a)
+                     → [ f , id C ]₁ ∘C (j a') ≡ [ id (C op) , f ]₁ ∘C (j a)
     
     L : (a b c : Obj C) → Hom C [ b , c ]₀ [ [ a , b ]₀ , [ a , c ]₀ ]₀
     
@@ -91,14 +67,14 @@ record ClosedCategory {ℓC₀ ℓC₁ : Level} (C : Category {ℓC₀} {ℓC₁
   L-natural-transformation : (a b : Obj (C op))
                            → NaturalTransformation
                              ([ b ,-] InternalHom)
-                             (leftId ([ invert ([ a , b ] InternalHom) , [ a ,-] InternalHom ]∘[ InternalHom ]))
+                             ([⊤, [ [ [ a , b ] InternalHom ]op , [ a ,-] InternalHom ]∘[ InternalHom ] ])
   L-natural-transformation a b = naturalTransformation (λ x → L a b x) (L-natural-c a b)
 
   -- [-,c] → [[a,-],[a,c]] is a natural transformation
   L-natural-transformation-op : (a : Obj (C op)) → (c : Obj C)
                               → NaturalTransformation
                                 ([-, c ] InternalHom)
-                                (rightId [ invert ([ a ,-] InternalHom) , [ a , c ] InternalHom ]∘[ InternalHom ])
+                                ([ [ [ [ a ,-] InternalHom ]op , [ a , c ] InternalHom ]∘[ InternalHom ] ,⊤])
   L-natural-transformation-op a c = naturalTransformation (λ x → L a x c) (L-natural-b a c)
   
   open import Theory.Triple

@@ -10,6 +10,22 @@ open import Theory.Functor
 
 module Theory.Functor.Application where
 
+private
+  module BiFunctorUnitApplication {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} 
+                                  {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} where
+    open import Data.Product
+    open import Data.Unit
+    
+    [⊤,_] : Functor (⊤-Cat ×C C) D → Functor C D
+    [⊤,_] (functor F₀ F₁ id compose)
+      = functor (λ x → F₀ (tt , x)) (λ f → F₁ (tt , f)) id compose
+
+    [_,⊤] : Functor (C ×C ⊤-Cat) D → Functor C D
+    [_,⊤] (functor F₀ F₁ id compose)
+      = functor (λ x → F₀ (x , tt)) (λ f → F₁ (f , tt)) id compose
+
+open BiFunctorUnitApplication public
+
 -------------------------------------------------------------------------------
 -- Application of objects to bifunctors
 -------------------------------------------------------------------------------
@@ -18,6 +34,7 @@ module BiFunctor {ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓE₀ ℓE₁ : Level}
                  {D : Category {ℓD₀} {ℓD₁}}
                  {E : Category {ℓE₀} {ℓE₁}} where
   open import Data.Product
+  open import Data.Unit
   open Category
   private
     _∘C_ = _∘_ C

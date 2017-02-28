@@ -80,6 +80,20 @@ Id[_] : {ℓC₀ ℓC₁ : Level} → (C : Category {ℓC₀} {ℓC₁}) → Fun
 Id[ C ] = idFunctor C
 
 -------------------------------------------------------------------------------
+-- The opposite Functor
+-------------------------------------------------------------------------------
+oppositeFunctor : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}}
+                → Functor C D → Functor (C op) (D op)
+oppositeFunctor (functor F₀ F₁ id compose) = functor F₀ F₁ id compose
+
+oppositeFunctor' : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}}
+                 → Functor (C op) (D op) → Functor C D
+oppositeFunctor' (functor F₀ F₁ id compose) = functor F₀ F₁ id compose
+
+[_]op  = oppositeFunctor
+[_]op' = oppositeFunctor'
+
+-------------------------------------------------------------------------------
 -- Product of Functors
 -------------------------------------------------------------------------------
 open Category
@@ -118,7 +132,11 @@ constFunctor C c = record
     
     F₁ : {a b : Obj ⊤-Cat} → Hom ⊤-Cat a b → Hom C (F₀ a) (F₀ b)
     F₁ {a = tt} {b = tt} tt = Category.id C {c}
-    
+
+constToAnyFunctor : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} (C : Category {ℓC₀} {ℓC₁}) {D : Category {ℓD₀} {ℓD₁}}
+                  → Functor ⊤-Cat D → Functor C D
+constToAnyFunctor C (functor F₀ F₁ id compose) = functor (λ _ → F₀ tt) (λ _ → F₁ tt) id compose
+
 -------------------------------------------------------------------------------
 -- Left and right extensions of a Functors result
 -------------------------------------------------------------------------------
