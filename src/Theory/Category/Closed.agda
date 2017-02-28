@@ -41,6 +41,7 @@ constToAny : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} (C : Category {ℓC₀} {
            → Functor ⊤-Cat D → Functor C D
 constToAny C (functor F₀ F₁ id compose) = functor (λ _ → F₀ tt) (λ _ → F₁ tt) id compose
 
+
 record ClosedCategory {ℓC₀ ℓC₁ : Level} (C : Category {ℓC₀} {ℓC₁}) : Set (lsuc (ℓC₀ ⊔ ℓC₁)) where
   constructor closedCategory
 
@@ -68,17 +69,22 @@ record ClosedCategory {ℓC₀ ℓC₁ : Level} (C : Category {ℓC₀} {ℓC₁
   field
     i : NaturalIsomorphism Id[ C ] ([ I ,-] InternalHom)
 
-    j : (x : Obj C) → Hom C I [ x , x ]₀
+    j : (a : Obj C) → Hom C I [ a , a ]₀
 
-    L : (x y z : Obj C) → Hom C [ y , z ]₀ [ [ x , y ]₀ , [ x , z ]₀ ]₀
+    j-extranatural-a : {a a' : Obj C} (f : Hom C a a') 
+                   → [ f , id C ]₁ ∘C (j a') ≡ [ id (C op) , f ]₁ ∘C (j a)
     
-    L-natural : (a : Obj C) → (b : Obj (C op)) → {x y : Obj C} {f : Hom C x y}
-              → ([ [ id C {a} , id C {b} ]₁ , [ id C {a} , f ]₁ ]₁) ∘C (L a b x) ≡ (L a b y) ∘C ([ id C {b} , f ]₁)
+    L : (a b c : Obj C) → Hom C [ b , c ]₀ [ [ a , b ]₀ , [ a , c ]₀ ]₀
     
-    L-natural-op : (a c : Obj C) → {x y : Obj C} {f : Hom C x y}
-                 → ([ [ id C {a} , f ]₁ , [ id C {a} , id C {c} ]₁ ]₁) ∘C (L a y c) ≡ (L a x c) ∘C ([ f , id C {c} ]₁)
-
-  -- TODO: Extranaturality
+    L-natural-c : (a : Obj C) → (b : Obj (C op)) → {c c' : Obj C} {f : Hom C c c'}
+                → ([ [ id C {a} , id C {b} ]₁ , [ id C {a} , f ]₁ ]₁) ∘C (L a b c) ≡ (L a b c') ∘C ([ id C {b} , f ]₁)
+    
+    L-natural-b : (a c : Obj C) → {b b' : Obj C} {f : Hom C b b'}
+                → ([ [ id C {a} , f ]₁ , [ id C {a} , id C {c} ]₁ ]₁) ∘C (L a b' c) ≡ (L a b c) ∘C ([ f , id C {c} ]₁)
+    
+    L-extranatural-a : (b : Obj (C op)) → (c : Obj C) → {a a' : Obj C} (f : Hom C a a') 
+                     → [ id C , [ f , id C {c} ]₁ ]₁ ∘C (L a' b c) ≡ [ [ f , id (C op) {b} ]₁ , id C ]₁ ∘C (L a b c)
+  
   open Theory.Functor.Composition.BiFunctor
   
   -- [b,-] → [[a,b],[a,-]] is a natural transformation
@@ -86,23 +92,54 @@ record ClosedCategory {ℓC₀ ℓC₁ : Level} (C : Category {ℓC₀} {ℓC₁
                            → NaturalTransformation
                              ([ b ,-] InternalHom)
                              (leftId ([ invert ([ a , b ] InternalHom) , [ a ,-] InternalHom ]∘[ InternalHom ]))
-  L-natural-transformation a b = naturalTransformation (λ x → L a b x) (L-natural a b)
+  L-natural-transformation a b = naturalTransformation (λ x → L a b x) (L-natural-c a b)
 
   -- [-,c] → [[a,-],[a,c]] is a natural transformation
   L-natural-transformation-op : (a : Obj (C op)) → (c : Obj C)
                               → NaturalTransformation
                                 ([-, c ] InternalHom)
                                 (rightId [ invert ([ a ,-] InternalHom) , [ a , c ] InternalHom ]∘[ InternalHom ])
-  L-natural-transformation-op a c = naturalTransformation (λ x → L a x c) (L-natural-op a c)
+  L-natural-transformation-op a c = naturalTransformation (λ x → L a x c) (L-natural-b a c)
   
   open import Theory.Triple
   open ≡-Reasoning
+  private
+    _∘⊤⊤⊤_ = _∘_ (⊤-Cat ×C ⊤-Cat op ×C ⊤-Cat)
+    
   
-  L-left-functor : Obj (C op) → Obj C → Functor (⊤-Cat ×C (⊤-Cat op) ×C ⊤-Cat) C
-  L-left-functor b c = functor leftObj leftHom (Functor.id InternalHom) compose
+  LeftExtraFunctor-j : Functor (⊤-Cat ×C (⊤-Cat op) ×C ⊤-Cat) C
+  LeftExtraFunctor-j = functor (λ _ → I) (λ _ → id C {I}) refl (sym $ left-id C)
+  
+  RightExtraFunctor-j : Functor (⊤-Cat ×C (C op) ×C C) C
+  RightExtraFunctor-j = functor rightObj rightHom (Functor.id InternalHom) (Functor.compose InternalHom)
     where
-      _∘⊤⊤⊤_ = _∘_ (⊤-Cat ×C ⊤-Cat op ×C ⊤-Cat)
+      rightObj : Obj (⊤-Cat ×C C op ×C C) → Obj C
+      rightObj (tt , a⁻ , a⁺) = [ a⁻ , a⁺ ]₀
       
+      rightHom : {a b : Obj (⊤-Cat ×C C op ×C C)} 
+               → Hom (⊤-Cat ×C C op ×C C) a b → Hom C (rightObj a) (rightObj b)
+      rightHom (tt , f⁻ , f⁺) = [ f⁻ , f⁺ ]₁
+  
+  j-extranatural-transformation : ExtranaturalTransformation LeftExtraFunctor-j RightExtraFunctor-j
+  j-extranatural-transformation = record
+    { η = λ _ _ a → j a
+    ; η-natural = λ _ c {_} {_} {_} → j-natural c
+    ; extranatural = λ _ _ {a} {a'} f → j-extranatural-a {a} {a'} f
+    ; extranatural-op = λ _ _ {_} {_} _ → refl
+    } where
+      j-natural : (c : Obj C) → [ id (C op) {c} , id C {c} ]₁ ∘C j c ≡ j c ∘C id C {I}
+      j-natural c = begin
+        [ id (C op) {c} , id C {c} ]₁ ∘C j c 
+          ≡⟨ cong (λ X → X ∘C j c) (Functor.id InternalHom) ⟩
+        id C ∘C j c 
+          ≡⟨ right-id C ⟩
+        j c 
+          ≡⟨ sym $ left-id C ⟩
+        j c ∘C id C {I} ∎
+  
+  LeftExtraFunctor-L : Obj (C op) → Obj C → Functor (⊤-Cat ×C (⊤-Cat op) ×C ⊤-Cat) C
+  LeftExtraFunctor-L b c = functor leftObj leftHom (Functor.id InternalHom) compose
+    where
       leftObj : Obj (⊤-Cat ×C ⊤-Cat op ×C ⊤-Cat) → Obj C
       leftObj (tt , tt , tt) = [ b , c ]₀
       
@@ -124,8 +161,8 @@ record ClosedCategory {ℓC₀ ℓC₁ : Level} (C : Category {ℓC₀} {ℓC₁
           ≡⟨⟩
         leftHom (tt , tt , tt) ∘C leftHom (tt , tt , tt) ∎
 
-  L-right-functor : Obj (C op) → Obj C → Functor (⊤-Cat ×C (C op) ×C C) C
-  L-right-functor b c 
+  RightExtraFunctor-L : Obj (C op) → Obj C → Functor (⊤-Cat ×C (C op) ×C C) C
+  RightExtraFunctor-L b c 
     = functor rightObj rightHom (trans (cong₂ [_,_]₁ (Functor.id InternalHom) (Functor.id InternalHom)) (Functor.id InternalHom)) compose 
     where
       _∘⊤CC_ = _∘_ (⊤-Cat ×C C op ×C C)
@@ -153,22 +190,25 @@ record ClosedCategory {ℓC₀ ℓC₁ : Level} (C : Category {ℓC₀} {ℓC₁
           ≡⟨⟩
         rightHom (tt , g⁻ , g⁺) ∘C rightHom (tt , f⁻ , f⁺) ∎
   
-  open Theory.Functor.Application.TriFunctor
-  
-  L-extranatural : (b : Obj (C op)) → (c : Obj C)
-                 → ExtranaturalTransformation (L-left-functor b c) (L-right-functor b c)
-  L-extranatural b c = record
+  L-extranatural-transformation : (b : Obj (C op)) → (c : Obj C)
+                                → ExtranaturalTransformation (LeftExtraFunctor-L b c) (RightExtraFunctor-L b c)
+  L-extranatural-transformation b c = record
     { η = η
-    ; η-natural = η-natural
-    ; extranatural = {!!}
-    ; extranatural-op = {!!}
+    ; η-natural = λ b' c' {x} {y} {f} → L-natural-c c' b {c} {c} {id C {c}}
+    ; extranatural = λ _ _ → extranatural
+    ; extranatural-op = λ _ a {_} {_} f → refl
     } where
-      η : (x y : ⊤) (z : Obj C) → Hom C ([ L-left-functor b c ]₀ (x , y , y)) ([ L-right-functor b c ]₀ (x , z , z))
+      η : (x y : ⊤) (z : Obj C) → Hom C ([ LeftExtraFunctor-L b c ]₀ (x , y , y)) ([ RightExtraFunctor-L b c ]₀ (x , z , z))
       η tt tt a = L a b c
       
-      η-natural : (b₁ : ⊤) → (c₁ : Obj C) → {x y : ⊤} {f : Hom ⊤-Cat x y}
-        -- 
-        → [ [ id C {c₁} , id (C op) {b} ]₁ , [ id (C op) {c₁} , id C {c} ]₁ ]₁ ∘C (L c₁ b c)
-        ≡ (L c₁ b c) ∘C ([ id (C op) {b} , id C {c} ]₁)
-      η-natural = {!!}
-  
+      extranatural : {z z' : Obj C} (f : Hom C z z') 
+                   → [ [ id C , id (C op) {b} ]₁ , [ f , id C {c} ]₁ ]₁ ∘C (L z' b c)
+                   ≡ [ [ f , id (C op) {b} ]₁ , [ id (C op) , id C {c} ]₁ ]₁ ∘C (L z b c)
+      extranatural {z} {z'} f = begin
+        [ [ id C , id (C op) {b} ]₁ , [ f , id C {c} ]₁ ]₁ ∘C (L z' b c)
+          ≡⟨ cong (λ X → [ X , [ f , id C {c} ]₁ ]₁ ∘C (L z' b c)) (Functor.id InternalHom) ⟩
+        [ id C , [ f , id C {c} ]₁ ]₁ ∘C (L z' b c)
+          ≡⟨ L-extranatural-a b c {z} {z'} f ⟩
+        [ [ f , id (C op) {b} ]₁ , id C ]₁ ∘C (L z b c)
+          ≡⟨ cong (λ X → [ [ f , id (C op) {b} ]₁ , X ]₁ ∘C L z b c) (sym $ Functor.id InternalHom) ⟩
+        [ [ f , id (C op) {b} ]₁ , [ id (C op) , id C {c} ]₁ ]₁ ∘C (L z b c) ∎
