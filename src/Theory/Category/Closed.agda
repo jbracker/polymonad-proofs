@@ -7,6 +7,8 @@ open import Data.Product renaming ( _,_ to _,'_ )
 
 open import Relation.Binary.PropositionalEquality
 
+open import Bijection hiding ( refl ; sym ; trans )
+
 open import Theory.Category hiding ( category )
 open import Theory.Functor
 open import Theory.Functor.Application
@@ -46,11 +48,22 @@ record ClosedCategory {ℓC₀ ℓC₁ : Level} (C : Category {ℓC₀} {ℓC₁
   open Theory.Functor.Application.BiFunctor
   
   field
-    i : NaturalIsomorphism Id[ C ] ([ I ,-] InternalHom)
+    i-natural-isomorphism : NaturalIsomorphism Id[ C ] ([ I ,-] InternalHom)
 
+  open NaturalIsomorphism i-natural-isomorphism 
+    renaming ( η to i ; η-natural to i-natural ; inv to i-inv ; inv-left-id to i-inv-left-id ; inv-right-id to i-inv-right-id ; inv-natural to i-inv-natural ) 
+    hiding ( natural-transformation ; inv-natural-transformation )
+  
+  field
     j : (a : Obj C) → Hom C I [ a , a ]₀
     
     L : (a b c : Obj C) → Hom C [ b , c ]₀ [ [ a , b ]₀ , [ a , c ]₀ ]₀
+    
+  γ : {x y : Obj C} → Hom C x y → Hom C I [ x , y ]₀
+  γ {x} {y} f = [ id C , f ]₁ ∘C j x
+  
+  field
+    γ-inv : {x y : Obj C} → Hom C I [ x , y ]₀ → Hom C x y
 
     j-extranatural-a : {a a' : Obj C} (f : Hom C a a') 
                      → [ f , id C ]₁ ∘C (j a') ≡ [ id (C op) , f ]₁ ∘C (j a)
@@ -63,6 +76,21 @@ record ClosedCategory {ℓC₀ ℓC₁ : Level} (C : Category {ℓC₀} {ℓC₁
     
     L-extranatural-a : (b : Obj (C op)) → (c : Obj C) → {a a' : Obj C} (f : Hom C a a') 
                      → [ id C , [ f , id C {c} ]₁ ]₁ ∘C (L a' b c) ≡ [ [ f , id (C op) {b} ]₁ , id C ]₁ ∘C (L a b c)
+    
+    coher-1 : (x y : Obj C) → L x y y ∘C j y ≡ j [ x , y ]₀
+    
+    coher-2 : (x y : Obj C) → [ j x , id C ]₁ ∘C L x x y ≡ i [ x , y ]₀
+    
+    coher-3 : (y z : Obj C) → [ i y , id C ]₁ ∘C L I y z ≡ [ id C , i z ]₁
+    
+    coher-4 : (x y u v : Obj C) → [ id C , L x y v ]₁ ∘C L y u v ≡ [ L x y u , id C ]₁ ∘C (L [ x , y ]₀ [ x , u ]₀ [ x , v ]₀ ∘C L x u v)
+    
+    γ-right-id : {x y : Obj C} → (f : Hom C I [ x , y ]₀) → γ (γ-inv f) ≡ f
+    
+    γ-left-id  : {x y : Obj C} → (f : Hom C x y) → γ-inv (γ f) ≡ f
+  
+  γ-bijection : {x y : Obj C} → Bijection (Hom C x y) (Hom C I [ x , y ]₀)
+  γ-bijection {x} {y} = bijection (γ {x} {y}) (γ-inv {x} {y}) γ-right-id γ-left-id
   
   open Theory.Functor.Composition.BiFunctor
   
@@ -298,6 +326,8 @@ private
                        → {j₁ : (a : Obj C) → Hom C I₁ (F₀ InternalHom₁ (a , a))}
                        → {L₀ : (a b c : Obj C) → Hom C (F₀ InternalHom₀ (b , c)) (F₀ InternalHom₀ (F₀ InternalHom₀ (a , b) , F₀ InternalHom₀ (a , c)))}
                        → {L₁ : (a b c : Obj C) → Hom C (F₀ InternalHom₁ (b , c)) (F₀ InternalHom₁ (F₀ InternalHom₁ (a , b) , F₀ InternalHom₁ (a , c)))}
+                       → {γ-inv₀ : (x y : Obj C) → Hom C I₀ (F₀ InternalHom₀ (x , y)) → Hom C x y}
+                       → {γ-inv₁ : (x y : Obj C) → Hom C I₁ (F₀ InternalHom₁ (x , y)) → Hom C x y}
                        → {j-extranatural-a₀ : {a a' : Obj C} (f : Hom C a a') → (F₁ InternalHom₀ (f , id C)) ∘C (j₀ a') ≡ F₁ InternalHom₀ (id (C op) , f) ∘C (j₀ a)}
                        → {j-extranatural-a₁ : {a a' : Obj C} (f : Hom C a a') → (F₁ InternalHom₁ (f , id C)) ∘C (j₁ a') ≡ F₁ InternalHom₁ (id (C op) , f) ∘C (j₁ a)}
                        → {L-natural-c₀ : (a : Obj C) → (b : Obj (C op)) → {c c' : Obj C} {f : Hom C c c'}
@@ -312,17 +342,40 @@ private
                                             → F₁ InternalHom₀ (id C , F₁ InternalHom₀ (f , id C {c})) ∘C L₀ a' b c ≡ F₁ InternalHom₀ (F₁ InternalHom₀ (f , id (C op) {b}) , id C) ∘C L₀ a b c}
                        → {L-extranatural-a₁ : (b : Obj (C op)) → (c : Obj C) → {a a' : Obj C} (f : Hom C a a') 
                                             → F₁ InternalHom₁ (id C , F₁ InternalHom₁ (f , id C {c})) ∘C L₁ a' b c ≡ F₁ InternalHom₁ (F₁ InternalHom₁ (f , id (C op) {b}) , id C) ∘C L₁ a b c}
-                       → InternalHom₀ ≡ InternalHom₁ → I₀ ≡ I₁ → i₀ ≅ i₁ → j₀ ≅ j₁ → L₀ ≅ L₁
-                       → closedCategory InternalHom₀ I₀ i₀ j₀ L₀ j-extranatural-a₀ L-natural-c₀ L-natural-b₀ L-extranatural-a₀
-                       ≡ closedCategory InternalHom₁ I₁ i₁ j₁ L₁ j-extranatural-a₁ L-natural-c₁ L-natural-b₁ L-extranatural-a₁
-    closed-category-eq {InternalHom₀ = InternalHom} {._} {I} {._} {i} {._} {j} {._} {L} {._} 
+                       → {coher-1₀ : (x y : Obj C) → L₀ x y y ∘C j₀ y ≡ j₀ (F₀ InternalHom₀ (x , y))}
+                       → {coher-1₁ : (x y : Obj C) → L₁ x y y ∘C j₁ y ≡ j₁ (F₀ InternalHom₁ (x , y))}
+                       → {coher-2₀ : (x y : Obj C) → F₁ InternalHom₀ (j₀ x , id C) ∘C L₀ x x y ≡ NaturalIsomorphism.η i₀ (F₀ InternalHom₀ (x , y))}
+                       → {coher-2₁ : (x y : Obj C) → F₁ InternalHom₁ (j₁ x , id C) ∘C L₁ x x y ≡ NaturalIsomorphism.η i₁ (F₀ InternalHom₁ (x , y))}
+                       → {coher-3₀ : (y z : Obj C) → F₁ InternalHom₀ (NaturalIsomorphism.η i₀ y , id C) ∘C L₀ I₀ y z ≡ F₁ InternalHom₀ (id C , NaturalIsomorphism.η i₀ z)}
+                       → {coher-3₁ : (y z : Obj C) → F₁ InternalHom₁ (NaturalIsomorphism.η i₁ y , id C) ∘C L₁ I₁ y z ≡ F₁ InternalHom₁ (id C , NaturalIsomorphism.η i₁ z)}
+                       → {coher-4₀ : (x y u v : Obj C) 
+                                   → F₁ InternalHom₀ (id C , L₀ x y v) ∘C L₀ y u v 
+                                   ≡ F₁ InternalHom₀ (L₀ x y u , id C) ∘C (L₀ (F₀ InternalHom₀ (x , y)) (F₀ InternalHom₀ (x , u)) (F₀ InternalHom₀ (x , v)) ∘C L₀ x u v)}
+                       → {coher-4₁ : (x y u v : Obj C) 
+                                   → F₁ InternalHom₁ (id C , L₁ x y v) ∘C L₁ y u v 
+                                   ≡ F₁ InternalHom₁ (L₁ x y u , id C) ∘C (L₁ (F₀ InternalHom₁ (x , y)) (F₀ InternalHom₁ (x , u)) (F₀ InternalHom₁ (x , v)) ∘C L₁ x u v)}
+                       → {γ-right-id₀ : {x y : Obj C} → (f : Hom C I₀ (F₀ InternalHom₀ (x , y))) → F₁ InternalHom₀ (id C , γ-inv₀ x y f) ∘C j₀ x ≡ f}
+                       → {γ-right-id₁ : {x y : Obj C} → (f : Hom C I₁ (F₀ InternalHom₁ (x , y))) → F₁ InternalHom₁ (id C , γ-inv₁ x y f) ∘C j₁ x ≡ f}
+                       → {γ-left-id₀  : {x y : Obj C} → (f : Hom C x y) → γ-inv₀ x y (F₁ InternalHom₀ (id C , f) ∘C j₀ x) ≡ f}
+                       → {γ-left-id₁  : {x y : Obj C} → (f : Hom C x y) → γ-inv₁ x y (F₁ InternalHom₁ (id C , f) ∘C j₁ x) ≡ f}
+                       → InternalHom₀ ≡ InternalHom₁ → I₀ ≡ I₁ → i₀ ≅ i₁ → j₀ ≅ j₁ → L₀ ≅ L₁ → γ-inv₀ ≅ γ-inv₁
+                       → closedCategory InternalHom₀ I₀ i₀ j₀ L₀ (λ {x} {y} f → γ-inv₀ x y f) j-extranatural-a₀ L-natural-c₀ L-natural-b₀ L-extranatural-a₀ coher-1₀ coher-2₀ coher-3₀ coher-4₀ γ-right-id₀ γ-left-id₀
+                       ≡ closedCategory InternalHom₁ I₁ i₁ j₁ L₁ (λ {x} {y} f → γ-inv₁ x y f) j-extranatural-a₁ L-natural-c₁ L-natural-b₁ L-extranatural-a₁ coher-1₁ coher-2₁ coher-3₁ coher-4₁ γ-right-id₁ γ-left-id₁
+    closed-category-eq {InternalHom} {._} {I} {._} {i} {._} {j} {._} {L} {._} {γ-inv} {._}
                        {j-extranatural-a₀} {j-extranatural-a₁} {L-natural-c₀} {L-natural-c₁} {L-natural-b₀} {L-natural-b₁} {L-extranatural-a₀} {L-extranatural-a₁}
-                       refl refl refl refl refl 
-      = cong₄ (closedCategory InternalHom I i j L) 
-              (implicit-fun-ext $ λ a → implicit-fun-ext $ λ a' → fun-ext $ λ f → proof-irrelevance (j-extranatural-a₀ {a} {a'} f) (j-extranatural-a₁ {a} {a'} f)) 
-              (fun-ext $ λ a → fun-ext $ λ b → implicit-fun-ext $ λ c → implicit-fun-ext $ λ c' → implicit-fun-ext $ λ f → proof-irrelevance (L-natural-c₀ a b {c} {c'} {f}) (L-natural-c₁ a b {c} {c'} {f}))
-              (fun-ext $ λ a → fun-ext $ λ c → implicit-fun-ext $ λ b → implicit-fun-ext $ λ b' → implicit-fun-ext $ λ f → proof-irrelevance (L-natural-b₀ a c {b} {b'} {f}) (L-natural-b₁ a c {b} {b'} {f}))
-              (fun-ext $ λ b → fun-ext $ λ c → implicit-fun-ext $ λ a → implicit-fun-ext $ λ a' → fun-ext $ λ f → proof-irrelevance (L-extranatural-a₀ b c {a} {a'} f) (L-extranatural-a₁ b c {a} {a'} f))
+                       {coher-1₀} {coher-1₁} {coher-2₀} {coher-2₁} {coher-3₀} {coher-3₁} {coher-4₀} {coher-4₁} {γ-right-id₀} {γ-right-id₁} {γ-left-id₀} {γ-left-id₁}
+                       refl refl refl refl refl refl 
+      = cong10 (closedCategory InternalHom I i j L (λ {x} {y} f → γ-inv x y f))
+               (implicit-fun-ext $ λ a → implicit-fun-ext $ λ a' → fun-ext $ λ f → proof-irrelevance (j-extranatural-a₀ {a} {a'} f) (j-extranatural-a₁ {a} {a'} f)) 
+               (fun-ext $ λ a → fun-ext $ λ b → implicit-fun-ext $ λ c → implicit-fun-ext $ λ c' → implicit-fun-ext $ λ f → proof-irrelevance (L-natural-c₀ a b {c} {c'} {f}) (L-natural-c₁ a b {c} {c'} {f}))
+               (fun-ext $ λ a → fun-ext $ λ c → implicit-fun-ext $ λ b → implicit-fun-ext $ λ b' → implicit-fun-ext $ λ f → proof-irrelevance (L-natural-b₀ a c {b} {b'} {f}) (L-natural-b₁ a c {b} {b'} {f}))
+               (fun-ext $ λ b → fun-ext $ λ c → implicit-fun-ext $ λ a → implicit-fun-ext $ λ a' → fun-ext $ λ f → proof-irrelevance (L-extranatural-a₀ b c {a} {a'} f) (L-extranatural-a₁ b c {a} {a'} f))
+               (fun-ext $ λ x → fun-ext $ λ y → proof-irrelevance (coher-1₀ x y) (coher-1₁ x y))
+               (fun-ext $ λ x → fun-ext $ λ y → proof-irrelevance (coher-2₀ x y) (coher-2₁ x y))
+               (fun-ext $ λ x → fun-ext $ λ y → proof-irrelevance (coher-3₀ x y) (coher-3₁ x y))
+               (fun-ext $ λ x → fun-ext $ λ y → fun-ext $ λ u → fun-ext $ λ v → proof-irrelevance (coher-4₀ x y u v) (coher-4₁ x y u v)) 
+               (implicit-fun-ext $ λ x → implicit-fun-ext $ λ y → fun-ext $ λ f → proof-irrelevance (γ-right-id₀ f) (γ-right-id₁ f)) 
+               (implicit-fun-ext $ λ x → implicit-fun-ext $ λ y → fun-ext $ λ f → proof-irrelevance (γ-left-id₀ f) (γ-left-id₁ f))
 
 open Equality public
 
