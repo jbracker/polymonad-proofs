@@ -242,7 +242,7 @@ private
                        {j-extranatural-a₀} {j-extranatural-a₁} {L-natural-c₀} {L-natural-c₁} {L-natural-b₀} {L-natural-b₁} {L-extranatural-a₀} {L-extranatural-a₁}
                        refl refl refl refl refl 
       = cong₄ (closedCategory InternalHom I i j L) 
-              (implicit-fun-ext (λ a → implicit-fun-ext (λ a' → fun-ext (λ f → proof-irrelevance (j-extranatural-a₀ {a} {a'} f) (j-extranatural-a₁ {a} {a'} f))))) 
+              (implicit-fun-ext $ λ a → implicit-fun-ext $ λ a' → fun-ext $ λ f → proof-irrelevance (j-extranatural-a₀ {a} {a'} f) (j-extranatural-a₁ {a} {a'} f)) 
               (fun-ext $ λ a → fun-ext $ λ b → implicit-fun-ext $ λ c → implicit-fun-ext $ λ c' → implicit-fun-ext $ λ f → proof-irrelevance (L-natural-c₀ a b {c} {c'} {f}) (L-natural-c₁ a b {c} {c'} {f}))
               (fun-ext $ λ a → fun-ext $ λ c → implicit-fun-ext $ λ b → implicit-fun-ext $ λ b' → implicit-fun-ext $ λ f → proof-irrelevance (L-natural-b₀ a c {b} {b'} {f}) (L-natural-b₁ a c {b} {b'} {f}))
               (fun-ext $ λ b → fun-ext $ λ c → implicit-fun-ext $ λ a → implicit-fun-ext $ λ a' → fun-ext $ λ f → proof-irrelevance (L-extranatural-a₀ b c {a} {a'} f) (L-extranatural-a₁ b c {a} {a'} f))
