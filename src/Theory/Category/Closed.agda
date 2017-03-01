@@ -191,7 +191,84 @@ record ClosedCategory {ℓC₀ ℓC₁ : Level} (C : Category {ℓC₀} {ℓC₁
         [ [ f , id (C op) {b} ]₁ , id C ]₁ ∘C (L z b c)
           ≡⟨ cong (λ X → [ [ f , id (C op) {b} ]₁ , X ]₁ ∘C L z b c) (sym $ Functor.id InternalHom) ⟩
         [ [ f , id (C op) {b} ]₁ , [ id (C op) , id C {c} ]₁ ]₁ ∘C (L z b c) ∎
-
+  
+  LeftExtraFunctor : Functor ((C op ×C C) ×C ⊤-Cat op ×C ⊤-Cat) C
+  LeftExtraFunctor = functor LeftObj LeftHom (Functor.id InternalHom) (Functor.compose InternalHom)
+    where
+      LeftObj : Obj (((C op) ×C C) ×C ⊤-Cat op ×C ⊤-Cat) → Obj C
+      LeftObj ((b ,' c) , tt , tt) = [ b , c ]₀
+      
+      LeftHom : {a b : Obj (((C op) ×C C) ×C ⊤-Cat op ×C ⊤-Cat)}
+              → Hom (((C op) ×C C) ×C ⊤-Cat op ×C ⊤-Cat) a b → Hom C (LeftObj a) (LeftObj b)
+      LeftHom ((fb ,' fc) , tt , tt) = [ fb , fc ]₁
+  
+  RightExtraFunctor : Functor ((C op ×C C) ×C C op ×C C) C
+  RightExtraFunctor = functor RightObj RightHom 
+                              (trans (cong₂ [_,_]₁ (Functor.id InternalHom) (Functor.id InternalHom)) (Functor.id InternalHom)) 
+                              (trans (cong₂ [_,_]₁ (Functor.compose InternalHom) (Functor.compose InternalHom)) (Functor.compose InternalHom))
+    where
+      _∘CCCC_ = _∘_ ((C op ×C C) ×C C op ×C C)
+      
+      RightObj : Obj (((C op) ×C C) ×C C op ×C C) → Obj C
+      RightObj ((b ,' c) , a⁻ , a⁺) = [ [ a⁺ , b ]₀ , [ a⁻ , c ]₀ ]₀
+      
+      RightHom : {a b : Obj (((C op) ×C C) ×C C op ×C C)}
+              → Hom (((C op) ×C C) ×C C op ×C C) a b → Hom C (RightObj a) (RightObj b)
+      RightHom ((fb ,' fc) , fa⁻ , fa⁺) = [ [ fa⁺ , fb ]₁ , [ fa⁻ , fc ]₁ ]₁
+  
+  private
+    InternalHom-compose-eq : {b b' : Obj C} {c c' : Obj (C op)} {f : Hom C b b'} {g : Hom (C op) c c'} 
+                           → [ g , id C ]₁ ∘C [ id (C op) , f ]₁ ≡ [ g , f ]₁
+    InternalHom-compose-eq = trans (sym $ Functor.compose InternalHom) (cong₂ [_,_]₁ (right-id C) (left-id (C op)))
+  
+  L-natural-bc : (a : Obj C) 
+               → {b b' : Obj (C op)} {c c' : Obj C}
+               → {f : Hom (C op) b b'} {g : Hom C c c'}
+               → [ [ id C {a} , f ]₁ , [ id C {a} , g ]₁ ]₁ ∘C L a b c 
+               ≡ L a b' c' ∘C [ f , g ]₁
+  L-natural-bc a {b} {b'} {c} {c'} {f} {g} = begin
+    [ [ id C {a} , f ]₁ , [ id C {a} , g ]₁ ]₁ ∘C L a b c
+      ≡⟨ cong (λ X → X ∘C L a b c) (sym $ InternalHom-compose-eq) ⟩
+    ([ [ id C {a} , f ]₁ , id C ]₁ ∘C [ id (C op) , [ id C {a} , g ]₁ ]₁) ∘C L a b c
+      ≡⟨ sym (assoc C) ⟩
+    [ [ id C {a} , f ]₁ , id C ]₁ ∘C ([ id (C op) , [ id C {a} , g ]₁ ]₁ ∘C L a b c)
+      ≡⟨ cong₂ (λ X Y → [ [ id C {a} , f ]₁ , X ]₁ ∘C ([ Y , [ id C {a} , g ]₁ ]₁ ∘C L a b c)) (sym $ Functor.id InternalHom) (sym $ Functor.id InternalHom) ⟩
+    [ [ id C {a} , f ]₁ , [ id C , id C ]₁ ]₁ ∘C ([ [ id (C op) , id (C op) ]₁ , [ id C {a} , g ]₁ ]₁ ∘C L a b c)
+      ≡⟨ cong (λ X → [ [ id C {a} , f ]₁ , [ id C , id C ]₁ ]₁ ∘C X) (L-natural-c a b {c} {c'} {g}) ⟩
+    [ [ id C {a} , f ]₁ , [ id C , id C ]₁ ]₁ ∘C (L a b c' ∘C [ id C {b} , g ]₁)
+      ≡⟨ assoc C ⟩
+    ([ [ id C {a} , f ]₁ , [ id C , id C ]₁ ]₁ ∘C L a b c') ∘C [ id C {b} , g ]₁
+      ≡⟨ cong (λ X → X ∘C [ id C {b} , g ]₁) (L-natural-b a c' {b'} {b} {f}) ⟩
+    (L a b' c' ∘C [ f , id C {c'} ]₁) ∘C [ id C {b} , g ]₁
+      ≡⟨ sym (assoc C) ⟩
+    L a b' c' ∘C ([ f , id C {c'} ]₁ ∘C [ id C {b} , g ]₁)
+      ≡⟨ cong (λ X → L a b' c' ∘C X) InternalHom-compose-eq ⟩
+    L a b' c' ∘C [ f , g ]₁ ∎
+  
+  extranatural-transformation : ExtranaturalTransformation LeftExtraFunctor RightExtraFunctor
+  extranatural-transformation = record
+    { η = η
+    ; η-natural = λ _ a {x} {y} {f} → L-natural-bc a {proj₁ x} {proj₁ y} {proj₂ x} {proj₂ y} {proj₁ f} {proj₂ f}
+    ; extranatural = extranatural
+    ; extranatural-op = λ a c f → refl
+    } where
+      η : (a : Obj (C op ×C C)) (b : ⊤) (c : Obj C) → Hom C ([ LeftExtraFunctor ]₀ (a , b , b)) ([ RightExtraFunctor ]₀ (a , c , c))
+      η (b ,' c) tt a = L a b c
+      
+      extranatural : (a : Σ (Obj (C op)) (λ x → Obj C)) (b : ⊤) {c c' : Obj C}
+                   → (f : Hom C c c')
+                   → [ [ id C , id C ]₁ , [ f , id C ]₁ ]₁ ∘C η a b c'
+                   ≡ [ [ f , id C ]₁ , [ id C , id C ]₁ ]₁ ∘C η a b c
+      extranatural (a ,' a') tt {c} {c'} f = begin
+        [ [ id C , id C ]₁ , [ f , id C ]₁ ]₁ ∘C L c' a a'
+          ≡⟨ cong (λ X → [ X , [ f , id C ]₁ ]₁ ∘C L c' a a') (Functor.id InternalHom) ⟩
+        [ id C , [ f , id C ]₁ ]₁ ∘C L c' a a'
+          ≡⟨ L-extranatural-a a a' f ⟩
+        [ [ f , id C ]₁ , id C ]₁ ∘C L c a a'
+          ≡⟨ cong (λ X → [ [ f , id C ]₁ , X ]₁ ∘C L c a a') (sym $ Functor.id InternalHom) ⟩
+        [ [ f , id C ]₁ , [ id C , id C ]₁ ]₁ ∘C L c a a' ∎
+      
+  open Category C public
 
 -------------------------------------------------------------------------------
 -- Equality of Closed Categories
@@ -248,3 +325,4 @@ private
               (fun-ext $ λ b → fun-ext $ λ c → implicit-fun-ext $ λ a → implicit-fun-ext $ λ a' → fun-ext $ λ f → proof-irrelevance (L-extranatural-a₀ b c {a} {a'} f) (L-extranatural-a₁ b c {a} {a'} f))
 
 open Equality public
+
