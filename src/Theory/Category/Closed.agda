@@ -52,7 +52,7 @@ record ClosedCategory {ℓC₀ ℓC₁ : Level} (C : Category {ℓC₀} {ℓC₁
 
   open NaturalIsomorphism i-natural-isomorphism 
     renaming ( η to i ; η-natural to i-natural ; inv to i-inv ; inv-left-id to i-inv-left-id ; inv-right-id to i-inv-right-id ; inv-natural to i-inv-natural ) 
-    hiding ( natural-transformation ; inv-natural-transformation )
+    hiding ( natural-transformation ; inv-natural-transformation ) public
   
   field
     j : (a : Obj C) → Hom C I [ a , a ]₀
@@ -244,10 +244,9 @@ record ClosedCategory {ℓC₀ ℓC₁ : Level} (C : Category {ℓC₀} {ℓC₁
               → Hom (((C op) ×C C) ×C C op ×C C) a b → Hom C (RightObj a) (RightObj b)
       RightHom ((fb ,' fc) , fa⁻ , fa⁺) = [ [ fa⁺ , fb ]₁ , [ fa⁻ , fc ]₁ ]₁
   
-  private
-    InternalHom-compose-eq : {b b' : Obj C} {c c' : Obj (C op)} {f : Hom C b b'} {g : Hom (C op) c c'} 
-                           → [ g , id C ]₁ ∘C [ id (C op) , f ]₁ ≡ [ g , f ]₁
-    InternalHom-compose-eq = trans (sym $ Functor.compose InternalHom) (cong₂ [_,_]₁ (right-id C) (left-id (C op)))
+  InternalHom-compose-eq : {b b' : Obj C} {c c' : Obj (C op)} {f : Hom C b b'} {g : Hom (C op) c c'} 
+                         → [ g , id C ]₁ ∘C [ id (C op) , f ]₁ ≡ [ g , f ]₁
+  InternalHom-compose-eq = trans (sym $ Functor.compose InternalHom) (cong₂ [_,_]₁ (right-id C) (left-id (C op)))
   
   L-natural-bc : (a : Obj C) 
                → {b b' : Obj (C op)} {c c' : Obj C}
