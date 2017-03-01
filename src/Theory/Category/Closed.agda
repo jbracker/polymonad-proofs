@@ -18,6 +18,9 @@ open import Theory.Natural.ExtranaturalTransformation
 
 module Theory.Category.Closed where
 
+-------------------------------------------------------------------------------
+-- Definition of Closed Categories
+-------------------------------------------------------------------------------
 record ClosedCategory {ℓC₀ ℓC₁ : Level} (C : Category {ℓC₀} {ℓC₁}) : Set (lsuc (ℓC₀ ⊔ ℓC₁)) where
   constructor closedCategory
 
@@ -46,11 +49,11 @@ record ClosedCategory {ℓC₀ ℓC₁ : Level} (C : Category {ℓC₀} {ℓC₁
     i : NaturalIsomorphism Id[ C ] ([ I ,-] InternalHom)
 
     j : (a : Obj C) → Hom C I [ a , a ]₀
+    
+    L : (a b c : Obj C) → Hom C [ b , c ]₀ [ [ a , b ]₀ , [ a , c ]₀ ]₀
 
     j-extranatural-a : {a a' : Obj C} (f : Hom C a a') 
                      → [ f , id C ]₁ ∘C (j a') ≡ [ id (C op) , f ]₁ ∘C (j a)
-    
-    L : (a b c : Obj C) → Hom C [ b , c ]₀ [ [ a , b ]₀ , [ a , c ]₀ ]₀
     
     L-natural-c : (a : Obj C) → (b : Obj (C op)) → {c c' : Obj C} {f : Hom C c c'}
                 → ([ [ id C {a} , id C {b} ]₁ , [ id C {a} , f ]₁ ]₁) ∘C (L a b c) ≡ (L a b c') ∘C ([ id C {b} , f ]₁)
@@ -188,3 +191,60 @@ record ClosedCategory {ℓC₀ ℓC₁ : Level} (C : Category {ℓC₀} {ℓC₁
         [ [ f , id (C op) {b} ]₁ , id C ]₁ ∘C (L z b c)
           ≡⟨ cong (λ X → [ [ f , id (C op) {b} ]₁ , X ]₁ ∘C L z b c) (sym $ Functor.id InternalHom) ⟩
         [ [ f , id (C op) {b} ]₁ , [ id (C op) , id C {c} ]₁ ]₁ ∘C (L z b c) ∎
+
+
+-------------------------------------------------------------------------------
+-- Equality of Closed Categories
+-------------------------------------------------------------------------------
+
+private
+  module Equality {ℓC₀ ℓC₁ : Level} {C : Category {ℓC₀} {ℓC₁}} where
+    open import Data.Product
+
+    open import Relation.Binary.HeterogeneousEquality using ( _≅_ ; refl )
+    
+    open import Congruence
+    open import Extensionality
+    open Category
+    open Functor hiding ( id )
+    open Theory.Functor.Application.BiFunctor
+    
+    private
+      _∘C_ = _∘_ C
+
+    closed-category-eq : {InternalHom₀ : Functor (C op ×C C) C}
+                       → {InternalHom₁ : Functor (C op ×C C) C}
+                       → {I₀ : Obj C} {I₁ : Obj C}
+                       → {i₀ : NaturalIsomorphism Id[ C ] ([ I₀ ,-] InternalHom₀)}
+                       → {i₁ : NaturalIsomorphism Id[ C ] ([ I₁ ,-] InternalHom₁)}
+                       → {j₀ : (a : Obj C) → Hom C I₀ (F₀ InternalHom₀ (a , a))}
+                       → {j₁ : (a : Obj C) → Hom C I₁ (F₀ InternalHom₁ (a , a))}
+                       → {L₀ : (a b c : Obj C) → Hom C (F₀ InternalHom₀ (b , c)) (F₀ InternalHom₀ (F₀ InternalHom₀ (a , b) , F₀ InternalHom₀ (a , c)))}
+                       → {L₁ : (a b c : Obj C) → Hom C (F₀ InternalHom₁ (b , c)) (F₀ InternalHom₁ (F₀ InternalHom₁ (a , b) , F₀ InternalHom₁ (a , c)))}
+                       → {j-extranatural-a₀ : {a a' : Obj C} (f : Hom C a a') → (F₁ InternalHom₀ (f , id C)) ∘C (j₀ a') ≡ F₁ InternalHom₀ (id (C op) , f) ∘C (j₀ a)}
+                       → {j-extranatural-a₁ : {a a' : Obj C} (f : Hom C a a') → (F₁ InternalHom₁ (f , id C)) ∘C (j₁ a') ≡ F₁ InternalHom₁ (id (C op) , f) ∘C (j₁ a)}
+                       → {L-natural-c₀ : (a : Obj C) → (b : Obj (C op)) → {c c' : Obj C} {f : Hom C c c'}
+                                       → F₁ InternalHom₀ (F₁ InternalHom₀ (id C {a} , id C {b}) , F₁ InternalHom₀ (id C {a} , f)) ∘C L₀ a b c ≡ L₀ a b c' ∘C F₁ InternalHom₀ (id C {b} , f)}
+                       → {L-natural-c₁ : (a : Obj C) → (b : Obj (C op)) → {c c' : Obj C} {f : Hom C c c'}
+                                       → F₁ InternalHom₁ (F₁ InternalHom₁ (id C {a} , id C {b}) , F₁ InternalHom₁ (id C {a} , f)) ∘C L₁ a b c ≡ L₁ a b c' ∘C F₁ InternalHom₁ (id C {b} , f)}
+                       → {L-natural-b₀ : (a c : Obj C) → {b b' : Obj C} {f : Hom C b b'}
+                                       → F₁ InternalHom₀ (F₁ InternalHom₀ (id C {a} , f) , F₁ InternalHom₀ (id C {a} , id C {c})) ∘C L₀ a b' c ≡ L₀ a b c ∘C F₁ InternalHom₀ (f , id C {c})}
+                       → {L-natural-b₁ : (a c : Obj C) → {b b' : Obj C} {f : Hom C b b'}
+                                       → F₁ InternalHom₁ (F₁ InternalHom₁ (id C {a} , f) , F₁ InternalHom₁ (id C {a} , id C {c})) ∘C L₁ a b' c ≡ L₁ a b c ∘C F₁ InternalHom₁ (f , id C {c})}
+                       → {L-extranatural-a₀ : (b : Obj (C op)) → (c : Obj C) → {a a' : Obj C} (f : Hom C a a') 
+                                            → F₁ InternalHom₀ (id C , F₁ InternalHom₀ (f , id C {c})) ∘C L₀ a' b c ≡ F₁ InternalHom₀ (F₁ InternalHom₀ (f , id (C op) {b}) , id C) ∘C L₀ a b c}
+                       → {L-extranatural-a₁ : (b : Obj (C op)) → (c : Obj C) → {a a' : Obj C} (f : Hom C a a') 
+                                            → F₁ InternalHom₁ (id C , F₁ InternalHom₁ (f , id C {c})) ∘C L₁ a' b c ≡ F₁ InternalHom₁ (F₁ InternalHom₁ (f , id (C op) {b}) , id C) ∘C L₁ a b c}
+                       → InternalHom₀ ≡ InternalHom₁ → I₀ ≡ I₁ → i₀ ≅ i₁ → j₀ ≅ j₁ → L₀ ≅ L₁
+                       → closedCategory InternalHom₀ I₀ i₀ j₀ L₀ j-extranatural-a₀ L-natural-c₀ L-natural-b₀ L-extranatural-a₀
+                       ≡ closedCategory InternalHom₁ I₁ i₁ j₁ L₁ j-extranatural-a₁ L-natural-c₁ L-natural-b₁ L-extranatural-a₁
+    closed-category-eq {InternalHom₀ = InternalHom} {._} {I} {._} {i} {._} {j} {._} {L} {._} 
+                       {j-extranatural-a₀} {j-extranatural-a₁} {L-natural-c₀} {L-natural-c₁} {L-natural-b₀} {L-natural-b₁} {L-extranatural-a₀} {L-extranatural-a₁}
+                       refl refl refl refl refl 
+      = cong₄ (closedCategory InternalHom I i j L) 
+              (implicit-fun-ext (λ a → implicit-fun-ext (λ a' → fun-ext (λ f → proof-irrelevance (j-extranatural-a₀ {a} {a'} f) (j-extranatural-a₁ {a} {a'} f))))) 
+              (fun-ext $ λ a → fun-ext $ λ b → implicit-fun-ext $ λ c → implicit-fun-ext $ λ c' → implicit-fun-ext $ λ f → proof-irrelevance (L-natural-c₀ a b {c} {c'} {f}) (L-natural-c₁ a b {c} {c'} {f}))
+              (fun-ext $ λ a → fun-ext $ λ c → implicit-fun-ext $ λ b → implicit-fun-ext $ λ b' → implicit-fun-ext $ λ f → proof-irrelevance (L-natural-b₀ a c {b} {b'} {f}) (L-natural-b₁ a c {b} {b'} {f}))
+              (fun-ext $ λ b → fun-ext $ λ c → implicit-fun-ext $ λ a → implicit-fun-ext $ λ a' → fun-ext $ λ f → proof-irrelevance (L-extranatural-a₀ b c {a} {a'} f) (L-extranatural-a₁ b c {a} {a'} f))
+
+open Equality public
