@@ -32,7 +32,7 @@ open import Theory.Category.Examples
 open import Theory.Category.Subcategory
 open import Theory.Category.Subcategory.Examples
 open import Theory.Functor
-open import Theory.Functor.Constrained
+open import Theory.Haskell.ConstrainedFunctor
 open import Theory.Examples.HaskellFunctorToFunctor
 
 open import Theory.Examples.Haskell.FunctorSet.Base
