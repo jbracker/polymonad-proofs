@@ -1,18 +1,25 @@
  
-module Theory.Examples.Haskell.FunctorEndomorphisms where
-
 open import Level renaming ( suc to lsuc ; zero to lzero )
 open import Function renaming ( _∘_ to _∘F_ ; id to idF )
 open import Data.Unit
-open import Data.Product
+open import Data.Product hiding ( map )
 open import Relation.Binary.PropositionalEquality
+open import Relation.Binary.HeterogeneousEquality hiding ( trans )
 open ≡-Reasoning
 
 open import Extensionality
 open import Congruence
 open import ProofIrrelevance
-open import Haskell
+open import Haskell hiding ( Hask ; Type )
+open import Theory.Category
+open import Theory.Category.Dependent
 open import Theory.Haskell.ConstrainedFunctor
+open import Theory.Haskell.Constrained
+
+module Theory.Examples.Haskell.FunctorEndomorphisms {ℓ : Level} where
+
+private
+  Type = Set ℓ
 
 -- The functor of endomorphisms.
 data Endo (α : Type) : Type where
@@ -23,68 +30,67 @@ endomap : {α : Type} → (α → α) → (Endo α) → (Endo α)
 endomap f (endo g) = endo $ f ∘F g
 
 -- The categorical structure of the constrained functor.
-FunctorEndomorphisms : ConstrainedFunctor
+FunctorEndomorphisms : ConstrainedFunctor {ℓ}
 FunctorEndomorphisms = record
-  { ObjCts = ObjCts
-  ; HomCts = HomCts
-  ; _∘Ct_ = flip trans
-  ; idCt = refl
-  ; constraint-assoc = λ {α} {β} {γ} {δ} {α'} {β'} {γ'} {δ'} {f} {g} {h} → assoc {f = f} {g} {h}
-  ; constraint-right-id = λ {α} {β} {α'} {β'} {f} → right-id {f = f}
-  ; constraint-left-id = λ {α} {β} {α'} {β'} {f} → left-id {f = f}
+  { Cts = Cts
   ; F = F
-  ; map = ctMap
-  ; functor-id = ctFuncId
-  ; functor-compose = λ {α} {β} {γ} {f} {g} → ctFuncComp {α} {β} {γ} {f} {g}
-  ; proof-irr-ObjCts = λ {α} → ctObjProofIrr {α}
-  ; proof-irr-HomCts = λ {α} {β} {α'} {β'} {f} → ctHomProofIrr {f = f}
+  ; map = map
+  ; functor-id = functor-id
+  ; functor-compose = λ {α} {β} {γ} {f} {g} → functor-compose {α} {β} {γ} {f} {g}
+  ; unique-instances = unique-type-inst , unique-hom-inst
   } where
-    ObjCts : Type → Set lzero
+    ObjCts : Type → Set ℓ
     ObjCts _ = Lift ⊤
     
-    HomCts : {α β : Type} → ObjCts α → ObjCts β → (α → β) → Set (lsuc lzero)
-    HomCts = λ {α} {β} _ _ f → α ≡ β
-
-    Obj = Σ Type ObjCts
-    
-    Hom : Obj → Obj → Set (lsuc lzero)
-    Hom (α , αCts) (β , βCts) = Σ (α → β) (HomCts {α} {β} αCts βCts)
+    HomCts : {α β : Type} → ObjCts α → ObjCts β → (α → β) → Set (lsuc ℓ)
+    HomCts = λ {α} {β} _ _ _ → α ≡ β
     
     assoc : {α β γ δ : Type} 
-          → {α' : ObjCts α} {β' : ObjCts β} {γ' : ObjCts γ} {δ' : ObjCts δ}
           → {f : α → β} {g : β → γ} {h : γ → δ}
+          → {α' : ObjCts α} {β' : ObjCts β} {γ' : ObjCts γ} {δ' : ObjCts δ}
           → (f' : HomCts α' β' f) (g' : HomCts β' γ' g) (h' : HomCts γ' δ' h) 
           → flip trans h' (flip trans g' f') ≡ flip trans (flip trans h' g') f'
     assoc refl refl refl = refl
     
-    right-id : {α β : Type} {α' : ObjCts α} {β' : ObjCts β} {f : α → β}
-        → (f' : HomCts α' β' f) → flip trans refl f' ≡ f'
+    right-id : {α β : Type} {f : α → β} {α' : ObjCts α} {β' : ObjCts β} 
+             → (f' : HomCts α' β' f) → flip trans refl f' ≡ f'
     right-id refl = refl
     
-    left-id : {α β : Type} {α' : ObjCts α} {β' : ObjCts β} {f : α → β}
-        → (f' : HomCts α' β' f) → flip trans f' refl ≡ f'
+    left-id : {α β : Type} {f : α → β} {α' : ObjCts α} {β' : ObjCts β}
+            → (f' : HomCts α' β' f) → flip trans f' refl ≡ f'
     left-id refl = refl
     
+    Cts : ConstraintCategory {ℓ}
+    Cts = dependentCategory ObjCts HomCts (flip trans) refl 
+                            (λ {α} {β} {γ} {δ} {f} {g} {h} {α'} {β'} {γ'} {δ'} f' g' h' → ≡-to-≅ $ assoc {f = f} {g} {h} f' g' h')
+                            (λ {α} {β} {f} {α'} {β'} f' → ≡-to-≅ $ right-id {f = f} f') 
+                            (λ {α} {β} {f} {α'} {β'} f' → ≡-to-≅ $ left-id {f = f} f')
+    
+    open DependentCategory Cts
+    open Category dep-category
+    
     F : Obj → Type
-    F (α , _) = Endo α
+    F α = Endo (proj₁ α)
     
-    ctMap : {α β : Obj} → (Hom α β) → F α → F β
-    ctMap (f , refl) x = endomap f x
+    map : {α β : Obj} → (Hom α β) → F α → F β
+    map (f , refl) x = endomap f x
     
-    ctFuncId : {α : Obj} → endomap {α = proj₁ α} idF ≡ idF
-    ctFuncId {α , lift tt} = fun-ext helper
+    functor-id : {α : Obj} → endomap {α = proj₁ α} idF ≡ idF
+    functor-id {α , lift tt} = fun-ext helper
       where helper : (x : Endo α) → endomap idF x ≡ idF x
             helper (endo f) = refl
     
-    ctFuncComp : {α β γ : Obj} {f : Hom α β} {g : Hom β γ}
-               → ctMap (proj₁ g ∘F proj₁ f , flip trans (proj₂ g) (proj₂ f)) ≡ ctMap g ∘F ctMap f
-    ctFuncComp {α , lift tt} {.α , lift tt} {.α , lift tt} {f , refl} {g , refl} = fun-ext helper
+    functor-compose : {α β γ : Obj} {f : Hom α β} {g : Hom β γ}
+                    → map (proj₁ g ∘F proj₁ f , flip trans (proj₂ g) (proj₂ f)) ≡ map g ∘F map f
+    functor-compose {α , lift tt} {.α , lift tt} {.α , lift tt} {f , refl} {g , refl} = fun-ext helper
       where helper : (x : Endo α) → endomap (g ∘F f) x ≡ (endomap g ∘F endomap f) x
             helper (endo h) = refl
     
-    ctObjProofIrr : {α : Type} (αCts αCts' : ObjCts α) → αCts ≡ αCts'
-    ctObjProofIrr (lift tt) (lift tt) = refl
+    unique-type-inst : (α : Type) → (αCts αCts' : DepObj α) → αCts ≡ αCts'
+    unique-type-inst α (lift tt) (lift tt) = refl
     
-    ctHomProofIrr : {α β : Type} {αCts : ObjCts α} {βCts : ObjCts β} {f : α → β}
-                  → (fCts fCts' : HomCts αCts βCts f) → fCts ≡ fCts'
-    ctHomProofIrr refl refl = refl
+    unique-hom-inst : {α β : Type} → (f g : α → β)
+                    → (αCt : DepObj α) → (βCt : DepObj β) 
+                    → (fCt : DepHom αCt βCt f) → (gCt : DepHom αCt βCt g)
+                    → fCt ≅ gCt
+    unique-hom-inst f g (lift tt) (lift tt) refl refl = refl
