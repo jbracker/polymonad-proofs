@@ -46,6 +46,8 @@ UniqueInstances {ℓCts₀} {ℓCt₁} Cts
   -- For the homomorphisms the constraints may only depend on the type of the functions, not the functions themselves.
   × ({α β : Obj Hask} → (f g : α → β) → (αCt : DepObj Cts α) → (βCt : DepObj Cts β) → (fCt : DepHom Cts αCt βCt f) → (gCt : DepHom Cts αCt βCt g) → fCt ≅ gCt)
 
+-- Proof that the embedding functor for a constraint category is injective if the 
+-- instances are unique (which should always be true in Haskell).
 constraint-embedding-functor-is-injective : {ℓCt₀ ℓCt₁ : Level} 
                                           → (Cts : ConstraintCategory {ℓCt₀} {ℓCt₁}) 
                                           → UniqueInstances Cts
