@@ -24,10 +24,9 @@ record ConstrainedFunctor {ℓ ℓ₀ ℓ₁ : Level} : Set (lsuc (ℓ ⊔ ℓ�
   open DependentCategory Cts
   open Category dep-category
   
-  F : Obj → Set ℓ
-  F x = proj₁ x
-
   field
+    F : Obj → Set ℓ
+    
     map : {α β : Obj} → Hom α β → F α → F β
     
     functor-id : {α : Obj} → map {α} {α} id ≡ idF
@@ -35,7 +34,7 @@ record ConstrainedFunctor {ℓ ℓ₀ ℓ₁ : Level} : Set (lsuc (ℓ ⊔ ℓ�
     functor-compose : {α β γ : Obj} {f : Hom α β} {g : Hom β γ} 
                     → map (g ∘ f) ≡ map g ∘F map f
     
-    unique-insts : UniqueInstances Cts
+    unique-instances : UniqueInstances Cts
   
   -- The actual constrained functor.
   CtFunctor : Functor (ConstrainedHask Cts) (Hask {ℓ})
