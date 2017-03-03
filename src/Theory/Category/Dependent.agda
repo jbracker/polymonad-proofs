@@ -32,12 +32,14 @@ record DependentCategory {ℓ₀ ℓ₁ ℓDep₀ ℓDep₁ : Level} (C : Catego
               → (f' : DepHom a' b' f) → (g' : DepHom b' c' g) → (h' : DepHom c' d' h) 
               → h' ∘dep (g' ∘dep f') ≅ (h' ∘dep g') ∘dep f'
 
-    dep-right-id : {a b : Obj} {a' : DepObj a} {b' : DepObj b}
-                 → {f : Hom a b} → (f' : DepHom a' b' f)
+    dep-right-id : {a b : Obj} {f : Hom a b} 
+                 → {a' : DepObj a} {b' : DepObj b}
+                 → (f' : DepHom a' b' f)
                  → depId {b} {b'} ∘dep f' ≅ f'
 
-    dep-left-id : {a b : Obj} {a' : DepObj a} {b' : DepObj b}
-                → {f : Hom a b} → (f' : DepHom a' b' f)
+    dep-left-id : {a b : Obj} {f : Hom a b}
+                → {a' : DepObj a} {b' : DepObj b}
+                → (f' : DepHom a' b' f)
                 → f' ∘dep depId {a} {a'} ≅ f'
   
   dep-category : Category {ℓ₀ ⊔ ℓDep₀} {ℓ₁ ⊔ ℓDep₁}
