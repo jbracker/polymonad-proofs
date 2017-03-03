@@ -4,6 +4,7 @@ open import Level renaming ( suc to lsuc ; zero to lzero )
 open import Function renaming ( id to idF ; _∘_ to _∘F_ )
 open import Data.Product renaming ( _,_ to _,'_ ; _×_ to _×'_ )
 open import Data.Unit
+open import Data.Empty
 open import Relation.Binary.HeterogeneousEquality hiding ( cong ; cong₂ ; subst ; trans ; sym ; proof-irrelevance ) renaming ( refl to hrefl )
 open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning
@@ -94,6 +95,41 @@ unitCategory = record
   }
 
 ⊤-Cat = unitCategory
+
+-------------------------------------------------------------------------------
+-- The Empty Category
+-------------------------------------------------------------------------------
+
+-- The unit category with exactly one element and one morphism.
+emptyCategory : Category {lzero} {lzero}
+emptyCategory = record
+  { Obj = ⊥
+  ; Hom = Hom
+  ; _∘_ = λ {a} {b} {c} → _∘_ {a} {b} {c}
+  ; id = id
+  ; assoc = assoc
+  ; left-id = left-id
+  ; right-id = right-id
+  } where
+    Hom : ⊥ → ⊥ → Set lzero
+    Hom ()
+    
+    _∘_ : {a b c : ⊥} → Hom b c → Hom a b → Hom a c
+    _∘_ {()}
+    
+    id : {a : ⊥} → Hom a a
+    id {()}
+    
+    assoc : {a b c d : ⊥} {f : Hom a b} {g : Hom b c} {h : Hom c d} → h ∘ (g ∘ f) ≡ (h ∘ g) ∘ f
+    assoc {()}
+    
+    left-id : {a b : ⊥} {f : Hom a b} → f ∘ id ≡ f
+    left-id {()}
+    
+    right-id : {a b : ⊥} {f : Hom a b} → id ∘ f ≡ f
+    right-id {()}
+
+⊥-Cat = emptyCategory
 
 -------------------------------------------------------------------------------
 -- Lifting of Categories to another Level
