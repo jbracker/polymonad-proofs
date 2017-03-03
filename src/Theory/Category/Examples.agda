@@ -4,7 +4,6 @@ module Theory.Category.Examples where
 -- Stdlib
 open import Level renaming ( suc to lsuc ; zero to lzero )
 open import Function renaming ( id to idF ; _∘_ to _∘F_ )
-open import Data.Product
 open import Relation.Binary using ( Preorder )
 open import Relation.Binary.HeterogeneousEquality renaming ( cong to hcong )
 open import Relation.Binary.PropositionalEquality
@@ -18,9 +17,9 @@ open import Theory.Functor.Composition
 open import Theory.Natural.Transformation
 
 -- Category of sets and functions.
-setCategory : {ℓ₀ : Level} → Category {ℓ₀ = lsuc ℓ₀} {ℓ₀}
-setCategory {ℓ₀ = ℓ₀} = record
-  { Obj = Set ℓ₀
+setCategory : {ℓ : Level} → Category {ℓ₀ = lsuc ℓ} {ℓ}
+setCategory {ℓ} = record
+  { Obj = Set ℓ
   ; Hom = λ a b → (a → b)
   ; _∘_ = λ f g → f ∘F g
   ; id = idF
@@ -40,6 +39,8 @@ endomorphismCategory {ℓ₀} {ℓ₁} C = record
   ; left-id = left-id
   ; right-id = right-id
   } where
+    open import Data.Product
+    
     Obj : Set ℓ₀
     Obj = Category.Obj C
     
