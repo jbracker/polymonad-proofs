@@ -15,6 +15,7 @@ open import Data.Sum hiding ( map )
 open import Relation.Nullary
 open import Relation.Binary using ( IsDecEquivalence ; IsEquivalence ; IsDecTotalOrder ; IsPreorder )
 open import Relation.Binary.PropositionalEquality
+open import Relation.Binary.HeterogeneousEquality hiding ( cong ; sym ; trans )
 open ≡-Reasoning
 
 
@@ -31,7 +32,9 @@ open import Theory.Category
 open import Theory.Category.Examples
 open import Theory.Category.Subcategory
 open import Theory.Category.Subcategory.Examples
+open import Theory.Category.Dependent
 open import Theory.Functor
+open import Theory.Haskell.Constrained hiding ( Hask )
 open import Theory.Haskell.ConstrainedFunctor
 open import Theory.Examples.HaskellFunctorToFunctor
 
@@ -86,37 +89,21 @@ map {α , OrdA} {β , OrdB} (f , mon-f) (listSet xs sorted noDup) =
 -- The constrained functor for Sets in Haskell.
 -- The requirement of proof irrelevance for OrdInstance is in one-to-one correspondance with the
 -- type class system that Haskell uses in that it there can be only one class instance per type.
-FunctorListSet : ({ℓEq ℓOrd : Level} → (A : Type) → ProofIrrelevance (OrdInstance {ℓEq} {ℓOrd} A))
-               → ConstrainedFunctor
+FunctorListSet : ({ℓEq ℓOrd : Level} → (A : Type) → ProofIrrelevance (OrdInstance {ℓEq} {ℓOrd} A)) → ConstrainedFunctor {lzero}
 FunctorListSet unique-ord-instances = record
-  { ObjCts = ObjCts
-  ; HomCts = HomCts
-  ; _∘Ct_ = λ {α} {β} {γ} {f} {g} {α'} {β'} {γ'} → _∘Ct_ {α} {β} {γ} {f} {g} {α'} {β'} {γ'}
-  ; idCt = λ {α} {α'} → ctId {α} {α'}
-  ; constraint-assoc = λ {α} {β} {γ} {δ} {α'} {β'} {γ'} {δ'} {f} {g} {h} → ctAssoc {α} {β} {γ} {δ} {α'} {β'} {γ'} {δ'} {f} {g} {h}
-  ; constraint-right-id = λ {α} {β} {α'} {β'} {f} → ctIdR {α} {β} {α'} {β'} {f}
-  ; constraint-left-id = λ {α} {β} {α'} {β'} {f} → ctIdL {α} {β} {α'} {β'} {f}
+  { Cts = Cts
   ; F = F
   ; map = map
-  ; functor-id = ctFuncId
-  ; functor-compose = ctFuncComp
-  ; proof-irr-ObjCts = λ {α} → unique-ord-instances {lzero} {lzero} α
-  ; proof-irr-HomCts = λ {α} {β} {αCts} {βCts} {f} → proof-irr-monotonic {A = α} {β} αCts βCts f
+  ; functor-id = functor-id
+  ; functor-compose = λ {α} {β} {γ} {f} {g} → functor-compose {α} {β} {γ} {f} {g}
+  ; unique-instances = (λ α → unique-ord-instances {lzero} {lzero} α) 
+                     , unique-hom-inst
   } where
     ObjCts : Type → Set (lsuc lzero)
     ObjCts = OrdInstance
     
     HomCts : {α β : Type} → ObjCts α → ObjCts β → (α → β) → Set lzero
     HomCts OrdA OrdB f = Monotonic OrdA OrdB f
-    
-    Obj : Set (lsuc lzero)
-    Obj = Σ Type ObjCts
-
-    Hom : Obj → Obj → Set lzero
-    Hom α β = Σ (proj₁ α → proj₁ β) (HomCts (proj₂ α) (proj₂ β))
-    
-    F : Obj → Type
-    F (α , OrdA) = ListSet (α , OrdA)
     
     _∘Ct_ : {α β γ : Type} {f : β → γ} {g : α → β} 
         → {α' : ObjCts α} {β' : ObjCts β} {γ' : ObjCts γ}
@@ -126,34 +113,48 @@ FunctorListSet unique-ord-instances = record
     ctId : {α : Type} {α' : ObjCts α} → HomCts α' α' idF
     ctId a b a≤a = a≤a
     
-    ctAssoc : {α β γ δ : Type} 
-            → {α' : ObjCts α} {β' : ObjCts β} {γ' : ObjCts γ} {δ' : ObjCts δ}
-            → {f : α → β} {g : β → γ} {h : γ → δ}
-            → (f' : HomCts α' β' f) (g' : HomCts β' γ' g) (h' : HomCts γ' δ' h)
-            → _∘Ct_ {α} {γ} {δ} {h} {g ∘F f} {α'} {γ'} {δ'} h' (_∘Ct_ {α} {β} {γ} {g} {f} {α'} {β'} {γ'} g' f') 
-            ≡ _∘Ct_ {α} {β} {δ} {h ∘F g} {f} {α'} {β'} {δ'} (_∘Ct_ {β} {γ} {δ} {h} {g} {β'} {γ'} {δ'} h' g') f'
-    ctAssoc mon-f mon-g mon-h = refl
+    assoc : {α β γ δ : Type} 
+          → {f : α → β} {g : β → γ} {h : γ → δ}
+          → {α' : ObjCts α} {β' : ObjCts β} {γ' : ObjCts γ} {δ' : ObjCts δ}
+          → (f' : HomCts α' β' f) (g' : HomCts β' γ' g) (h' : HomCts γ' δ' h)
+          → _∘Ct_ {α} {γ} {δ} {h} {g ∘F f} {α'} {γ'} {δ'} h' (_∘Ct_ {α} {β} {γ} {g} {f} {α'} {β'} {γ'} g' f') 
+          ≡ _∘Ct_ {α} {β} {δ} {h ∘F g} {f} {α'} {β'} {δ'} (_∘Ct_ {β} {γ} {δ} {h} {g} {β'} {γ'} {δ'} h' g') f'
+    assoc mon-f mon-g mon-h = refl
     
-    ctIdR : {α β : Type} {α' : ObjCts α} {β' : ObjCts β} {f : α → β}
-          → (f' : HomCts α' β' f) → _∘Ct_ {α} {β} {β} {idF} {f} {α'} {β'} {β'} (ctId {β} {β'}) f' ≡ f'
-    ctIdR mon-f = refl
+    right-id : {α β : Type} {f : α → β} {α' : ObjCts α} {β' : ObjCts β} 
+             → (f' : HomCts α' β' f) → _∘Ct_ {α} {β} {β} {idF} {f} {α'} {β'} {β'} (ctId {β} {β'}) f' ≡ f'
+    right-id mon-f = refl
     
-    ctIdL : {α β : Type} {α' : ObjCts α} {β' : ObjCts β} {f : α → β}
-          → (f' : HomCts α' β' f) → _∘Ct_ {α} {α} {β} {f} {idF} {α'} {α'} {β'} f' (ctId {α} {α'}) ≡ f'
-    ctIdL mon-f = refl
+    left-id : {α β : Type} {f : α → β} {α' : ObjCts α} {β' : ObjCts β}
+            → (f' : HomCts α' β' f) → _∘Ct_ {α} {α} {β} {f} {idF} {α'} {α'} {β'} f' (ctId {α} {α'}) ≡ f'
+    left-id mon-f = refl
     
-    ctFuncId : {α : Obj} → map {α = α} {α} (idF , ctId {proj₁ α} {proj₂ α}) ≡ idF
-    ctFuncId {α , OrdA} = fun-ext helper
+    Cts : ConstraintCategory {lzero}
+    Cts = dependentCategory ObjCts HomCts 
+                            (λ {α} {β} {γ} {f} {g} {α'} {β'} {γ'} → _∘Ct_ {α} {β} {γ} {f} {g} {α'} {β'} {γ'}) 
+                            (λ {α} {α'} → ctId {α} {α'}) 
+                            (λ {α} {β} {γ} {δ} {f} {g} {h} {α'} {β'} {γ'} {δ'} f' g' h' → ≡-to-≅ $ assoc {α} {β} {γ} {δ} {f} {g} {h} {α'} {β'} {γ'} {δ'} f' g' h')
+                            (λ {α} {β} {f} {α'} {β'} f' → ≡-to-≅ $ right-id {α} {β} {f} {α'} {β'} f') 
+                            (λ {α} {β} {f} {α'} {β'} f' → ≡-to-≅ $ left-id {α} {β} {f} {α'} {β'} f')
+    
+    open DependentCategory Cts
+    open Category dep-category
+    
+    F : Obj → Type
+    F (α , OrdA) = ListSet (α , OrdA)
+    
+    functor-id : {α : Obj} → map {α = α} {α} (idF , ctId {proj₁ α} {proj₂ α}) ≡ idF
+    functor-id {α , OrdA} = fun-ext helper
       where helper : (x : ListSet (α , OrdA)) → map (idF , ctId {α} {OrdA}) x ≡ idF x
             helper (listSet xs sorted noDup) = eqListSet OrdA (nub OrdA (mapList idF xs)) xs
               (nub-preserves-sorted OrdA (mapList idF xs) (monotonic-preserves-sorted OrdA OrdA idF (ctId {α' = OrdA}) xs sorted)) sorted
               (nub-produces-no-dup OrdA (mapList idF xs)) noDup
               (nub-map-id OrdA xs noDup)
 
-    ctFuncComp : {α β γ : Obj} {f : Hom α β} {g : Hom β γ}
+    functor-compose : {α β γ : Obj} {f : Hom α β} {g : Hom β γ}
                → map {α = α} {γ} (proj₁ g ∘F proj₁ f , _∘Ct_ {proj₁ α} {proj₁ β} {proj₁ γ} {proj₁ g} {proj₁ f} {proj₂ α} {proj₂ β} {proj₂ γ} (proj₂ g) (proj₂ f))
                ≡ map {α = β} {γ} g ∘F map f
-    ctFuncComp {α , OrdA} {β , OrdB} {γ , OrdC} {f , mon-f} {g , mon-g} = fun-ext helper
+    functor-compose {α , OrdA} {β , OrdB} {γ , OrdC} {f , mon-f} {g , mon-g} = fun-ext helper
       where
         helper : (xs : ListSet (α , OrdA)) → map (g ∘F f , monotonic-composition OrdA OrdB OrdC g f mon-g mon-f) xs ≡ (map (g , mon-g) ∘F map (f , mon-f)) xs
         helper (listSet xs sorted noDup) = eqListSet OrdC 
@@ -167,3 +168,9 @@ FunctorListSet unique-ord-instances = record
           (nub-produces-no-dup OrdC (mapList g (nub OrdB (mapList f xs))))
           (sym (trans (nub∘map∘nub≡nub∘map OrdB OrdC g mon-g (mapList f xs)) (cong (nub OrdC) (sym (map-compose xs)))))
 
+    unique-hom-inst : {α β : Category.Obj Hask}
+                    → (f g : α → β)
+                    → (αCt : DepObj α) → (βCt : DepObj β)
+                    → (fCt : DepHom αCt βCt f) → (gCt : DepHom αCt βCt g)
+                    → fCt ≅ gCt
+    unique-hom-inst f g αCt βCt fCt gCt = {!!}
