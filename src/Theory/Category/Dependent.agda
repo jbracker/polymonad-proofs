@@ -12,6 +12,7 @@ open import Theory.Category
 module Theory.Category.Dependent where
 
 record DependentCategory {ℓ₀ ℓ₁ ℓDep₀ ℓDep₁ : Level} (C : Category {ℓ₀} {ℓ₁}) : Set (ℓ₀ ⊔ ℓ₁ ⊔ suc (ℓDep₀ ⊔ ℓDep₁)) where
+  constructor dependentCategory
   open Category C
   
   field
@@ -57,4 +58,15 @@ record DependentCategory {ℓ₀ ℓ₁ ℓDep₀ ℓDep₁ : Level} (C : Catego
 
       _∘'_ : {a b c : Σ Obj DepObj} → Hom' b c → Hom' a b → Hom' a c
       _∘'_ (f , f') (g , g') = f ∘ g , f' ∘dep g'
-      
+
+open import Function hiding ( id ; _∘_ )
+open Category
+
+productDependentCategory : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} 
+                         → (C : Category {ℓC₀} {ℓC₁}) (D : Category {ℓD₀} {ℓD₁})
+                         → DependentCategory {ℓC₀} {ℓC₁} {ℓD₀} {ℓD₁} C
+productDependentCategory C D = dependentCategory (const $ Obj D) (λ a b → const $ Hom D a b) (_∘_ D) (id D) 
+                                                 (λ f' g' h' → ≡-to-≅ (assoc D {f = f'} {g'} {h'})) 
+                                                 (λ f' → ≡-to-≅ (right-id D)) 
+                                                 (λ f' → ≡-to-≅ (left-id D))
+
