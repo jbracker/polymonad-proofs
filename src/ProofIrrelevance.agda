@@ -6,6 +6,8 @@ open import Level renaming ( suc to lsuc ; zero to lzero )
 open import Data.Empty
 open import Data.Unit
 open import Data.Product
+open import Data.List using ( List ; [] ; _∷_ )
+open import Data.List.All using ( All ; [] ; _∷_ )
 open import Relation.Nullary
 open import Relation.Binary.PropositionalEquality
 
@@ -59,6 +61,12 @@ proof-irr-× proof-irr-A proof-irr-B a b = proof-irr-Σ proof-irr-A (λ _ → pr
 proof-irr-ProofIrrelevance : {ℓA : Level} {A : Set ℓA} → ProofIrrelevance (ProofIrrelevance A)
 proof-irr-ProofIrrelevance proof-irr-A proof-irr-A' 
   = fun-ext (λ a → fun-ext (λ b → proof-irrelevance (proof-irr-A a b) (proof-irr-A' a b)))
+
+-- Proofs for all elements of a list are irrelevant if the proofs for each element are irrelevant.
+proof-irr-All : {ℓA ℓP : Level} {A : Set ℓA} → (xs : List A) → (P : A → Set ℓP) → ((a : A) → ProofIrrelevance (P a)) → ProofIrrelevance (All P xs)
+proof-irr-All [] P proof-irr-P [] [] = refl
+proof-irr-All (x ∷ xs) P proof-irr-P (px ∷ allX) (py ∷ allY) with proof-irr-P x px py
+proof-irr-All (x ∷ xs) P proof-irr-P (px ∷ allX) (.px ∷ allY) | refl = cong (_∷_ px) (proof-irr-All xs P proof-irr-P allX allY)
 
 -- Reexport proof irrelevance for propositional and heterogeneous equality.
 open import Relation.Binary.PropositionalEquality as PE
