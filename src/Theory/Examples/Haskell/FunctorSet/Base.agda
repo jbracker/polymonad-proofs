@@ -7,12 +7,15 @@ open import Data.Unit hiding ( _≤_ ; _≟_ ; total )
 open import Data.Empty
 open import Data.List renaming ( map to mapList )
 open import Data.List.Any hiding ( map )
+open import Data.List.All hiding ( map )
 open import Data.Product hiding ( map )
 open import Data.Sum hiding ( map )
 open import Relation.Nullary
-open import Relation.Binary using ( IsDecEquivalence ; IsEquivalence ; IsDecTotalOrder ; IsPreorder )
+open import Relation.Binary using ( IsDecEquivalence ; IsEquivalence ; IsDecTotalOrder ; IsPreorder ; IsPartialOrder )
 open import Relation.Binary.PropositionalEquality
+open import Relation.Binary.HeterogeneousEquality using ( refl ; ≡-to-≅ )
 
+open import Equality
 open import Extensionality
 open import Haskell
 open import ProofIrrelevance
@@ -54,15 +57,15 @@ record OrdInstance {ℓEq ℓOrd : Level} (A : Type) : Set (lsuc ℓEq ⊔ lsuc 
   total-contr {x} {y} ¬x≤y ¬y≤x with total x y
   total-contr ¬x≤y ¬y≤x | inj₁ x≤y = ¬x≤y x≤y
   total-contr ¬x≤y ¬y≤x | inj₂ y≤x = ¬y≤x y≤x
-
+  
   sym-not-eq : {x y : A} → ¬ (x == y) → ¬ (y == x)
   sym-not-eq {x} {y} ¬x==y y==x = ¬x==y (sym-eq y==x)
   
   eq-ord-comp : {x y z : A} → x == y → y ≤ z → x ≤ z
-  eq-ord-comp x==y y≤z = proj₂ (IsPreorder.∼-resp-≈ OrdInstance.isPreorder) (sym-eq x==y) y≤z
+  eq-ord-comp x==y y≤z = proj₂ (IsPartialOrder.≤-resp-≈ OrdInstance.isPartialOrder) (sym-eq x==y) y≤z
   
   ord-eq-comp : {x y z : A} → x ≤ y → y == z → x ≤ z
-  ord-eq-comp x≤y y==z = proj₁ (IsPreorder.∼-resp-≈ OrdInstance.isPreorder) y==z x≤y
+  ord-eq-comp x≤y y==z = proj₁ (IsPartialOrder.≤-resp-≈ OrdInstance.isPartialOrder) y==z x≤y
 
   eq-contr : {x y : A} → x == y → (¬ (x ≤ y) ⊎ ¬ (y ≤ x)) → ⊥
   eq-contr {x} {y} x==y (inj₁ ¬x≤y) with total x y
@@ -76,7 +79,19 @@ record OrdInstance {ℓEq ℓOrd : Level} (A : Type) : Set (lsuc ℓEq ⊔ lsuc 
   excluded-middle-ord {x} {y} ¬x≤y with total x y
   excluded-middle-ord {x} {y} ¬x≤y | inj₁ x≤y = ⊥-elim (¬x≤y x≤y)
   excluded-middle-ord {x} {y} ¬x≤y | inj₂ y≤x = y≤x
-
+  
+  excluded-middle-ord' : {x y : A} → ¬ (x == y) → x ≤ y → ¬ (y ≤ x)
+  excluded-middle-ord' {x} {y} ¬x==y x≤y y≤x = ¬x==y (antisym-ord x≤y y≤x)
+  
+  antisym-ord' : {x y : A} → x == y → (x ≤ y) × (y ≤ x)
+  antisym-ord' {x} {y} x==y with dec-ord x y | dec-ord y x
+  antisym-ord' x==y | yes x≤y | yes y≤x = x≤y , y≤x
+  antisym-ord' x==y | yes x≤y | no ¬y≤x = ⊥-elim (eq-contr x==y (inj₂ ¬y≤x))
+  antisym-ord' x==y | no ¬x≤y | yes y≤x = ⊥-elim (eq-contr x==y (inj₁ ¬x≤y))
+  antisym-ord' x==y | no ¬x≤y | no ¬y≤x = ⊥-elim (¬x≤y (excluded-middle-ord ¬y≤x))
+  
+  ord-not-eq : {x y : A} → x ≤ y → ¬ (y ≤ x) → ¬ (x == y)
+  ord-not-eq x≤y ¬y≤x x==y = ¬y≤x (eq-ord-comp (sym-eq x==y) (ord-eq-comp x≤y (sym-eq x==y)))
 
 -------------------------------------------------------------------------------
 -- Eq instance of lists in Haskell
@@ -185,6 +200,31 @@ module ListProperties {ℓEq ℓOrd : Level} {A : Type} (OrdA : OrdInstance {ℓ
   IsNoDupList : List A → Set (ℓEq ⊔ ℓOrd)
   IsNoDupList [] = Lift ⊤
   IsNoDupList (x ∷ xs) = ¬ (InList x xs) × IsNoDupList xs
+
+  IsSortedNoDupList : List A → Set (ℓEq ⊔ ℓOrd)
+  IsSortedNoDupList [] = Lift ⊤
+  IsSortedNoDupList (x ∷ xs) = All (λ y → (x ≤ y) × ¬ (x == y)) xs × IsSortedNoDupList xs
+
+  IsSortedNoDupList-forget : {x : A} {xs : List A} → IsSortedNoDupList (x ∷ xs) → IsSortedNoDupList xs
+  IsSortedNoDupList-forget {x} {xs} (_ , sorted) = sorted
+  
+  IsSortedNoDupList-replace-eq' : {x y : A} {zs : List A} → x == y → All (λ z → x ≤ z × ¬ x == z) zs → All (λ z → y ≤ z × ¬ y == z) zs
+  IsSortedNoDupList-replace-eq' x=y [] = []
+  IsSortedNoDupList-replace-eq' x=y ((x≤z , x≠z) ∷ sorted)
+    = (eq-ord-comp (sym-eq x=y) x≤z , (λ y=z → x≠z (trans-eq x=y y=z))) ∷ IsSortedNoDupList-replace-eq' x=y sorted
+  
+  IsSortedNoDupList-replace-eq : {x y : A} {zs : List A} → x == y → IsSortedNoDupList (x ∷ zs) → IsSortedNoDupList (y ∷ zs)
+  IsSortedNoDupList-replace-eq {x} {y} {zs} x=y (x≤zs , sorted)
+    = IsSortedNoDupList-replace-eq' x=y x≤zs , sorted
+  
+  IsSortedNoDupList-replace-ord' : {x y : A} {zs : List A} → y ≤ x → All (λ z → x ≤ z × ¬ x == z) zs → All (λ z → y ≤ z × ¬ y == z) zs
+  IsSortedNoDupList-replace-ord' y≤x [] = []
+  IsSortedNoDupList-replace-ord' y≤x ((x≤z , x≠z) ∷ sorted) 
+    = (trans-ord y≤x x≤z , (λ y=z → x≠z (trans-eq (antisym-ord (ord-eq-comp x≤z (sym-eq y=z)) y≤x) y=z))) ∷ IsSortedNoDupList-replace-ord' y≤x sorted
+  
+  IsSortedNoDupList-replace-ord : {x y : A} {zs : List A} → y ≤ x → IsSortedNoDupList (x ∷ zs) → IsSortedNoDupList (y ∷ zs)
+  IsSortedNoDupList-replace-ord {x} {y} {zs} y≤x (x≤zs , sorted)
+    = IsSortedNoDupList-replace-ord' y≤x x≤zs , sorted
   
   -------------------------------------------------------------------------------
   -- Proof irrelevancy for sorted and no duplicate list
@@ -201,7 +241,14 @@ module ListProperties {ℓEq ℓOrd : Level} {A : Type} (OrdA : OrdInstance {ℓ
   proof-irr-IsNoDupList [] noDupX noDupY = refl
   proof-irr-IsNoDupList (x ∷ xs) (¬x∈xs , noDupX) (¬x∈xs' , noDupY) with proof-irr-¬ ¬x∈xs ¬x∈xs'
   proof-irr-IsNoDupList (x ∷ xs) (¬x∈xs , noDupX) (.¬x∈xs , noDupY) | refl = cong (λ X → ¬x∈xs , X) (proof-irr-IsNoDupList xs noDupX noDupY)
+  
+  proof-irr-IsSortedNoDupList : (xs : List A) → ProofIrrelevance (IsSortedNoDupList xs)
+  proof-irr-IsSortedNoDupList [] (lift tt) (lift tt) = refl
+  proof-irr-IsSortedNoDupList (x ∷ xs) (allX , sortedX) (allY , sortedY) 
+    = Σ-eq (proof-irr-All xs (λ y → x ≤ y × ¬ (x == y)) (λ y p q → proof-irr-× (OrdInstance.proof-irr-ord OrdA) proof-irr-¬ p q) allX allY) 
+           (≡-to-≅ (proof-irr-IsSortedNoDupList xs sortedX sortedY))
 
+open ListProperties public
 
 -------------------------------------------------------------------------------
 -- Definition of monotonicity for function in relation to OrdInstances.
@@ -267,10 +314,6 @@ monotonic-id OrdA a b a≤b = a≤b
 
 open ListProperties
 
-private
-  Obj : {ℓEq ℓOrd : Level} → Set (lsuc (ℓOrd ⊔ ℓEq))
-  Obj {ℓEq} {ℓOrd} = Σ Type (OrdInstance {ℓEq} {ℓOrd})
-
 data ListSet (A : Σ Type OrdInstance) : Type where
   listSet : (xs : List (proj₁ A)) → IsSortedList (proj₂ A) xs → IsNoDupList (proj₂ A) xs → ListSet A
 
@@ -282,3 +325,4 @@ eqListSet : {A : Type} → (OrdA : OrdInstance A) → (xs ys : List A)
 eqListSet OrdA xs .xs sortedX sortedY noDupX noDupY refl with proof-irr-IsSortedList OrdA xs sortedX sortedY
 eqListSet OrdA xs .xs sortedX .sortedX noDupX noDupY refl | refl with proof-irr-IsNoDupList OrdA xs noDupX noDupY
 eqListSet OrdA xs .xs sortedX .sortedX noDupX .noDupX refl | refl | refl = refl
+ 
