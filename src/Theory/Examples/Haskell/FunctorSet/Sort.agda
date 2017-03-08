@@ -14,7 +14,7 @@ open ≡-Reasoning
 open import Haskell
 open import ProofIrrelevance 
 
-open import Theory.Examples.Haskell.FunctorSet.Base
+open import Theory.Examples.Haskell.FunctorSet.Base hiding ( IsSortedList ; InList ; InList-forget-elem ; ¬InList-forget-elem )
 
 module Theory.Examples.Haskell.FunctorSet.Sort {ℓEq ℓOrd : Level} {A : Type} (OrdA : OrdInstance {ℓEq} {ℓOrd} A) where
   
