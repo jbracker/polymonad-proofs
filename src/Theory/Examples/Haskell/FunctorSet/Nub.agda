@@ -3,7 +3,7 @@ open import Function renaming ( _∘_ to _∘F_ ; id to idF )
 open import Level renaming ( suc to lsuc ; zero to lzero)
 open import Data.Unit hiding ( _≤_ ; _≟_ ; total )
 open import Data.Empty
-open import Data.List renaming ( map to mapList )
+open import Data.List 
 open import Data.List.Any hiding ( map )
 open import Data.Product hiding ( map )
 open import Data.Sum hiding ( map )
@@ -14,7 +14,7 @@ open import Relation.Binary.PropositionalEquality
 open import Haskell
 open import ProofIrrelevance 
 
-open import Theory.Examples.Haskell.FunctorSet.Base
+open import Theory.Examples.Haskell.FunctorSet.Base hiding ( IsSortedList ; IsSortedList-replace-elem ; IsSortedList-forget-elem ; IsNoDupList ; InList ; InList-forget-elem ; ¬InList-forget-elem )
 
 module Theory.Examples.Haskell.FunctorSet.Nub {ℓEq ℓOrd : Level} {A : Type} (OrdA : OrdInstance {ℓEq} {ℓOrd} A) where
 
@@ -211,7 +211,7 @@ nub-shrink (x ∷ xs) = cong (λ X → x ∷ X) (trans (cong (remove x) (nub-rem
                                                 (trans (remove-shrink x x (nub (nub xs)) (OrdInstance.refl-eq OrdA)) 
                                                         (cong (remove x) (nub-shrink xs))))
 
-nub-map-id : (xs : List A) → IsNoDupList xs → nub (mapList idF xs) ≡ xs
+nub-map-id : (xs : List A) → IsNoDupList xs → nub (map idF xs) ≡ xs
 nub-map-id [] noDup = refl
 nub-map-id (x ∷ xs) (¬x∈xs , noDup) 
-  = cong (λ X → x ∷ X) (remove-removing-missing-elem' x xs (nub (mapList idF xs)) ¬x∈xs (nub-map-id xs noDup))
+  = cong (λ X → x ∷ X) (remove-removing-missing-elem' x xs (nub (map idF xs)) ¬x∈xs (nub-map-id xs noDup))

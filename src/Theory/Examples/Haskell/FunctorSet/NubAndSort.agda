@@ -77,7 +77,7 @@ nub∘insert≡insert∘remove∘nub x (y ∷ xs) (x≤y , sorted) | no ¬x≤y 
 
 sort∘nub≡nub∘sort : (xs : List A) → IsSortedList xs
                   → sort (nub xs) ≡ nub (sort xs)
-sort∘nub≡nub∘sort [] sorted = refl
+sort∘nub≡nub∘sort [] _ = refl
 sort∘nub≡nub∘sort (x ∷ xs) sorted = begin
   insert x (sort (remove x (nub xs)))
     ≡⟨ cong (insert x) (sort-sorting-sorted (remove x (nub xs)) (remove-preserves-sorted x (nub xs) (nub-preserves-sorted xs (IsSortedList-forget-elem x xs sorted)))) ⟩
