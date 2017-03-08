@@ -11,6 +11,8 @@ open import Theory.Category
 
 module Theory.Category.Dependent where
 
+
+-- Concrete Category
 record DependentCategory {ℓ₀ ℓ₁ ℓDep₀ ℓDep₁ : Level} (C : Category {ℓ₀} {ℓ₁}) : Set (ℓ₀ ⊔ ℓ₁ ⊔ suc (ℓDep₀ ⊔ ℓDep₁)) where
   constructor dependentCategory
   open Category C
