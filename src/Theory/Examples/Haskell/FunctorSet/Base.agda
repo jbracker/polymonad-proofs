@@ -5,7 +5,7 @@ open import Function renaming ( _∘_ to _∘F_ ; id to idF )
 open import Level renaming ( suc to lsuc ; zero to lzero)
 open import Data.Unit hiding ( _≤_ ; _≟_ ; total )
 open import Data.Empty
-open import Data.List renaming ( map to mapList )
+open import Data.List
 open import Data.List.Any hiding ( map )
 open import Data.List.All hiding ( map )
 open import Data.Product hiding ( map )
@@ -160,6 +160,9 @@ EqList {A} EqA = record
 module ListProperties {ℓEq ℓOrd : Level} {A : Type} (OrdA : OrdInstance {ℓEq} {ℓOrd} A) where
   
   open OrdInstance OrdA
+
+  IsStructuralEquality : Set ℓEq
+  IsStructuralEquality = (a b : A) → (a == b) → (a ≡ b)
   
   IsSortedList : List A → Set ℓOrd
   IsSortedList [] = Lift ⊤
@@ -226,10 +229,23 @@ module ListProperties {ℓEq ℓOrd : Level} {A : Type} (OrdA : OrdInstance {ℓ
   IsSortedNoDupList-replace-ord {x} {y} {zs} y≤x (x≤zs , sorted)
     = IsSortedNoDupList-replace-ord' y≤x x≤zs , sorted
   
+  
+  map-id-preserves-sorted : (xs : List A) → IsSortedList xs → IsSortedList (map idF xs)
+  map-id-preserves-sorted [] sorted = lift tt
+  map-id-preserves-sorted (x ∷ []) sorted = lift tt
+  map-id-preserves-sorted (x ∷ y ∷ xs) (x≤y , sorted) = x≤y , map-id-preserves-sorted (y ∷ xs) sorted
+  
   -------------------------------------------------------------------------------
   -- Proof irrelevancy for sorted and no duplicate list
   -------------------------------------------------------------------------------
-
+  
+  proof-irr-IsStructuralEquality : ProofIrrelevance IsStructuralEquality
+  proof-irr-IsStructuralEquality struct-eq₀ struct-eq₁ 
+    = fun-ext 
+    $ λ a → fun-ext 
+    $ λ b → fun-ext 
+    $ λ a=b → proof-irr-≡ (struct-eq₀ a b a=b) (struct-eq₁ a b a=b)
+  
   proof-irr-IsSortedList : (xs : List A) → ProofIrrelevance (IsSortedList xs)
   proof-irr-IsSortedList [] sortedX sortedY = refl
   proof-irr-IsSortedList (x ∷ []) sortedX sortedY = refl
@@ -276,7 +292,7 @@ module Monotonic {ℓEqA ℓOrdA ℓEqB ℓOrdB : Level} {A B : Type} (OrdA : Or
   
   -- (monotonic-preserves-sorted OrdA OrdB f mon-f xs sorted)
   monotonic-preserves-sorted : (f : A → B) → Monotonic f
-                             → (xs : List A) → IsSortedList OrdA xs → IsSortedList OrdB (mapList f xs)
+                             → (xs : List A) → IsSortedList OrdA xs → IsSortedList OrdB (map f xs)
   monotonic-preserves-sorted f mon-f [] sorted = lift tt
   monotonic-preserves-sorted f mon-f (x ∷ []) sorted = lift tt
   monotonic-preserves-sorted f mon-f (x ∷ y ∷ xs) (x≤y , sorted) = mon-f x y x≤y , monotonic-preserves-sorted f mon-f (y ∷ xs) sorted

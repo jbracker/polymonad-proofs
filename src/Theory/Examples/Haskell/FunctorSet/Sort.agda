@@ -95,6 +95,54 @@ insert-shift-elem y x (z ∷ xs) x≤y ¬y==x | no ¬y≤x with dec-ord y z
 insert-shift-elem y x (z ∷ xs) x≤y ¬y==x | no ¬y≤x | yes y≤z = refl
 insert-shift-elem y x (z ∷ xs) x≤y ¬y==x | no ¬y≤x | no ¬y≤z = refl
 
+insert-interchange-struct-eq : (x y : A) → (xs : List A) 
+                             → ((a b : A) → a == b → a ≡ b)
+                             → insert x (insert y xs) ≡ insert y (insert x xs)
+insert-interchange-struct-eq a b  [] struct-eqA with dec-ord a b | dec-ord b a
+insert-interchange-struct-eq a b  [] struct-eqA | yes a≤b | yes b≤a with struct-eqA a b (antisym-ord a≤b b≤a)
+insert-interchange-struct-eq a .a [] struct-eqA | yes a≤b | yes b≤a | refl = refl
+insert-interchange-struct-eq a b  [] struct-eqA | yes a≤b | no ¬b≤a = refl
+insert-interchange-struct-eq a b  [] struct-eqA | no ¬a≤b | yes b≤a = refl
+insert-interchange-struct-eq a b  [] struct-eqA | no ¬a≤b | no ¬b≤a = ⊥-elim (total-contr ¬b≤a ¬a≤b)
+insert-interchange-struct-eq a b  (x ∷ xs) struct-eqA with dec-ord a b
+insert-interchange-struct-eq a b  (x ∷ xs) struct-eqA | yes a≤b with dec-ord b x
+insert-interchange-struct-eq a b  (x ∷ xs) struct-eqA | yes a≤b | yes b≤x with dec-ord a b
+insert-interchange-struct-eq a b  (x ∷ xs) struct-eqA | yes a≤b | yes b≤x | yes _ with dec-ord a x
+insert-interchange-struct-eq a b  (x ∷ xs) struct-eqA | yes a≤b | yes b≤x | yes _ | yes a≤x with dec-ord b a
+insert-interchange-struct-eq a b  (x ∷ xs) struct-eqA | yes a≤b | yes b≤x | yes _ | yes a≤x | yes b≤a with struct-eqA a b (antisym-ord a≤b b≤a)
+insert-interchange-struct-eq a .a (x ∷ xs) struct-eqA | yes a≤b | yes b≤x | yes _ | yes a≤x | yes b≤a | refl = refl
+insert-interchange-struct-eq a b  (x ∷ xs) struct-eqA | yes a≤b | yes b≤x | yes _ | yes a≤x | no ¬b≤a with dec-ord b x
+insert-interchange-struct-eq a b  (x ∷ xs) struct-eqA | yes a≤b | yes b≤x | yes _ | yes a≤x | no ¬b≤a | yes _ = refl
+insert-interchange-struct-eq a b  (x ∷ xs) struct-eqA | yes a≤b | yes b≤x | yes _ | yes a≤x | no ¬b≤a | no ¬b≤x = ⊥-elim (¬b≤x b≤x)
+insert-interchange-struct-eq a b  (x ∷ xs) struct-eqA | yes a≤b | yes b≤x | yes _ | no ¬a≤x = ⊥-elim (¬a≤x (trans-ord a≤b b≤x))
+insert-interchange-struct-eq a b  (x ∷ xs) struct-eqA | yes a≤b | yes b≤x | no ¬a≤b = ⊥-elim (¬a≤b a≤b)
+insert-interchange-struct-eq a b  (x ∷ xs) struct-eqA | yes a≤b | no ¬b≤x with dec-ord a x
+insert-interchange-struct-eq a b  (x ∷ xs) struct-eqA | yes a≤b | no ¬b≤x | yes a≤x with dec-ord b a
+insert-interchange-struct-eq a b  (x ∷ xs) struct-eqA | yes a≤b | no ¬b≤x | yes a≤x | yes b≤a = ⊥-elim (¬b≤x (trans-ord b≤a a≤x))
+insert-interchange-struct-eq a b  (x ∷ xs) struct-eqA | yes a≤b | no ¬b≤x | yes a≤x | no ¬b≤a with dec-ord b x
+insert-interchange-struct-eq a b  (x ∷ xs) struct-eqA | yes a≤b | no ¬b≤x | yes a≤x | no ¬b≤a | yes b≤x = ⊥-elim (¬b≤x b≤x)
+insert-interchange-struct-eq a b  (x ∷ xs) struct-eqA | yes a≤b | no ¬b≤x | yes a≤x | no ¬b≤a | no _ = refl
+insert-interchange-struct-eq a b  (x ∷ xs) struct-eqA | yes a≤b | no ¬b≤x | no ¬a≤x with dec-ord b x
+insert-interchange-struct-eq a b  (x ∷ xs) struct-eqA | yes a≤b | no ¬b≤x | no ¬a≤x | yes b≤x = ⊥-elim (¬b≤x b≤x)
+insert-interchange-struct-eq a b  (x ∷ xs) struct-eqA | yes a≤b | no ¬b≤x | no ¬a≤x | no _ = cong (_∷_ x) (insert-interchange-struct-eq a b xs struct-eqA)
+insert-interchange-struct-eq a b  (x ∷ xs) struct-eqA | no ¬a≤b with dec-ord b x
+insert-interchange-struct-eq a b  (x ∷ xs) struct-eqA | no ¬a≤b | yes b≤x with dec-ord a b
+insert-interchange-struct-eq a b  (x ∷ xs) struct-eqA | no ¬a≤b | yes b≤x | yes a≤b = ⊥-elim (¬a≤b a≤b)
+insert-interchange-struct-eq a b  (x ∷ xs) struct-eqA | no ¬a≤b | yes b≤x | no _ with dec-ord a x
+insert-interchange-struct-eq a b  (x ∷ xs) struct-eqA | no ¬a≤b | yes b≤x | no _ | yes a≤x with dec-ord b a
+insert-interchange-struct-eq a b  (x ∷ xs) struct-eqA | no ¬a≤b | yes b≤x | no _ | yes a≤x | yes b≤a = refl
+insert-interchange-struct-eq a b  (x ∷ xs) struct-eqA | no ¬a≤b | yes b≤x | no _ | yes a≤x | no ¬b≤a = ⊥-elim (total-contr ¬a≤b ¬b≤a)
+insert-interchange-struct-eq a b  (x ∷ xs) struct-eqA | no ¬a≤b | yes b≤x | no _ | no ¬a≤x with dec-ord b x
+insert-interchange-struct-eq a b  (x ∷ xs) struct-eqA | no ¬a≤b | yes b≤x | no _ | no ¬a≤x | yes _ = refl
+insert-interchange-struct-eq a b  (x ∷ xs) struct-eqA | no ¬a≤b | yes b≤x | no _ | no ¬a≤x | no ¬b≤x = ⊥-elim (¬b≤x b≤x)
+insert-interchange-struct-eq a b  (x ∷ xs) struct-eqA | no ¬a≤b | no ¬b≤x with dec-ord a x
+insert-interchange-struct-eq a b  (x ∷ xs) struct-eqA | no ¬a≤b | no ¬b≤x | yes a≤x with dec-ord b a
+insert-interchange-struct-eq a b  (x ∷ xs) struct-eqA | no ¬a≤b | no ¬b≤x | yes a≤x | yes b≤a = ⊥-elim (¬b≤x (trans-ord b≤a a≤x))
+insert-interchange-struct-eq a b  (x ∷ xs) struct-eqA | no ¬a≤b | no ¬b≤x | yes a≤x | no ¬b≤a = ⊥-elim (total-contr ¬a≤b ¬b≤a)
+insert-interchange-struct-eq a b  (x ∷ xs) struct-eqA | no ¬a≤b | no ¬b≤x | no ¬a≤x with dec-ord b x
+insert-interchange-struct-eq a b  (x ∷ xs) struct-eqA | no ¬a≤b | no ¬b≤x | no ¬a≤x | yes b≤x = ⊥-elim (¬b≤x b≤x)
+insert-interchange-struct-eq a b  (x ∷ xs) struct-eqA | no ¬a≤b | no ¬b≤x | no ¬a≤x | no _ = cong (_∷_ x) (insert-interchange-struct-eq a b xs struct-eqA)
+
 insert-interchange : (x y : A) → (xs : List A) 
                    → ¬ (x == y)
                    → insert x (insert  y xs) ≡ insert y (insert x xs)
@@ -138,6 +186,14 @@ sort-produces-sorted [] = lift tt
 sort-produces-sorted (x ∷ []) = lift tt
 sort-produces-sorted (x ∷ y ∷ xs) = insert-preserves-sorted x (insert  y (sort xs))
                                   $ insert-preserves-sorted y (sort xs) (sort-produces-sorted xs)
+
+sort-insert-interchange : (x : A) → (xs : List A) → sort (insert x xs) ≡ insert x (sort xs)
+sort-insert-interchange a [] = refl
+sort-insert-interchange a (x ∷ xs) with dec-ord a x
+sort-insert-interchange a (x ∷ xs) | yes a≤x = refl
+sort-insert-interchange a (x ∷ xs) | no ¬a≤x with dec-eq a x
+sort-insert-interchange a (x ∷ xs) | no ¬a≤x | yes a=x = ⊥-elim (eq-contr a=x (inj₁ ¬a≤x))
+sort-insert-interchange a (x ∷ xs) | no ¬a≤x | no ¬a=x = trans (cong (insert x) (sort-insert-interchange a xs)) (insert-interchange x a (sort xs) (sym-not-eq ¬a=x))
 
 sort-sorting-sorted : (xs : List A) → IsSortedList  xs → sort  xs ≡ xs
 sort-sorting-sorted [] sorted = refl

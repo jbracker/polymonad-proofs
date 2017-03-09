@@ -56,7 +56,7 @@ insert-remove-elim y (x ∷ xs) ._ refl (y≤x , sorted) (¬y∈x∷xs , ¬x∈x
 insert-remove-elim y (x ∷ xs) ._ refl (y≤x , sorted) (¬y∈x∷xs , ¬x∈xs , noDup) | no ¬y==x | yes _ 
   = cong (λ X → y ∷ x ∷ X) (remove-removing-missing-elem y xs (¬InList-forget-elem y x xs ¬y∈x∷xs))
 insert-remove-elim y (x ∷ xs) ._ refl (y≤x , sorted) (¬y∈x∷xs , ¬x∈xs , noDup) | no ¬y==x | no ¬y≤x = ⊥-elim (¬y≤x y≤x)
-  
+ 
 nub∘insert≡insert∘remove∘nub : (x : A) → (xs : List A)
                              → IsSortedList (x ∷ xs)
                              → nub (insert x xs) ≡ insert x (remove x (nub xs))

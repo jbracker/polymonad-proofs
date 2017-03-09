@@ -1,7 +1,4 @@
 
--- TODO: Finish proofs
-module Theory.Examples.Haskell.FunctorMonotonicSet where
-
 open import Function renaming ( _∘_ to _∘F_ ; id to idF )
 open import Level renaming ( suc to lsuc ; zero to lzero)
 open import Data.Unit hiding ( _≤_ ; _≟_ ; total )
@@ -20,6 +17,7 @@ open ≡-Reasoning
 
 
 open import Extensionality
+open import Equality
 open import Congruence
 open import Substitution
 open import Haskell
@@ -41,38 +39,10 @@ open import Theory.Examples.HaskellFunctorToFunctor
 open import Theory.Examples.Haskell.FunctorSet.Base
 open import Theory.Examples.Haskell.FunctorSet.Sort
 open import Theory.Examples.Haskell.FunctorSet.Nub
+open import Theory.Examples.Haskell.FunctorSet.Map
 open import Theory.Examples.Haskell.FunctorSet.NubAndSort
 
-remove∘map∘remove≡remove∘map : {ℓEqA ℓOrdA ℓEqB ℓOrdB : Level} {A B : Type}
-                             → (OrdA : OrdInstance {ℓEqA} {ℓOrdA} A) → (OrdB : OrdInstance {ℓEqB} {ℓOrdB} B)
-                             → (f : A → B) → Monotonic OrdA OrdB f → (x : A) → (xs : List A)
-                             → remove OrdB (f x) (mapList f (remove OrdA x xs)) ≡ remove OrdB (f x) (mapList f xs)
-remove∘map∘remove≡remove∘map OrdA OrdB f mon-f x [] = refl
-remove∘map∘remove≡remove∘map OrdA OrdB f mon-f x (y ∷ xs) with OrdInstance.dec-eq OrdA x y | OrdInstance.dec-eq OrdB (f x) (f y)
-remove∘map∘remove≡remove∘map OrdA OrdB f mon-f x (y ∷ xs) | yes x==y | yes fx==fy = remove∘map∘remove≡remove∘map OrdA OrdB f mon-f x xs
-remove∘map∘remove≡remove∘map OrdA OrdB f mon-f x (y ∷ xs) | yes x==y | no ¬fx==fy = ⊥-elim (¬fx==fy (monotonic-preserves-equality OrdA OrdB f mon-f x y x==y))
-remove∘map∘remove≡remove∘map OrdA OrdB f mon-f x (y ∷ xs) | no ¬x==y | yes fx==fy with OrdInstance.dec-eq OrdB (f x) (f y)
-remove∘map∘remove≡remove∘map OrdA OrdB f mon-f x (y ∷ xs) | no ¬x==y | yes fx==fy | yes _ = remove∘map∘remove≡remove∘map OrdA OrdB f mon-f x xs
-remove∘map∘remove≡remove∘map OrdA OrdB f mon-f x (y ∷ xs) | no ¬x==y | yes fx==fy | no ¬fx==fy = ⊥-elim (¬fx==fy fx==fy)
-remove∘map∘remove≡remove∘map OrdA OrdB f mon-f x (y ∷ xs) | no ¬x==y | no ¬fx==fy with OrdInstance.dec-eq OrdB (f x) (f y)
-remove∘map∘remove≡remove∘map OrdA OrdB f mon-f x (y ∷ xs) | no ¬x==y | no ¬fx==fy | yes fx==fy = ⊥-elim (¬fx==fy fx==fy)
-remove∘map∘remove≡remove∘map OrdA OrdB f mon-f x (y ∷ xs) | no ¬x==y | no ¬fx==fy | no _ = cong (λ X → f y ∷ X) (remove∘map∘remove≡remove∘map OrdA OrdB f mon-f x xs)
-
-nub∘map∘nub≡nub∘map : {ℓEqA ℓOrdA ℓEqB ℓOrdB : Level} {A B : Type}
-                    → (OrdA : OrdInstance {ℓEqA} {ℓOrdA} A) → (OrdB : OrdInstance {ℓEqB} {ℓOrdB} B)
-                    → (f : A → B) → Monotonic OrdA OrdB f → (xs : List A)
-                    → nub OrdB (mapList f (nub OrdA xs)) ≡ nub OrdB (mapList f xs)
-nub∘map∘nub≡nub∘map OrdA OrdB f mon-f [] = refl
-nub∘map∘nub≡nub∘map OrdA OrdB f mon-f (x ∷ xs) = cong (λ X → f x ∷ X) $ begin
-  remove OrdB (f x) (nub OrdB (mapList f (remove OrdA x (nub OrdA xs))))
-    ≡⟨ sym (nub-remove-interchange OrdB (f x) (mapList f (remove OrdA x (nub OrdA xs)))) ⟩
-  nub OrdB (remove OrdB (f x) (mapList f (remove OrdA x (nub OrdA xs))))
-    ≡⟨ cong (nub OrdB) (remove∘map∘remove≡remove∘map OrdA OrdB f mon-f x (nub OrdA xs)) ⟩
-  nub OrdB (remove OrdB (f x) (mapList f (nub OrdA xs)))
-    ≡⟨ nub-remove-interchange OrdB (f x) (mapList f (nub OrdA xs)) ⟩
-  remove OrdB (f x) (nub OrdB (mapList f (nub OrdA xs)))
-    ≡⟨ cong (remove OrdB (f x)) (nub∘map∘nub≡nub∘map OrdA OrdB f mon-f xs) ⟩
-  remove OrdB (f x) (nub OrdB (mapList f xs)) ∎
+module Theory.Examples.Haskell.FunctorMonotonicSet where
 
 mkListSet : {α : Σ Type OrdInstance} → List (proj₁ α) → ListSet α
 mkListSet {α , OrdA} xs = listSet (nub OrdA (sort OrdA xs))
@@ -80,11 +50,11 @@ mkListSet {α , OrdA} xs = listSet (nub OrdA (sort OrdA xs))
                                   (nub-produces-no-dup OrdA (sort OrdA xs))
 
 -- Definition of map for Sets represented as ordered lists without duplicates.
-map : {α β : Σ Type OrdInstance} → (Σ (proj₁ α → proj₁ β) (Monotonic (proj₂ α) (proj₂ β))) → ListSet α → ListSet β
-map {α , OrdA} {β , OrdB} (f , mon-f) (listSet xs sorted noDup) = 
-  listSet (nub OrdB (mapList f xs)) 
-          (nub-preserves-sorted OrdB (mapList f xs) (monotonic-preserves-sorted OrdA OrdB f mon-f xs sorted))
-          (nub-produces-no-dup OrdB (mapList f xs))
+map : {α β : Σ Type OrdInstance} → (proj₁ α → proj₁ β) → ListSet α → ListSet β
+map {α , OrdA} {β , OrdB} f (listSet xs sorted noDup) = 
+  listSet (nub OrdB (sort OrdB (mapList f xs))) 
+          (nub-preserves-sorted OrdB (sort OrdB (mapList f xs)) (sort-produces-sorted OrdB (mapList f xs)))
+          (nub-produces-no-dup OrdB (sort OrdB (mapList f xs)))
 
 -- The constrained functor for Sets in Haskell.
 -- The requirement of proof irrelevance for OrdInstance is in one-to-one correspondance with the
@@ -93,25 +63,25 @@ FunctorListSet : ({ℓEq ℓOrd : Level} → (A : Type) → ProofIrrelevance (Or
 FunctorListSet unique-ord-instances = record
   { Cts = Cts
   ; F = F
-  ; map = map
-  ; functor-id = functor-id
+  ; map = λ {α} {β} → fmap {α} {β}
+  ; functor-id = λ {α} → functor-id {α}
   ; functor-compose = λ {α} {β} {γ} {f} {g} → functor-compose {α} {β} {γ} {f} {g}
-  ; unique-instances = (λ α → unique-ord-instances {lzero} {lzero} α) 
-                     , unique-hom-inst
+  ; unique-instances = unique-instances
   } where
+    
     ObjCts : Type → Set (lsuc lzero)
-    ObjCts = OrdInstance
+    ObjCts A = Σ (OrdInstance A) IsStructuralEquality
     
     HomCts : {α β : Type} → ObjCts α → ObjCts β → (α → β) → Set lzero
-    HomCts OrdA OrdB f = Monotonic OrdA OrdB f
+    HomCts _ _ _ = ⊤
     
     _∘Ct_ : {α β γ : Type} {f : β → γ} {g : α → β} 
         → {α' : ObjCts α} {β' : ObjCts β} {γ' : ObjCts γ}
         → HomCts β' γ' f → HomCts α' β' g → HomCts α' γ' (f ∘F g)
-    _∘Ct_ {A} {B} {C} {f} {g} {OrdA} {OrdB} {OrdC} mon-f mon-g = monotonic-composition OrdA OrdB OrdC f g mon-f mon-g
+    _∘Ct_ {A} {B} {C} {f} {g} {OrdA} {OrdB} {OrdC} _ _ = tt
     
     ctId : {α : Type} {α' : ObjCts α} → HomCts α' α' idF
-    ctId a b a≤a = a≤a
+    ctId = tt
     
     assoc : {α β γ δ : Type} 
           → {f : α → β} {g : β → γ} {h : γ → δ}
@@ -140,37 +110,80 @@ FunctorListSet unique-ord-instances = record
     open DependentCategory Cts
     open Category dep-category
     
-    F : Obj → Type
-    F (α , OrdA) = ListSet (α , OrdA)
+    Obj' : Obj → Σ Type OrdInstance
+    Obj' (A , OrdA , _) = A , OrdA
     
-    functor-id : {α : Obj} → map {α = α} {α} (idF , ctId {proj₁ α} {proj₂ α}) ≡ idF
-    functor-id {α , OrdA} = fun-ext helper
-      where helper : (x : ListSet (α , OrdA)) → map (idF , ctId {α} {OrdA}) x ≡ idF x
-            helper (listSet xs sorted noDup) = eqListSet OrdA (nub OrdA (mapList idF xs)) xs
-              (nub-preserves-sorted OrdA (mapList idF xs) (monotonic-preserves-sorted OrdA OrdA idF (ctId {α' = OrdA}) xs sorted)) sorted
-              (nub-produces-no-dup OrdA (mapList idF xs)) noDup
-              (nub-map-id OrdA xs noDup)
-
-    functor-compose : {α β γ : Obj} {f : Hom α β} {g : Hom β γ}
-               → map {α = α} {γ} (proj₁ g ∘F proj₁ f , _∘Ct_ {proj₁ α} {proj₁ β} {proj₁ γ} {proj₁ g} {proj₁ f} {proj₂ α} {proj₂ β} {proj₂ γ} (proj₂ g) (proj₂ f))
-               ≡ map {α = β} {γ} g ∘F map f
-    functor-compose {α , OrdA} {β , OrdB} {γ , OrdC} {f , mon-f} {g , mon-g} = fun-ext helper
+    F : Obj → Type
+    F (α , OrdA , struct-eqA) = ListSet (α , OrdA)
+    
+    fmap : {α β : Obj} → Hom α β → ListSet (Obj' α) → ListSet (Obj' β)
+    fmap (f , tt) a = map f a
+    
+    functor-id : {α : Obj} → fmap {α} {α} (id {α}) ≡ idF
+    functor-id {α , OrdA , struct-eqA} = fun-ext helper
       where
-        helper : (xs : ListSet (α , OrdA)) → map (g ∘F f , monotonic-composition OrdA OrdB OrdC g f mon-g mon-f) xs ≡ (map (g , mon-g) ∘F map (f , mon-f)) xs
-        helper (listSet xs sorted noDup) = eqListSet OrdC 
-          (nub OrdC (mapList (g ∘F f) xs)) (nub OrdC (mapList g (nub OrdB (mapList f xs)))) 
-          (nub-preserves-sorted OrdC (mapList (g ∘F f) xs) 
-            (monotonic-preserves-sorted OrdA OrdC (g ∘F f) (monotonic-composition OrdA OrdB OrdC g f mon-g mon-f) xs sorted))
-          (nub-preserves-sorted OrdC (mapList g (nub OrdB (mapList f xs))) 
-            (monotonic-preserves-sorted OrdB OrdC g mon-g (nub OrdB (mapList f xs)) 
-              (nub-preserves-sorted OrdB (mapList f xs) (monotonic-preserves-sorted OrdA OrdB f mon-f xs sorted))))
-          (nub-produces-no-dup OrdC (mapList (g ∘F f) xs))
-          (nub-produces-no-dup OrdC (mapList g (nub OrdB (mapList f xs))))
-          (sym (trans (nub∘map∘nub≡nub∘map OrdB OrdC g mon-g (mapList f xs)) (cong (nub OrdC) (sym (map-compose xs)))))
-
-    unique-hom-inst : {α β : Category.Obj Hask}
-                    → (f g : α → β)
-                    → (αCt : DepObj α) → (βCt : DepObj β)
-                    → (fCt : DepHom αCt βCt f) → (gCt : DepHom αCt βCt g)
-                    → fCt ≅ gCt
-    unique-hom-inst f g αCt βCt fCt gCt = {!!}
+        helper' : (xs : List α) → IsSortedList OrdA xs → IsNoDupList OrdA xs → nub OrdA (sort OrdA (mapList (λ z → z) xs)) ≡ xs
+        helper' [] sorted noDup = refl
+        helper' (x ∷ xs) sorted noDup = begin
+          nub OrdA (insert OrdA x (sort OrdA (mapList (λ z → z) xs)))
+            ≡⟨ cong (λ X → nub OrdA (insert OrdA x (sort OrdA X))) (map-id xs) ⟩
+          nub OrdA (insert OrdA x (sort OrdA xs))
+            ≡⟨ cong (λ X → nub OrdA (insert OrdA x X)) (sort-sorting-sorted OrdA xs (IsSortedList-forget-elem OrdA x xs sorted)) ⟩
+          nub OrdA (insert OrdA x xs)
+            ≡⟨ nub∘insert≡insert∘remove∘nub OrdA x xs sorted ⟩
+          insert OrdA x (remove OrdA x (nub OrdA xs))
+            ≡⟨ cong (λ X → insert OrdA x (remove OrdA x X)) (nub-nubbing-no-dup OrdA xs xs refl (proj₂ noDup)) ⟩
+          insert OrdA x (remove OrdA x xs)
+            ≡⟨ cong (insert OrdA x) (remove-removing-missing-elem OrdA x xs (proj₁ noDup)) ⟩
+          insert OrdA x xs
+            ≡⟨ insert-smallest-in-front OrdA x xs sorted ⟩
+          x ∷ xs ∎
+        
+        helper : (x : ListSet (α , OrdA)) → fmap {α , OrdA , struct-eqA} {α , OrdA , struct-eqA} (id {α , OrdA , struct-eqA}) x ≡ idF x
+        helper (listSet xs sorted noDup) 
+          = eqListSet OrdA 
+            (nub OrdA (sort OrdA (mapList (λ z → z) xs))) xs 
+            (nub-preserves-sorted OrdA (sort OrdA (mapList (λ z → z) xs)) (sort-produces-sorted OrdA (mapList (λ z → z) xs))) sorted
+            (nub-produces-no-dup OrdA (sort OrdA (mapList (λ z → z) xs))) noDup
+            (helper' xs sorted noDup)
+    
+    functor-compose : {α β γ : Obj} {f : Hom α β} {g : Hom β γ} 
+                    → fmap {α} {γ} (_∘_ {α} {β} {γ} g f) ≡ fmap {β} {γ} g ∘F fmap {α} {β} f
+    functor-compose {α , OrdA , struct-eqA} {β , OrdB , struct-eqB} {γ , OrdC , struct-eqC} {f , tt} {g , tt} = fun-ext helper
+      where
+        helper' : (xs : List α) → IsSortedList OrdA xs → IsNoDupList OrdA xs 
+                → nub OrdC (sort OrdC (mapList (λ z → g (f z)) xs)) ≡ nub OrdC (sort OrdC (mapList g (nub OrdB (sort OrdB (mapList f xs)))))
+        helper' xs sorted noDup = begin
+          nub OrdC (sort OrdC (mapList (λ z → g (f z)) xs))
+            ≡⟨ {!!} ⟩
+          nub OrdC (sort OrdC (mapList g (nub OrdB (sort OrdB (mapList f (sort OrdA xs))))))
+            ≡⟨ {!!} ⟩
+          nub OrdC (sort OrdC (mapList g (nub OrdB (sort OrdB (mapList f (sort OrdA xs))))))
+            ≡⟨ cong (λ X → nub OrdC (sort OrdC (mapList g (nub OrdB X)))) (sort∘map∘sort≡sort∘map OrdA OrdB f xs struct-eqB) ⟩
+          nub OrdC (sort OrdC (mapList g (nub OrdB (sort OrdB (mapList f xs))))) ∎
+        
+        helper : (x : ListSet (α , OrdA)) 
+               → fmap {α , OrdA , struct-eqA} {γ , OrdC , struct-eqC} (g ∘F f , tt) x 
+               ≡ fmap {β , OrdB , struct-eqB} {γ , OrdC , struct-eqC} (g , tt) (fmap {α , OrdA , struct-eqA} {β , OrdB , struct-eqB} (f , tt) x)
+        helper (listSet xs sorted noDup) 
+          = eqListSet OrdC 
+            (nub OrdC (sort OrdC (mapList (λ z → g (f z)) xs))) 
+            (nub OrdC (sort OrdC (mapList g (nub OrdB (sort OrdB (mapList f xs)))))) 
+            (nub-preserves-sorted OrdC (sort OrdC (mapList (λ z → g (f z)) xs)) (sort-produces-sorted OrdC (mapList (λ z → g (f z)) xs))) 
+            (nub-preserves-sorted OrdC (sort OrdC (mapList g (nub OrdB (sort OrdB (mapList f xs)))))
+            (sort-produces-sorted OrdC (mapList g (nub OrdB (sort OrdB (mapList f xs)))))) 
+            (nub-produces-no-dup OrdC (sort OrdC (mapList (λ z → g (f z)) xs))) 
+            (nub-produces-no-dup OrdC (sort OrdC (mapList g (nub OrdB (sort OrdB (mapList f xs))))))
+            (helper' xs sorted noDup)
+      
+    unique-instances : UniqueInstances Cts
+    unique-instances = proof-irr-Obj , proof-irr-Hom
+      where
+        proof-irr-Obj : (α : Category.Obj Hask) → ProofIrrelevance (DepObj α)
+        proof-irr-Obj α (OrdA₀ , struct-eq₀) (OrdA₁ , struct-eq₁) with unique-ord-instances α OrdA₀ OrdA₁
+        proof-irr-Obj α (OrdA  , struct-eq₀) (.OrdA , struct-eq₁) | refl = cong (_,_ OrdA) (proof-irr-IsStructuralEquality OrdA struct-eq₀ struct-eq₁)
+        
+        proof-irr-Hom : {α β : Category.Obj Hask} → (f g : α → β)
+                      → (αCt : DepObj α) (βCt : DepObj β) (fCt : DepHom αCt βCt f) (gCt : DepHom αCt βCt g) 
+                      → fCt ≅ gCt
+        proof-irr-Hom f g αCt βCt fCt gCt = refl
