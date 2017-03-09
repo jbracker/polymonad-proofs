@@ -59,133 +59,133 @@ insert-adds-in-front {x} {y ∷ ys} allX | no ¬x=y with dec-ord x y
 insert-adds-in-front {x} {y ∷ ys} allX | no ¬x=y | yes x≤y = refl
 insert-adds-in-front {x} {y ∷ xs} ((x≤y , x≠y) ∷ allY) | no ¬x=y | no ¬x≤y = ⊥-elim (¬x≤y x≤y)
     
-insert-commute : {x y : A} {xs : List A} → ¬ (x == y) → IsSortedNoDupList OrdA xs → insert x (insert y xs) ≡ insert y (insert x xs)
-insert-commute {x} {y} {[]} x≠y sorted with dec-eq x y
-insert-commute {x} {y} {[]} x≠y sorted | yes x=y = ⊥-elim (x≠y x=y)
-insert-commute {x} {y} {[]} x≠y sorted | no ¬x=y with dec-ord x y
-insert-commute {x} {y} {[]} x≠y sorted | no ¬x=y | yes x≤y with dec-eq y x
-insert-commute {x} {y} {[]} x≠y sorted | no ¬x=y | yes x≤y | yes y=x = ⊥-elim (x≠y (sym-eq y=x))
-insert-commute {x} {y} {[]} x≠y sorted | no ¬x=y | yes x≤y | no ¬y=x with dec-ord y x
-insert-commute {x} {y} {[]} x≠y sorted | no ¬x=y | yes x≤y | no ¬y=x | yes y≤x = ⊥-elim (x≠y (antisym-ord x≤y y≤x))
-insert-commute {x} {y} {[]} x≠y sorted | no ¬x=y | yes x≤y | no ¬y=x | no ¬y≤x = refl
-insert-commute {x} {y} {[]} x≠y sorted | no ¬x=y | no ¬x≤y with dec-eq y x
-insert-commute {x} {y} {[]} x≠y sorted | no ¬x=y | no ¬x≤y | yes y=x = ⊥-elim (x≠y (sym-eq y=x))
-insert-commute {x} {y} {[]} x≠y sorted | no ¬x=y | no ¬x≤y | no ¬y=x with dec-ord y x
-insert-commute {x} {y} {[]} x≠y sorted | no ¬x=y | no ¬x≤y | no ¬y=x | yes y≤x = refl
-insert-commute {x} {y} {[]} x≠y sorted | no ¬x=y | no ¬x≤y | no ¬y=x | no ¬y≤x = ⊥-elim (total-contr ¬x≤y ¬y≤x)
-insert-commute {x} {y} {z ∷ zs} x≠y sorted with dec-eq y z | dec-eq x z 
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | yes y=z | yes x=z = ⊥-elim (x≠y (trans-eq x=z (sym-eq y=z)))
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | yes y=z | no ¬x=z with dec-eq x y
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | yes y=z | no ¬x=z | yes x=y = ⊥-elim (x≠y x=y)
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | yes y=z | no ¬x=z | no ¬x=y with dec-ord x y | dec-ord x z
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | yes y=z | no ¬x=z | no ¬x=y | yes x≤y | yes x≤z with dec-eq y x
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | yes y=z | no ¬x=z | no ¬x=y | yes x≤y | yes x≤z | yes y=x = ⊥-elim (x≠y (sym-eq y=x))
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | yes y=z | no ¬x=z | no ¬x=y | yes x≤y | yes x≤z | no ¬y=x with dec-ord y x
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | yes y=z | no ¬x=z | no ¬x=y | yes x≤y | yes x≤z | no ¬y=x | yes y≤x = ⊥-elim (x≠y (antisym-ord x≤y y≤x))
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | yes y=z | no ¬x=z | no ¬x=y | yes x≤y | yes x≤z | no ¬y=x | no ¬y≤x with dec-eq y z
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | yes y=z | no ¬x=z | no ¬x=y | yes x≤y | yes x≤z | no ¬y=x | no ¬y≤x | yes _ = refl
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | yes y=z | no ¬x=z | no ¬x=y | yes x≤y | yes x≤z | no ¬y=x | no ¬y≤x | no ¬y=z = ⊥-elim (¬y=z y=z)
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | yes y=z | no ¬x=z | no ¬x=y | yes x≤y | no ¬x≤z = ⊥-elim (¬x≤z (trans-ord x≤y (proj₁ (antisym-ord' y=z))))
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | yes y=z | no ¬x=z | no ¬x=y | no ¬x≤y | yes x≤z = ⊥-elim (¬x≤y (ord-eq-comp x≤z (sym-eq y=z)))
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | yes y=z | no ¬x=z | no ¬x=y | no ¬x≤y | no ¬x≤z with dec-eq y z
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | yes y=z | no ¬x=z | no ¬x=y | no ¬x≤y | no ¬x≤z | yes _ = refl
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | yes y=z | no ¬x=z | no ¬x=y | no ¬x≤y | no ¬x≤z | no ¬y=z = ⊥-elim (¬y=z y=z)
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | yes x=z with dec-eq y x
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | yes x=z | yes y=x = ⊥-elim (x≠y (sym-eq y=x))
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | yes x=z | no ¬y=x with dec-ord y z | dec-ord y x
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | yes x=z | no ¬y=x | yes y≤z | yes y≤x with dec-eq x y
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | yes x=z | no ¬y=x | yes y≤z | yes y≤x | yes x=y = ⊥-elim (x≠y x=y)
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | yes x=z | no ¬y=x | yes y≤z | yes y≤x | no ¬x=y with dec-ord x y
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | yes x=z | no ¬y=x | yes y≤z | yes y≤x | no ¬x=y | yes x≤y = ⊥-elim (x≠y (antisym-ord x≤y y≤x))
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | yes x=z | no ¬y=x | yes y≤z | yes y≤x | no ¬x=y | no ¬x≤y with dec-eq x z
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | yes x=z | no ¬y=x | yes y≤z | yes y≤x | no ¬x=y | no ¬x≤y | yes _ with dec-ord x z
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | yes x=z | no ¬y=x | yes y≤z | yes y≤x | no ¬x=y | no ¬x≤y | yes _ | yes x≤z = refl
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | yes x=z | no ¬y=x | yes y≤z | yes y≤x | no ¬x=y | no ¬x≤y | yes _ | no ¬x≤z = refl
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | yes x=z | no ¬y=x | yes y≤z | yes y≤x | no ¬x=y | no ¬x≤y | no ¬x=z = ⊥-elim (¬x=z x=z)
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | yes x=z | no ¬y=x | yes y≤z | no ¬y≤x = ⊥-elim (¬y≤x (ord-eq-comp y≤z (sym-eq x=z)))
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | yes x=z | no ¬y=x | no ¬y≤z | yes y≤x = ⊥-elim (¬y≤z (ord-eq-comp y≤x x=z))
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | yes x=z | no ¬y=x | no ¬y≤z | no ¬y≤x with dec-eq x z
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | yes x=z | no ¬y=x | no ¬y≤z | no ¬y≤x | yes _ = refl
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | yes x=z | no ¬y=x | no ¬y≤z | no ¬y≤x | no ¬x=z = ⊥-elim (¬x=z x=z)
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z with dec-ord y z | dec-ord x z
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | yes y≤z | yes x≤z with dec-eq x y
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | yes y≤z | yes x≤z | yes x=y = ⊥-elim (x≠y x=y)
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | yes y≤z | yes x≤z | no ¬x=y with dec-eq y x
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | yes y≤z | yes x≤z | no ¬x=y | yes y=x = ⊥-elim (¬x=y (sym-eq y=x))
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | yes y≤z | yes x≤z | no ¬x=y | no ¬y=x with dec-ord x y | dec-ord y x
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | yes y≤z | yes x≤z | no ¬x=y | no ¬y=x | yes x≤y | yes y≤x = ⊥-elim (¬x=y (antisym-ord x≤y y≤x))
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | yes y≤z | yes x≤z | no ¬x=y | no ¬y=x | yes x≤y | no ¬y≤x with dec-eq y z
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | yes y≤z | yes x≤z | no ¬x=y | no ¬y=x | yes x≤y | no ¬y≤x | yes y=z = ⊥-elim (¬y=z y=z)
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | yes y≤z | yes x≤z | no ¬x=y | no ¬y=x | yes x≤y | no ¬y≤x | no _ with dec-ord y z 
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | yes y≤z | yes x≤z | no ¬x=y | no ¬y=x | yes x≤y | no ¬y≤x | no _ | yes _ = refl
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | yes y≤z | yes x≤z | no ¬x=y | no ¬y=x | yes x≤y | no ¬y≤x | no _ | no ¬y≤z = ⊥-elim (¬y≤z y≤z)
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | yes y≤z | yes x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x with dec-eq x z
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | yes y≤z | yes x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x | yes x=z = ⊥-elim (¬x=z x=z)
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | yes y≤z | yes x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x | no _ with dec-ord x z 
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | yes y≤z | yes x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x | no _ | yes _ = refl
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | yes y≤z | yes x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x | no _ | no ¬x≤z = ⊥-elim (¬x≤z x≤z)
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | yes y≤z | yes x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | no ¬y≤x = ⊥-elim (total-contr ¬x≤y ¬y≤x)
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | yes y≤z | no ¬x≤z with dec-eq x y
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | yes y≤z | no ¬x≤z | yes x=y = ⊥-elim (x≠y x=y)
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | yes y≤z | no ¬x≤z | no ¬x=y with dec-eq y x
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | yes y≤z | no ¬x≤z | no ¬x=y | yes y=x = ⊥-elim (¬x=y (sym-eq y=x))
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | yes y≤z | no ¬x≤z | no ¬x=y | no ¬y=x with dec-ord x y | dec-ord y x
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | yes y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | yes x≤y | yes y≤x = ⊥-elim (¬x=y (antisym-ord x≤y y≤x))
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | yes y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | yes x≤y | no ¬y≤x = ⊥-elim (excluded-middle-ord' ¬y=z y≤z (trans-ord (excluded-middle-ord ¬x≤z) x≤y))
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | yes y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x with dec-eq x z
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | yes y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x | yes x=z = ⊥-elim (¬x=z x=z)
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | yes y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x | no _ with dec-ord x z
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | yes y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x | no _ | yes x≤z = ⊥-elim (¬x≤z x≤z)
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | yes y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x | no _ | no _ with dec-ord y z
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | yes y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x | no _ | no _ | yes _ with dec-eq y z
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | yes y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x | no _ | no _ | yes _ | yes y=z = ⊥-elim (¬y=z y=z)
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | yes y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x | no _ | no _ | yes _ | no _ with dec-ord y z
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | yes y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x | no _ | no _ | yes _ | no _ | yes _ = refl
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | yes y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x | no _ | no _ | yes _ | no _ | no ¬y≤z = ⊥-elim (¬y≤z y≤z)
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | yes y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x | no _ | no _ | no ¬y≤z = ⊥-elim (¬y≤z y≤z)
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | yes y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | no ¬y≤x = ⊥-elim (total-contr ¬x≤y ¬y≤x)
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | no ¬y≤z | yes x≤z with dec-eq x y
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | no ¬y≤z | yes x≤z | yes x=y = ⊥-elim (x≠y x=y)
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | no ¬y≤z | yes x≤z | no ¬x=y with dec-eq y x
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | no ¬y≤z | yes x≤z | no ¬x=y | yes y=x = ⊥-elim (¬x=y (sym-eq y=x))
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | no ¬y≤z | yes x≤z | no ¬x=y | no ¬y=x with dec-ord x y | dec-ord y x
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | no ¬y≤z | yes x≤z | no ¬x=y | no ¬y=x | yes x≤y | yes y≤x = ⊥-elim (¬x=y (antisym-ord x≤y y≤x))
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | no ¬y≤z | yes x≤z | no ¬x=y | no ¬y=x | yes x≤y | no ¬y≤x with dec-eq y z
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | no ¬y≤z | yes x≤z | no ¬x=y | no ¬y=x | yes x≤y | no ¬y≤x | yes y=z = ⊥-elim (¬y=z y=z)
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | no ¬y≤z | yes x≤z | no ¬x=y | no ¬y=x | yes x≤y | no ¬y≤x | no _ with dec-ord y z 
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | no ¬y≤z | yes x≤z | no ¬x=y | no ¬y=x | yes x≤y | no ¬y≤x | no _ | yes y≤z = ⊥-elim (¬y≤z y≤z)
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | no ¬y≤z | yes x≤z | no ¬x=y | no ¬y=x | yes x≤y | no ¬y≤x | no _ | no _ with dec-eq x z
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | no ¬y≤z | yes x≤z | no ¬x=y | no ¬y=x | yes x≤y | no ¬y≤x | no _ | no _ | yes x=z = ⊥-elim (¬x=z x=z)
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | no ¬y≤z | yes x≤z | no ¬x=y | no ¬y=x | yes x≤y | no ¬y≤x | no _ | no _ | no _ with dec-ord x z
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | no ¬y≤z | yes x≤z | no ¬x=y | no ¬y=x | yes x≤y | no ¬y≤x | no _ | no _ | no _ | yes _ = refl
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | no ¬y≤z | yes x≤z | no ¬x=y | no ¬y=x | yes x≤y | no ¬y≤x | no _ | no _ | no _ | no ¬x≤z = ⊥-elim (¬x≤z x≤z)
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | no ¬y≤z | yes x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x = ⊥-elim (¬x≤y (trans-ord x≤z (excluded-middle-ord ¬y≤z)))
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | no ¬y≤z | yes x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | no ¬y≤x = ⊥-elim (total-contr ¬x≤y ¬y≤x)
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z with dec-eq x y
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | yes x=y = ⊥-elim (x≠y x=y)
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | no ¬x=y with dec-eq y x
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | no ¬x=y | yes y=x = ⊥-elim (¬x=y (sym-eq y=x))
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | no ¬x=y | no ¬y=x with dec-ord x y | dec-ord y x
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | yes x≤y | yes y≤x = ⊥-elim (¬x=y (antisym-ord x≤y y≤x))
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | yes x≤y | no ¬y≤x with dec-eq y z
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | yes x≤y | no ¬y≤x | yes y=z = ⊥-elim (¬y=z y=z)
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | yes x≤y | no ¬y≤x | no _ with dec-ord y z 
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | yes x≤y | no ¬y≤x | no _ | yes y≤z = ⊥-elim (¬y≤z y≤z)
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | yes x≤y | no ¬y≤x | no _ | no _ with dec-eq x z
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | yes x≤y | no ¬y≤x | no _ | no _ | yes x=z = ⊥-elim (¬x=z x=z)
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | yes x≤y | no ¬y≤x | no _ | no _ | no _ with dec-ord x z
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | yes x≤y | no ¬y≤x | no _ | no _ | no _ | yes x≤z = ⊥-elim (¬x≤z x≤z)
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | yes x≤y | no ¬y≤x | no _ | no _ | no _ | no _ = cong (_∷_ z) (insert-commute x≠y (proj₂ sorted))
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x with dec-eq x z
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x | yes x=z = ⊥-elim (¬x=z x=z)
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x | no _ with dec-eq y z
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x | no _ | yes y=z = ⊥-elim (¬y=z y=z)
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x | no _ | no _ with dec-ord y z
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x | no _ | no _ | yes y≤z = ⊥-elim (¬y≤z y≤z)
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x | no _ | no _ | no _ with dec-ord x z
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x | no _ | no _ | no _ | yes x≤z = ⊥-elim (¬x≤z x≤z)
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x | no _ | no _ | no _ | no _ = cong (_∷_ z) (insert-commute x≠y (proj₂ sorted))
-insert-commute {x} {y} {z ∷ zs} x≠y sorted | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | no ¬y≤x = ⊥-elim (total-contr ¬x≤y ¬y≤x)
+insert-commute : {x y : A} {xs : List A} → ¬ (x == y) → insert x (insert y xs) ≡ insert y (insert x xs)
+insert-commute {x} {y} {[]} x≠y with dec-eq x y
+insert-commute {x} {y} {[]} x≠y | yes x=y = ⊥-elim (x≠y x=y)
+insert-commute {x} {y} {[]} x≠y | no ¬x=y with dec-ord x y
+insert-commute {x} {y} {[]} x≠y | no ¬x=y | yes x≤y with dec-eq y x
+insert-commute {x} {y} {[]} x≠y | no ¬x=y | yes x≤y | yes y=x = ⊥-elim (x≠y (sym-eq y=x))
+insert-commute {x} {y} {[]} x≠y | no ¬x=y | yes x≤y | no ¬y=x with dec-ord y x
+insert-commute {x} {y} {[]} x≠y | no ¬x=y | yes x≤y | no ¬y=x | yes y≤x = ⊥-elim (x≠y (antisym-ord x≤y y≤x))
+insert-commute {x} {y} {[]} x≠y | no ¬x=y | yes x≤y | no ¬y=x | no ¬y≤x = refl
+insert-commute {x} {y} {[]} x≠y | no ¬x=y | no ¬x≤y with dec-eq y x
+insert-commute {x} {y} {[]} x≠y | no ¬x=y | no ¬x≤y | yes y=x = ⊥-elim (x≠y (sym-eq y=x))
+insert-commute {x} {y} {[]} x≠y | no ¬x=y | no ¬x≤y | no ¬y=x with dec-ord y x
+insert-commute {x} {y} {[]} x≠y | no ¬x=y | no ¬x≤y | no ¬y=x | yes y≤x = refl
+insert-commute {x} {y} {[]} x≠y | no ¬x=y | no ¬x≤y | no ¬y=x | no ¬y≤x = ⊥-elim (total-contr ¬x≤y ¬y≤x)
+insert-commute {x} {y} {z ∷ zs} x≠y with dec-eq y z | dec-eq x z 
+insert-commute {x} {y} {z ∷ zs} x≠y | yes y=z | yes x=z = ⊥-elim (x≠y (trans-eq x=z (sym-eq y=z)))
+insert-commute {x} {y} {z ∷ zs} x≠y | yes y=z | no ¬x=z with dec-eq x y
+insert-commute {x} {y} {z ∷ zs} x≠y | yes y=z | no ¬x=z | yes x=y = ⊥-elim (x≠y x=y)
+insert-commute {x} {y} {z ∷ zs} x≠y | yes y=z | no ¬x=z | no ¬x=y with dec-ord x y | dec-ord x z
+insert-commute {x} {y} {z ∷ zs} x≠y | yes y=z | no ¬x=z | no ¬x=y | yes x≤y | yes x≤z with dec-eq y x
+insert-commute {x} {y} {z ∷ zs} x≠y | yes y=z | no ¬x=z | no ¬x=y | yes x≤y | yes x≤z | yes y=x = ⊥-elim (x≠y (sym-eq y=x))
+insert-commute {x} {y} {z ∷ zs} x≠y | yes y=z | no ¬x=z | no ¬x=y | yes x≤y | yes x≤z | no ¬y=x with dec-ord y x
+insert-commute {x} {y} {z ∷ zs} x≠y | yes y=z | no ¬x=z | no ¬x=y | yes x≤y | yes x≤z | no ¬y=x | yes y≤x = ⊥-elim (x≠y (antisym-ord x≤y y≤x))
+insert-commute {x} {y} {z ∷ zs} x≠y | yes y=z | no ¬x=z | no ¬x=y | yes x≤y | yes x≤z | no ¬y=x | no ¬y≤x with dec-eq y z
+insert-commute {x} {y} {z ∷ zs} x≠y | yes y=z | no ¬x=z | no ¬x=y | yes x≤y | yes x≤z | no ¬y=x | no ¬y≤x | yes _ = refl
+insert-commute {x} {y} {z ∷ zs} x≠y | yes y=z | no ¬x=z | no ¬x=y | yes x≤y | yes x≤z | no ¬y=x | no ¬y≤x | no ¬y=z = ⊥-elim (¬y=z y=z)
+insert-commute {x} {y} {z ∷ zs} x≠y | yes y=z | no ¬x=z | no ¬x=y | yes x≤y | no ¬x≤z = ⊥-elim (¬x≤z (trans-ord x≤y (proj₁ (antisym-ord' y=z))))
+insert-commute {x} {y} {z ∷ zs} x≠y | yes y=z | no ¬x=z | no ¬x=y | no ¬x≤y | yes x≤z = ⊥-elim (¬x≤y (ord-eq-comp x≤z (sym-eq y=z)))
+insert-commute {x} {y} {z ∷ zs} x≠y | yes y=z | no ¬x=z | no ¬x=y | no ¬x≤y | no ¬x≤z with dec-eq y z
+insert-commute {x} {y} {z ∷ zs} x≠y | yes y=z | no ¬x=z | no ¬x=y | no ¬x≤y | no ¬x≤z | yes _ = refl
+insert-commute {x} {y} {z ∷ zs} x≠y | yes y=z | no ¬x=z | no ¬x=y | no ¬x≤y | no ¬x≤z | no ¬y=z = ⊥-elim (¬y=z y=z)
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | yes x=z with dec-eq y x
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | yes x=z | yes y=x = ⊥-elim (x≠y (sym-eq y=x))
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | yes x=z | no ¬y=x with dec-ord y z | dec-ord y x
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | yes x=z | no ¬y=x | yes y≤z | yes y≤x with dec-eq x y
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | yes x=z | no ¬y=x | yes y≤z | yes y≤x | yes x=y = ⊥-elim (x≠y x=y)
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | yes x=z | no ¬y=x | yes y≤z | yes y≤x | no ¬x=y with dec-ord x y
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | yes x=z | no ¬y=x | yes y≤z | yes y≤x | no ¬x=y | yes x≤y = ⊥-elim (x≠y (antisym-ord x≤y y≤x))
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | yes x=z | no ¬y=x | yes y≤z | yes y≤x | no ¬x=y | no ¬x≤y with dec-eq x z
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | yes x=z | no ¬y=x | yes y≤z | yes y≤x | no ¬x=y | no ¬x≤y | yes _ with dec-ord x z
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | yes x=z | no ¬y=x | yes y≤z | yes y≤x | no ¬x=y | no ¬x≤y | yes _ | yes x≤z = refl
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | yes x=z | no ¬y=x | yes y≤z | yes y≤x | no ¬x=y | no ¬x≤y | yes _ | no ¬x≤z = refl
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | yes x=z | no ¬y=x | yes y≤z | yes y≤x | no ¬x=y | no ¬x≤y | no ¬x=z = ⊥-elim (¬x=z x=z)
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | yes x=z | no ¬y=x | yes y≤z | no ¬y≤x = ⊥-elim (¬y≤x (ord-eq-comp y≤z (sym-eq x=z)))
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | yes x=z | no ¬y=x | no ¬y≤z | yes y≤x = ⊥-elim (¬y≤z (ord-eq-comp y≤x x=z))
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | yes x=z | no ¬y=x | no ¬y≤z | no ¬y≤x with dec-eq x z
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | yes x=z | no ¬y=x | no ¬y≤z | no ¬y≤x | yes _ = refl
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | yes x=z | no ¬y=x | no ¬y≤z | no ¬y≤x | no ¬x=z = ⊥-elim (¬x=z x=z)
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z with dec-ord y z | dec-ord x z
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | yes y≤z | yes x≤z with dec-eq x y
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | yes y≤z | yes x≤z | yes x=y = ⊥-elim (x≠y x=y)
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | yes y≤z | yes x≤z | no ¬x=y with dec-eq y x
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | yes y≤z | yes x≤z | no ¬x=y | yes y=x = ⊥-elim (¬x=y (sym-eq y=x))
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | yes y≤z | yes x≤z | no ¬x=y | no ¬y=x with dec-ord x y | dec-ord y x
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | yes y≤z | yes x≤z | no ¬x=y | no ¬y=x | yes x≤y | yes y≤x = ⊥-elim (¬x=y (antisym-ord x≤y y≤x))
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | yes y≤z | yes x≤z | no ¬x=y | no ¬y=x | yes x≤y | no ¬y≤x with dec-eq y z
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | yes y≤z | yes x≤z | no ¬x=y | no ¬y=x | yes x≤y | no ¬y≤x | yes y=z = ⊥-elim (¬y=z y=z)
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | yes y≤z | yes x≤z | no ¬x=y | no ¬y=x | yes x≤y | no ¬y≤x | no _ with dec-ord y z 
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | yes y≤z | yes x≤z | no ¬x=y | no ¬y=x | yes x≤y | no ¬y≤x | no _ | yes _ = refl
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | yes y≤z | yes x≤z | no ¬x=y | no ¬y=x | yes x≤y | no ¬y≤x | no _ | no ¬y≤z = ⊥-elim (¬y≤z y≤z)
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | yes y≤z | yes x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x with dec-eq x z
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | yes y≤z | yes x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x | yes x=z = ⊥-elim (¬x=z x=z)
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | yes y≤z | yes x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x | no _ with dec-ord x z 
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | yes y≤z | yes x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x | no _ | yes _ = refl
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | yes y≤z | yes x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x | no _ | no ¬x≤z = ⊥-elim (¬x≤z x≤z)
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | yes y≤z | yes x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | no ¬y≤x = ⊥-elim (total-contr ¬x≤y ¬y≤x)
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | yes y≤z | no ¬x≤z with dec-eq x y
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | yes y≤z | no ¬x≤z | yes x=y = ⊥-elim (x≠y x=y)
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | yes y≤z | no ¬x≤z | no ¬x=y with dec-eq y x
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | yes y≤z | no ¬x≤z | no ¬x=y | yes y=x = ⊥-elim (¬x=y (sym-eq y=x))
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | yes y≤z | no ¬x≤z | no ¬x=y | no ¬y=x with dec-ord x y | dec-ord y x
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | yes y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | yes x≤y | yes y≤x = ⊥-elim (¬x=y (antisym-ord x≤y y≤x))
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | yes y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | yes x≤y | no ¬y≤x = ⊥-elim (excluded-middle-ord' ¬y=z y≤z (trans-ord (excluded-middle-ord ¬x≤z) x≤y))
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | yes y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x with dec-eq x z
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | yes y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x | yes x=z = ⊥-elim (¬x=z x=z)
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | yes y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x | no _ with dec-ord x z
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | yes y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x | no _ | yes x≤z = ⊥-elim (¬x≤z x≤z)
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | yes y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x | no _ | no _ with dec-ord y z
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | yes y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x | no _ | no _ | yes _ with dec-eq y z
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | yes y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x | no _ | no _ | yes _ | yes y=z = ⊥-elim (¬y=z y=z)
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | yes y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x | no _ | no _ | yes _ | no _ with dec-ord y z
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | yes y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x | no _ | no _ | yes _ | no _ | yes _ = refl
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | yes y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x | no _ | no _ | yes _ | no _ | no ¬y≤z = ⊥-elim (¬y≤z y≤z)
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | yes y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x | no _ | no _ | no ¬y≤z = ⊥-elim (¬y≤z y≤z)
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | yes y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | no ¬y≤x = ⊥-elim (total-contr ¬x≤y ¬y≤x)
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | no ¬y≤z | yes x≤z with dec-eq x y
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | no ¬y≤z | yes x≤z | yes x=y = ⊥-elim (x≠y x=y)
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | no ¬y≤z | yes x≤z | no ¬x=y with dec-eq y x
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | no ¬y≤z | yes x≤z | no ¬x=y | yes y=x = ⊥-elim (¬x=y (sym-eq y=x))
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | no ¬y≤z | yes x≤z | no ¬x=y | no ¬y=x with dec-ord x y | dec-ord y x
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | no ¬y≤z | yes x≤z | no ¬x=y | no ¬y=x | yes x≤y | yes y≤x = ⊥-elim (¬x=y (antisym-ord x≤y y≤x))
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | no ¬y≤z | yes x≤z | no ¬x=y | no ¬y=x | yes x≤y | no ¬y≤x with dec-eq y z
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | no ¬y≤z | yes x≤z | no ¬x=y | no ¬y=x | yes x≤y | no ¬y≤x | yes y=z = ⊥-elim (¬y=z y=z)
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | no ¬y≤z | yes x≤z | no ¬x=y | no ¬y=x | yes x≤y | no ¬y≤x | no _ with dec-ord y z 
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | no ¬y≤z | yes x≤z | no ¬x=y | no ¬y=x | yes x≤y | no ¬y≤x | no _ | yes y≤z = ⊥-elim (¬y≤z y≤z)
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | no ¬y≤z | yes x≤z | no ¬x=y | no ¬y=x | yes x≤y | no ¬y≤x | no _ | no _ with dec-eq x z
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | no ¬y≤z | yes x≤z | no ¬x=y | no ¬y=x | yes x≤y | no ¬y≤x | no _ | no _ | yes x=z = ⊥-elim (¬x=z x=z)
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | no ¬y≤z | yes x≤z | no ¬x=y | no ¬y=x | yes x≤y | no ¬y≤x | no _ | no _ | no _ with dec-ord x z
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | no ¬y≤z | yes x≤z | no ¬x=y | no ¬y=x | yes x≤y | no ¬y≤x | no _ | no _ | no _ | yes _ = refl
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | no ¬y≤z | yes x≤z | no ¬x=y | no ¬y=x | yes x≤y | no ¬y≤x | no _ | no _ | no _ | no ¬x≤z = ⊥-elim (¬x≤z x≤z)
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | no ¬y≤z | yes x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x = ⊥-elim (¬x≤y (trans-ord x≤z (excluded-middle-ord ¬y≤z)))
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | no ¬y≤z | yes x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | no ¬y≤x = ⊥-elim (total-contr ¬x≤y ¬y≤x)
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z with dec-eq x y
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | yes x=y = ⊥-elim (x≠y x=y)
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | no ¬x=y with dec-eq y x
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | no ¬x=y | yes y=x = ⊥-elim (¬x=y (sym-eq y=x))
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | no ¬x=y | no ¬y=x with dec-ord x y | dec-ord y x
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | yes x≤y | yes y≤x = ⊥-elim (¬x=y (antisym-ord x≤y y≤x))
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | yes x≤y | no ¬y≤x with dec-eq y z
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | yes x≤y | no ¬y≤x | yes y=z = ⊥-elim (¬y=z y=z)
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | yes x≤y | no ¬y≤x | no _ with dec-ord y z 
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | yes x≤y | no ¬y≤x | no _ | yes y≤z = ⊥-elim (¬y≤z y≤z)
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | yes x≤y | no ¬y≤x | no _ | no _ with dec-eq x z
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | yes x≤y | no ¬y≤x | no _ | no _ | yes x=z = ⊥-elim (¬x=z x=z)
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | yes x≤y | no ¬y≤x | no _ | no _ | no _ with dec-ord x z
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | yes x≤y | no ¬y≤x | no _ | no _ | no _ | yes x≤z = ⊥-elim (¬x≤z x≤z)
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | yes x≤y | no ¬y≤x | no _ | no _ | no _ | no _ = cong (_∷_ z) (insert-commute {x} {y} {zs} x≠y)
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x with dec-eq x z
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x | yes x=z = ⊥-elim (¬x=z x=z)
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x | no _ with dec-eq y z
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x | no _ | yes y=z = ⊥-elim (¬y=z y=z)
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x | no _ | no _ with dec-ord y z
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x | no _ | no _ | yes y≤z = ⊥-elim (¬y≤z y≤z)
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x | no _ | no _ | no _ with dec-ord x z
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x | no _ | no _ | no _ | yes x≤z = ⊥-elim (¬x≤z x≤z)
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x | no _ | no _ | no _ | no _ = cong (_∷_ z) (insert-commute {x} {y} {zs} x≠y)
+insert-commute {x} {y} {z ∷ zs} x≠y | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | no ¬x=y | no ¬y=x | no ¬x≤y | no ¬y≤x = ⊥-elim (total-contr ¬x≤y ¬y≤x)
 
 insert-elim : {x y : A} {zs : List A} → x == y → insert x (insert y zs) ≡ insert x zs
 insert-elim {x} {y} {[]} x=y with dec-eq x y

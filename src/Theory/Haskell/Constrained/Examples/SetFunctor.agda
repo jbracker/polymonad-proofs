@@ -19,7 +19,6 @@ open import Haskell
 open import ProofIrrelevance
 open import Theory.Category
 open import Theory.Category.Dependent
-open import Theory.Examples.Haskell.FunctorSet.Base
 open import Theory.Haskell.Constrained
 open import Theory.Haskell.ConstrainedFunctor
 
@@ -95,6 +94,8 @@ FunctorLSet proof-irr-Ord = record
             ≡⟨ cong (insert (g (f x))) (map-structure (g ∘F f) (lset xs sortedX)) ⟩
           insert (g (f x)) (mapList (g ∘F f) xs)
             ≡⟨ {!!} ⟩
+          insert (g (f x)) (mapList g (mapList f xs))
+            ≡⟨ sym (map-insert-commute g (f x) (mapList f xs) {!!} {!!}) ⟩
           mapList g (insert (f x) (mapList f xs))
             ≡⟨ cong (mapList g ∘F insert (f x)) (sym (map-structure f (lset xs sortedX))) ⟩
           mapList g (insert (f x) (LSet.xs (mapSet f (lset xs sortedX))))
