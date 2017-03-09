@@ -161,6 +161,9 @@ module ListProperties {ℓEq ℓOrd : Level} {A : Type} (OrdA : OrdInstance {ℓ
   
   open OrdInstance OrdA
   
+  IsStructuralEquality : Set ℓEq
+  IsStructuralEquality = (a b : A) → (a == b) → (a ≡ b)
+
   IsSortedList : List A → Set ℓOrd
   IsSortedList [] = Lift ⊤
   IsSortedList (x ∷ []) = Lift ⊤
@@ -230,12 +233,18 @@ module ListProperties {ℓEq ℓOrd : Level} {A : Type} (OrdA : OrdInstance {ℓ
   -- Proof irrelevancy for sorted and no duplicate list
   -------------------------------------------------------------------------------
 
+  proof-irr-IsStructuralEquality : ProofIrrelevance IsStructuralEquality
+  proof-irr-IsStructuralEquality struct-eq₀ struct-eq₁ 
+    = fun-ext 
+    $ λ a → fun-ext 
+    $ λ b → fun-ext 
+    $ λ a=b → proof-irr-≡ (struct-eq₀ a b a=b) (struct-eq₁ a b a=b)
+  
   proof-irr-IsSortedList : (xs : List A) → ProofIrrelevance (IsSortedList xs)
   proof-irr-IsSortedList [] sortedX sortedY = refl
   proof-irr-IsSortedList (x ∷ []) sortedX sortedY = refl
   proof-irr-IsSortedList (x ∷ y ∷ xs) (x≤y , sortedX) (x≤y' , sortedY) with OrdInstance.proof-irr-ord OrdA x≤y x≤y'
   proof-irr-IsSortedList (x ∷ y ∷ xs) (x≤y , sortedX) (.x≤y , sortedY) | refl = cong (λ X → x≤y , X) (proof-irr-IsSortedList (y ∷ xs) sortedX sortedY)
-  
   
   proof-irr-IsNoDupList : (xs : List A) → ProofIrrelevance (IsNoDupList xs)
   proof-irr-IsNoDupList [] noDupX noDupY = refl
