@@ -4,9 +4,10 @@ open import Function renaming ( _∘_ to _∘F_ ; id to idF )
 open import Level renaming ( suc to lsuc ; zero to lzero)
 open import Data.Unit hiding ( _≤_ ; _≟_ ; total )
 open import Data.Empty
-open import Data.List hiding ( map )
+open import Data.List
 open import Data.List.Any hiding ( map )
 open import Data.List.All hiding ( map )
+open import Data.List.Properties using ( map-id ; map-compose )
 open import Data.Product hiding ( map )
 open import Data.Sum hiding ( map )
 open import Relation.Nullary
@@ -46,7 +47,7 @@ FunctorLSet : {ℓEq ℓOrd : Level} → ((A : Type) → ProofIrrelevance (OrdIn
 FunctorLSet proof-irr-Ord = record
   { Cts = CtCat
   ; F = LSet
-  ; map = map
+  ; map = fmap
   ; functor-id = functor-id
   ; functor-compose = λ {a} {b} {c} {f} {g} → functor-compose {a} {b} {c} {f} {g}
   ; unique-instances = {!!}
@@ -63,15 +64,15 @@ FunctorLSet proof-irr-Ord = record
     
     _∘dep_ = _∘_ dep-category
     
-    map : {A B : Σ Type ObjCt} → Σ (proj₁ A → proj₁ B) (HomCt (proj₂ A) (proj₂ B)) → LSet A → LSet B
-    map (f , tt) set = mapSet f set
+    fmap : {A B : Σ Type ObjCt} → Σ (proj₁ A → proj₁ B) (HomCt (proj₂ A) (proj₂ B)) → LSet A → LSet B
+    fmap (f , tt) set = mapSet f set
     
     open ≡-Reasoning
     
-    functor-id : {A : Obj dep-category} → map {A} {A} (id dep-category {A}) ≡ idF
+    functor-id : {A : Obj dep-category} → fmap {A} {A} (id dep-category {A}) ≡ idF
     functor-id {A} = fun-ext helper
       where
-        helper : (x : LSet A) → map (id dep-category {A}) x ≡ idF x
+        helper : (x : LSet A) → fmap (id dep-category {A}) x ≡ idF x
         helper (lset [] sorted) = refl
         helper (lset (x ∷ xs) (allX , sortedX)) = lset-eq _ (x ∷ xs) _ (allX , sortedX) $ begin
           insert {OrdA = proj₂ A} x (LSet.xs (mapSet (λ a → a) (lset xs sortedX)))
@@ -84,10 +85,10 @@ FunctorLSet proof-irr-Ord = record
     
     functor-compose : {α β γ : Obj dep-category}
                     → {f : Hom dep-category α β} {g : Hom dep-category β γ} 
-                    → map (_∘dep_ {α} {β} {γ} g f) ≡ map g ∘F map f
+                    → fmap (_∘dep_ {α} {β} {γ} g f) ≡ fmap g ∘F fmap f
     functor-compose {A , OrdA} {B , OrdB} {C , OrdC} {f , tt} {g , tt} = fun-ext (λ xs → helper xs)
       where
-        helper : (set : LSet (A , OrdA)) → map (g ∘F f , tt) set ≡ map (g , tt) (map (f , tt) set)
+        helper : (set : LSet (A , OrdA)) → fmap (g ∘F f , tt) set ≡ fmap (g , tt) (fmap (f , tt) set)
         helper (lset [] (lift tt)) = refl
         helper (lset (x ∷ xs) (allX , sortedX)) = lset-eq _ _ _ _ $ begin
           insert ((g ∘F f) x) (LSet.xs (mapSet (g ∘F f) (lset xs sortedX)))
