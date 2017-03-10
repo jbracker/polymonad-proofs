@@ -13,6 +13,7 @@ open import Relation.Binary.HeterogeneousEquality using ( refl ; _≅_ )
 
 open import Extensionality
 open import ProofIrrelevance
+open import Haskell hiding ( Type )
 
 open import Theory.Category
 open import Theory.Category.Dependent
