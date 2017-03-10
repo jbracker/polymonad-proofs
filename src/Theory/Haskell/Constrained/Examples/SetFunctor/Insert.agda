@@ -1,23 +1,26 @@
 
-
 open import Function renaming ( _∘_ to _∘F_ ; id to idF )
-open import Level renaming ( suc to lsuc ; zero to lzero)
+open import Level
+
 open import Data.Unit hiding ( _≤_ ; _≟_ ; total )
 open import Data.Empty
 open import Data.List hiding ( map )
 open import Data.List.All hiding ( map )
 open import Data.Product hiding ( map )
+
 open import Relation.Nullary
 open import Relation.Binary.PropositionalEquality
 
 open import Extensionality
-open import Haskell
 
 open import Theory.Haskell.Constrained.Examples.SetFunctor.Base
 
-module Theory.Haskell.Constrained.Examples.SetFunctor.Insert {A : Type} {OrdA : OrdInstance {lzero} {lzero} A} where 
+module Theory.Haskell.Constrained.Examples.SetFunctor.Insert {ℓ ℓEq ℓOrd : Level} {A : Set ℓ} {OrdA : OrdInstance {ℓ} {ℓEq} {ℓOrd} A} where 
 
 open OrdInstance OrdA
+
+private
+  Type = Set ℓ
 
 insert : A → List A → List A
 insert a [] = a ∷ []
