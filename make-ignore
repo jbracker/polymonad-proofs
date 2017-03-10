@@ -6,19 +6,13 @@ src/MorphMonad/Closure.agda
 src/MorphMonad/Diamond1.agda
 src/MorphMonad/Diamond2.agda
 
-
 src/Haskell/Parameterized/IndexedMonad/Principal.agda
 src/Haskell/Parameterized/IndexedMonad/SessionTypes.agda
 src/Haskell/Parameterized/IndexedMonad/NonPhantomNonPrincipal.agda
 
-
 src/Supermonad/Polymonad.agda
 src/Supermonad/DefinitionWithCategory/ToLaxTwoFunctor.agda
 
-
-src/Theory/Examples/Haskell/FunctorSet/ListSet.agda
-src/Theory/Examples/Haskell/FunctorSet/ListMap.agda
-src/Theory/Examples/Haskell/FunctorMonotonicSet.agda
 src/Theory/Examples/TwoFunctorToAtkeyParameterizedMonad.agda
 src/Theory/Examples/IxMonadToAtkeyParameterizedMonad.agda
 
