@@ -3,6 +3,7 @@ open import Level renaming ( suc to lsuc ; zero to lzero )
 open import Function renaming ( _∘_ to _∘F_ ; id to idF )
 open import Data.Unit
 open import Data.Product hiding ( map )
+
 open import Relation.Binary.PropositionalEquality
 open import Relation.Binary.HeterogeneousEquality hiding ( trans )
 open ≡-Reasoning
@@ -10,11 +11,11 @@ open ≡-Reasoning
 open import Extensionality
 open import Congruence
 open import ProofIrrelevance
-open import Haskell hiding ( Hask ; Type )
+
 open import Theory.Category
 open import Theory.Category.Dependent
-open import Theory.Haskell.ConstrainedFunctor
 open import Theory.Haskell.Constrained
+open import Theory.Haskell.Constrained.Functor
 
 module Theory.Haskell.Constrained.Examples.EndomorphismFunctor {ℓ : Level} where
 

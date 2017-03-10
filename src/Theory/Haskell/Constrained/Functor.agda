@@ -1,5 +1,5 @@
  
-module Theory.Haskell.ConstrainedFunctor where
+module Theory.Haskell.Constrained.Functor where
 
 open import Function renaming ( _∘_ to _∘F_ ; id to idF )
 open import Level renaming ( suc to lsuc ; zero to lzero)

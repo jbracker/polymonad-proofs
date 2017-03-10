@@ -18,7 +18,7 @@ open import Haskell hiding ( Type )
 open import Theory.Category
 open import Theory.Category.Dependent
 
-open import Theory.Haskell.ConstrainedFunctor
+open import Theory.Haskell.Constrained.Functor
 open import Theory.Haskell.Constrained.Examples.SetFunctor.Base
 open import Theory.Haskell.Constrained.Examples.SetFunctor.Insert
 open import Theory.Haskell.Constrained.Examples.SetFunctor.Map
