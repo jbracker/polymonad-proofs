@@ -30,7 +30,7 @@ TyCon = Type → Type
 -- What we assume to be the category of Haskell
 --------------------------------------------------------------------------------
 
-Hask = setCategory {lzero}
+Hask = setCategory
 
 --------------------------------------------------------------------------------
 -- Some general equality laws

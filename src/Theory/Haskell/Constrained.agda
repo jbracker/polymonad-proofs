@@ -9,6 +9,7 @@ open import Relation.Binary.HeterogeneousEquality hiding ( cong )
 
 open import Utilities
 open import ProofIrrelevance
+open import Haskell
 
 open import Theory.Category
 open import Theory.Category.Examples
@@ -20,13 +21,10 @@ open import Theory.Functor
  
 module Theory.Haskell.Constrained {ℓ : Level} where
 
-Hask : Category {suc ℓ} {ℓ}
-Hask = setCategory {ℓ}
-
 -- A constraint category adds constraints on the types and functions involving those types.
 -- Therefore, a constraint category is a category that depends on Hask for its definition.
 ConstraintCategory : {ℓCt₀ ℓCt₁ : Level} → Set (suc (ℓCt₁ ⊔ ℓCt₀ ⊔ ℓ))
-ConstraintCategory {ℓCt₀} {ℓCt₁} = DependentCategory {ℓDep₀ = ℓCt₀} {ℓDep₁ = ℓCt₁} Hask
+ConstraintCategory {ℓCt₀} {ℓCt₁} = DependentCategory {ℓDep₀ = ℓCt₀} {ℓDep₁ = ℓCt₁} (Hask {ℓ})
 
 open Category
 open DependentCategory

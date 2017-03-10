@@ -7,7 +7,7 @@ open import Data.Unit
 open import Data.Product hiding ( map )
 open import Relation.Binary.PropositionalEquality
 
-open import Haskell hiding ( Hask )
+open import Haskell
 open import Utilities
 open import ProofIrrelevance
 open import Theory.Category
