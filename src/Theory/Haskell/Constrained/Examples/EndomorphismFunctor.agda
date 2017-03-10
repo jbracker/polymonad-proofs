@@ -16,7 +16,7 @@ open import Theory.Category.Dependent
 open import Theory.Haskell.ConstrainedFunctor
 open import Theory.Haskell.Constrained
 
-module Theory.Examples.Haskell.FunctorEndomorphisms {ℓ : Level} where
+module Theory.Haskell.Constrained.Examples.EndomorphismFunctor {ℓ : Level} where
 
 private
   Type = Set ℓ
