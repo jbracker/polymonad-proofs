@@ -38,7 +38,7 @@ FunctorEndomorphisms = record
   ; map = map
   ; functor-id = functor-id
   ; functor-compose = λ {α} {β} {γ} {f} {g} → functor-compose {α} {β} {γ} {f} {g}
-  ; unique-instances = unique-type-inst , unique-hom-inst
+  -- ; unique-instances = unique-type-inst , unique-hom-inst
   } where
     ObjCts : Type → Set ℓ
     ObjCts _ = Lift ⊤
@@ -86,7 +86,7 @@ FunctorEndomorphisms = record
     functor-compose {α , lift tt} {.α , lift tt} {.α , lift tt} {f , refl} {g , refl} = fun-ext helper
       where helper : (x : Endo α) → endomap (g ∘F f) x ≡ (endomap g ∘F endomap f) x
             helper (endo h) = refl
-    
+    {-
     unique-type-inst : (α : Type) → (αCts αCts' : DepObj α) → αCts ≡ αCts'
     unique-type-inst α (lift tt) (lift tt) = refl
     
@@ -95,3 +95,4 @@ FunctorEndomorphisms = record
                     → (fCt : DepHom αCt βCt f) → (gCt : DepHom αCt βCt g)
                     → fCt ≅ gCt
     unique-hom-inst f g (lift tt) (lift tt) refl refl = refl
+    -}

@@ -53,14 +53,14 @@ mapList-compose {OrdA = OrdA} struct-eqB struct-eqC f g (x ∷ xs) = begin
     ≡⟨ sym (map-insert-commute g (f x) (mapList f xs) struct-eqB struct-eqC) ⟩
   mapList g (insert (f x) (mapList f xs)) ∎
 
-FunctorLSet : {ℓ : Level} → ((A : Set ℓ) → ProofIrrelevance (OrdInstance {ℓ} {lzero} {lzero} A)) → ConstrainedFunctor {ℓ}
-FunctorLSet {ℓ} proof-irr-Ord = record
+FunctorLSet : {ℓ : Level} {- → ((A : Set ℓ) → ProofIrrelevance (OrdInstance {ℓ} {lzero} {lzero} A)) -} → ConstrainedFunctor {ℓ}
+FunctorLSet {ℓ} {- proof-irr-Ord -} = record
   { Cts = CtCat
   ; F = F
   ; map = λ {α} {β} → fmap {α} {β}
   ; functor-id = λ {α} → functor-id {α}
   ; functor-compose = λ {α} {β} {γ} {f} {g} → functor-compose {α} {β} {γ} {f} {g}
-  ; unique-instances = proof-irr-Obj , proof-irr-Hom
+  --; unique-instances = proof-irr-Obj , proof-irr-Hom
   } where
     Type = Set ℓ
     open import Theory.Haskell.Constrained {ℓ}
@@ -124,7 +124,7 @@ FunctorLSet {ℓ} proof-irr-Ord = record
           mapList g (insert (f x) (LSet.xs (mapSet f (lset xs sortedX))))
             ≡⟨ sym (map-structure g (lset (insert (f x) (LSet.xs (mapSet f (lset xs sortedX)))) (insert-preserves-IsSortedNoDupList (LSet.sorted (mapSet f (lset xs sortedX)))))) ⟩
           LSet.xs (mapSet g (lset (insert (f x) (LSet.xs (mapSet f (lset xs sortedX)))) (insert-preserves-IsSortedNoDupList (LSet.sorted (mapSet f (lset xs sortedX)))))) ∎
-    
+    {-
     proof-irr-Obj : (α : Category.Obj Hask) → ProofIrrelevance (ObjCt α)
     proof-irr-Obj α (Ord₀ , struct-eq₀) (Ord₁ , struct-eq₁) with proof-irr-Ord α Ord₀ Ord₁
     proof-irr-Obj α (Ord  , struct-eq₀) (.Ord , struct-eq₁) | refl = cong (_,_ Ord) (proof-irr-IsStructuralEquality Ord struct-eq₀ struct-eq₁)
@@ -135,3 +135,4 @@ FunctorLSet {ℓ} proof-irr-Ord = record
                   → (fCt : HomCt αCt βCt f) (gCt : HomCt αCt βCt g)
                   → fCt ≅ gCt
     proof-irr-Hom f g _ _ tt tt = refl
+    -}

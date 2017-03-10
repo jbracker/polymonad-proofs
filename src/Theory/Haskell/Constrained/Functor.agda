@@ -34,7 +34,11 @@ record ConstrainedFunctor {ℓ ℓ₀ ℓ₁ : Level} : Set (lsuc (ℓ ⊔ ℓ�
     functor-compose : {α β γ : Obj} {f : Hom α β} {g : Hom β γ} 
                     → map (g ∘ f) ≡ map g ∘F map f
     
-    unique-instances : UniqueInstances Cts
+    -- We do not force the instance for each type to be unique,
+    -- because Haskell (or at least GHC) does not enforce the 
+    -- uniqueness of an instance and reasonable extensions such
+    -- as OverlappingInstances violate this condition anyway.
+    --unique-instances : UniqueInstances Cts
   
   -- The actual constrained functor.
   CtFunctor : Functor (ConstrainedHask Cts) (Hask {ℓ})
