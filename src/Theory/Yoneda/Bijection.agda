@@ -6,7 +6,7 @@ open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning
 
 open import Extensionality
-open import Bijection using ( Bijection )
+open import Bijection using ( Bijection ; _↔_ )
 
 open import Theory.Category
 open import Theory.Category.Examples
@@ -47,8 +47,8 @@ yoneda← F A FA = naturalTransformation η' natural-η
         ≡⟨ refl ⟩
       (η' b) ∘Set ([ Hom[ A ,-] ]₁ f) ∎
 
-yoneda-left-id : (F : Functor C SetCat) → (A : Obj C) → yoneda→ F A ∘F yoneda← F A ≡ (λ x → x)
-yoneda-left-id F A = fun-ext p
+yoneda-right-id : (F : Functor C SetCat) → (A : Obj C) → yoneda→ F A ∘F yoneda← F A ≡ (λ x → x)
+yoneda-right-id F A = fun-ext p
   where
     p : (FA : F₀ F A) → (yoneda→ F A ∘F yoneda← F A) FA ≡ FA
     p FA with yoneda← F A FA 
@@ -57,8 +57,8 @@ yoneda-left-id F A = fun-ext p
         ≡⟨ cong (λ P → P FA) (Functor.id F) ⟩
       FA ∎
 
-yoneda-right-id : (F : Functor C SetCat) → (A : Obj C) → yoneda← F A ∘F yoneda→ F A ≡ (λ x → x)
-yoneda-right-id F A = fun-ext $ λ NatTrans → natural-transformation-eq (p NatTrans)
+yoneda-left-id : (F : Functor C SetCat) → (A : Obj C) → yoneda← F A ∘F yoneda→ F A ≡ (λ x → x)
+yoneda-left-id F A = fun-ext $ λ NatTrans → natural-transformation-eq (p NatTrans)
   where
     open NaturalTransformation
     
@@ -73,14 +73,12 @@ yoneda-right-id F A = fun-ext $ λ NatTrans → natural-transformation-eq (p Nat
       η' x (f ∘C (id C {A}))
         ≡⟨ cong (η' x) (left-id C) ⟩
       η' x f ∎
-{-
+
 yoneda-bijection : (F : Functor C SetCat) → (A : Obj C) → NaturalTransformation Hom[ A ,-] F ↔ [ F ]₀ A
 yoneda-bijection F A = record
   { f = yoneda→ F A
-  ; f⁻¹ = yoneda← F A
-  ; lawInjective = {!!}
-  ; lawSurjective = {!!}
-  ; lawInjective⁻¹ = {!!}
-  ; lawSurjective⁻¹ = {!!}
+  ; inv = yoneda← F A
+  ; left-id = λ a → cong (λ f → f a) (yoneda-left-id F A)
+  ; right-id = λ b → cong (λ f → f b) (yoneda-right-id F A)
   }
--}
+
