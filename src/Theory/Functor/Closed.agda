@@ -117,7 +117,7 @@ record ClosedFunctor {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level}
   
   private
     module F̂-iso-mod (x : Category.Obj (C' op)) (y : Category.Obj C')  where
-      open Isomorphism (F̂-iso x y) hiding ( f⁻¹ ) renaming ( inv to F̂-inv ; left-id to F̂-left-id ; right-id to F̂-right-id )
+      open Isomorphism (F̂-iso x y) hiding ( f⁻¹ ) renaming ( inv to F̂-inv ; left-id to F̂-left-id ; right-id to F̂-right-id ) public
       
   open F̂-iso-mod public
   
