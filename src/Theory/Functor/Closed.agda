@@ -8,9 +8,11 @@ open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning
 
 open import Theory.Category
+open import Theory.Category.Isomorphism
 open import Theory.Category.Closed
 open import Theory.Functor
 open import Theory.Natural.Transformation
+open import Theory.Natural.Isomorphism
 
 module Theory.Functor.Closed where
 
@@ -91,3 +93,38 @@ record LaxClosedFunctor {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level}
   F̂-natural-transformation : NaturalTransformation ([ F ]∘[ InternalHom C ]) ([ [ F ]op , F ]∘[ InternalHom D ])
   F̂-natural-transformation = naturalTransformation (uncurry F̂)
                            $ λ {a} {b} {f} → F̂-natural-xy {proj₁ a} {proj₂ a} {proj₁ b} {proj₂ b} {proj₁ f} {proj₂ f}
+
+-------------------------------------------------------------------------------
+-- Definition of (strong) closed functors
+-------------------------------------------------------------------------------
+record ClosedFunctor {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} 
+                     {C' : Category {ℓC₀} {ℓC₁}} {D' : Category {ℓD₀} {ℓD₁}} 
+                     (C : ClosedCategory C') (D : ClosedCategory D')
+                     : Set (ℓC₀ ⊔ ℓC₁ ⊔ ℓD₀ ⊔ ℓD₁) where
+  
+  field
+    lax-closed-functor : LaxClosedFunctor C D
+  
+  open LaxClosedFunctor lax-closed-functor public
+  open ClosedCategory renaming ( id to idC ) hiding ( coher-1 ; coher-2 ; coher-3 ; coher-4 )
+
+  field
+    F̂-iso : (x : Category.Obj (C' op)) → (y : Category.Obj C') → Isomorphism D' (F̂ x y)
+
+    F⁰-iso : Isomorphism D' F⁰
+  
+  open Isomorphism F⁰-iso hiding ( f⁻¹ ) renaming ( inv to F⁰-inv ; left-id to F⁰-left-id ; right-id to F⁰-right-id )
+  
+  private
+    module F̂-iso-mod (x : Category.Obj (C' op)) (y : Category.Obj C')  where
+      open Isomorphism (F̂-iso x y) hiding ( f⁻¹ ) renaming ( inv to F̂-inv ; left-id to F̂-left-id ; right-id to F̂-right-id )
+      
+  open F̂-iso-mod public
+  
+  import Theory.Functor.Application
+  open import Theory.Functor.Composition
+  open Theory.Functor.Application.BiFunctor
+  open Theory.Functor.Composition.BiFunctor
+  
+  F̂-natural-isomorphism : NaturalIsomorphism ([ F ]∘[ InternalHom C ]) ([ [ F ]op , F ]∘[ InternalHom D ])
+  F̂-natural-isomorphism = naturalIsomorphism F̂-natural-transformation (uncurry F̂-iso)
