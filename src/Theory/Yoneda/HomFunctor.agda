@@ -1,5 +1,6 @@
 
 open import Level
+open import Function renaming ( _∘_ to _∘F_ ; id to idF )
 
 open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning
@@ -10,12 +11,12 @@ open import Theory.Category
 open import Theory.Category.Examples
 open import Theory.Functor
 
-module Theory.Yoneda.HomFunctor {ℓ₀ ℓ₁ : Level} {C : Category {ℓ₀} {ℓ₁}} where
+module Theory.Yoneda.HomFunctor {ℓC₀ ℓC₁ : Level} {C : Category {ℓC₀} {ℓC₁}} where
 
 open Category
 
 private
-  SetCat = setCategory {ℓ₁}
+  SetCat = setCategory {ℓC₁}
   _∘C_ = _∘_ C
   _∘Set_ = _∘_ SetCat
 
@@ -32,11 +33,11 @@ Hom[_,-] a = functor HomF₀ HomF₁ id-HomF compose-HomF
     id-HomF : {a : Obj C} → HomF₁ (id C {a}) ≡ id SetCat
     id-HomF {a} = begin
       HomF₁ (id C) 
-        ≡⟨ refl ⟩
+        ≡⟨⟩
       ( λ g → id C ∘C g )
         ≡⟨ fun-ext (λ g → right-id C {f = g}) ⟩
       ( λ g → g )
-        ≡⟨ refl ⟩
+        ≡⟨⟩
       id SetCat ∎
     
     compose-HomF : {a b c : Obj C} {f : Hom C a b} {g : Hom C b c} 
