@@ -9,15 +9,18 @@ open import Data.Product hiding ( map )
 
 open import Relation.Nullary
 open import Relation.Binary.PropositionalEquality
-open import Relation.Binary.HeterogeneousEquality using ( refl ; _≅_ )
+open import Relation.Binary.HeterogeneousEquality using ( refl ; _≅_ ; ≡-to-≅ )
 
 open import Extensionality
+open import Equality
 open import ProofIrrelevance
 open import Haskell hiding ( Type )
 
 open import Theory.Category
+open import Theory.Category.Dependent
 open import Theory.Category.Concrete
 
+open import Theory.Haskell.Constrained
 open import Theory.Haskell.Constrained.Functor
 open import Theory.Haskell.Constrained.Examples.SetFunctor.Base
 open import Theory.Haskell.Constrained.Examples.SetFunctor.Insert
@@ -53,14 +56,13 @@ mapList-compose {OrdA = OrdA} struct-eqB struct-eqC f g (x ∷ xs) = begin
     ≡⟨ sym (map-insert-commute g (f x) (mapList f xs) struct-eqB struct-eqC) ⟩
   mapList g (insert (f x) (mapList f xs)) ∎
 
-FunctorLSet : {ℓ : Level} {- → ((A : Set ℓ) → ProofIrrelevance (OrdInstance {ℓ} {lzero} {lzero} A)) -} → ConstrainedFunctor {ℓ}
-FunctorLSet {ℓ} {- proof-irr-Ord -} = record
+FunctorLSet : {ℓ : Level} → ConstrainedFunctor {ℓ}
+FunctorLSet {ℓ} = record
   { Cts = CtCat
   ; F = F
   ; map = λ {α} {β} → fmap {α} {β}
   ; functor-id = λ {α} → functor-id {α}
   ; functor-compose = λ {α} {β} {γ} {f} {g} → functor-compose {α} {β} {γ} {f} {g}
-  --; unique-instances = proof-irr-Obj , proof-irr-Hom
   } where
     Type = Set ℓ
     open import Theory.Haskell.Constrained {ℓ}
@@ -71,10 +73,10 @@ FunctorLSet {ℓ} {- proof-irr-Ord -} = record
     HomCt : {A B : Type} → ObjCt A → ObjCt B → (A → B) → Set lzero
     HomCt OrdA OrdB f = ⊤
     
-    CtCat = concreteCategory ObjCt HomCt (λ _ _ → tt) tt (λ f' g' h' → refl) (λ f' → refl) (λ f' → refl)
+    CtCat = dependentCategory ObjCt HomCt (λ _ _ → tt) tt (λ f' g' h' → refl) (λ f' → refl) (λ f' → refl)
     
-    open ConcreteCategory CtCat using ( concrete-category )
-    open Category concrete-category
+    open DependentCategory CtCat using ( DepCat )
+    open Category DepCat
     
     Obj' : Obj → Σ Type (OrdInstance {ℓ} {lzero} {lzero})
     Obj' (A , OrdA , _) = (A , OrdA)
@@ -124,15 +126,39 @@ FunctorLSet {ℓ} {- proof-irr-Ord -} = record
           mapList g (insert (f x) (LSet.xs (mapSet f (lset xs sortedX))))
             ≡⟨ sym (map-structure g (lset (insert (f x) (LSet.xs (mapSet f (lset xs sortedX)))) (insert-preserves-IsSortedNoDupList (LSet.sorted (mapSet f (lset xs sortedX)))))) ⟩
           LSet.xs (mapSet g (lset (insert (f x) (LSet.xs (mapSet f (lset xs sortedX)))) (insert-preserves-IsSortedNoDupList (LSet.sorted (mapSet f (lset xs sortedX)))))) ∎
-    {-
-    proof-irr-Obj : (α : Category.Obj Hask) → ProofIrrelevance (ObjCt α)
-    proof-irr-Obj α (Ord₀ , struct-eq₀) (Ord₁ , struct-eq₁) with proof-irr-Ord α Ord₀ Ord₁
-    proof-irr-Obj α (Ord  , struct-eq₀) (.Ord , struct-eq₁) | refl = cong (_,_ Ord) (proof-irr-IsStructuralEquality Ord struct-eq₀ struct-eq₁)
+
+
+FunctorLSet-DependentHomUniqueness : {ℓ : Level} → DependentHomUniqueness (ConstrainedFunctor.Cts (FunctorLSet {ℓ}))
+FunctorLSet-DependentHomUniqueness (f₁ , tt) (.f₁ , tt) refl = refl
+
+FunctorLSet-DependentObjUniqueness : {ℓ : Level} 
+                                   → ((A : Set ℓ) → ProofIrrelevance (OrdInstance {ℓ} {lzero} {lzero} A)) 
+                                   → DependentObjUniqueness (ConstrainedFunctor.Cts (FunctorLSet {ℓ}))
+FunctorLSet-DependentObjUniqueness proof-irr-Ord (a₁ , ord-a₂ , struct-eq-a₂) (.a₁ , ord-b₂ , struct-eq-b₂) refl with proof-irr-Ord a₁ ord-a₂ ord-b₂ 
+FunctorLSet-DependentObjUniqueness proof-irr-Ord (a₁ , ord-a , struct-eq-a₂) (.a₁ , .ord-a , struct-eq-b₂) refl | refl 
+  = ≡-to-≅ (cong (_,_ ord-a) (proof-irr-IsStructuralEquality ord-a struct-eq-a₂ struct-eq-b₂))
+
+FunctorLSet-UniqueInstances : {ℓ : Level}
+                            → ((A : Set ℓ) → ProofIrrelevance (OrdInstance {ℓ} {lzero} {lzero} A))
+                            → UniqueInstances (ConstrainedFunctor.Cts (FunctorLSet {ℓ}))
+FunctorLSet-UniqueInstances {ℓ} proof-irr-ord = unique-type-inst , unique-hom-inst
+  where
+    open DependentCategory (ConstrainedFunctor.Cts FunctorLSet)
+    open Category DepCat
+
+    Type = Set ℓ
     
-    proof-irr-Hom : {α β : Category.Obj Hask}
-                  → (f g : α → β)
-                  → (αCt : ObjCt α) (βCt : ObjCt β)
-                  → (fCt : HomCt αCt βCt f) (gCt : HomCt αCt βCt g)
-                  → fCt ≅ gCt
-    proof-irr-Hom f g _ _ tt tt = refl
-    -}
+    unique-type-inst : (α : Type) → (αCts αCts' : DepObj α) → αCts ≡ αCts'
+    unique-type-inst α (ordA , struct-eqA) (ordB , struct-eqB) with proof-irr-ord α ordA ordB
+    unique-type-inst α (ord , struct-eqA) (.ord , struct-eqB) | refl 
+      = cong (_,_ ord) (proof-irr-IsStructuralEquality ord struct-eqA struct-eqB)
+    
+    unique-hom-inst : {α β : Type} → (f g : α → β)
+                    → (αCt : DepObj α) → (βCt : DepObj β) 
+                    → (fCt : DepHom αCt βCt f) → (gCt : DepHom αCt βCt g)
+                    → fCt ≅ gCt
+    unique-hom-inst f g a b tt tt = refl
+
+FunctorLSetCodomain-IsConcreteCategory : {ℓ : Level} → IsConcreteCategory (DependentCategory.DepCat (ConstrainedFunctor.Cts (FunctorLSet {ℓ})))
+FunctorLSetCodomain-IsConcreteCategory {ℓ} = ConstraintCategory→ConcreteCategory (ConstrainedFunctor.Cts FunctorLSet) (λ {a} {b} → FunctorLSet-DependentHomUniqueness {ℓ} {a} {b})
+

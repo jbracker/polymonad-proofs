@@ -14,6 +14,7 @@ open import ProofIrrelevance
 
 open import Theory.Category
 open import Theory.Category.Concrete
+open import Theory.Category.Dependent
 open import Theory.Haskell.Constrained
 open import Theory.Haskell.Constrained.Functor
 
@@ -62,13 +63,13 @@ FunctorEndomorphisms = record
     left-id refl = refl
     
     Cts : ConstraintCategory {ℓ}
-    Cts = concreteCategory ObjCts HomCts (flip trans) refl 
+    Cts = dependentCategory ObjCts HomCts (flip trans) refl 
                             (λ {α} {β} {γ} {δ} {f} {g} {h} {α'} {β'} {γ'} {δ'} f' g' h' → ≡-to-≅ $ assoc {f = f} {g} {h} f' g' h')
                             (λ {α} {β} {f} {α'} {β'} f' → ≡-to-≅ $ right-id {f = f} f') 
                             (λ {α} {β} {f} {α'} {β'} f' → ≡-to-≅ $ left-id {f = f} f')
     
-    open ConcreteCategory Cts
-    open Category concrete-category
+    open DependentCategory Cts
+    open Category DepCat
     
     F : Obj → Type
     F α = Endo (proj₁ α)
@@ -86,7 +87,19 @@ FunctorEndomorphisms = record
     functor-compose {α , lift tt} {.α , lift tt} {.α , lift tt} {f , refl} {g , refl} = fun-ext helper
       where helper : (x : Endo α) → endomap (g ∘F f) x ≡ (endomap g ∘F endomap f) x
             helper (endo h) = refl
-    {-
+
+FunctorEndomorphisms-DependentHomUniqueness : DependentHomUniqueness (ConstrainedFunctor.Cts FunctorEndomorphisms)
+FunctorEndomorphisms-DependentHomUniqueness (f₁ , refl) (.f₁ , refl) refl = refl
+
+FunctorEndomorphisms-DependentObjUniqueness : DependentObjUniqueness (ConstrainedFunctor.Cts FunctorEndomorphisms)
+FunctorEndomorphisms-DependentObjUniqueness (a₁ , lift tt) (.a₁ , lift tt) refl = refl
+ 
+FunctorEndomorphisms-UniqueInstances : UniqueInstances (ConstrainedFunctor.Cts FunctorEndomorphisms)
+FunctorEndomorphisms-UniqueInstances = unique-type-inst , unique-hom-inst
+  where
+    open DependentCategory (ConstrainedFunctor.Cts FunctorEndomorphisms)
+    open Category DepCat
+    
     unique-type-inst : (α : Type) → (αCts αCts' : DepObj α) → αCts ≡ αCts'
     unique-type-inst α (lift tt) (lift tt) = refl
     
@@ -95,4 +108,6 @@ FunctorEndomorphisms = record
                     → (fCt : DepHom αCt βCt f) → (gCt : DepHom αCt βCt g)
                     → fCt ≅ gCt
     unique-hom-inst f g (lift tt) (lift tt) refl refl = refl
-    -}
+
+FunctorEndomorphismsCodomain-IsConcreteCategory : IsConcreteCategory (DependentCategory.DepCat (ConstrainedFunctor.Cts FunctorEndomorphisms))
+FunctorEndomorphismsCodomain-IsConcreteCategory = ConstraintCategory→ConcreteCategory (ConstrainedFunctor.Cts FunctorEndomorphisms) FunctorEndomorphisms-DependentHomUniqueness
