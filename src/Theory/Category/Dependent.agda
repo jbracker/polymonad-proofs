@@ -112,5 +112,8 @@ productDependentCategory C D = dependentCategory (const $ Obj D) (λ a b → con
 -------------------------------------------------------------------------------
 open DependentCategory
 
-DependentCategory→ConcreteCategory : {ℓ ℓDep₀ ℓDep₁ : Level} → (DC : DependentCategory {ℓDep₀ = ℓDep₀} {ℓDep₁} (setCategory {ℓ})) → DependentHomUniqueness DC → IsConcreteCategory {ℓ = ℓ} (DepCat DC)
+DependentCategory→ConcreteCategory : {ℓ ℓDep₀ ℓDep₁ : Level} 
+                                   → (DC : DependentCategory {ℓDep₀ = ℓDep₀} {ℓDep₁} (setCategory {ℓ})) 
+                                   → DependentHomUniqueness DC 
+                                   → IsConcreteCategory {ℓ = ℓ} (DepCat DC)
 DependentCategory→ConcreteCategory {ℓ} DC dep-hom-unique = forgetful-functor DC , forgetful-functor-faithful DC dep-hom-unique 
