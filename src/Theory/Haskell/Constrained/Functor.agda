@@ -14,6 +14,7 @@ open import Theory.Category
 open import Theory.Category.Subcategory
 open import Theory.Category.Subcategory.Examples
 open import Theory.Category.Concrete
+open import Theory.Category.Dependent
 open import Theory.Functor
 open import Theory.Haskell.Constrained
 
@@ -21,8 +22,8 @@ record ConstrainedFunctor {ℓ ℓ₀ ℓ₁ : Level} : Set (lsuc (ℓ ⊔ ℓ�
   field
     Cts : ConstraintCategory {ℓ} {ℓ₀} {ℓ₁}
   
-  open ConcreteCategory Cts
-  open Category concrete-category
+  open DependentCategory Cts
+  open Category DepCat
   
   field
     F : Obj → Set ℓ
