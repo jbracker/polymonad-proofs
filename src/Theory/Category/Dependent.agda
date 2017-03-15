@@ -9,10 +9,15 @@ open import Relation.Binary.HeterogeneousEquality using ( _≅_ ; ≡-to-≅ ; �
 open import Equality
 open import Theory.Category
 open import Theory.Category.Examples
+open import Theory.Category.Concrete
 open import Theory.Functor
 
 module Theory.Category.Dependent where
 
+
+-------------------------------------------------------------------------------
+-- Definition of dependent category (essentially a product category with dependent pairs)
+-------------------------------------------------------------------------------
 record DependentCategory {ℓ₀ ℓ₁ ℓDep₀ ℓDep₁ : Level} (C : Category {ℓ₀} {ℓ₁}) : Set (ℓ₀ ⊔ ℓ₁ ⊔ suc (ℓDep₀ ⊔ ℓDep₁)) where
   constructor dependentCategory
   open Category C
@@ -68,6 +73,9 @@ record DependentCategory {ℓ₀ ℓ₁ ℓDep₀ ℓDep₁ : Level} (C : Catego
 
 open Category
 
+-------------------------------------------------------------------------------
+-- Properties of dependent categories
+-------------------------------------------------------------------------------
 private
   module Properties {ℓ₀ ℓ₁ ℓDep₀ ℓDep₁ : Level} {C : Category {ℓ₀} {ℓ₁}} (DC : DependentCategory {ℓDep₀ = ℓDep₀} {ℓDep₁} C) where
     open DependentCategory hiding ( DepCat )
@@ -86,6 +94,9 @@ private
 
 open Properties public
 
+-------------------------------------------------------------------------------
+-- Examples of dependent categories
+-------------------------------------------------------------------------------
 open import Function hiding ( id ; _∘_ )
 
 productDependentCategory : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} 
@@ -96,3 +107,10 @@ productDependentCategory C D = dependentCategory (const $ Obj D) (λ a b → con
                                                  (λ f' → ≡-to-≅ (right-id D)) 
                                                  (λ f' → ≡-to-≅ (left-id D))
 
+-------------------------------------------------------------------------------
+-- Dependent categories can be instances of concrete categories
+-------------------------------------------------------------------------------
+open DependentCategory
+
+DependentCategory→ConcreteCategory : {ℓ ℓDep₀ ℓDep₁ : Level} → (DC : DependentCategory {ℓDep₀ = ℓDep₀} {ℓDep₁} (setCategory {ℓ})) → DependentHomUniqueness DC → IsConcreteCategory {ℓ = ℓ} (DepCat DC)
+DependentCategory→ConcreteCategory {ℓ} DC dep-hom-unique = forgetful-functor DC , forgetful-functor-faithful DC dep-hom-unique 
