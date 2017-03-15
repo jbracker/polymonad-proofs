@@ -8,13 +8,15 @@ open import Relation.Binary.HeterogeneousEquality
 
 open import Equality
 open import Theory.Category
+open import Theory.Category.Examples
+open import Theory.Functor
 
-module Theory.Category.Dependent where
+module Theory.Category.Concrete where
 
 
 -- Concrete Category
-record DependentCategory {ℓ₀ ℓ₁ ℓDep₀ ℓDep₁ : Level} (C : Category {ℓ₀} {ℓ₁}) : Set (ℓ₀ ⊔ ℓ₁ ⊔ suc (ℓDep₀ ⊔ ℓDep₁)) where
-  constructor dependentCategory
+record ConcreteCategory {ℓ₀ ℓ₁ ℓDep₀ ℓDep₁ : Level} (C : Category {ℓ₀} {ℓ₁}) : Set (ℓ₀ ⊔ ℓ₁ ⊔ suc (ℓDep₀ ⊔ ℓDep₁)) where
+  constructor concreteCategory
   open Category C
   
   field
@@ -44,8 +46,8 @@ record DependentCategory {ℓ₀ ℓ₁ ℓDep₀ ℓDep₁ : Level} (C : Catego
                 → (f' : DepHom a' b' f)
                 → f' ∘dep depId {a} {a'} ≅ f'
   
-  dep-category : Category {ℓ₀ ⊔ ℓDep₀} {ℓ₁ ⊔ ℓDep₁}
-  dep-category = record
+  concrete-category : Category {ℓ₀ ⊔ ℓDep₀} {ℓ₁ ⊔ ℓDep₁}
+  concrete-category = record
     { Obj = Σ Obj DepObj
     ; Hom = Hom'
     ; _∘_ = _∘'_
@@ -62,15 +64,18 @@ record DependentCategory {ℓ₀ ℓ₁ ℓDep₀ ℓDep₁ : Level} (C : Catego
 
       _∘'_ : {a b c : Σ Obj DepObj} → Hom' b c → Hom' a b → Hom' a c
       _∘'_ (f , f') (g , g') = f ∘ g , f' ∘dep g'
+  
+  forgetful-functor : Functor concrete-category C
+  forgetful-functor = functor proj₁ proj₁ refl refl
 
 open import Function hiding ( id ; _∘_ )
 open Category
 
 productDependentCategory : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} 
                          → (C : Category {ℓC₀} {ℓC₁}) (D : Category {ℓD₀} {ℓD₁})
-                         → DependentCategory {ℓC₀} {ℓC₁} {ℓD₀} {ℓD₁} C
-productDependentCategory C D = dependentCategory (const $ Obj D) (λ a b → const $ Hom D a b) (_∘_ D) (id D) 
-                                                 (λ f' g' h' → ≡-to-≅ (assoc D {f = f'} {g'} {h'})) 
-                                                 (λ f' → ≡-to-≅ (right-id D)) 
-                                                 (λ f' → ≡-to-≅ (left-id D))
+                         → ConcreteCategory {ℓC₀} {ℓC₁} {ℓD₀} {ℓD₁} C
+productDependentCategory C D = concreteCategory (const $ Obj D) (λ a b → const $ Hom D a b) (_∘_ D) (id D) 
+                                                (λ f' g' h' → ≡-to-≅ (assoc D {f = f'} {g'} {h'})) 
+                                                (λ f' → ≡-to-≅ (right-id D)) 
+                                                (λ f' → ≡-to-≅ (left-id D))
 

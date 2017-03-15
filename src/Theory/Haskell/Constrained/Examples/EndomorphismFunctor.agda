@@ -13,7 +13,7 @@ open import Congruence
 open import ProofIrrelevance
 
 open import Theory.Category
-open import Theory.Category.Dependent
+open import Theory.Category.Concrete
 open import Theory.Haskell.Constrained
 open import Theory.Haskell.Constrained.Functor
 
@@ -62,13 +62,13 @@ FunctorEndomorphisms = record
     left-id refl = refl
     
     Cts : ConstraintCategory {ℓ}
-    Cts = dependentCategory ObjCts HomCts (flip trans) refl 
+    Cts = concreteCategory ObjCts HomCts (flip trans) refl 
                             (λ {α} {β} {γ} {δ} {f} {g} {h} {α'} {β'} {γ'} {δ'} f' g' h' → ≡-to-≅ $ assoc {f = f} {g} {h} f' g' h')
                             (λ {α} {β} {f} {α'} {β'} f' → ≡-to-≅ $ right-id {f = f} f') 
                             (λ {α} {β} {f} {α'} {β'} f' → ≡-to-≅ $ left-id {f = f} f')
     
-    open DependentCategory Cts
-    open Category dep-category
+    open ConcreteCategory Cts
+    open Category concrete-category
     
     F : Obj → Type
     F α = Endo (proj₁ α)

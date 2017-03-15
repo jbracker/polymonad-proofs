@@ -16,7 +16,7 @@ open import ProofIrrelevance
 open import Haskell hiding ( Type )
 
 open import Theory.Category
-open import Theory.Category.Dependent
+open import Theory.Category.Concrete
 
 open import Theory.Haskell.Constrained.Functor
 open import Theory.Haskell.Constrained.Examples.SetFunctor.Base
@@ -71,10 +71,10 @@ FunctorLSet {ℓ} {- proof-irr-Ord -} = record
     HomCt : {A B : Type} → ObjCt A → ObjCt B → (A → B) → Set lzero
     HomCt OrdA OrdB f = ⊤
     
-    CtCat = dependentCategory ObjCt HomCt (λ _ _ → tt) tt (λ f' g' h' → refl) (λ f' → refl) (λ f' → refl)
+    CtCat = concreteCategory ObjCt HomCt (λ _ _ → tt) tt (λ f' g' h' → refl) (λ f' → refl) (λ f' → refl)
     
-    open DependentCategory CtCat using ( dep-category )
-    open Category dep-category
+    open ConcreteCategory CtCat using ( concrete-category )
+    open Category concrete-category
     
     Obj' : Obj → Σ Type (OrdInstance {ℓ} {lzero} {lzero})
     Obj' (A , OrdA , _) = (A , OrdA)
