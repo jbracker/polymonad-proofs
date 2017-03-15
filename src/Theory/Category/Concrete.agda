@@ -8,11 +8,13 @@ open import Theory.Category
 open import Theory.Category.Examples
 open import Theory.Functor
 
-module Theory.Category.Concrete where
+module Theory.Category.Concrete {ℓ ℓC₀ ℓC₁ : Level} where
 
 -------------------------------------------------------------------------------
--- Definition of what being a concrete category means
+-- Definition of concrete categories
 -------------------------------------------------------------------------------
-IsConcreteCategory : {ℓC₀ ℓC₁ ℓ : Level} → (C : Category {ℓC₀} {ℓC₁}) → Set (suc ℓ ⊔ ℓC₀ ⊔ ℓC₁)
-IsConcreteCategory {ℓ = ℓ} C = Σ (Functor C (setCategory {ℓ})) IsFaithfulFunctor
+IsConcreteCategory : (C : Category {ℓC₀} {ℓC₁}) → Set (suc ℓ ⊔ ℓC₀ ⊔ ℓC₁)
+IsConcreteCategory C = Σ (Functor C (setCategory {ℓ})) IsFaithfulFunctor
 
+ConcreteCategory : Set (suc (ℓ ⊔ ℓC₁ ⊔ ℓC₀))
+ConcreteCategory = Σ (Category {ℓC₀} {ℓC₁}) IsConcreteCategory
