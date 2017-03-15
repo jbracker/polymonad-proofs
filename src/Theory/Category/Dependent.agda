@@ -4,19 +4,17 @@ open import Level
 open import Data.Product
 
 open import Relation.Binary.PropositionalEquality
-open import Relation.Binary.HeterogeneousEquality
+open import Relation.Binary.HeterogeneousEquality using ( _≅_ ; ≡-to-≅ ; ≅-to-≡ )
 
 open import Equality
 open import Theory.Category
 open import Theory.Category.Examples
 open import Theory.Functor
 
-module Theory.Category.Concrete where
+module Theory.Category.Dependent where
 
-
--- Concrete Category
-record ConcreteCategory {ℓ₀ ℓ₁ ℓDep₀ ℓDep₁ : Level} (C : Category {ℓ₀} {ℓ₁}) : Set (ℓ₀ ⊔ ℓ₁ ⊔ suc (ℓDep₀ ⊔ ℓDep₁)) where
-  constructor concreteCategory
+record DependentCategory {ℓ₀ ℓ₁ ℓDep₀ ℓDep₁ : Level} (C : Category {ℓ₀} {ℓ₁}) : Set (ℓ₀ ⊔ ℓ₁ ⊔ suc (ℓDep₀ ⊔ ℓDep₁)) where
+  constructor dependentCategory
   open Category C
   
   field
@@ -46,8 +44,8 @@ record ConcreteCategory {ℓ₀ ℓ₁ ℓDep₀ ℓDep₁ : Level} (C : Categor
                 → (f' : DepHom a' b' f)
                 → f' ∘dep depId {a} {a'} ≅ f'
   
-  concrete-category : Category {ℓ₀ ⊔ ℓDep₀} {ℓ₁ ⊔ ℓDep₁}
-  concrete-category = record
+  DepCat : Category {ℓ₀ ⊔ ℓDep₀} {ℓ₁ ⊔ ℓDep₁}
+  DepCat = record
     { Obj = Σ Obj DepObj
     ; Hom = Hom'
     ; _∘_ = _∘'_
@@ -65,17 +63,36 @@ record ConcreteCategory {ℓ₀ ℓ₁ ℓDep₀ ℓDep₁ : Level} (C : Categor
       _∘'_ : {a b c : Σ Obj DepObj} → Hom' b c → Hom' a b → Hom' a c
       _∘'_ (f , f') (g , g') = f ∘ g , f' ∘dep g'
   
-  forgetful-functor : Functor concrete-category C
+  forgetful-functor : Functor DepCat C
   forgetful-functor = functor proj₁ proj₁ refl refl
 
-open import Function hiding ( id ; _∘_ )
 open Category
+
+private
+  module Properties {ℓ₀ ℓ₁ ℓDep₀ ℓDep₁ : Level} {C : Category {ℓ₀} {ℓ₁}} (DC : DependentCategory {ℓDep₀ = ℓDep₀} {ℓDep₁} C) where
+    open DependentCategory hiding ( DepCat )
+    
+    private
+      DepCat = DependentCategory.DepCat DC
+
+    DependentObjUniqueness : Set (ℓDep₀ ⊔ ℓ₀)
+    DependentObjUniqueness = (a b : Σ (Obj C) (DepObj DC)) → proj₁ a ≡ proj₁ b → proj₂ a ≅ proj₂ b
+    
+    DependentHomUniqueness : Set (ℓDep₁ ⊔ ℓDep₀ ⊔ ℓ₁ ⊔ ℓ₀)
+    DependentHomUniqueness = {a b : Obj DepCat} → (f g : Hom DepCat a b) → proj₁ f ≡ proj₁ g → proj₂ f ≅ proj₂ g
+  
+    forgetful-functor-faithful : DependentHomUniqueness → IsFaithfulFunctor (forgetful-functor DC)
+    forgetful-functor-faithful dep-hom-unique a b (f₁ , f₂) (.f₁ , g₂) refl = cong (_,_ f₁) (≅-to-≡ (dep-hom-unique (f₁ , f₂) (f₁ , g₂) refl))
+
+open Properties public
+
+open import Function hiding ( id ; _∘_ )
 
 productDependentCategory : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} 
                          → (C : Category {ℓC₀} {ℓC₁}) (D : Category {ℓD₀} {ℓD₁})
-                         → ConcreteCategory {ℓC₀} {ℓC₁} {ℓD₀} {ℓD₁} C
-productDependentCategory C D = concreteCategory (const $ Obj D) (λ a b → const $ Hom D a b) (_∘_ D) (id D) 
-                                                (λ f' g' h' → ≡-to-≅ (assoc D {f = f'} {g'} {h'})) 
-                                                (λ f' → ≡-to-≅ (right-id D)) 
-                                                (λ f' → ≡-to-≅ (left-id D))
+                         → DependentCategory {ℓC₀} {ℓC₁} {ℓD₀} {ℓD₁} C
+productDependentCategory C D = dependentCategory (const $ Obj D) (λ a b → const $ Hom D a b) (_∘_ D) (id D) 
+                                                 (λ f' g' h' → ≡-to-≅ (assoc D {f = f'} {g'} {h'})) 
+                                                 (λ f' → ≡-to-≅ (right-id D)) 
+                                                 (λ f' → ≡-to-≅ (left-id D))
 
