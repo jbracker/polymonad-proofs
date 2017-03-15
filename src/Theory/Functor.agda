@@ -54,6 +54,10 @@ record Functor {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} (C : Category {ℓC₀}
 ContravariantFunctor : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} (C : Category {ℓC₀} {ℓC₁}) (D : Category {ℓD₀} {ℓD₁}) → Set (ℓC₀ ⊔ ℓC₁ ⊔ ℓD₀ ⊔ ℓD₁)
 ContravariantFunctor C D = Functor (C op) D
 
+-------------------------------------------------------------------------------
+-- Definition of different functor properties
+-------------------------------------------------------------------------------
+
 private
   module Properties {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} (F : Functor C D) where
     open Category
@@ -68,7 +72,6 @@ private
     IsFullyFaithfulFunctor : Set (ℓD₁ ⊔ (ℓC₁ ⊔ ℓC₀))
     IsFullyFaithfulFunctor = (a b : Obj C) → IsBijective (F₁ F {a} {b})
     
-
 open Properties public
 
 -------------------------------------------------------------------------------
@@ -80,7 +83,7 @@ open Properties public
 IsInjectiveFunctor : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} {C : Category {ℓC₀} {ℓC₁}} 
                    → {D : Category {ℓD₀} {ℓD₁}} 
                    → Functor C D → Set (ℓD₁ ⊔ ℓD₀ ⊔ ℓC₁ ⊔ ℓC₀)
-IsInjectiveFunctor {C = C} {D} F = IsInjective (Functor.F₀ F) × ((x y : Category.Obj C) → IsInjective (Functor.F₁ F {x} {y}))
+IsInjectiveFunctor {C = C} {D} F = IsInjective (Functor.F₀ F) × IsFaithfulFunctor F
 
 -------------------------------------------------------------------------------
 -- The Identity Functor
