@@ -29,13 +29,19 @@ x ∈ S = S x
 -- Formalization of Injectivity and Surjectivity
 --------------------------------------------------------------------------------
 
-IsInjective : {ℓA ℓB : Level} {A : Set ℓA} {B : Set ℓB} 
-            → (F : A → B) → Set (ℓA ⊔ ℓB)
-IsInjective {A = A} {B = B} F = (x y : A) → F x ≡ F y → x ≡ y
+private
+  module FunctionProperties {ℓA ℓB : Level} {A : Set ℓA} {B : Set ℓB} (F : A → B) where
 
-IsSurjective : {ℓA ℓB : Level} {A : Set ℓA} {B : Set ℓB}
-             → (F : A → B) → Set (ℓA ⊔ ℓB)
-IsSurjective {A = A} {B = B} F = (y : B) → ∃ λ (x : A) → F x ≡ y
+    IsInjective :  Set (ℓA ⊔ ℓB)
+    IsInjective = (x y : A) → F x ≡ F y → x ≡ y
+
+    IsSurjective : Set (ℓA ⊔ ℓB)
+    IsSurjective = (y : B) → ∃ λ (x : A) → F x ≡ y
+
+    IsBijective : Set (ℓA ⊔ ℓB)
+    IsBijective = IsInjective × IsSurjective
+
+open FunctionProperties public
 
 --------------------------------------------------------------------------------
 -- Utilities
