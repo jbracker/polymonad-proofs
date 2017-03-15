@@ -54,6 +54,23 @@ record Functor {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} (C : Category {ℓC₀}
 ContravariantFunctor : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} (C : Category {ℓC₀} {ℓC₁}) (D : Category {ℓD₀} {ℓD₁}) → Set (ℓC₀ ⊔ ℓC₁ ⊔ ℓD₀ ⊔ ℓD₁)
 ContravariantFunctor C D = Functor (C op) D
 
+private
+  module Properties {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} (F : Functor C D) where
+    open Category
+    open Functor
+    
+    IsFaithfulFunctor : Set (ℓD₁ ⊔ ℓC₁ ⊔ ℓC₀)
+    IsFaithfulFunctor = (a b : Obj C) → IsInjective (F₁ F {a} {b})
+
+    IsFullFunctor : Set (ℓD₁ ⊔ ℓC₁ ⊔ ℓC₀)
+    IsFullFunctor = (a b : Obj C) → IsSurjective (F₁ F {a} {b})
+
+    IsFullyFaithfulFunctor : Set (ℓD₁ ⊔ (ℓC₁ ⊔ ℓC₀))
+    IsFullyFaithfulFunctor = (a b : Obj C) → IsBijective (F₁ F {a} {b})
+    
+
+open Properties public
+
 -------------------------------------------------------------------------------
 -- Definition of Injective Functor 
 -------------------------------------------------------------------------------
