@@ -10,6 +10,9 @@ open import Theory.Functor
 
 module Theory.Category.Concrete where
 
+-------------------------------------------------------------------------------
+-- Definition of what being a concrete category means
+-------------------------------------------------------------------------------
 IsConcreteCategory : {ℓC₀ ℓC₁ ℓ : Level} → (C : Category {ℓC₀} {ℓC₁}) → Set (suc ℓ ⊔ ℓC₀ ⊔ ℓC₁)
 IsConcreteCategory {ℓ = ℓ} C = Σ (Functor C (setCategory {ℓ})) IsFaithfulFunctor
 
