@@ -26,12 +26,16 @@ _∈_ : ∀ {ℓ} {X : Set ℓ} → (x : X) → (S : SubsetOf X) → Set ℓ
 x ∈ S = S x
 
 --------------------------------------------------------------------------------
--- Formalization of Injectivity
+-- Formalization of Injectivity and Surjectivity
 --------------------------------------------------------------------------------
 
 IsInjective : {ℓA ℓB : Level} {A : Set ℓA} {B : Set ℓB} 
-          → (F : A → B) → Set (ℓA ⊔ ℓB)
+            → (F : A → B) → Set (ℓA ⊔ ℓB)
 IsInjective {A = A} {B = B} F = (x y : A) → F x ≡ F y → x ≡ y
+
+IsSurjective : {ℓA ℓB : Level} {A : Set ℓA} {B : Set ℓB}
+             → (F : A → B) → Set (ℓA ⊔ ℓB)
+IsSurjective {A = A} {B = B} F = (y : B) → ∃ λ (x : A) → F x ≡ y
 
 --------------------------------------------------------------------------------
 -- Utilities
