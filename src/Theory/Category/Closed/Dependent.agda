@@ -27,7 +27,7 @@ record DependentClosedCategory {ℓ₀ ℓ₁ ℓDep₀ ℓDep₁ : Level} {C : 
   field 
     DC : DependentCategory {ℓDep₀ = ℓDep₀} {ℓDep₁} C
   
-  open DependentCategory DC
+  open DependentCategory DC public
   open ClosedCategory CC hiding ( _∘_ ; Obj ; Hom ; id )
   open Category
   
