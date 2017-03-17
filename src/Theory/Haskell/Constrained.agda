@@ -17,6 +17,8 @@ open import Theory.Category.Concrete
 open import Theory.Category.Dependent
 open import Theory.Category.Subcategory
 open import Theory.Category.Subcategory.Examples
+open import Theory.Category.Closed.Dependent
+open import Theory.Category.Closed.Examples
 
 open import Theory.Functor
  
@@ -26,6 +28,9 @@ module Theory.Haskell.Constrained {ℓ : Level} where
 -- Therefore, a constraint category is a category that depends on Hask for its definition.
 ConstraintCategory : {ℓCt₀ ℓCt₁ : Level} → Set (suc (ℓCt₁ ⊔ ℓCt₀ ⊔ ℓ))
 ConstraintCategory {ℓCt₀} {ℓCt₁} = DependentCategory {ℓDep₀ = ℓCt₀} {ℓDep₁ = ℓCt₁} (Hask {ℓ})
+
+ClosedConstraintCategory : {ℓCt₀ ℓCt₁ : Level} → Set (suc (ℓCt₁ ⊔ ℓCt₀ ⊔ ℓ))
+ClosedConstraintCategory {ℓCt₀} {ℓCt₁} = DependentClosedCategory {ℓDep₀ = ℓCt₀} {ℓDep₁ = ℓCt₁} (setClosedCategory {ℓ})
 
 open Category
 open DependentCategory
