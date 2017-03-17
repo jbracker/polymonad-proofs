@@ -31,16 +31,13 @@ data Endo (α : Type) : Type where
 endomap : {α : Type} → (α → α) → (Endo α) → (Endo α)
 endomap f (endo g) = endo $ f ∘F g
 
--- The categorical structure of the constrained functor.
-FunctorEndomorphisms : ConstrainedFunctor {ℓ}
-FunctorEndomorphisms = record
-  { Cts = Cts
-  ; F = F
-  ; map = map
-  ; functor-id = functor-id
-  ; functor-compose = λ {α} {β} {γ} {f} {g} → functor-compose {α} {β} {γ} {f} {g}
-  -- ; unique-instances = unique-type-inst , unique-hom-inst
-  } where
+ConstraintCategoryEndomorphisms : ConstraintCategory {ℓ}
+ConstraintCategoryEndomorphisms 
+  = dependentCategory ObjCts HomCts (flip trans) refl 
+                      (λ {α} {β} {γ} {δ} {f} {g} {h} {α'} {β'} {γ'} {δ'} f' g' h' → ≡-to-≅ $ assoc {f = f} {g} {h} f' g' h')
+                      (λ {α} {β} {f} {α'} {β'} f' → ≡-to-≅ $ right-id {f = f} f') 
+                      (λ {α} {β} {f} {α'} {β'} f' → ≡-to-≅ $ left-id {f = f} f')
+  where
     ObjCts : Type → Set ℓ
     ObjCts _ = Lift ⊤
     
@@ -61,12 +58,17 @@ FunctorEndomorphisms = record
     left-id : {α β : Type} {f : α → β} {α' : ObjCts α} {β' : ObjCts β}
             → (f' : HomCts α' β' f) → flip trans f' refl ≡ f'
     left-id refl = refl
-    
+
+-- The categorical structure of the constrained functor.
+FunctorEndomorphisms : ConstrainedFunctor ConstraintCategoryEndomorphisms
+FunctorEndomorphisms = record
+  { F = F
+  ; map = map
+  ; functor-id = functor-id
+  ; functor-compose = λ {α} {β} {γ} {f} {g} → functor-compose {α} {β} {γ} {f} {g}
+  } where
     Cts : ConstraintCategory {ℓ}
-    Cts = dependentCategory ObjCts HomCts (flip trans) refl 
-                            (λ {α} {β} {γ} {δ} {f} {g} {h} {α'} {β'} {γ'} {δ'} f' g' h' → ≡-to-≅ $ assoc {f = f} {g} {h} f' g' h')
-                            (λ {α} {β} {f} {α'} {β'} f' → ≡-to-≅ $ right-id {f = f} f') 
-                            (λ {α} {β} {f} {α'} {β'} f' → ≡-to-≅ $ left-id {f = f} f')
+    Cts = ConstraintCategoryEndomorphisms
     
     open DependentCategory Cts
     open Category DepCat

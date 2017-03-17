@@ -56,10 +56,15 @@ mapList-compose {OrdA = OrdA} struct-eqB struct-eqC f g (x ∷ xs) = begin
     ≡⟨ sym (map-insert-commute g (f x) (mapList f xs) struct-eqB struct-eqC) ⟩
   mapList g (insert (f x) (mapList f xs)) ∎
 
-FunctorLSet : {ℓ : Level} → ConstrainedFunctor {ℓ}
+LSetObj : {ℓ : Level} → Set ℓ → Set (lsuc ℓ)
+LSetObj {ℓ} A = Σ (OrdInstance {ℓ} {lzero} {lzero} A) IsStructuralEquality
+
+ConstraintCategoryLSet : {ℓ : Level} → ConstraintCategory {ℓ}
+ConstraintCategoryLSet = dependentCategory LSetObj (λ _ _ _ → ⊤) (λ _ _ → tt) tt (λ f' g' h' → refl) (λ f' → refl) (λ f' → refl)
+
+FunctorLSet : {ℓ : Level} → ConstrainedFunctor (ConstraintCategoryLSet {ℓ})
 FunctorLSet {ℓ} = record
-  { Cts = CtCat
-  ; F = F
+  { F = F
   ; map = λ {α} {β} → fmap {α} {β}
   ; functor-id = λ {α} → functor-id {α}
   ; functor-compose = λ {α} {β} {γ} {f} {g} → functor-compose {α} {β} {γ} {f} {g}
@@ -67,13 +72,12 @@ FunctorLSet {ℓ} = record
     Type = Set ℓ
     open import Theory.Haskell.Constrained {ℓ}
     
-    ObjCt : Set ℓ → Set (lsuc ℓ)
-    ObjCt A = Σ (OrdInstance {ℓ} {lzero} {lzero} A) IsStructuralEquality
+    ObjCt = LSetObj
     
     HomCt : {A B : Type} → ObjCt A → ObjCt B → (A → B) → Set lzero
     HomCt OrdA OrdB f = ⊤
     
-    CtCat = dependentCategory ObjCt HomCt (λ _ _ → tt) tt (λ f' g' h' → refl) (λ f' → refl) (λ f' → refl)
+    CtCat = ConstraintCategoryLSet {ℓ}
     
     open DependentCategory CtCat using ( DepCat )
     open Category DepCat
