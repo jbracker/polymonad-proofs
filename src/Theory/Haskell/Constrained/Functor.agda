@@ -18,7 +18,7 @@ open import Theory.Category.Dependent
 open import Theory.Functor
 open import Theory.Haskell.Constrained
 
-record ConstrainedFunctor {ℓ ℓ₀ ℓ₁ : Level} (CC : ConstraintCategory {ℓ} {ℓ₀} {ℓ₁}) : Set (lsuc (ℓ ⊔ ℓ₀ ⊔ ℓ₁)) where
+record ConstrainedFunctor {ℓ ℓCt₀ ℓCt₁ : Level} (CC : ConstraintCategory {ℓ} {ℓCt₀} {ℓCt₁}) : Set (lsuc (ℓ ⊔ ℓCt₀ ⊔ ℓCt₁)) where
   open DependentCategory CC
   open Category DepCat
   
