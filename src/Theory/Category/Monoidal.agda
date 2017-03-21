@@ -12,6 +12,7 @@ open import Theory.Category
 open import Theory.Functor
 import Theory.Functor.Association
 import Theory.Functor.Application
+open import Theory.Natural.Transformation
 open import Theory.Natural.Isomorphism
 
 -------------------------------------------------------------------------------
@@ -45,7 +46,7 @@ record MonoidalCategory {ℓ₀ ℓ₁ : Level} (C : Category {ℓ₀} {ℓ₁})
     
     right-unitor : NaturalIsomorphism ([-, unit ] tensor) Id[ C ]
     
-  open NaturalIsomorphism using ( η )
+  open NaturalIsomorphism using ( η ) renaming ( natural-transformation to nat-trans )
   
   α : (x y z : Obj) → Hom ((x ⊗₀ y) ⊗₀ z) (x ⊗₀ (y ⊗₀ z))
   α x y z = η associator (x , y , z)
@@ -56,6 +57,9 @@ record MonoidalCategory {ℓ₀ ℓ₁ : Level} (C : Category {ℓ₀} {ℓ₁})
   ρ : (x : Obj) → Hom (x ⊗₀ unit) x
   ρ x = η right-unitor x
   
+  open NaturalTransformation (nat-trans associator)   renaming (natural to α-natural) hiding (η) public
+  open NaturalTransformation (nat-trans left-unitor)  renaming (natural to λ-natural) hiding (η) public
+  open NaturalTransformation (nat-trans right-unitor) renaming (natural to ρ-natural) hiding (η) public
   
   field
     triangle-id : (x y : Obj) → (ρ x ⊗₁ id {y}) ≡ (id {x} ⊗₁ λ' y) ∘ α x unit y
