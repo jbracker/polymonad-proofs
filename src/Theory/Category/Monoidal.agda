@@ -9,6 +9,7 @@ open import Relation.Binary.HeterogeneousEquality using ( _≅_ )
 
 open import Theory.Triple
 open import Theory.Category
+open import Theory.Category.Isomorphism
 open import Theory.Functor
 import Theory.Functor.Association
 import Theory.Functor.Application
@@ -46,7 +47,7 @@ record MonoidalCategory {ℓ₀ ℓ₁ : Level} (C : Category {ℓ₀} {ℓ₁})
     
     right-unitor : NaturalIsomorphism ([-, unit ] tensor) Id[ C ]
     
-  open NaturalIsomorphism using ( η ) renaming ( natural-transformation to nat-trans )
+  open NaturalIsomorphism using ( η ; isomorphic ) renaming ( natural-transformation to nat-trans )
   
   α : (x y z : Obj) → Hom ((x ⊗₀ y) ⊗₀ z) (x ⊗₀ (y ⊗₀ z))
   α x y z = η associator (x , y , z)
@@ -56,6 +57,15 @@ record MonoidalCategory {ℓ₀ ℓ₁ : Level} (C : Category {ℓ₀} {ℓ₁})
   
   ρ : (x : Obj) → Hom (x ⊗₀ unit) x
   ρ x = η right-unitor x
+  
+  α-inv : (x y z : Obj) → Hom (x ⊗₀ (y ⊗₀ z)) ((x ⊗₀ y) ⊗₀ z)
+  α-inv x y z = Isomorphism.inv (isomorphic associator (x , y , z))
+  
+  λ-inv : (x : Obj) → Hom x (unit ⊗₀ x)
+  λ-inv x = Isomorphism.inv (isomorphic left-unitor x)
+
+  ρ-inv : (x : Obj) → Hom x (x ⊗₀ unit)
+  ρ-inv x = Isomorphism.inv (isomorphic right-unitor x)
   
   open NaturalTransformation (nat-trans associator)   renaming (natural to α-natural) hiding (η) public
   open NaturalTransformation (nat-trans left-unitor)  renaming (natural to λ-natural) hiding (η) public
