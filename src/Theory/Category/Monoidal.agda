@@ -58,15 +58,6 @@ record MonoidalCategory {ℓ₀ ℓ₁ : Level} (C : Category {ℓ₀} {ℓ₁})
   ρ : (x : Obj) → Hom (x ⊗₀ unit) x
   ρ x = η right-unitor x
   
-  α-inv : (x y z : Obj) → Hom (x ⊗₀ (y ⊗₀ z)) ((x ⊗₀ y) ⊗₀ z)
-  α-inv x y z = Isomorphism.inv (isomorphic associator (x , y , z))
-  
-  λ-inv : (x : Obj) → Hom x (unit ⊗₀ x)
-  λ-inv x = Isomorphism.inv (isomorphic left-unitor x)
-
-  ρ-inv : (x : Obj) → Hom x (x ⊗₀ unit)
-  ρ-inv x = Isomorphism.inv (isomorphic right-unitor x)
-  
   open NaturalTransformation (nat-trans associator)   renaming (natural to α-natural) hiding (η) public
   open NaturalTransformation (nat-trans left-unitor)  renaming (natural to λ-natural) hiding (η) public
   open NaturalTransformation (nat-trans right-unitor) renaming (natural to ρ-natural) hiding (η) public
@@ -77,3 +68,23 @@ record MonoidalCategory {ℓ₀ ℓ₁ : Level} (C : Category {ℓ₀} {ℓ₁})
     pentagon-id : (w x y z : Obj) 
                 → (id {w} ⊗₁ α x y z) ∘ (α w (x ⊗₀ y) z ∘ (α w x y ⊗₁ id {z})) ≡ α w x (y ⊗₀ z) ∘ α (w ⊗₀ x) y z
   
+
+private
+  module MonoidalCategoryAccessors {ℓ₀ ℓ₁ : Level} {C : Category {ℓ₀} {ℓ₁}} (MC : MonoidalCategory C) where
+    
+    open MonoidalCategory MC
+    open Isomorphism
+    open NaturalIsomorphism using ( isomorphic )
+    
+    private
+      module AssociatorInv (x y z : Obj) where
+        open Isomorphism (isomorphic associator (x , y , z)) hiding ( f⁻¹ ) renaming ( inv to α-inv ; left-id to α-left-id ; right-id to α-right-id ) public
+    open AssociatorInv public
+    
+    private
+      module UnitorInvs (x : Obj) where
+        open Isomorphism (isomorphic left-unitor  x) hiding ( f⁻¹ ) renaming ( inv to λ-inv ; left-id to λ-left-id ; right-id to λ-right-id ) public
+        open Isomorphism (isomorphic right-unitor x) hiding ( f⁻¹ ) renaming ( inv to ρ-inv ; left-id to ρ-left-id ; right-id to ρ-right-id ) public
+    open UnitorInvs public
+    
+open MonoidalCategoryAccessors public
