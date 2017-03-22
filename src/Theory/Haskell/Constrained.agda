@@ -19,6 +19,8 @@ open import Theory.Category.Subcategory
 open import Theory.Category.Subcategory.Examples
 open import Theory.Category.Closed.Dependent
 open import Theory.Category.Closed.Examples
+open import Theory.Category.Monoidal.Dependent
+open import Theory.Category.Monoidal.Examples
 
 open import Theory.Functor
  
@@ -31,6 +33,9 @@ ConstraintCategory {ℓCt₀} {ℓCt₁} = DependentCategory {ℓDep₀ = ℓCt�
 
 ClosedConstraintCategory : {ℓCt₀ ℓCt₁ : Level} → Set (suc (ℓCt₁ ⊔ ℓCt₀ ⊔ ℓ))
 ClosedConstraintCategory {ℓCt₀} {ℓCt₁} = DependentClosedCategory {ℓDep₀ = ℓCt₀} {ℓDep₁ = ℓCt₁} (setClosedCategory {ℓ})
+
+MonoidalConstraintCategory : {ℓCt₀ ℓCt₁ : Level} → Set (suc (ℓCt₁ ⊔ ℓCt₀ ⊔ ℓ))
+MonoidalConstraintCategory {ℓCt₀} {ℓCt₁} = DependentMonoidalCategory {ℓDep₀ = ℓCt₀} {ℓDep₁ = ℓCt₁} (setMonoidalCategory {ℓ})
 
 open Category
 open DependentCategory
