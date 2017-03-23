@@ -4,14 +4,21 @@ module Theory.Category.Examples where
 -- Stdlib
 open import Level renaming ( suc to lsuc ; zero to lzero )
 open import Function renaming ( id to idF ; _∘_ to _∘F_ )
+
+open import Data.Product
+open import Data.Sum
+
 open import Relation.Binary using ( Preorder )
 open import Relation.Binary.HeterogeneousEquality renaming ( cong to hcong )
 open import Relation.Binary.PropositionalEquality
 
 --open import Utilities
 open import Extensionality
+open import Equality
 open import ProofIrrelevance
+open import Bijection renaming ( refl to brefl )
 open import Theory.Category
+open import Theory.Category.Isomorphism
 open import Theory.Functor
 open import Theory.Functor.Composition
 open import Theory.Natural.Transformation
@@ -27,6 +34,21 @@ setCategory {ℓ} = record
   ; left-id = refl
   ; right-id = refl
   }
+
+SetIsomorphism↔Bijection : {ℓ : Level} {A B : Set ℓ} → (Σ (A → B) (Isomorphism (setCategory {ℓ}))) ↔ (Bijection A B)
+SetIsomorphism↔Bijection {ℓ} {A} {B} = bijection Iso→Bij Bij→Iso right-id left-id
+  where
+    Iso→Bij : Σ (A → B) (Isomorphism setCategory) → Bijection A B
+    Iso→Bij (f , iso) = bijection f (Isomorphism.inv iso) (λ x → cong (λ g → g x) (Isomorphism.left-id iso)) (λ x → cong (λ g → g x) (Isomorphism.right-id iso))
+    
+    Bij→Iso : (bij : Bijection A B) → Σ (A → B) (Isomorphism setCategory)
+    Bij→Iso bij = Bijection.f bij ,  isomorphism (Bijection.inv bij) (fun-ext (Bijection.right-id bij)) (fun-ext (Bijection.left-id bij))
+
+    right-id : (b : Bijection A B) → Iso→Bij (Bij→Iso b) ≡ b
+    right-id bij = bijection-eq (inj₁ refl)
+    
+    left-id : (a : Σ (A → B) (Isomorphism setCategory)) → Bij→Iso (Iso→Bij a) ≡ a
+    left-id (f , iso) = Σ-eq refl (≡-to-≅ (isomorphism-eq refl))
 
 -- Category that only contains the endomorphisms of the given category.
 endomorphismCategory : {ℓ₀ ℓ₁ : Level} → Category {ℓ₀} {ℓ₁} → Category {ℓ₀} {ℓ₀ ⊔ ℓ₁}
