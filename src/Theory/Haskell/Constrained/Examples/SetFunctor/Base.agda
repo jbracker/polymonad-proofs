@@ -328,6 +328,10 @@ monotonic-id : {ℓEq ℓOrd : Level} {A : Type}
              → Monotonic OrdA OrdA idF
 monotonic-id OrdA a b a≤b = a≤b
 
+IsStructuralEquality-⊤ : IsStructuralEquality Ord-⊤
+IsStructuralEquality-⊤ (lift tt) (lift tt) (lift tt) = refl
+
+
 -------------------------------------------------------------------------------
 -- Definition of ordered sets in form of lists
 -------------------------------------------------------------------------------
