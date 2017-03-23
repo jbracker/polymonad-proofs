@@ -53,6 +53,9 @@ open Equality using ( isomorphism-eq ) public
 open Category
 open Isomorphism
 
+isoId : {ℓ₀ ℓ₁ : Level} {C : Category {ℓ₀} {ℓ₁}} {a : Obj C} → Isomorphism C (id C {a})
+isoId {C = C} {a} = isomorphism (id C {a}) (Category.left-id C) (Category.right-id C)
+
 _∘Iso_ : {ℓ₀ ℓ₁ : Level} {C : Category {ℓ₀} {ℓ₁}} {a b c : Obj C}
        → {f : Hom C b c} {g : Hom C a b} 
        → (Isomorphism C f) → Isomorphism C g → Isomorphism C (_∘_ C f g)
