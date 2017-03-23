@@ -49,3 +49,43 @@ private
       = cong₂ (isomorphism inv) (proof-irrelevance left-id left-id') (proof-irrelevance right-id right-id')
 
 open Equality using ( isomorphism-eq ) public
+
+open Category
+open Isomorphism
+
+_∘Iso_ : {ℓ₀ ℓ₁ : Level} {C : Category {ℓ₀} {ℓ₁}} {a b c : Obj C}
+       → {f : Hom C b c} {g : Hom C a b} 
+       → (Isomorphism C f) → Isomorphism C g → Isomorphism C (_∘_ C f g)
+_∘Iso_ {ℓ₀} {ℓ₁} {C} {a} {b} {c} {f} {g} iso-f iso-g = isomorphism ((inv iso-g) ∘C (inv iso-f)) left-id' right-id'
+  where
+    _∘C_ = _∘_ C
+    
+    open ≡-Reasoning
+    
+    left-id' : (f ∘C g) ∘C (inv iso-g ∘C inv iso-f) ≡ id C
+    left-id' = begin
+      (f ∘C g) ∘C (inv iso-g ∘C inv iso-f) 
+        ≡⟨ sym (assoc C) ⟩
+      f ∘C (g ∘C (inv iso-g ∘C inv iso-f))
+        ≡⟨ cong (_∘C_ f) (assoc C) ⟩
+      f ∘C ((g ∘C inv iso-g) ∘C inv iso-f)
+        ≡⟨ cong (λ P → f ∘C (P ∘C inv iso-f)) (Isomorphism.left-id iso-g) ⟩
+      f ∘C (id C ∘C inv iso-f)
+        ≡⟨ cong (_∘C_ f) (Category.right-id C) ⟩
+      f ∘C inv iso-f
+        ≡⟨ Isomorphism.left-id iso-f ⟩
+      id C ∎
+    
+    right-id' : (inv iso-g ∘C inv iso-f) ∘C (f ∘C g) ≡ id C
+    right-id' = begin
+      (inv iso-g ∘C inv iso-f) ∘C (f ∘C g) 
+        ≡⟨ sym (assoc C) ⟩
+      inv iso-g ∘C (inv iso-f ∘C (f ∘C g))
+        ≡⟨ cong (_∘C_ (inv iso-g)) (assoc C) ⟩
+      inv iso-g ∘C ((inv iso-f ∘C f) ∘C g)
+        ≡⟨ cong (λ P → inv iso-g ∘C (P ∘C g)) (Isomorphism.right-id iso-f) ⟩
+      inv iso-g ∘C (id C ∘C g)
+        ≡⟨ cong (_∘C_ (inv iso-g)) (Category.right-id C) ⟩
+      inv iso-g ∘C g
+        ≡⟨ Isomorphism.right-id iso-g ⟩
+      id C ∎
