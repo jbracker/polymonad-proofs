@@ -155,6 +155,45 @@ EqList {ℓEq} {A} EqA = record
     proof-irr {x ∷ xs} {y ∷ ys} (eqX , eqXs) (eqY , eqYs) with EqInstance.proof-irr-eq EqA eqX eqY | proof-irr {xs} {ys} eqXs eqYs
     proof-irr {x ∷ xs} {y ∷ ys} (eqX , eqXs) (.eqX , .eqXs) | refl | refl = refl
     
+-------------------------------------------------------------------------------
+-- Ord instance of unit in Haskell
+-------------------------------------------------------------------------------
+
+Eq-⊤ : EqInstance {zero} (Lift ⊤)
+Eq-⊤ = record 
+  { _==_ = λ _ _ → Lift ⊤ 
+  ; isDecEquivalence = record 
+    { isEquivalence = record 
+      { refl = lift tt 
+      ; sym = λ _ → lift tt 
+      ; trans = λ _ _ → lift tt 
+      }
+    ; _≟_ = λ _ _ → yes (lift tt)
+    } 
+  ; proof-irr-eq = λ _ _ → refl
+  }
+
+Ord-⊤ : OrdInstance {zero} (Lift ⊤)
+Ord-⊤ = record
+  { _≤_ = λ _ _ → ⊤
+  ; eqInstance = Eq-⊤
+  ; proof-irr-ord = λ x y → refl
+  ; isDecTotalOrder = record 
+    { isTotalOrder = record 
+      { isPartialOrder = record 
+        { isPreorder = record 
+          { isEquivalence = EqInstance.isEquivalence Eq-⊤ 
+          ; reflexive = λ _ → tt 
+          ; trans = λ _ _ → tt
+          }
+        ; antisym = λ _ _ → lift tt 
+        }
+      ; total = λ _ _ → inj₁ tt 
+      } 
+    ; _≟_ = EqInstance.dec-eq Eq-⊤ 
+    ; _≤?_ = λ x y → yes tt
+    }
+  }
 
 -------------------------------------------------------------------------------
 -- Definition of predicates on lists
