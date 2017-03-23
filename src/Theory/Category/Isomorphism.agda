@@ -52,6 +52,26 @@ open Equality using ( isomorphism-eq ) public
 
 open Category
 open Isomorphism
+open ≡-Reasoning
+
+
+iso-inverse-unique : {ℓ₀ ℓ₁ : Level} {C : Category {ℓ₀} {ℓ₁}} {a b c : Obj C}
+                   → {f : Hom C b c}
+                   → (iso-f : Isomorphism C f) → (iso-f' : Isomorphism C f) 
+                   → inv iso-f ≡ inv iso-f'
+iso-inverse-unique {C = C} {f = f} iso-f iso-f' = begin
+  inv iso-f 
+    ≡⟨ sym (Category.left-id C) ⟩
+  inv iso-f ∘C id C
+    ≡⟨ cong (_∘C_ (inv iso-f)) (sym (Isomorphism.left-id iso-f')) ⟩
+  inv iso-f ∘C (f ∘C inv iso-f')
+    ≡⟨ assoc C ⟩
+  (inv iso-f ∘C f) ∘C inv iso-f'
+    ≡⟨ cong (λ P → P ∘C inv iso-f') (Isomorphism.right-id iso-f) ⟩
+  id C ∘C inv iso-f'
+    ≡⟨ Category.right-id C ⟩
+  inv iso-f' ∎
+  where _∘C_ = _∘_ C
 
 isoId : {ℓ₀ ℓ₁ : Level} {C : Category {ℓ₀} {ℓ₁}} {a : Obj C} → Isomorphism C (id C {a})
 isoId {C = C} {a} = isomorphism (id C {a}) (Category.left-id C) (Category.right-id C)
@@ -62,8 +82,6 @@ _∘Iso_ : {ℓ₀ ℓ₁ : Level} {C : Category {ℓ₀} {ℓ₁}} {a b c : Obj
 _∘Iso_ {ℓ₀} {ℓ₁} {C} {a} {b} {c} {f} {g} iso-f iso-g = isomorphism ((inv iso-g) ∘C (inv iso-f)) left-id' right-id'
   where
     _∘C_ = _∘_ C
-    
-    open ≡-Reasoning
     
     left-id' : (f ∘C g) ∘C (inv iso-g ∘C inv iso-f) ≡ id C
     left-id' = begin
