@@ -1,12 +1,11 @@
- 
+
 open import Level renaming ( suc to lsuc ; zero to lzero )
 open import Function renaming ( _∘_ to _∘F_ ; id to idF )
 open import Data.Unit
 open import Data.Product hiding ( map )
-open import Data.Sum hiding ( map )
 
-open import Relation.Binary.PropositionalEquality renaming ( trans to ptrans ; refl to prefl ; cong to pcong )
-open import Relation.Binary.HeterogeneousEquality renaming ( trans to htrans ; refl to hrefl )
+open import Relation.Binary.PropositionalEquality
+open import Relation.Binary.HeterogeneousEquality hiding ( trans )
 open ≡-Reasoning
 
 open import Extensionality
@@ -14,10 +13,8 @@ open import Congruence
 open import ProofIrrelevance
 
 open import Theory.Category
-open import Theory.Category.Isomorphism
 open import Theory.Category.Concrete
 open import Theory.Category.Dependent
-open import Theory.Category.Examples
 open import Theory.Haskell.Constrained
 open import Theory.Haskell.Constrained.Functor
 
@@ -25,52 +22,49 @@ module Theory.Haskell.Constrained.Examples.EndomorphismFunctor {ℓ : Level} whe
 
 private
   Type = Set ℓ
-  Hask = setCategory {ℓ}
 
 -- The functor of endomorphisms.
 data Endo (α : Type) : Type where
   endo : (α → α) → Endo α
 
-open Isomorphism
-
 -- fmap of the functor of endomorphisms.
-endomap : {α β : Type} → (Σ (α → β) (Isomorphism Hask)) → (Endo α) → (Endo β)
-endomap (f , iso) (endo g) = endo $ f ∘F g ∘F inv iso
+endomap : {α : Type} → (α → α) → (Endo α) → (Endo α)
+endomap f (endo g) = endo $ f ∘F g
 
 ConstraintCategoryEndomorphisms : ConstraintCategory {ℓ}
 ConstraintCategoryEndomorphisms 
-  = dependentCategory ObjCts HomCts (_∘Iso_) isoId 
+  = dependentCategory ObjCts HomCts (flip trans) refl 
                       (λ {α} {β} {γ} {δ} {f} {g} {h} {α'} {β'} {γ'} {δ'} f' g' h' → ≡-to-≅ $ assoc {f = f} {g} {h} f' g' h')
-                      (λ {α} {β} {f} {α'} {β'} f' → ≡-to-≅ $ right-id' {f = f} f') 
-                      (λ {α} {β} {f} {α'} {β'} f' → ≡-to-≅ $ left-id' {f = f} f')
+                      (λ {α} {β} {f} {α'} {β'} f' → ≡-to-≅ $ right-id {f = f} f') 
+                      (λ {α} {β} {f} {α'} {β'} f' → ≡-to-≅ $ left-id {f = f} f')
   where
     ObjCts : Type → Set ℓ
     ObjCts _ = Lift ⊤
     
-    HomCts : {α β : Type} → ObjCts α → ObjCts β → (α → β) → Set ℓ
-    HomCts = λ {α} {β} _ _ f → Isomorphism (setCategory {ℓ}) f
+    HomCts : {α β : Type} → ObjCts α → ObjCts β → (α → β) → Set (lsuc ℓ)
+    HomCts = λ {α} {β} _ _ _ → α ≡ β
     
     assoc : {α β γ δ : Type} 
           → {f : α → β} {g : β → γ} {h : γ → δ}
           → {α' : ObjCts α} {β' : ObjCts β} {γ' : ObjCts γ} {δ' : ObjCts δ}
           → (f' : HomCts α' β' f) (g' : HomCts β' γ' g) (h' : HomCts γ' δ' h) 
-          → h' ∘Iso (g' ∘Iso f') ≡ (h' ∘Iso g') ∘Iso  f'
-    assoc α↔β β↔γ γ↔δ = isomorphism-eq (Category.assoc Hask {f = inv γ↔δ} {inv β↔γ} {inv α↔β})
+          → flip trans h' (flip trans g' f') ≡ flip trans (flip trans h' g') f'
+    assoc refl refl refl = refl
     
-    right-id' : {α β : Type} {f : α → β} {α' : ObjCts α} {β' : ObjCts β} 
-              → (f' : HomCts α' β' f) → isoId ∘Iso f' ≡ f'
-    right-id' α↔β = isomorphism-eq (Category.right-id Hask)
+    right-id : {α β : Type} {f : α → β} {α' : ObjCts α} {β' : ObjCts β} 
+             → (f' : HomCts α' β' f) → flip trans refl f' ≡ f'
+    right-id refl = refl
     
-    left-id' : {α β : Type} {f : α → β} {α' : ObjCts α} {β' : ObjCts β}
-             → (f' : HomCts α' β' f) → f' ∘Iso isoId ≡ f'
-    left-id' α↔β = isomorphism-eq (Category.left-id Hask)
+    left-id : {α β : Type} {f : α → β} {α' : ObjCts α} {β' : ObjCts β}
+            → (f' : HomCts α' β' f) → flip trans f' refl ≡ f'
+    left-id refl = refl
 
 -- The categorical structure of the constrained functor.
 FunctorEndomorphisms : ConstrainedFunctor ConstraintCategoryEndomorphisms
 FunctorEndomorphisms = record
   { F = F
   ; map = map
-  ; functor-id = λ {α} → functor-id {α}
+  ; functor-id = functor-id
   ; functor-compose = λ {α} {β} {γ} {f} {g} → functor-compose {α} {β} {γ} {f} {g}
   } where
     Cts : ConstraintCategory {ℓ}
@@ -83,33 +77,25 @@ FunctorEndomorphisms = record
     F α = Endo (proj₁ α)
     
     map : {α β : Obj} → (Hom α β) → F α → F β
-    map = endomap
+    map (f , refl) x = endomap f x
     
-    functor-id : {α : Obj} → endomap (idF , isoId {a = proj₁ α}) ≡ idF
+    functor-id : {α : Obj} → endomap {α = proj₁ α} idF ≡ idF
     functor-id {α , lift tt} = fun-ext helper
-      where helper : (x : Endo α) → endomap (idF , isoId) x ≡ idF x
-            helper (endo f) = prefl
+      where helper : (x : Endo α) → endomap idF x ≡ idF x
+            helper (endo f) = refl
     
     functor-compose : {α β γ : Obj} {f : Hom α β} {g : Hom β γ}
-                    → map (proj₁ g ∘F proj₁ f , (proj₂ g) ∘Iso (proj₂ f)) ≡ map g ∘F map f
-    functor-compose {α , lift tt} {β , lift tt} {γ , lift tt} {f , α↔β} {g , β↔γ} = fun-ext helper
-      where helper : (x : Endo α) → endomap (g ∘F f , β↔γ ∘Iso α↔β) x ≡ (endomap (g , β↔γ) ∘F endomap (f , α↔β)) x
-            helper (endo h) = prefl
+                    → map (proj₁ g ∘F proj₁ f , flip trans (proj₂ g) (proj₂ f)) ≡ map g ∘F map f
+    functor-compose {α , lift tt} {.α , lift tt} {.α , lift tt} {f , refl} {g , refl} = fun-ext helper
+      where helper : (x : Endo α) → endomap (g ∘F f) x ≡ (endomap g ∘F endomap f) x
+            helper (endo h) = refl
 
 FunctorEndomorphisms-DependentHomUniqueness : DependentHomUniqueness (ConstrainedFunctor.Cts FunctorEndomorphisms)
-FunctorEndomorphisms-DependentHomUniqueness {α , lift tt} {β , lift tt} (f , α↔β) (.f , α↔β') prefl = ≡-to-≅ $ isomorphism-eq $ fun-ext $ λ b → pcong (λ P → P b) (iso-inverse-unique {a = α} α↔β α↔β')
+FunctorEndomorphisms-DependentHomUniqueness (f₁ , refl) (.f₁ , refl) refl = refl
 
 FunctorEndomorphisms-DependentObjUniqueness : DependentObjUniqueness (ConstrainedFunctor.Cts FunctorEndomorphisms)
-FunctorEndomorphisms-DependentObjUniqueness (α , lift tt) (.α , lift tt) prefl = hrefl
-{- 
-
--- TODO: 
--- This does not hold in general, but it does in the special case of 
--- Haskell when we say (a ∼ b) => (a -> b) → Endo a → Endo b
--- In that special case the isomorphism used is always the identity 
--- isomorphism and therefore unique for every type independent of the 
--- actual function being used.
-
+FunctorEndomorphisms-DependentObjUniqueness (a₁ , lift tt) (.a₁ , lift tt) refl = refl
+ 
 FunctorEndomorphisms-UniqueInstances : UniqueInstances (ConstrainedFunctor.Cts FunctorEndomorphisms)
 FunctorEndomorphisms-UniqueInstances = unique-type-inst , unique-hom-inst
   where
@@ -127,4 +113,3 @@ FunctorEndomorphisms-UniqueInstances = unique-type-inst , unique-hom-inst
 
 FunctorEndomorphismsCodomain-IsConcreteCategory : IsConcreteCategory (DependentCategory.DepCat (ConstrainedFunctor.Cts FunctorEndomorphisms))
 FunctorEndomorphismsCodomain-IsConcreteCategory = ConstraintCategory→ConcreteCategory (ConstrainedFunctor.Cts FunctorEndomorphisms) FunctorEndomorphisms-DependentHomUniqueness
--}
