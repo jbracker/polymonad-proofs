@@ -274,47 +274,59 @@ open ListProperties public
 -- Definition of monotonicity for function in relation to OrdInstances.
 -------------------------------------------------------------------------------
 
-module Monotonic {ℓEqA ℓOrdA ℓEqB ℓOrdB : Level} {A B : Type} (OrdA : OrdInstance {ℓEqA} {ℓOrdA} A) (OrdB : OrdInstance {ℓEqB} {ℓOrdB} B) where
+private
+  module Functions {ℓEqA ℓOrdA ℓEqB ℓOrdB : Level} {A B : Type} (OrdA : OrdInstance {ℓEqA} {ℓOrdA} A) (OrdB : OrdInstance {ℓEqB} {ℓOrdB} B) where
   
-  private
-    open ListProperties
-    open OrdInstance
+    private
+      open ListProperties
+      open OrdInstance
     
-    _=A=_ = OrdInstance._==_ OrdA
-    _=B=_ = OrdInstance._==_ OrdB
-    _≤A_ = OrdInstance._≤_ OrdA
-    _≤B_ = OrdInstance._≤_ OrdB
+      _=A=_ = OrdInstance._==_ OrdA
+      _=B=_ = OrdInstance._==_ OrdB
+      _≤A_ = OrdInstance._≤_ OrdA
+      _≤B_ = OrdInstance._≤_ OrdB
   
-  -- What it means for a function to be monotonic in the context of 
-  -- the Haskell Ord-instance.
-  Monotonic : (f : A → B) → Set (ℓ ⊔ ℓOrdA ⊔ ℓOrdB)
-  Monotonic f = (a b : A) → a ≤A b → f a ≤B f b
-
--------------------------------------------------------------------------------
--- Lemmas for monotonicity
--------------------------------------------------------------------------------
+    Congruent : (f : A → B) → Set ℓ
+    Congruent f = (a b : A) → a =A= b → f a =B= f b
+    
+    -- What it means for a function to be monotonic in the context of 
+    -- the Haskell Ord-instance.
+    Monotonic : (f : A → B) → Set (ℓ ⊔ ℓOrdA ⊔ ℓOrdB)
+    Monotonic f = (a b : A) → a ≤A b → f a ≤B f b
+    
+    IsStructuralEquality→Congruent : (f : A → B) → IsStructuralEquality OrdA → Congruent f
+    IsStructuralEquality→Congruent f struct-eqA a b a=b with struct-eqA a b a=b
+    IsStructuralEquality→Congruent f struct-eqA a .a a=b | refl = refl-eq OrdB
+    
+    proof-irr-Congruent : (f : A → B) → ProofIrrelevance (Congruent f)
+    proof-irr-Congruent f cong-f cong-f' = fun-ext (λ a → fun-ext (λ b → fun-ext (λ a=b → proof-irr-eq OrdB (cong-f a b a=b) (cong-f' a b a=b))))
+    
+    
+  -------------------------------------------------------------------------------
+  -- Lemmas for monotonicity
+  -------------------------------------------------------------------------------
+    
+    -- (monotonic-preserves-sorted OrdA OrdB f mon-f xs sorted)
+    monotonic-preserves-sorted : (f : A → B) → Monotonic f
+                               → (xs : List A) → IsSortedList OrdA xs → IsSortedList OrdB (map f xs)
+    monotonic-preserves-sorted f mon-f [] sorted = lift tt
+    monotonic-preserves-sorted f mon-f (x ∷ []) sorted = lift tt
+    monotonic-preserves-sorted f mon-f (x ∷ y ∷ xs) (x≤y , sorted) = mon-f x y x≤y , monotonic-preserves-sorted f mon-f (y ∷ xs) sorted
+    
+    monotonic-preserves-equality : (f : A → B)
+                                 → Monotonic f
+                                 → (a b : A) → a =A= b → f a =B= f b
+    monotonic-preserves-equality f mon-f a b a==b with dec-ord OrdA a b | dec-ord OrdA b a
+    monotonic-preserves-equality f mon-f a b a==b | yes a≤b | yes b≤a = antisym-ord OrdB (mon-f a b a≤b) (mon-f b a b≤a)
+    monotonic-preserves-equality f mon-f a b a==b | yes a≤b | no ¬b≤a = ⊥-elim (eq-contr OrdA a==b (inj₂ ¬b≤a))
+    monotonic-preserves-equality f mon-f a b a==b | no ¬a≤b | yes b≤a = ⊥-elim (eq-contr OrdA a==b (inj₁ ¬a≤b))
+    monotonic-preserves-equality f mon-f a b a==b | no ¬a≤b | no ¬b≤a = ⊥-elim (total-contr OrdA ¬a≤b ¬b≤a)
+    
+    proof-irr-monotonic : (f : A → B) → ProofIrrelevance (Monotonic f)
+    proof-irr-monotonic f mon-f mon-f' = fun-ext (λ x → fun-ext (λ y → fun-ext (λ x≤y → proof-irr-ord OrdB (mon-f x y x≤y) (mon-f' x y x≤y))))
+    
+open Functions public
   
-  -- (monotonic-preserves-sorted OrdA OrdB f mon-f xs sorted)
-  monotonic-preserves-sorted : (f : A → B) → Monotonic f
-                             → (xs : List A) → IsSortedList OrdA xs → IsSortedList OrdB (map f xs)
-  monotonic-preserves-sorted f mon-f [] sorted = lift tt
-  monotonic-preserves-sorted f mon-f (x ∷ []) sorted = lift tt
-  monotonic-preserves-sorted f mon-f (x ∷ y ∷ xs) (x≤y , sorted) = mon-f x y x≤y , monotonic-preserves-sorted f mon-f (y ∷ xs) sorted
-  
-  monotonic-preserves-equality : (f : A → B)
-                               → Monotonic f
-                               → (a b : A) → a =A= b → f a =B= f b
-  monotonic-preserves-equality f mon-f a b a==b with dec-ord OrdA a b | dec-ord OrdA b a
-  monotonic-preserves-equality f mon-f a b a==b | yes a≤b | yes b≤a = antisym-ord OrdB (mon-f a b a≤b) (mon-f b a b≤a)
-  monotonic-preserves-equality f mon-f a b a==b | yes a≤b | no ¬b≤a = ⊥-elim (eq-contr OrdA a==b (inj₂ ¬b≤a))
-  monotonic-preserves-equality f mon-f a b a==b | no ¬a≤b | yes b≤a = ⊥-elim (eq-contr OrdA a==b (inj₁ ¬a≤b))
-  monotonic-preserves-equality f mon-f a b a==b | no ¬a≤b | no ¬b≤a = ⊥-elim (total-contr OrdA ¬a≤b ¬b≤a)
-  
-  proof-irr-monotonic : (f : A → B) → ProofIrrelevance (Monotonic f)
-  proof-irr-monotonic f mon-f mon-f' = fun-ext (λ x → fun-ext (λ y → fun-ext (λ x≤y → proof-irr-ord OrdB (mon-f x y x≤y) (mon-f' x y x≤y))))
-  
-open Monotonic public
-
 -- Composing two monotonic functions produces a monotonic function.
 monotonic-composition : {ℓEqA ℓOrdA ℓEqB ℓOrdB ℓEqC ℓOrdC : Level} {A B C : Type} 
                       → (OrdA : OrdInstance {ℓEqA} {ℓOrdA} A) → (OrdB : OrdInstance {ℓEqB} {ℓOrdB} B) → (OrdC : OrdInstance {ℓEqC} {ℓOrdC} C)
