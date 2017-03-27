@@ -34,14 +34,14 @@ mapList-produces-IsSortedNoDupList f [] = lift tt
 mapList-produces-IsSortedNoDupList f (x ∷ xs) = insert-preserves-IsSortedNoDupList (mapList-produces-IsSortedNoDupList f xs)
 
 struct-eq-preserves-equality : (f : A → B)
-                             → IsStructuralEquality OrdA
+                             → IsStructuralEquality (eqInstance OrdA)
                              → (a b : A) → (a =A= b) → (f a =B= f b)
 struct-eq-preserves-equality f struct-eqX a b a=A=b with struct-eqX a b a=A=b
 struct-eq-preserves-equality f struct-eqX a .a a=A=b | refl = refl-eq OrdB {f a}
 
 map-insert-commute : (f : A → B) → (x : A) → (xs : List A) 
-                   → IsStructuralEquality OrdA
-                   → IsStructuralEquality OrdB
+                   → IsStructuralEquality (eqInstance OrdA)
+                   → IsStructuralEquality (eqInstance OrdB)
                    → mapList f (insert {A = A} {OrdA} x xs) ≡ insert {A = B} {OrdB} (f x) (mapList f xs)
 map-insert-commute f x [] _ _ = refl
 map-insert-commute f x (y  ∷ ys) struct-eqA struct-eqB with dec-eq OrdA x y

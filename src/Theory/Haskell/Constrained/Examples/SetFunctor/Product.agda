@@ -143,7 +143,7 @@ private
         }
       }
     
-    IsStructuralEquality-× : IsStructuralEquality OrdA → IsStructuralEquality OrdB → IsStructuralEquality OrdInstance-×
+    IsStructuralEquality-× : IsStructuralEquality (eqInstance OrdA) → IsStructuralEquality (eqInstance OrdB) → IsStructuralEquality (eqInstance OrdInstance-×)
     IsStructuralEquality-× struct-eqA struct-eqB (a₁ , a₂) (b₁ , b₂) (a₁=b₁ , a₂=b₂) = Σ-eq (struct-eqA a₁ b₁ a₁=b₁) (≡-to-≅ (struct-eqB a₂ b₂ a₂=b₂))
     
 open Ord using ( OrdInstance-× ; IsStructuralEquality-× ) public
