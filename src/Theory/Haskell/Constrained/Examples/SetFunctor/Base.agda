@@ -154,7 +154,8 @@ EqList {ℓEq} {A} EqA = record
     proof-irr {x ∷ xs} {[]} (lift ()) eqXs
     proof-irr {x ∷ xs} {y ∷ ys} (eqX , eqXs) (eqY , eqYs) with EqInstance.proof-irr-eq EqA eqX eqY | proof-irr {xs} {ys} eqXs eqYs
     proof-irr {x ∷ xs} {y ∷ ys} (eqX , eqXs) (.eqX , .eqXs) | refl | refl = refl
-    
+
+
 -------------------------------------------------------------------------------
 -- Ord instance of unit in Haskell
 -------------------------------------------------------------------------------
@@ -199,12 +200,27 @@ Ord-⊤ = record
 -- Definition of predicates on lists
 -------------------------------------------------------------------------------
 
+private
+  module StructuralEquality {ℓEq : Level} {A : Type} (EqA : EqInstance {ℓEq} A) where
+    open EqInstance EqA
+    
+    IsStructuralEquality : Set ℓ
+    IsStructuralEquality = (a b : A) → (a == b) → (a ≡ b)
+
+    proof-irr-IsStructuralEquality : ProofIrrelevance IsStructuralEquality
+    proof-irr-IsStructuralEquality struct-eq₀ struct-eq₁ 
+      = fun-ext 
+      $ λ a → fun-ext 
+      $ λ b → fun-ext 
+      $ λ a=b → proof-irr-≡ (struct-eq₀ a b a=b) (struct-eq₁ a b a=b)
+
+open StructuralEquality public
+    
+
+
 module ListProperties {ℓEq ℓOrd : Level} {A : Type} (OrdA : OrdInstance {ℓEq} {ℓOrd} A) where
   
   open OrdInstance OrdA
-  
-  IsStructuralEquality : Set ℓ
-  IsStructuralEquality = (a b : A) → (a == b) → (a ≡ b)
 
   IsSortedList : List A → Set ℓOrd
   IsSortedList [] = Lift ⊤
@@ -249,13 +265,6 @@ module ListProperties {ℓEq ℓOrd : Level} {A : Type} (OrdA : OrdInstance {ℓ
   -- Proof irrelevancy for sorted and no duplicate list
   -------------------------------------------------------------------------------
 
-  proof-irr-IsStructuralEquality : ProofIrrelevance IsStructuralEquality
-  proof-irr-IsStructuralEquality struct-eq₀ struct-eq₁ 
-    = fun-ext 
-    $ λ a → fun-ext 
-    $ λ b → fun-ext 
-    $ λ a=b → proof-irr-≡ (struct-eq₀ a b a=b) (struct-eq₁ a b a=b)
-  
   proof-irr-IsSortedList : (xs : List A) → ProofIrrelevance (IsSortedList xs)
   proof-irr-IsSortedList [] sortedX sortedY = refl
   proof-irr-IsSortedList (x ∷ []) sortedX sortedY = refl
@@ -286,21 +295,11 @@ private
       _≤A_ = OrdInstance._≤_ OrdA
       _≤B_ = OrdInstance._≤_ OrdB
   
-    Congruent : (f : A → B) → Set ℓ
-    Congruent f = (a b : A) → a =A= b → f a =B= f b
     
     -- What it means for a function to be monotonic in the context of 
     -- the Haskell Ord-instance.
     Monotonic : (f : A → B) → Set (ℓ ⊔ ℓOrdA ⊔ ℓOrdB)
     Monotonic f = (a b : A) → a ≤A b → f a ≤B f b
-    
-    IsStructuralEquality→Congruent : (f : A → B) → IsStructuralEquality OrdA → Congruent f
-    IsStructuralEquality→Congruent f struct-eqA a b a=b with struct-eqA a b a=b
-    IsStructuralEquality→Congruent f struct-eqA a .a a=b | refl = refl-eq OrdB
-    
-    proof-irr-Congruent : (f : A → B) → ProofIrrelevance (Congruent f)
-    proof-irr-Congruent f cong-f cong-f' = fun-ext (λ a → fun-ext (λ b → fun-ext (λ a=b → proof-irr-eq OrdB (cong-f a b a=b) (cong-f' a b a=b))))
-    
     
   -------------------------------------------------------------------------------
   -- Lemmas for monotonicity
@@ -340,9 +339,29 @@ monotonic-id : {ℓEq ℓOrd : Level} {A : Type}
              → Monotonic OrdA OrdA idF
 monotonic-id OrdA a b a≤b = a≤b
 
-IsStructuralEquality-⊤ : IsStructuralEquality Ord-⊤
+IsStructuralEquality-⊤ : IsStructuralEquality (OrdInstance.eqInstance Ord-⊤)
 IsStructuralEquality-⊤ (lift tt) (lift tt) (lift tt) = refl
 
+private
+  module Congruence {ℓEqA ℓEqB : Level} {A B : Type} (EqA : EqInstance {ℓEqA} A) (EqB : EqInstance {ℓEqB} B) where
+    private
+      open ListProperties
+      open EqInstance
+    
+      _=A=_ = EqInstance._==_ EqA
+      _=B=_ = EqInstance._==_ EqB
+    
+    Congruent : (f : A → B) → Set ℓ
+    Congruent f = (a b : A) → a =A= b → f a =B= f b
+    
+    IsStructuralEquality→Congruent : (f : A → B) → IsStructuralEquality EqA → Congruent f
+    IsStructuralEquality→Congruent f struct-eqA a b a=b with struct-eqA a b a=b
+    IsStructuralEquality→Congruent f struct-eqA a .a a=b | refl = EqInstance.refl-eq EqB
+    
+    proof-irr-Congruent : (f : A → B) → ProofIrrelevance (Congruent f)
+    proof-irr-Congruent f cong-f cong-f' = fun-ext (λ a → fun-ext (λ b → fun-ext (λ a=b → proof-irr-eq EqB (cong-f a b a=b) (cong-f' a b a=b))))
+    
+open Congruence public
 
 -------------------------------------------------------------------------------
 -- Definition of ordered sets in form of lists
