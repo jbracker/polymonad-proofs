@@ -8,83 +8,72 @@ open import Data.Product hiding ( map )
 open import Relation.Binary.PropositionalEquality
 
 open import Theory.Category
-open import Theory.Category.Closed
-open import Theory.Category.Closed.Examples
-open import Theory.Category.Closed.Dependent
+open import Theory.Category.Monoidal
+open import Theory.Category.Monoidal.Examples
+open import Theory.Category.Monoidal.Dependent
 open import Theory.Category.Dependent
 open import Theory.Category.Examples
 
 open import Theory.Functor
-open import Theory.Functor.Closed
+open import Theory.Functor.Monoidal
 
+open import Theory.Natural.Transformation
+
+open import Theory.Haskell.Constrained
 open import Theory.Haskell.Constrained.Functor
 
-module Theory.Haskell.Constrained.Applicative where
+module Theory.Haskell.Constrained.Applicative {ℓ : Level} where
 
 private
-  Hask : {ℓ : Level} → ClosedCategory (setCategory {ℓ})
-  Hask {ℓ} = setClosedCategory {ℓ}
+  Hask = setCategory {ℓ}
+  HaskMon = setMonoidalCategory {ℓ}
+  Type = Set ℓ
+  _∘Hask_ = Category._∘_ Hask
 
-record ConstrainedApplicative {ℓ ℓCt₀ ℓCt₁ : Level} : Set (suc (ℓ ⊔ ℓCt₀ ⊔ ℓCt₁)) where
+open import Theory.Functor.Composition
+record ConstrainedApplicative {ℓCt₀ ℓCt₁ : Level} : Set (suc (ℓ ⊔ ℓCt₀ ⊔ ℓCt₁)) where
   open Category
-  open ClosedCategory hiding ( Obj ; Hom ; id ; _∘_ )
+  open MonoidalCategory using ( tensor ; unit )
   open Functor hiding ( F₀ )
   open ConstrainedFunctor hiding ( Cts ; CtFunctor ; map )
   
   field
-    Cts : DependentClosedCategory {ℓDep₀ = ℓ} {ℓ} (Hask {ℓ})
+    Cts : MonoidalConstraintCategory {ℓ} {ℓCt₀} {ℓCt₁}
     
-    CtsFunctor : ConstrainedFunctor (DependentClosedCategory.DC Cts)
-  
-  private
-    _∘Hask_ = _∘_ (setCategory {ℓ})
-    Type = Set ℓ
-  
-  open ≡-Reasoning
+    CtsFunctor : ConstrainedFunctor (DependentMonoidalCategory.DC Cts)
   
   CtCategory : Category
-  CtCategory = DependentClosedCategory.DepCat Cts
+  CtCategory = DependentMonoidalCategory.DepCat Cts
   
-  CtClosedCategory : ClosedCategory CtCategory 
-  CtClosedCategory = DependentClosedCategory.DepClosedCat Cts
-
-  Ct[_,_]₀ = [_,_]₀ CtClosedCategory
+  CtMonoidalCategory : MonoidalCategory CtCategory 
+  CtMonoidalCategory = DependentMonoidalCategory.DepMonCat Cts
   
-  CtFunctor : Functor CtCategory (setCategory {ℓ})
+  CtFunctor : Functor CtCategory Hask
   CtFunctor = ConstrainedFunctor.CtFunctor CtsFunctor
   
   F₀ = Functor.F₀ CtFunctor
+  _⊗₀_ = MonoidalCategory._⊗₀_ CtMonoidalCategory
   
   field
-    ap : {α β : Obj CtCategory}
-       → F₀ Ct[ α , β ]₀ → (F₀ α → F₀ β)
+    unit-map : unit HaskMon → F₀ (unit CtMonoidalCategory)
     
-    unit : F₀ (I CtClosedCategory)
-  
+    prod-map : (x y : Obj CtCategory) → (F₀ x) × (F₀ y) → F₀ (x ⊗₀ y)
+    
   map = ConstrainedFunctor.map CtsFunctor
 
-{- TODO:
-  CtApplicative : LaxClosedFunctor CtClosedCategory (Hask {ℓ})
+  CtApplicative : LaxMonoidalFunctor CtMonoidalCategory HaskMon
   CtApplicative = record 
     { F = CtFunctor
-    ; F̂ = λ α β → ap {α} {β}
-    ; F⁰ = λ _ → unit
-    ; F̂-natural-x = {!!}
-    ; F̂-natural-y = {!!}
-    ; coher-1 = {!!}
-    ; coher-2 = {!!}
-    ; coher-3 = {!!}
+    ; ε = unit-map
+    ; μ-natural-transformation = record
+      { η = λ x → prod-map (proj₁ x) (proj₂ x)
+      ; natural = {!!}
+      }
+    ; assoc = {!!}
+    ; left-unitality = {!!}
+    ; right-unitality = {!!}
     }
-  
-  open import Theory.Yoneda.Bijection
-  open import Theory.Natural.Transformation
-  
-  pure : {α : Obj CtCategory} → proj₁ α → F₀ α
-  pure {α} a = map f unit
-    where 
-      x = ClosedCategory.i CtClosedCategory α
-      
-      f : ClosedCategory.Hom CtClosedCategory (I CtClosedCategory) α
-      f = proj₁ x a , {!proj₂ x!}
-
--}
+  {-
+  pure : (A : Obj CtCategory) → (proj₁ A  → F₀ A)
+  pure (A , CtA) a = map ((λ _ → a) , {!!}) (unit-map (lift tt))
+  -}
