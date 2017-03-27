@@ -46,7 +46,7 @@ mapList-id (x ∷ xs) (allX , sortedX) = begin
 mapList-compose : {ℓA ℓB ℓC ℓEqA ℓEqB ℓEqC ℓOrdA ℓOrdB ℓOrdC : Level}
                 → {A : Set ℓA} {B : Set ℓB} {C : Set ℓC}
                 → {OrdA : OrdInstance {ℓA} {ℓEqA} {ℓOrdA} A} {OrdB : OrdInstance {ℓB} {ℓEqB} {ℓOrdB} B} {OrdC : OrdInstance {ℓC} {ℓEqC} {ℓOrdC} C}
-                → IsStructuralEquality OrdB → IsStructuralEquality OrdC
+                → IsStructuralEquality (OrdInstance.eqInstance OrdB) → IsStructuralEquality (OrdInstance.eqInstance OrdC)
                 → (f : A → B) → (g : B → C) → (xs : List A)
                 → mapList {OrdA = OrdA} {OrdC} (g ∘F f) xs ≡ mapList {OrdA = OrdB} {OrdC} g (mapList {OrdA = OrdA} {OrdB} f xs)
 mapList-compose struct-eqB struct-eqC f g [] = refl
@@ -57,8 +57,46 @@ mapList-compose {OrdA = OrdA} struct-eqB struct-eqC f g (x ∷ xs) = begin
     ≡⟨ sym (map-insert-commute g (f x) (mapList f xs) struct-eqB struct-eqC) ⟩
   mapList g (insert (f x) (mapList f xs)) ∎
 
+{-
+As a side condition for types with an ordering we say that they must provide 
+structural or representational equality. This is stronger then what we need in 
+Haskell. In Haskell it suffices that the functions used in 'fmap' are congruent, 
+i.e., they preserve equality.
+
+Why do we need this stronger assumption?
+
+We formalized functors in Agda using propositional equality in their laws.
+In order for us to prove these propositional functor laws we need to be 
+able to convert equalities delivered by an 'Eq' instance to a propositional equality.
+This requirement arises, because our proofs involve the two different equalities.
+An example of this can be seen in 'map-insert-commute' from 
+'Theory.Haskell.Constrained.Examples.SetFunctor.Map'. The case where x /= y, 
+but (f x) == (f y) requires us to prove
+  (insert (f x)) ∘ (insert (f y)) ≡ (insert (f y)) ∘ (insert (f x)),
+which only holds as a propositional equality if (f x) /= (f y). Allowing us 
+to convert the (==) into a propositional equality (≡) makes the two sides equivalent.
+
+This problem arises, because our proofs involve two different notions of equality:
+The Haskell 'Eq' equality '==' and the proof level propositional equality '≡'.
+
+In Haskell requiring congruence for the mapping function is sufficient,
+because the equality used for the laws is _not_ propositional (representational/structural),
+it is actually the equivalence relationship formed by the quotient of the representation 
+of the set data type.
+
+If we replace all of the propositional equalities in our functor laws with the 
+equivalence relationships we use in Haskell we can show them only assuming that the
+mapping functions are congruent.
+
+The assumption that the mappings are congruent is implicit in the implementation
+of 'Set' in Haskell already. If we 'map' functions that are not congruent then the 
+functor laws for set break. This is, because congruence prevents the function from 'cheating'.
+By 'cheating' we mean that the function can differentiate between two values although 
+they are equal, because it can inspect there internal representation, which should
+not be possible for an abstract data type.
+-}
 LSetObj : {ℓ : Level} → Set ℓ → Set (suc ℓ)
-LSetObj {ℓ} A = Σ (OrdInstance {ℓ} {zero} {zero} A) IsStructuralEquality
+LSetObj {ℓ} A = Σ (OrdInstance {ℓ} {zero} {zero} A) (IsStructuralEquality ∘F OrdInstance.eqInstance)
 
 private
   module ApplicativeReadyVersion where
@@ -237,7 +275,7 @@ module NotApplicativeReady where
                                      → DependentObjUniqueness (ConstrainedFunctor.Cts (FunctorLSet {ℓ}))
   FunctorLSet-DependentObjUniqueness proof-irr-Ord (a₁ , ord-a₂ , struct-eq-a₂) (.a₁ , ord-b₂ , struct-eq-b₂) refl with proof-irr-Ord a₁ ord-a₂ ord-b₂ 
   FunctorLSet-DependentObjUniqueness proof-irr-Ord (a₁ , ord-a , struct-eq-a₂) (.a₁ , .ord-a , struct-eq-b₂) refl | refl 
-    = ≡-to-≅ (cong (_,_ ord-a) (proof-irr-IsStructuralEquality ord-a struct-eq-a₂ struct-eq-b₂))
+    = ≡-to-≅ (cong (_,_ ord-a) (proof-irr-IsStructuralEquality (OrdInstance.eqInstance ord-a) struct-eq-a₂ struct-eq-b₂))
   
   FunctorLSet-UniqueInstances : {ℓ : Level}
                               → ((A : Set ℓ) → ProofIrrelevance (OrdInstance {ℓ} {zero} {zero} A))
@@ -252,7 +290,7 @@ module NotApplicativeReady where
       unique-type-inst : (α : Type) → (αCts αCts' : DepObj α) → αCts ≡ αCts'
       unique-type-inst α (ordA , struct-eqA) (ordB , struct-eqB) with proof-irr-ord α ordA ordB
       unique-type-inst α (ord , struct-eqA) (.ord , struct-eqB) | refl 
-        = cong (_,_ ord) (proof-irr-IsStructuralEquality ord struct-eqA struct-eqB)
+        = cong (_,_ ord) (proof-irr-IsStructuralEquality (OrdInstance.eqInstance ord) struct-eqA struct-eqB)
       
       unique-hom-inst : {α β : Type} → (f g : α → β)
                       → (αCt : DepObj α) → (βCt : DepObj β) 
