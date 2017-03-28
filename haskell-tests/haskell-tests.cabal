@@ -1,0 +1,55 @@
+name:                haskell-tests
+version:             0.1
+synopsis:            Test some of the laws proven in agda in Haskell.
+category:            Test
+license:             BSD3
+license-file:        LICENSE
+author:              Jan Bracker <jan.bracker@googlemail.com>
+maintainer:          Jan Bracker <jan.bracker@googlemail.com>
+bug-reports:         https://github.com/jbracker/polymonad-proofs/issues
+stability:           experimental
+copyright:           Copyright (c) 2017, Jan Bracker
+build-type:          Simple
+cabal-version:       >=1.10
+extra-source-files: README.md
+description:
+
+    Test some of the laws proven in agda in Haskell.
+
+source-repository head
+  type:     git
+  location: https://github.com/jbracker/polymonad-proofs.git
+
+library
+  exposed-modules: Test.Schemes
+                 , Test.Equality
+                 , Test.Utilities
+                 , Test.Types
+                 , Test.Types.Set
+                 , Test.Types.Endo
+                 , Test.Laws.Eq
+                 , Test.Laws.Ord
+                 , Test.Laws.Set.Functor
+                 , Test.Laws.Set.Applicative
+                 , Test.Laws.Endo.Functor
+                 , Test.Laws.Endo.Applicative
+  other-extensions:
+  build-depends: base         >=4.8  && <5
+               , containers   >=0.5  && <0.6
+               , mtl          >=2.2  && <3
+               , transformers >=0.4  && <0.6
+               , QuickCheck   >=2.9  && <3.0
+  hs-source-dirs:      src
+  default-language:    Haskell2010
+  ghc-options:         -Wall
+
+executable test-laws
+  build-depends: base        >= 4.8  && <5
+               , containers   >=0.5  && <0.6
+               , mtl          >=2.2  && <3
+               , transformers >=0.4  && <0.6
+               , QuickCheck   >=2.9  && <3.0
+  main-is:             Main.hs
+  hs-source-dirs:      src
+  default-language:    Haskell2010
+  ghc-options:         -Wall -dynamic -dcore-lint
