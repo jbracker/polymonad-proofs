@@ -31,7 +31,7 @@ private
 -- relation for its type.
 record EqInstance {ℓEq : Level} (A : Type) : Set (suc (ℓ ⊔ ℓEq)) where
   field
-    _==_ : A → A → Set ℓ
+    _==_ : A → A → Set ℓEq
     isDecEquivalence : IsDecEquivalence {A = A} _==_
     proof-irr-eq : {a b : A} → ProofIrrelevance (a == b)
 
@@ -97,106 +97,6 @@ record OrdInstance {ℓEq ℓOrd : Level} (A : Type) : Set (suc (ℓ ⊔ ℓEq �
   ord-not-eq x≤y ¬y≤x x==y = ¬y≤x (eq-ord-comp (sym-eq x==y) (ord-eq-comp x≤y (sym-eq x==y)))
 
 -------------------------------------------------------------------------------
--- Eq instance of lists in Haskell
--------------------------------------------------------------------------------
-
-EqList : {ℓEq : Level} {A : Type} → EqInstance {ℓEq} A → EqInstance {ℓEq} (List A)
-EqList {ℓEq} {A} EqA = record 
-  { _==_ = _==_
-  ; isDecEquivalence = record 
-    { isEquivalence = record 
-      { refl = λ {xs} → lrefl {xs} 
-      ; sym = λ {xs} {ys} → lsym {xs} {ys} 
-      ; trans = λ {xs} {ys} {zs} → ltrans {xs} {ys} {zs}
-      } 
-    ; _≟_ = _=?=_
-    }
-  ; proof-irr-eq = λ {xs} {ys} → proof-irr {xs} {ys}
-  } where
-    _=A=_ = EqInstance._==_ EqA
-    
-    _==_ : List A → List A → Set ℓ
-    [] == [] = Lift ⊤
-    [] == (x ∷ ys) = Lift ⊥
-    (x ∷ xs) == [] = Lift ⊥
-    (x ∷ xs) == (y ∷ ys) = (x =A= y) × (xs == ys)
-    
-    lrefl : {xs : List A} → xs == xs
-    lrefl {[]} = lift tt
-    lrefl {x ∷ xs} = EqInstance.refl-eq EqA {x} , lrefl {xs}
-    
-    lsym : {xs ys : List A} → xs == ys → ys == xs
-    lsym {[]} {[]} (lift tt) = lift tt
-    lsym {[]} {x ∷ ys} (lift ())
-    lsym {x ∷ xs} {[]} (lift ())
-    lsym {x ∷ xs} {y ∷ ys} (x==y , xs==ys) = EqInstance.sym-eq EqA x==y , lsym {xs} {ys} xs==ys
-    
-    ltrans : {xs ys zs : List A} → xs == ys → ys == zs → xs == zs
-    ltrans {[]} {[]} {[]} (lift tt) (lift tt) = lift tt
-    ltrans {[]} {[]} {z ∷ zs} (lift tt) (lift ())
-    ltrans {[]} {y ∷ ys} (lift ()) ys==zs
-    ltrans {x ∷ xs} {[]} (lift ()) ys==zs
-    ltrans {x ∷ xs} {y ∷ ys} {[]} (x==y , xs==ys) (lift ())
-    ltrans {x ∷ xs} {y ∷ ys} {z ∷ zs} (x==y , xs==ys) (y==z , ys==zs) = EqInstance.trans-eq EqA x==y y==z , ltrans {xs} {ys} {zs} xs==ys ys==zs
-    
-    _=?=_ : (x y : List A) → Dec (x == y)
-    [] =?= [] = yes (lift tt)
-    [] =?= (x ∷ ys) = no lower
-    (x ∷ xs) =?= [] = no lower
-    (x ∷ xs) =?= (y ∷ ys) with EqInstance.dec-eq EqA x y | xs =?= ys
-    (x ∷ xs) =?= (y ∷ ys) | yes x==y | yes xs==ys = yes (x==y , xs==ys)
-    (x ∷ xs) =?= (y ∷ ys) | yes x==y | no ¬xs==ys = no (¬xs==ys ∘F proj₂)
-    (x ∷ xs) =?= (y ∷ ys) | no ¬x==y | xs=?=ys    = no (¬x==y   ∘F proj₁)
-    
-    proof-irr : {xs ys : List A} → ProofIrrelevance (xs == ys)
-    proof-irr {[]} {[]} (lift tt) (lift tt) = refl
-    proof-irr {[]} {y ∷ ys} (lift ()) eqYs
-    proof-irr {x ∷ xs} {[]} (lift ()) eqXs
-    proof-irr {x ∷ xs} {y ∷ ys} (eqX , eqXs) (eqY , eqYs) with EqInstance.proof-irr-eq EqA eqX eqY | proof-irr {xs} {ys} eqXs eqYs
-    proof-irr {x ∷ xs} {y ∷ ys} (eqX , eqXs) (.eqX , .eqXs) | refl | refl = refl
-
-
--------------------------------------------------------------------------------
--- Ord instance of unit in Haskell
--------------------------------------------------------------------------------
-
-Eq-⊤ : EqInstance {zero} (Lift ⊤)
-Eq-⊤ = record 
-  { _==_ = λ _ _ → Lift ⊤ 
-  ; isDecEquivalence = record 
-    { isEquivalence = record 
-      { refl = lift tt 
-      ; sym = λ _ → lift tt 
-      ; trans = λ _ _ → lift tt 
-      }
-    ; _≟_ = λ _ _ → yes (lift tt)
-    } 
-  ; proof-irr-eq = λ _ _ → refl
-  }
-
-Ord-⊤ : OrdInstance {zero} (Lift ⊤)
-Ord-⊤ = record
-  { _≤_ = λ _ _ → ⊤
-  ; eqInstance = Eq-⊤
-  ; proof-irr-ord = λ x y → refl
-  ; isDecTotalOrder = record 
-    { isTotalOrder = record 
-      { isPartialOrder = record 
-        { isPreorder = record 
-          { isEquivalence = EqInstance.isEquivalence Eq-⊤ 
-          ; reflexive = λ _ → tt 
-          ; trans = λ _ _ → tt
-          }
-        ; antisym = λ _ _ → lift tt 
-        }
-      ; total = λ _ _ → inj₁ tt 
-      } 
-    ; _≟_ = EqInstance.dec-eq Eq-⊤ 
-    ; _≤?_ = λ x y → yes tt
-    }
-  }
-
--------------------------------------------------------------------------------
 -- Definition of predicates on lists
 -------------------------------------------------------------------------------
 
@@ -204,7 +104,7 @@ private
   module StructuralEquality {ℓEq : Level} {A : Type} (EqA : EqInstance {ℓEq} A) where
     open EqInstance EqA
     
-    IsStructuralEquality : Set ℓ
+    IsStructuralEquality : Set (ℓ ⊔ ℓEq)
     IsStructuralEquality = (a b : A) → (a == b) → (a ≡ b)
 
     proof-irr-IsStructuralEquality : ProofIrrelevance IsStructuralEquality
@@ -339,9 +239,6 @@ monotonic-id : {ℓEq ℓOrd : Level} {A : Type}
              → Monotonic OrdA OrdA idF
 monotonic-id OrdA a b a≤b = a≤b
 
-IsStructuralEquality-⊤ : IsStructuralEquality (OrdInstance.eqInstance Ord-⊤)
-IsStructuralEquality-⊤ (lift tt) (lift tt) (lift tt) = refl
-
 private
   module Congruence {ℓEqA ℓEqB : Level} {A B : Type} (EqA : EqInstance {ℓEqA} A) (EqB : EqInstance {ℓEqB} B) where
     private
@@ -351,7 +248,7 @@ private
       _=A=_ = EqInstance._==_ EqA
       _=B=_ = EqInstance._==_ EqB
     
-    Congruent : (f : A → B) → Set ℓ
+    Congruent : (f : A → B) → Set (ℓ ⊔ ℓEqA ⊔ ℓEqB)
     Congruent f = (a b : A) → a =A= b → f a =B= f b
     
     IsStructuralEquality→Congruent : (f : A → B) → IsStructuralEquality EqA → Congruent f
