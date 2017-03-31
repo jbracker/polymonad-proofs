@@ -215,6 +215,51 @@ IsStructuralEquality-List EqA struct-eqA (x ∷ xs) [] (lift ())
 IsStructuralEquality-List EqA struct-eqA (x ∷ xs) (y ∷ ys) (x=y , xs=ys) = cong₂ _∷_ (struct-eqA x y x=y) (IsStructuralEquality-List EqA struct-eqA xs ys xs=ys)
 
 -------------------------------------------------------------------------------
+-- Instances of Set in Haskell
+-------------------------------------------------------------------------------
+
+EqLSet : {ℓ : Level} {A : Σ (Set ℓ) (OrdInstance {ℓ} {ℓ} {ℓ})} → EqInstance {ℓ} {ℓ} (LSet A)
+EqLSet {ℓ} {A , OrdA} = record 
+  { _==_ = λ x y → EqInstance._==_ (EqList (OrdInstance.eqInstance OrdA)) (LSet.xs x) (LSet.xs y)
+  ; isDecEquivalence = record 
+    { isEquivalence = record 
+      { refl = λ {a} → EqInstance.refl-eq (EqList (OrdInstance.eqInstance OrdA)) {LSet.xs a}
+      ; sym = λ {a} {b} x → EqInstance.sym-eq (EqList (OrdInstance.eqInstance OrdA)) {LSet.xs a} {LSet.xs b} x
+      ; trans = λ {a} {b} {c} x y → EqInstance.trans-eq (EqList (OrdInstance.eqInstance OrdA)) {LSet.xs a} {LSet.xs b} {LSet.xs c} x y 
+      }
+    ; _≟_ = λ x y → EqInstance.dec-eq (EqList (OrdInstance.eqInstance OrdA)) (LSet.xs x) (LSet.xs y)
+    }
+  ; proof-irr-eq = λ {a} {b} x y → EqInstance.proof-irr-eq (EqList (OrdInstance.eqInstance OrdA)) {LSet.xs a} {LSet.xs b} x y
+  }
+
+OrdLSet : {ℓ : Level} {A : Σ (Set ℓ) (OrdInstance {ℓ} {ℓ} {ℓ})} → OrdInstance {ℓ} {ℓ} {ℓ} (LSet A)
+OrdLSet {ℓ} {A , OrdA} = record
+  { _≤_ = λ x y → OrdInstance._≤_ (OrdList OrdA) (LSet.xs x) (LSet.xs y)
+  ; eqInstance = EqLSet {ℓ} {A , OrdA}
+  ; proof-irr-ord = λ {a} {b} x y → OrdInstance.proof-irr-ord (OrdList OrdA) {LSet.xs a} {LSet.xs b} x y
+  ; isDecTotalOrder = record 
+    { isTotalOrder = record 
+      { isPartialOrder = record 
+        { isPreorder = record 
+          { isEquivalence = EqInstance.isEquivalence (EqLSet {ℓ} {A , OrdA})
+          ; reflexive = λ {a} x → OrdInstance.reflexive (OrdList OrdA) {LSet.xs a} x
+          ; trans = λ {a} {b} {c} x y → OrdInstance.trans-ord (OrdList OrdA) {LSet.xs a} {LSet.xs b} {LSet.xs c} x y
+          } 
+        ; antisym = λ {a} {b} x y → OrdInstance.antisym-ord (OrdList OrdA) {LSet.xs a} {LSet.xs b} x y
+        } 
+      ; total = λ x y → OrdInstance.total (OrdList OrdA) (LSet.xs x) (LSet.xs y)
+      }
+    ; _≟_ = λ x y → OrdInstance.dec-eq (OrdList OrdA) (LSet.xs x) (LSet.xs y)
+    ; _≤?_ = λ x y → OrdInstance.dec-ord (OrdList OrdA) (LSet.xs x) (LSet.xs y)
+    }
+  }
+
+IsStructuralEquality-LSet : {ℓ : Level} {A : Set ℓ} → (OrdA : OrdInstance {ℓ} {ℓ} {ℓ} A) 
+                          → IsStructuralEquality (eqInstance OrdA) → IsStructuralEquality (EqLSet {ℓ} {A , OrdA})
+IsStructuralEquality-LSet {ℓ} {A} OrdA struct-eqA (lset x sortedX) (lset y sortedY) p 
+  = lset-eq x y sortedX sortedY (IsStructuralEquality-List (eqInstance OrdA) struct-eqA x y p)
+
+-------------------------------------------------------------------------------
 -- Instances of unit in Haskell
 -------------------------------------------------------------------------------
 
