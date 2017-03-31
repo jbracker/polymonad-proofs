@@ -20,21 +20,27 @@ open import Haskell hiding ( Type )
 
 open import Theory.Category
 open import Theory.Category.Dependent
-open import Theory.Category.Closed
+open import Theory.Category.Monoidal
+open import Theory.Category.Monoidal.Dependent
 open import Theory.Category.Examples
+
+open import Theory.Functor
 
 open import Theory.Haskell.Constrained
 open import Theory.Haskell.Constrained.Functor
+open import Theory.Haskell.Constrained.Applicative
 
-module Theory.Haskell.Constrained.Examples.SetApplicative where 
+module Theory.Haskell.Constrained.Examples.SetApplicative {ℓ : Level} where 
 
 open import Theory.Haskell.Constrained.Examples.SetFunctor.Base
 open import Theory.Haskell.Constrained.Examples.SetFunctor.Product
+open import Theory.Haskell.Constrained.Examples.SetFunctor.Map
+open import Theory.Haskell.Constrained.Examples.SetFunctor.Instances
 open import Theory.Haskell.Constrained.Examples.SetFunctor
 
 open DependentCategory
 
-ConstraintMonoidalCategoryLSet : {ℓ : Level} → MonoidalConstraintCategory {ℓ} {suc (suc ℓ)}
+ConstraintMonoidalCategoryLSet : MonoidalConstraintCategory {ℓ} {suc (suc ℓ)}
 ConstraintMonoidalCategoryLSet = record
   { DC = ConstraintCategoryLSet
   ; _Dep⊗₀_ = ProdCt
@@ -60,3 +66,25 @@ ConstraintMonoidalCategoryLSet = record
   ; dep-triangle-id = λ x' y' → refl
   ; dep-pentagon-id = λ w' x' y' z' → refl
   }
+
+unions : {A : Σ (Set ℓ) (OrdInstance {ℓ} {ℓ} {ℓ})} → LSet (LSet A , OrdLSet {ℓ} {A}) → LSet A
+unions (lset [] (lift tt)) = lset [] (lift tt)
+unions (lset (x ∷ xs) (proj₁ , sortedXs)) = {!proj₁!}
+
+ApplicativeLSet : ConstrainedApplicative ConstraintMonoidalCategoryLSet
+ApplicativeLSet = record
+  { CtsFunctor = FunctorLSet
+  ; unit = lset [] (lift tt)
+  ; prod-map = prod-map
+  ; naturality = {!!}
+  ; associativity = {!!}
+  ; left-unitality = {!!}
+  ; right-unitality = {!!}
+  } where
+    F₀ = Functor.F₀ (ConstrainedFunctor.CtFunctor FunctorLSet)
+    _⊗₀_ = MonoidalCategory._⊗₀_ (DependentMonoidalCategory.DepMonCat ConstraintMonoidalCategoryLSet)
+    
+    DC = DepCat (DependentMonoidalCategory.DC ConstraintMonoidalCategoryLSet)
+    
+    prod-map : (x y : Category.Obj DC) → F₀ x × F₀ y → F₀ (x ⊗₀ y)
+    prod-map (A , CtA) (B , CtB) (lset xs sortedXs , lset ys sortedYs) = {!!}
