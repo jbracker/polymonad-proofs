@@ -184,6 +184,7 @@ LaxMonoidalFunctor→Applicative LMF = record
   ; law-applicative-fmap = law-applicative-fmap
   } where
     open LaxMonoidalFunctor LMF
+    open MonoidalCategory HaskMonoidal hiding ( _∘_ ; unit )
     
     fmap : {α β : Type} → (α → β) → F₀ α → F₀ β
     fmap f Fa = F₁ f Fa
@@ -194,8 +195,11 @@ LaxMonoidalFunctor→Applicative LMF = record
     pure : {α : Type} → α → F₀ α
     pure a = fmap (λ _ → a) unit
     
+    _**_ : {α β : Type} → F₀ α → F₀ β → F₀ (α × β)
+    _**_ {α} {β} Fa Fb = μ α β (Fa ,' Fb)
+
     _<*>_ : {α β : Type} → F₀ (α → β) → F₀ α → F₀ β
-    _<*>_ {α} {β} Ff Fa = fmap (uncurry _$_) (μ (α → β) α (Ff ,' Fa))
+    _<*>_ {α} {β} Ff Fa = fmap (uncurry _$_) (Ff ** Fa)
     
     law-id : {α : Type} → (v : F₀ α) 
            → pure (λ x → x) <*> v ≡ v
@@ -203,34 +207,69 @@ LaxMonoidalFunctor→Applicative LMF = record
       (F₁ (λ x → (proj₁ x) (proj₂ x)) ∘ μ (α → α) α) (F₁ (λ _ → (λ x → x)) (ε (lift tt)) ,' v)
         ≡⟨ {!!} ⟩
       v ∎
-
-    σ : {a b : Type} → a × b → b × a
-    σ (a ,' b) = (b ,' a)
     
-    {-
-      μ-natural-transformation : NaturalTransformation ([ tensor D ]∘[ [ F ]×[ F ] ]) ([ F ]∘[ tensor C ])
-  
-  μ : (x y : Obj C) → Hom D (F₀ x ⊗D₀ F₀ y) (F₀ (x ⊗C₀ y))
-  μ x y = η (x , y)
-
--- G₁ f ∘ η ≡ η ∘ F₁ f
-  field
-    assoc : (x y z : Obj C) 
-          → F₁ (α C x y z) ∘D ((μ (x ⊗C₀ y) z) ∘D (μ x y ⊗D₁ cat-id D {F₀ z})) 
-          ≡ (μ x (y ⊗C₀ z)) ∘D ((cat-id D {F₀ x} ⊗D₁ μ y z) ∘D (α D (F₀ x) (F₀ y) (F₀ z)))
+    _***_ : {α β γ δ : Type} → (f : α → β) → (g : γ → δ) → α × γ → β × δ
+    (f *** g) (a ,' c) = (f a ,' g c)
     
-    left-unitality : (x : Obj C)
-                   → λ' D (F₀ x)
-                   ≡ F₁ (λ' C x) ∘D (μ (unit C) x ∘D (ε ⊗D₁ cat-id D {F₀ x}))
+    naturality : {α β γ δ : Type} → (f : α → β) → (g : γ → δ) → (u : F₀ α) → (v : F₀ γ)
+               → fmap (f *** g) (u ** v) ≡ fmap f u ** fmap g v
+    naturality {α} {β} {γ} {δ} f g u v = cong (λ X → X (u ,' v)) $ NaturalTransformation.natural μ-natural-transformation
     
-    right-unitality : (x : Obj C)
-                    → ρ D (F₀ x) 
-                    ≡ F₁ (ρ C x) ∘D (μ x (unit C) ∘D (cat-id D {F₀ x} ⊗D₁ ε))
--}
+    associativity : {a b c : Type} → (u : F₀ a) → (v : F₀ b) → (w : F₀ c)
+                  → fmap (α a b c) ((u ** v) ** w) ≡ u ** (v ** w)
+    associativity {a} {b} {c} u v w = cong (λ P → P ((u ,' v) ,' w)) (LaxMonoidalFunctor.assoc LMF a b c)
+    
+    left-identity : {a : Type} → (v : F₀ a) → fmap (λ' a) (unit ** v) ≡ v
+    left-identity {a} v = cong (λ P → P (lift tt ,' v)) (sym (LaxMonoidalFunctor.left-unitality LMF a))
+    
+    left-identity' : {a : Type} → (v : F₀ a) → (unit ** v) ≡ fmap (λ x → lift tt ,' x) v
+    left-identity' {a} v = begin
+      unit ** v 
+        ≡⟨ cong (λ P → P (unit ** v)) (sym $ Functor.id F) ⟩
+      fmap (λ x → x) (unit ** v) 
+        ≡⟨⟩
+      fmap ((λ x → lift tt ,' x) ∘ λ' a) (unit ** v) 
+        ≡⟨ cong (λ P → P (unit ** v)) (Functor.compose F) ⟩
+      (fmap (λ x → lift tt ,' x) ∘ fmap (λ' a)) (unit ** v) 
+        ≡⟨⟩
+      fmap (λ x → lift tt ,' x) (fmap (λ' a) (unit ** v))
+        ≡⟨ cong (fmap (λ x → lift tt ,' x)) (left-identity v) ⟩
+      fmap (λ x → lift tt ,' x) v ∎
+    
+    right-identity : {a : Type} → (v : F₀ a) → fmap (ρ a) (v ** unit) ≡ v
+    right-identity {a} v = cong (λ P → P (v ,' lift tt)) (sym (LaxMonoidalFunctor.right-unitality LMF a))
+    
     law-composition : {α β γ : Type} → (u : F₀ (β → γ)) (v : F₀ (α → β)) (w : F₀ α) 
                     → ((pure _∘′_ <*> u) <*> v) <*> w ≡ u <*> (v <*> w)
-    law-composition {α} {β} {γ} u v w = {!!}
-    
+    law-composition {α} {β} {γ} u v w = begin
+      fmap (uncurry _$_) (fmap (uncurry _$_) (fmap (uncurry _$_) ((fmap (λ _ → _∘′_) unit) ** u) ** v) ** w) 
+        ≡⟨ cong (λ X → fmap (uncurry _$_) (fmap (uncurry _$_) (fmap (uncurry _$_) (fmap (λ _ → _∘′_) unit ** X) ** v) ** w))
+                (cong (λ P → P u) (sym $ Functor.id F)) ⟩
+      fmap (uncurry _$_) (fmap (uncurry _$_) (fmap (uncurry _$_) ((fmap (λ _ → _∘′_) unit) ** (fmap (λ a → a) u)) ** v) ** w) 
+        ≡⟨ cong (λ X → fmap (uncurry _$_) (fmap (uncurry _$_) (fmap (uncurry _$_) X ** v) ** w))
+                (sym (naturality (λ _ → _∘′_) (λ z → z) unit u)) ⟩
+      fmap (uncurry _$_) (fmap (uncurry _$_) (fmap (uncurry _$_) (fmap ((λ _ → _∘′_) *** (λ a → a)) (unit ** u)) ** v) ** w) 
+        ≡⟨ {!!} ⟩
+      fmap (uncurry _$_) (fmap (uncurry _$_) (fmap (uncurry _$_) (fmap ((λ _ → _∘′_) *** (λ a → a)) (fmap (λ x → lift tt ,' x) u)) ** v) ** w) 
+        ≡⟨ {!!} ⟩
+      fmap (uncurry _$_) (fmap (uncurry _$_) (fmap (uncurry _$_) (fmap (((λ _ → _∘′_) *** (λ a → a)) ∘ (λ x → lift tt ,' x)) u) ** v) ** w) 
+        ≡⟨ {!!} ⟩
+      fmap (uncurry _$_) (fmap (uncurry _$_) (fmap (uncurry _$_) (fmap (((λ _ f g → f ∘ g) *** (λ a → a)) ∘ (λ x → lift tt ,' x)) u) ** (fmap (λ a → a) v)) ** w) 
+      --  ≡⟨ {!!} ⟩
+      --fmap (uncurry _$_) (fmap (uncurry _$_) (fmap (uncurry _$_) (fmap ((((λ _ f g → f ∘ g) *** (λ a → a)) ∘ (λ x → lift tt ,' x)) *** (λ a → a)) (u ** v))) ** w) 
+        ≡⟨ {!!} ⟩
+      fmap (uncurry _$_ ∘ ((λ a → a) *** (uncurry _$_))) (u ** (v ** w))
+        ≡⟨ {!!} ⟩
+      fmap (uncurry _$_) (fmap ((λ a → a) *** (uncurry _$_)) (u ** (v ** w)))
+        ≡⟨ {!!} ⟩
+      fmap (uncurry _$_) (fmap (λ a → a) u ** fmap (uncurry _$_) (v ** w))
+        ≡⟨ {!!} ⟩
+      fmap (uncurry _$_) (u ** fmap (uncurry _$_) (v ** w)) ∎
+    {-
+
+    _<*>_ : {α β : Type} → F₀ (α → β) → F₀ α → F₀ β
+    _<*>_ {α} {β} Ff Fa = fmap (uncurry _$_) (Ff ** Fa)
+-}
     law-homomorphism : {α β : Type} (x : α) (f : α → β) 
                      → pure f <*> pure x ≡ pure (f x)
     law-homomorphism {α} {β} x f = {!!}
