@@ -23,7 +23,7 @@ record Applicative (F : TyCon) : Set₁ where
   field
     law-id  : ∀ {α : Type} 
            → (v : F α) 
-           → pure (id refl) <*> v ≡ v
+           → pure (λ x → x) <*> v ≡ v
     law-composition : ∀ {α β γ : Type} 
                    → (u : F (β → γ)) → (v : F (α → β)) → (w : F α) 
                    → (pure _∘_) <*> u <*> v <*> w ≡ u <*> (v <*> w)
