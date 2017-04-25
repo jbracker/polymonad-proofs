@@ -14,5 +14,6 @@ src/Supermonad/Polymonad.agda
 src/Supermonad/DefinitionWithCategory/ToLaxTwoFunctor.agda
 
 src/Theory/Examples/TwoFunctorToAtkeyParameterizedMonad.agda
+src/Theory/Examples/AtkeyParameterizedMonadToTwoFunctor.agda
 src/Theory/Examples/IxMonadToAtkeyParameterizedMonad.agda
 
