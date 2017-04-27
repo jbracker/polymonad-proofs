@@ -47,8 +47,8 @@ AtkeyFunctor→LaxTwoFunctor {C = C} {S} {T} F = record
   ; P₁ = P
   ; η = λ {x} → η' x
   ; μ = λ {x} {y} {z} {f} {g} → μ' x y z f g
-  ; laxFunId₁ = {!!} -- λ {x} {y} {f} → laxFunId₁ x y f
-  ; laxFunId₂ = {!!} -- λ {x} {y} {f} → laxFunId₂ x y f
+  ; laxFunId₁ = λ {x} {y} {f} → laxFunId₁ x y f
+  ; laxFunId₂ = λ {x} {y} {f} → laxFunId₂ x y f
   ; laxFunAssoc = λ {w} {x} {y} {z} {f} {g} {h} → laxFunAssoc w x y z f g h
   } where
     
@@ -89,7 +89,7 @@ AtkeyFunctor→LaxTwoFunctor {C = C} {S} {T} F = record
     μ' x y z f g = naturalTransformation
                    (η (AtkeyParameterizedMonad.NatTrans-μ F z y x))
                    (λ {a : Obj C} {b : Obj C} {f : Hom C a b} → natural (AtkeyParameterizedMonad.NatTrans-μ F z y x) {a} {b} {f})
-{-
+    
     laxFunId₁ : (x y : Obj S) (f : Hom S x y)
               → ⟨ stateHomIndep f f ⟩∘ᵥ⟨ ⟨ μ' x x y (id S) f ⟩∘ᵥ⟨ ⟨ Id⟨ ApplyT f ⟩ ⟩∘ₕ⟨ (η' x) ⟩ ⟩ ⟩
               ≡ stateHomIndep f f
@@ -166,7 +166,6 @@ AtkeyFunctor→LaxTwoFunctor {C = C} {S} {T} F = record
                ≡ η (subst₂ NaturalTransformation q refl Id⟨ ApplyT f ⟩) c
         helper c refl = refl
 
--}
     laxFunAssoc : (w x y z : Obj S) (f : Hom S w x) (g : Hom S x y) (h : Hom S y z)
                 → ⟨ Functor.F₁ P {a = h ∘S (g ∘S f)} {b = (h ∘S g) ∘S f} (α (Category→StrictTwoCategory S) f g h)
                   ⟩∘ᵥ⟨
@@ -181,7 +180,15 @@ AtkeyFunctor→LaxTwoFunctor {C = C} {S} {T} F = record
                     ∘C (id C {[ ApplyT h ]₀ ([ ApplyT (g ∘S f) ]₀ c)} ∘C [ ApplyT h ]₁ (η (μ' w x y f g) c)) )
         ≡⟨ cong (λ X → η (Functor.F₁ P {a = h ∘S (g ∘S f)} {b = (h ∘S g) ∘S f} (α (Category→StrictTwoCategory S) f g h)) c ∘C (η (μ' w y z (g ∘S f) h) c ∘C X )) (right-id C) ⟩
       η (Functor.F₁ P {a = h ∘S (g ∘S f)} {b = (h ∘S g) ∘S f} (α (Category→StrictTwoCategory S) f g h)) c ∘C (η (μ' w y z (g ∘S f) h) c ∘C [ ApplyT h ]₁ (η (μ' w x y f g) c) )
-        ≡⟨ {!!} ⟩
+        ≡⟨ refl ⟩
+      id C {[ ApplyT (h ∘S (g ∘S f)) ]₀ c} ∘C (η (μ' w y z (g ∘S f) h) c ∘C [ ApplyT h ]₁ (η (μ' w x y f g) c) )
+        ≡⟨ right-id C ⟩
+      η (μ' w y z (g ∘S f) h) c ∘C [ ApplyT h ]₁ (η (μ' w x y f g) c)
+        ≡⟨ sym (left-id C) ⟩
+      (η (μ' w y z (g ∘S f) h) c ∘C [ ApplyT h ]₁ (η (μ' w x y f g) c)) ∘C id C {[ [ [ [ P ]₀ h ]∘[ [ P ]₀ g ] ]∘[ [ P ]₀ f ] ]₀ c}
+        ≡⟨ refl ⟩
+      (η (μ' w y z (g ∘S f) h) c ∘C [ ApplyT h ]₁ (η (μ' w x y f g) c)) ∘C (η (functorAssociator ([ P ]₀ h) ([ P ]₀ g) ([ P ]₀ f)) c)
+        ≡⟨ cong (λ X → (η (μ' w y z (g ∘S f) h) c ∘C [ ApplyT h ]₁ (η (μ' w x y f g) c)) ∘C (η X c)) (sym (associator-eq ([ P ]₀ f) ([ P ]₀ g) ([ P ]₀ h))) ⟩
       (η (μ' w y z (g ∘S f) h) c ∘C [ ApplyT h ]₁ (η (μ' w x y f g) c)) ∘C (η (α functorTwoCategory ([ P ]₀ f) ([ P ]₀ g) ([ P ]₀ h)) c)
         ≡⟨ cong (λ X → X ∘C (η (α functorTwoCategory ([ P ]₀ f) ([ P ]₀ g) ([ P ]₀ h)) c)) (sym (left-id C)) ⟩
       (  (η (μ' w y z (g ∘S f) h) c ∘C [ ApplyT h ]₁ (η (μ' w x y f g) c)) ∘C id C {[ [ ApplyT h ]∘[ ApplyT g ] ]₀ ([ ApplyT f ]₀ c)} )
@@ -201,12 +208,3 @@ AtkeyFunctor→LaxTwoFunctor {C = C} {S} {T} F = record
                                    ∘C (η (α functorTwoCategory ([ P ]₀ f) ([ P ]₀ g) ([ P ]₀ h)) c) )
         ≡⟨⟩
       η ⟨ μ' w x z f (h ∘S g) ⟩∘ᵥ⟨ ⟨ ⟨ μ' x y z g h ⟩∘ₕ⟨ Id⟨ ApplyT f ⟩ ⟩ ⟩∘ᵥ⟨ α functorTwoCategory ([ P ]₀ f) ([ P ]₀ g) ([ P ]₀ h) ⟩ ⟩ c ∎
-{-
-associator-eq : {ℓObj ℓHom : Level}
-              → {A : Category {ℓObj} {ℓHom}} {B : Category {ℓObj} {ℓHom}}
-              → {C : Category {ℓObj} {ℓHom}} {D : Category {ℓObj} {ℓHom}}
-              → (F : Functor A B)
-              → (G : Functor B C)
-              → (H : Functor C D)
-              → StrictTwoCategory.α (functorTwoCategory {ℓObj} {ℓHom}) F G H ≡ functorAssociator H G F
--}
