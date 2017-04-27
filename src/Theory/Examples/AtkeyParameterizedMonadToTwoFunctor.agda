@@ -22,9 +22,11 @@ open import Theory.Category
 open import Theory.Functor
 open import Theory.Functor.Composition
 open import Theory.Natural.Transformation
+open import Theory.Natural.Transformation.Examples
 open import Theory.Monad.Atkey
 open import Theory.TwoCategory
 open import Theory.TwoCategory.Examples
+open import Theory.TwoCategory.ExampleProperties
 open import Theory.TwoFunctor
 
 open Category
@@ -45,9 +47,9 @@ AtkeyFunctor→LaxTwoFunctor {C = C} {S} {T} F = record
   ; P₁ = P
   ; η = λ {x} → η' x
   ; μ = λ {x} {y} {z} {f} {g} → μ' x y z f g
-  ; laxFunId₁ = λ {x} {y} {f} → laxFunId₁ x y f
-  ; laxFunId₂ = λ {x} {y} {f} → laxFunId₂ x y f
-  ; laxFunAssoc = {!!}
+  ; laxFunId₁ = {!!} -- λ {x} {y} {f} → laxFunId₁ x y f
+  ; laxFunId₂ = {!!} -- λ {x} {y} {f} → laxFunId₂ x y f
+  ; laxFunAssoc = λ {w} {x} {y} {z} {f} {g} {h} → laxFunAssoc w x y z f g h
   } where
     
     _∘C_ = Category._∘_ C
@@ -55,29 +57,30 @@ AtkeyFunctor→LaxTwoFunctor {C = C} {S} {T} F = record
     
     ApplyT : {x y : Obj S} → Hom S x y → Functor C C
     ApplyT {x} {y} f = functor 
-      (λ A → Functor.F₀ T (y , x , A)) 
-      (λ f → Functor.F₁ T (id S {y} , id S {x} , f))
-      (λ {a} → Functor.id T)
-      (λ {a} {b} {c} {f} {g} → trans (cong₂ (λ X Y → Functor.F₁ T (X , Y , (g ∘C f))) (sym (left-id S)) (sym (left-id S))) (Functor.compose T))
+      (λ (c : Obj C) → Functor.F₀ T (y , x , c)) 
+      (λ {a : Obj C} {b : Obj C} (f : Hom C a b) → Functor.F₁ T (id S {y} , id S {x} , f))
+      (λ {a : Obj C} → Functor.id T)
+      (λ {a : Obj C} {b : Obj C} {c : Obj C} {f} {g} → trans (cong₂ (λ X Y → Functor.F₁ T (X , Y , (g ∘C f))) (sym (left-id S {y})) (sym (left-id S {x})))
+                                                             (Functor.compose T {y , x , a} {y , x , b} {y , x , c} {id S {y} , id S {x} , f} {id S {y} , id S {x} , g}))
   
     stateHomIndep : {x y : Obj S} → (fS : Hom S x y) (gS : Hom S x y)
                   → NaturalTransformation (ApplyT fS) (ApplyT gS)
     stateHomIndep fS gS = naturalTransformation 
-      (λ x → id C {[ ApplyT fS ]₀ x}) 
-      (λ {a} {b} {f} → trans (left-id C {f = [ ApplyT fS ]₁ f}) (sym (right-id C {f = [ ApplyT fS ]₁ f})))
+      (λ (x : Obj C) → id C {[ ApplyT fS ]₀ x}) 
+      (λ {a : Obj C} {b : Obj C} {f : Hom C a b} → trans (left-id C {f = [ ApplyT fS ]₁ f}) (sym (right-id C {f = [ ApplyT fS ]₁ f})))
     
-    P : {x y : Cell₀ (Category→StrictTwoCategory S)} 
+    P : {x y : Obj S} 
       → Functor (HomCat (Category→StrictTwoCategory S) x y) (HomCat functorTwoCategory C C)
-    P = λ {x} {y} → functor 
-       (λ fS → ApplyT fS) 
-       (λ {fS} {gS} _ → stateHomIndep fS gS)
-       (λ {fS} → refl)
-       (λ {fS} {gS} {hS} {_} {_} → natural-transformation-eq (fun-ext (λ x → sym (right-id C))))
+    P {x} {y} = functor 
+       (λ (fS : Hom S x y) → ApplyT fS) 
+       (λ {fS : Hom S x y} {gS : Hom S x y} (f : ⊤) → stateHomIndep fS gS)
+       (λ {fS : Hom S x y} → refl)
+       (λ {fS : Hom S x y} {gS : Hom S x y} {hS : Hom S x y} {f : ⊤} {g : ⊤} → natural-transformation-eq (fun-ext (λ x → sym (right-id C))))
 
     η' : (s : Obj S) → NaturalTransformation Id[ C ] (ApplyT (id S {s}))
     η' s = naturalTransformation
              (η (AtkeyParameterizedMonad.NatTrans-η F s))
-             (λ {a} {b} {f} → natural (AtkeyParameterizedMonad.NatTrans-η F s) {a} {b} {f})
+             (λ {a : Obj C} {b : Obj C} {f : Hom C a b} → natural (AtkeyParameterizedMonad.NatTrans-η F s) {a} {b} {f})
 
     μ' : (x y z : Obj S)
        → (f : Hom S x y)
@@ -85,8 +88,8 @@ AtkeyFunctor→LaxTwoFunctor {C = C} {S} {T} F = record
        → NaturalTransformation ([ ApplyT g ]∘[ ApplyT f ]) (ApplyT (g ∘S f))
     μ' x y z f g = naturalTransformation
                    (η (AtkeyParameterizedMonad.NatTrans-μ F z y x))
-                   (λ {a} {b} {f} → natural (AtkeyParameterizedMonad.NatTrans-μ F z y x) {a} {b} {f})
-
+                   (λ {a : Obj C} {b : Obj C} {f : Hom C a b} → natural (AtkeyParameterizedMonad.NatTrans-μ F z y x) {a} {b} {f})
+{-
     laxFunId₁ : (x y : Obj S) (f : Hom S x y)
               → ⟨ stateHomIndep f f ⟩∘ᵥ⟨ ⟨ μ' x x y (id S) f ⟩∘ᵥ⟨ ⟨ Id⟨ ApplyT f ⟩ ⟩∘ₕ⟨ (η' x) ⟩ ⟩ ⟩
               ≡ stateHomIndep f f
@@ -162,13 +165,48 @@ AtkeyFunctor→LaxTwoFunctor {C = C} {S} {T} F = record
                → η Id⟨ ApplyT (id S ∘S f) ⟩ c
                ≡ η (subst₂ NaturalTransformation q refl Id⟨ ApplyT f ⟩) c
         helper c refl = refl
-      
-{-compNaturalTransformationHorz 
-  : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓE₀ ℓE₁ : Level} 
-  → {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} {E : Category {ℓE₀} {ℓE₁}}
-  → {G G' : Functor D E} {F F' : Functor C D}
-  → NaturalTransformation G G' → NaturalTransformation F F'
-  → NaturalTransformation [ G ]∘[ F ] [ G' ]∘[ F' ]
+
 -}
--- compNaturalTransformationHorz {C = C} {D} {E} {G} {G'} {F} {F'} α β =  record 
---  η c = ηα ([ F' ]₀ c) ∘E [ G ]₁ (ηβ c)
+    laxFunAssoc : (w x y z : Obj S) (f : Hom S w x) (g : Hom S x y) (h : Hom S y z)
+                → ⟨ Functor.F₁ P {a = h ∘S (g ∘S f)} {b = (h ∘S g) ∘S f} (α (Category→StrictTwoCategory S) f g h)
+                  ⟩∘ᵥ⟨
+                  ⟨ μ' w y z (g ∘S f) h ⟩∘ᵥ⟨ ⟨ Id⟨ ApplyT h ⟩ ⟩∘ₕ⟨ μ' w x y f g ⟩ ⟩ ⟩
+                ≡ ⟨ μ' w x z f (h ∘S g) ⟩∘ᵥ⟨
+                  ⟨ ⟨ μ' x y z g h ⟩∘ₕ⟨ Id⟨ ApplyT f ⟩ ⟩ ⟩∘ᵥ⟨ α functorTwoCategory ([ P ]₀ f) ([ P ]₀ g) ([ P ]₀ h) ⟩ ⟩
+    laxFunAssoc w x y z f g h = natural-transformation-eq $ fun-ext $ λ (c : Obj C) → begin
+      η ⟨ Functor.F₁ P {a = h ∘S (g ∘S f)} {b = (h ∘S g) ∘S f} (α (Category→StrictTwoCategory S) f g h) ⟩∘ᵥ⟨ ⟨ μ' w y z (g ∘S f) h ⟩∘ᵥ⟨ ⟨ Id⟨ ApplyT h ⟩ ⟩∘ₕ⟨ μ' w x y f g ⟩ ⟩ ⟩ c
+        ≡⟨⟩
+      η (Functor.F₁ P {a = h ∘S (g ∘S f)} {b = (h ∘S g) ∘S f} (α (Category→StrictTwoCategory S) f g h)) c ∘C
+                    (  η (μ' w y z (g ∘S f) h) c
+                    ∘C (id C {[ ApplyT h ]₀ ([ ApplyT (g ∘S f) ]₀ c)} ∘C [ ApplyT h ]₁ (η (μ' w x y f g) c)) )
+        ≡⟨ cong (λ X → η (Functor.F₁ P {a = h ∘S (g ∘S f)} {b = (h ∘S g) ∘S f} (α (Category→StrictTwoCategory S) f g h)) c ∘C (η (μ' w y z (g ∘S f) h) c ∘C X )) (right-id C) ⟩
+      η (Functor.F₁ P {a = h ∘S (g ∘S f)} {b = (h ∘S g) ∘S f} (α (Category→StrictTwoCategory S) f g h)) c ∘C (η (μ' w y z (g ∘S f) h) c ∘C [ ApplyT h ]₁ (η (μ' w x y f g) c) )
+        ≡⟨ {!!} ⟩
+      (η (μ' w y z (g ∘S f) h) c ∘C [ ApplyT h ]₁ (η (μ' w x y f g) c)) ∘C (η (α functorTwoCategory ([ P ]₀ f) ([ P ]₀ g) ([ P ]₀ h)) c)
+        ≡⟨ cong (λ X → X ∘C (η (α functorTwoCategory ([ P ]₀ f) ([ P ]₀ g) ([ P ]₀ h)) c)) (sym (left-id C)) ⟩
+      (  (η (μ' w y z (g ∘S f) h) c ∘C [ ApplyT h ]₁ (η (μ' w x y f g) c)) ∘C id C {[ [ ApplyT h ]∘[ ApplyT g ] ]₀ ([ ApplyT f ]₀ c)} )
+      ∘C (η (α functorTwoCategory ([ P ]₀ f) ([ P ]₀ g) ([ P ]₀ h)) c)
+        ≡⟨ cong (λ X → ((η (μ' w y z (g ∘S f) h) c ∘C [ ApplyT h ]₁ (η (μ' w x y f g) c)) ∘C X ) ∘C (η (α functorTwoCategory ([ P ]₀ f) ([ P ]₀ g) ([ P ]₀ h)) c))
+                (sym $ Functor.id [ ApplyT h ]∘[ ApplyT g ]) ⟩
+      (  (η (μ' w y z (g ∘S f) h) c ∘C [ ApplyT h ]₁ (η (μ' w x y f g) c)) ∘C [ [ ApplyT h ]∘[ ApplyT g ] ]₁ (id C {[ ApplyT f ]₀ c}) )
+      ∘C (η (α functorTwoCategory ([ P ]₀ f) ([ P ]₀ g) ([ P ]₀ h)) c)
+        ≡⟨ cong (λ X →  (X ∘C [ [ ApplyT h ]∘[ ApplyT g ] ]₁ (id C {[ ApplyT f ]₀ c}) ) ∘C (η (α functorTwoCategory ([ P ]₀ f) ([ P ]₀ g) ([ P ]₀ h)) c)) (AtkeyParameterizedMonad.assoc F) ⟩
+      (  (η (μ' w x z f (h ∘S g)) c ∘C η (μ' x y z g h) ([ ApplyT f ]₀ c)) ∘C [ [ ApplyT h ]∘[ ApplyT g ] ]₁ (id C {[ ApplyT f ]₀ c}) )
+      ∘C (η (α functorTwoCategory ([ P ]₀ f) ([ P ]₀ g) ([ P ]₀ h)) c)
+        ≡⟨ cong (λ X → X ∘C (η (α functorTwoCategory ([ P ]₀ f) ([ P ]₀ g) ([ P ]₀ h)) c)) (sym (assoc C)) ⟩
+      (  η (μ' w x z f (h ∘S g)) c ∘C (η (μ' x y z g h) ([ ApplyT f ]₀ c) ∘C [ [ ApplyT h ]∘[ ApplyT g ] ]₁ (id C {[ ApplyT f ]₀ c})) )
+      ∘C (η (α functorTwoCategory ([ P ]₀ f) ([ P ]₀ g) ([ P ]₀ h)) c) 
+        ≡⟨ sym (assoc C) ⟩
+      η (μ' w x z f (h ∘S g)) c ∘C (  (η (μ' x y z g h) ([ ApplyT f ]₀ c) ∘C [ [ ApplyT h ]∘[ ApplyT g ] ]₁ (id C {[ ApplyT f ]₀ c}))
+                                   ∘C (η (α functorTwoCategory ([ P ]₀ f) ([ P ]₀ g) ([ P ]₀ h)) c) )
+        ≡⟨⟩
+      η ⟨ μ' w x z f (h ∘S g) ⟩∘ᵥ⟨ ⟨ ⟨ μ' x y z g h ⟩∘ₕ⟨ Id⟨ ApplyT f ⟩ ⟩ ⟩∘ᵥ⟨ α functorTwoCategory ([ P ]₀ f) ([ P ]₀ g) ([ P ]₀ h) ⟩ ⟩ c ∎
+{-
+associator-eq : {ℓObj ℓHom : Level}
+              → {A : Category {ℓObj} {ℓHom}} {B : Category {ℓObj} {ℓHom}}
+              → {C : Category {ℓObj} {ℓHom}} {D : Category {ℓObj} {ℓHom}}
+              → (F : Functor A B)
+              → (G : Functor B C)
+              → (H : Functor C D)
+              → StrictTwoCategory.α (functorTwoCategory {ℓObj} {ℓHom}) F G H ≡ functorAssociator H G F
+-}
