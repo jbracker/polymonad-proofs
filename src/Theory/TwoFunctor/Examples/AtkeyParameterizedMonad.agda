@@ -33,16 +33,16 @@ open Category
 open NaturalTransformation
 open StrictTwoCategory
 
-module Theory.Examples.AtkeyParameterizedMonadToTwoFunctor where
+module Theory.TwoFunctor.Examples.AtkeyParameterizedMonad where
 
-AtkeyFunctor→LaxTwoFunctor 
+AtkeyParameterizedMonad→LaxTwoFunctor 
   : {ℓC₀ ℓC₁ ℓS₀ ℓS₁ : Level} 
   → {C : Category {ℓC₀} {ℓC₁}}
   → {S : Category {ℓS₀} {ℓS₁}}
   → {T : Functor (S op ×C S ×C C) C}
   → (F : AtkeyParameterizedMonad C S T) 
   → LaxTwoFunctor (Category→StrictTwoCategory S) (functorTwoCategory {ℓC₀} {ℓC₁})
-AtkeyFunctor→LaxTwoFunctor {C = C} {S} {T} F = record
+AtkeyParameterizedMonad→LaxTwoFunctor {C = C} {S} {T} F = record
   { P₀ = λ _ → C
   ; P₁ = P
   ; η = λ {x} → η' x
