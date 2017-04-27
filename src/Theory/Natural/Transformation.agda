@@ -179,7 +179,7 @@ natural-transformation-eq {η₀ = η₀} {.η₀} {nat₀} {nat₁} refl
   = cong (naturalTransformation η₀) 
   $ implicit-fun-ext (λ a → implicit-fun-ext (λ b → implicit-fun-ext (λ f → proof-irrelevance (nat₀ {a} {b} {f}) (nat₁ {a} {b} {f}) ) ) )
 
-het-natrural-transformation-eq : {Cℓ₀ Cℓ₁ Dℓ₀ Dℓ₁ : Level} 
+het-natural-transformation-eq : {Cℓ₀ Cℓ₁ Dℓ₀ Dℓ₁ : Level} 
                                → {C : Category {Cℓ₀} {Cℓ₁}} {D : Category {Dℓ₀} {Dℓ₁}} 
                                → {F G : Functor C D}
                                → {η₀ : (x : Obj C) → Hom D ([ F ]₀ x) ([ G ]₀ x)}
@@ -188,6 +188,6 @@ het-natrural-transformation-eq : {Cℓ₀ Cℓ₁ Dℓ₀ Dℓ₁ : Level}
                                → {nat₁ : {a b : Obj C} {f : Hom C a b} → ( _∘_ D ([ G ]₁ f) (η₁ a) ) ≅ ( _∘_ D (η₁ b) ([ F ]₁ f) )}
                                → η₀ ≅ η₁
                                → naturalTransformation {F = F} {G = G} η₀ (≅-to-≡ nat₀) ≅ naturalTransformation {F = F} {G = G} η₁ (≅-to-≡ nat₁)
-het-natrural-transformation-eq {η₀ = η₀} {.η₀} {nat₀} {nat₁} refl 
+het-natural-transformation-eq {η₀ = η₀} {.η₀} {nat₀} {nat₁} refl 
   with het-implicit-fun-ext (λ a → het-implicit-fun-ext (λ b → het-implicit-fun-ext (λ f → ≡-to-≅ (hproof-irrelevance (nat₀ {a} {b} {f}) (nat₁ {a} {b} {f})) ) ) )
-het-natrural-transformation-eq {η₀ = η₀} {.η₀} {nat₀} {.nat₀} refl | refl = refl
+het-natural-transformation-eq {η₀ = η₀} {.η₀} {nat₀} {.nat₀} refl | refl = refl
