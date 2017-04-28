@@ -58,10 +58,10 @@ AtkeyParameterizedMonad→LaxTwoFunctor {C = C} {S} {T} F = record
     ApplyT : {x y : Obj S} → Hom S x y → Functor C C
     ApplyT {x} {y} f = functor 
       (λ (c : Obj C) → Functor.F₀ T (y , x , c)) 
-      (λ {a : Obj C} {b : Obj C} (f : Hom C a b) → Functor.F₁ T (id S {y} , id S {x} , f))
+      (λ {a : Obj C} {b : Obj C} (g : Hom C a b) → Functor.F₁ T (id S {y} , id S {x} , g))
       (λ {a : Obj C} → Functor.id T)
-      (λ {a : Obj C} {b : Obj C} {c : Obj C} {f} {g} → trans (cong₂ (λ X Y → Functor.F₁ T (X , Y , (g ∘C f))) (sym (left-id S {y})) (sym (left-id S {x})))
-                                                             (Functor.compose T {y , x , a} {y , x , b} {y , x , c} {id S {y} , id S {x} , f} {id S {y} , id S {x} , g}))
+      (λ {a : Obj C} {b : Obj C} {c : Obj C} {g} {h} → trans (cong₂ (λ X Y → Functor.F₁ T (X , Y , (h ∘C g))) (sym (left-id S {y})) (sym (left-id S {x})))
+                                                             (Functor.compose T {y , x , a} {y , x , b} {y , x , c} {id S {y} , id S {x} , g} {id S {y} , id S {x} , h}))
   
     stateHomIndep : {x y : Obj S} → (fS : Hom S x y) (gS : Hom S x y)
                   → NaturalTransformation (ApplyT fS) (ApplyT gS)
