@@ -1,6 +1,9 @@
 
 module Theory.Monad.Atkey.IsTwoFunctor where
 
+open import Theory.TwoFunctor.Examples.FromAtkeyParameterizedMonad using ( AtkeyParameterizedMonad→LaxTwoFunctor ) public
+
+{-
 -- Stdlib
 open import Level renaming ( suc to lsuc ; zero to lzero )
 open import Function renaming ( _∘_ to _∘F_ ; id to idF )
@@ -203,3 +206,4 @@ AtkeyParameterizedMonad→LaxTwoFunctor {ℓC₀} {ℓC₁} {ℓS₀} {ℓS₁} 
         ∘C ( ( AtkeyParameterizedMonad.μ monad {[ M ]₀ (s₁ , s₀ , x)} {s₃} {s₂} {s₁} ∘C [ M ]₁ (id (S op) {s₃} , id S {s₂} , [ M ]₁ (id (S op) {s₂} , id S {s₁} , id C {[ M ]₀ (s₁ , s₀ , x)} ) ) )
         ∘C NatTrans.η (subst₂ NatTrans refl (hAssoc₁ FunTwoCat {C} {C} {C} {C} {[ P₁ {s₀} {s₁} ]₀ f} {[ P₁ {s₁} {s₂} ]₀ g} {[ P₁ {s₂} {s₃} ]₀ h}) 
                                             (Id⟨ [ [ P₁ {s₂} {s₃} ]₀ h ]∘[ [ [ P₁ {s₁} {s₂} ]₀ g ]∘[ [ P₁ {s₀} {s₁} ]₀ f ] ] ⟩)) x) ∎
+-}
