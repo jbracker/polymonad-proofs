@@ -14,6 +14,7 @@ open ≡-Reasoning
 -- Local
 open import Theory.Category
 open import Theory.Functor
+open import Theory.Natural.Transformation
 
 open Category hiding ( right-id ; left-id )
 
@@ -23,17 +24,49 @@ open Category hiding ( right-id ; left-id )
 record RelativeMonad {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} (T : Obj C → Obj D) (J : Functor C D) : Set (ℓC₀ ⊔ ℓC₁ ⊔ ℓD₀ ⊔ ℓD₁) where
   private
     _∘D_ = _∘_ D
+    _∘C_ = _∘_ C
   
   field
     η : {a : Obj C} → Hom D ([ J ]₀ a) (T a)
     kext : {a b : Obj C} → Hom D ([ J ]₀ a) (T b) → Hom D (T a) (T b)
     
     right-id : {a b : Obj C} {k : Hom D ([ J ]₀ a) (T b)} 
-             → _∘_ D (kext k) η ≡ k
+             → kext k ∘D η ≡ k
     left-id : {a : Obj C} → kext η ≡ id D {a = T a}
     
     coher : {a b c : Obj C} {k : Hom D ([ J ]₀ a) (T b)} {l : Hom D ([ J ]₀ b) (T c)} 
           → kext ( kext l ∘D k ) ≡ kext l ∘D kext k
+  
+  FunctorT : Functor C D
+  FunctorT = functor T (λ f → kext (η ∘D [ J ]₁ f)) fun-id compose
+    where
+      fun-id : {a : Obj C} → kext {a = a} (η ∘D [ J ]₁ (id C)) ≡ id D
+      fun-id = trans (trans (cong (λ X → kext (η ∘D X)) (Functor.id J)) (cong kext (Category.left-id D))) left-id
+      
+      compose : {a b c : Obj C} {f : Hom C a b} {g : Hom C b c}
+              → kext (η ∘D [ J ]₁ (g ∘C f)) ≡ kext (η ∘D [ J ]₁ g) ∘D (kext (η ∘D [ J ]₁ f))
+      compose {f = f} {g} = trans (cong kext (trans (trans (trans (cong (λ X → η ∘D X) (Functor.compose J)) (assoc D)) (cong (λ X → X ∘D [ J ]₁ f) (sym right-id))) (sym $ assoc D))) coher
+  
+  NaturalTransformation-η : NaturalTransformation J FunctorT
+  NaturalTransformation-η = naturalTransformation (λ _ → η) right-id
+  
+  NaturalTransformation-kext : NaturalTransformation FunctorT FunctorT
+  NaturalTransformation-kext = naturalTransformation (λ x → kext (η {x})) {!natural!}
+    where
+      natural : {a b : Obj C} {f : Hom C a b} →
+              kext (η ∘D [ J ]₁ f) ∘D kext η ≡ kext η ∘D kext (η ∘D [ J ]₁ f)
+      natural {f = f} = begin
+        kext (η ∘D [ J ]₁ f) ∘D kext η 
+          ≡⟨ cong (λ X → kext (η ∘D [ J ]₁ f) ∘D X) left-id ⟩
+        kext (η ∘D [ J ]₁ f) ∘D id D
+          ≡⟨ Category.left-id D ⟩
+        kext (η ∘D [ J ]₁ f)
+          ≡⟨ cong kext (sym $ Category.right-id D) ⟩
+        kext (id D ∘D (η ∘D [ J ]₁ f))
+          ≡⟨ cong (λ X → kext (X ∘D (η ∘D [ J ]₁ f))) (sym left-id) ⟩
+        kext (kext η ∘D (η ∘D [ J ]₁ f))
+          ≡⟨ coher ⟩
+        kext η ∘D kext (η ∘D [ J ]₁ f) ∎
 
 
 -- -----------------------------------------------------------------------------
