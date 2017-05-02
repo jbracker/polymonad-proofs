@@ -1,5 +1,5 @@
 
-module Theory.Monad.Atkey.IsIxMonad where
+module Theory.Monad.Atkey.ToIndexedMonad where
 
 -- Stdlib
 open import Level renaming ( suc to lsuc ; zero to lzero )
