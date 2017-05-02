@@ -140,8 +140,10 @@ productFunctor {C = C} {D} {E} {K} F G = record
 -------------------------------------------------------------------------------
 -- Constant Functor
 -------------------------------------------------------------------------------
-constFunctor : {ℓC₀ ℓC₁ : Level} → (C : Category {ℓC₀} {ℓC₁}) → (c : Obj C) → Functor ⊤-Cat C
-constFunctor C c = record
+constObjFunctor : {ℓC₀ ℓC₁ : Level} 
+                → (C : Category {ℓC₀} {ℓC₁}) → (c : Obj C) 
+                → Functor ⊤-Cat C
+constObjFunctor C c = record
   { F₀ = F₀
   ; F₁ = F₁
   ; id = refl
