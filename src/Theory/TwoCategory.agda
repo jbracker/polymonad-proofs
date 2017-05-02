@@ -105,7 +105,7 @@ record StrictTwoCategory {ℓ₀ ℓ₁ ℓ₂ : Level} : Set (lsuc (ℓ₀ ⊔ 
   
   -- The functor designated by id
   id→functor : {a : Cell₀} → Functor ⊤-Cat (HomCat a a)
-  id→functor {a} = constFunctor (HomCat a a) (id₁ {a})
+  id→functor {a} = constObjFunctor (HomCat a a) (id₁ {a})
 
   vIdL : {a b : Cell₀} {f g : Cell₁ a b} {θ : Cell₂ f g} → θ ∘ᵥ id₂ ≡ θ
   vIdL {a} {b} = Category.left-id (HomCat a b)
