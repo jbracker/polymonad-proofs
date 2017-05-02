@@ -189,5 +189,5 @@ het-natural-transformation-eq : {Cℓ₀ Cℓ₁ Dℓ₀ Dℓ₁ : Level}
                                → η₀ ≅ η₁
                                → naturalTransformation {F = F} {G = G} η₀ (≅-to-≡ nat₀) ≅ naturalTransformation {F = F} {G = G} η₁ (≅-to-≡ nat₁)
 het-natural-transformation-eq {η₀ = η₀} {.η₀} {nat₀} {nat₁} refl 
-  with het-implicit-fun-ext (λ a → het-implicit-fun-ext (λ b → het-implicit-fun-ext (λ f → ≡-to-≅ (hproof-irrelevance (nat₀ {a} {b} {f}) (nat₁ {a} {b} {f})) ) ) )
+  with het-implicit-fun-ext refl (λ a → het-implicit-fun-ext refl (λ b → het-implicit-fun-ext refl (λ f → ≡-to-≅ (hproof-irrelevance (nat₀ {a} {b} {f}) (nat₁ {a} {b} {f})) ) ) )
 het-natural-transformation-eq {η₀ = η₀} {.η₀} {nat₀} {.nat₀} refl | refl = refl

@@ -226,11 +226,11 @@ het-functor-eq : {Cℓ₀ Cℓ₁ Dℓ₀ Dℓ₁ : Level} {C : Category {Cℓ�
            → functor {C = C} {D = D} F₀ (λ {a b} → F₁ a b) idF composeF ≅ functor {C = C} {D = D} G₀ (λ {a b} → G₁ a b) idG composeG
 het-functor-eq {F₀ = F₀} {F₁ = F₁} {idF = idF} {idG} {composeF} {composeG} hrefl hrefl = hcong₂ (functor F₀ (λ {a b} → F₁ a b)) p1 p2
   where
-    p1 = het-implicit-fun-ext (λ a → ≡-to-≅ $ proof-irrelevance (idF {a}) (idG {a}))
-    p2 = het-implicit-fun-ext 
-           (λ a → het-implicit-fun-ext 
-           (λ b → het-implicit-fun-ext
-           (λ c → het-implicit-fun-ext
-           (λ f → het-implicit-fun-ext
+    p1 = het-implicit-fun-ext hrefl (λ a → ≡-to-≅ $ proof-irrelevance (idF {a}) (idG {a}))
+    p2 = het-implicit-fun-ext hrefl
+           (λ a → het-implicit-fun-ext hrefl
+           (λ b → het-implicit-fun-ext hrefl
+           (λ c → het-implicit-fun-ext hrefl
+           (λ f → het-implicit-fun-ext hrefl
            (λ g → ≡-to-≅ $ proof-irrelevance (composeF {a} {b} {c} {f} {g}) (composeG {a} {b} {c} {f} {g})
            ) ) ) ) )

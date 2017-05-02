@@ -28,13 +28,15 @@ fun-ext₂ : {ℓA ℓB ℓC : Level} {A : Set ℓA} {B : A → Set ℓB} {C : (
 fun-ext₂ {f = f} {g = g} p = fun-ext (λ a → fun-ext (p a))
 
 -- Function extensionality for heterogeneous equality.
-het-fun-ext : {ℓA ℓB : Level} {A : Set ℓA} {B : A → Set ℓB} {f g : (a : A) → B a} 
-            → ((x : A) → f x ≅ g x) 
+het-fun-ext : {ℓA ℓBC : Level} {A : Set ℓA} {B : A → Set ℓBC} {C : A → Set ℓBC} {f : (a : A) → B a} {g : (a : A) → C a}
+            → B ≅ C
+            → ((x : A) → f x ≅ g x)
             → f ≅ g
-het-fun-ext p = ≡-to-≅ (fun-ext (λ x → ≅-to-≡ (p x)))
+het-fun-ext refl p = ≡-to-≅ (fun-ext (λ x → ≅-to-≡ (p x)))
 
 -- Function extensionality for heterogeneous equality with implicit arguments.
-het-implicit-fun-ext : {ℓA ℓB : Level} {A : Set ℓA} {B : A → Set ℓB} {f g : {a : A} → B a} 
-                     → ((x : A) → f {x} ≅ g {x}) 
+het-implicit-fun-ext : {ℓA ℓBC : Level} {A : Set ℓA} {B : A → Set ℓBC} {C : A → Set ℓBC} {f : {a : A} → B a} {g : {a : A} → C a}
+                     → B ≅ C
+                     → ((x : A) → f {x} ≅ g {x})
                      → (λ {a} → f {a}) ≅ (λ {a} → g {a})
-het-implicit-fun-ext {f = f} {g = g} p = hcong (λ X → (λ {a} → X a)) (het-fun-ext p)
+het-implicit-fun-ext {f = f} {g = g} refl p = hcong (λ X → (λ {a} → X a)) (het-fun-ext refl p)
