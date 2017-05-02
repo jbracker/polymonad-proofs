@@ -18,3 +18,4 @@ src/Theory/Examples/IxMonadToAtkeyParameterizedMonad.agda
 src/Theory/Haskell/Constrained/Examples/SetApplicative.agda
 src/Theory/Haskell/Applicative.agda
 
+src/Theory/TwoFunctor/Examples/FromRelativeMonad.agda
