@@ -33,7 +33,7 @@ open Category
 open NaturalTransformation
 open StrictTwoCategory
 
-module Theory.TwoFunctor.Examples.AtkeyParameterizedMonad where
+module Theory.TwoFunctor.Examples.FromAtkeyParameterizedMonad where
 
 AtkeyParameterizedMonad→LaxTwoFunctor 
   : {ℓC₀ ℓC₁ ℓS₀ ℓS₁ : Level} 
