@@ -51,7 +51,7 @@ record RelativeMonad {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} {C : Category {�
   NaturalTransformation-η = naturalTransformation (λ _ → η) right-id
   
   NaturalTransformation-kext : NaturalTransformation FunctorT FunctorT
-  NaturalTransformation-kext = naturalTransformation (λ x → kext (η {x})) {!natural!}
+  NaturalTransformation-kext = naturalTransformation (λ x → kext (η {x})) natural
     where
       natural : {a b : Obj C} {f : Hom C a b} →
               kext (η ∘D [ J ]₁ f) ∘D kext η ≡ kext η ∘D kext (η ∘D [ J ]₁ f)
