@@ -9,6 +9,8 @@ open import Haskell
 open import Identity
 
 record Functor (F : TyCon) : Set₁ where
+  constructor functor
+  
   field
     fmap : ∀ {α β : Type} → (α → β) → (F α → F β)
     
@@ -16,6 +18,30 @@ record Functor (F : TyCon) : Set₁ where
     law-compose : ∀ {α β γ : Type} 
                → (f : β → γ) → (g : α → β) 
                → fmap (f ∘ g) ≡ fmap f ∘ fmap g
+
+functor-eq : {F : TyCon}
+           → {fmap₀ : ∀ {α β : Type} → (α → β) → (F α → F β)}
+           → {fmap₁ : ∀ {α β : Type} → (α → β) → (F α → F β)}
+           → {law-id₀ : ∀ {α : Type} → fmap₀ {α = α} identity ≡ identity}
+           → {law-id₁ : ∀ {α : Type} → fmap₁ {α = α} identity ≡ identity}
+           → {law-compose₀ : ∀ {α β γ : Type} → (f : β → γ) → (g : α → β) → fmap₀ (f ∘ g) ≡ fmap₀ f ∘ fmap₀ g}
+           → {law-compose₁ : ∀ {α β γ : Type} → (f : β → γ) → (g : α → β) → fmap₁ (f ∘ g) ≡ fmap₁ f ∘ fmap₁ g}
+           → (λ {α} {β} → fmap₀ {α} {β}) ≡ fmap₁
+           → functor fmap₀ law-id₀ law-compose₀ ≡ functor fmap₁ law-id₁ law-compose₁
+functor-eq {F} {fmap} {._} {i₀} {i₁} {c₀} {c₁} refl = cong₂ (functor fmap) p1 p2
+  where
+    p1 : (λ {α} → i₀ {α}) ≡ i₁
+    p1 = implicit-fun-ext 
+       $ λ α → proof-irrelevance (i₀ {α}) (i₁ {α})
+    
+    p2 : (λ {α} {β} {γ} → c₀ {α} {β} {γ}) ≡ c₁
+    p2 = implicit-fun-ext 
+       $ λ α → implicit-fun-ext 
+       $ λ β → implicit-fun-ext 
+       $ λ γ → fun-ext 
+       $ λ f → fun-ext 
+       $ λ g → proof-irrelevance (c₀ {α} {β} {γ} f g) (c₁ {α} {β} {γ} f g)
+
 
 functorFromMonad : ∀ {M : TyCon}
                  → (_>>=_ : [ M , M ]▷ M)
