@@ -15,14 +15,14 @@ open ≡-Reasoning
 open import Extensionality
 open import Haskell
 open import Identity
-open import Haskell.Functor
+open import Haskell.Functor hiding ( functor )
 open import Haskell.Parameterized.IndexedMonad
 
 -- -----------------------------------------------------------------------------
 -- Indexed Monads are Functors
 -- -----------------------------------------------------------------------------
 
-open IxMonad hiding ( _>>=_ ; return )
+open IxMonad hiding ( _>>=_ ; return ; fmap )
 
 IxMonad→Functor : ∀ {ℓ}
                 → (Ixs : Set ℓ)

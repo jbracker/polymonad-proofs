@@ -13,7 +13,7 @@ open ≡-Reasoning
 -- Local
 open import Utilities
 open import Haskell
-open import Haskell.Functor
+open import Haskell.Functor hiding ( functor )
 open import Haskell.Applicative
 open import Haskell.Monad
 open import Identity

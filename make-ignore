@@ -14,8 +14,8 @@ src/Supermonad/Polymonad.agda
 src/Supermonad/DefinitionWithCategory/ToLaxTwoFunctor.agda
 
 src/Theory/Examples/TwoFunctorToAtkeyParameterizedMonad.agda
-src/Theory/Examples/IxMonadToAtkeyParameterizedMonad.agda
 src/Theory/Haskell/Constrained/Examples/SetApplicative.agda
 src/Theory/Haskell/Applicative.agda
 
 src/Theory/TwoFunctor/Examples/FromRelativeMonad.agda
+src/Theory/TwoFunctor/Examples/FromEffectMonad.agda

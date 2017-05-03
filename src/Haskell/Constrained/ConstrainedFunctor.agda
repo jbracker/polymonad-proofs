@@ -11,7 +11,7 @@ open ≡-Reasoning
 open import Utilities
 open import Haskell 
 open import Identity
-open import Haskell.Functor
+open import Haskell.Functor hiding ( functor )
 
 record ConstrainedFunctor {ℓ : Level} (F : TyCon) : Set (lsuc ℓ) where
   field

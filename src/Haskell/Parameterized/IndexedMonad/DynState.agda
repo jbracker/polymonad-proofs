@@ -41,12 +41,23 @@ evalDynState ma i = proj₂ (runDynState ma i)
 
 DynStateMonad : IxMonad Type DynState
 DynStateMonad = record
-  { _>>=_ = λ ma f → DynStateCon (λ i → let j , a = runDynState ma i in runDynState (f a) j)
-  ; return = λ a → DynStateCon (λ s → s , a)
+  { _>>=_ = _>>=_
+  ; return = return
+  ; functor = λ i j → record 
+    { fmap = λ f ma → ma >>= (return ∘ f)
+    ; law-id = refl
+    ; law-compose = λ f g → refl
+    }
   ; law-right-id = λ a k → refl
   ; law-left-id = λ m → refl
-  ; law-assoc = λ m f g → refl 
-  }
+  ; law-assoc = λ m f g → refl
+  ; law-monad-fmap = λ f ma → refl
+  } where
+    _>>=_ : {α β i j k : Type} → DynState i j α → (α → DynState j k β) → DynState i k β
+    _>>=_ ma f = DynStateCon (λ i → let j , a = runDynState ma i in runDynState (f a) j)
+    
+    return : {α i : Type} → α → DynState i i α
+    return a = DynStateCon (λ s → s , a)
 
 -- -----------------------------------------------------------------------------
 -- Lifting the universe of DynState

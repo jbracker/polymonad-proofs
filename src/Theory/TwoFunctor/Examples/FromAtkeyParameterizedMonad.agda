@@ -39,10 +39,9 @@ AtkeyParameterizedMonad→LaxTwoFunctor
   : {ℓC₀ ℓC₁ ℓS₀ ℓS₁ : Level} 
   → {C : Category {ℓC₀} {ℓC₁}}
   → {S : Category {ℓS₀} {ℓS₁}}
-  → {T : Functor (S op ×C S ×C C) C}
-  → (F : AtkeyParameterizedMonad C S T) 
+  → (F : AtkeyParameterizedMonad C S) 
   → LaxTwoFunctor (Category→StrictTwoCategory S) (functorTwoCategory {ℓC₀} {ℓC₁})
-AtkeyParameterizedMonad→LaxTwoFunctor {C = C} {S} {T} F = record
+AtkeyParameterizedMonad→LaxTwoFunctor {C = C} {S} F = record
   { P₀ = λ _ → C
   ; P₁ = P
   ; η = λ {x} → η' x
@@ -51,6 +50,7 @@ AtkeyParameterizedMonad→LaxTwoFunctor {C = C} {S} {T} F = record
   ; laxFunId₂ = λ {x} {y} {f} → laxFunId₂ x y f
   ; laxFunAssoc = λ {w} {x} {y} {z} {f} {g} {h} → laxFunAssoc w x y z f g h
   } where
+    T = AtkeyParameterizedMonad.T F
     
     _∘C_ = Category._∘_ C
     _∘S_ = Category._∘_ S
@@ -136,7 +136,7 @@ AtkeyParameterizedMonad→LaxTwoFunctor {C = C} {S} {T} F = record
                          (implicit-fun-ext (λ a → proof-irrelevance (Functor.id T) (trans (cong (Functor.F₁ Id[ C ]) (Functor.id T)) (Functor.id Id[ C ])))) ⟩
         η (subst₂ NaturalTransformation
                 (sym $ functor-eq {F₀ = [ ApplyT f ]₀} {G₀ = [ ApplyT (id S ∘S f) ]₀}
-                                  {F₁ = λ a b h → Functor.F₁ (ApplyT f) {a} {b} h} {G₁ = λ a b h → Functor.F₁ (ApplyT (id S ∘S f)) {a} {b} h}
+                                  {F₁ = λ {a} {b} h → Functor.F₁ (ApplyT f) {a} {b} h} {G₁ = λ {a} {b} h → Functor.F₁ (ApplyT (id S ∘S f)) {a} {b} h}
                                   {idF = trans (cong (Functor.F₁ Id[ C ]) (Functor.id T)) (Functor.id Id[ C ])}
                                   {composeF = λ {a} {b} {c} {h} {k} → Functor.compose (ApplyT (id S ∘S f)) {a} {b} {c} {h} {k}}
                                   refl hrefl)
