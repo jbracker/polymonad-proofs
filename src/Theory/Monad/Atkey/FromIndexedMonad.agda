@@ -11,17 +11,19 @@ open import Data.Unit
 open import Data.Empty
 open import Relation.Binary.PropositionalEquality
 open import Relation.Binary.HeterogeneousEquality 
-  renaming ( sym to hsym ; trans to htrans ; cong to hcong ; cong₂ to hcong₂ ; subst to hsubst ; subst₂ to hsubst₂ )
+  renaming ( refl to hrefl ; sym to hsym ; trans to htrans ; cong to hcong ; cong₂ to hcong₂ ; subst to hsubst ; subst₂ to hsubst₂ )
 open ≡-Reasoning hiding ( _≅⟨_⟩_ )
-open ≅-Reasoning hiding ( _≡⟨_⟩_ ) renaming ( begin_ to hbegin_ ; _∎ to _∎h)
+open ≅-Reasoning hiding ( _≡⟨_⟩_ ; _≡⟨⟩_ ) renaming ( begin_ to hbegin_ ; _∎ to _∎h)
 
 -- Local
 open import Utilities
 open import Extensionality
 open import Haskell
+open import Haskell.Functor renaming ( Functor to HaskFunctor )
 open import Haskell.Parameterized.IndexedMonad
 open import Theory.Triple
 open import Theory.Category
+open import Theory.Category.Examples
 open import Theory.Functor
 open import Theory.Natural.Transformation
 open import Theory.Monad hiding ( monad )
@@ -37,147 +39,127 @@ open Category
 open Triple
 
 IxTyCon→AtkeyFunctor
-  : {ℓS₀ ℓS₁ : Level}
-  → {S : Category {ℓS₀} {ℓS₁}}
-  → (Functor (S op ×C S) (S op ×C S))
-  → (Obj (S op) → Obj S → TyCon)
-  → (Functor (S op ×C S ×C setCategory {lzero}) (setCategory {lzero}))
-IxTyCon→AtkeyFunctor {S = S} SF F = functor F₀ F₁ {!!} {!!}
+  : {ℓ : Level}
+  → (Ixs : Set ℓ)
+  → (M : Obj ((discreteCategory Ixs) op) → Obj (discreteCategory Ixs) → TyCon)
+  → (monad : IxMonad Ixs M)
+  → (Functor ((discreteCategory Ixs) op ×C (discreteCategory Ixs) ×C Hask {lzero}) (Hask {lzero}))
+IxTyCon→AtkeyFunctor Ixs M monad = functor F₀ F₁ (λ {a} → law-id {a}) (λ {a} {b} {c} {f} {g} → law-compose {a} {b} {c} {f} {g})
   where
-    F₀ : Obj ((S op) ×C S ×C setCategory) → Obj setCategory
-    F₀ (s₀ , s₁ , a) = F s₀ s₁ a
+    S = discreteCategory Ixs
+    H = Hask {lzero}
+    _∘SSH_ = Category._∘_ (S op ×C S ×C H)
+    _∘S_ = Category._∘_ S
+    _∘Sop_ = Category._∘_ (S op)
     
-    F₁ : {a b : Obj ((S op) ×C S ×C setCategory)} → Hom ((S op) ×C S ×C setCategory) a b → Hom setCategory (F₀ a) (F₀ b)
-    F₁ {sa₀ , sa₁ , a} {sb₀ , sb₁ , b} {sf₀ , sf₁ , f} = {!!}
+    F₀ : Obj ((S op) ×C S ×C H) → Obj H
+    F₀ (s₀ , s₁ , a) = M s₀ s₁ a
+    
+    F₁ : {a b : Obj ((S op) ×C S ×C H)} → Hom ((S op) ×C S ×C H) a b → Hom H (F₀ a) (F₀ b)
+    F₁ {sa₀ , sa₁ , a} {.sa₀ , .sa₁ , b} (refl , refl , f) ma = IxMonad.fmap monad f ma
+    
+    law-id : {a : Obj ((S op) ×C S ×C H)} → IxMonad.fmap monad (id H) ≡ id H
+    law-id {s₀ , s₁ , α} = Functor.law-id (IxMonad.functor monad s₀ s₁)
+
+    law-compose : {a b c : Obj ((S op) ×C S ×C H)}
+                → {f : Hom ((S op) ×C S ×C H) a b}
+                → {g : Hom ((S op) ×C S ×C H) b c}
+                → F₁ (g ∘SSH f) ≡ F₁ g ∘F F₁ f
+    law-compose {a₀ , a₁ , α} {f = refl , refl , f} {refl , refl , g} = Functor.law-compose (IxMonad.functor monad a₀ a₁) g f
 
 IxMonad→AtkeyParameterizedMonad
-  : {ℓS₀ ℓS₁ : Level}
-  → (S : Category {ℓS₀} {ℓS₁})
-  → (F : Functor (S op ×C S ×C setCategory {lzero}) (setCategory {lzero}))
-  → (monad : IxMonad (Obj S) (AtkeyFunctor→IxTyCon F))
-  → ({α β : Type} {i j : Obj S} → (f : α → β) → (ma : (AtkeyFunctor→IxTyCon F) i j α) → IxMonad.bind monad ma (IxMonad.return monad ∘F f) ≡ [ F ]₁ (id (S op) {i} , id S {j} , f) ma)
-  → AtkeyParameterizedMonad setCategory S F
-IxMonad→AtkeyParameterizedMonad S F monad fmap-rel  = record
+  : {ℓ : Level}
+  → (Ixs : Set ℓ)
+  → (M : Obj ((discreteCategory Ixs) op) → Obj (discreteCategory Ixs) → TyCon)
+  → (monad : IxMonad Ixs M)
+  → AtkeyParameterizedMonad setCategory (discreteCategory Ixs) (IxTyCon→AtkeyFunctor Ixs M monad)
+IxMonad→AtkeyParameterizedMonad Ixs M monad = record
   { η = return
   ; μ = join
-  ; naturalη = {!!}
-  ; dinaturalη = {!!}
-  ; naturalμ = {!!}
-  ; naturalμ₁ = {!!}
-  ; naturalμ₂ = {!!}
-  ; dinaturalμ = {!!}
-  ; assoc = {!!}
+  ; naturalη = λ {s} {a} {b} {f} → naturalη {s} {a} {b} {f}
+  ; dinaturalη = λ {x} {a} {b} {f} → dinaturalη {x} {a} {b} {f}
+  ; naturalμ = λ {s₀} {s₁} {s₂} {a} {b} {f} → naturalμ {s₀} {s₁} {s₂} {a} {b} {f}
+  ; naturalμ₁ = λ {s₀} {s₁} {x} {a} {b} {f} → naturalμ₁ {s₀} {s₁} {x} {a} {b} {f}
+  ; naturalμ₂ = λ {s₀} {s₁} {x} {a} {b} {f} → naturalμ₂ {s₀} {s₁} {x} {a} {b} {f}
+  ; dinaturalμ = λ {s₀} {s₁} {x} {a} {b} {f} → dinaturalμ {s₀} {s₁} {x} {a} {b} {f}
+  ; assoc = λ {x} {s₀} {s₁} {s₂} {s₃} → assoc' {x} {s₀} {s₁} {s₂} {s₃}
   ; left-id = λ {x} {s₁} {s₂} → left-id' {x} {s₁} {s₂}
   ; right-id = λ {x} {s₁} {s₂} → right-id' {x} {s₁} {s₂}
   } where
+    S = discreteCategory Ixs
+    
     open IxMonad monad hiding ( bind )
     
-    left-id' : {A : Obj setCategory} {s₁ s₂ : Obj S} 
-             → join ∘F [ F ]₁ (id (S op) , id S , return) ≡ (λ x → x)
-    left-id' = fun-ext $ λ x → begin
-      ([ F ]₁ (id (S op) , id S , return) x) >>= (λ x → x)
-        ≡⟨ cong (λ X → _>>=_ X (λ x₁ → x₁)) (sym (fmap-rel return x)) ⟩
-      (x >>= (return ∘F return)) >>= (λ x → x)
-        ≡⟨ sym (law-assoc x (return ∘F return) (λ y → y)) ⟩
-      x >>= (λ y → return (return y) >>= (λ y → y))
-        ≡⟨ cong (λ X → _>>=_ x X) (fun-ext (λ y → law-right-id (return y) (λ y → y))) ⟩
-      x >>= return
-        ≡⟨ law-left-id x ⟩
-      x ∎
+    naturalη : {s : Ixs} {a b : Type} {f : Hom Hask a b} 
+             → IxMonad.fmap monad f ∘F return ≡ return ∘F f
+    naturalη {s} {f = f} = fun-ext $ λ x → begin
+      fmap f (return x)
+        ≡⟨ sym (law-monad-fmap f (return x)) ⟩
+      return x >>= (return ∘F f)
+        ≡⟨ law-right-id x (return ∘F f) ⟩
+      return (f x) ∎
     
-    right-id' : {x : Obj setCategory} {s₁ s₂ : Obj S} → join ∘F return ≡ id setCategory
-    right-id' = fun-ext $ λ x → law-right-id x (λ y → y)
+    dinaturalη : {x : Type} {a b : Ixs} {f : Hom S a b} 
+               → [ IxTyCon→AtkeyFunctor Ixs M monad ]₁ (refl , f , (λ x → x)) ∘F return
+               ≡ [ IxTyCon→AtkeyFunctor Ixs M monad ]₁ (f , refl , (λ x → x)) ∘F return
+    dinaturalη {f = refl} = refl
     
-{-
-law-left-id : ∀ {α : Type} {i j : Ixs}
-           → (m : M i j α)
-           → m >>= return ≡ m
--}
+    naturalμ : {s₁ s₂ s₃ : Ixs} {a b : Type} {f : Hom Hask a b} 
+             → fmap f ∘F join ≡ join ∘F fmap (fmap f)
+    naturalμ {f = f} = fun-ext $ λ mma → begin
+      fmap f (join mma) 
+        ≡⟨ sym (law-monad-fmap f (join mma)) ⟩ 
+      (mma >>= (λ x → x)) >>= (return ∘F f)
+        ≡⟨ sym (law-assoc mma (λ x → x) (return ∘F f)) ⟩ 
+      mma >>= (λ ma → ma >>= (return ∘F f))
+        ≡⟨ cong (λ X → mma >>= X) (fun-ext (λ ma → sym (law-right-id (ma >>= (return ∘F f)) (λ x → x)))) ⟩ 
+      mma >>= (λ ma → (return (ma >>= (return ∘F f))) >>= (λ x → x))
+        ≡⟨ law-assoc mma (return ∘F (λ ma → ma >>= (return ∘F f))) (λ x → x) ⟩ 
+      (mma >>= (return ∘F (λ ma → ma >>= (return ∘F f)))) >>= (λ x → x)
+        ≡⟨ cong (λ X → _>>=_ X (λ x → x)) (law-monad-fmap (λ ma → ma >>= (return ∘F f)) mma) ⟩ 
+      join (fmap (λ ma → ma >>= (return ∘F f)) mma)
+        ≡⟨ cong (λ X → join (fmap X mma)) (fun-ext (λ ma → law-monad-fmap f ma)) ⟩ 
+      join (fmap (fmap f) mma) ∎
 
-{-record
-  { _>>=_ = _>>=_
-  ; return = return
-  ; law-right-id = law-right-id
-  ; law-left-id = law-left-id
-  ; law-assoc = law-assoc
-  } where
-    SetCat = setCategory {lzero}
-    M = AtkeyFunctor→IxTyCon F
+    naturalμ₁ : {s₂ s₃ : Ixs} {x : Type} {a b : Ixs} {f : Hom (S op) a b} 
+              → [ IxTyCon→AtkeyFunctor Ixs M monad ]₁ (f , refl , (λ x → x)) ∘F join
+              ≡ join ∘F ([ IxTyCon→AtkeyFunctor Ixs M monad ]₁ (f , refl , fmap (λ x → x)))
+    naturalμ₁ {f = refl} = naturalμ {f = λ x → x}
+    
+    naturalμ₂ : {s₁ s₂ : Ixs} {x : Type} {a b : Ixs} {f : Hom S a b} 
+              → ([ IxTyCon→AtkeyFunctor Ixs M monad ]₁ (refl , f , (λ x → x))) ∘F join
+              ≡ join ∘F (fmap ([ IxTyCon→AtkeyFunctor Ixs M monad ]₁ (refl , f , (λ x → x))))
+    naturalμ₂ {f = refl} = naturalμ {f = λ x → x}
 
-    _∘S_ = _∘_ S
-    _∘Sop_ = _∘_ (S op)
+    dinaturalμ : {s₁ s₃ : Ixs} {x : Type} {a b : Ixs} {f : Hom S a b} 
+               → join ∘F (fmap ([ IxTyCon→AtkeyFunctor Ixs M monad ]₁ (f , refl , (λ x → x))))
+               ≡ join ∘F ([ IxTyCon→AtkeyFunctor Ixs M monad ]₁ (refl , f , fmap (λ x → x)))
+    dinaturalμ {f = refl} = refl
+    
+    assoc' : {x : Type} {s₀ s₁ s₂ s₃ : Ixs} 
+           → join ∘F (fmap join) ≡ join ∘F join
+    assoc' = fun-ext $ λ mma → begin
+      fmap (λ ma → ma >>= (λ x → x)) mma >>= (λ x → x) 
+        ≡⟨ cong (λ X → _>>=_ X (λ x → x)) (sym (law-monad-fmap (λ ma → ma >>= (λ x → x)) mma)) ⟩ 
+      (mma >>= (λ ma → return (ma >>= (λ x → x)))) >>= (λ x → x) 
+        ≡⟨ sym (law-assoc mma (λ ma → return (ma >>= (λ x → x))) (λ x → x)) ⟩ 
+      mma >>= (λ ma → return (ma >>= (λ x → x)) >>= (λ x → x))
+        ≡⟨ cong (λ X → _>>=_ mma X) (fun-ext (λ ma → law-right-id (ma >>= (λ x → x)) (λ x → x))) ⟩  
+      mma >>= (λ ma → ma >>= (λ x → x))
+        ≡⟨ law-assoc mma (λ x → x) (λ x → x) ⟩ 
+      (mma >>= (λ x → x)) >>= (λ x → x) ∎
 
-    fmap : {α β : Type} {i j : Obj S}
-         → (α → β) → M i j α → M i j β
-    fmap {i = i} {j} f ma = [ F ]₁ (id (S op) {i} , id S {j} , f) ma
+    left-id' : {x : Type} {s₁ s₂ : Ixs} → join ∘F (fmap return) ≡ (λ x → x)
+    left-id' = fun-ext $ λ mma → begin
+      (fmap return mma) >>= (λ x → x) 
+        ≡⟨ cong (λ X → _>>=_ X (λ x → x)) (sym (law-monad-fmap return mma)) ⟩ 
+      (mma >>= (return ∘F return)) >>= (λ x → x) 
+        ≡⟨ sym (law-assoc mma (return ∘F return) (λ x → x)) ⟩ 
+      mma >>= (λ ma → return (return ma) >>= (λ x → x)) 
+        ≡⟨ cong (λ X → _>>=_ mma X) (fun-ext (λ ma → law-right-id (return ma) (λ x → x))) ⟩ 
+      mma >>= return
+        ≡⟨ law-left-id mma ⟩ 
+      mma ∎
     
-    join : {α : Type} {i j k : Obj S} 
-         → M i j (M j k α) → M i k α
-    join mma = AtkeyParameterizedMonad.μ monad mma
-    
-    _>>=_ : {α β : Type} {i j k : Obj S} 
-          → M i j α → (α → M j k β) → M i k β
-    _>>=_ ma fm = join $ fmap fm ma
-    
-    return : {α : Type} {i : Obj S} 
-           → α → M i i α
-    return a = AtkeyParameterizedMonad.η monad a
-    
-    open AtkeyParameterizedMonad
-    
-    law-right-id : {α β : Type} {i j : Obj S} 
-           → (a : α) (k : α → M i j β) 
-           → return a >>= k ≡ k a
-    law-right-id {α} {β} {i} {j} a k = begin
-      return a >>= k 
-        ≡⟨ refl ⟩
-      μ monad ([ F ]₁ (id (S op) {i} , id S {i} , k) (η monad a))
-        ≡⟨ refl ⟩
-      (μ monad ∘F ([ F ]₁ (id (S op) {i} , id S {i} , k)) ∘F (η monad)) a
-        ≡⟨ cong (λ X → (μ monad ∘F X) a) (naturalη monad) ⟩
-      (μ monad ∘F (η monad ∘F k)) a
-        ≡⟨ refl ⟩
-      (μ monad ∘F η monad) (k a)
-        ≡⟨ cong (λ X → X (k a)) (AtkeyParameterizedMonad.right-id monad) ⟩
-      k a ∎
-    
-    law-left-id : {α : Type} {i j : Obj S}
-           → (m : M i j α) 
-           → m >>= return ≡ m
-    law-left-id {α} {i} {j} m = begin
-      m >>= return 
-        ≡⟨ refl ⟩
-      (μ monad ∘F [ F ]₁ (id (S op) {i} , id S {j} , η monad)) m
-        ≡⟨ cong (λ X →  X m) (AtkeyParameterizedMonad.left-id monad) ⟩
-      m ∎
-
-    law-assoc : {α β γ : Type} {i j k l : Obj S}
-             → (m : M i j α) (f : α → M j k β) (g : β → M k l γ) 
-             → m >>= (λ x → f x >>= g) ≡ (m >>= f) >>= g
-    law-assoc m f g = begin
-      m >>= (λ x → f x >>= g) 
-        ≡⟨ refl ⟩
-      (μ monad ∘F ([ F ]₁ ( id (S op) , id S , (μ monad ∘F ([ F ]₁ (id (S op) , id S , g)) ∘F f)) ) ) m
-        ≡⟨ cong₂ (λ X Y → (μ monad ∘F ([ F ]₁ (X , Y , (μ monad ∘F ([ F ]₁ (id (S op) , id S , g)) ∘F f)) ) ) m) (sym $ Category.left-id (S op)) (sym $ Category.left-id S) ⟩
-      (μ monad ∘F ([ F ]₁ ( (id (S op) ∘Sop id (S op)) , (id S ∘S id S) , (μ monad ∘F ([ F ]₁ (id (S op) , id S , g)) ∘F f)) ) ) m
-        ≡⟨ cong (λ X → (μ monad ∘F X) m) (Functor.compose F) ⟩
-      (μ monad ∘F ([ F ]₁ ( id (S op) , id S , μ monad ) ∘F [ F ]₁ (id (S op) , id S , ([ F ]₁ (id (S op) , id S , g) ∘F f)))) m
-        ≡⟨ refl ⟩ -- associativity of ∘F
-      ( (μ monad ∘F [ F ]₁ (id (S op) , id S , μ monad) ) ∘F [ F ]₁ (id (S op) , id S , ([ F ]₁ (id (S op) , id S , g) ∘F f))) m
-        ≡⟨ cong (λ X → (X ∘F [ F ]₁ (id (S op) , id S , ([ F ]₁ (id (S op) , id S , g) ∘F f))) m) (AtkeyParameterizedMonad.assoc monad) ⟩
-      ( (μ monad ∘F μ monad) ∘F [ F ]₁ (id (S op) , id S , ([ F ]₁ (id (S op) , id S , g) ∘F f))) m
-        ≡⟨ refl ⟩ -- associativity of ∘F
-      (μ monad ∘F (μ monad ∘F [ F ]₁ (id (S op) , id S , ([ F ]₁ (id (S op) , id S , g) ∘F f)))) m
-        ≡⟨ cong₂ (λ X Y → (μ monad ∘F (μ monad ∘F [ F ]₁ (X , Y , ([ F ]₁ (id (S op) , id S , g) ∘F f)))) m) (sym $ Category.left-id (S op)) (sym $ Category.left-id S) ⟩
-      (μ monad ∘F (μ monad ∘F [ F ]₁ ((id (S op) ∘Sop id (S op)) , (id S ∘S id S) , ([ F ]₁ (id (S op) , id S , g) ∘F f)))) m
-        ≡⟨ cong (λ X → (μ monad ∘F (μ monad ∘F X)) m) (Functor.compose F) ⟩
-      (μ monad ∘F (μ monad ∘F ([ F ]₁ (id (S op) , id S , ([ F ]₁ (id (S op) , id S , g))) ∘F [ F ]₁ (id (S op) , id S , f)))) m
-        ≡⟨ refl ⟩ -- associativity of ∘F
-      (μ monad ∘F ((μ monad ∘F [ F ]₁ (id (S op) , id S , ([ F ]₁ (id (S op) , id S , g))) ) ∘F [ F ]₁ (id (S op) , id S , f))) m
-        ≡⟨ cong (λ X → (μ monad ∘F (X ∘F [ F ]₁ (id (S op) , id S , f))) m) (sym $ naturalμ monad) ⟩
-      (μ monad ∘F (([ F ]₁ (id (S op) , id S , g) ∘F μ monad) ∘F [ F ]₁ (id (S op) , id S , f))) m
-        ≡⟨ refl ⟩ -- associativity of ∘F
-      (μ monad ∘F ([ F ]₁ (id (S op) , id S , g) ∘F (μ monad ∘F [ F ]₁ (id (S op) , id S , f)))) m
-        ≡⟨ refl ⟩
-      (m >>= f) >>= g ∎
--}
+    right-id' : {x : Type} {s₁ s₂ : Ixs} → join ∘F return ≡ (λ x → x)
+    right-id' = fun-ext $ λ ma → law-right-id ma (λ x → x)
