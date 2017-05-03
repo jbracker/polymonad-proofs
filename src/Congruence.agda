@@ -43,6 +43,13 @@ cong₇ : ∀ {a b c d e f g h} {A : Set a} {B : Set b} {C : Set c} {D : Set d} 
       → f x1 x2 x3 x4 x5 x6 x7 ≡ f y1 y2 y3 y4 y5 y6 y7
 cong₇ f refl refl refl refl refl refl refl = refl
 
+-- Congruence with seven arguments.
+cong₉ : ∀ {a b c d e f g h i j} {A : Set a} {B : Set b} {C : Set c} {D : Set d} {E : Set e} {F : Set f} {G : Set g} {H : Set h} {I : Set i} {J : Set j}
+        (f : A → B → C → D → E → F → G → H → I → J) {x1 y1 x2 y2 x3 y3 x4 y4 x5 y5 x6 y6 x7 y7 x8 y8 x9 y9} 
+      → x1 ≡ y1 → x2 ≡ y2 → x3 ≡ y3 → x4 ≡ y4 → x5 ≡ y5 → x6 ≡ y6 → x7 ≡ y7 → x8 ≡ y8 → x9 ≡ y9
+      → f x1 x2 x3 x4 x5 x6 x7 x8 x9 ≡ f y1 y2 y3 y4 y5 y6 y7 y8 y9
+cong₉ f refl refl refl refl refl refl refl refl refl = refl
+
 -- Congruence with ten arguments.
 cong10 : ∀ {a b c d e f g h i j k} {A : Set a} {B : Set b} {C : Set c} {D : Set d} {E : Set e} {F : Set f} {G : Set g} {H : Set h} {I : Set i} {J : Set j} {K : Set k}
         (f : A → B → C → D → E → F → G → H → I → J → K) {x1 y1 x2 y2 x3 y3 x4 y4 x5 y5 x6 y6 x7 y7 x8 y8 x9 y9 x10 y10} 
