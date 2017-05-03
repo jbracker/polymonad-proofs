@@ -317,10 +317,14 @@ natTransAtkeyFunctorComp {S = S} {C} s₂ F G = record
 -- The definition and names choosen closly follow the definition given in 
 -- Atkeys paper "Parameterized notions of computation" (page 339).
 -- This is definition does not contain a strength conditions.
-record AtkeyParameterizedMonad {ℓC₀ ℓC₁ ℓS₀ ℓS₁ : Level} (C : Category {ℓC₀} {ℓC₁}) (S : Category {ℓS₀} {ℓS₁}) (T : Functor (S op ×C S ×C C) C) : Set (ℓC₀ ⊔ ℓC₁ ⊔ ℓS₀ ⊔ ℓS₁) where
+record AtkeyParameterizedMonad {ℓC₀ ℓC₁ ℓS₀ ℓS₁ : Level} (C : Category {ℓC₀} {ℓC₁}) (S : Category {ℓS₀} {ℓS₁}) : Set (ℓC₀ ⊔ ℓC₁ ⊔ ℓS₀ ⊔ ℓS₁) where
+  constructor atkey-parameterized-monad
+  
   private
     _∘C_ = _∘_ C ; _∘S_ = _∘_ S ; _∘Sop_ = _∘_ (S op)
   field
+    T : Functor (S op ×C S ×C C) C
+    
     η : {a : Obj C} {s : Obj S} → Hom C a ([ T ]₀ (s , s , a))
     
     μ : {a : Obj C} {s₁ s₂ s₃ : Obj S} → Hom C ([ T ]₀ (s₁ , s₂ , ([ T ]₀ (s₂ , s₃ , a)))) ([ T ]₀ (s₁ , s₃ , a))
