@@ -2,7 +2,7 @@
 module Theory.Category.Examples where 
 
 -- Stdlib
-open import Level renaming ( suc to lsuc ; zero to lzero )
+open import Level
 open import Function renaming ( id to idF ; _∘_ to _∘F_ )
 
 open import Data.Product
@@ -12,7 +12,7 @@ open import Data.Unit hiding ( _≤_ )
 open import Data.Bool
 
 open import Relation.Binary using ( Preorder )
-open import Relation.Binary.HeterogeneousEquality renaming ( cong to hcong )
+open import Relation.Binary.HeterogeneousEquality renaming ( cong to hcong ; proof-irrelevance to het-proof-irrelevance )
 open import Relation.Binary.PropositionalEquality
 
 --open import Utilities
@@ -27,7 +27,7 @@ open import Theory.Functor.Composition
 open import Theory.Natural.Transformation
 
 -- Category of sets and functions.
-setCategory : {ℓ : Level} → Category {ℓ₀ = lsuc ℓ} {ℓ}
+setCategory : {ℓ : Level} → Category {ℓ₀ = suc ℓ} {ℓ}
 setCategory {ℓ} = record
   { Obj = Set ℓ
   ; Hom = λ a b → (a → b)
@@ -37,6 +37,23 @@ setCategory {ℓ} = record
   ; left-id = refl
   ; right-id = refl
   }
+
+-- Category that only has identity morphisms.
+discreteCategory : {ℓ₀ : Level} → (A : Set ℓ₀) → Category {ℓ₀} {ℓ₀}
+discreteCategory {ℓ₀} A = category A (λ a b → a ≡ b) comp (λ {a} → refl) assoc left-id right-id
+  where
+    comp : {a b c : A} → b ≡ c → a ≡ b → a ≡ c
+    comp refl refl = refl
+    
+    assoc : {a b c d : A} {f : a ≡ b} {g : b ≡ c} {h : c ≡ d}
+          → comp h (comp g f) ≡ comp (comp h g) f
+    assoc {f = refl} {refl} {refl} = refl
+    
+    left-id : {a b : A} {f : a ≡ b} → comp refl f ≡ f
+    left-id {f = refl} = refl
+    
+    right-id : {a b : A} {f : a ≡ b} → comp f refl ≡ f
+    right-id {f = refl} = refl
 
 SetIsomorphism↔Bijection : {ℓ : Level} {A B : Set ℓ} → (Σ (A → B) (Isomorphism (setCategory {ℓ}))) ↔ (Bijection A B)
 SetIsomorphism↔Bijection {ℓ} {A} {B} = bijection Iso→Bij Bij→Iso right-id left-id
@@ -90,7 +107,7 @@ endomorphismCategory {ℓ₀} {ℓ₁} C = record
     right-id {f = f , refl} = cong (λ X → X , refl) (Category.right-id C {f = f})
 
 -- Category of categories and functors.
-catCategory : {ℓ₀ ℓ₁ : Level} → Category {ℓ₀ = lsuc (ℓ₀ ⊔ ℓ₁)} {ℓ₁ = ℓ₀ ⊔ ℓ₁}
+catCategory : {ℓ₀ ℓ₁ : Level} → Category {ℓ₀ = suc (ℓ₀ ⊔ ℓ₁)} {ℓ₁ = ℓ₀ ⊔ ℓ₁}
 catCategory {ℓ₀} {ℓ₁} = record
   { Obj = Category {ℓ₀} {ℓ₁}
   ; Hom = λ C D → Functor C D
@@ -157,7 +174,7 @@ preorderCategory P proof-irr-≤ = record
 -- The Binary Category
 -------------------------------------------------------------------------------
 
-binaryCategory : Category {lzero} {lzero}
+binaryCategory : Category {zero} {zero}
 binaryCategory = record
   { Obj = Bool
   ; Hom = Hom
@@ -167,7 +184,7 @@ binaryCategory = record
   ; left-id = λ {a} {b} {f} → left-id {a} {b} {f}
   ; right-id = λ {a} {b} {f} → right-id {a} {b} {f}
   } where
-    Hom : Bool → Bool → Set lzero
+    Hom : Bool → Bool → Set zero
     Hom true  true  = ⊤
     Hom false true  = ⊤
     Hom false false = ⊤
