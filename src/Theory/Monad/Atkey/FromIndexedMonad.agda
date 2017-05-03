@@ -72,9 +72,10 @@ IxMonad→AtkeyParameterizedMonad
   → (Ixs : Set ℓ)
   → (M : Obj ((discreteCategory Ixs) op) → Obj (discreteCategory Ixs) → TyCon)
   → (monad : IxMonad Ixs M)
-  → AtkeyParameterizedMonad setCategory (discreteCategory Ixs) (IxTyCon→AtkeyFunctor Ixs M monad)
+  → AtkeyParameterizedMonad setCategory (discreteCategory Ixs)
 IxMonad→AtkeyParameterizedMonad Ixs M monad = record
-  { η = return
+  { T = T
+  ; η = return
   ; μ = join
   ; naturalη = λ {s} {a} {b} {f} → naturalη {s} {a} {b} {f}
   ; dinaturalη = λ {x} {a} {b} {f} → dinaturalη {x} {a} {b} {f}
@@ -86,6 +87,7 @@ IxMonad→AtkeyParameterizedMonad Ixs M monad = record
   ; left-id = λ {x} {s₁} {s₂} → left-id' {x} {s₁} {s₂}
   ; right-id = λ {x} {s₁} {s₂} → right-id' {x} {s₁} {s₂}
   } where
+    T = IxTyCon→AtkeyFunctor Ixs M monad
     S = discreteCategory Ixs
     
     open IxMonad monad hiding ( bind )

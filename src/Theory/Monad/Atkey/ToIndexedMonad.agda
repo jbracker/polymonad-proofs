@@ -2,7 +2,7 @@
 module Theory.Monad.Atkey.ToIndexedMonad where
 
 -- Stdlib
-open import Level renaming ( suc to lsuc ; zero to lzero )
+open import Level
 open import Function renaming ( _∘_ to _∘F_ ; id to idF )
 open import Data.Unit
 open import Data.Product renaming ( _,_ to _,'_ )
@@ -37,17 +37,16 @@ open Category
 AtkeyFunctor→IxTyCon
   : {ℓS₀ ℓS₁ : Level}
   → {S : Category {ℓS₀} {ℓS₁}}
-  → (F : Functor (S op ×C S ×C setCategory {lzero}) (setCategory {lzero}))
+  → AtkeyParameterizedMonad (Hask {zero}) S
   → (Obj S → Obj S → TyCon)
-AtkeyFunctor→IxTyCon F s₁ s₂ A = [ F ]₀ (s₁ , s₂ , A)
+AtkeyFunctor→IxTyCon F s₁ s₂ A = [ AtkeyParameterizedMonad.T F ]₀ (s₁ , s₂ , A)
 
 AtkeyParameterizedMonad→IxMonad
   : {ℓS₀ ℓS₁ : Level}
   → (S : Category {ℓS₀} {ℓS₁})
-  → (F : Functor (S op ×C S ×C setCategory {lzero}) (setCategory {lzero}))
-  → AtkeyParameterizedMonad setCategory S F
-  → IxMonad (Obj S) (AtkeyFunctor→IxTyCon F)
-AtkeyParameterizedMonad→IxMonad S F monad = record
+  → (monad : AtkeyParameterizedMonad (Hask {zero}) S)
+  → IxMonad (Obj S) (AtkeyFunctor→IxTyCon monad)
+AtkeyParameterizedMonad→IxMonad S monad = record
   { _>>=_ = _>>=_
   ; return = return
   ; functor = λ i j → record 
@@ -60,10 +59,11 @@ AtkeyParameterizedMonad→IxMonad S F monad = record
   ; law-assoc = law-assoc
   ; law-monad-fmap = law-monad-fmap
   } where
-    SetCat = setCategory {lzero}
-    M = AtkeyFunctor→IxTyCon F
+    SetCat = setCategory {zero}
+    F = AtkeyParameterizedMonad.T monad
+    M = AtkeyFunctor→IxTyCon monad
     Ixs = Obj S
-
+    
     _∘S_ = _∘_ S
     _∘Sop_ = _∘_ (S op)
 
