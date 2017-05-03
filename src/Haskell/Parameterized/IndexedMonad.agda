@@ -18,7 +18,7 @@ open import Congruence
 open import Extensionality
 open import Haskell
 open import Identity
-open import Haskell.Functor
+open import Haskell.Functor hiding ( functor )
 open import Haskell.Monad
 
 module Haskell.Parameterized.IndexedMonad where

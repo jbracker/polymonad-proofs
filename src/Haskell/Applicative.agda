@@ -8,7 +8,7 @@ open ≡-Reasoning
 open import Extensionality
 open import Identity
 open import Haskell 
-open import Haskell.Functor
+open import Haskell.Functor hiding ( functor )
 
 record Applicative (F : TyCon) : Set₁ where
   infixl 4 _*>_ _<*_ _<*>_ _<$>_
