@@ -61,7 +61,7 @@ LaxTwoFunctor→AtkeyParameterizedMonad {C = C} {ObjS} F = record
     S = codiscreteCategory ObjS
     
     T₀ : Obj ((S op) ×C S ×C C) → Obj C
-    T₀ (s₀ , s₁ , a) = [ [ P₁ {s₀} {s₁} ]₀ {!!} ]₀ a
+    T₀ (s₀ , s₁ , a) = [ [ P₁ {s₀} {s₁} ]₀ (lift tt) ]₀ a
     
     T₁ : {a b : Obj ((S op) ×C S ×C C)} → Hom ((S op) ×C S ×C C) a b → Hom C (T₀ a) (T₀ b)
     T₁ {sa₀ , sa₁ , a} {sb₀ , sb₁ , b} (lift tt , lift tt , f) = {!!} -- [ [ P₁ {sa₀} {sa₁} ]₀ {!!} ]₁ f
