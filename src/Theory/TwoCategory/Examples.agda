@@ -267,3 +267,5 @@ functorTwoCategory {ℓObj} {ℓHom} = record
         ≡⟨ refl ⟩ 
       η ⟨ [ comp ]₁ (β , idC (HomCat A B) {a = G}) ⟩∘ᵥ⟨ [ comp ]₁ (idC (HomCat B C) {a = H} , α) ⟩ x ∎
       where _∘C_ = _∘_ C
+
+Cat = functorTwoCategory
