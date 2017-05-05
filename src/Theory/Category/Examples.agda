@@ -55,6 +55,10 @@ discreteCategory {ℓ₀} A = category A (λ a b → a ≡ b) comp (λ {a} → r
     right-id : {a b : A} {f : a ≡ b} → comp f refl ≡ f
     right-id {f = refl} = refl
 
+-- Category that has exactly one morphism for any pair of objects.
+codiscreteCategory : {ℓ : Level} → (A : Set ℓ) → Category {ℓ} {ℓ}
+codiscreteCategory {ℓ} A = category A (λ a b → Lift ⊤) (λ _ _ → lift tt) (lift tt) refl refl refl
+
 SetIsomorphism↔Bijection : {ℓ : Level} {A B : Set ℓ} → (Σ (A → B) (Isomorphism (setCategory {ℓ}))) ↔ (Bijection A B)
 SetIsomorphism↔Bijection {ℓ} {A} {B} = bijection Iso→Bij Bij→Iso right-id left-id
   where
