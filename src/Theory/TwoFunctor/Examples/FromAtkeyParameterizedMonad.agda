@@ -56,7 +56,7 @@ AtkeyParameterizedMonad→LaxTwoFunctor {C = C} {S} F = record
     _∘S_ = Category._∘_ S
     
     ApplyT : {x y : Obj S} → Hom S x y → Functor C C
-    ApplyT {x} {y} f = functor 
+    ApplyT {x} {y} _ = functor 
       (λ (c : Obj C) → Functor.F₀ T (y , x , c)) 
       (λ {a : Obj C} {b : Obj C} (g : Hom C a b) → Functor.F₁ T (id S {y} , id S {x} , g))
       (λ {a : Obj C} → Functor.id T)
