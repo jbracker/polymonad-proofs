@@ -1,0 +1,34 @@
+
+module Theory.Functor.EquivalentHaskellFunctor where
+
+-- Stdlib
+open import Level renaming ( suc to lsuc ; zero to lzero )
+
+open import Data.Product
+
+open import Relation.Binary.PropositionalEquality
+
+-- Local
+open import Bijection hiding ( refl )
+open import Haskell
+open import Haskell.Functor renaming ( Functor to HaskellFunctor )
+open import Theory.Functor
+open import Theory.Category.Examples 
+
+Functor→HaskellFunctor : (F : Functor (Hask {lzero}) (Hask {lzero}))
+                       → HaskellFunctor ([ F ]₀)
+Functor→HaskellFunctor F = record 
+  { fmap = λ f ma → [ F ]₁ f ma
+  ; law-id = Functor.id F
+  ; law-compose = λ f g → Functor.compose F
+  }
+ 
+HaskellFunctor→Functor : {F : TyCon} → HaskellFunctor F
+                       → Functor (Hask {lzero}) (Hask {lzero})
+HaskellFunctor→Functor {F} func = functor F (Functor.fmap func) (Functor.law-id func) (λ {a} {b} {c} {f} {g} → Functor.law-compose func g f)
+
+
+Functor↔HaskellFunctor : Functor (Hask {lzero}) (Hask {lzero}) ↔ (Σ TyCon HaskellFunctor)
+Functor↔HaskellFunctor = bijection (λ F → [ F ]₀ , Functor→HaskellFunctor F)
+                                   (λ F → HaskellFunctor→Functor (proj₂ F))
+                                   (λ _ → refl) (λ _ → refl)
