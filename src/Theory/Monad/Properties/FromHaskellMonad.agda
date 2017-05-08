@@ -1,14 +1,8 @@
 
-module Theory.Monad.Properties.FromHaskellMonad where
-
 -- Stdlib
 open import Level
 open import Function renaming ( _∘_ to _∘F_ ; id to idF )
-open import Data.Unit
 open import Data.Product
-open import Data.Sum
-open import Data.Unit
-open import Data.Empty
 open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning
 
@@ -17,13 +11,13 @@ open import Extensionality
 open import Haskell
 open import Haskell.Monad renaming ( Monad to HaskellMonad )
 open import Haskell.Functor renaming ( Functor to HaskellFunctor )
-open import Theory.Category
 open import Theory.Functor
 open import Theory.Functor.Composition
 open import Theory.Natural.Transformation renaming ( NaturalTransformation to NatTrans )
 open import Theory.Monad hiding ( monad )
-open import Theory.Category.Examples
 open import Theory.Functor.EquivalentHaskellFunctor
+
+module Theory.Monad.Properties.FromHaskellMonad where
 
 HaskellMonad→Monad : {M : TyCon}
                    → (haskMonad : HaskellMonad M)
