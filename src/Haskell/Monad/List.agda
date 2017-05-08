@@ -21,12 +21,12 @@ open import Identity
 monadList : Monad List
 monadList = record
   { _>>=_ = _>>=_
-  ; return = return
   ; applicative = applicativeFromMonad _>>=_ return law-right-id law-left-id law-assoc
   ; law-right-id = law-right-id
   ; law-left-id = law-left-id
   ; law-assoc = law-assoc
   ; law-monad-fmap = λ f a → refl
+  ; law-monad-ap = λ mf ma → refl
   } where
     _>>=_ : ∀ {α β : Type} → List α → (α → List β) → List β
     _>>=_ = bindList

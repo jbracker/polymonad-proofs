@@ -14,8 +14,8 @@ open ≡-Reasoning
 open import Extensionality
 open import Haskell
 open import Polymonad.Definition
-open import Haskell.Applicative
-open import Haskell.Monad
+open import Haskell.Applicative hiding ( applicative )
+open import Haskell.Monad hiding ( monad )
 open import Identity
 
 open Monad hiding ( _>>=_ ; functor ) renaming ( bind to mBind ; return to mReturn ; law-id to law-applicative-id ; law-assoc to law-monad-assoc )
@@ -342,12 +342,12 @@ Polymonad→Monad : ∀ {TyCons : Set} {Id : TyCons}
                 → (∃ λ(M : TyCons) → Monad ⟨ pm ▷ M ⟩)
 Polymonad→Monad {TyCons = TyCons} {Id = Id} pm (mTC , bindB , returnB) = mTC , (record
   { _>>=_ = _>>=_
-  ; return = return
   ; applicative = applicativeFromMonad _>>=_ return law-right-id' law-left-id' law-assocM
   ; law-right-id = law-right-id'
   ; law-left-id = law-left-id'
   ; law-assoc = law-assocM
   ; law-monad-fmap = λ f x → refl
+  ; law-monad-ap = λ mf ma → refl
   }) where
     M = ⟨ pm ▷ mTC ⟩
     

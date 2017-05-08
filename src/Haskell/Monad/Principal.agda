@@ -13,7 +13,7 @@ open ≡-Reasoning
 -- Local
 open import Haskell
 open import Identity
-open import Haskell.Monad
+open import Haskell.Monad hiding ( monad )
 open import Haskell.Monad.Polymonad
 open import Polymonad.Definition
 open import Polymonad.Principal

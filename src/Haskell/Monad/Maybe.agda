@@ -28,12 +28,12 @@ bindMaybe Nothing f = Nothing
 monadMaybe : Monad Maybe
 monadMaybe = record
   { _>>=_ = _>>=_
-  ; return = return
   ; applicative = applicativeFromMonad _>>=_ return law-right-id law-left-id law-assoc
   ; law-right-id = law-right-id
   ; law-left-id = law-left-id
   ; law-assoc = law-assoc
   ; law-monad-fmap = λ f x → refl
+  ; law-monad-ap = λ mf ma → refl
   } where
     _>>=_ : ∀ {α β : Type} → Maybe α → (α → Maybe β) → Maybe β
     _>>=_ = bindMaybe

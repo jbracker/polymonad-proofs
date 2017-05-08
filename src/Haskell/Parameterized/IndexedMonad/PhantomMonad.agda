@@ -64,12 +64,12 @@ id≡Mij→K∘K→Mij K {α = α} {k = k} = sym (subst²≡id (lower (proj₂ K
 PhantomIxMonad→Monad : ∀ {Ixs} {M : Ixs → Ixs → TyCon} → Ixs → (K : PhantomIndices (Ixs ∷ Ixs ∷ []) (LiftM M)) → IxMonad Ixs M → Monad (proj₁ K)
 PhantomIxMonad→Monad {Ixs = Ixs} {M = IxM} i K ixMonad = record
   { _>>=_ = _>>=_
-  ; return = return
   ; applicative = applicativeFromMonad _>>=_ return law-right-id law-left-id law-assoc
   ; law-right-id = law-right-id
   ; law-left-id = law-left-id
   ; law-assoc = law-assoc
   ; law-monad-fmap = λ f x → refl
+  ; law-monad-ap = λ mf ma → refl
   } where
       ixReturn : ∀ {α} → α → IxM i i α
       ixReturn = IxMonad.return ixMonad

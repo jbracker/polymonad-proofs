@@ -4,7 +4,7 @@ module Haskell.Alternative where
 open import Relation.Binary.PropositionalEquality
 
 open import Haskell
-open import Haskell.Applicative
+open import Haskell.Applicative hiding ( applicative )
 
 record Alternative (F : TyCon) : Set₁ where
   infixl 3 _<|>_

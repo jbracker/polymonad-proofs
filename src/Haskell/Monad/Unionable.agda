@@ -16,7 +16,7 @@ open import Haskell
 open import Identity
 open import Polymonad.Definition
 open import Polymonad.Unionable
-open import Haskell.Monad
+open import Haskell.Monad hiding ( monad )
 open import Haskell.Monad.Polymonad
 
 Monad→UnionablePolymonad : ∀ {M : TyCon} 

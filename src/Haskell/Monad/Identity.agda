@@ -14,8 +14,8 @@ open ≡-Reasoning
 open import Utilities
 open import Haskell
 open import Haskell.Functor hiding ( functor )
-open import Haskell.Applicative
-open import Haskell.Monad
+open import Haskell.Applicative hiding ( applicative )
+open import Haskell.Monad hiding ( monad )
 open import Identity
 
 open Functor
@@ -24,12 +24,12 @@ open Applicative hiding ( fmap )
 monadId : Monad Identity
 monadId = record
   { _>>=_ = _>>=_
-  ; return = return
   ; applicative = applicative
   ; law-right-id = law-right-id
   ; law-left-id = law-left-id
   ; law-assoc = law-assoc
   ; law-monad-fmap = law-monad-fmap
+  ; law-monad-ap = λ mf ma → refl
   } where
     _>>=_ : ∀ {α β : Type} → Identity α → (α → Identity β) → Identity β
     _>>=_ = bindId
