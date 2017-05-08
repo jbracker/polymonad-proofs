@@ -19,7 +19,7 @@ open ≡-Reasoning hiding ( _≅⟨_⟩_ )
 open import Extensionality
 open import Haskell
 open import Haskell.Monad hiding ( monad ) renaming ( Monad to HaskellMonad )
-open import Haskell.Applicative renaming ( Applicative to HaskellApplicative )
+open import Haskell.Applicative hiding ( applicative ) renaming ( Applicative to HaskellApplicative )
 open import Haskell.Functor renaming ( Functor to HaskellFunctor )
 open import Theory.Category
 open import Theory.Functor
@@ -33,12 +33,12 @@ Monad→HaskellMonad : {M : Functor (setCategory {lzero}) (setCategory {lzero})}
                    → Monad M → HaskellMonad ([ M ]₀)
 Monad→HaskellMonad {M} monad = record
   { _>>=_ = _>>=_
-  ; return = return
   ; applicative = applicative
   ; law-right-id = law-right-id
   ; law-left-id = law-left-id
   ; law-assoc = law-assoc
   ; law-monad-fmap = law-monad-fmap
+  ; law-monad-ap = law-monad-ap
   } where
     C = setCategory {lzero}
     
@@ -195,3 +195,6 @@ Monad→HaskellMonad {M} monad = record
                            → fmap f x ≡ return f <*> x
         law-applicative-fmap {α} {β} f x = sym $ law-left-id f (λ g → fmap g x)
 
+    law-monad-ap : {α β : Type} (mf : [ M ]₀ (α → β)) (ma : [ M ]₀ α)
+                 → Applicative._<*>_ applicative mf ma ≡ mf >>= (λ f → Functor.fmap (Applicative.functor applicative) f ma)
+    law-monad-ap mf ma = refl
