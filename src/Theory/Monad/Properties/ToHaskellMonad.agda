@@ -18,7 +18,7 @@ open ≡-Reasoning hiding ( _≅⟨_⟩_ )
 -- Local
 open import Extensionality
 open import Haskell
-open import Haskell.Monad renaming ( Monad to HaskellMonad )
+open import Haskell.Monad hiding ( monad ) renaming ( Monad to HaskellMonad )
 open import Haskell.Applicative renaming ( Applicative to HaskellApplicative )
 open import Haskell.Functor renaming ( Functor to HaskellFunctor )
 open import Theory.Category
