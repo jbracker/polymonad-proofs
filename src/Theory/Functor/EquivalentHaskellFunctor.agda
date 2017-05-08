@@ -32,3 +32,6 @@ Functor↔HaskellFunctor : Functor (Hask {lzero}) (Hask {lzero}) ↔ (Σ TyCon H
 Functor↔HaskellFunctor = bijection (λ F → [ F ]₀ , Functor→HaskellFunctor F)
                                    (λ F → HaskellFunctor→Functor (proj₂ F))
                                    (λ _ → refl) (λ _ → refl)
+
+HaskellFunctor↔Functor : (Σ TyCon HaskellFunctor) ↔ Functor (Hask {lzero}) (Hask {lzero})
+HaskellFunctor↔Functor = Bijection.sym Functor↔HaskellFunctor
