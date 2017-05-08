@@ -12,7 +12,7 @@ open import Haskell.Functor
 open import Haskell.Applicative hiding ( applicative )
 
 open Functor hiding ( fmap )
-open Applicative hiding ( fmap )
+open Applicative hiding ( fmap ; _<*>_ )
 
 record Monad (M : TyCon) : Set₁ where
   constructor monad
@@ -40,8 +40,13 @@ record Monad (M : TyCon) : Set₁ where
              → m >>= (λ x → k x >>= h) ≡ (m >>= k) >>= h
     
     law-monad-fmap : ∀ {α β : Type} 
-                 → (f : α → β) → (x : M α) 
-                 → fmap f x ≡ x >>= (return ∘F f)
+                   → (f : α → β) → (x : M α) 
+                   → fmap f x ≡ x >>= (return ∘F f)
+
+    law-monad-ap : ∀ {α β : Type} 
+                   → (mf : M (α → β)) → (ma : M α) 
+                   → mf <*> ma ≡ mf >>= (λ f → fmap f ma)
+
   
   _>>_ : {α β : Type} → M α → M β → M β
   ma >> mb = ma >>= λ a → mb
@@ -65,12 +70,14 @@ monad-eq : {M : TyCon}
          → {law-assoc₁ : ∀ {α β γ : Type} → (m : M α) → (k : α → M β) → (h : β → M γ) → m >>=₁ (λ x → k x >>=₁ h) ≡ (m >>=₁ k) >>=₁ h}
          → {law-monad-fmap₀ : ∀ {α β : Type}  → (f : α → β) → (x : M α) → Applicative.fmap applicative₀ f x ≡ x >>=₀ (Applicative.pure applicative₀ ∘F f)}
          → {law-monad-fmap₁ : ∀ {α β : Type}  → (f : α → β) → (x : M α) → Applicative.fmap applicative₁ f x ≡ x >>=₁ (Applicative.pure applicative₁ ∘F f)}
+         → {law-monad-ap₀ : ∀ {α β : Type} → (mf : M (α → β)) → (ma : M α) → Applicative._<*>_ applicative₀ mf ma ≡ mf >>=₀ (λ f → Applicative.fmap applicative₀ f ma)}
+         → {law-monad-ap₁ : ∀ {α β : Type} → (mf : M (α → β)) → (ma : M α) → Applicative._<*>_ applicative₁ mf ma ≡ mf >>=₁ (λ f → Applicative.fmap applicative₁ f ma)}
          → (λ {α} {β} → _>>=₀_ {α} {β}) ≡ _>>=₁_
          → applicative₀ ≡ applicative₁
-         → monad _>>=₀_ applicative₀ law-left-id₀ law-right-id₀ law-assoc₀ law-monad-fmap₀
-         ≡ monad _>>=₁_ applicative₁ law-left-id₁ law-right-id₁ law-assoc₁ law-monad-fmap₁
-monad-eq {M} {b} {.b} {a} {.a} {li₀} {li₁} {ri₀} {ri₁} {as₀} {as₁} {mf₀} {mf₁} refl refl
-  = cong₄ (monad {M = M} b a) p1 p2 p3 p4
+         → monad _>>=₀_ applicative₀ law-left-id₀ law-right-id₀ law-assoc₀ law-monad-fmap₀ law-monad-ap₀
+         ≡ monad _>>=₁_ applicative₁ law-left-id₁ law-right-id₁ law-assoc₁ law-monad-fmap₁ law-monad-ap₁
+monad-eq {M} {b} {.b} {a} {.a} {li₀} {li₁} {ri₀} {ri₁} {as₀} {as₁} {mf₀} {mf₁} {ma₀} {ma₁} refl refl
+  = cong₅ (monad {M = M} b a) p1 p2 p3 p4 p5
   where
     p1 : (λ {α β} → li₀ {α} {β}) ≡ li₁
     p1 = implicit-fun-ext
@@ -99,6 +106,13 @@ monad-eq {M} {b} {.b} {a} {.a} {li₀} {li₁} {ri₀} {ri₁} {as₀} {as₁} {
        $ λ β → fun-ext
        $ λ f → fun-ext
        $ λ ma → proof-irrelevance (mf₀ f ma) (mf₁ f ma)
+    
+    p5 : (λ {α β} → ma₀ {α} {β}) ≡ ma₁
+    p5 = implicit-fun-ext
+       $ λ α → implicit-fun-ext
+       $ λ β → fun-ext
+       $ λ mf → fun-ext
+       $ λ ma → proof-irrelevance (ma₀ mf ma) (ma₁ mf ma)
 
 private
   module MonadProperties {M : TyCon} (monad : Monad M) where
