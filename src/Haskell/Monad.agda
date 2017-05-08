@@ -9,7 +9,7 @@ open import Extensionality
 open import Congruence
 open import Haskell
 open import Haskell.Functor
-open import Haskell.Applicative
+open import Haskell.Applicative hiding ( applicative )
 
 open Functor hiding ( fmap )
 open Applicative hiding ( fmap )
@@ -19,11 +19,14 @@ record Monad (M : TyCon) : Set₁ where
   
   field
     _>>=_ : ∀ {α β : Type} → M α → (α → M β) → M β
-    return : ∀ {α : Type} → α → M α
+    --return : ∀ {α : Type} → α → M α
     
     applicative : Applicative M
 
   open Applicative applicative public
+
+  return : ∀ {α : Type} → α → M α
+  return = Applicative.pure applicative
   
   field
     law-left-id : ∀ {α β : Type} 
@@ -39,7 +42,7 @@ record Monad (M : TyCon) : Set₁ where
     law-monad-fmap : ∀ {α β : Type} 
                  → (f : α → β) → (x : M α) 
                  → fmap f x ≡ x >>= (return ∘F f)
-    
+  
   _>>_ : {α β : Type} → M α → M β → M β
   ma >> mb = ma >>= λ a → mb
   
@@ -52,25 +55,22 @@ record Monad (M : TyCon) : Set₁ where
 monad-eq : {M : TyCon}
          → {_>>=₀_ : ∀ {α β : Type} → M α → (α → M β) → M β}
          → {_>>=₁_ : ∀ {α β : Type} → M α → (α → M β) → M β}
-         → {return₀ : ∀ {α : Type} → α → M α}
-         → {return₁ : ∀ {α : Type} → α → M α}
          → {applicative₀ : Applicative M}
          → {applicative₁ : Applicative M}
-         → {law-left-id₀ : ∀ {α β : Type} → (a : α) → (k : α → M β) → return₀ a >>=₀ k ≡ k a}
-         → {law-left-id₁ : ∀ {α β : Type} → (a : α) → (k : α → M β) → return₁ a >>=₁ k ≡ k a}
-         → {law-right-id₀ : ∀ {α : Type} → (m : M α) → m >>=₀ return₀ ≡ m}
-         → {law-right-id₁ : ∀ {α : Type} → (m : M α) → m >>=₁ return₁ ≡ m}
+         → {law-left-id₀ : ∀ {α β : Type} → (a : α) → (k : α → M β) → Applicative.pure applicative₀ a >>=₀ k ≡ k a}
+         → {law-left-id₁ : ∀ {α β : Type} → (a : α) → (k : α → M β) → Applicative.pure applicative₁ a >>=₁ k ≡ k a}
+         → {law-right-id₀ : ∀ {α : Type} → (m : M α) → m >>=₀ Applicative.pure applicative₀ ≡ m}
+         → {law-right-id₁ : ∀ {α : Type} → (m : M α) → m >>=₁ Applicative.pure applicative₁ ≡ m}
          → {law-assoc₀ : ∀ {α β γ : Type} → (m : M α) → (k : α → M β) → (h : β → M γ) → m >>=₀ (λ x → k x >>=₀ h) ≡ (m >>=₀ k) >>=₀ h}
          → {law-assoc₁ : ∀ {α β γ : Type} → (m : M α) → (k : α → M β) → (h : β → M γ) → m >>=₁ (λ x → k x >>=₁ h) ≡ (m >>=₁ k) >>=₁ h}
-         → {law-monad-fmap₀ : ∀ {α β : Type}  → (f : α → β) → (x : M α) → Applicative.fmap applicative₀ f x ≡ x >>=₀ (return₀ ∘F f)}
-         → {law-monad-fmap₁ : ∀ {α β : Type}  → (f : α → β) → (x : M α) → Applicative.fmap applicative₁ f x ≡ x >>=₁ (return₁ ∘F f)}
+         → {law-monad-fmap₀ : ∀ {α β : Type}  → (f : α → β) → (x : M α) → Applicative.fmap applicative₀ f x ≡ x >>=₀ (Applicative.pure applicative₀ ∘F f)}
+         → {law-monad-fmap₁ : ∀ {α β : Type}  → (f : α → β) → (x : M α) → Applicative.fmap applicative₁ f x ≡ x >>=₁ (Applicative.pure applicative₁ ∘F f)}
          → (λ {α} {β} → _>>=₀_ {α} {β}) ≡ _>>=₁_
-         → (λ {α} → return₀ {α}) ≡ return₁
          → applicative₀ ≡ applicative₁
-         → monad _>>=₀_ return₀ applicative₀ law-left-id₀ law-right-id₀ law-assoc₀ law-monad-fmap₀
-         ≡ monad _>>=₁_ return₁ applicative₁ law-left-id₁ law-right-id₁ law-assoc₁ law-monad-fmap₁
-monad-eq {M} {b} {.b} {r} {.r} {a} {.a} {li₀} {li₁} {ri₀} {ri₁} {as₀} {as₁} {mf₀} {mf₁} refl refl refl
-  = cong₄ (monad {M = M} b r a) p1 p2 p3 p4
+         → monad _>>=₀_ applicative₀ law-left-id₀ law-right-id₀ law-assoc₀ law-monad-fmap₀
+         ≡ monad _>>=₁_ applicative₁ law-left-id₁ law-right-id₁ law-assoc₁ law-monad-fmap₁
+monad-eq {M} {b} {.b} {a} {.a} {li₀} {li₁} {ri₀} {ri₁} {as₀} {as₁} {mf₀} {mf₁} refl refl
+  = cong₄ (monad {M = M} b a) p1 p2 p3 p4
   where
     p1 : (λ {α β} → li₀ {α} {β}) ≡ li₁
     p1 = implicit-fun-ext
