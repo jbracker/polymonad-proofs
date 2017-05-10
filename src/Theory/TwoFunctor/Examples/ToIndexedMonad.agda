@@ -11,7 +11,7 @@ open import Relation.Binary.PropositionalEquality
 open import Relation.Binary.HeterogeneousEquality 
   renaming ( refl to hrefl; sym to hsym ; trans to htrans ; cong to hcong ; cong₂ to hcong₂ ; subst to hsubst ; subst₂ to hsubst₂ ; proof-irrelevance to hproof-irrelevance )
 open ≡-Reasoning hiding ( _≅⟨_⟩_ )
--- open ≅-Reasoning hiding ( _≡⟨_⟩_ ) renaming ( begin_ to hbegin_ ; _∎ to _∎h)
+open ≅-Reasoning hiding ( _≡⟨_⟩_ ; _≡⟨⟩_ ) renaming ( begin_ to hbegin_ ; _∎ to _∎h)
 
 -- Local
 open import Extensionality
@@ -48,11 +48,14 @@ LaxTwoFunctor→IndexedMonad
   → (S : Set ℓS)
   → (F : ConstLaxTwoFunctor (Category→StrictTwoCategory (codiscreteCategory S)) (Cat {suc zero} {zero}) (Hask {zero}))
   → IxMonad S (LaxTwoFunctor→IxMonadTyCon S F)
-LaxTwoFunctor→IndexedMonad ObjS F 
+LaxTwoFunctor→IndexedMonad {ℓS} ObjS F 
   = indexed-monad _>>=_ return functor law-left-id law-right-id law-assoc law-monad-fmap
   where
     open ConstLaxTwoFunctor F
     open NaturalTransformation renaming (η to nat-η)
+    
+    import Theory.TwoFunctor.Examples.ToIndexedMonadProperties
+    open Theory.TwoFunctor.Examples.ToIndexedMonadProperties {ℓS} ObjS F
     
     S : Category
     S = codiscreteCategory ObjS
@@ -96,6 +99,7 @@ LaxTwoFunctor→IndexedMonad ObjS F
               ≡ return {β} {i} ∘F f 
     natural-η {i} a b f = natural (η {i}) {a = a} {b} {f} 
     
+    
     law-left-id : {α β : Type} {i j : ObjS} → (a : α) → (k : α → M i j β) → return a >>= k ≡ k a
     law-left-id {α} {β} {i} {j} a k = begin
       return a >>= k 
@@ -105,74 +109,35 @@ LaxTwoFunctor→IndexedMonad ObjS F
       (join ∘F return ∘F k) a
         ≡⟨⟩
       (join ∘F return) (k a)
-      --  ≡⟨⟩
-      --(nat-η (μ {j} {i} {i}) β ∘F [ [ P₁ {i} {i} ]₀ (lift tt) ]₁ k ∘F nat-η (η {i}) α) a 
-        ≡⟨ {!!} ⟩
+        ≡⟨ cong (λ X → X (k a)) (join-return-id {j} {i} β) ⟩
       k a ∎
-
-{-
-natural : {a b : Obj C} {f : Hom C a b} 
-            → ([ G ]₁ f) ∘D (η a) ≡ (η b) ∘D ([ F ]₁ f)
-            -- G₁ f ∘ η ≡ η ∘ F₁ f
--}
     
-    law-right-id : {α : Type} {i j : ObjS} → (m : M i j α) → m >>= return ≡ m
-    law-right-id m = {!!}
+    law-right-id : {α : Type} {i j : Ixs} → (m : M i j α) → m >>= return ≡ m
+    law-right-id {α} {i} {j} m = begin
+      m >>= return 
+        ≡⟨ refl ⟩ 
+      (join {α} {i} {j} {j} ∘F fmap {i} {j} (return {α})) m 
+        ≡⟨ refl ⟩ 
+      (nat-η (Id⟨ [ P₁ {j} {i} ]₀ (lift tt) ⟩) α ∘F join {α} {i} {j} {j} ∘F fmap {i} {j} (return {α})) m
+        ≡⟨ cong (λ X → (nat-η X α ∘F join {α} {i} {j} {j} ∘F fmap {i} {j} (return {α})) m) (sym (Functor.id (P₁ {j} {i}))) ⟩ 
+      (nat-η ([ P₁ {j} {i} ]₁ tt) α ∘F join {α} {i} {j} {j} ∘F fmap {i} {j} (return {α})) m
+        ≡⟨ cong (λ X → X m) (η-lax-id₁ {j} {i} α) ⟩ 
+      (λ (x : M i j α) → x) m ∎
     
     law-assoc : {α β γ : Type} {i j k l : ObjS} 
               → (m : M i j α) (f : α → M j k β) (g : β → M k l γ) 
               → m >>= (λ x → f x >>= g) ≡ (m >>= f) >>= g
-    law-assoc ma f g = {!!}
+    law-assoc {α} {β} {γ} {i} {j} {k} {l} m f g = begin
+      (join ∘F fmap (join ∘F fmap g ∘F f)) m
+        ≡⟨ {!!} ⟩ 
+      (join ∘F fmap g ∘F join ∘F fmap f) m ∎
     
     law-monad-fmap : {α β : Type} {i j : ObjS} → (f : α → β) (ma : M i j α)
                    → ma >>= (return ∘F f) ≡ fmap {i} {j} f ma
-    law-monad-fmap f ma = {!!}
+    law-monad-fmap {α} {β} {i} {j} f ma = begin
+      (join ∘F fmap (return ∘F f)) ma 
+        ≡⟨ {!!} ⟩
+      fmap {i} {j} f ma ∎
+  
     
-    _∘Dᵥ_ = StrictTwoCategory._∘ᵥ_ Cat'
-    _∘Dₕ₂_ = StrictTwoCategory._∘ₕ₂_ Cat'
-    
-
-    lax-id₁ : {i j : Ixs} 
-            → ⟨ [ P₁ {i} {j} ]₁ tt ⟩∘ᵥ⟨ ⟨ μ {i} {i} {j} ⟩∘ᵥ⟨ ⟨ Id⟨ [ P₁ {i} {j} ]₀ (lift tt) ⟩ ⟩∘ₕ⟨ η {i} ⟩ ⟩ ⟩
-            ≡ StrictTwoCategory.λ' Cat' ([ P₁ {i} {j} ]₀ (lift tt))
-    lax-id₁ {i} {j} = laxFunId₁ {i} {j} {lift tt}
-    
-    η-extract : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} {F G : Functor C D} 
-              → (NT₀ NT₁ : NaturalTransformation F G) 
-              → NT₀ ≡ NT₁ 
-              → (x : Category.Obj C) 
-              → nat-η NT₀ x ≡ nat-η NT₁ x
-    η-extract NT₀ .NT₀ refl x = refl
-    {-
-η : (c : Obj C) → Hom E ([ [ G ]∘[ F ] ]₀ c) ([ [ G' ]∘[ F' ] ]₀ c)
-    η c = ηα ([ F' ]₀ c) ∘E [ G ]₁ (ηβ c)
--}
--- nat-η (⟨ Id⟨ [ P₁ {i} {j} ]₀ (lift tt) ⟩ ⟩∘ₕ⟨ η {i} ⟩) x
--- nat-η (Id⟨ [ P₁ {i} {j} ]₀ (lift tt) ⟩) ([ ? ]₀ x) ∘F [ ? ]₀ (nat-η (η {i}) x)
-
-    η-lax-id₁ : {i j : Ixs} → (x : Type)
-            → nat-η ([ P₁ {i} {j} ]₁ tt) x ∘F join {x} {j} {i} {i} ∘F fmap {j} {i} (return {x}) ≡ (λ x → x)
-    η-lax-id₁ {i} {j} x = η-extract ⟨ [ P₁ {i} {j} ]₁ tt ⟩∘ᵥ⟨ ⟨ μ {i} {i} {j} ⟩∘ᵥ⟨ ⟨ Id⟨ [ P₁ {i} {j} ]₀ (lift tt) ⟩ ⟩∘ₕ⟨ η {i} ⟩ ⟩ ⟩ 
-                                    (StrictTwoCategory.λ' Cat' ([ P₁ {i} {j} ]₀ (lift tt))) 
-                                    (laxFunId₁ {i} {j} {lift tt}) x
-    {-
-    laxFunId₁ : {x y : Cell₀ C} {f : Cell₁ C x y} 
-              → ([ P₁ {x} {y} ]₁ (λ' C f)) 
-            ∘Dᵥ ( (μ {x} {x} {y} {id₁ C {x}} {f}) 
-            ∘Dᵥ   (id₂ D {f = [ P₁ {x} {y} ]₀ f} ∘Dₕ₂ η {x}) )
-              ≡ λ' D ([ P₁ {x} {y} ]₀ f)
-    
-    laxFunId₂ : {x y : Cell₀ C} {f : Cell₁ C x y} 
-              → ([ P₁ {x} {y} ]₁ (ρ C f)) 
-            ∘Dᵥ ( (μ {x} {y} {y} {f} {id₁ C {y}}) 
-            ∘Dᵥ   (η {y} ∘Dₕ₂ id₂ D {f = [ P₁ {x} {y} ]₀ f}) ) 
-              ≡ ρ D ([ P₁ {x} {y} ]₀ f)
-
-    laxFunAssoc : {w x y z : Cell₀ C} {f : Cell₁ C w x} {g : Cell₁ C x y} {h : Cell₁ C y z}
-               → ([ P₁ {w} {z} ]₁ (α C f g h)) 
-             ∘Dᵥ ( (μ {w} {y} {z} {g ∘Cₕ f} {h}) 
-             ∘Dᵥ   (id₂ D {P₀ y} {P₀ z} {[ P₁ {y} {z} ]₀ h} ∘Dₕ₂ μ {w} {x} {y} {f} {g}) ) 
-               ≡ μ {w} {x} {z} {f} {h ∘Cₕ g} 
-             ∘Dᵥ ( (μ {x} {y} {z} {g} {h} ∘Dₕ₂ id₂ D {P₀ w} {P₀ x} {[ P₁ {w} {x} ]₀ f}) 
-             ∘Dᵥ   (α D ([ P₁ {w} {x} ]₀ f) ([ P₁ {x} {y} ]₀ g) ([ P₁ {y} {z} ]₀ h)) )
--}
+  
