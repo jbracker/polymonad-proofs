@@ -42,7 +42,6 @@ LaxTwoFunctor→IxMonadTyCon : {ℓS : Level}
   → ( S → S → TyCon )
 LaxTwoFunctor→IxMonadTyCon S F i j A = [ [ ConstLaxTwoFunctor.P₁ F {j} {i} ]₀ (lift tt) ]₀ A
 
-
 LaxTwoFunctor→IndexedMonad
   : {ℓS : Level}
   → (S : Set ℓS)
@@ -88,10 +87,6 @@ LaxTwoFunctor→IndexedMonad {ℓS} ObjS F
     natural-μ : {i j k : Ixs} → (α β : Type) → (f : α → β) 
               → (fmap {i} {k} f) ∘F (join {α} {i} {j} {k}) 
               ≡ join {β} {i} {j} {k} ∘F fmap {i} {j} (fmap {j} {k} f) 
-              {-
-              → ([ [ P₁ {i} {k} ]₀ (lift tt) ]₁ f) ∘F (nat-η (μ {i} {j} {k}) a) 
-              ≡ (nat-η (μ {i} {j} {k}) b) ∘F ([ [ P₁ {j} {k} ]₀ (lift tt) ]₁ ([ [ P₁ {i} {j} ]₀ (lift tt) ]₁ f)) 
-              -}
     natural-μ {i} {j} {k} a b f = natural (μ {k} {j} {i}) {a = a} {b} {f} 
     
     natural-η : {i : Ixs} → (α β : Type) → (f : α → β) 
@@ -124,20 +119,35 @@ LaxTwoFunctor→IndexedMonad {ℓS} ObjS F
         ≡⟨ cong (λ X → X m) (η-lax-id₁ {j} {i} α) ⟩ 
       (λ (x : M i j α) → x) m ∎
     
+    law-right-id' : {α : Type} {i j : Ixs} → join {α} {i} {j} {j} ∘F fmap {i} {j} (return {α}) ≡ (λ (x : M i j α) → x)
+    law-right-id' {α} {i} {j} = fun-ext $ λ m → law-right-id {α} {i} {j} m
+    
     law-assoc : {α β γ : Type} {i j k l : ObjS} 
               → (m : M i j α) (f : α → M j k β) (g : β → M k l γ) 
               → m >>= (λ x → f x >>= g) ≡ (m >>= f) >>= g
     law-assoc {α} {β} {γ} {i} {j} {k} {l} m f g = begin
       (join ∘F fmap (join ∘F fmap g ∘F f)) m
-        ≡⟨ {!!} ⟩ 
+        ≡⟨ cong (λ X → (join ∘F X) m) (Functor.compose ([ P₁ {j} {i} ]₀ (lift tt))) ⟩ 
+      (join ∘F fmap join ∘F fmap (fmap g ∘F f)) m
+        ≡⟨ cong (λ X → (join ∘F fmap join ∘F X) m) (Functor.compose ([ P₁ {j} {i} ]₀ (lift tt))) ⟩ 
+      (join ∘F fmap join ∘F fmap (fmap g) ∘F fmap f) m
+        ≡⟨ cong (λ X → (X ∘F fmap (fmap g) ∘F fmap f) m) (join-assoc γ) ⟩ 
+      (join ∘F join ∘F fmap (fmap (λ x → x)) ∘F fmap (fmap g) ∘F fmap f) m
+        ≡⟨ cong (λ X → (join ∘F join ∘F fmap X ∘F fmap (fmap g) ∘F fmap f) m) (Functor.id ([ P₁ {k} {j} ]₀ (lift tt))) ⟩
+      (join ∘F join ∘F fmap (λ x → x) ∘F fmap (fmap g) ∘F fmap f) m
+        ≡⟨ cong (λ X → (join ∘F join ∘F X ∘F fmap f) m) (sym (Functor.compose ([ P₁ {j} {i} ]₀ (lift tt)))) ⟩
+      (join ∘F join ∘F fmap (fmap g) ∘F fmap f) m
+        ≡⟨ cong (λ X → (join ∘F X ∘F fmap f) m) (sym (natural-μ β (M k l γ) g)) ⟩ 
       (join ∘F fmap g ∘F join ∘F fmap f) m ∎
     
     law-monad-fmap : {α β : Type} {i j : ObjS} → (f : α → β) (ma : M i j α)
                    → ma >>= (return ∘F f) ≡ fmap {i} {j} f ma
     law-monad-fmap {α} {β} {i} {j} f ma = begin
       (join ∘F fmap (return ∘F f)) ma 
-        ≡⟨ {!!} ⟩
+        ≡⟨ cong (λ X → (join ∘F X) ma) (Functor.compose ([ P₁ {j} {i} ]₀ (lift tt))) ⟩
+      (join ∘F fmap return ∘F fmap f) ma 
+        ≡⟨ cong (λ X → (X ∘F fmap f) ma) law-right-id' ⟩
       fmap {i} {j} f ma ∎
-  
+
     
   
