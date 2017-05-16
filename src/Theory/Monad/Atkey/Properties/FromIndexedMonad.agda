@@ -1,5 +1,5 @@
 
-module Theory.Monad.Atkey.FromIndexedMonad where
+module Theory.Monad.Atkey.Properties.FromIndexedMonad where
 
 -- Stdlib
 open import Level renaming ( suc to lsuc ; zero to lzero )
@@ -30,7 +30,6 @@ open import Theory.Monad hiding ( monad )
 open import Theory.TwoCategory
 open import Theory.TwoFunctor
 open import Theory.Monad.Atkey
-open import Theory.Monad.Atkey.ToIndexedMonad
 open import Theory.Category.Examples
 open import Theory.TwoCategory.Examples
 
