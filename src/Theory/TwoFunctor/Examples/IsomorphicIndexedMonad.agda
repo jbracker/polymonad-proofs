@@ -3,16 +3,16 @@ module Theory.TwoFunctor.Examples.IsomorphicIndexedMonad where
 
 -- Stdlib
 open import Level
-open import Function
+open import Function renaming ( _∘_ to _∘F_ )
 
 open import Data.Product
 
 open import Relation.Binary.PropositionalEquality
-open import Relation.Binary.HeterogeneousEquality
+open import Relation.Binary.HeterogeneousEquality renaming ( cong to hcong ; refl to hrefl ; sym to hsym )
 open ≡-Reasoning
 
 -- Local
-open import Bijection hiding ( refl )
+open import Bijection hiding ( refl ; sym )
 open import Extensionality
 open import Equality
 open import Haskell
@@ -52,6 +52,8 @@ IndexedMonad↔LaxTwoFunctor {ℓ} = bijection l→r r→l l→r→l r→l→r
           → r→l (l→r x) ≡ x
     r→l→r (Ixs , M , monad) = Σ-eq refl $ het-Σ-eq refl $ ≡-to-≅ $ indexed-monad-eq bind-eq refl refl
       where
+        open IxMonad monad
+        
         bind-eq : (λ {α β : Type} {i j k : Ixs} → IxMonad._>>=_ (proj₂ (proj₂ (r→l (l→r (Ixs , M , monad))))) {α} {β} {i} {j} {k})
                 ≡ (λ {α β : Type} {i j k : Ixs} → IxMonad._>>=_ monad {α} {β} {i} {j} {k})
         bind-eq = implicit-fun-ext
@@ -59,8 +61,14 @@ IndexedMonad↔LaxTwoFunctor {ℓ} = bijection l→r r→l l→r→l r→l→r
                 $ λ i → implicit-fun-ext $ λ j → implicit-fun-ext $ λ k → fun-ext
                 $ λ ma → fun-ext $ λ f → begin
                   IxMonad._>>=_ (proj₂ (proj₂ (r→l (l→r (Ixs , M , monad))))) ma f
-                    ≡⟨ {!!} ⟩
-                  IxMonad._>>=_ monad ma f ∎
+                    ≡⟨⟩
+                  fmap f ma >>= (λ x → x)
+                    ≡⟨ cong (λ X → X >>= (λ x → x)) (sym (law-monad-fmap f ma)) ⟩
+                  (ma >>= (return ∘F f)) >>= (λ x → x)
+                    ≡⟨ sym (law-assoc ma (return ∘F f) (λ x → x)) ⟩
+                  ma >>= (λ a → return (f a) >>= (λ x → x))
+                    ≡⟨ cong (λ X → _>>=_ ma X) (fun-ext (λ a → law-right-id (f a) (λ x → x))) ⟩
+                  ma >>= f ∎
 
 LaxTwoFunctor↔IndexedMonad : {ℓ : Level}
                            → (Σ (Set ℓ) (λ Ixs → ConstLaxTwoFunctor (Category→StrictTwoCategory (codiscreteCategory Ixs)) (Cat {suc zero} {zero}) (Hask {zero})))
