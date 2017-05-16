@@ -116,12 +116,7 @@ IndexedMonad→LaxTwoFunctor {ℓ} Ixs M monad = record
       ma >>= return
         ≡⟨ law-left-id ma ⟩
       ma ∎
-
-{-
-η : (c : Obj C) → Hom E ([ [ G ]∘[ F ] ]₀ c) ([ [ G' ]∘[ F' ] ]₀ c)
-  η c = ηα ([ F' ]₀ c) ∘E [ G ]₁ (ηβ c)
--}
-
+    
     lawFunId₂ : {i j : Ixs}-- tt =  ρ Ixs₂ (lift tt)
               → ⟨ Id⟨ [ P {i} {j} ]₀ (lift tt) ⟩ ⟩∘ᵥ⟨ ⟨ μ {i} {j} {j} ⟩∘ᵥ⟨ ⟨ η {j} ⟩∘ₕ⟨ Id⟨ [ P {i} {j} ]₀ (lift tt) ⟩ ⟩ ⟩ ⟩ ≡ ρ Cat' ([ P {i} {j} ]₀ (lift tt))
     lawFunId₂ {i} {j} = natural-transformation-eq $ fun-ext $ λ (α : Type) → fun-ext $ λ (ma : M j i α) → begin
