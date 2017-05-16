@@ -31,7 +31,7 @@ EffectMonad→Functor : ∀ {ℓ}
                 → {Eff : Set ℓ}
                 → {monoid : Monoid Eff}
                 → (M : Eff → TyCon)
-                → EffectMonad Eff {{monoid}} M 
+                → EffectMonad monoid M 
                 → ∀ (e : Eff) → Functor (M e)
 EffectMonad→Functor {Eff = Eff} {monoid = monoid} M monad m = record 
   { fmap = fmap
@@ -61,7 +61,7 @@ EffectMonad→Functor {Eff = Eff} {monoid = monoid} M monad m = record
       fmap identity ma 
         ≡⟨ refl ⟩
       subst₂ M (monLawIdR m) refl (ma >>= (return ∘ identity))
-        ≡⟨ cong (λ X → subst₂ M (monLawIdR m) refl X) (EffectMonad.law-right-id monad ma) ⟩
+        ≡⟨ cong (λ X → subst₂ M (monLawIdR m) refl X) (EffectMonad.law-right-id' monad ma) ⟩
       subst₂ M (monLawIdR m) refl (subst₂ M (sym (monLawIdR m)) refl ma)
         ≡⟨ subst₂²≡id1 (Monoid.right-id monoid {m}) refl M ma ⟩
       identity ma ∎)
@@ -122,7 +122,7 @@ EffectMonad→Functor {Eff = Eff} {monoid = monoid} M monad m = record
       subst (λ X → M X γ) (trans (monLawAssoc m ε ε) (trans (cong (λ X → X ∙ ε) (monLawIdR m)) (monLawIdR m)))
             (ma >>= (λ a → subst₂ M (sym (monLawIdL ε)) refl (return (f (g a)))))
         ≡⟨ cong (λ X → subst (λ X → M X γ) (trans (monLawAssoc m ε ε) (trans (cong (λ X → X ∙ ε) (monLawIdR m)) (monLawIdR m))) (ma >>= X)) 
-                (fun-ext (λ a → sym (EffectMonad.law-left-id monad (g a) (return ∘ f)))) ⟩
+                (fun-ext (λ a → sym (EffectMonad.law-left-id' monad (g a) (return ∘ f)))) ⟩
       subst (λ X → M X γ) (trans (monLawAssoc m ε ε) (trans (cong (λ X → X ∙ ε) (monLawIdR m)) (monLawIdR m)))
             (ma >>= (λ a → return (g a) >>= (return ∘ f)))
         ≡⟨ sym (substTrans (monLawAssoc m ε ε) (trans (cong (λ X → X ∙ ε) (monLawIdR m)) (monLawIdR m)) 
@@ -135,7 +135,7 @@ EffectMonad→Functor {Eff = Eff} {monoid = monoid} M monad m = record
       subst (λ X → M X γ) (trans (cong (λ X → X ∙ ε) (monLawIdR m)) (monLawIdR m)) 
             (subst₂ M (monLawAssoc m ε ε) refl (ma >>= (λ a → return (g a) >>= (return ∘ f))))
         ≡⟨ cong (λ X → subst (λ X → M X γ) (trans (cong (λ X → X ∙ ε) (monLawIdR m)) (monLawIdR m)) X) 
-                (EffectMonad.symLawAssoc monad ma (return ∘ g) (return ∘ f)) ⟩
+                (EffectMonad.law-assoc'' monad ma (return ∘ g) (return ∘ f)) ⟩
       subst (λ X → M X γ) (trans (cong (λ X → X ∙ ε) (monLawIdR m)) (monLawIdR m)) 
             ((ma >>= (return ∘ g)) >>= (return ∘ f))
         ≡⟨ assocSubstShift (trans (cong (λ X → X ∙ ε) (monLawIdR m)) (monLawIdR m)) 
