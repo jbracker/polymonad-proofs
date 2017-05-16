@@ -18,13 +18,13 @@ open import Haskell.Monad hiding ( monad ) renaming ( Monad to HaskellMonad )
 
 open import Theory.Functor
 open import Theory.Functor.Composition
-open import Theory.Functor.EquivalentHaskellFunctor
+open import Theory.Functor.IsomorphicHaskellFunctor
 open import Theory.Monad hiding ( monad )
 open import Theory.Monad.Properties.FromHaskellMonad
 open import Theory.Monad.Properties.ToHaskellMonad
 open import Theory.Natural.Transformation
 
-module Theory.Monad.Properties.EquivalentHaskellMonad where
+module Theory.Monad.Properties.IsomorphicHaskellMonad where
 
 Monad↔HaskellMonad : (Σ (Functor (Hask {zero}) (Hask {zero})) Monad) ↔ (Σ TyCon HaskellMonad)
 Monad↔HaskellMonad = bijection
