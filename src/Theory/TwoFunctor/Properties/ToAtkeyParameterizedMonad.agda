@@ -29,12 +29,12 @@ open import Theory.TwoCategory
 open import Theory.TwoCategory.Examples
 open import Theory.TwoCategory.ExampleProperties
 open import Theory.TwoFunctor
-open import Theory.TwoFunctor.Examples.ConstZeroCell
+open import Theory.TwoFunctor.Properties.ConstZeroCell
 
 open Category
 open StrictTwoCategory
 
-module Theory.TwoFunctor.Examples.ToAtkeyParameterizedMonad where
+module Theory.TwoFunctor.Properties.ToAtkeyParameterizedMonad where
 
 LaxTwoFunctor→AtkeyParameterizedMonad
   : {ℓC₀ ℓC₁ ℓS : Level} 

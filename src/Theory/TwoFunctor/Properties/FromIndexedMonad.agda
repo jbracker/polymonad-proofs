@@ -24,18 +24,18 @@ open import Theory.Category
 open import Theory.Category.Examples
 open import Theory.Functor hiding ( functor )
 open import Theory.Functor.Composition
-open import Theory.Functor.EquivalentHaskellFunctor
+open import Theory.Functor.Properties.IsomorphicHaskellFunctor
 open import Theory.Natural.Transformation
 open import Theory.Natural.Transformation.Examples
 open import Theory.TwoCategory
 open import Theory.TwoCategory.Examples
 open import Theory.TwoCategory.ExampleProperties
-open import Theory.TwoFunctor.Examples.ConstZeroCell
+open import Theory.TwoFunctor.Properties.ConstZeroCell
 
 open Category
 open StrictTwoCategory
 
-module Theory.TwoFunctor.Examples.FromIndexedMonad where
+module Theory.TwoFunctor.Properties.FromIndexedMonad where
 
 IndexedMonad→LaxTwoFunctor
   : {ℓ : Level}

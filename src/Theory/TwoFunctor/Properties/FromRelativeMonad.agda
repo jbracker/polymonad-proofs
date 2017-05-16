@@ -35,7 +35,7 @@ open Category
 open NaturalTransformation
 open StrictTwoCategory
 
-module Theory.TwoFunctor.Examples.FromRelativeMonad where
+module Theory.TwoFunctor.Properties.FromRelativeMonad where
 
 -- TODO: This does not seem to work...
 RelativeMonad→LaxTwoFunctor 

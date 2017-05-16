@@ -1,6 +1,4 @@
 
-module Theory.TwoFunctor.Examples.IsomorphicIndexedMonad where
-
 -- Stdlib
 open import Level
 open import Function renaming ( _∘_ to _∘F_ )
@@ -22,14 +20,16 @@ open import Haskell.Functor renaming ( Functor to HaskellFunctor ; functor-eq to
 open import Theory.Category
 open import Theory.Category.Examples
 open import Theory.Functor
-open import Theory.Functor.EquivalentHaskellFunctor
+open import Theory.Functor.Properties.IsomorphicHaskellFunctor
 open import Theory.Natural.Transformation
 open import Theory.TwoCategory
 open import Theory.TwoCategory.Examples
 open import Theory.TwoFunctor
-open import Theory.TwoFunctor.Examples.ConstZeroCell
-open import Theory.TwoFunctor.Examples.FromIndexedMonad
-open import Theory.TwoFunctor.Examples.ToIndexedMonad
+open import Theory.TwoFunctor.Properties.ConstZeroCell
+open import Theory.TwoFunctor.Properties.FromIndexedMonad
+open import Theory.TwoFunctor.Properties.ToIndexedMonad
+
+module Theory.TwoFunctor.Properties.IsomorphicIndexedMonad where
 
 open StrictTwoCategory
 

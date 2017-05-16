@@ -29,12 +29,12 @@ open import Theory.Natural.Transformation.Examples
 open import Theory.TwoCategory
 open import Theory.TwoCategory.Examples
 open import Theory.TwoCategory.ExampleProperties
-open import Theory.TwoFunctor.Examples.ConstZeroCell
+open import Theory.TwoFunctor.Properties.ConstZeroCell
 
 open Category
 open StrictTwoCategory
 
-module Theory.TwoFunctor.Examples.ToIndexedMonad where
+module Theory.TwoFunctor.Properties.ToIndexedMonad where
 
 LaxTwoFunctor→IxMonadTyCon : {ℓS : Level}
   → (S : Set ℓS)
@@ -53,8 +53,8 @@ LaxTwoFunctor→IndexedMonad {ℓS} ObjS F
     open ConstLaxTwoFunctor F
     open NaturalTransformation renaming (η to nat-η)
     
-    import Theory.TwoFunctor.Examples.ToIndexedMonadProperties
-    open Theory.TwoFunctor.Examples.ToIndexedMonadProperties {ℓS} ObjS F
+    import Theory.TwoFunctor.Properties.ToIndexedMonadProperties
+    open Theory.TwoFunctor.Properties.ToIndexedMonadProperties {ℓS} ObjS F
     
     S : Category
     S = codiscreteCategory ObjS

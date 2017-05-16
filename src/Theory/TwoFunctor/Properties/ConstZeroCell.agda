@@ -16,7 +16,7 @@ open import Theory.TwoFunctor
 open Category
 open StrictTwoCategory
 
-module Theory.TwoFunctor.Examples.ConstZeroCell where
+module Theory.TwoFunctor.Properties.ConstZeroCell where
 
 record ConstLaxTwoFunctor {ℓC₀ ℓC₁ ℓC₂ ℓD₀ ℓD₁ ℓD₂ : Level} 
                           (C : StrictTwoCategory {ℓC₀} {ℓC₁} {ℓC₂}) 

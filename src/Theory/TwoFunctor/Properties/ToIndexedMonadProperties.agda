@@ -29,9 +29,9 @@ open import Theory.Natural.Transformation.Examples
 open import Theory.TwoCategory
 open import Theory.TwoCategory.Examples
 open import Theory.TwoCategory.ExampleProperties
-open import Theory.TwoFunctor.Examples.ConstZeroCell
+open import Theory.TwoFunctor.Properties.ConstZeroCell
 
-module Theory.TwoFunctor.Examples.ToIndexedMonadProperties 
+module Theory.TwoFunctor.Properties.ToIndexedMonadProperties 
   {ℓS : Level} 
   (Ixs : Set ℓS)
   (F : ConstLaxTwoFunctor (Category→StrictTwoCategory (codiscreteCategory Ixs)) (Cat {suc zero} {zero}) (Hask {zero})) 
