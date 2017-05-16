@@ -72,7 +72,7 @@ Monad→LaxTwoFunctor {ℓC₀} {ℓC₁} {C} {M} monad = record
         F₁ : {a b : Obj (HomCat ⊤-TwoCat tt tt)} 
            → Hom (HomCat ⊤-TwoCat tt tt) a b 
            → Hom (HomCat FunTwoCat (P₀ tt) (P₀ tt)) (F₀ a) (F₀ b)
-        F₁ {tt} {tt} tt = naturalTransformation ηF naturalF
+        F₁ {tt} {tt} tt = Id⟨ F₀ tt ⟩
         
         compose : {a b c : Obj (HomCat ⊤-TwoCat tt tt)}
                 → {f : Hom (HomCat ⊤-TwoCat tt tt) a b}
