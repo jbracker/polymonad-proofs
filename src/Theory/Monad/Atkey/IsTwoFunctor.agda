@@ -1,7 +1,7 @@
 
 module Theory.Monad.Atkey.IsTwoFunctor where
 
-open import Theory.TwoFunctor.Examples.FromAtkeyParameterizedMonad using ( AtkeyParameterizedMonad→LaxTwoFunctor ) public
+open import Theory.TwoFunctor.Properties.FromAtkeyParameterizedMonad using ( AtkeyParameterizedMonad→LaxTwoFunctor ) public
 
 {-
 -- Stdlib
