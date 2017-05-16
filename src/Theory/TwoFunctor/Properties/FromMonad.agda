@@ -1,5 +1,5 @@
 
-module Theory.Monad.Properties.ToTwoFunctor where
+module Theory.TwoFunctor.Properties.FromMonad where
 
 -- Stdlib
 open import Level renaming ( suc to lsuc ; zero to lzero )
@@ -25,13 +25,13 @@ open import Theory.Natural.Transformation
 open import Theory.Monad hiding ( monad )
 open import Theory.TwoCategory
 open import Theory.TwoCategory.Examples
-open import Theory.TwoFunctor 
+open import Theory.TwoFunctor
 
 open StrictTwoCategory
 
 Monad→LaxTwoFunctor : ∀ {ℓC₀ ℓC₁} 
                     → {C : Category {ℓC₀} {ℓC₁}} {M : Functor C C} 
-                    →  Monad M → LaxTwoFunctor ⊤-TwoCat (functorTwoCategory {ℓC₀} {ℓC₁})
+                    →  Monad M → LaxTwoFunctor ⊤-TwoCat (Cat {ℓC₀} {ℓC₁})
 Monad→LaxTwoFunctor {ℓC₀} {ℓC₁} {C} {M} monad = record
   { P₀ = P₀
   ; P₁ = P₁

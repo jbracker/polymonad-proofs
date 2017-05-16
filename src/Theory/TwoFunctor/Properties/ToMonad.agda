@@ -1,5 +1,5 @@
 
-module Theory.TwoFunctor.IsMonad where
+module Theory.TwoFunctor.Properties.ToMonad where
 
 -- Stdlib
 open import Level renaming ( suc to lsuc ; zero to lzero )
@@ -30,7 +30,7 @@ open import Theory.TwoFunctor
 open StrictTwoCategory
 
 LaxTwoFunctor→Monad : ∀ {ℓC₀ ℓC₁} 
-                    → (F : LaxTwoFunctor ⊤-TwoCat (functorTwoCategory {ℓC₀} {ℓC₁})) → Monad ([ LaxTwoFunctor.P₁ F ]₀ tt)
+                    → (F : LaxTwoFunctor ⊤-TwoCat (Cat {ℓC₀} {ℓC₁})) → Monad ([ LaxTwoFunctor.P₁ F ]₀ tt)
 LaxTwoFunctor→Monad {ℓC₀} {ℓC₁} F = record 
   { η = ηNat
   ; μ = μNat
