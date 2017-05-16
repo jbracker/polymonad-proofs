@@ -15,7 +15,7 @@ open import Theory.Functor
 open import Theory.Functor.Composition
 open import Theory.Natural.Transformation renaming ( NaturalTransformation to NatTrans )
 open import Theory.Monad hiding ( monad )
-open import Theory.Functor.IsomorphicHaskellFunctor
+open import Theory.Functor.Properties.IsomorphicHaskellFunctor
 
 module Theory.Monad.Properties.FromHaskellMonad where
 

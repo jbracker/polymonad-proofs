@@ -1,5 +1,5 @@
 
-module Theory.Functor.IsomorphicHaskellFunctor where
+module Theory.Functor.Properties.IsomorphicHaskellFunctor where
 
 -- Stdlib
 open import Level renaming ( suc to lsuc ; zero to lzero )

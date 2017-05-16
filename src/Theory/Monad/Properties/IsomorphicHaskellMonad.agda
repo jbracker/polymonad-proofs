@@ -18,7 +18,7 @@ open import Haskell.Monad hiding ( monad ) renaming ( Monad to HaskellMonad )
 
 open import Theory.Functor
 open import Theory.Functor.Composition
-open import Theory.Functor.IsomorphicHaskellFunctor
+open import Theory.Functor.Properties.IsomorphicHaskellFunctor
 open import Theory.Monad hiding ( monad )
 open import Theory.Monad.Properties.FromHaskellMonad
 open import Theory.Monad.Properties.ToHaskellMonad
