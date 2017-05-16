@@ -25,7 +25,7 @@ open import Theory.Natural.Transformation
 open import Theory.TwoCategory
 open import Theory.TwoCategory.Examples
 open import Theory.TwoFunctor
-open import Theory.TwoFunctor.Properties.ConstZeroCell
+open import Theory.TwoFunctor.ConstZeroCell
 open import Theory.TwoFunctor.Properties.FromIndexedMonad
 open import Theory.TwoFunctor.Properties.ToIndexedMonad
 
