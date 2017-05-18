@@ -47,6 +47,14 @@ record EffectMonad {n} {Effect : Set n} (monoid : Monoid Effect) (M : Effect →
   _>>_ : ∀ {α β : Type} {i j : Effect} → M i α → M j β → M (i ∙ j) β
   ma >> mb = ma >>= λ a → mb
   
+  bind = _>>=_
+  
+  join : {α : Type} {i j : Effect} → M i (M j α) → M (i ∙ j) α
+  join mma = mma >>= λ x → x
+
+  fmap : {α β : Type} {i : Effect} → (α → β) → M i α → M i β
+  fmap {i = i} f ma = Functor.fmap (functor i) f ma
+  
   private
     helper : {α : Type} {i j : Effect} 
            → (ma : M i α) → (mb : M j α) → (eq : j ≡ i) → (eqM : ma ≅ mb)
