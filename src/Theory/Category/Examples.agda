@@ -20,6 +20,7 @@ open import Extensionality
 open import Equality
 open import ProofIrrelevance
 open import Bijection renaming ( refl to brefl )
+open import Theory.Monoid
 open import Theory.Category
 open import Theory.Category.Isomorphism
 open import Theory.Functor
@@ -58,6 +59,18 @@ discreteCategory {ℓ₀} A = category A (λ a b → a ≡ b) comp (λ {a} → r
 -- Category that has exactly one morphism for any pair of objects.
 codiscreteCategory : {ℓ : Level} → (A : Set ℓ) → Category {ℓ} {ℓ}
 codiscreteCategory {ℓ} A = category A (λ a b → Lift ⊤) (λ _ _ → lift tt) (lift tt) refl refl refl
+
+-- Category naturally formed by a monoid.
+monoidCategory : ∀ {ℓ} {C : Set ℓ} → Monoid C → Category {ℓ₀ = ℓ}
+monoidCategory {ℓ = ℓ} monoid = record
+  { Obj = Lift ⊤
+  ; Hom = \_ _ → Monoid.carrier monoid
+  ; _∘_ = Monoid._∙_ monoid
+  ; id = Monoid.ε monoid
+  ; assoc = Monoid.assoc monoid
+  ; left-id = Monoid.right-id monoid
+  ; right-id = Monoid.left-id monoid
+  }
 
 SetIsomorphism↔Bijection : {ℓ : Level} {A B : Set ℓ} → (Σ (A → B) (Isomorphism (setCategory {ℓ}))) ↔ (Bijection A B)
 SetIsomorphism↔Bijection {ℓ} {A} {B} = bijection Iso→Bij Bij→Iso right-id left-id
