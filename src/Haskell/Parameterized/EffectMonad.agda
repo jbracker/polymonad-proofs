@@ -9,7 +9,7 @@ open import Data.Sum
 open import Data.Unit
 open import Data.Empty
 open import Relation.Binary.PropositionalEquality
-open import Relation.Binary.HeterogeneousEquality renaming ( refl to hrefl ; sym to hsym ; trans to htrans ; cong to hcong ; subst₂ to hsubst₂ )
+open import Relation.Binary.HeterogeneousEquality renaming ( refl to hrefl ; sym to hsym ; trans to htrans ; cong to hcong ; subst₂ to hsubst₂ ; subst to hsubst )
 open ≡-Reasoning
 
 -- Local
@@ -46,6 +46,12 @@ record EffectMonad {n} {Effect : Set n} (monoid : Monoid Effect) (M : Effect →
   
   _>>_ : ∀ {α β : Type} {i j : Effect} → M i α → M j β → M (i ∙ j) β
   ma >> mb = ma >>= λ a → mb
+  
+  Mi≅Miε : {α : Type} {i : Effect} → M i α ≅ M (i ∙ ε) α
+  Mi≅Miε {α} {i} = hcong (λ X → M X α) (≡-to-≅ (sym right-id))
+  
+  Mi≅Mεi : {α : Type} {i : Effect} → M i α ≅ M (ε ∙ i) α
+  Mi≅Mεi {α} {i} = hcong (λ X → M X α) (≡-to-≅ (sym left-id))
   
   bind = _>>=_
   
