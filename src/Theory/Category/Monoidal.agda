@@ -8,7 +8,7 @@ open ≡-Reasoning
 open import Relation.Binary.HeterogeneousEquality using ( _≅_ )
 
 open import Theory.Triple
-open import Theory.Category
+open import Theory.Category hiding ( category )
 open import Theory.Category.Isomorphism
 open import Theory.Functor
 import Theory.Functor.Association
@@ -67,6 +67,9 @@ record MonoidalCategory {ℓ₀ ℓ₁ : Level} (C : Category {ℓ₀} {ℓ₁})
     
     pentagon-id : (w x y z : Obj) 
                 → (id {w} ⊗₁ α x y z) ∘ (α w (x ⊗₀ y) z ∘ (α w x y ⊗₁ id {z})) ≡ α w x (y ⊗₀ z) ∘ α (w ⊗₀ x) y z
+    
+  category : Category
+  category = Category.category Obj Hom _∘_ id assoc right-id left-id
   
 
 private
