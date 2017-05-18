@@ -63,6 +63,9 @@ private
   nat-helper2 : {ℓ : Level} {F G : Functor (SetCat {ℓ}) (SetCat {ℓ})} → (p : F ≡ G) → (α : Obj (SetCat {ℓ})) → (x : [ F ]₀ α) → nat-η (subst₂ NaturalTransformation refl p Id⟨ F ⟩) α x ≅ x
   nat-helper2 {ℓ} {F} {.F} refl α x = hrefl
 
+het-cat-λ-id : {ℓ : Level} {F : Functor (SetCat {ℓ}) (SetCat {ℓ})} → (a : Obj (SetCat {ℓ})) → (x : [ F ]₀ a) → nat-η (λ' Cat F) a x ≅ x
+het-cat-λ-id {ℓ} {F} a x = hrefl
+
 het-cat-ρ-id : {ℓ : Level} {F : Functor (SetCat {ℓ}) (SetCat {ℓ})} → (a : Obj (SetCat {ℓ})) → (x : [ F ]₀ a) → nat-η (ρ Cat F) a x ≅ x
 het-cat-ρ-id {ℓ} {F} a x = hbegin
   nat-η (ρ Cat F) a x 
