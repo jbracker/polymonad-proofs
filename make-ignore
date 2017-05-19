@@ -13,7 +13,6 @@ src/Haskell/Parameterized/IndexedMonad/NonPhantomNonPrincipal.agda
 src/Supermonad/Polymonad.agda
 src/Supermonad/DefinitionWithCategory/ToLaxTwoFunctor.agda
 
-src/Theory/Examples/TwoFunctorToAtkeyParameterizedMonad.agda
 src/Theory/Haskell/Constrained/Examples/SetApplicative.agda
 src/Theory/Haskell/Applicative.agda
 
