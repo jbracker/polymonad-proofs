@@ -18,5 +18,4 @@ src/Theory/Haskell/Constrained/Examples/SetApplicative.agda
 src/Theory/Haskell/Applicative.agda
 
 src/Theory/TwoFunctor/Properties/FromRelativeMonad.agda
-src/Theory/TwoFunctor/Properties/FromEffectMonad.agda
 src/Theory/TwoFunctor/Properties/ToAtkeyParameterizedMonad.agda
