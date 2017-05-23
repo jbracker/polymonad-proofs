@@ -24,7 +24,7 @@ open import Theory.Monoid
 -- Effect Monads are Functors
 -- -----------------------------------------------------------------------------
 
-open EffectMonad hiding ( _>>=_ ; return )
+open EffectMonad hiding ( _>>=_ ; return ; fmap )
 open Monoid hiding ( _∙_ ; ε )
 
 EffectMonad→Functor : ∀ {ℓ}

@@ -20,7 +20,7 @@ open import Polymonad.Identity
 open import Haskell.Parameterized.EffectMonad
 open import Theory.Monoid
 
-open EffectMonad hiding ( law-assoc ) renaming (_>>=_ to mBind; return to mReturn; law-assoc' to mLawAssoc; law-assoc'' to mSymLawAssoc)
+open EffectMonad hiding ( law-assoc ; bind ) renaming (_>>=_ to mBind; return to mReturn; law-assoc' to mLawAssoc; law-assoc'' to mSymLawAssoc)
 
 subst₂²≡id : ∀ {a b k} {A : Set a} {B : Set b} {X₁ X₂ : A} {Y₁ Y₂ : B}
            → (P : A → B → Set k)
