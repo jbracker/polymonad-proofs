@@ -14,7 +14,7 @@ open import Extensionality
 
 open import Haskell
 open import Haskell.Functor hiding ( functor ) renaming ( Functor to HaskellFunctor )
-open import Haskell.Parameterized.EffectMonad
+open import Haskell.Parameterized.EffectMonad hiding ( effect-monad )
 
 open import Theory.Triple
 open import Theory.Monoid
@@ -44,7 +44,7 @@ EffectMonad→LaxTwoFunctor
   → (M : Effects → TyCon)
   → (monad : EffectMonad monoid M)
   → ConstLaxTwoFunctor (discreteHomCatTwoCategory (monoidCategory monoid)) (Cat {suc zero} {zero}) (Hask {zero})
-EffectMonad→LaxTwoFunctor {ℓ} {Eff} monoid M monad = record
+EffectMonad→LaxTwoFunctor {ℓ} {Eff} {monoid} M monad = record
   { P₁ = λ {i} {j} → P
   ; η = λ {i} → η
   ; μ = λ {i} {j} {k} {f} {g} → μ {g} {f}
@@ -92,12 +92,6 @@ EffectMonad→LaxTwoFunctor {ℓ} {Eff} monoid M monad = record
             ≅⟨ law-left-id a (return ∘F f) ⟩
           return (f a) ∎h
     
-    bind-arg-1 : {α β : Type} {i j k : Eff} → i ≡ j → (ma : M i α) → (mb : M j α) → ma ≅ mb → (f : α → M k β) → ma >>= f ≅ mb >>= f
-    bind-arg-1 refl ma .ma hrefl f = hrefl
-
-    bind-arg-2 : {α β : Type} {i j k : Eff} → j ≡ k → (ma : M i α) → (f : α → M j β) → (g : α → M k β) → f ≅ g → ma >>= f ≅ ma >>= g
-    bind-arg-2 refl ma f .f hrefl = hrefl
-    
     μ : {i j : Eff} → NaturalTransformation ([ [ P ]₀ i ]∘[ [ P ]₀ j ]) ([ P ]₀ (i ∘Eff j))
     μ {i} {j} = naturalTransformation (λ α mma → join {α} {i} {j} mma) $ λ {α β} {f} → fun-ext $ λ mma → natural {α} {β} {f} mma 
       where
@@ -108,13 +102,13 @@ EffectMonad→LaxTwoFunctor {ℓ} {Eff} monoid M monad = record
           (M ((i ∘Eff j) ∘Eff ε) β ∋ (mma >>= (λ x → x)) >>= (return ∘F f))
             ≅⟨ hsym (law-assoc mma (λ z → z) (return ∘F f)) ⟩
           (M (i ∘Eff (j ∘Eff ε)) β ∋ mma >>= (λ ma → ma >>= (return ∘F f)))
-            ≅⟨ bind-arg-2 right-id mma (λ ma → ma >>= (return ∘F f)) (fmap f) (het-fun-ext (het-fun-ext hrefl (λ _ → hsym Mi≅Miε)) (λ ma → law-monad-fmap f ma)) ⟩
+            ≅⟨ bind-arg₂ right-id mma (λ ma → ma >>= (return ∘F f)) (fmap f) (het-fun-ext (het-fun-ext hrefl (λ _ → hsym Mi≅Miε)) (λ ma → law-monad-fmap f ma)) ⟩
           (M (i ∘Eff j) β          ∋ mma >>= (λ ma → fmap f ma))
-            ≅⟨ bind-arg-2 (sym left-id) mma (fmap f) (λ ma → return (fmap f ma) >>= (λ x → x)) (hsym (het-fun-ext (het-fun-ext hrefl (λ _ → hsym Mi≅Mεi)) (λ ma → law-left-id (fmap f ma) (λ z → z)))) ⟩
+            ≅⟨ bind-arg₂ (sym left-id) mma (fmap f) (λ ma → return (fmap f ma) >>= (λ x → x)) (hsym (het-fun-ext (het-fun-ext hrefl (λ _ → hsym Mi≅Mεi)) (λ ma → law-left-id (fmap f ma) (λ z → z)))) ⟩
           (M (i ∘Eff (ε ∘Eff j)) β ∋ mma >>= (λ ma → return (fmap f ma) >>= (λ x → x)))
             ≅⟨ law-assoc mma (return ∘F fmap f) (λ x → x) ⟩
           (M ((i ∘Eff ε) ∘Eff j) β ∋ (mma >>= (return ∘F fmap f)) >>= (λ x → x))
-            ≅⟨ bind-arg-1 right-id (mma >>= (return ∘F fmap f)) (fmap (fmap f) mma) (law-monad-fmap (fmap f) mma) (λ x → x) ⟩ -- (law-monad-fmap (fmap f) mma)
+            ≅⟨ bind-arg₁ right-id (mma >>= (return ∘F fmap f)) (fmap (fmap f) mma) (law-monad-fmap (fmap f) mma) (λ x → x) ⟩ -- (law-monad-fmap (fmap f) mma)
           (M (i ∘Eff j) β          ∋ fmap {i = i} (fmap {i = j} f) mma >>= (λ x → x)) ∎h
     
     subst-refl-id : {α : Type} {i j : Eff} → (eq : i ≡ j) → (ma : M j α) → nat-η ([ P ]₁ (subst₂ _≡_ eq refl (refl {ℓ} {Eff} {i}))) α ma ≅ nat-η (Id⟨ F j ⟩) α ma
@@ -130,11 +124,11 @@ EffectMonad→LaxTwoFunctor {ℓ} {Eff} monoid M monad = record
       (M (i ∘Eff ε) α          ∋ nat-η (Id⟨ F (i ∘Eff ε) ⟩) α (fmap return ma >>= (λ x → x)))
         ≅⟨ hrefl ⟩
       (M (i ∘Eff ε) α          ∋ fmap return ma >>= (λ x → x))
-        ≅⟨ bind-arg-1 (sym right-id) (fmap return ma) (ma >>= (return ∘F return)) (hsym (law-monad-fmap return ma)) (λ x → x) ⟩
+        ≅⟨ bind-arg₁ (sym right-id) (fmap return ma) (ma >>= (return ∘F return)) (hsym (law-monad-fmap return ma)) (λ x → x) ⟩
       (M ((i ∘Eff ε) ∘Eff ε) α ∋ (ma >>= (return ∘F return)) >>= (λ x → x))
         ≅⟨ hsym (law-assoc ma (return ∘F return) (λ x → x)) ⟩
       (M (i ∘Eff (ε ∘Eff ε)) α ∋ ma >>= (λ a → return (return a) >>= (λ x → x)))
-        ≅⟨ bind-arg-2 left-id ma (λ a → return (return a) >>= (λ x → x)) return (het-fun-ext (het-fun-ext hrefl (λ _ → hsym Mi≅Miε)) (λ a → law-left-id (return a) (λ x → x))) ⟩
+        ≅⟨ bind-arg₂ left-id ma (λ a → return (return a) >>= (λ x → x)) return (het-fun-ext (het-fun-ext hrefl (λ _ → hsym Mi≅Miε)) (λ a → law-left-id (return a) (λ x → x))) ⟩
       (M (i ∘Eff ε) α          ∋ ma >>= return) 
         ≅⟨ law-right-id ma ⟩
       (M i α                   ∋ ma) ∎h
@@ -167,11 +161,11 @@ EffectMonad→LaxTwoFunctor {ℓ} {Eff} monoid M monad = record
       (M (k ∘Eff (j ∘Eff i)) β ∋ join {β} {k} {j ∘Eff i} (fmap (join {β} {j} {i}) ma))
         ≅⟨ hrefl ⟩
       (M (k ∘Eff (j ∘Eff i)) β ∋ fmap (join {β} {j} {i}) ma >>= (λ x → x))
-        ≅⟨ bind-arg-1 (sym right-id) (fmap (join {β} {j} {i}) ma) (ma >>= (return ∘F join {β} {j} {i})) (hsym (law-monad-fmap (join {β} {j} {i}) ma)) (λ x → x) ⟩
+        ≅⟨ bind-arg₁ (sym right-id) (fmap (join {β} {j} {i}) ma) (ma >>= (return ∘F join {β} {j} {i})) (hsym (law-monad-fmap (join {β} {j} {i}) ma)) (λ x → x) ⟩
       (M ((k ∘Eff ε) ∘Eff (j ∘Eff i)) β ∋ (ma >>= (return ∘F join {β} {j} {i})) >>= (λ x → x))
         ≅⟨ hsym (law-assoc ma (return ∘F join) (λ x → x)) ⟩
       (M (k ∘Eff (ε ∘Eff (j ∘Eff i))) β ∋ ma >>= (λ a → return (join {β} {j} {i} a) >>= (λ x → x)))
-        ≅⟨ bind-arg-2 left-id ma (λ a → return (join a) >>= (λ x → x)) (λ mma → mma >>= (λ x → x)) (het-fun-ext (het-fun-ext hrefl (λ _ → hsym Mi≅Mεi)) (λ x → law-left-id (join x) (λ x → x))) ⟩
+        ≅⟨ bind-arg₂ left-id ma (λ a → return (join a) >>= (λ x → x)) (λ mma → mma >>= (λ x → x)) (het-fun-ext (het-fun-ext hrefl (λ _ → hsym Mi≅Mεi)) (λ x → law-left-id (join x) (λ x → x))) ⟩
       (M (k ∘Eff (j ∘Eff i)) β ∋ ma >>= (λ mma → mma >>= (λ x → x)))
         ≅⟨ law-assoc ma (λ x → x) (λ x → x) ⟩
       (M ((k ∘Eff j) ∘Eff i) β ∋ (ma >>= (λ x → x)) >>= (λ x → x))

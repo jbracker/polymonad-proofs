@@ -64,6 +64,12 @@ record EffectMonad {ℓ} {Effect : Set ℓ} (monoid : Monoid Effect) (M : Effect
   fmap : {α β : Type} {i : Effect} → (α → β) → M i α → M i β
   fmap {i = i} f ma = Functor.fmap (functor i) f ma
   
+  bind-arg₁ : {α β : Type} {i j k : Effect} → i ≡ j → (ma : M i α) → (mb : M j α) → ma ≅ mb → (f : α → M k β) → ma >>= f ≅ mb >>= f
+  bind-arg₁ refl ma .ma hrefl f = hrefl
+
+  bind-arg₂ : {α β : Type} {i j k : Effect} → j ≡ k → (ma : M i α) → (f : α → M j β) → (g : α → M k β) → f ≅ g → ma >>= f ≅ ma >>= g
+  bind-arg₂ refl ma f .f hrefl = hrefl
+  
   private
     helper : {α : Type} {i j : Effect} 
            → (ma : M i α) → (mb : M j α) → (eq : j ≡ i) → (eqM : ma ≅ mb)
