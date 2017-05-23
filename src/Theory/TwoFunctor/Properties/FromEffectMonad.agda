@@ -39,12 +39,12 @@ open Triple
 
 EffectMonad→LaxTwoFunctor
   : {ℓ : Level}
-  → (Effects : Set ℓ)
-  → (monoid : Monoid Effects)
+  → {Effects : Set ℓ}
+  → {monoid : Monoid Effects}
   → (M : Effects → TyCon)
   → (monad : EffectMonad monoid M)
   → ConstLaxTwoFunctor (discreteHomCatTwoCategory (monoidCategory monoid)) (Cat {suc zero} {zero}) (Hask {zero})
-EffectMonad→LaxTwoFunctor {ℓ} Eff monoid M monad = record
+EffectMonad→LaxTwoFunctor {ℓ} {Eff} monoid M monad = record
   { P₁ = λ {i} {j} → P
   ; η = λ {i} → η
   ; μ = λ {i} {j} {k} {f} {g} → μ {g} {f}
