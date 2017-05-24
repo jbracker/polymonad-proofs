@@ -83,12 +83,13 @@ record LaxTwoFunctor {ℓC₀ ℓC₁ ℓC₂ ℓD₀ ℓD₁ ℓD₂ : Level}
               ≡ ρ D ([ P₁ {x} {y} ]₀ f)
 
     laxFunAssoc : {w x y z : Cell₀ C} {f : Cell₁ C w x} {g : Cell₁ C x y} {h : Cell₁ C y z}
-               → ([ P₁ {w} {z} ]₁ (α C f g h)) 
-             ∘Dᵥ ( (μ {w} {y} {z} {g ∘Cₕ f} {h}) 
-             ∘Dᵥ   (id₂ D {P₀ y} {P₀ z} {[ P₁ {y} {z} ]₀ h} ∘Dₕ₂ μ {w} {x} {y} {f} {g}) ) 
-               ≡ μ {w} {x} {z} {f} {h ∘Cₕ g} 
-             ∘Dᵥ ( (μ {x} {y} {z} {g} {h} ∘Dₕ₂ id₂ D {P₀ w} {P₀ x} {[ P₁ {w} {x} ]₀ f}) 
-             ∘Dᵥ   (α D ([ P₁ {w} {x} ]₀ f) ([ P₁ {x} {y} ]₀ g) ([ P₁ {y} {z} ]₀ h)) )
+                → ([ P₁ {w} {z} ]₁ (α C f g h)) 
+                  ∘Dᵥ ( (μ {w} {y} {z} {g ∘Cₕ f} {h}) 
+                  ∘Dᵥ   (id₂ D {P₀ y} {P₀ z} {[ P₁ {y} {z} ]₀ h} ∘Dₕ₂ μ {w} {x} {y} {f} {g}) ) 
+                ≡ μ {w} {x} {z} {f} {h ∘Cₕ g} 
+                  ∘Dᵥ ( (μ {x} {y} {z} {g} {h} ∘Dₕ₂ id₂ D {P₀ w} {P₀ x} {[ P₁ {w} {x} ]₀ f}) 
+                  ∘Dᵥ   (α D ([ P₁ {w} {x} ]₀ f) ([ P₁ {x} {y} ]₀ g) ([ P₁ {y} {z} ]₀ h)) )
+               -- P₂ α ∘ᵥ μ ∘ᵥ (id₂ ∘ₕ μ) ≡ μ ∘ᵥ (μ ∘ₕ id₂) ∘ᵥ α P₁
     
 -- horizontal composite:  ∘  =   _∘ₕ_  = flip (;)
 -- vertical composite:    •  =   _∘ᵥ_
