@@ -19,7 +19,7 @@ open ≅-Reasoning hiding ( _≡⟨_⟩_ ) renaming ( begin_ to hbegin_ ; _∎ t
 open import Utilities
 open import Haskell
 open import Haskell.Functor renaming ( Functor to HaskFunctor )
-open import Haskell.Parameterized.IndexedMonad
+open import Haskell.Parameterized.Indexed.Monad
 open import Theory.Triple
 open import Theory.Category
 open import Theory.Functor
