@@ -15,7 +15,7 @@ open import Bijection hiding ( refl ; sym )
 open import Extensionality
 open import Equality
 open import Haskell
-open import Haskell.Parameterized.IndexedMonad
+open import Haskell.Parameterized.Indexed.Monad
 open import Haskell.Functor renaming ( Functor to HaskellFunctor ; functor-eq to haskell-functor-eq )
 open import Theory.Category
 open import Theory.Category.Examples

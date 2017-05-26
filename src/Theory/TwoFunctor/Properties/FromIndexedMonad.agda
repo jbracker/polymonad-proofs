@@ -18,7 +18,7 @@ open import Extensionality
 open import Utilities
 open import Haskell
 open import Haskell.Functor hiding ( functor ) renaming ( Functor to HaskellFunctor )
-open import Haskell.Parameterized.IndexedMonad
+open import Haskell.Parameterized.Indexed.Monad
 open import Theory.Triple
 open import Theory.Category
 open import Theory.Category.Examples

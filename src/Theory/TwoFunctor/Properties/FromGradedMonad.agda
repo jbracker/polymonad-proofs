@@ -14,7 +14,7 @@ open import Extensionality
 
 open import Haskell
 open import Haskell.Functor hiding ( functor ) renaming ( Functor to HaskellFunctor )
-open import Haskell.Parameterized.EffectMonad hiding ( effect-monad )
+open import Haskell.Parameterized.Graded.Monad hiding ( graded-monad )
 
 open import Theory.Triple
 open import Theory.Monoid
@@ -31,20 +31,20 @@ open import Theory.TwoCategory.Examples.DiscreteHomCat
 open import Theory.TwoFunctor
 open import Theory.TwoFunctor.ConstZeroCell
  
-module Theory.TwoFunctor.Properties.FromEffectMonad where
+module Theory.TwoFunctor.Properties.FromGradedMonad where
 
 open Category hiding ( right-id ; left-id ; assoc )
 open StrictTwoCategory
 open Triple
 
-EffectMonad→LaxTwoFunctor
+GradedMonad→LaxTwoFunctor
   : {ℓ : Level}
   → {Effects : Set ℓ}
   → {monoid : Monoid Effects}
   → (M : Effects → TyCon)
-  → (monad : EffectMonad monoid M)
+  → (monad : GradedMonad monoid M)
   → ConstLaxTwoFunctor (discreteHomCatTwoCategory (monoidCategory monoid)) (Cat {suc zero} {zero}) (Hask {zero})
-EffectMonad→LaxTwoFunctor {ℓ} {Eff} {monoid} M monad = record
+GradedMonad→LaxTwoFunctor {ℓ} {Eff} {monoid} M monad = record
   { P₁ = λ {i} {j} → P
   ; η = λ {i} → η
   ; μ = λ {i} {j} {k} {f} {g} → μ {g} {f}
@@ -61,7 +61,7 @@ EffectMonad→LaxTwoFunctor {ℓ} {Eff} {monoid} M monad = record
     _∘Eff_ = Category._∘_ monCat₁
     
     open Monoid monoid
-    open EffectMonad monad
+    open GradedMonad monad
     open NaturalTransformation renaming ( η to nat-η ; natural to nat-natural )
     
     F = λ i → HaskellFunctor→Functor (functor i)

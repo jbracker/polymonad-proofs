@@ -17,7 +17,7 @@ open import Extensionality
 open import Utilities
 open import Haskell
 open import Haskell.Functor hiding ( functor ) renaming ( Functor to HaskellFunctor )
-open import Haskell.Parameterized.EffectMonad
+open import Haskell.Parameterized.Graded.Monad
 open import Theory.Triple
 open import Theory.Monoid
 open import Theory.Category
@@ -35,27 +35,27 @@ open import Theory.TwoFunctor.ConstZeroCell
 open Category hiding ( left-id ; right-id ; assoc )
 open StrictTwoCategory
 
-module Theory.TwoFunctor.Properties.ToEffectMonad where
+module Theory.TwoFunctor.Properties.ToGradedMonad where
 
 private
   Cat' = Cat {suc zero} {zero}
   Hask' = Hask {zero}
 
-LaxTwoFunctor→EffectMonadTyCon 
+LaxTwoFunctor→GradedMonadTyCon 
   : {ℓ : Level}
   → {Eff : Set ℓ}
   → (mon : Monoid Eff)
   → (F : ConstLaxTwoFunctor (discreteHomCatTwoCategory (monoidCategory mon)) Cat' Hask')
   → ( Eff → TyCon )
-LaxTwoFunctor→EffectMonadTyCon S F i A = [ [ ConstLaxTwoFunctor.P₁ F {lift tt} {lift tt} ]₀ i ]₀ A
+LaxTwoFunctor→GradedMonadTyCon S F i A = [ [ ConstLaxTwoFunctor.P₁ F {lift tt} {lift tt} ]₀ i ]₀ A
 
-LaxTwoFunctor→EffectMonad
+LaxTwoFunctor→GradedMonad
   : {ℓ : Level}
   → {Eff : Set ℓ}
   → (mon : Monoid Eff)
   → (F : ConstLaxTwoFunctor (discreteHomCatTwoCategory (monoidCategory mon)) Cat' Hask')
-  → EffectMonad mon (LaxTwoFunctor→EffectMonadTyCon mon F)
-LaxTwoFunctor→EffectMonad {ℓ} {Eff} mon F = record
+  → GradedMonad mon (LaxTwoFunctor→GradedMonadTyCon mon F)
+LaxTwoFunctor→GradedMonad {ℓ} {Eff} mon F = record
   { _>>=_ = _>>=_
   ; return = return
   ; functor = functor
@@ -70,8 +70,8 @@ LaxTwoFunctor→EffectMonad {ℓ} {Eff} mon F = record
     open NaturalTransformation renaming (η to nat-η)
 
 
-    import Theory.TwoFunctor.Properties.ToEffectMonadProperties
-    open Theory.TwoFunctor.Properties.ToEffectMonadProperties mon F
+    import Theory.TwoFunctor.Properties.ToGradedMonadProperties
+    open Theory.TwoFunctor.Properties.ToGradedMonadProperties mon F
     
     _∘Eff_ = _∙_
     
@@ -83,7 +83,7 @@ LaxTwoFunctor→EffectMonad {ℓ} {Eff} mon F = record
     Fun = λ i → [ ConstLaxTwoFunctor.P₁ F {lift tt} {lift tt} ]₀ i
     
     M : Eff → TyCon
-    M = LaxTwoFunctor→EffectMonadTyCon mon F
+    M = LaxTwoFunctor→GradedMonadTyCon mon F
     
     fmap : {i : Eff} {α β : Type} → (α → β) → M i α → M i β
     fmap {i} = [ [ P₁ {lift tt} {lift tt} ]₀ i ]₁

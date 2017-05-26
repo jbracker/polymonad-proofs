@@ -17,7 +17,7 @@ open import Extensionality
 open import Utilities
 open import Haskell
 open import Haskell.Functor hiding ( functor ) renaming ( Functor to HaskellFunctor )
-open import Haskell.Parameterized.EffectMonad
+open import Haskell.Parameterized.Graded.Monad
 open import Theory.Triple
 open import Theory.Monoid
 open import Theory.Category
@@ -32,7 +32,7 @@ open import Theory.TwoCategory.Examples.DiscreteHomCat
 open import Theory.TwoCategory.ExampleProperties
 open import Theory.TwoFunctor.ConstZeroCell
 
-module Theory.TwoFunctor.Properties.ToEffectMonadProperties 
+module Theory.TwoFunctor.Properties.ToGradedMonadProperties 
   {ℓ : Level} 
   {Eff : Set ℓ}
   (mon : Monoid Eff)

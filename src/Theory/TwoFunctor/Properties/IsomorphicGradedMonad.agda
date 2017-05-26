@@ -16,7 +16,7 @@ open import Bijection hiding ( refl ; sym )
 open import Extensionality
 open import Equality
 open import Haskell
-open import Haskell.Parameterized.EffectMonad
+open import Haskell.Parameterized.Graded.Monad
 open import Haskell.Functor renaming ( Functor to HaskellFunctor ; functor-eq to haskell-functor-eq )
 
 open import Theory.Monoid
@@ -30,10 +30,10 @@ open import Theory.TwoCategory.Examples
 open import Theory.TwoCategory.Examples.DiscreteHomCat
 open import Theory.TwoFunctor
 open import Theory.TwoFunctor.ConstZeroCell
-open import Theory.TwoFunctor.Properties.FromEffectMonad
-open import Theory.TwoFunctor.Properties.ToEffectMonad
+open import Theory.TwoFunctor.Properties.FromGradedMonad
+open import Theory.TwoFunctor.Properties.ToGradedMonad
 
-module Theory.TwoFunctor.Properties.IsomorphicEffectMonad where
+module Theory.TwoFunctor.Properties.IsomorphicGradedMonad where
 
 open StrictTwoCategory
 
@@ -41,20 +41,20 @@ private
   Cat' = Cat {suc zero} {zero}
   Hask' = Hask {zero}
 
-EffectMonad↔LaxTwoFunctor : {ℓ : Level}
+GradedMonad↔LaxTwoFunctor : {ℓ : Level}
                           → {Eff : Set ℓ}
                           → (mon : Monoid Eff)
-                          → (Σ (Eff → TyCon) (EffectMonad mon))
+                          → (Σ (Eff → TyCon) (GradedMonad mon))
                           ↔ (ConstLaxTwoFunctor (discreteHomCatTwoCategory (monoidCategory mon)) Cat' Hask')
-EffectMonad↔LaxTwoFunctor {ℓ} {Eff} mon = bijection l→r r→l l→r→l r→l→r
+GradedMonad↔LaxTwoFunctor {ℓ} {Eff} mon = bijection l→r r→l l→r→l r→l→r
   where
     MonCat₂ = discreteHomCatTwoCategory (monoidCategory mon)
     
-    l→r : Σ (Eff → TyCon) (EffectMonad mon) → ConstLaxTwoFunctor MonCat₂ Cat' Hask'
-    l→r (M , monad) = EffectMonad→LaxTwoFunctor M monad
+    l→r : Σ (Eff → TyCon) (GradedMonad mon) → ConstLaxTwoFunctor MonCat₂ Cat' Hask'
+    l→r (M , monad) = GradedMonad→LaxTwoFunctor M monad
 
-    r→l : ConstLaxTwoFunctor MonCat₂ Cat' Hask' → Σ (Eff → TyCon) (EffectMonad mon)
-    r→l F = LaxTwoFunctor→EffectMonadTyCon mon F , LaxTwoFunctor→EffectMonad mon F
+    r→l : ConstLaxTwoFunctor MonCat₂ Cat' Hask' → Σ (Eff → TyCon) (GradedMonad mon)
+    r→l F = LaxTwoFunctor→GradedMonadTyCon mon F , LaxTwoFunctor→GradedMonad mon F
     
     l→r→l : (F : ConstLaxTwoFunctor MonCat₂ Cat' Hask') → l→r (r→l F) ≡ F
     l→r→l F = const-lax-two-functor-eq P-eq (≡-to-≅ η-eq) (≡-to-≅ μ-eq)
@@ -90,25 +90,25 @@ EffectMonad↔LaxTwoFunctor {ℓ} {Eff} mon = bijection l→r r→l l→r→l r�
              $ λ (α : Type) → fun-ext $ λ mma → begin
                NaturalTransformation.η (ConstLaxTwoFunctor.μ (l→r (r→l F))) α mma
                  ≡⟨⟩
-               EffectMonad._>>=_ (proj₂ (r→l F)) mma (λ x → x)
+               GradedMonad._>>=_ (proj₂ (r→l F)) mma (λ x → x)
                  ≡⟨⟩
                NaturalTransformation.η (ConstLaxTwoFunctor.μ F) α ([ [ P₁ ]₀ g ]₁ (λ x → x) mma)
                  ≡⟨ cong (λ X → NaturalTransformation.η (ConstLaxTwoFunctor.μ F) α X) (cong (λ X → X mma) (Functor.id ([ P₁ ]₀ g))) ⟩
                NaturalTransformation.η (ConstLaxTwoFunctor.μ F) α mma ∎
     
-    r→l→r : (x : Σ (Eff → TyCon) (EffectMonad mon)) → r→l (l→r x) ≡ x
-    r→l→r (M , monad) = Σ-eq refl $ ≡-to-≅ $ effect-monad-eq bind-eq refl refl
+    r→l→r : (x : Σ (Eff → TyCon) (GradedMonad mon)) → r→l (l→r x) ≡ x
+    r→l→r (M , monad) = Σ-eq refl $ ≡-to-≅ $ graded-monad-eq bind-eq refl refl
       where
-        open EffectMonad monad
+        open GradedMonad monad
         open Monoid mon
                
-        bind-eq : (λ {α β : Type} {i j : Eff} → EffectMonad._>>=_ (proj₂ (r→l (l→r (M , monad)))) {α} {β} {i} {j})
-                ≡ (λ {α β : Type} {i j : Eff} → EffectMonad._>>=_ monad {α} {β} {i} {j})
+        bind-eq : (λ {α β : Type} {i j : Eff} → GradedMonad._>>=_ (proj₂ (r→l (l→r (M , monad)))) {α} {β} {i} {j})
+                ≡ (λ {α β : Type} {i j : Eff} → GradedMonad._>>=_ monad {α} {β} {i} {j})
         bind-eq = implicit-fun-ext
                 $ λ α → implicit-fun-ext $ λ β → implicit-fun-ext
                 $ λ i → implicit-fun-ext $ λ j → fun-ext
                 $ λ ma → fun-ext $ λ f → ≅-to-≡ $ hbegin
-                  EffectMonad._>>=_ (proj₂ (r→l (l→r (M , monad)))) ma f
+                  GradedMonad._>>=_ (proj₂ (r→l (l→r (M , monad)))) ma f
                     ≅⟨ hrefl ⟩
                   fmap f ma >>= (λ x → x)
                     ≅⟨ bind-arg₁ (sym right-id) (fmap f ma) (ma >>= (return ∘F f)) (hsym (law-monad-fmap f ma)) (λ x → x) ⟩ 
@@ -119,10 +119,10 @@ EffectMonad↔LaxTwoFunctor {ℓ} {Eff} mon = bijection l→r r→l l→r→l r�
                   ma >>= f ∎h
 
 
-LaxTwoFunctor↔EffectMonad : {ℓ : Level}
+LaxTwoFunctor↔GradedMonad : {ℓ : Level}
                           → {Eff : Set ℓ}
                           → (mon : Monoid Eff)
                           → (ConstLaxTwoFunctor (discreteHomCatTwoCategory (monoidCategory mon)) Cat' Hask')
-                          ↔ (Σ (Eff → TyCon) (EffectMonad mon))
-LaxTwoFunctor↔EffectMonad {ℓ} {Eff} mon = Bijection.sym $ EffectMonad↔LaxTwoFunctor {ℓ} {Eff} mon
+                          ↔ (Σ (Eff → TyCon) (GradedMonad mon))
+LaxTwoFunctor↔GradedMonad {ℓ} {Eff} mon = Bijection.sym $ GradedMonad↔LaxTwoFunctor {ℓ} {Eff} mon
 
