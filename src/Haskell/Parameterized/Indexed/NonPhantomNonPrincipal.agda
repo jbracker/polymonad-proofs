@@ -1,5 +1,5 @@
  
-module Haskell.Parameterized.IndexedMonad.NonPhantomNonPrincipal where
+module Haskell.Parameterized.Indexed.NonPhantomNonPrincipal where
 
 -- Stdlib
 open import Level renaming ( suc to lsuc ; zero to lzero)
@@ -18,16 +18,16 @@ open ≡-Reasoning
 open import Utilities
 open import Haskell
 open import Identity
-open import Haskell.Monad renaming ( mBind to monadBind ; mReturn to monadReturn )
+open import Haskell.Monad
 open import Haskell.Monad.Polymonad
 open import Haskell.Monad.Principal
 open import Haskell.Monad.Unionable
 open import Polymonad.Definition
 open import Polymonad.Principal
 open import Polymonad.Unionable
-open import Haskell.Parameterized.IndexedMonad
-open import Haskell.Parameterized.IndexedMonad.DynState
-open import Haskell.Parameterized.IndexedMonad.Polymonad
+open import Haskell.Parameterized.Indexed.Monad
+open import Haskell.Parameterized.Indexed.Examples.DynState
+open import Haskell.Parameterized.Indexed.Polymonad
 open import Haskell.Parameterized.PhantomIndices 
 
 open IxMonad renaming (bind to mBind; return to mReturn; law-right-id to mLawIdR ; law-left-id to mLawIdL ; law-assoc to mLawAssoc ) hiding (_>>=_)

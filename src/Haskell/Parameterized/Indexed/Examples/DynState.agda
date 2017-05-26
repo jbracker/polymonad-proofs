@@ -1,5 +1,5 @@
 
-module Haskell.Parameterized.IndexedMonad.DynState where
+module Haskell.Parameterized.Indexed.Examples.DynState where
 
 -- Stdlib
 open import Level renaming ( suc to lsuc ; zero to lzero)
@@ -18,7 +18,7 @@ open ≡-Reasoning
 open import Utilities
 open import Haskell
 open import Identity
-open import Haskell.Parameterized.IndexedMonad
+open import Haskell.Parameterized.Indexed.Monad
 open import Haskell.Parameterized.PhantomIndices  
 
 -- -----------------------------------------------------------------------------

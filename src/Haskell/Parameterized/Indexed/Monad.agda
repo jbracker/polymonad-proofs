@@ -21,7 +21,7 @@ open import Identity
 open import Haskell.Functor hiding ( functor )
 open import Haskell.Monad
 
-module Haskell.Parameterized.IndexedMonad where
+module Haskell.Parameterized.Indexed.Monad where
 
 record IxMonad {ℓ : Level} (Ixs : Set ℓ) (M : Ixs → Ixs → TyCon) : Set (ℓ ⊔ lsuc lzero) where
   constructor indexed-monad

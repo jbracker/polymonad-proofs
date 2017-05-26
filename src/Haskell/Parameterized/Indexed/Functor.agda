@@ -1,5 +1,5 @@
 
-module Haskell.Parameterized.IndexedMonad.Functor where
+module Haskell.Parameterized.Indexed.Functor where
 
 -- Stdlib
 open import Function
@@ -16,7 +16,7 @@ open import Extensionality
 open import Haskell
 open import Identity
 open import Haskell.Functor hiding ( functor )
-open import Haskell.Parameterized.IndexedMonad
+open import Haskell.Parameterized.Indexed.Monad
 
 -- -----------------------------------------------------------------------------
 -- Indexed Monads are Functors

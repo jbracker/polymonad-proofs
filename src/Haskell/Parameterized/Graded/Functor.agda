@@ -1,5 +1,5 @@
 
-module Haskell.Parameterized.EffectMonad.Functor where
+module Haskell.Parameterized.Graded.Functor where
 
 -- Stdlib
 open import Function
@@ -17,23 +17,23 @@ open import Extensionality
 open import Haskell
 open import Identity
 open import Haskell.Functor
-open import Haskell.Parameterized.EffectMonad
+open import Haskell.Parameterized.Graded.Monad
 open import Theory.Monoid
 
 -- -----------------------------------------------------------------------------
 -- Effect Monads are Functors
 -- -----------------------------------------------------------------------------
 
-open EffectMonad hiding ( _>>=_ ; return ; fmap )
+open GradedMonad hiding ( _>>=_ ; return ; fmap )
 open Monoid hiding ( _∙_ ; ε )
 
-EffectMonad→Functor : ∀ {ℓ}
+GradedMonad→Functor : ∀ {ℓ}
                 → {Eff : Set ℓ}
                 → {monoid : Monoid Eff}
                 → (M : Eff → TyCon)
-                → EffectMonad monoid M 
+                → GradedMonad monoid M 
                 → ∀ (e : Eff) → Functor (M e)
-EffectMonad→Functor {Eff = Eff} {monoid = monoid} M monad m = record 
+GradedMonad→Functor {Eff = Eff} {monoid = monoid} M monad m = record 
   { fmap = fmap
   ; law-id = law-id
   ; law-compose = law-compose
@@ -50,8 +50,8 @@ EffectMonad→Functor {Eff = Eff} {monoid = monoid} M monad m = record
     monLawAssoc : (m n o : Eff) → m ∙ (n ∙ o) ≡ (m ∙ n) ∙ o
     monLawAssoc m n o = Monoid.assoc monoid {m} {n} {o}
     
-    _>>=_ = EffectMonad._>>=_ monad
-    return = EffectMonad.return monad
+    _>>=_ = GradedMonad._>>=_ monad
+    return = GradedMonad.return monad
     
     fmap : ∀ {α β : Type} → (α → β) → M m α → M m β
     fmap {α = α} {β = β} f ma = subst₂ M (monLawIdR m) refl (ma >>= (return ∘ f))
@@ -61,7 +61,7 @@ EffectMonad→Functor {Eff = Eff} {monoid = monoid} M monad m = record
       fmap identity ma 
         ≡⟨ refl ⟩
       subst₂ M (monLawIdR m) refl (ma >>= (return ∘ identity))
-        ≡⟨ cong (λ X → subst₂ M (monLawIdR m) refl X) (EffectMonad.law-right-id' monad ma) ⟩
+        ≡⟨ cong (λ X → subst₂ M (monLawIdR m) refl X) (GradedMonad.law-right-id' monad ma) ⟩
       subst₂ M (monLawIdR m) refl (subst₂ M (sym (monLawIdR m)) refl ma)
         ≡⟨ subst₂²≡id1 (Monoid.right-id monoid {m}) refl M ma ⟩
       identity ma ∎)
@@ -122,7 +122,7 @@ EffectMonad→Functor {Eff = Eff} {monoid = monoid} M monad m = record
       subst (λ X → M X γ) (trans (monLawAssoc m ε ε) (trans (cong (λ X → X ∙ ε) (monLawIdR m)) (monLawIdR m)))
             (ma >>= (λ a → subst₂ M (sym (monLawIdL ε)) refl (return (f (g a)))))
         ≡⟨ cong (λ X → subst (λ X → M X γ) (trans (monLawAssoc m ε ε) (trans (cong (λ X → X ∙ ε) (monLawIdR m)) (monLawIdR m))) (ma >>= X)) 
-                (fun-ext (λ a → sym (EffectMonad.law-left-id' monad (g a) (return ∘ f)))) ⟩
+                (fun-ext (λ a → sym (GradedMonad.law-left-id' monad (g a) (return ∘ f)))) ⟩
       subst (λ X → M X γ) (trans (monLawAssoc m ε ε) (trans (cong (λ X → X ∙ ε) (monLawIdR m)) (monLawIdR m)))
             (ma >>= (λ a → return (g a) >>= (return ∘ f)))
         ≡⟨ sym (substTrans (monLawAssoc m ε ε) (trans (cong (λ X → X ∙ ε) (monLawIdR m)) (monLawIdR m)) 
@@ -135,7 +135,7 @@ EffectMonad→Functor {Eff = Eff} {monoid = monoid} M monad m = record
       subst (λ X → M X γ) (trans (cong (λ X → X ∙ ε) (monLawIdR m)) (monLawIdR m)) 
             (subst₂ M (monLawAssoc m ε ε) refl (ma >>= (λ a → return (g a) >>= (return ∘ f))))
         ≡⟨ cong (λ X → subst (λ X → M X γ) (trans (cong (λ X → X ∙ ε) (monLawIdR m)) (monLawIdR m)) X) 
-                (EffectMonad.law-assoc'' monad ma (return ∘ g) (return ∘ f)) ⟩
+                (GradedMonad.law-assoc'' monad ma (return ∘ g) (return ∘ f)) ⟩
       subst (λ X → M X γ) (trans (cong (λ X → X ∙ ε) (monLawIdR m)) (monLawIdR m)) 
             ((ma >>= (return ∘ g)) >>= (return ∘ f))
         ≡⟨ assocSubstShift (trans (cong (λ X → X ∙ ε) (monLawIdR m)) (monLawIdR m)) 

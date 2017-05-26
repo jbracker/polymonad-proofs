@@ -21,9 +21,6 @@ open import Polymonad.Definition
 open import Polymonad.Unionable
 open import Polymonad.Principal
 open import Polymonad.Union
-open import Haskell.Parameterized.IndexedMonad
-open import Haskell.Parameterized.IndexedMonad.Polymonad
-open import Haskell.Parameterized.IndexedMonad.Unionable
 open import Haskell.Monad
 open import Haskell.Monad.Polymonad
 open import Haskell.Monad.Unionable

@@ -1,5 +1,5 @@
 
-module Parameterized.IndexedMonad.SessionTypes where
+module Haskell.Parameterized.Indexed.Examples.SessionTypes where
 
 -- Stdlib
 open import Level renaming (zero to lzero; suc to lsuc)
@@ -12,10 +12,10 @@ open import Relation.Binary.PropositionalEquality
 -- Local
 open import Haskell
 open import Identity
-open import Polymonad
+open import Polymonad.Definition
 open import Polymonad.Principal
-open import Parameterized.IndexedMonad
-open import Parameterized.IndexedMonad.Polymonad
+open import Haskell.Parameterized.Indexed.Monad
+open import Haskell.Parameterized.Indexed.Polymonad
 
 
 data Types : Set where

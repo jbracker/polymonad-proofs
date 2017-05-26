@@ -1,5 +1,5 @@
  
-module Haskell.Parameterized.EffectMonad.Polymonad where
+module Haskell.Parameterized.Graded.Polymonad where
 
 -- Stdlib
 open import Function renaming ( id to idF )
@@ -17,10 +17,10 @@ open import Haskell
 open import Identity
 open import Polymonad.Definition
 open import Polymonad.Identity
-open import Haskell.Parameterized.EffectMonad
+open import Haskell.Parameterized.Graded.Monad renaming ( GradedMonadTyCons to EffMonadTyCons ; GradedMonadTC to EffMonadTC ; GradedMonadBinds to EffMonadBinds )
 open import Theory.Monoid
 
-open EffectMonad hiding ( law-assoc ; bind ) renaming (_>>=_ to mBind; return to mReturn; law-assoc' to mLawAssoc; law-assoc'' to mSymLawAssoc)
+open GradedMonad hiding ( law-assoc ; bind ) renaming (_>>=_ to mBind; return to mReturn; law-assoc' to mLawAssoc; law-assoc'' to mSymLawAssoc)
 
 subst₂²≡id : ∀ {a b k} {A : Set a} {B : Set b} {X₁ X₂ : A} {Y₁ Y₂ : B}
            → (P : A → B → Set k)
@@ -37,7 +37,7 @@ subst₂²≡id' : ∀ {a b k} {A : Set a} {B : Set b} {X₁ X₂ : A} {Y₁ Y�
 subst₂²≡id' P refl refl = refl
 
 flipEffectMonadLawAssoc : ∀ {Effect : Set} {monoid : Monoid Effect} {M : Effect → TyCon} 
-                        → (monad : EffectMonad monoid M) 
+                        → (monad : GradedMonad monoid M) 
                         → {α β γ : Type} {i j k : Effect}
                         → (m : M i α) → (f : α → M j β) → (g : β → M k γ)
                         → subst₂ M (Monoid.assoc monoid {m = i} {j} {k}) refl (mBind monad m (λ x → mBind monad (f x) g)) ≡ mBind monad (mBind monad m f) g
@@ -48,7 +48,7 @@ flipEffectMonadLawAssoc {monoid = monoid} {M = M} monad {i = i} {j = j} {k = k} 
 
 EffectMonad→Polymonad : {Effect : Set} {M : Effect → TyCon}
                       → {monoid : Monoid Effect}
-                      → (monad : EffectMonad monoid M)
+                      → (monad : GradedMonad monoid M)
                       → Polymonad (IdTyCons ⊎ EffMonadTyCons Effect) idTC
 EffectMonad→Polymonad {Effect = Effect} {M = M'} {monoid = mon} monad = record 
   { B[_,_]▷_ = B[_,_]▷_

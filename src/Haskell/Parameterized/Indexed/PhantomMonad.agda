@@ -1,5 +1,5 @@
  
-module Haskell.Parameterized.IndexedMonad.PhantomMonad where
+module Haskell.Parameterized.Indexed.PhantomMonad where
 
 -- Stdlib
 open import Level
@@ -26,7 +26,7 @@ open import Haskell.Monad.Unionable
 open import Polymonad.Definition
 open import Polymonad.Principal
 open import Polymonad.Unionable
-open import Haskell.Parameterized.IndexedMonad
+open import Haskell.Parameterized.Indexed.Monad
 open import Haskell.Parameterized.PhantomIndices
 
 open Monad hiding ( _>>=_ ; law-right-id ; law-left-id ; law-assoc ) renaming ( bind to monadBind ; return to monadReturn )
