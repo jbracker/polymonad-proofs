@@ -29,6 +29,7 @@ open import Theory.Natural.Transformation
 open import Theory.Natural.Transformation.Examples
 open import Theory.TwoCategory
 open import Theory.TwoCategory.Examples
+open import Theory.TwoCategory.Examples.CodiscreteHomCat
 open import Theory.TwoCategory.ExampleProperties
 open import Theory.TwoFunctor.ConstZeroCell
 
@@ -42,7 +43,7 @@ IndexedMonad→LaxTwoFunctor
   → (Ixs : Set ℓ)
   → (M : Ixs → Ixs → TyCon)
   → (monad : IxMonad Ixs M)
-  → ConstLaxTwoFunctor (Category→StrictTwoCategory (codiscreteCategory Ixs)) (Cat {suc zero} {zero}) (Hask {zero})
+  → ConstLaxTwoFunctor (codiscreteHomCatTwoCategory (codiscreteCategory Ixs)) (Cat {suc zero} {zero}) (Hask {zero})
 IndexedMonad→LaxTwoFunctor {ℓ} Ixs M monad = record
   { P₁ = λ {i} {j} → P {i} {j}
   ; η = λ {i} → η {i}
@@ -53,7 +54,7 @@ IndexedMonad→LaxTwoFunctor {ℓ} Ixs M monad = record
   }
   where
     Ixs₁ = codiscreteCategory Ixs
-    Ixs₂ = Category→StrictTwoCategory Ixs₁
+    Ixs₂ = codiscreteHomCatTwoCategory Ixs₁
     Cat' = Cat {suc zero} {zero}
     Hask' = Hask {zero}
 
@@ -69,7 +70,7 @@ IndexedMonad→LaxTwoFunctor {ℓ} Ixs M monad = record
         P₀ (lift tt) = HaskellFunctor→Functor (functor j i)
         
         P₁ : {a b : Obj (HomCat Ixs₂ i j)} → Hom (HomCat Ixs₂ i j) a b → Hom (HomCat Cat' Hask Hask) (P₀ a) (P₀ b)
-        P₁ {lift tt} {lift tt} {tt} = Id⟨ P₀ (lift tt) ⟩
+        P₁ {lift tt} {lift tt} {lift tt} = Id⟨ P₀ (lift tt) ⟩
     
     η : {i : Ixs} → NaturalTransformation Id[ Hask' ] ([ P {i} {i} ]₀ (lift tt))
     η {i} = naturalTransformation (λ α x → return {α} {i} x) $ fun-ext $ λ a → natural a

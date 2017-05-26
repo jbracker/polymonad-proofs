@@ -24,6 +24,7 @@ open import Theory.Functor.Properties.IsomorphicHaskellFunctor
 open import Theory.Natural.Transformation
 open import Theory.TwoCategory
 open import Theory.TwoCategory.Examples
+open import Theory.TwoCategory.Examples.CodiscreteHomCat
 open import Theory.TwoFunctor
 open import Theory.TwoFunctor.ConstZeroCell
 open import Theory.TwoFunctor.Properties.FromIndexedMonad
@@ -35,21 +36,21 @@ open StrictTwoCategory
 
 IndexedMonad↔LaxTwoFunctor : {ℓ : Level}
                            → (Σ (Set ℓ) (λ Ixs → Σ (Ixs → Ixs → TyCon) (IxMonad Ixs)))
-                           ↔ (Σ (Set ℓ) (λ Ixs → ConstLaxTwoFunctor (Category→StrictTwoCategory (codiscreteCategory Ixs)) (Cat {suc zero} {zero}) (Hask {zero})))
+                           ↔ (Σ (Set ℓ) (λ Ixs → ConstLaxTwoFunctor (codiscreteHomCatTwoCategory (codiscreteCategory Ixs)) (Cat {suc zero} {zero}) (Hask {zero})))
 IndexedMonad↔LaxTwoFunctor {ℓ} = bijection l→r r→l l→r→l r→l→r
   where
     Cat' = Cat {suc zero} {zero}
     Hask' = Hask {zero}
     
     l→r : Σ (Set ℓ) (λ Ixs → Σ (Ixs → Ixs → TyCon) (IxMonad Ixs))
-        → Σ (Set ℓ) (λ Ixs → ConstLaxTwoFunctor (Category→StrictTwoCategory (codiscreteCategory Ixs)) Cat' Hask')
+        → Σ (Set ℓ) (λ Ixs → ConstLaxTwoFunctor (codiscreteHomCatTwoCategory (codiscreteCategory Ixs)) Cat' Hask')
     l→r (Ixs , M , monad) = Ixs , IndexedMonad→LaxTwoFunctor Ixs M monad
 
-    r→l : Σ (Set ℓ) (λ Ixs → ConstLaxTwoFunctor (Category→StrictTwoCategory (codiscreteCategory Ixs)) Cat' Hask')
+    r→l : Σ (Set ℓ) (λ Ixs → ConstLaxTwoFunctor (codiscreteHomCatTwoCategory (codiscreteCategory Ixs)) Cat' Hask')
         → Σ (Set ℓ) (λ Ixs → Σ (Ixs → Ixs → TyCon) (IxMonad Ixs))
     r→l (Ixs , F) = Ixs , LaxTwoFunctor→IxMonadTyCon Ixs F , LaxTwoFunctor→IndexedMonad Ixs F
 
-    l→r→l : (x : Σ (Set ℓ) (λ Ixs → ConstLaxTwoFunctor (Category→StrictTwoCategory (codiscreteCategory Ixs)) Cat' Hask'))
+    l→r→l : (x : Σ (Set ℓ) (λ Ixs → ConstLaxTwoFunctor (codiscreteHomCatTwoCategory (codiscreteCategory Ixs)) Cat' Hask'))
           → l→r (r→l x) ≡ x
     l→r→l (Ixs , F) = Σ-eq refl $ ≡-to-≅ $ const-lax-two-functor-eq P-eq (≡-to-≅ η-eq) (≡-to-≅ μ-eq)
       where
@@ -58,13 +59,13 @@ IndexedMonad↔LaxTwoFunctor {ℓ} = bijection l→r r→l l→r→l r→l→r
         M i j α = [ Functor.F₀ (ConstLaxTwoFunctor.P₁ (proj₂ (l→r (r→l (Ixs , F)))) {i} {j}) (lift tt) ]₀ α
 
         Cell₂-eq : {α : Type} → (i j : Ixs) → (ma : M i j α) 
-          → ma ≡ NaturalTransformation.η (Functor.F₁ (ConstLaxTwoFunctor.P₁ F) tt) α ma
+          → ma ≡ NaturalTransformation.η (Functor.F₁ (ConstLaxTwoFunctor.P₁ F) (lift tt)) α ma
         Cell₂-eq {α} i j ma = begin
           ma
             ≡⟨⟩ 
           NaturalTransformation.η (Id⟨ Functor.F₀ (ConstLaxTwoFunctor.P₁ F) (lift tt) ⟩) α ma
             ≡⟨ cong (λ X → NaturalTransformation.η X α ma) (sym (Functor.id (ConstLaxTwoFunctor.P₁ F))) ⟩ 
-          NaturalTransformation.η (Functor.F₁ (ConstLaxTwoFunctor.P₁ F) tt) α ma ∎
+          NaturalTransformation.η (Functor.F₁ (ConstLaxTwoFunctor.P₁ F) (lift tt)) α ma ∎
       
         P₁-eq : {x y : Ixs} 
               → (λ {a b} → Functor.F₁ (ConstLaxTwoFunctor.P₁ (proj₂ (l→r (r→l (Ixs , F)))) {x} {y}) {a} {b}) 
@@ -116,6 +117,6 @@ IndexedMonad↔LaxTwoFunctor {ℓ} = bijection l→r r→l l→r→l r→l→r
                   ma >>= f ∎
 
 LaxTwoFunctor↔IndexedMonad : {ℓ : Level}
-                           → (Σ (Set ℓ) (λ Ixs → ConstLaxTwoFunctor (Category→StrictTwoCategory (codiscreteCategory Ixs)) (Cat {suc zero} {zero}) (Hask {zero})))
+                           → (Σ (Set ℓ) (λ Ixs → ConstLaxTwoFunctor (codiscreteHomCatTwoCategory (codiscreteCategory Ixs)) (Cat {suc zero} {zero}) (Hask {zero})))
                            ↔ (Σ (Set ℓ) (λ Ixs → Σ (Ixs → Ixs → TyCon) (IxMonad Ixs)))
 LaxTwoFunctor↔IndexedMonad {ℓ} = Bijection.sym $ IndexedMonad↔LaxTwoFunctor {ℓ}

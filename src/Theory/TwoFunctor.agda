@@ -21,6 +21,7 @@ open import Theory.Functor
 open import Theory.Functor.Examples
 open import Theory.Natural.Transformation
 open import Theory.TwoCategory
+open import Theory.TwoCategory.Examples.CodiscreteHomCat
 
 -------------------------------------------------------------------------------
 -- Definition of 2-Functors
@@ -142,18 +143,18 @@ lax-two-functor-eq {C = C} {D} {P₀} {.P₀} {P₁} {.P₁} {η} {.η} {μ} {.�
 -------------------------------------------------------------------------------
 
 Functor→LaxTwoFunctor : ∀ {ℓ₀ ℓ₁} {C D : Category {ℓ₀} {ℓ₁}} 
-                      → Functor C D → LaxTwoFunctor (Category→StrictTwoCategory C) (Category→StrictTwoCategory D)
+                      → Functor C D → LaxTwoFunctor (codiscreteHomCatTwoCategory C) (codiscreteHomCatTwoCategory D)
 Functor→LaxTwoFunctor {ℓ₀} {ℓ₁} {C} {D} F = record
   { P₀ = P₀
   ; P₁ = P₁
-  ; η = tt
-  ; μ = tt
+  ; η = lift tt
+  ; μ = lift tt
   ; laxFunId₁ = refl
   ; laxFunId₂ = refl
   ; laxFunAssoc = refl
   } where
-      C' = Category→StrictTwoCategory C
-      D' = Category→StrictTwoCategory D
+      C' = codiscreteHomCatTwoCategory C
+      D' = codiscreteHomCatTwoCategory D
       
       P₀ : Cell₀ C' → Cell₀ D'
       P₀ a = [ F ]₀ a
@@ -170,4 +171,4 @@ Functor→LaxTwoFunctor {ℓ₀} {ℓ₁} {C} {D} F = record
           
           F₁ : {a b : Obj (HomCat C' x y)} 
              → Hom (HomCat C' x y) a b → Hom (HomCat D' (P₀ x) (P₀ y)) (F₀ a) (F₀ b)
-          F₁ f = tt
+          F₁ f = lift tt

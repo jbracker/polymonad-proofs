@@ -305,61 +305,6 @@ unitStrictTwoCategory = record
 
 ⊤-TwoCat = unitStrictTwoCategory
 
--------------------------------------------------------------------------------
--- Creating a Strict 2-Category from a Category.
--------------------------------------------------------------------------------
-
-Category→StrictTwoCategory : ∀ {ℓ₀ ℓ₁} → Category {ℓ₀} {ℓ₁} → StrictTwoCategory {ℓ₀} {ℓ₁} {lzero}
-Category→StrictTwoCategory {ℓ₀} {ℓ₁} C = record
-  { Cell₀ = Cell₀
-  ; HomCat = HomCat
-  ; comp = comp
-  ; id₁ = id₁
-  ; horizontalIdR₁ = Category.right-id C
-  ; horizontalIdR₂ = refl
-  ; horizontalIdL₁ = Category.left-id C
-  ; horizontalIdL₂ = refl
-  ; horizontalAssoc₁ = Category.assoc C
-  ; horizontalAssoc₂ = refl
-  ; whiskerCoher1' = refl
-  ; whiskerCoher2' = refl
-  ; whiskerCoher3' = refl
-  ; whiskerCoher4' = refl
-  } where
-    ℓ₂ = lzero
-    _∘C_ = _∘_ C
-    
-    Cell₀ = Obj C
-    
-    HomCat : Cell₀ → Cell₀ → Category {ℓ₁} {ℓ₂}
-    HomCat a b = record
-      { Obj = Hom C a b
-      ; Hom = λ f g → ⊤
-      ; _∘_ = λ tt tt → tt
-      ; id = tt
-      ; assoc = refl
-      ; left-id = refl
-      ; right-id = refl
-      }
-    
-    comp : {a b c : Cell₀} 
-         → Functor (HomCat b c ×C HomCat a b) (HomCat a c)
-    comp {a} {b} {c} = record 
-      { F₀ = F₀
-      ; F₁ = λ {x} {y} → F₁ {x} {y}
-      ; id = refl
-      ; compose = refl
-      } where
-          F₀ : Obj (HomCat b c ×C HomCat a b) → Obj (HomCat a c)
-          F₀ (g , f) = g ∘C f
-          
-          F₁ : {x y : Obj (HomCat b c ×C HomCat a b)} 
-             → Hom (HomCat b c ×C HomCat a b) x y → Hom (HomCat a c) (F₀ x) (F₀ y)
-          F₁ f = tt
-    
-    id₁ : {a : Cell₀} → Obj (HomCat a a)
-    id₁ = idC C
-
 StrictTwoCategory→Category : ∀ {ℓ₀ ℓ₁ ℓ₂} → StrictTwoCategory {ℓ₀} {ℓ₁} {ℓ₂} → Category {ℓ₀} {ℓ₁}
 StrictTwoCategory→Category TwoCat = record
   { Obj = StrictTwoCategory.Cell₀ TwoCat

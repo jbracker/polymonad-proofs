@@ -28,6 +28,7 @@ open import Theory.Natural.Transformation
 open import Theory.Natural.Transformation.Examples
 open import Theory.TwoCategory
 open import Theory.TwoCategory.Examples
+open import Theory.TwoCategory.Examples.CodiscreteHomCat
 open import Theory.TwoCategory.ExampleProperties
 open import Theory.TwoFunctor.ConstZeroCell
 
@@ -38,14 +39,14 @@ module Theory.TwoFunctor.Properties.ToIndexedMonad where
 
 LaxTwoFunctor→IxMonadTyCon : {ℓS : Level}
   → (S : Set ℓS)
-  → (F : ConstLaxTwoFunctor (Category→StrictTwoCategory (codiscreteCategory S)) (Cat {suc zero} {zero}) (Hask {zero}))
+  → (F : ConstLaxTwoFunctor (codiscreteHomCatTwoCategory (codiscreteCategory S)) (Cat {suc zero} {zero}) (Hask {zero}))
   → ( S → S → TyCon )
 LaxTwoFunctor→IxMonadTyCon S F i j A = [ [ ConstLaxTwoFunctor.P₁ F {j} {i} ]₀ (lift tt) ]₀ A
 
 LaxTwoFunctor→IndexedMonad
   : {ℓS : Level}
   → (S : Set ℓS)
-  → (F : ConstLaxTwoFunctor (Category→StrictTwoCategory (codiscreteCategory S)) (Cat {suc zero} {zero}) (Hask {zero}))
+  → (F : ConstLaxTwoFunctor (codiscreteHomCatTwoCategory (codiscreteCategory S)) (Cat {suc zero} {zero}) (Hask {zero}))
   → IxMonad S (LaxTwoFunctor→IxMonadTyCon S F)
 LaxTwoFunctor→IndexedMonad {ℓS} ObjS F 
   = indexed-monad _>>=_ return functor law-left-id law-right-id law-assoc law-monad-fmap
@@ -59,7 +60,7 @@ LaxTwoFunctor→IndexedMonad {ℓS} ObjS F
     S : Category
     S = codiscreteCategory ObjS
     
-    S₂ = Category→StrictTwoCategory S
+    S₂ = codiscreteHomCatTwoCategory S
     Cat' = Cat {suc zero} {zero}
 
     Ixs = Obj S
@@ -115,7 +116,7 @@ LaxTwoFunctor→IndexedMonad {ℓS} ObjS F
         ≡⟨ refl ⟩ 
       (nat-η (Id⟨ [ P₁ {j} {i} ]₀ (lift tt) ⟩) α ∘F join {α} {i} {j} {j} ∘F fmap {i} {j} (return {α})) m
         ≡⟨ cong (λ X → (nat-η X α ∘F join {α} {i} {j} {j} ∘F fmap {i} {j} (return {α})) m) (sym (Functor.id (P₁ {j} {i}))) ⟩ 
-      (nat-η ([ P₁ {j} {i} ]₁ tt) α ∘F join {α} {i} {j} {j} ∘F fmap {i} {j} (return {α})) m
+      (nat-η ([ P₁ {j} {i} ]₁ (lift tt)) α ∘F join {α} {i} {j} {j} ∘F fmap {i} {j} (return {α})) m
         ≡⟨ cong (λ X → X m) (η-lax-id₁ {j} {i} α) ⟩ 
       (λ (x : M i j α) → x) m ∎
     

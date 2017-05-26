@@ -26,6 +26,7 @@ open import Theory.Natural.Transformation.Examples
 open import Theory.Monad.Atkey
 open import Theory.TwoCategory
 open import Theory.TwoCategory.Examples
+open import Theory.TwoCategory.Examples.CodiscreteHomCat
 open import Theory.TwoCategory.ExampleProperties
 open import Theory.TwoFunctor
 
@@ -40,7 +41,7 @@ AtkeyParameterizedMonad→LaxTwoFunctor
   → {C : Category {ℓC₀} {ℓC₁}}
   → {S : Category {ℓS₀} {ℓS₁}}
   → (F : AtkeyParameterizedMonad C S) 
-  → LaxTwoFunctor (Category→StrictTwoCategory S) (functorTwoCategory {ℓC₀} {ℓC₁})
+  → LaxTwoFunctor (codiscreteHomCatTwoCategory S) (functorTwoCategory {ℓC₀} {ℓC₁})
 AtkeyParameterizedMonad→LaxTwoFunctor {C = C} {S} F = record
   { P₀ = λ _ → C
   ; P₁ = P
@@ -70,12 +71,12 @@ AtkeyParameterizedMonad→LaxTwoFunctor {C = C} {S} F = record
       (λ {a : Obj C} {b : Obj C} {f : Hom C a b} → trans (left-id C {f = [ ApplyT fS ]₁ f}) (sym (right-id C {f = [ ApplyT fS ]₁ f})))
     
     P : {x y : Obj S} 
-      → Functor (HomCat (Category→StrictTwoCategory S) x y) (HomCat functorTwoCategory C C)
+      → Functor (HomCat (codiscreteHomCatTwoCategory S) x y) (HomCat functorTwoCategory C C)
     P {x} {y} = functor 
        (λ (fS : Hom S x y) → ApplyT fS) 
-       (λ {fS : Hom S x y} {gS : Hom S x y} (f : ⊤) → stateHomIndep fS gS)
+       (λ {fS : Hom S x y} {gS : Hom S x y} (f : Lift ⊤) → stateHomIndep fS gS)
        (λ {fS : Hom S x y} → refl)
-       (λ {fS : Hom S x y} {gS : Hom S x y} {hS : Hom S x y} {f : ⊤} {g : ⊤} → natural-transformation-eq (fun-ext (λ x → sym (right-id C))))
+       (λ {fS : Hom S x y} {gS : Hom S x y} {hS : Hom S x y} {f : Lift ⊤} {g : Lift ⊤} → natural-transformation-eq (fun-ext (λ x → sym (right-id C))))
 
     η' : (s : Obj S) → NaturalTransformation Id[ C ] (ApplyT (id S {s}))
     η' s = naturalTransformation
@@ -167,19 +168,19 @@ AtkeyParameterizedMonad→LaxTwoFunctor {C = C} {S} F = record
         helper c refl = refl
 
     laxFunAssoc : (w x y z : Obj S) (f : Hom S w x) (g : Hom S x y) (h : Hom S y z)
-                → ⟨ Functor.F₁ P {a = h ∘S (g ∘S f)} {b = (h ∘S g) ∘S f} (α (Category→StrictTwoCategory S) f g h)
+                → ⟨ Functor.F₁ P {a = h ∘S (g ∘S f)} {b = (h ∘S g) ∘S f} (α (codiscreteHomCatTwoCategory S) f g h)
                   ⟩∘ᵥ⟨
                   ⟨ μ' w y z (g ∘S f) h ⟩∘ᵥ⟨ ⟨ Id⟨ ApplyT h ⟩ ⟩∘ₕ⟨ μ' w x y f g ⟩ ⟩ ⟩
                 ≡ ⟨ μ' w x z f (h ∘S g) ⟩∘ᵥ⟨
                   ⟨ ⟨ μ' x y z g h ⟩∘ₕ⟨ Id⟨ ApplyT f ⟩ ⟩ ⟩∘ᵥ⟨ α functorTwoCategory ([ P ]₀ f) ([ P ]₀ g) ([ P ]₀ h) ⟩ ⟩
     laxFunAssoc w x y z f g h = natural-transformation-eq $ fun-ext $ λ (c : Obj C) → begin
-      η ⟨ Functor.F₁ P {a = h ∘S (g ∘S f)} {b = (h ∘S g) ∘S f} (α (Category→StrictTwoCategory S) f g h) ⟩∘ᵥ⟨ ⟨ μ' w y z (g ∘S f) h ⟩∘ᵥ⟨ ⟨ Id⟨ ApplyT h ⟩ ⟩∘ₕ⟨ μ' w x y f g ⟩ ⟩ ⟩ c
+      η ⟨ Functor.F₁ P {a = h ∘S (g ∘S f)} {b = (h ∘S g) ∘S f} (α (codiscreteHomCatTwoCategory S) f g h) ⟩∘ᵥ⟨ ⟨ μ' w y z (g ∘S f) h ⟩∘ᵥ⟨ ⟨ Id⟨ ApplyT h ⟩ ⟩∘ₕ⟨ μ' w x y f g ⟩ ⟩ ⟩ c
         ≡⟨⟩
-      η (Functor.F₁ P {a = h ∘S (g ∘S f)} {b = (h ∘S g) ∘S f} (α (Category→StrictTwoCategory S) f g h)) c ∘C
+      η (Functor.F₁ P {a = h ∘S (g ∘S f)} {b = (h ∘S g) ∘S f} (α (codiscreteHomCatTwoCategory S) f g h)) c ∘C
                     (  η (μ' w y z (g ∘S f) h) c
                     ∘C (id C {[ ApplyT h ]₀ ([ ApplyT (g ∘S f) ]₀ c)} ∘C [ ApplyT h ]₁ (η (μ' w x y f g) c)) )
-        ≡⟨ cong (λ X → η (Functor.F₁ P {a = h ∘S (g ∘S f)} {b = (h ∘S g) ∘S f} (α (Category→StrictTwoCategory S) f g h)) c ∘C (η (μ' w y z (g ∘S f) h) c ∘C X )) (right-id C) ⟩
-      η (Functor.F₁ P {a = h ∘S (g ∘S f)} {b = (h ∘S g) ∘S f} (α (Category→StrictTwoCategory S) f g h)) c ∘C (η (μ' w y z (g ∘S f) h) c ∘C [ ApplyT h ]₁ (η (μ' w x y f g) c) )
+        ≡⟨ cong (λ X → η (Functor.F₁ P {a = h ∘S (g ∘S f)} {b = (h ∘S g) ∘S f} (α (codiscreteHomCatTwoCategory S) f g h)) c ∘C (η (μ' w y z (g ∘S f) h) c ∘C X )) (right-id C) ⟩
+      η (Functor.F₁ P {a = h ∘S (g ∘S f)} {b = (h ∘S g) ∘S f} (α (codiscreteHomCatTwoCategory S) f g h)) c ∘C (η (μ' w y z (g ∘S f) h) c ∘C [ ApplyT h ]₁ (η (μ' w x y f g) c) )
         ≡⟨ refl ⟩
       id C {[ ApplyT (h ∘S (g ∘S f)) ]₀ c} ∘C (η (μ' w y z (g ∘S f) h) c ∘C [ ApplyT h ]₁ (η (μ' w x y f g) c) )
         ≡⟨ right-id C ⟩
