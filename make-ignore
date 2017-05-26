@@ -6,9 +6,9 @@ src/MorphMonad/Closure.agda
 src/MorphMonad/Diamond1.agda
 src/MorphMonad/Diamond2.agda
 
-src/Haskell/Parameterized/IndexedMonad/Principal.agda
-src/Haskell/Parameterized/IndexedMonad/SessionTypes.agda
-src/Haskell/Parameterized/IndexedMonad/NonPhantomNonPrincipal.agda
+src/Haskell/Parameterized/Indexed/Principal.agda
+src/Haskell/Parameterized/Indexed/Examples/SessionTypes.agda
+src/Haskell/Parameterized/Indexed/NonPhantomNonPrincipal.agda
 
 src/Supermonad/Polymonad.agda
 src/Supermonad/DefinitionWithCategory/ToLaxTwoFunctor.agda
