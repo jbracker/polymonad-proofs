@@ -1,17 +1,22 @@
 
 open import Level
+open import Function hiding ( _∘_ ; id )
 
 open import Data.Product
 
 open import Relation.Binary.PropositionalEquality
 
+open import Extensionality
 open import Theory.Category.Definition
 open import Theory.Functor.Definition
+open import Theory.Functor.Constant
+open import Theory.Functor.Application
+open import Theory.Natural.ExtranaturalTransformation
 
 module Theory.Wedge.Definition where
 
 open Category
-open Functor renaming (id to functor-id ; compose to functor-compose)
+open Functor renaming (id to fun-id ; compose to fun-compose)
 
 --------------------------------------------------------------------------------
 -- Definition of wedges
@@ -33,6 +38,33 @@ record Wedge {ℓC₀ ℓC₁ ℓX₀ ℓX₁ : Level} {C : Category {ℓC₀} {
     { e = λ c → e c ∘X f 
     ; coher = λ g → trans (assoc X) (trans (cong (λ Y → Y ∘X f) (coher g)) (sym (assoc X))) 
     }
+
+  open Theory.Functor.Application.TriFunctor
+  
+  extranatural : {ℓA₀ ℓA₁ ℓB₀ ℓB₁ : Level} 
+               → (A : Category {ℓA₀} {ℓA₁}) (B : Category {ℓB₀} {ℓB₁})
+               → ExtranaturalTransformation (constFunctor (A ×C B op ×C B) X w) (Tri[ F ]₂₃)
+  extranatural A B = record
+    { η = λ a b c → e c 
+    ; η-natural = λ b c {a} {a'} {f} → trans (cong (λ Y → Y ∘X e c) (fun-id F)) (trans (right-id X) (trans (sym (left-id X)) (sym (cong (λ Y → e c ∘X Y) refl)))) 
+    ; extranatural = λ a b f → coher f 
+    ; extranatural-op = λ a c f → refl
+    }
+
+wedge-eq : {ℓC₀ ℓC₁ ℓX₀ ℓX₁ : Level} 
+         → {C : Category {ℓC₀} {ℓC₁}} {X : Category {ℓX₀} {ℓX₁}} 
+         → {w : Obj X}
+         → {F : Functor (C op ×C C) X} 
+         → {e₀ : (c : Obj C) → Hom X w (F₀ F (c , c))}
+         → {e₁ : (c : Obj C) → Hom X w (F₀ F (c , c))}
+         → {coher₀ : {c c' : Obj C} (f : Hom C c c') → _∘_ X (F₁ F (f , id C {c'})) (e₀ c') ≡ _∘_ X (F₁ F (id C {c} , f)) (e₀ c)}
+         → {coher₁ : {c c' : Obj C} (f : Hom C c c') → _∘_ X (F₁ F (f , id C {c'})) (e₁ c') ≡ _∘_ X (F₁ F (id C {c} , f)) (e₁ c)}
+         → e₀ ≡ e₁
+         → wedge {C = C} {X} {w} {F} e₀ coher₀ ≡ wedge {C = C} {X} {w} {F} e₁ coher₁
+wedge-eq {C = C} {X} {w} {F} {e} {.e} {coher₀} {coher₁} refl 
+  = cong (wedge {C = C} {X} {w} {F} e) 
+  $ implicit-fun-ext $ λ c → implicit-fun-ext $ λ c' → fun-ext 
+  $ λ f → proof-irrelevance (coher₀ f) (coher₁ f)
 
 --------------------------------------------------------------------------------
 -- Definition of cowedges
