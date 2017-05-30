@@ -41,8 +41,8 @@ module BiFunctor {ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓE₀ ℓE₁ : Level}
     _∘D_ = _∘_ D
     _∘E_ = _∘_ E
   
-  [_,-]_ : Obj C → Functor (C ×C D) E → Functor D E
-  [_,-]_ x (functor F₀ F₁ functor-id compose) = functor ObjF HomF functor-id composeF
+  constBiFunctor₁ : Obj C → Functor (C ×C D) E → Functor D E
+  constBiFunctor₁ x (functor F₀ F₁ functor-id compose) = functor ObjF HomF functor-id composeF
     where
       ObjF : Obj D → Obj E
       ObjF d = F₀ (x , d)
@@ -59,8 +59,8 @@ module BiFunctor {ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓE₀ ℓE₁ : Level}
           ≡⟨ compose ⟩
         F₁ (id C {x} , g) ∘E F₁ (id C {x} , f) ∎
   
-  [-,_]_ : Obj D → Functor (C ×C D) E → Functor C E
-  [-,_]_ x (functor F₀ F₁ functor-id compose) = functor ObjF HomF functor-id composeF
+  constBiFunctor₂ : Obj D → Functor (C ×C D) E → Functor C E
+  constBiFunctor₂ x (functor F₀ F₁ functor-id compose) = functor ObjF HomF functor-id composeF
     where
       ObjF : Obj C → Obj E
       ObjF c = F₀ (c , x)
@@ -77,10 +77,23 @@ module BiFunctor {ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓE₀ ℓE₁ : Level}
           ≡⟨ compose ⟩
         F₁ (g , id D {x}) ∘E F₁ (f , id D {x}) ∎
   
-  [_,_]_ : Obj C → Obj D → Functor (C ×C D) E → Functor ⊤-Cat E
-  [ c , d ] (functor F₀ F₁ functor-id compose)
+  constBiFunctor : Obj C → Obj D → Functor (C ×C D) E → Functor ⊤-Cat E
+  constBiFunctor c d (functor F₀ F₁ functor-id compose)
     = functor (λ _ → F₀ (c , d)) (λ _ → F₁ (id C , id D)) functor-id
     $ λ {x} {y} {z} {f} {g} → trans (cong₂ (λ X Y → F₁ (X , Y)) (sym $ left-id C) (sym $ left-id D)) compose
+  
+  [_,-]_ = constBiFunctor₁
+  [-,_]_ = constBiFunctor₂
+  [_,_]_ = constBiFunctor
+  
+  functorToBiFunctor₁ : Functor C E → Functor (C ×C D) E
+  functorToBiFunctor₁ (functor F₀ F₁ fun-id compose) = functor (λ x → F₀ (proj₁ x)) (λ f → F₁ (proj₁ f)) fun-id compose
+  
+  functorToBiFunctor₂ : Functor D E → Functor (C ×C D) E
+  functorToBiFunctor₂ (functor F₀ F₁ fun-id compose) = functor (λ x → F₀ (proj₂ x)) (λ f → F₁ (proj₂ f)) fun-id compose
+  
+  Bi[_]₁ = functorToBiFunctor₁
+  Bi[_]₂ = functorToBiFunctor₂
   
 -------------------------------------------------------------------------------
 -- Application of objects to trifunctors
@@ -90,25 +103,63 @@ module TriFunctor {ℓA₀ ℓA₁ ℓB₀ ℓB₁ ℓC₀ ℓC₁ ℓD₀ ℓD�
                   {B : Category {ℓB₀} {ℓB₁}}
                   {C : Category {ℓC₀} {ℓC₁}} 
                   {D : Category {ℓD₀} {ℓD₁}} where
+
+  open import Data.Product renaming ( _,_ to _,'_ ; proj₁ to pproj₁ ; proj₂ to pproj₂ )
   open import Theory.Triple
   open Category
+  open Triple
   private
     _∘A_ = _∘_ A
     _∘B_ = _∘_ B
     _∘C_ = _∘_ C
     _∘D_ = _∘_ D
 
-  [-,_,_]_ : Obj B → Obj C → Functor (A ×C B ×C C) D → Functor A D
-  [-,_,_]_ b c (functor F₀ F₁ functor-id compose)
+  constTriFunctor₂₃ : Obj B → Obj C → Functor (A ×C B ×C C) D → Functor A D
+  constTriFunctor₂₃ b c (functor F₀ F₁ functor-id compose)
     = functor (λ a → F₀ (a , b , c)) (λ f → F₁ (f , id B , id C)) functor-id
     $ λ {x} {y} {z} {f} {g} → trans (cong₂ (λ X Y → F₁ ((g ∘A f) , X , Y)) (sym $ left-id B) (sym $ left-id C)) compose
 
-  [_,-,_]_ : Obj A → Obj C → Functor (A ×C B ×C C) D → Functor B D
-  [_,-,_]_ a c (functor F₀ F₁ functor-id compose)
+  constTriFunctor₁₃ : Obj A → Obj C → Functor (A ×C B ×C C) D → Functor B D
+  constTriFunctor₁₃ a c (functor F₀ F₁ functor-id compose)
     = functor (λ b → F₀ (a , b , c)) (λ f → F₁ (id A , f , id C)) functor-id
     $ λ {x} {y} {z} {f} {g} → trans (cong₂ (λ X Y → F₁ (X , (g ∘B f) , Y)) (sym $ left-id A) (sym $ left-id C)) compose
   
-  [_,_,-]_ : Obj A → Obj B → Functor (A ×C B ×C C) D → Functor C D
-  [_,_,-]_ a b (functor F₀ F₁ functor-id compose)
+  constTriFunctor₁₂ : Obj A → Obj B → Functor (A ×C B ×C C) D → Functor C D
+  constTriFunctor₁₂ a b (functor F₀ F₁ functor-id compose)
     = functor (λ c → F₀ (a , b , c)) (λ f → F₁ (id A , id B , f)) functor-id
     $ λ {x} {y} {z} {f} {g} → trans (cong₂ (λ X Y → F₁ (X , Y , (g ∘C f))) (sym $ left-id A) (sym $ left-id B)) compose
+  
+  [-,_,_]_ = constTriFunctor₂₃
+  [_,-,_]_ = constTriFunctor₁₃
+  [_,_,-]_ = constTriFunctor₁₂
+  
+  open Functor
+
+  biFunctorToTriFunctor₁₂ : Functor (A ×C B) D → Functor (A ×C B ×C C) D
+  biFunctorToTriFunctor₁₂ (functor F₀ F₁ fun-id compose)
+    = functor (λ x → F₀ (proj₁ x ,' proj₂ x)) (λ f → F₁ (proj₁ f ,' proj₂ f)) fun-id compose
+    
+  biFunctorToTriFunctor₂₃ : Functor (B ×C C) D → Functor (A ×C B ×C C) D
+  biFunctorToTriFunctor₂₃ (functor F₀ F₁ fun-id compose) 
+    = functor (λ x → F₀ (proj₂ x ,' proj₃ x)) (λ f → F₁ (proj₂ f ,' proj₃ f)) fun-id compose
+
+  biFunctorToTriFunctor₁₃ : Functor (A ×C C) D → Functor (A ×C B ×C C) D
+  biFunctorToTriFunctor₁₃ (functor F₀ F₁ fun-id compose) 
+    = functor (λ x → F₀ (proj₁ x ,' proj₃ x)) (λ f → F₁ (proj₁ f ,' proj₃ f)) fun-id compose
+
+  Tri[_]₁₂ = biFunctorToTriFunctor₁₂
+  Tri[_]₂₃ = biFunctorToTriFunctor₂₃
+  Tri[_]₁₃ = biFunctorToTriFunctor₁₃
+  
+  functorToTriFunctor₁ : Functor A D → Functor (A ×C B ×C C) D
+  functorToTriFunctor₁ (functor F₀ F₁ fun-id compose) = functor (λ x → F₀ (proj₁ x)) (λ f → F₁ (proj₁ f)) fun-id compose
+  
+  functorToTriFunctor₂ : Functor B D → Functor (A ×C B ×C C) D
+  functorToTriFunctor₂ (functor F₀ F₁ fun-id compose) = functor (λ x → F₀ (proj₂ x)) (λ f → F₁ (proj₂ f)) fun-id compose
+  
+  functorToTriFunctor₃ : Functor C D → Functor (A ×C B ×C C) D
+  functorToTriFunctor₃ (functor F₀ F₁ fun-id compose) = functor (λ x → F₀ (proj₃ x)) (λ f → F₁ (proj₃ f)) fun-id compose
+
+  Tri[_]₁ = functorToTriFunctor₁
+  Tri[_]₂ = functorToTriFunctor₂
+  Tri[_]₃ = functorToTriFunctor₃
