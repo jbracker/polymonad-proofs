@@ -12,11 +12,11 @@ open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning 
 
 -- Local
-open import Theory.Category
-open import Theory.Functor
+open import Theory.Category.Definition
+open import Theory.Functor.Definition
 open import Theory.Functor.Composition
 open import Theory.Natural.Transformation 
-open import Theory.Monad
+open import Theory.Monad.Definition
 
 open Category using ( Obj ; Hom )
 

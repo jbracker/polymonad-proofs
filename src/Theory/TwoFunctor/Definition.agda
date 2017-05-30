@@ -1,5 +1,5 @@
  
-module Theory.TwoFunctor where
+module Theory.TwoFunctor.Definition where
 
 -- Stdlib
 open import Level renaming ( suc to lsuc ; zero to lzero )
@@ -16,11 +16,11 @@ open ≡-Reasoning
 open import Utilities
 open import Extensionality
 open import Congruence
-open import Theory.Category
-open import Theory.Functor
+open import Theory.Category.Definition
+open import Theory.Functor.Definition
 open import Theory.Functor.Examples
 open import Theory.Natural.Transformation
-open import Theory.TwoCategory
+open import Theory.TwoCategory.Definition
 open import Theory.TwoCategory.Examples.CodiscreteHomCat
 
 -------------------------------------------------------------------------------

@@ -18,17 +18,17 @@ open import Haskell.Parameterized.Graded.Monad hiding ( graded-monad )
 
 open import Theory.Triple
 open import Theory.Monoid
-open import Theory.Category hiding ( category )
+open import Theory.Category.Definition hiding ( category )
 open import Theory.Category.Examples
-open import Theory.Functor hiding ( functor )
+open import Theory.Functor.Definition hiding ( functor )
 open import Theory.Functor.Composition
 open import Theory.Functor.Properties.IsomorphicHaskellFunctor
 open import Theory.Natural.Transformation
-open import Theory.TwoCategory
+open import Theory.TwoCategory.Definition
 open import Theory.TwoCategory.Examples
 open import Theory.TwoCategory.ExampleProperties
 open import Theory.TwoCategory.Examples.DiscreteHomCat
-open import Theory.TwoFunctor
+open import Theory.TwoFunctor.Definition
 open import Theory.TwoFunctor.ConstZeroCell
  
 module Theory.TwoFunctor.Properties.FromGradedMonad where

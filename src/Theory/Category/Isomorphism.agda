@@ -5,7 +5,7 @@ open import Relation.Binary.PropositionalEquality
 
 open import Substitution
 open import Congruence
-open import Theory.Category
+open import Theory.Category.Definition
 
 module Theory.Category.Isomorphism where
 

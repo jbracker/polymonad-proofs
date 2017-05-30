@@ -16,7 +16,7 @@ open import Equality
 open import ProofIrrelevance
 open import Haskell hiding ( Type )
 
-open import Theory.Category
+open import Theory.Category.Definition
 open import Theory.Category.Dependent
 open import Theory.Category.Concrete
 

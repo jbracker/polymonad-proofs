@@ -7,10 +7,10 @@ open import Relation.Binary.PropositionalEquality
 open import Relation.Binary.HeterogeneousEquality using ( _≅_ ; ≡-to-≅ ; ≅-to-≡ )
 
 open import Equality
-open import Theory.Category
+open import Theory.Category.Definition
 open import Theory.Category.Examples
 open import Theory.Category.Concrete
-open import Theory.Functor
+open import Theory.Functor.Definition
 
 module Theory.Category.Dependent where
 

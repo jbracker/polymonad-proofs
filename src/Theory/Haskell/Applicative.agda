@@ -8,13 +8,13 @@ open import Data.Product renaming ( _,_ to _,'_ )
 open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning
 
-open import Theory.Category
+open import Theory.Category.Definition
 open import Theory.Category.Examples
 open import Theory.Category.Closed
 open import Theory.Category.Closed.Examples
 open import Theory.Category.Monoidal
 open import Theory.Category.Monoidal.Examples
-open import Theory.Functor
+open import Theory.Functor.Definition
 open import Theory.Functor.Closed
 open import Theory.Functor.Monoidal
 open import Theory.Natural.Transformation

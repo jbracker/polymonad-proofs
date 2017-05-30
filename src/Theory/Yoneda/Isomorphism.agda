@@ -9,11 +9,11 @@ open ≡-Reasoning
 
 open import Extensionality
 
-open import Theory.Category
+open import Theory.Category.Definition
 open import Theory.Category.Isomorphism
 open import Theory.Category.Examples renaming ( setCategory to SetCat' ; functorCategory to FunctorCat )
 
-open import Theory.Functor
+open import Theory.Functor.Definition
 
 open import Theory.Natural.Transformation
 open import Theory.Natural.Isomorphism

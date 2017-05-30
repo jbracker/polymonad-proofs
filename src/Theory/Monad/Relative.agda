@@ -12,8 +12,8 @@ open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning 
 
 -- Local
-open import Theory.Category
-open import Theory.Functor
+open import Theory.Category.Definition
+open import Theory.Functor.Definition
 open import Theory.Natural.Transformation
 
 open Category hiding ( right-id ; left-id )

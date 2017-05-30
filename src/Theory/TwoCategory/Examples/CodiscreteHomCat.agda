@@ -8,9 +8,9 @@ open import Data.Unit
 open import Relation.Binary.PropositionalEquality
 
 open import Extensionality
-open import Theory.Category
-open import Theory.Functor
-open import Theory.TwoCategory
+open import Theory.Category.Definition
+open import Theory.Functor.Definition
+open import Theory.TwoCategory.Definition
 
 open import Theory.Category.Examples
 

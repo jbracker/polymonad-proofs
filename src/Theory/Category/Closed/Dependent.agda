@@ -10,12 +10,12 @@ open import Relation.Binary.HeterogeneousEquality
 
 open import Equality
 
-open import Theory.Category
+open import Theory.Category.Definition
 open import Theory.Category.Closed
 open import Theory.Category.Dependent
 open import Theory.Category.Isomorphism
 
-open import Theory.Functor
+open import Theory.Functor.Definition
 
 open import Theory.Natural.Transformation
 open import Theory.Natural.Isomorphism

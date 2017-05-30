@@ -9,8 +9,8 @@ open import Relation.Binary.PropositionalEquality
 
 open import Bijection hiding ( refl ; sym ; trans )
 
-open import Theory.Category hiding ( category )
-open import Theory.Functor
+open import Theory.Category.Definition hiding ( category )
+open import Theory.Functor.Definition
 open import Theory.Functor.Application
 import Theory.Functor.Composition
 open import Theory.Natural.Isomorphism

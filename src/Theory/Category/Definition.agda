@@ -14,7 +14,7 @@ open import Extensionality
 open import Congruence
 open import Theory.Triple
 
-module Theory.Category where
+module Theory.Category.Definition where
 
 -------------------------------------------------------------------------------
 -- Definition of Categories

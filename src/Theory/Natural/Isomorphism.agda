@@ -8,9 +8,9 @@ open import Relation.Binary.HeterogeneousEquality hiding ( cong ; sym )
 
 -- Local
 open import Extensionality
-open import Theory.Category
+open import Theory.Category.Definition
 open import Theory.Category.Isomorphism
-open import Theory.Functor
+open import Theory.Functor.Definition
 open import Theory.Natural.Transformation
 
 module Theory.Natural.Isomorphism where

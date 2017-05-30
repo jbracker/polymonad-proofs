@@ -18,13 +18,13 @@ open import Equality
 open import ProofIrrelevance
 open import Haskell hiding ( Type )
 
-open import Theory.Category
+open import Theory.Category.Definition
 open import Theory.Category.Dependent
 open import Theory.Category.Monoidal
 open import Theory.Category.Monoidal.Dependent
 open import Theory.Category.Examples
 
-open import Theory.Functor
+open import Theory.Functor.Definition
 
 open import Theory.Haskell.Constrained
 open import Theory.Haskell.Constrained.Functor

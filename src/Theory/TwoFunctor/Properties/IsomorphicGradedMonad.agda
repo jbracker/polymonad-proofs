@@ -20,15 +20,15 @@ open import Haskell.Parameterized.Graded.Monad
 open import Haskell.Functor renaming ( Functor to HaskellFunctor ; functor-eq to haskell-functor-eq )
 
 open import Theory.Monoid
-open import Theory.Category
+open import Theory.Category.Definition
 open import Theory.Category.Examples
-open import Theory.Functor
+open import Theory.Functor.Definition
 open import Theory.Functor.Properties.IsomorphicHaskellFunctor
 open import Theory.Natural.Transformation
-open import Theory.TwoCategory
+open import Theory.TwoCategory.Definition
 open import Theory.TwoCategory.Examples
 open import Theory.TwoCategory.Examples.DiscreteHomCat
-open import Theory.TwoFunctor
+open import Theory.TwoFunctor.Definition
 open import Theory.TwoFunctor.ConstZeroCell
 open import Theory.TwoFunctor.Properties.FromGradedMonad
 open import Theory.TwoFunctor.Properties.ToGradedMonad

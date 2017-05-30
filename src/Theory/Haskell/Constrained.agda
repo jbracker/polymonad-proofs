@@ -11,7 +11,7 @@ open import Utilities
 open import ProofIrrelevance
 open import Haskell
 
-open import Theory.Category
+open import Theory.Category.Definition
 open import Theory.Category.Examples
 open import Theory.Category.Concrete
 open import Theory.Category.Dependent
@@ -22,7 +22,7 @@ open import Theory.Category.Closed.Examples
 open import Theory.Category.Monoidal.Dependent
 open import Theory.Category.Monoidal.Examples
 
-open import Theory.Functor
+open import Theory.Functor.Definition
  
 module Theory.Haskell.Constrained {ℓ : Level} where
 

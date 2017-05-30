@@ -12,13 +12,13 @@ open ≡-Reasoning
 open import Equality
 open import Extensionality
 open import Bijection hiding ( refl ; sym )
-open import Theory.Category
-open import Theory.Functor hiding ( functor )
+open import Theory.Category.Definition
+open import Theory.Functor.Definition hiding ( functor )
 open import Theory.Natural.Transformation
-open import Theory.Monad hiding ( monad )
-open import Theory.TwoCategory
+open import Theory.Monad.Definition hiding ( monad )
+open import Theory.TwoCategory.Definition
 open import Theory.TwoCategory.Examples
-open import Theory.TwoFunctor
+open import Theory.TwoFunctor.Definition
 open import Theory.TwoFunctor.Properties.ToMonad
 open import Theory.TwoFunctor.Properties.FromMonad
  

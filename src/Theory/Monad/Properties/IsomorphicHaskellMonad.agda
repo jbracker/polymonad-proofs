@@ -16,10 +16,10 @@ open import Haskell.Functor using ( functor-eq )
 open import Haskell.Applicative hiding ( applicative )
 open import Haskell.Monad hiding ( monad ) renaming ( Monad to HaskellMonad )
 
-open import Theory.Functor
+open import Theory.Functor.Definition
 open import Theory.Functor.Composition
 open import Theory.Functor.Properties.IsomorphicHaskellFunctor
-open import Theory.Monad hiding ( monad )
+open import Theory.Monad.Definition hiding ( monad )
 open import Theory.Monad.Properties.FromHaskellMonad
 open import Theory.Monad.Properties.ToHaskellMonad
 open import Theory.Natural.Transformation
@@ -70,12 +70,12 @@ Monad↔HaskellMonad = bijection
             ≡⟨ sym (Monad.law-monad-ap haskMonad f a) ⟩
           Applicative._<*>_ (Monad.applicative haskMonad) f a ∎
 
-    open Theory.Monad.Monad
+    open Theory.Monad.Definition.Monad
 
     id₂ : (m : Σ (Functor Hask Hask) Monad)
         → (HaskellFunctor→Functor (Monad.functor (Monad→HaskellMonad (proj₂ m)))) , HaskellMonad→Monad (Monad→HaskellMonad (proj₂ m))
         ≡ m
-    id₂ (F , monad) = Σ-eq refl $ ≡-to-≅ $ Theory.Monad.monad-eq (natural-transformation-eq refl)
+    id₂ (F , monad) = Σ-eq refl $ ≡-to-≅ $ Theory.Monad.Definition.monad-eq (natural-transformation-eq refl)
                     $ natural-transformation-eq $ fun-ext $ λ (A : Type) → fun-ext $ λ x → begin
       Monad.join (Monad→HaskellMonad monad) x
         ≡⟨⟩

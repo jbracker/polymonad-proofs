@@ -18,9 +18,9 @@ open import Haskell.Functor hiding ( functor ) renaming ( functor-eq to hask-fun
 open import Haskell.Parameterized.Indexed.Monad
 
 open import Theory.Triple
-open import Theory.Category
+open import Theory.Category.Definition
 open import Theory.Category.Examples
-open import Theory.Functor hiding ( functor )
+open import Theory.Functor.Definition hiding ( functor )
 open import Theory.Monad.Atkey
 open import Theory.Monad.Atkey.Equality
 open import Theory.Monad.Atkey.Properties.FromIndexedMonad

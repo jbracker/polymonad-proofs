@@ -11,13 +11,13 @@ open ≅-Reasoning hiding ( _≡⟨_⟩_ ; _≡⟨⟩_ ) renaming ( begin_ to hb
 
 open import Extensionality
 
-open import Theory.Category
+open import Theory.Category.Definition
 open import Theory.Category.Examples renaming ( setCategory to SetCat )
-open import Theory.Functor
+open import Theory.Functor.Definition
 open import Theory.Functor.Composition
 open import Theory.Natural.Transformation
 open import Theory.Natural.Transformation.Examples
-open import Theory.TwoCategory
+open import Theory.TwoCategory.Definition
 open import Theory.TwoCategory.Examples
 
 module Theory.TwoCategory.ExampleProperties where

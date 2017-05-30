@@ -12,7 +12,7 @@ open import Extensionality
 open import Congruence
 open import ProofIrrelevance
 
-open import Theory.Category
+open import Theory.Category.Definition
 open import Theory.Category.Concrete
 open import Theory.Category.Dependent
 open import Theory.Haskell.Constrained

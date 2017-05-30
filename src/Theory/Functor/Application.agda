@@ -5,8 +5,8 @@ open import Function using ( _$_ )
 open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning
 
-open import Theory.Category
-open import Theory.Functor
+open import Theory.Category.Definition
+open import Theory.Functor.Definition
 
 module Theory.Functor.Application where
 

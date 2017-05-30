@@ -20,17 +20,17 @@ open import Extensionality
 open import Utilities
 open import Haskell
 open import Theory.Triple
-open import Theory.Category
+open import Theory.Category.Definition
 open import Theory.Category.Examples
-open import Theory.Functor
+open import Theory.Functor.Definition
 open import Theory.Functor.Composition
 open import Theory.Natural.Transformation
 open import Theory.Natural.Transformation.Examples
 open import Theory.Monad.Relative
-open import Theory.TwoCategory
+open import Theory.TwoCategory.Definition
 open import Theory.TwoCategory.Examples
 open import Theory.TwoCategory.Examples.DiscreteHomCat
-open import Theory.TwoFunctor
+open import Theory.TwoFunctor.Definition
 
 
 module Theory.TwoFunctor.Properties.FromRelativeMonad where

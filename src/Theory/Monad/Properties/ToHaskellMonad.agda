@@ -21,11 +21,11 @@ open import Haskell
 open import Haskell.Monad hiding ( monad ) renaming ( Monad to HaskellMonad )
 open import Haskell.Applicative hiding ( applicative ) renaming ( Applicative to HaskellApplicative )
 open import Haskell.Functor renaming ( Functor to HaskellFunctor )
-open import Theory.Category
-open import Theory.Functor
+open import Theory.Category.Definition
+open import Theory.Functor.Definition
 open import Theory.Functor.Composition
 open import Theory.Natural.Transformation renaming ( NaturalTransformation to NatTrans )
-open import Theory.Monad hiding ( monad )
+open import Theory.Monad.Definition hiding ( monad )
 open import Theory.Category.Examples
 open import Theory.Functor.Properties.IsomorphicHaskellFunctor
 

@@ -12,7 +12,7 @@ open import Relation.Binary.PropositionalEquality
 open import Bijection hiding ( refl )
 open import Haskell
 open import Haskell.Functor renaming ( Functor to HaskellFunctor )
-open import Theory.Functor
+open import Theory.Functor.Definition
 open import Theory.Category.Examples 
 
 Functor→HaskellFunctor : (F : Functor (Hask {lzero}) (Hask {lzero}))

@@ -9,9 +9,9 @@ open import Relation.Binary.PropositionalEquality
 open import Utilities renaming ( _∈_ to _∈'_ )
 open import Haskell
 open import ProofIrrelevance
-open import Theory.Category
+open import Theory.Category.Definition
 open import Theory.Category.Subcategory
-open import Theory.Functor
+open import Theory.Functor.Definition
 
 -- Define the subcategory of D in terms of C's embedding into D through a functor.
 -- Every injective functor defines a subcategory of its target category.

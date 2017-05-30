@@ -7,9 +7,9 @@ open ≡-Reasoning
 
 open import Extensionality
 
-open import Theory.Category
+open import Theory.Category.Definition
 open import Theory.Category.Examples
-open import Theory.Functor
+open import Theory.Functor.Definition
 
 module Theory.Yoneda.HomFunctor {ℓC₀ ℓC₁ : Level} {C : Category {ℓC₀} {ℓC₁}} where
 

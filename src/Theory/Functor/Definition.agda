@@ -1,6 +1,4 @@
 
-module Theory.Functor where
-
 -- Stdlib
 open import Level
 open import Function renaming ( _∘_ to _∘F_ ; id to idF )
@@ -12,7 +10,9 @@ open import Relation.Binary.PropositionalEquality
 -- Local
 open import Utilities
 open import Extensionality
-open import Theory.Category
+open import Theory.Category.Definition
+
+module Theory.Functor.Definition where
 
 open Category hiding ( id )
 

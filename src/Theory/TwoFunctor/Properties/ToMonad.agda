@@ -18,14 +18,14 @@ open ≡-Reasoning hiding ( _≅⟨_⟩_ )
 -- Local
 open import Extensionality
 open import Haskell
-open import Theory.Category
-open import Theory.Functor
+open import Theory.Category.Definition
+open import Theory.Functor.Definition
 open import Theory.Functor.Composition
 open import Theory.Natural.Transformation
-open import Theory.Monad
-open import Theory.TwoCategory
+open import Theory.Monad.Definition
+open import Theory.TwoCategory.Definition
 open import Theory.TwoCategory.Examples
-open import Theory.TwoFunctor 
+open import Theory.TwoFunctor.Definition
 
 open StrictTwoCategory
 

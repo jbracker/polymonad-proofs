@@ -17,15 +17,15 @@ open import Equality
 open import Haskell
 open import Haskell.Parameterized.Indexed.Monad
 open import Haskell.Functor renaming ( Functor to HaskellFunctor ; functor-eq to haskell-functor-eq )
-open import Theory.Category
+open import Theory.Category.Definition
 open import Theory.Category.Examples
-open import Theory.Functor
+open import Theory.Functor.Definition
 open import Theory.Functor.Properties.IsomorphicHaskellFunctor
 open import Theory.Natural.Transformation
-open import Theory.TwoCategory
+open import Theory.TwoCategory.Definition
 open import Theory.TwoCategory.Examples
 open import Theory.TwoCategory.Examples.CodiscreteHomCat
-open import Theory.TwoFunctor
+open import Theory.TwoFunctor.Definition
 open import Theory.TwoFunctor.ConstZeroCell
 open import Theory.TwoFunctor.Properties.FromIndexedMonad
 open import Theory.TwoFunctor.Properties.ToIndexedMonad

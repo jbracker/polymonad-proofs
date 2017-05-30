@@ -7,10 +7,10 @@ open import Relation.Binary.HeterogeneousEquality renaming ( refl to hrefl ; pro
 
 open import Congruence
 open import Extensionality
-open import Theory.Category
-open import Theory.Functor
-open import Theory.TwoCategory
-open import Theory.TwoFunctor
+open import Theory.Category.Definition
+open import Theory.Functor.Definition
+open import Theory.TwoCategory.Definition
+open import Theory.TwoFunctor.Definition
 
 
 open Category

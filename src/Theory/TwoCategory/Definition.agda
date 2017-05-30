@@ -1,5 +1,5 @@
 
-module Theory.TwoCategory where
+module Theory.TwoCategory.Definition where
 
 -- Stdlib
 open import Level renaming ( suc to lsuc ; zero to lzero )
@@ -13,8 +13,8 @@ open ≡-Reasoning
 
 -- Local
 open import Utilities
-open import Theory.Category
-open import Theory.Functor
+open import Theory.Category.Definition
+open import Theory.Functor.Definition
 open import Theory.Functor.Examples
 open import Theory.Natural.Transformation
 

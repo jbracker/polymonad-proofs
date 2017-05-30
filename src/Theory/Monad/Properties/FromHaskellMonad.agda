@@ -11,10 +11,10 @@ open import Extensionality
 open import Haskell
 open import Haskell.Monad renaming ( Monad to HaskellMonad )
 open import Haskell.Functor renaming ( Functor to HaskellFunctor )
-open import Theory.Functor
+open import Theory.Functor.Definition
 open import Theory.Functor.Composition
 open import Theory.Natural.Transformation renaming ( NaturalTransformation to NatTrans )
-open import Theory.Monad hiding ( monad )
+open import Theory.Monad.Definition hiding ( monad )
 open import Theory.Functor.Properties.IsomorphicHaskellFunctor
 
 module Theory.Monad.Properties.FromHaskellMonad where

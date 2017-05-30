@@ -6,10 +6,10 @@ open import Relation.Binary.HeterogeneousEquality using ( _≅_ ; refl )
 
 open import Extensionality
 open import Congruence
-open import Theory.Category
+open import Theory.Category.Definition
 open import Theory.Category.Monoidal
 open import Theory.Category.Isomorphism
-open import Theory.Functor
+open import Theory.Functor.Definition
 open import Theory.Functor.Composition
 open import Theory.Natural.Isomorphism
 open import Theory.Natural.Transformation

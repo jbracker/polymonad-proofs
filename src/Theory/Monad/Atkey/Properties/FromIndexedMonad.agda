@@ -22,13 +22,13 @@ open import Haskell
 open import Haskell.Functor renaming ( Functor to HaskFunctor )
 open import Haskell.Parameterized.Indexed.Monad
 open import Theory.Triple
-open import Theory.Category
+open import Theory.Category.Definition
 open import Theory.Category.Examples
-open import Theory.Functor
+open import Theory.Functor.Definition
 open import Theory.Natural.Transformation
-open import Theory.Monad hiding ( monad )
-open import Theory.TwoCategory
-open import Theory.TwoFunctor
+open import Theory.Monad.Definition hiding ( monad )
+open import Theory.TwoCategory.Definition
+open import Theory.TwoFunctor.Definition
 open import Theory.Monad.Atkey
 open import Theory.Category.Examples
 open import Theory.TwoCategory.Examples

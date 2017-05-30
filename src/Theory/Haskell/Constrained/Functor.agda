@@ -10,12 +10,12 @@ open import Relation.Binary.PropositionalEquality
 open import Haskell
 open import Utilities
 open import ProofIrrelevance
-open import Theory.Category
+open import Theory.Category.Definition
 open import Theory.Category.Subcategory
 open import Theory.Category.Subcategory.Examples
 open import Theory.Category.Concrete
 open import Theory.Category.Dependent
-open import Theory.Functor
+open import Theory.Functor.Definition
 open import Theory.Haskell.Constrained
 
 record ConstrainedFunctor {ℓ ℓCt₀ ℓCt₁ : Level} (CC : ConstraintCategory {ℓ} {ℓCt₀} {ℓCt₁}) : Set (lsuc (ℓ ⊔ ℓCt₀ ⊔ ℓCt₁)) where

@@ -10,8 +10,8 @@ open import Congruence
 open import Extensionality
 
 open import Theory.Triple
-open import Theory.Category
-open import Theory.Functor
+open import Theory.Category.Definition
+open import Theory.Functor.Definition
 open import Theory.Monad.Atkey
 
 module Theory.Monad.Atkey.Equality {ℓC₀ ℓC₁ ℓS₀ ℓS₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {S : Category {ℓS₀} {ℓS₁}} where

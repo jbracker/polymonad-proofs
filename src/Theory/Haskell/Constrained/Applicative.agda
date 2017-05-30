@@ -7,14 +7,14 @@ open import Data.Product hiding ( map )
 
 open import Relation.Binary.PropositionalEquality
 
-open import Theory.Category
+open import Theory.Category.Definition
 open import Theory.Category.Monoidal
 open import Theory.Category.Monoidal.Examples
 open import Theory.Category.Monoidal.Dependent
 open import Theory.Category.Dependent
 open import Theory.Category.Examples
 
-open import Theory.Functor
+open import Theory.Functor.Definition
 open import Theory.Functor.Monoidal
 
 open import Theory.Natural.Transformation

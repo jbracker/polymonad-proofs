@@ -6,8 +6,8 @@ open import Data.Product
 open import Relation.Binary.PropositionalEquality
 
 open import Utilities
-open import Theory.Category
-open import Theory.Functor
+open import Theory.Category.Definition
+open import Theory.Functor.Definition
 open import Theory.Wedge.Definition
 
 module Theory.End.Definition where

@@ -10,7 +10,7 @@ open import Relation.Binary.PropositionalEquality
 open import ProofIrrelevance
 open import Congruence
 open import Extensionality
-open import Theory.Category hiding ( category )
+open import Theory.Category.Definition hiding ( category )
 
 module Theory.Category.Subcategory where
 

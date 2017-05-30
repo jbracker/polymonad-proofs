@@ -8,9 +8,9 @@ open ≡-Reasoning
 open import Extensionality
 open import Bijection using ( Bijection ; _↔_ )
 
-open import Theory.Category
+open import Theory.Category.Definition
 open import Theory.Category.Examples
-open import Theory.Functor
+open import Theory.Functor.Definition
 open import Theory.Natural.Transformation
 
 module Theory.Yoneda.Bijection {ℓ₀ ℓ₁ : Level} {C : Category {ℓ₀} {ℓ₁}} where

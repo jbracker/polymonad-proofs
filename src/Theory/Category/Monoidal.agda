@@ -8,9 +8,9 @@ open ≡-Reasoning
 open import Relation.Binary.HeterogeneousEquality using ( _≅_ )
 
 open import Theory.Triple
-open import Theory.Category hiding ( category )
+open import Theory.Category.Definition hiding ( category )
 open import Theory.Category.Isomorphism
-open import Theory.Functor
+open import Theory.Functor.Definition
 import Theory.Functor.Association
 import Theory.Functor.Application
 open import Theory.Natural.Transformation

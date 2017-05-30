@@ -1,6 +1,4 @@
 
-module Theory.Monad where
-
 -- Stdlib
 open import Level
 open import Data.Product
@@ -13,10 +11,12 @@ open ≡-Reasoning
 -- Local
 open import Congruence
 open import Extensionality
-open import Theory.Category
-open import Theory.Functor
+open import Theory.Category.Definition
+open import Theory.Functor.Definition
 open import Theory.Functor.Composition
 open import Theory.Natural.Transformation
+
+module Theory.Monad.Definition where
 
 -------------------------------------------------------------------------------
 -- Definition of Monads
