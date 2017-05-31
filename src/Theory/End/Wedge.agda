@@ -5,6 +5,7 @@ open import Function hiding ( _∘_ ; id )
 open import Data.Product
 
 open import Relation.Binary.PropositionalEquality
+open ≡-Reasoning
 
 open import Extensionality
 open import Theory.Category.Definition
@@ -13,7 +14,7 @@ open import Theory.Functor.Constant
 open import Theory.Functor.Application
 open import Theory.Natural.ExtranaturalTransformation
 
-module Theory.Wedge.Definition where
+module Theory.End.Wedge where
 
 open Category
 open Functor renaming (id to fun-id ; compose to fun-compose)
@@ -86,3 +87,30 @@ record CoWedge {ℓC₀ ℓC₁ ℓX₀ ℓX₁ : Level} {C : Category {ℓC₀}
     { co-e = λ c → f ∘X co-e c  
     ; co-coher = λ g → trans (sym (assoc X)) (trans (cong (λ Y → f ∘X Y) (co-coher g)) (assoc X)) 
     } 
+
+  open Theory.Functor.Application.TriFunctor
+  
+  extranatural : {ℓA₀ ℓA₁ ℓB₀ ℓB₁ : Level} 
+               → (A : Category {ℓA₀} {ℓA₁}) (B : Category {ℓB₀} {ℓB₁})
+               → ExtranaturalTransformation (Tri[ F ]₂₃) (constFunctor (A ×C B op ×C B) X w)
+  extranatural A B = record
+    { η = λ a b c → co-e b 
+    ; η-natural = λ b c {a} {a'} {f} → trans (right-id X) (trans (sym (left-id X)) (cong (λ Y → co-e b ∘X Y) (sym (fun-id F))))
+    ; extranatural = λ a b f → refl 
+    ; extranatural-op = λ a c f → co-coher f
+    }
+
+cowedge-eq : {ℓC₀ ℓC₁ ℓX₀ ℓX₁ : Level} 
+           → {C : Category {ℓC₀} {ℓC₁}} {X : Category {ℓX₀} {ℓX₁}} 
+           → {F : Functor (C op ×C C) X} 
+           → {w : Obj X}
+           → {co-e₀ : (c : Obj C) → Hom X (F₀ F (c , c)) w}
+           → {co-e₁ : (c : Obj C) → Hom X (F₀ F (c , c)) w}
+           → {coher₀ : {c c' : Obj C} (f : Hom C c c') → _∘_ X (co-e₀ c') (F₁ F (id C {c'} , f)) ≡ _∘_ X (co-e₀ c) (F₁ F (f , id C {c}))}
+           → {coher₁ : {c c' : Obj C} (f : Hom C c c') → _∘_ X (co-e₁ c') (F₁ F (id C {c'} , f)) ≡ _∘_ X (co-e₁ c) (F₁ F (f , id C {c}))}
+           → co-e₀ ≡ co-e₁
+           → cowedge {C = C} {X} {F} {w} co-e₀ coher₀ ≡ cowedge {C = C} {X} {F} {w} co-e₁ coher₁
+cowedge-eq {C = C} {X} {F} {w} {co-e} {.co-e} {coher₀} {coher₁} refl 
+  = cong (cowedge {C = C} {X} {F} {w} co-e) 
+  $ implicit-fun-ext $ λ c → implicit-fun-ext $ λ c' → fun-ext 
+  $ λ f → proof-irrelevance (coher₀ f) (coher₁ f)
