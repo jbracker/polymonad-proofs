@@ -6,7 +6,7 @@ open import Level
 open import Function renaming ( id to idF ; _∘_ to _∘F_ )
 
 open import Data.Product
-open import Data.Sum
+open import Data.Sum hiding ( [_,_] )
 open import Data.Empty
 open import Data.Unit hiding ( _≤_ )
 open import Data.Bool
@@ -155,6 +155,8 @@ functorCategory C D = record
   ; left-id = natural-transformation-eq $ fun-ext $ λ _ → Category.left-id D
   ; right-id = natural-transformation-eq $ fun-ext $ λ _ → Category.right-id D
   }
+
+[_,_] = functorCategory
 
 -- Category formed by a preorder
 preorderCategory : {ℓC ℓEq ℓOrd : Level} 
