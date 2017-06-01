@@ -1,6 +1,6 @@
 
 open import Level
-open import Function hiding ( _∘_ ; id )
+open import Function renaming ( _∘_ to _∘F_ ) hiding ( id )
 
 open import Data.Product
 
