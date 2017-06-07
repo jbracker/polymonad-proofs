@@ -178,7 +178,7 @@ yoneda-isomorphism = naturalIsomorphism (naturalTransformation η (λ {a} {b} {f
           NaturalTransformation.η (η (G , b) ((lift ∘F [ G ]₁ f ∘F NaturalTransformation.η Φ a) Fa)) x g ∎
     
     iso : (x : Obj (FunctorCat C SetCat ×C C)) → Isomorphism SetCat' (η x)
-    iso {F , a} = isomorphism (lift ∘F inv) iso-left-id (fun-ext iso-right-id)
+    iso (F , a) = isomorphism (lift ∘F inv) iso-left-id (fun-ext iso-right-id)
       where
         inv : NaturalTransformation Hom[ a ,-] F -> [ F ]₀ a
         inv (naturalTransformation η natural) = η a (id C)
