@@ -20,7 +20,7 @@ open ≡-Reasoning
 open import Utilities
 open import Haskell
 open import Haskell.Constrained.ConstrainedFunctor
-open import Theory.Category
+open import Theory.Category.Definition
 
 
 open Category renaming ( left-id to catIdL ; right-id to catIdR ; assoc to catAssoc ; _∘_ to comp )

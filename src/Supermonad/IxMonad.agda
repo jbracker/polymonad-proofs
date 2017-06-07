@@ -19,10 +19,10 @@ open ≡-Reasoning
 open import Utilities
 open import Haskell
 open import Identity
-open import Haskell.Functor
+open import Haskell.Functor hiding ( functor )
 open import Haskell.Constrained.ConstrainedFunctor
-open import Haskell.Parameterized.IndexedMonad
-open import Haskell.Parameterized.IndexedMonad.Functor
+open import Haskell.Parameterized.Indexed.Monad
+open import Haskell.Parameterized.Indexed.Functor
 open import Haskell.Parameterized.PhantomIndices
 open import Supermonad.Definition
 

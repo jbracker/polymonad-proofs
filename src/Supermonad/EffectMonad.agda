@@ -19,12 +19,12 @@ open ≡-Reasoning
 open import Utilities
 open import Haskell
 open import Identity
-open import Haskell.Functor
+open import Haskell.Functor hiding ( functor )
 open import Polymonad.Definition
 open import Haskell.Constrained.ConstrainedFunctor
 open import Haskell.Parameterized.PhantomIndices
-open import Haskell.Parameterized.EffectMonad
-open import Haskell.Parameterized.EffectMonad.Functor
+open import Haskell.Parameterized.Graded.Monad renaming ( GradedMonad to EffectMonad ; GradedMonadTyCons to EffMonadTyCons ; GradedMonadTC to EffMonadTC )
+open import Haskell.Parameterized.Graded.Functor
 open import Supermonad.Definition
 open import Theory.Monoid
 
@@ -38,7 +38,7 @@ EffectMonad→Supermonad : ∀ {n}
                        → (Effect : Set n)
                        → (EffectMonoid : Monoid Effect)
                        → (M : Effect → TyCon)
-                       → EffectMonad Effect {{EffectMonoid}} M → Supermonad (EffMonadTyCons Effect)
+                       → EffectMonad EffectMonoid M → Supermonad (EffMonadTyCons Effect)
 EffectMonad→Supermonad {n = n} Effect monoid M monad = record
   { ⟨_⟩ = ⟨_⟩
   ; Binds = Binds
@@ -134,7 +134,7 @@ EffectMonad→Supermonad {n = n} Effect monoid M monad = record
       subst (λ X → [ ⟨ EffMonadTC ε ⟩ , ⟨ EffMonadTC x ⟩ ]▷ ⟨ EffMonadTC X ⟩ ) (sym b) (_>>=_) (return' a) k
         ≡⟨ bindSubstShift b (return' a) k ⟩
       subst (λ X → ⟨ EffMonadTC X ⟩ β) (sym b) (return' a >>= k)
-        ≡⟨ cong (λ X → subst (λ X → ⟨ EffMonadTC X ⟩ β) (sym b) X) (EffectMonad.law-left-id monad a k) ⟩
+        ≡⟨ cong (λ X → subst (λ X → ⟨ EffMonadTC X ⟩ β) (sym b) X) (EffectMonad.law-left-id' monad a k) ⟩
       subst (λ X → ⟨ EffMonadTC X ⟩ β) (sym b) (subst₂ M (sym (Monoid.left-id monoid {m = x})) refl (k a))
         ≡⟨ cong (λ X → subst (λ X → ⟨ EffMonadTC X ⟩ β) (sym b) X) (subst₂ToSubst (sym (Monoid.left-id monoid {m = x})) (k a)) ⟩
       subst (λ X → ⟨ EffMonadTC X ⟩ β) (sym b) (subst (λ X → ⟨ EffMonadTC X ⟩ β) (sym (Monoid.left-id monoid {m = x})) (k a))
@@ -155,7 +155,7 @@ EffectMonad→Supermonad {n = n} Effect monoid M monad = record
       subst (λ X → [ ⟨ EffMonadTC e ⟩ , ⟨ EffMonadTC ε ⟩ ]▷ ⟨ EffMonadTC X ⟩ ) (sym b) (_>>=_) m return' 
         ≡⟨ bindSubstShift b m return' ⟩
       subst (λ X → ⟨ EffMonadTC X ⟩ α) (sym b) (m >>= return') 
-        ≡⟨ cong (λ X → subst (λ X → ⟨ EffMonadTC X ⟩ α) (sym b) X) (EffectMonad.law-right-id monad m) ⟩
+        ≡⟨ cong (λ X → subst (λ X → ⟨ EffMonadTC X ⟩ α) (sym b) X) (EffectMonad.law-right-id' monad m) ⟩
       subst (λ X → ⟨ EffMonadTC X ⟩ α) (sym b) (subst₂ M (sym (Monoid.right-id monoid {m = e})) refl m) 
         ≡⟨ cong (λ Y → subst (λ X → ⟨ EffMonadTC X ⟩ α) (sym b) Y) (subst₂ToSubst (sym (Monoid.right-id monoid {m = e})) m) ⟩
       subst (λ X → ⟨ EffMonadTC X ⟩ α) (sym b) (subst (λ X → ⟨ EffMonadTC X ⟩ α) (sym (Monoid.right-id monoid {m = e})) m) 
@@ -182,7 +182,7 @@ EffectMonad→Supermonad {n = n} Effect monoid M monad = record
              → bind b₁ m (λ x → bind b₂ (f x) g) ≡ bind b₃ (bind b₄ m f) g
     law-assoc {β = β} {γ = γ} (EffMonadTC m) (EffMonadTC .(s ∙ t)) (EffMonadTC .(m ∙ (s ∙ t))) (EffMonadTC s) (EffMonadTC t) refl refl b₃ b₄ ma f g = begin 
       ma >>= (λ x → f x >>= g)
-        ≡⟨ EffectMonad.law-assoc monad ma f g ⟩
+        ≡⟨ EffectMonad.law-assoc' monad ma f g ⟩
       subst₂ M (sym $ Monoid.assoc monoid {m = m} {s} {t}) refl ((ma >>= f) >>= g)
         ≡⟨ subst₂ToSubst (sym $ Monoid.assoc monoid {m = m} {s} {t}) ((ma >>= f) >>= g) ⟩
       subst (λ X → ⟨ EffMonadTC X ⟩ γ) (sym $ Monoid.assoc monoid {m = m} {s} {t}) ((ma >>= f) >>= g)
@@ -198,7 +198,7 @@ EffectMonad→Supermonad {n = n} Effect monoid M monad = record
       bind b₃ (bind b₄ ma f) g ∎
     
     functor : (M : TyCons) → Functor ⟨ M ⟩
-    functor (EffMonadTC m) = EffectMonad→Functor M monad m
+    functor (EffMonadTC m) = GradedMonad→Functor M monad m
     
     cfunctor : (M : TyCons) → ConstrainedFunctor ⟨ M ⟩
     cfunctor (EffMonadTC m) = Functor→ConstrainedFunctor (M m) (functor (EffMonadTC m))
@@ -228,7 +228,7 @@ EffectMonad→UnconstrainedSupermonad
   → (Effect : Set n)
   → (EffectMonoid : Monoid Effect)
   → (M : Effect → TyCon)
-  → EffectMonad Effect {{EffectMonoid}} M → UnconstrainedSupermonad (EffMonadTyCons Effect)
+  → EffectMonad EffectMonoid M → UnconstrainedSupermonad (EffMonadTyCons Effect)
 EffectMonad→UnconstrainedSupermonad {n} Effect monoid M monad = record
   { supermonad = supermonad
   ; lawBindUnconstrained = Binds , lawBindUnconstrained
@@ -256,7 +256,7 @@ EffectMonad→UnconstrainedSupermonad {n} Effect monoid M monad = record
     lawReturnUnconstrained α (EffMonadTC m) = refl
     
     lawFunctorUnconstrained : (M : TyCons) → Functor K⟨ supermonad ▷ M ⟩
-    lawFunctorUnconstrained (EffMonadTC e) = EffectMonad→Functor M monad e
+    lawFunctorUnconstrained (EffMonadTC e) = GradedMonad→Functor M monad e
 
     {-
     lawFunctorUnconstrained : (α β : Type) → (M : TyCons)

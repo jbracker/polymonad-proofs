@@ -16,7 +16,7 @@ module Haskell.Parameterized.Indexed.Applicative where
 
 record IxApplicative {ℓ : Level} (Ixs : Set ℓ) (F : Ixs → Ixs → TyCon) : Set (suc zero ⊔ ℓ) where
   constructor indexed-applicative
-  infixl 4 _*>_ _<*_ _<*>_ _<$>_
+  infixl 5 _*>_ _<*_ _<*>_ _<$>_
   field
     pure : {α : Type} {i : Ixs} → α → F i i α
     _<*>_ : {α β : Type} {i j k : Ixs} → F i j (α → β) → (F j k α → F i k β)

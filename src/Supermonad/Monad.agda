@@ -19,9 +19,9 @@ open ≡-Reasoning
 open import Utilities
 open import Haskell
 open import Identity
-open import Haskell.Functor
+open import Haskell.Functor hiding ( functor )
 open import Haskell.Applicative
-open import Haskell.Monad
+open import Haskell.Monad hiding ( monad )
 open import Haskell.Monad.Polymonad
 open import Haskell.Constrained.ConstrainedFunctor
 open import Haskell.Parameterized.PhantomIndices

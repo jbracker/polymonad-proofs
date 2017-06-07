@@ -20,7 +20,7 @@ open ≡-Reasoning
 open import Utilities
 open import Haskell
 open import Haskell.Constrained.ConstrainedFunctor
-open import Theory.Category
+open import Theory.Category.Definition
 open import Supermonad.Definition
 open import Supermonad.DefinitionWithCategory
 

@@ -21,14 +21,14 @@ open import Utilities
 open import Haskell
 open import Haskell.Constrained.ConstrainedFunctor
 open import Supermonad.DefinitionWithCategory
-open import Theory.Category
-open import Theory.Examples.Category
-open import Theory.Functor
-open import Theory.NaturalTransformation
-open import Theory.Monad
-open import Theory.TwoCategory
-open import Theory.Examples.TwoCategory
-open import Theory.TwoFunctor 
+open import Theory.Category.Definition
+open import Theory.Category.Examples
+open import Theory.Functor.Definition
+open import Theory.Natural.Transformation
+open import Theory.Monad.Definition
+open import Theory.TwoCategory.Definition
+open import Theory.TwoCategory.Examples
+open import Theory.TwoFunctor.Definition
 
 open StrictTwoCategory
 

@@ -20,7 +20,7 @@ open import Utilities
 open import Haskell
 open import Identity
 open import Polymonad.Definition
-open import Haskell.Functor
+open import Haskell.Functor hiding ( functor )
 open import Haskell.Constrained.ConstrainedFunctor
 
 open import Haskell.Parameterized.PhantomIndices

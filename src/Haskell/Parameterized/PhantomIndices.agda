@@ -23,7 +23,7 @@ ParamTyCon {ℓT = ℓT} (T ∷ ts) = T → ParamTyCon {ℓT = ℓT} ts
 
 ∀Indices : ∀ {ℓ ℓT} {n} → (ts : Vec (Set ℓ) n) → (M : ParamTyCon {ℓT = ℓT} ts) → ((Set ℓT → Set ℓT) → Set (lsuc (ℓT ⊔ ℓ))) → Set (lsuc (ℓT ⊔ ℓ))
 ∀Indices [] M pred = pred (lower M)
-∀Indices (T ∷ ts) M pred = ∀ {i : T} → ∀Indices ts (M i) pred
+∀Indices (T ∷ ts) M pred = {i : T} → ∀Indices ts (M i) pred
 
 ∀IndicesImpl : ∀ {n} {Accum : TyCon → Set₁} {Result : TyCon → Set₁} 
              → (ts : Vec Set n) 
@@ -32,7 +32,7 @@ ParamTyCon {ℓT = ℓT} (T ∷ ts) = T → ParamTyCon {ℓT = ℓT} ts
              → ((X : TyCon) → Accum X → Result X) 
              → ∀Indices ts M Result
 ∀IndicesImpl [] M assum impl = impl (lower M) assum
-∀IndicesImpl (I ∷ ts) M accum impl = λ {i : I} → ∀IndicesImpl ts (M i) (accum {i}) impl
+∀IndicesImpl (I ∷ ts) M accum impl {i} = ∀IndicesImpl ts (M i) (accum {i}) impl
 
 ∃IndicesImpl : ∀ {n} {Accum : TyCon → Set₁} {Result : TyCon → Set₁} 
              → (ts : Vec Set n) 
