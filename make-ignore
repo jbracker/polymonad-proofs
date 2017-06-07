@@ -21,3 +21,5 @@ src/Theory/TwoFunctor/Properties/ToAtkeyParameterizedMonad.agda
 
 src/Theory/End/DayConvolution.agda
 src/Theory/End/Examples.agda
+
+src/Theory/Natural/Isomorphism/Examples/FunctorCompositionAssociator.agda
