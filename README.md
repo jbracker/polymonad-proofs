@@ -13,8 +13,8 @@ formalizations assume we are working in a "Haskell World".
 Calling `make` should type check all files that don't contain 
 unsolved holes.
 
-This was tested with Agda in version `2.4.2.5` and the Adga standard library 
-in version `0.11`. If you have problems type checking the code, please contact
+This was tested with Agda in version `2.5.2` and the Adga standard library 
+in version `0.13`. If you have problems type checking the code, please contact
 me.
 
 Type checking the proof in `Polymonad.Union` is very memory hungry. Make sure you have 
