@@ -28,6 +28,7 @@ open import Theory.TwoCategory.Examples
 open import Theory.TwoFunctor.Definition
 
 open StrictTwoCategory
+open NaturalTransformation renaming ( η to nat-η ) 
 
 LaxTwoFunctor→Monad : ∀ {ℓC₀ ℓC₁} 
                     → (F : LaxTwoFunctor ⊤-TwoCat (Cat {ℓC₀} {ℓC₁})) → Monad ([ LaxTwoFunctor.P₁ F ]₀ tt)
@@ -104,7 +105,7 @@ LaxTwoFunctor→Monad {ℓC₀} {ℓC₁} F = record
     laxFunId₁ x = cong (λ X → X x) $ cong natη $ LaxTwoFunctor.laxFunId₁ F {tt} {tt} {tt}
     
     ηCoherL : {x : Obj C} 
-            → μ x ∘C [ M ]₁ (η x) ≡ η⟨ Id⟨ M ⟩ ⟩ x
+            → μ x ∘C [ M ]₁ (η x) ≡ nat-η Id⟨ M ⟩ x
     ηCoherL {x} = begin
       μ x ∘C [ M ]₁ (η x) 
         ≡⟨ sym $ right-id C ⟩ 
@@ -118,7 +119,7 @@ LaxTwoFunctor→Monad {ℓC₀} {ℓC₁} F = record
         ≡⟨ laxFunId₁ x ⟩
       natη (λ' FunTwoCat M) x
         ≡⟨ refl ⟩
-      η⟨ Id⟨ M ⟩ ⟩ x ∎
+      nat-η Id⟨ M ⟩ x ∎
 
     laxFunId₂ : (x : Obj C) 
               → natη ([ LaxTwoFunctor.P₁ F ]₁ tt) x ∘C ( μ x ∘C ( η ([ M ]₀ x) ∘C id C ) )
@@ -126,7 +127,7 @@ LaxTwoFunctor→Monad {ℓC₀} {ℓC₁} F = record
     laxFunId₂ x = cong (λ X → X x) $ cong natη $ LaxTwoFunctor.laxFunId₂ F {tt} {tt} {tt}
 
     ηCoherR : {x : Obj C} 
-            → μ x ∘C η ([ M ]₀ x) ≡ η⟨ Id⟨ M ⟩ ⟩ x
+            → μ x ∘C η ([ M ]₀ x) ≡ nat-η Id⟨ M ⟩ x
     ηCoherR {x} = begin
       μ x ∘C η ([ M ]₀ x) 
         ≡⟨ cong (λ X → μ x ∘C X) (sym $ left-id C) ⟩
@@ -140,5 +141,5 @@ LaxTwoFunctor→Monad {ℓC₀} {ℓC₁} F = record
         ≡⟨ laxFunId₂ x ⟩
       natη (ρ FunTwoCat M) x
         ≡⟨ sym $ ≅-to-≡ $ subst₂-insert (sym (hIdR₁ FunTwoCat)) refl Id⟨ M ⟩ x ⟩
-      η⟨ Id⟨ M ⟩ ⟩ x ∎
+      nat-η Id⟨ M ⟩ x ∎
 

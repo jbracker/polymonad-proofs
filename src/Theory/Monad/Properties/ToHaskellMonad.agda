@@ -196,5 +196,5 @@ Monad→HaskellMonad {M} monad = record
         law-applicative-fmap {α} {β} f x = sym $ law-left-id f (λ g → fmap g x)
 
     law-monad-ap : {α β : Type} (mf : [ M ]₀ (α → β)) (ma : [ M ]₀ α)
-                 → Applicative._<*>_ applicative mf ma ≡ mf >>= (λ f → Functor.fmap (Applicative.functor applicative) f ma)
+                 → (HaskellApplicative._<*>_ applicative mf ma) ≡ mf >>= (λ f → HaskellFunctor.fmap (HaskellApplicative.functor applicative) f ma)
     law-monad-ap mf ma = refl

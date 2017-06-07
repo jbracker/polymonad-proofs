@@ -272,8 +272,8 @@ record ClosedCategory {ℓC₀ ℓC₁ : Level} (C : Category {ℓC₀} {ℓC₁
       ≡⟨ cong (λ X → L a b' c' ∘C X) InternalHom-compose-eq ⟩
     L a b' c' ∘C [ f , g ]₁ ∎
   
-  extranatural-transformation : ExtranaturalTransformation LeftExtraFunctor RightExtraFunctor
-  extranatural-transformation = record
+  extranatural-trans : ExtranaturalTransformation LeftExtraFunctor RightExtraFunctor
+  extranatural-trans = record
     { η = η
     ; η-natural = λ _ a {x} {y} {f} → L-natural-bc a {proj₁ x} {proj₁ y} {proj₂ x} {proj₂ y} {proj₁ f} {proj₂ f}
     ; extranatural = extranatural

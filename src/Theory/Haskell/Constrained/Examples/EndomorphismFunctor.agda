@@ -42,7 +42,7 @@ ConstraintCategoryEndomorphisms
     ObjCts _ = Lift ⊤
     
     HomCts : {α β : Type} → ObjCts α → ObjCts β → (α → β) → Set (lsuc ℓ)
-    HomCts = λ {α} {β} _ _ _ → α ≡ β
+    HomCts {α} {β} _ _ _ = α ≡ β
     
     assoc : {α β γ δ : Type} 
           → {f : α → β} {g : β → γ} {h : γ → δ}

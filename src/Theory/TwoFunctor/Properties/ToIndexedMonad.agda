@@ -24,6 +24,7 @@ open import Theory.Category.Definition
 open import Theory.Category.Examples
 open import Theory.Functor.Definition hiding ( functor )
 open import Theory.Functor.Composition
+open import Theory.Functor.Properties.IsomorphicHaskellFunctor
 open import Theory.Natural.Transformation
 open import Theory.Natural.Transformation.Examples
 open import Theory.TwoCategory.Definition
@@ -72,9 +73,9 @@ LaxTwoFunctor→IndexedMonad {ℓS} ObjS F
     fmap {i} {j} = [ [ P₁ {j} {i} ]₀ (lift tt) ]₁
     
     functor : (i j : Ixs) → HaskellFunctor (LaxTwoFunctor→IxMonadTyCon ObjS F i j)
-    functor i j = Functor.functor (fmap {i} {j}) 
+    functor i j = Functor→HaskellFunctor ([ P₁ {j} {i} ]₀ (lift tt)) {- Functor.functor (fmap {i} {j}) 
                                   (Functor.id ([ P₁ {j} {i} ]₀ (lift tt)))
-                                  (λ g f → Functor.compose ([ P₁ {j} {i} ]₀ (lift tt)) {f = f} {g = g})
+                                  (λ g f → Functor.compose ([ P₁ {j} {i} ]₀ (lift tt)) {f = f} {g = g}) -}
     
     return : {α : Type} {i : Ixs} → α → M i i α
     return {α} {i} a = nat-η (η {i}) α a

@@ -186,7 +186,7 @@ private
               insert (g (f x)) (mapList g (mapList f xs))
                 ≡⟨ sym (map-insert-commute g (f x) (mapList f xs) struct-eqB struct-eqC) ⟩
               mapList g (insert (f x) (mapList f xs))
-                ≡⟨ cong (mapList g ∘F insert (f x)) (sym (map-structure f (lset xs sortedX))) ⟩
+                ≡⟨ cong (mapList {OrdA = OrdB} {OrdC} g ∘F insert (f x)) (sym (map-structure f (lset xs sortedX))) ⟩
               mapList g (insert (f x) (LSet.xs (mapSet f (lset xs sortedX))))
                 ≡⟨ sym (map-structure g (lset (insert (f x) (LSet.xs (mapSet f (lset xs sortedX)))) (insert-preserves-IsSortedNoDupList (LSet.sorted (mapSet f (lset xs sortedX)))))) ⟩
               LSet.xs (mapSet g (lset (insert (f x) (LSet.xs (mapSet f (lset xs sortedX)))) (insert-preserves-IsSortedNoDupList (LSet.sorted (mapSet f (lset xs sortedX)))))) ∎
@@ -261,7 +261,7 @@ module NotApplicativeReady where
             insert (g (f x)) (mapList g (mapList f xs))
               ≡⟨ sym (map-insert-commute g (f x) (mapList f xs) struct-eqB struct-eqC) ⟩
             mapList g (insert (f x) (mapList f xs))
-              ≡⟨ cong (mapList g ∘F insert (f x)) (sym (map-structure f (lset xs sortedX))) ⟩
+              ≡⟨ cong (mapList {OrdA = OrdB} {OrdC} g ∘F insert (f x)) (sym (map-structure f (lset xs sortedX))) ⟩
             mapList g (insert (f x) (LSet.xs (mapSet f (lset xs sortedX))))
               ≡⟨ sym (map-structure g (lset (insert (f x) (LSet.xs (mapSet f (lset xs sortedX)))) (insert-preserves-IsSortedNoDupList (LSet.sorted (mapSet f (lset xs sortedX)))))) ⟩
             LSet.xs (mapSet g (lset (insert (f x) (LSet.xs (mapSet f (lset xs sortedX)))) (insert-preserves-IsSortedNoDupList (LSet.sorted (mapSet f (lset xs sortedX)))))) ∎

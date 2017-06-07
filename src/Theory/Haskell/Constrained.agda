@@ -65,7 +65,7 @@ UniqueInstances→DependentHomUniqueness CC (unique-obj-inst , unique-hom-inst) 
 UniqueInstances→DependentObjUniqueness : {ℓCt₀ ℓCt₁ : Level} 
                                        → (CC : ConstraintCategory {ℓCt₀} {ℓCt₁}) → UniqueInstances CC 
                                        → DependentObjUniqueness CC
-UniqueInstances→DependentObjUniqueness CC (unique-obj-inst , unique-hom-inst) {a₁ , a₂} {.a₁ , b₂} refl = ≡-to-≅ (unique-obj-inst a₁ a₂ b₂)
+UniqueInstances→DependentObjUniqueness CC (unique-obj-inst , unique-hom-inst) (a₁ , a₂) (.a₁ , b₂) refl = ≡-to-≅ (unique-obj-inst a₁ a₂ b₂)
 
 -- Every constraint category is an instance of a concrete category if the dependent homomorphisms it uses are uniquely determined.
 ConstraintCategory→ConcreteCategory : {ℓCt₀ ℓCt₁ : Level} 

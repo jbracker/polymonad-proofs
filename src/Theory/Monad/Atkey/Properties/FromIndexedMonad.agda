@@ -58,13 +58,13 @@ IxTyCon→AtkeyFunctor Ixs M monad = functor F₀ F₁ (λ {a} → law-id {a}) (
     F₁ {sa₀ , sa₁ , a} {.sa₀ , .sa₁ , b} (refl , refl , f) ma = IxMonad.fmap monad f ma
     
     law-id : {a : Obj ((S op) ×C S ×C H)} → IxMonad.fmap monad (id H) ≡ id H
-    law-id {s₀ , s₁ , α} = Functor.law-id (IxMonad.functor monad s₀ s₁)
+    law-id {s₀ , s₁ , α} = HaskFunctor.law-id (IxMonad.functor monad s₀ s₁)
 
     law-compose : {a b c : Obj ((S op) ×C S ×C H)}
                 → {f : Hom ((S op) ×C S ×C H) a b}
                 → {g : Hom ((S op) ×C S ×C H) b c}
                 → F₁ (g ∘SSH f) ≡ F₁ g ∘F F₁ f
-    law-compose {a₀ , a₁ , α} {f = refl , refl , f} {refl , refl , g} = Functor.law-compose (IxMonad.functor monad a₀ a₁) g f
+    law-compose {a₀ , a₁ , α} {f = refl , refl , f} {refl , refl , g} = HaskFunctor.law-compose (IxMonad.functor monad a₀ a₁) g f
 
 IxMonad→AtkeyParameterizedMonad
   : {ℓ : Level}

@@ -121,5 +121,5 @@ join-return-id {i} {j} x = begin
   nat-η ([ P₁ {i} {j} ]₁ (ρ S₂ {i} {j} (lift tt))) x ∘F join {x} {j} {j} {i} ∘F return {M j i x} 
     ≡⟨ η-lax-id₂ {i} {j} x ⟩
   nat-η (ρ Cat' ([ P₁ {i} {j} ]₀ (lift tt))) x
-    ≡⟨ fun-ext (λ y → ≅-to-≡ (het-cat-ρ-id x y)) ⟩
+    ≡⟨ fun-ext (λ y → ≅-to-≡ (het-cat-ρ-id {F = [ P₁ {i} {j} ]₀ (lift tt)} x y)) ⟩
   (λ (y : M j i x) → y) ∎

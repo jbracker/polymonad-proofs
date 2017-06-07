@@ -25,7 +25,7 @@ Functor→HaskellFunctor F = record
  
 HaskellFunctor→Functor : {F : TyCon} → HaskellFunctor F
                        → Functor (Hask {lzero}) (Hask {lzero})
-HaskellFunctor→Functor {F} func = functor F (Functor.fmap func) (Functor.law-id func) (λ {a} {b} {c} {f} {g} → Functor.law-compose func g f)
+HaskellFunctor→Functor {F} func = functor F (HaskellFunctor.fmap func) (HaskellFunctor.law-id func) (λ {a} {b} {c} {f} {g} → HaskellFunctor.law-compose func g f)
 
 
 Functor↔HaskellFunctor : Functor (Hask {lzero}) (Hask {lzero}) ↔ (Σ TyCon HaskellFunctor)

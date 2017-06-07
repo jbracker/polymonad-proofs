@@ -21,11 +21,12 @@ module Theory.Monad.Properties.FromHaskellMonad where
 
 HaskellMonad→Monad : {M : TyCon}
                    → (haskMonad : HaskellMonad M)
-                   → Monad (HaskellFunctor→Functor (Monad.functor haskMonad))
+                   → Monad (HaskellFunctor→Functor (HaskellMonad.functor haskMonad))
 HaskellMonad→Monad {M} haskMonad = Monad.monad η μ μ-coher η-left-coher η-right-coher
   where
-    F = HaskellFunctor→Functor (Monad.functor haskMonad)
-
+    F = HaskellFunctor→Functor (HaskellMonad.functor haskMonad)
+    
+    open NatTrans renaming ( η to nat-η )
     open Haskell.Monad.Monad haskMonad
     
     η : NatTrans Id[ Hask ] F
@@ -61,7 +62,7 @@ HaskellMonad→Monad {M} haskMonad = Monad.monad η μ μ-coher η-left-coher η
       (join ∘F [ [ F ]∘[ F ] ]₁ f) x ∎
 
     μ-coher : {A : Type}
-            → (η⟨ μ ⟩ A) ∘F ([ F ]₁ (η⟨ μ ⟩ A)) ≡ (η⟨ μ ⟩ A) ∘F (η⟨ μ ⟩ [ F ]₀ A)
+            → (nat-η μ A) ∘F ([ F ]₁ (nat-η μ A)) ≡ (nat-η μ A) ∘F (nat-η μ ([ F ]₀ A))
     μ-coher {A} = fun-ext $ λ (x : M (M (M A))) → begin
       join (fmap join x)
         ≡⟨⟩
@@ -77,7 +78,7 @@ HaskellMonad→Monad {M} haskMonad = Monad.monad η μ μ-coher η-left-coher η
         ≡⟨⟩
       join (join x) ∎
 
-    η-left-coher : {A : Type} → η⟨ μ ⟩ A ∘F ([ F ]₁ (η⟨ η ⟩ A)) ≡ η⟨ Id⟨ F ⟩ ⟩ A
+    η-left-coher : {A : Type} → nat-η μ A ∘F ([ F ]₁ (nat-η η A)) ≡ nat-η Id⟨ F ⟩ A
     η-left-coher {A} = fun-ext $ λ (x : M A) → begin
       join (fmap return x)
         ≡⟨⟩
@@ -91,7 +92,7 @@ HaskellMonad→Monad {M} haskMonad = Monad.monad η μ μ-coher η-left-coher η
         ≡⟨ law-right-id x ⟩
       x ∎
 
-    η-right-coher : {A : Type} → η⟨ μ ⟩ A ∘F η⟨ η ⟩ ([ F ]₀ A) ≡ η⟨ Id⟨ F ⟩ ⟩ A
+    η-right-coher : {A : Type} → nat-η μ A ∘F nat-η η ([ F ]₀ A) ≡ nat-η Id⟨ F ⟩ A
     η-right-coher {A} = fun-ext $ λ (x : M A) → begin
       join (return x)
         ≡⟨⟩

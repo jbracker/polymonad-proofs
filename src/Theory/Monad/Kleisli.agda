@@ -20,6 +20,8 @@ open import Theory.Monad.Definition
 
 open Category using ( Obj ; Hom )
 
+open NaturalTransformation renaming ( η to nat-η )
+
 -- -----------------------------------------------------------------------------
 -- Definition of a Kleisli monad/triple
 -- -----------------------------------------------------------------------------
@@ -161,7 +163,7 @@ KleisliTriple→Monad {C = C} {T = T} km = record
         ≡⟨ refl ⟩
       μ x ∘ μ ([ TF ]₀ x) ∎
     
-    ηCoherL : {x : Obj C} → μ x ∘ ([ TF ]₁ (η x)) ≡ η⟨ Id⟨ TF ⟩ ⟩ x
+    ηCoherL : {x : Obj C} → μ x ∘ ([ TF ]₁ (η x)) ≡ nat-η Id⟨ TF ⟩ x
     ηCoherL {x = x} = begin
       μ x ∘ ([ TF ]₁ (η x)) 
         ≡⟨ refl ⟩
@@ -177,9 +179,9 @@ KleisliTriple→Monad {C = C} {T = T} km = record
         ≡⟨ KleisliTriple.left-id km ⟩
       id
         ≡⟨ refl ⟩
-      η⟨ Id⟨ TF ⟩ ⟩ x ∎
+      nat-η Id⟨ TF ⟩ x ∎
     
-    ηCoherR : {x : Obj C} → μ x ∘ (η ([ TF ]₀ x)) ≡ η⟨ Id⟨ TF ⟩ ⟩ x
+    ηCoherR : {x : Obj C} → μ x ∘ (η ([ TF ]₀ x)) ≡ nat-η Id⟨ TF ⟩ x
     ηCoherR {x = x} = KleisliTriple.right-id km
     
     μNatTrans : NaturalTransformation [ TF ]∘[ TF ] TF
@@ -215,10 +217,10 @@ Monad→KleisliTriple {C = C} {T = T} m = record
     T₁ f = [ T ]₁ f
     
     η : {a : Obj C} → Hom C a (T₀ a)
-    η {a = a} = η⟨ Monad.η m ⟩ a
+    η {a = a} = nat-η (Monad.η m) a
     
     μ : {a : Obj C} → Hom C (T₀ (T₀ a)) (T₀ a)
-    μ {a = a} = η⟨ Monad.μ m ⟩ a
+    μ {a = a} = nat-η (Monad.μ m) a
 
     kext : {a b : Obj C} → Hom C a (T₀ b) → Hom C (T₀ a) (T₀ b)
     kext f = μ ∘ T₁ f

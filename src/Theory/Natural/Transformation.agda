@@ -34,8 +34,6 @@ record NaturalTransformation {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level}
             → ([ G ]₁ f) ∘D (η a) ≡ (η b) ∘D ([ F ]₁ f)
             -- G₁ f ∘ η ≡ η ∘ F₁ f
 
-η⟨_⟩_ = NaturalTransformation.η
-
 -------------------------------------------------------------------------------
 -- The Identity Natural Transformation
 -------------------------------------------------------------------------------

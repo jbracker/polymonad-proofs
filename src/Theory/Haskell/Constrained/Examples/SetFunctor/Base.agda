@@ -65,10 +65,10 @@ record OrdInstance {ℓEq ℓOrd : Level} (A : Type) : Set (suc (ℓ ⊔ ℓEq �
   sym-not-eq {x} {y} ¬x==y y==x = ¬x==y (sym-eq y==x)
   
   eq-ord-comp : {x y z : A} → x == y → y ≤ z → x ≤ z
-  eq-ord-comp x==y y≤z = proj₂ (IsPartialOrder.≤-resp-≈ OrdInstance.isPartialOrder) (sym-eq x==y) y≤z
+  eq-ord-comp x==y y≤z = proj₂ (IsPartialOrder.≤-resp-≈ isPartialOrder) (sym-eq x==y) y≤z
   
   ord-eq-comp : {x y z : A} → x ≤ y → y == z → x ≤ z
-  ord-eq-comp x≤y y==z = proj₁ (IsPartialOrder.≤-resp-≈ OrdInstance.isPartialOrder) y==z x≤y
+  ord-eq-comp x≤y y==z = proj₁ (IsPartialOrder.≤-resp-≈ isPartialOrder) y==z x≤y
 
   eq-contr : {x y : A} → x == y → (¬ (x ≤ y) ⊎ ¬ (y ≤ x)) → ⊥
   eq-contr {x} {y} x==y (inj₁ ¬x≤y) with total x y

@@ -29,7 +29,7 @@ open Functor hiding ( id )
 -- Definition is based on: https://ncatlab.org/nlab/show/dinatural+transformation
 record DinaturalTransformation {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} 
                              {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}}
-                             (F : Functor (C op ×C C) D) (G : Functor (C op ×C C) D) 
+                             (F : Functor ((C op) ×C C) D) (G : Functor ((C op) ×C C) D) 
                              : Set (ℓC₀ ⊔ ℓC₁ ⊔ ℓD₀ ⊔ ℓD₁) where
   constructor dinaturalTransformation
   private _∘D_ = Category._∘_ D

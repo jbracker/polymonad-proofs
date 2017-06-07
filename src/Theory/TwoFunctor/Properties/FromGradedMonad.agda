@@ -169,9 +169,9 @@ GradedMonad→LaxTwoFunctor {ℓ} {Eff} {monoid} M monad = record
       (M (k ∘Eff (j ∘Eff i)) β ∋ ma >>= (λ mma → mma >>= (λ x → x)))
         ≅⟨ law-assoc ma (λ x → x) (λ x → x) ⟩
       (M ((k ∘Eff j) ∘Eff i) β ∋ (ma >>= (λ x → x)) >>= (λ x → x))
-        ≅⟨ hcong (λ X → (X ma >>= (λ x → x)) >>= (λ x → x)) (≡-to-≅ (sym (Functor.law-id (functor k)))) ⟩
+        ≅⟨ hcong (λ X → (X ma >>= (λ x → x)) >>= (λ x → x)) (≡-to-≅ (sym (HaskellFunctor.law-id (functor k)))) ⟩
       (M ((k ∘Eff j) ∘Eff i) β ∋ (fmap (λ x → x) ma >>= (λ x → x)) >>= (λ x → x))
-        ≅⟨ hcong (λ X → _>>=_ (_>>=_ (fmap X ma) (λ x → x)) (λ x → x)) (≡-to-≅ (sym (Functor.law-id (functor j)))) ⟩
+        ≅⟨ hcong (λ X → _>>=_ (_>>=_ (fmap X ma) (λ x → x)) (λ x → x)) (≡-to-≅ (sym (HaskellFunctor.law-id (functor j)))) ⟩
       (M ((k ∘Eff j) ∘Eff i) β ∋ (fmap (fmap (λ x → x)) ma >>= (λ x → x)) >>= (λ x → x))
         ≅⟨ hrefl ⟩
       (M ((k ∘Eff j) ∘Eff i) β ∋ join {β} {k ∘Eff j} {i} (join {M i β} {k} {j} (fmap (fmap (λ x → x)) ma)))

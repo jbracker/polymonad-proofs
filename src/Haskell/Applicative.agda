@@ -13,7 +13,7 @@ open import Haskell.Functor hiding ( functor )
 
 record Applicative (F : TyCon) : Set₁ where
   constructor applicative
-  infixl 4 _*>_ _<*_ _<*>_ _<$>_
+  infixl 5 _*>_ _<*_ _<*>_ _<$>_
   field
     pure : ∀ {α : Type} → α → F α
     _<*>_ : ∀ {α β : Type} → F (α → β) → F α → F β
@@ -24,8 +24,8 @@ record Applicative (F : TyCon) : Set₁ where
   
   field
     law-id  : ∀ {α : Type} 
-           → (v : F α) 
-           → pure (λ x → x) <*> v ≡ v
+            → (v : F α) 
+            → pure (λ x → x) <*> v ≡ v
     law-composition : ∀ {α β γ : Type} 
                    → (u : F (β → γ)) → (v : F (α → β)) → (w : F α) 
                    → (pure _∘_) <*> u <*> v <*> w ≡ u <*> (v <*> w)

@@ -24,6 +24,7 @@ open import Theory.Category.Definition
 open import Theory.Category.Examples
 open import Theory.Functor.Definition hiding ( functor )
 open import Theory.Functor.Composition
+open import Theory.Functor.Properties.IsomorphicHaskellFunctor
 open import Theory.Natural.Transformation
 open import Theory.Natural.Transformation.Examples
 open import Theory.TwoCategory.Definition
@@ -89,9 +90,7 @@ LaxTwoFunctor→GradedMonad {ℓ} {Eff} mon F = record
     fmap {i} = [ [ P₁ {lift tt} {lift tt} ]₀ i ]₁
     
     functor : (i : Eff) → HaskellFunctor (M i)
-    functor i = Functor.functor (fmap {i}) 
-                                (Functor.id ([ P₁ {lift tt} {lift tt} ]₀ i))
-                                (λ g f → Functor.compose ([ P₁ {lift tt} {lift tt} ]₀ i) {f = f} {g = g})
+    functor i = Functor→HaskellFunctor ([ P₁ {lift tt} {lift tt} ]₀ i)
     
     return : {α : Type} → α → M ε α
     return {α} a = nat-η (η {lift tt}) α a

@@ -70,13 +70,13 @@ IndexedMonad→LaxTwoFunctor {ℓ} Ixs M monad = record
         P₀ (lift tt) = HaskellFunctor→Functor (functor j i)
         
         P₁ : {a b : Obj (HomCat Ixs₂ i j)} → Hom (HomCat Ixs₂ i j) a b → Hom (HomCat Cat' Hask Hask) (P₀ a) (P₀ b)
-        P₁ {lift tt} {lift tt} {lift tt} = Id⟨ P₀ (lift tt) ⟩
+        P₁ {lift tt} {lift tt} (lift tt) = Id⟨ P₀ (lift tt) ⟩
     
     η : {i : Ixs} → NaturalTransformation Id[ Hask' ] ([ P {i} {i} ]₀ (lift tt))
     η {i} = naturalTransformation (λ α x → return {α} {i} x) $ fun-ext $ λ a → natural a
       where
         natural : {α β : Type} {f : α → β} → (a : α)
-                → fmap f (return a) ≡ return (f a)
+                → fmap {i = i} f (return a) ≡ return (f a)
         natural {α} {β} {f} a = begin
           fmap f (return a) 
             ≡⟨ sym (law-monad-fmap f (return a)) ⟩
@@ -142,9 +142,9 @@ IndexedMonad→LaxTwoFunctor {ℓ} Ixs M monad = record
       ma >>= (λ mma → return (join {A} {k} {j} {i} mma) >>= (λ x → x))
         ≡⟨ cong (λ X → ma >>= X) (fun-ext (λ mma → law-right-id (join mma) (λ x → x))) ⟩
       ma >>= (λ mma → mma >>= (λ x → x))
-        ≡⟨ cong (λ X → X ma >>= (λ mma → mma >>= (λ x → x))) (sym (Functor.law-id (functor l k))) ⟩
+        ≡⟨ cong (λ X → X ma >>= (λ mma → mma >>= (λ x → x))) (sym (HaskellFunctor.law-id (functor l k))) ⟩
       fmap (λ x → x) ma >>= (λ ma → ma >>= (λ x → x))
-        ≡⟨ cong (λ X → fmap X ma >>= (λ mma → mma >>= (λ x → x))) (sym (Functor.law-id (functor k j))) ⟩
+        ≡⟨ cong (λ X → fmap X ma >>= (λ mma → mma >>= (λ x → x))) (sym (HaskellFunctor.law-id (functor k j))) ⟩
       fmap (fmap (λ x → x)) ma >>= (λ ma → ma >>= (λ x → x))
         ≡⟨ law-assoc (fmap (fmap (λ x → x)) ma) (λ x → x) (λ x → x) ⟩
       (fmap (fmap (λ x → x)) ma >>= (λ x → x)) >>= (λ x → x)
