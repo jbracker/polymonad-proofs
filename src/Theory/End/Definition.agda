@@ -28,20 +28,25 @@ open Theory.Functor.Application.TriFunctor
 --------------------------------------------------------------------------------
 
 record End {ℓC₀ ℓC₁ ℓX₀ ℓX₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {X : Category {ℓX₀} {ℓX₁}} (F : Functor (C op ×C C) X) : Set (ℓC₀ ⊔ ℓC₁ ⊔ ℓX₀ ⊔ ℓX₁) where
-  field
-    w : Obj X
-    e : Wedge w F
+  constructor end
+  field 
+    ∫ : Obj X
+    e : Wedge ∫ F
     
-    universal : ∀ {w' : Obj X} (e' : Wedge w' F) → ∃ λ (f : Hom X w' w) → (IsUnique f) × (e' ≡ Wedge.compose e f)
+    universal : {∫' : Obj X} (e' : Wedge ∫' F) → ∃ λ (f : Hom X ∫' ∫) → (IsUnique f) × (Wedge.e e' ≡ Wedge.e (Wedge.compose e f))
     
   private
     _∘X_ = _∘_ X
   
+  universal-wedge : {∫' : Obj X} (e' : Wedge ∫' F) → ∃ λ (f : Hom X ∫' ∫) → (IsUnique f) × (e' ≡ Wedge.compose e f)
+  universal-wedge {∫'} e' = proj₁ (universal e') , proj₁ (proj₂ (universal e'))
+                          , wedge-eq (proj₂ (proj₂ (universal e')))
+  
   universal-extranatural : {ℓA₀ ℓA₁ ℓB₀ ℓB₁ : Level} 
                          → (A : Category {ℓA₀} {ℓA₁}) (B : Category {ℓB₀} {ℓB₁}) 
-                         → ∀ {w' : Obj X} (e' : Wedge w' F) → ∃ λ (f : Hom X w' w) → (IsUnique f) × (Wedge.extranatural e' A B ≡ Wedge.extranatural (Wedge.compose e f) A B)
+                         → ∀ {∫' : Obj X} (e' : Wedge ∫' F) → ∃ λ (f : Hom X ∫' ∫) → (IsUnique f) × (Wedge.extranatural e' A B ≡ Wedge.extranatural (Wedge.compose e f) A B)
   universal-extranatural A B e' = proj₁ (universal e') , proj₁ (proj₂ (universal e')) 
-                                , (extranatural-transformation-eq $ fun-ext $ λ a → fun-ext $ λ b → cong Wedge.e $ proj₂ $ proj₂ $ universal e')
+                                , (extranatural-transformation-eq $ fun-ext $ λ a → fun-ext $ λ b → proj₂ (proj₂ (universal e')))
   
 --------------------------------------------------------------------------------
 -- Definition of coends
@@ -50,17 +55,17 @@ record End {ℓC₀ ℓC₁ ℓX₀ ℓX₁ : Level} {C : Category {ℓC₀} {�
 
 record CoEnd {ℓC₀ ℓC₁ ℓX₀ ℓX₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {X : Category {ℓX₀} {ℓX₁}} (F : Functor (C op ×C C) X) : Set (ℓC₀ ⊔ ℓC₁ ⊔ ℓX₀ ⊔ ℓX₁) where
   field
-    co-w : Obj X
-    co-e : CoWedge F co-w
+    co-∫ : Obj X
+    co-e : CoWedge F co-∫
     
-    co-universal : ∀ {co-w' : Obj X} (co-e' : CoWedge F co-w') → ∃ λ (f : Hom X co-w co-w') → (IsUnique f) × (co-e' ≡ CoWedge.co-compose co-e f)
+    co-universal : ∀ {co-∫' : Obj X} (co-e' : CoWedge F co-∫') → ∃ λ (f : Hom X co-∫ co-∫') → (IsUnique f) × (co-e' ≡ CoWedge.co-compose co-e f)
     
   private
     _∘X_ = _∘_ X
   
   universal-extranatural : {ℓA₀ ℓA₁ ℓB₀ ℓB₁ : Level} 
                          → (A : Category {ℓA₀} {ℓA₁}) (B : Category {ℓB₀} {ℓB₁}) 
-                         → ∀ {co-w' : Obj X} (co-e' : CoWedge F co-w') → ∃ λ (f : Hom X co-w co-w') → (IsUnique f) × (CoWedge.extranatural co-e' A B ≡ CoWedge.extranatural (CoWedge.co-compose co-e f) A B)
+                         → ∀ {co-∫' : Obj X} (co-e' : CoWedge F co-∫') → ∃ λ (f : Hom X co-∫ co-∫') → (IsUnique f) × (CoWedge.extranatural co-e' A B ≡ CoWedge.extranatural (CoWedge.co-compose co-e f) A B)
   universal-extranatural A B co-e' = proj₁ (co-universal co-e') , proj₁ (proj₂ (co-universal co-e')) 
                                    , (extranatural-transformation-eq $ fun-ext $ λ a → fun-ext $ λ b → fun-ext $ λ c → cong (λ Y → CoWedge.co-e Y b) $ proj₂ $ proj₂ $ co-universal co-e')
   
