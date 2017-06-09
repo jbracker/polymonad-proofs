@@ -24,20 +24,19 @@ private
   _∘C_ = _∘_ C
 
 
-
 dayConvolution : Functor ([ C , Set' ] ×C [ C , Set' ]) [ C , Set' ]
 dayConvolution = functor day₀ day₁ {!!} {!!}
   where
-    dayFunctor : Functor (C op) Set' → Functor C Set' → Obj C → Functor (C op ×C C) Set'
+    dayFunctor : Functor C Set' → Functor C Set' → Obj C → Functor (C op ×C C) Set'
     dayFunctor F G c = functor dayF₀ dayF₁ {!!} {!!}
       where
         dayF₀ : Obj (C op ×C C) → Obj Set'
         dayF₀ (c₁ , c₂) = Hom C (c₁ ⊗C₀ c₂) c × (F₀ F c₁) × (F₀ G c₂)
         
         dayF₁ : {a b : Obj (C op ×C C)} → Hom (C op ×C C) a b → Hom Set' (dayF₀ a) (dayF₀ b)
-        dayF₁ {a₁ , a₂} {b₁ , b₂} (f₁ , f₂) (homC , Fc₁ , Fc₂) = {!f₁ ⊗C₁ f₂!} , F₁ F f₁ Fc₁ , F₁ G f₂ Fc₂
+        dayF₁ {a₁ , a₂} {b₁ , b₂} (f₁ , f₂) (homC , Fc₁ , Fc₂) = {!f₁ ⊗C₁ f₂!} , {!!} , F₁ G f₂ Fc₂
        
-    dayEnd : (F : Functor (C op) Set') (G : Functor C Set') → (c : Obj C) → CoEnd (dayFunctor F G c)
+    dayEnd : (F G : Functor C Set') → (c : Obj C) → CoEnd (dayFunctor F G c)
     dayEnd F G c = record { co-w = {!!} ; co-e = cowedge {!!} {!!} ; co-universal = {!!} }
     
     day₀ : Obj ([ C , Set' ] ×C [ C , Set' ]) → Obj [ C , Set' ]
