@@ -18,30 +18,29 @@ open import Theory.Functor.Composition
 open import Theory.Functor.Association
 open import Theory.Functor.Examples.CompositionFunctor
 open import Theory.Natural.Transformation
-open import Theory.Natural.Transformation.Examples.FunctorCompositionAssociator renaming ( functorCompositionAssociator to fca ; functorCompositionAssociator' to fca' )
+open import Theory.Natural.Transformation.Examples.FunctorCompositionAssociator 
 open import Theory.Natural.Isomorphism
 
-module Theory.Natural.Isomorphism.Examples.FunctorCompositionAssociator 
-  {ℓC₀ ℓC₁ : Level} (C : Category {ℓC₀} {ℓC₁}) where
+module Theory.Natural.Isomorphism.Examples.FunctorCompositionAssociator where
 
 open Category
 open NaturalTransformation renaming ( η to nat-η )
 open Theory.Functor.Association.Associator
 
-private
-  Fun = functorCategory C C
-  comp = compositionFunctor C C C
-  _∘C_ = _∘_ C
-  lAssoc = leftAssociator comp
-  rAssoc = rightAssociator comp
-
--- fca : NaturalTransformation lAssoc rAssoc
- 
-functorCompositionAssociator : NaturalIsomorphism lAssoc rAssoc
-functorCompositionAssociator = naturalIsomorphism nat iso -- (fca C) {!!}
+functorCompositionAssociatorIso : {ℓC₀ ℓC₁ : Level} (C : Category {ℓC₀} {ℓC₁}) → NaturalIsomorphism (leftAssociator (compositionFunctor C C C)) (rightAssociator (compositionFunctor C C C))
+functorCompositionAssociatorIso C = naturalIsomorphism (functorCompositionAssociator C) iso -- (fca C) {!!}
   where
-    nat : NaturalTransformation lAssoc rAssoc
-    nat = {!fca {ℓC₀} {ℓC₁} C!}
-    
-    iso : (x : Obj (Fun ×C Fun ×C Fun)) → Isomorphism Fun (nat-η nat x)
-    iso x = isomorphism (nat-η (fca' C) x) {!!} {!!}
+    Fun = functorCategory C C
+    comp = compositionFunctor C C C
+    _∘C_ = _∘_ C
+    lAssoc = leftAssociator comp
+    rAssoc = rightAssociator comp
+
+    iso : (x : Obj (Fun ×C Fun ×C Fun)) → Isomorphism Fun (nat-η (functorCompositionAssociator C) x)
+    iso x = isomorphism (nat-η (functorCompositionAssociator' C) x) iso-id₁ iso-id₂
+      where
+        iso-id₁ : ⟨ nat-η (functorCompositionAssociator C) x ⟩∘ᵥ⟨ nat-η (functorCompositionAssociator' C) x ⟩ ≡ id Fun
+        iso-id₁ = natural-transformation-eq $ fun-ext $ λ (c : Obj C) → left-id C
+        
+        iso-id₂ : ⟨ nat-η (functorCompositionAssociator' C) x ⟩∘ᵥ⟨ nat-η (functorCompositionAssociator C) x ⟩ ≡ id Fun
+        iso-id₂ = natural-transformation-eq $ fun-ext $ λ (c : Obj C) → left-id C

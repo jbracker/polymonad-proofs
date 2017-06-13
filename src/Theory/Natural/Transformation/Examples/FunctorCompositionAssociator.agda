@@ -18,23 +18,21 @@ open import Theory.Functor.Association
 open import Theory.Functor.Examples.CompositionFunctor
 open import Theory.Natural.Transformation
 
-module Theory.Natural.Transformation.Examples.FunctorCompositionAssociator 
-  {ℓC₀ ℓC₁ : Level} (C : Category {ℓC₀} {ℓC₁}) where
+module Theory.Natural.Transformation.Examples.FunctorCompositionAssociator where
 
 open Category
 open NaturalTransformation renaming ( η to nat-η )
 open Theory.Functor.Association.Associator
 
-private
-  Fun = functorCategory C C
-  comp = compositionFunctor C C C
-  _∘C_ = _∘_ C
-  lAssoc = leftAssociator comp
-  rAssoc = rightAssociator comp
-
-functorCompositionAssociator : NaturalTransformation lAssoc rAssoc
-functorCompositionAssociator = naturalTransformation nat-assoc-η (λ {a b} {f} → nat-assoc-nat {a} {b} {f})
+functorCompositionAssociator : {ℓC₀ ℓC₁ : Level} (C : Category {ℓC₀} {ℓC₁}) → NaturalTransformation (leftAssociator (compositionFunctor C C C)) (rightAssociator (compositionFunctor C C C))
+functorCompositionAssociator C = naturalTransformation nat-assoc-η (λ {a b} {f} → nat-assoc-nat {a} {b} {f})
   where
+    Fun = functorCategory C C
+    comp = compositionFunctor C C C
+    _∘C_ = _∘_ C
+    lAssoc = leftAssociator comp
+    rAssoc = rightAssociator comp
+    
     nat-assoc-η : (c : Obj (Fun ×C Fun ×C Fun)) → Hom Fun ([ lAssoc ]₀ c) ([ rAssoc ]₀ c)
     nat-assoc-η (F ,' G ,' H) = naturalTransformation η nat
       where
@@ -64,9 +62,15 @@ functorCompositionAssociator = naturalTransformation nat-assoc-η (λ {a b} {f} 
         a = F ,' G ,' H
         b = F' ,' G' ,' H'
 
-functorCompositionAssociator' : NaturalTransformation rAssoc lAssoc
-functorCompositionAssociator' = naturalTransformation nat-assoc-η (λ {a b} {f} → nat-assoc-nat {a} {b} {f})
+functorCompositionAssociator' : {ℓC₀ ℓC₁ : Level} (C : Category {ℓC₀} {ℓC₁}) → NaturalTransformation (rightAssociator (compositionFunctor C C C)) (leftAssociator (compositionFunctor C C C))
+functorCompositionAssociator' C = naturalTransformation nat-assoc-η (λ {a b} {f} → nat-assoc-nat {a} {b} {f})
   where
+    Fun = functorCategory C C
+    comp = compositionFunctor C C C
+    _∘C_ = _∘_ C
+    lAssoc = leftAssociator comp
+    rAssoc = rightAssociator comp
+    
     nat-assoc-η : (c : Obj (Fun ×C Fun ×C Fun)) → Hom Fun ([ rAssoc ]₀ c) ([ lAssoc ]₀ c)
     nat-assoc-η (F ,' G ,' H) = naturalTransformation η nat
       where
