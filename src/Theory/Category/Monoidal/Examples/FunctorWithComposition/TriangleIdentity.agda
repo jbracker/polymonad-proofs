@@ -29,7 +29,8 @@ open import Extensionality
 module Theory.Category.Monoidal.Examples.FunctorWithComposition.TriangleIdentity where
 
 open Category
-open NaturalTransformation
+open Functor renaming ( id to functor-id )
+open NaturalTransformation renaming ( η to nat-η )
 open NaturalIsomorphism renaming ( η to iso-η )
 
 open Theory.Functor.Association.Associator
@@ -37,7 +38,30 @@ open Theory.Functor.Application.BiFunctor
 
 triangle-id 
   : {ℓC₀ ℓC₁ : Level} (C : Category {ℓC₀} {ℓC₁}) 
-  → (x y : Obj (Fun C C)) 
-  → Functor.F₁ (CompF C C C) (iso-η (fcrIso C) x , id (Fun C C))
-  ≡ (Fun C C ∘ Functor.F₁ (CompF C C C) (id (Fun C C) , iso-η (fclIso C) y)) (iso-η (fcaIso C) (x ,' Id[ C ] ,' y))
-triangle-id C = {!!}
+  → (F G : Obj (Fun C C)) 
+  → F₁ (CompF C C C) (iso-η (fcrIso C) F , id (Fun C C) {G})
+  ≡ (Fun C C ∘ F₁ (CompF C C C) (id (Fun C C) {F}, iso-η (fclIso C) G)) (iso-η (fcaIso C) (F ,' Id[ C ] ,' G))
+triangle-id C F G = natural-transformation-eq $ fun-ext $ λ (x : Obj C) → begin
+   nat-η ⟨ iso-η (fcrIso C) F ⟩∘ₕ⟨ Id⟨ G ⟩ ⟩ x
+     ≡⟨⟩
+   nat-η (iso-η (fcrIso C) F) ([ G ]₀ x) ∘C [ F ]₁ (nat-η Id⟨ G ⟩ x)
+     ≡⟨ cong (λ X → nat-η (iso-η (fcrIso C) F) ([ G ]₀ x) ∘C X) (functor-id F) ⟩
+   nat-η (iso-η (fcrIso C) F) ([ G ]₀ x) ∘C id C
+     ≡⟨ left-id C ⟩
+   nat-η (iso-η (fcrIso C) F) ([ G ]₀ x)
+     ≡⟨ sym (functor-id F) ⟩
+   [ F ]₁ (id C)
+     ≡⟨⟩
+   [ F ]₁ (nat-η (iso-η (fclIso C) G) x)
+     ≡⟨ sym (right-id C) ⟩
+   id C ∘C [ F ]₁ (nat-η (iso-η (fclIso C) G) x)
+     ≡⟨⟩
+   nat-η Id⟨ F ⟩ ([ G ]₀ x) ∘C [ F ]₁ (nat-η (iso-η (fclIso C) G) x)
+     ≡⟨⟩
+   nat-η ⟨ Id⟨ F ⟩ ⟩∘ₕ⟨ iso-η (fclIso C) G ⟩ x
+     ≡⟨ sym (left-id C) ⟩
+   nat-η ⟨ Id⟨ F ⟩ ⟩∘ₕ⟨ iso-η (fclIso C) G ⟩ x ∘C id C -- nat-η (iso-η (fcaIso C) (F ,' Id[ C ] ,' G)) x
+     ≡⟨⟩
+   nat-η ⟨ ⟨ Id⟨ F ⟩ ⟩∘ₕ⟨ iso-η (fclIso C) G ⟩ ⟩∘ᵥ⟨ (iso-η (fcaIso C) (F ,' Id[ C ] ,' G)) ⟩ x ∎
+   where _∘C_ = _∘_ C
+
