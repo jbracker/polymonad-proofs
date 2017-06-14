@@ -23,6 +23,8 @@ open import Theory.Natural.Isomorphism
 open import Theory.Natural.Isomorphism.Examples.FunctorCompositionAssociator
 open import Theory.Natural.Isomorphism.Examples.FunctorCompositionLeftUnitor
 open import Theory.Natural.Isomorphism.Examples.FunctorCompositionRightUnitor
+open import Theory.Category.Monoidal.Examples.FunctorWithComposition.TriangleIdentity
+open import Theory.Category.Monoidal.Examples.FunctorWithComposition.PentagonIdentity
 
 open import Extensionality
 
@@ -37,33 +39,11 @@ open Theory.Functor.Application.BiFunctor
 
 functorMonoidalCategory : {ℓC₀ ℓC₁ : Level} (C : Category {ℓC₀} {ℓC₁}) → MonoidalCategory (functorCategory C C)
 functorMonoidalCategory C = record
-  { tensor = tensor
-  ; unit = unit
+  { tensor = compositionFunctor C C C
+  ; unit = Id[ C ]
   ; associator = functorCompositionAssociatorIso C
   ; left-unitor = functorCompositionLeftUnitorIso C
   ; right-unitor = functorCompositionRightUnitorIso C
-  ; triangle-id = {!!} -- triangle-id
-  ; pentagon-id = {!!} -- pentagon-id
-  } where
-    Fun = functorCategory C C
-  
-    _∘C_ = Category._∘_ C
-    
-    tensor = compositionFunctor C C C
-    
-    tensor₀ = Functor.F₀ tensor
-    tensor₁ = Functor.F₁ tensor 
-        
-    unit : Obj Fun
-    unit = Id[ C ]
-    {-
-    triangle-id : (x y : Obj Fun) 
-                → tensor₁ (η (nat-trans right-unitor) x , id Fun)
-                ≡ ⟨ tensor₁ (id Fun , η (nat-trans left-unitor) y) ⟩∘ᵥ⟨ η (nat-trans associator) (x ,' unit ,' y) ⟩
-    triangle-id α β = {!!}
-    
-    pentagon-id : (w x y z : Obj Fun) 
-                → ⟨ tensor₁ (id Fun , η (nat-trans associator) (x ,' y ,' z)) ⟩∘ᵥ⟨ ⟨ η (nat-trans associator) (w ,' tensor₀ (x , y) ,' z) ⟩∘ᵥ⟨ tensor₁ (η (nat-trans associator) (w ,' x ,' y) , id Fun) ⟩ ⟩
-                ≡ ⟨ η (nat-trans associator) (w ,' x ,' tensor₀ (y , z)) ⟩∘ᵥ⟨ η (nat-trans associator) (tensor₀ (w , x) ,' y ,' z) ⟩
-    pentagon-id w x y z = {!!}
--}
+  ; triangle-id = triangle-id C
+  ; pentagon-id = pentagon-id C
+  }
