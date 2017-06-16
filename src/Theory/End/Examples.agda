@@ -151,7 +151,7 @@ module Theory.End.Examples where
               _∘Wedge_ = Wedge.compose (NatTrans→Wedge α)
               
               factor : Wedge.e e' ≡ Wedge.e (Wedge.compose (NatTrans→Wedge α) (λ _ → lift tt))
-              factor = fun-ext $ λ (c : Obj C) → fun-ext $ λ x → begin
+              factor = fun-ext $ λ (c : Obj C) → fun-ext $ λ (x : w') → begin
                 Wedge.e e' c x 
                   ≡⟨ {!!} ⟩
                 NaturalTransformation.η α c
