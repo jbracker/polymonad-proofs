@@ -9,6 +9,7 @@ open import Relation.Binary.PropositionalEquality
 open import Utilities
 open import Extensionality
 open import Theory.Category.Definition
+open import Theory.Category.Examples renaming ( setCategory to SetCat )
 open import Theory.Functor.Definition
 open import Theory.Functor.Constant
 open import Theory.Functor.Application
@@ -69,3 +70,21 @@ record CoEnd {ℓC₀ ℓC₁ ℓX₀ ℓX₁ : Level} {C : Category {ℓC₀} {
   universal-extranatural A B co-e' = proj₁ (co-universal co-e') , proj₁ (proj₂ (co-universal co-e')) 
                                    , (extranatural-transformation-eq $ fun-ext $ λ a → fun-ext $ λ b → fun-ext $ λ c → cong (λ Y → CoWedge.co-e Y b) $ proj₂ $ proj₂ $ co-universal co-e')
   
+
+postulate
+  Set-∫ : {ℓ₀ ℓ₁ : Level} → (ℓS : Level) → {C : Category {ℓ₀} {ℓ₁}} → Functor (C op ×C C) (SetCat {ℓ₀ ⊔ ℓ₁ ⊔ ℓS}) → Set (ℓ₀ ⊔ ℓ₁ ⊔ ℓS)
+  
+  universal-∫ : {ℓ₀ ℓ₁ ℓS : Level} {C : Category {ℓ₀} {ℓ₁}} 
+              → (F : Functor (C op ×C C) (SetCat {ℓ₀ ⊔ ℓ₁ ⊔ ℓS})) → (e : Wedge (Set-∫ ℓS F) F)
+              → {∫' : Set (ℓ₀ ⊔ ℓ₁ ⊔ ℓS)} (e' : Wedge ∫' F) 
+              → ∃ λ (f : Hom (SetCat {ℓ₀ ⊔ ℓ₁ ⊔ ℓS}) ∫' (Set-∫ ℓS F)) → (IsUnique f) × (Wedge.e e' ≡ Wedge.e (Wedge.compose e f))
+{-
+setEnd : {ℓ₀ ℓ₁ ℓS : Level} {C : Category {ℓ₀} {ℓ₁}} → (F : Functor (C op ×C C) (SetCat {ℓ₀ ⊔ ℓ₁ ⊔ ℓS})) → End F
+setEnd {ℓ₀} {ℓ₁} {ℓS} {C} F = end (Set-∫ ℓS F) {!!} {!!}
+  where
+    W : Wedge (Set-∫ ℓS F) F
+    W = wedge {!!} {!!}
+      where
+        e : (c : Obj C) → Set-∫ ℓS F → F₀ F (c , c)
+        e c ∫ = {!∫!}
+-}
