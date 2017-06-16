@@ -27,7 +27,6 @@ private
   _⊗C₁_ = MonoidalCategory._⊗₁_ CMon
   _∘C_ = _∘_ C
 
-
 dayConvolution : Functor ([ C , Set' ] ×C [ C , Set' ]) [ C , Set' ]
 dayConvolution = functor day₀ day₁ {!!} {!!}
   where
@@ -82,7 +81,7 @@ dayConvolution = functor day₀ day₁ {!!} {!!}
     
     dayEnd : (F G : Functor C Set') → (c : Obj C) → CoEnd (dayF F G c)
     dayEnd (functor F₀ F₁ F-id F-compose) (functor G₀ G₁ G-id G-compose) c 
-      = record { co-∫ = {!!} ; co-e = cowedge wed {!!} ; co-universal = {!!} }
+      = record { co-∫ = {!Σ (C ×C C) (λ {(a , a') → Hom C (a ⊗C₀ a') c × F₀ a × G₀ a'})!} ; co-e = cowedge wed {!!} ; co-universal = {!!} }
       where
         F = functor F₀ F₁ F-id F-compose
         G = functor G₀ G₁ G-id G-compose
