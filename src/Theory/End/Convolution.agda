@@ -96,3 +96,6 @@ convolutionTransformation (functor F₀ F₁ F-id F-compose) (functor G₀ G₁ 
       (λ {(f , Fc , Gc) → ((g ∘C (f ∘C (f₀⁻ ⊗C₁ f₁⁻))) , F₁ f₀⁺ Fc , G₁ f₁⁺ Gc)})
         ≡⟨⟩
       (λ {(f , Fc , Gc) → η y ([ convolutionFunctor F G a ]₁ ((f₀⁻ , f₁⁻) , (f₀⁺ , f₁⁺)) (f , Fc , Gc))}) ∎
+
+convolution-transformation-id : (F G : Functor C Set') → (a : Obj C) → convolutionTransformation F G (id C {a}) ≡ Id⟨ convolutionFunctor F G a ⟩
+convolution-transformation-id F G a = natural-transformation-eq $ fun-ext $ λ (c : Obj CC×CC) → fun-ext (λ {(f , Fc , Gc) → cong (λ X → X , Fc , Gc) (right-id C)})
