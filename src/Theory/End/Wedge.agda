@@ -94,7 +94,7 @@ record CoWedge {ℓC₀ ℓC₁ ℓX₀ ℓX₁ : Level} {C : Category {ℓC₀}
                → (A : Category {ℓA₀} {ℓA₁}) (B : Category {ℓB₀} {ℓB₁})
                → ExtranaturalTransformation (Tri[ F ]₂₃) (constFunctor (A ×C B op ×C B) X w)
   extranatural A B = record
-    { η = λ a b c → co-e b 
+    { η = λ a b c → co-e b
     ; η-natural = λ b c {a} {a'} {f} → trans (right-id X) (trans (sym (left-id X)) (cong (λ Y → co-e b ∘X Y) (sym (fun-id F))))
     ; extranatural = λ a b f → refl 
     ; extranatural-op = λ a c f → co-coher f
