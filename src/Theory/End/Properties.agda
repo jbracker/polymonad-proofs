@@ -28,7 +28,7 @@ private
   _∘C_ = _∘_ C
 
 wedgeTransform : {H H' : Functor (C op ×C C) Set'} → (θ : NaturalTransformation H H') → {w : Obj Set'} → Wedge w H → Wedge w H'
-wedgeTransform {functor H₀ H₁ H-id H-comp} {functor H'₀ H'₁ H'-id H'-comp} θ {w} (wedge f coher) = wedge f' {!!}
+wedgeTransform {functor H₀ H₁ H-id H-comp} {functor H'₀ H'₁ H'-id H'-comp} θ {w} (wedge f coher) = wedge f' coher'
   where
     f' : (c : Obj C) → Hom Set' w (H'₀ (c , c))
     f' c = nat-η θ (c , c) ∘F f c
