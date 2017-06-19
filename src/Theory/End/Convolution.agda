@@ -12,6 +12,7 @@ open import Theory.Category.Definition
 open import Theory.Category.Examples
 open import Theory.Category.Monoidal
 open import Theory.Functor.Definition
+open import Theory.Natural.Transformation
 open import Theory.End.Definition
 open import Theory.End.Wedge
 
@@ -76,3 +77,22 @@ convolutionFunctor (functor F₀ F₁ F-id F-compose) (functor G₀ G₁ G-id G-
       dayF₁ g ∘F dayF₁ f ∎
       where f = (f₁ , f₁') , (f₂ , f₂')
             g = (g₁ , g₁') , (g₂ , g₂')
+
+convolutionTransformation : (F G : Functor C Set') → {a b : Obj C} → Hom C a b → NaturalTransformation (convolutionFunctor F G a) (convolutionFunctor F G b)
+convolutionTransformation (functor F₀ F₁ F-id F-compose) (functor G₀ G₁ G-id G-compose) {a} {b} g = naturalTransformation η nat
+  where
+    F = functor F₀ F₁ F-id F-compose
+    G = functor G₀ G₁ G-id G-compose
+
+    η : (c : Obj CC×CC) → Hom Set' ([ convolutionFunctor F G a ]₀ c) ([ convolutionFunctor F G b ]₀ c)
+    η ((c₀⁻ , c₁⁻) , (c₀⁺ , c₁⁺)) (f , Fc₀ , Gc₁) = (g ∘C f) , Fc₀ , Gc₁
+    
+    nat : {x y : Obj CC×CC} {f : Hom CC×CC x y} → [ convolutionFunctor F G b ]₁ f ∘F η x ≡ η y ∘F [ convolutionFunctor F G a ]₁ f
+    nat {x} {y} {(f₀⁻ , f₁⁻) , (f₀⁺ , f₁⁺)} = begin
+      (λ {(f , Fc , Gc) → [ convolutionFunctor F G b ]₁ ((f₀⁻ , f₁⁻) , (f₀⁺ , f₁⁺)) ((g ∘C f) , Fc , Gc)})
+        ≡⟨⟩
+      (λ {(f , Fc , Gc) → (((g ∘C f) ∘C (f₀⁻ ⊗C₁ f₁⁻)) , F₁ f₀⁺ Fc , G₁ f₁⁺ Gc)})
+        ≡⟨ fun-ext (λ {(f , Fc , Gc) → cong (λ X → (X , F₁ f₀⁺ Fc , G₁ f₁⁺ Gc)) (sym $ assoc C)}) ⟩
+      (λ {(f , Fc , Gc) → ((g ∘C (f ∘C (f₀⁻ ⊗C₁ f₁⁻))) , F₁ f₀⁺ Fc , G₁ f₁⁺ Gc)})
+        ≡⟨⟩
+      (λ {(f , Fc , Gc) → η y ([ convolutionFunctor F G a ]₁ ((f₀⁻ , f₁⁻) , (f₀⁺ , f₁⁺)) (f , Fc , Gc))}) ∎
