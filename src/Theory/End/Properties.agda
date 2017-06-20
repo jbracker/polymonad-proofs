@@ -17,19 +17,20 @@ open import Theory.Natural.Transformation
 open import Theory.End.Wedge
 open import Theory.End.Definition
 
-module Theory.End.Properties {ℓC₀ ℓC₁ ℓS : Level} {C : Category {ℓC₀} {ℓC₁}} where
+module Theory.End.Properties where
 
 open Category
 open Functor hiding ( id )
 open NaturalTransformation renaming ( η to nat-η )
 
-private
-  Set' = setCategory {ℓC₀ ⊔ ℓC₁ ⊔ ℓS}
-  _∘C_ = _∘_ C
-
-wedgeTransform : {H H' : Functor (C op ×C C) Set'} → (θ : NaturalTransformation H H') → {w : Obj Set'} → Wedge w H → Wedge w H'
-wedgeTransform {functor H₀ H₁ H-id H-comp} {functor H'₀ H'₁ H'-id H'-comp} θ {w} (wedge f coher) = wedge f' coher'
+wedgeTransform : {ℓC₀ ℓC₁ ℓS : Level} {C : Category {ℓC₀} {ℓC₁}} 
+               → {H H' : Functor (C op ×C C) (setCategory {ℓC₀ ⊔ ℓC₁ ⊔ ℓS})} → (θ : NaturalTransformation H H') → {w : Obj (setCategory {ℓC₀ ⊔ ℓC₁ ⊔ ℓS})} 
+               → Wedge w H → Wedge w H'
+wedgeTransform {ℓC₀} {ℓC₁} {ℓS} {C} {functor H₀ H₁ H-id H-comp} {functor H'₀ H'₁ H'-id H'-comp} θ {w} (wedge f coher) = wedge f' coher'
   where
+    Set' = setCategory {ℓC₀ ⊔ ℓC₁ ⊔ ℓS}
+    _∘C_ = _∘_ C
+    
     f' : (c : Obj C) → Hom Set' w (H'₀ (c , c))
     f' c = nat-η θ (c , c) ∘F f c
     
@@ -47,9 +48,14 @@ wedgeTransform {functor H₀ H₁ H-id H-comp} {functor H'₀ H'₁ H'-id H'-com
         ≡⟨⟩
       H'₁ (id C , g) ∘F f' c ∎
 
-cowedgeTransform : {H H' : Functor (C op ×C C) Set'} → (θ : NaturalTransformation H H') → {w : Obj Set'} → CoWedge H' w → CoWedge H w
-cowedgeTransform {functor H₀ H₁ H-id H-comp} {functor H'₀ H'₁ H'-id H'-comp} θ {w} (cowedge f coher) = cowedge f' coher'
+cowedgeTransform : {ℓC₀ ℓC₁ ℓS : Level} {C : Category {ℓC₀} {ℓC₁}} 
+                 → {H H' : Functor (C op ×C C) (setCategory {ℓC₀ ⊔ ℓC₁ ⊔ ℓS})} → (θ : NaturalTransformation H H') → {w : Obj (setCategory {ℓC₀ ⊔ ℓC₁ ⊔ ℓS})} 
+                 → CoWedge H' w → CoWedge H w
+cowedgeTransform {ℓC₀} {ℓC₁} {ℓS} {C} {functor H₀ H₁ H-id H-comp} {functor H'₀ H'₁ H'-id H'-comp} θ {w} (cowedge f coher) = cowedge f' coher'
   where
+    Set' = setCategory {ℓC₀ ⊔ ℓC₁ ⊔ ℓS}
+    _∘C_ = _∘_ C
+    
     f' : (c : Obj C) → Hom Set' (H₀ (c , c)) w
     f' c = f c ∘F nat-η θ (c , c)
     
@@ -67,9 +73,17 @@ cowedgeTransform {functor H₀ H₁ H-id H-comp} {functor H'₀ H'₁ H'-id H'-c
         ≡⟨⟩
       f' c ∘F H₁ (g , id C) ∎
 
+endMorph : {ℓC₀ ℓC₁ ℓS : Level} {C : Category {ℓC₀} {ℓC₁}} 
+         → {H H' : Functor (C op ×C C) (setCategory {ℓC₀ ⊔ ℓC₁ ⊔ ℓS})} 
+         → (θ : NaturalTransformation H H') → Hom (setCategory {ℓC₀ ⊔ ℓC₁ ⊔ ℓS}) (Set-∫ ℓS H) (Set-∫ ℓS H')
+endMorph {ℓC₀} {ℓC₁} {ℓS} {C} {H} {H'} θ = proj₁ $ End.universal (setEnd ℓS H') $ wedgeTransform {ℓS = ℓS} θ $ End.e $ setEnd ℓS H
 
-endMorph : {H H' : Functor (C op ×C C) Set'} → (θ : NaturalTransformation H H') → Hom Set' (Set-∫ ℓS H) (Set-∫ ℓS H')
-endMorph {H} {H'} θ = proj₁ $ End.universal (setEnd ℓS H') $ wedgeTransform θ $ End.e $ setEnd ℓS H
+coendMorph : {ℓC₀ ℓC₁ ℓS : Level} {C : Category {ℓC₀} {ℓC₁}} 
+           → {H H' : Functor (C op ×C C) (setCategory {ℓC₀ ⊔ ℓC₁ ⊔ ℓS})} → (θ : NaturalTransformation H H') 
+           → Hom (setCategory {ℓC₀ ⊔ ℓC₁ ⊔ ℓS}) (Set-co-∫ ℓS H) (Set-co-∫ ℓS H')
+coendMorph {ℓC₀} {ℓC₁} {ℓS} {C} {H} {H'} θ = proj₁ $ CoEnd.co-universal (setCoEnd ℓS H) $ cowedgeTransform {ℓS = ℓS} θ $ CoEnd.co-e $ setCoEnd ℓS H'
 
-coendMorph : {H H' : Functor (C op ×C C) Set'} → (θ : NaturalTransformation H H') → Hom Set' (Set-co-∫ ℓS H) (Set-co-∫ ℓS H')
-coendMorph {H} {H'} θ = proj₁ $ CoEnd.co-universal (setCoEnd ℓS H) $ cowedgeTransform θ $ CoEnd.co-e $ setCoEnd ℓS H'
+coend-morph-unique : {ℓC₀ ℓC₁ ℓS : Level} {C : Category {ℓC₀} {ℓC₁}} 
+                   → {H H' : Functor (C op ×C C) (setCategory {ℓC₀ ⊔ ℓC₁ ⊔ ℓS})} → (θ : NaturalTransformation H H') 
+                   → (f : Hom (setCategory {ℓC₀ ⊔ ℓC₁ ⊔ ℓS}) (Set-co-∫ ℓS H) (Set-co-∫ ℓS H')) → f ≡ coendMorph θ
+coend-morph-unique {ℓC₀} {ℓC₁} {ℓS} {C} {H} {H'} θ = proj₁ $ proj₂ $ CoEnd.co-universal (setCoEnd ℓS H) $ cowedgeTransform {ℓS = ℓS} θ $ CoEnd.co-e $ setCoEnd ℓS H'
