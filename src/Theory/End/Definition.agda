@@ -91,6 +91,9 @@ setEnd : {ℓ₀ ℓ₁ : Level} → (ℓS : Level) → {C : Category {ℓ₀} {
 setEnd {ℓ₀} {ℓ₁} ℓS {C} F = end (Set-∫ ℓS F) (Wedge-∫ ℓS F) (universal-∫ ℓS F)
 
 postulate
+  -- This has the correct level, because:
+  -- test : Obj C → Set (ℓSet ⊔ ℓC₁ ⊔ ℓC₀)
+  -- test c = Σ (Obj CC×CC) (λ {((c₀⁻ , c₁⁻) , (c₀⁺ , c₁⁺)) → Hom C (c₀⁻ ⊗C₀ c₁⁻) c × F₀ F c₀⁺ × F₀ G c₁⁺})
   Set-co-∫ : {ℓ₀ ℓ₁ : Level} → (ℓS : Level) → {C : Category {ℓ₀} {ℓ₁}} → Functor (C op ×C C) (SetCat {ℓ₀ ⊔ ℓ₁ ⊔ ℓS}) → Set (ℓ₀ ⊔ ℓ₁ ⊔ ℓS)
   
   CoWedge-∫ : {ℓ₀ ℓ₁ : Level} → (ℓS : Level) → {C : Category {ℓ₀} {ℓ₁}} → (F : Functor (C op ×C C) (SetCat {ℓ₀ ⊔ ℓ₁ ⊔ ℓS})) → CoWedge F (Set-co-∫ ℓS F)
