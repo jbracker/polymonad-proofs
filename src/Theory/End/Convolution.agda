@@ -14,24 +14,27 @@ open import Theory.Category.Monoidal
 open import Theory.Functor.Definition
 open import Theory.Natural.Transformation
 open import Theory.End.Definition
+open import Theory.End.Properties
 open import Theory.End.Wedge
 
-module Theory.End.Convolution {ℓC₀ ℓC₁ ℓSet : Level} {C : Category {ℓC₀} {ℓC₁}} (CMon : MonoidalCategory C) where
+module Theory.End.Convolution where
 
 open Category
 open Functor
 
-private
-  Set' = setCategory {ℓSet ⊔ ℓC₁ ⊔ ℓC₀}
-
-  _⊗C₀_ = MonoidalCategory._⊗₀_ CMon
-  _⊗C₁_ = MonoidalCategory._⊗₁_ CMon
-  _∘C_ = _∘_ C
-  CC×CC = (C ×C C) op ×C (C ×C C)
-
-convolutionFunctor : (F G : Functor C Set') → (c : Obj C) → Functor CC×CC Set'
-convolutionFunctor (functor F₀ F₁ F-id F-compose) (functor G₀ G₁ G-id G-compose) c = functor dayF₀ dayF₁ day-id day-compose
+convolutionFunctor : {ℓC₀ ℓC₁ ℓSet : Level} {C : Category {ℓC₀} {ℓC₁}} (CMon : MonoidalCategory C) 
+                   → (F G : Functor C (setCategory {ℓSet ⊔ ℓC₁ ⊔ ℓC₀})) → (c : Obj C) 
+                   → Functor ((C ×C C) op ×C (C ×C C)) (setCategory {ℓSet ⊔ ℓC₁ ⊔ ℓC₀})
+convolutionFunctor {ℓC₀} {ℓC₁} {ℓSet} {C} CMon (functor F₀ F₁ F-id F-compose) (functor G₀ G₁ G-id G-compose) c = functor dayF₀ dayF₁ day-id day-compose
   where
+    Set' = setCategory {ℓSet ⊔ ℓC₁ ⊔ ℓC₀}
+    CC×CC = (C ×C C) op ×C (C ×C C)
+
+    _⊗C₀_ = MonoidalCategory._⊗₀_ CMon
+    _⊗C₁_ = MonoidalCategory._⊗₁_ CMon
+    _∘C_ = _∘_ C
+    _∘CC×CC_ = Category._∘_ CC×CC
+    
     dayF₀ : Obj (((C ×C C) op) ×C (C ×C C)) → Obj Set'
     dayF₀ ((c₁ , c₁') , (c₂ , c₂')) = Hom C (c₁ ⊗C₀ c₁') c × F₀ c₂ × G₀ c₂'
     
@@ -55,8 +58,6 @@ convolutionFunctor (functor F₀ F₁ F-id F-compose) (functor G₀ G₁ G-id G-
       (λ x → x)
         ≡⟨⟩
       id Set' ∎
-        
-    _∘CC×CC_ = Category._∘_ CC×CC
     
     day-compose : {x y z : Obj CC×CC}
                 → {f : Hom CC×CC x y} {g : Hom CC×CC y z}
@@ -78,24 +79,51 @@ convolutionFunctor (functor F₀ F₁ F-id F-compose) (functor G₀ G₁ G-id G-
       where f = (f₁ , f₁') , (f₂ , f₂')
             g = (g₁ , g₁') , (g₂ , g₂')
 
-convolutionTransformation : (F G : Functor C Set') → {a b : Obj C} → Hom C a b → NaturalTransformation (convolutionFunctor F G a) (convolutionFunctor F G b)
-convolutionTransformation (functor F₀ F₁ F-id F-compose) (functor G₀ G₁ G-id G-compose) {a} {b} g = naturalTransformation η nat
+convolutionTransformation : {ℓC₀ ℓC₁ ℓSet : Level} {C : Category {ℓC₀} {ℓC₁}} (CMon : MonoidalCategory C) 
+                          → {F G F' G' : Functor C (setCategory {ℓSet ⊔ ℓC₁ ⊔ ℓC₀})} 
+                          → (α : NaturalTransformation F F') → (β : NaturalTransformation G G')
+                          → {a b : Obj C} → Hom C a b 
+                          → NaturalTransformation (convolutionFunctor {ℓSet = ℓSet} CMon F G a) (convolutionFunctor {ℓSet = ℓSet} CMon F' G' b)
+convolutionTransformation {ℓC₀} {ℓC₁} {ℓSet} {C} CMon {F} {G} {F'} {G'} α β {a} {b} g = naturalTransformation η nat
   where
-    F = functor F₀ F₁ F-id F-compose
-    G = functor G₀ G₁ G-id G-compose
-
-    η : (c : Obj CC×CC) → Hom Set' ([ convolutionFunctor F G a ]₀ c) ([ convolutionFunctor F G b ]₀ c)
-    η ((c₀⁻ , c₁⁻) , (c₀⁺ , c₁⁺)) (f , Fc₀ , Gc₁) = (g ∘C f) , Fc₀ , Gc₁
+    Set' = setCategory {ℓSet ⊔ ℓC₁ ⊔ ℓC₀}
+    CC×CC = (C ×C C) op ×C (C ×C C)
     
-    nat : {x y : Obj CC×CC} {f : Hom CC×CC x y} → [ convolutionFunctor F G b ]₁ f ∘F η x ≡ η y ∘F [ convolutionFunctor F G a ]₁ f
-    nat {x} {y} {(f₀⁻ , f₁⁻) , (f₀⁺ , f₁⁺)} = begin
-      (λ {(f , Fc , Gc) → [ convolutionFunctor F G b ]₁ ((f₀⁻ , f₁⁻) , (f₀⁺ , f₁⁺)) ((g ∘C f) , Fc , Gc)})
+    _⊗C₀_ = MonoidalCategory._⊗₀_ CMon
+    _⊗C₁_ = MonoidalCategory._⊗₁_ CMon
+    _∘C_ = _∘_ C
+    _∘CC×CC_ = Category._∘_ CC×CC
+    
+    open NaturalTransformation renaming ( η to nat-η )
+    
+    η : (x' : Obj CC×CC) → Hom Set' ([ convolutionFunctor {ℓSet = ℓSet} CMon F G a ]₀ x') ([ convolutionFunctor {ℓSet = ℓSet} CMon F' G' b ]₀ x')
+    η ((c₀⁻ , c₁⁻) , (c₀⁺ , c₁⁺)) (f , Fc₀ , Gc₁) = (g ∘C f) , nat-η α c₀⁺ Fc₀ , nat-η β c₁⁺ Gc₁
+    
+    nat : {x y : Obj CC×CC} {f : Hom CC×CC x y} → [ convolutionFunctor {ℓSet = ℓSet} CMon F' G' b ]₁ f ∘F η x ≡ η y ∘F [ convolutionFunctor {ℓSet = ℓSet} CMon F G a ]₁ f
+    nat {x} {y} {f} = begin
+      [ convolutionFunctor {ℓSet = ℓSet} CMon F' G' b ]₁ f ∘F η x
         ≡⟨⟩
-      (λ {(f , Fc , Gc) → (((g ∘C f) ∘C (f₀⁻ ⊗C₁ f₁⁻)) , F₁ f₀⁺ Fc , G₁ f₁⁺ Gc)})
-        ≡⟨ fun-ext (λ {(f , Fc , Gc) → cong (λ X → (X , F₁ f₀⁺ Fc , G₁ f₁⁺ Gc)) (sym $ assoc C)}) ⟩
-      (λ {(f , Fc , Gc) → ((g ∘C (f ∘C (f₀⁻ ⊗C₁ f₁⁻))) , F₁ f₀⁺ Fc , G₁ f₁⁺ Gc)})
+      (λ {(h , Fc₀ , Gc₁) → ((g ∘C h) ∘C ((proj₁ (proj₁ f)) ⊗C₁ (proj₂ (proj₁ f)))) , F₁ F' (proj₁ (proj₂ f)) (nat-η α (proj₁ (proj₂  x)) Fc₀) , F₁ G' (proj₂ (proj₂ f)) (nat-η β (proj₂ (proj₂ x)) Gc₁)})
+        ≡⟨ fun-ext (λ {(h , Fc₀ , Gc₁) → cong (λ X → X , F₁ F' (proj₁ (proj₂ f)) (nat-η α (proj₁ (proj₂ x)) Fc₀) , F₁ G' (proj₂ (proj₂ f)) (nat-η β (proj₂ (proj₂ x)) Gc₁)) (sym (assoc C))}) ⟩
+      (λ {(h , Fc₀ , Gc₁) → (g ∘C (h ∘C ((proj₁ (proj₁ f)) ⊗C₁ (proj₂ (proj₁ f))))) , F₁ F' (proj₁ (proj₂ f)) (nat-η α (proj₁ (proj₂  x)) Fc₀) , F₁ G' (proj₂ (proj₂ f)) (nat-η β (proj₂ (proj₂ x)) Gc₁)})
+        ≡⟨ fun-ext (λ {(h , Fc₀ , Gc₁) → cong₂ (λ X Y → (g ∘C (h ∘C ((proj₁ (proj₁ f)) ⊗C₁ (proj₂ (proj₁ f))))) , X , Y) (cong (λ Z → Z Fc₀) (natural α)) (cong (λ Z → Z Gc₁) (natural β))}) ⟩
+      (λ {(h , Fc₀ , Gc₁) → (g ∘C (h ∘C ((proj₁ (proj₁ f)) ⊗C₁ (proj₂ (proj₁ f))))) , nat-η α (proj₁ (proj₂ y)) (F₁ F (proj₁ (proj₂ f)) Fc₀) , nat-η β (proj₂ (proj₂ y)) (F₁ G (proj₂ (proj₂ f)) Gc₁)})
         ≡⟨⟩
-      (λ {(f , Fc , Gc) → η y ([ convolutionFunctor F G a ]₁ ((f₀⁻ , f₁⁻) , (f₀⁺ , f₁⁺)) (f , Fc , Gc))}) ∎
+      η y ∘F [ convolutionFunctor {ℓSet = ℓSet} CMon F G a ]₁ f ∎
 
-convolution-transformation-id : (F G : Functor C Set') → (a : Obj C) → convolutionTransformation F G (id C {a}) ≡ Id⟨ convolutionFunctor F G a ⟩
-convolution-transformation-id F G a = natural-transformation-eq $ fun-ext $ λ (c : Obj CC×CC) → fun-ext (λ {(f , Fc , Gc) → cong (λ X → X , Fc , Gc) (right-id C)})
+convolutionTransObj : {ℓC₀ ℓC₁ ℓSet : Level} {C : Category {ℓC₀} {ℓC₁}} (CMon : MonoidalCategory C) 
+                    → (F G : Functor C (setCategory {ℓSet ⊔ ℓC₁ ⊔ ℓC₀})) → {a b : Obj C} → Hom C a b 
+                    → NaturalTransformation (convolutionFunctor {ℓSet = ℓSet} CMon F G a) (convolutionFunctor {ℓSet = ℓSet} CMon F G b)
+convolutionTransObj {ℓC₀} {ℓC₁} {ℓSet} {C} CMon F G f = convolutionTransformation {ℓSet = ℓSet} CMon (Id⟨ F ⟩) (Id⟨ G ⟩) f
+
+convolutionTransFun : {ℓC₀ ℓC₁ ℓSet : Level} {C : Category {ℓC₀} {ℓC₁}} (CMon : MonoidalCategory C) 
+                    → {F G F' G' : Functor C (setCategory {ℓSet ⊔ ℓC₁ ⊔ ℓC₀})} 
+                    → (α : NaturalTransformation F F') → (β : NaturalTransformation G G') 
+                    → (x : Obj C)
+                    → NaturalTransformation (convolutionFunctor {ℓSet = ℓSet} CMon F G x) (convolutionFunctor {ℓSet = ℓSet} CMon F' G' x)
+convolutionTransFun {ℓC₀} {ℓC₁} {ℓSet} {C} CMon α β x = convolutionTransformation {ℓSet = ℓSet} CMon α β (Category.id C {x})
+
+convolution-trans-obj-id : {ℓC₀ ℓC₁ ℓSet : Level} {C : Category {ℓC₀} {ℓC₁}} (CMon : MonoidalCategory C) 
+                         → (F G : Functor C (setCategory {ℓSet ⊔ ℓC₁ ⊔ ℓC₀})) → (a : Obj C) → convolutionTransObj {ℓSet = ℓSet} CMon F G (id C {a}) ≡ Id⟨ convolutionFunctor {ℓSet = ℓSet} CMon F G a ⟩
+convolution-trans-obj-id {ℓC₀} {ℓC₁} {ℓSet} {C} CMon F G a = natural-transformation-eq $ fun-ext $ λ (c : Obj ((C ×C C) op ×C (C ×C C))) → fun-ext (λ {(f , Fc , Gc) → cong (λ X → X , Fc , Gc) (right-id C)})
+
