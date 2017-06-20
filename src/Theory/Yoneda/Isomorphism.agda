@@ -33,27 +33,27 @@ import Theory.Yoneda.Embedding
 open Theory.Yoneda.Embedding {ℓ₀} {ℓ₁} {C}
 
 private
-  SetCat = SetCat' {ℓ₁}
+  SetCat = SetCat' {ℓ₀ ⊔ ℓ₁}
   _∘C_ = _∘_ C
   _∘Cop_ = _∘_ (C op)
   _∘Set_ = _∘_ SetCat
-  _∘Set'_ = _∘_ (SetCat' {suc ℓ₁ ⊔ ℓ₀})
+  _∘Set'_ = _∘_ (SetCat' {suc (ℓ₁ ⊔ ℓ₀)})
   _∘Func_ = _∘_ (FunctorCat C SetCat)
   _∘CSet×C_ = _∘_ $ FunctorCat C SetCat ×C C
 
-yonedaObjFunctor : Functor (FunctorCat C SetCat ×C C ) (SetCat' {suc ℓ₁ ⊔ ℓ₀})
+yonedaObjFunctor : Functor (FunctorCat C SetCat ×C C ) (SetCat' {suc (ℓ₁ ⊔ ℓ₀)})
 yonedaObjFunctor = functor ObjF₀ ObjF₁ (λ {a} → id-ObjF {a}) (λ {a} {b} {c} {f} {g} → compose-ObjF {a} {b} {c} {f} {g})
   where
     open NaturalTransformation
     
-    ObjF₀ : Obj (FunctorCat C SetCat ×C C) → Obj (SetCat' {suc ℓ₁ ⊔ ℓ₀})
+    ObjF₀ : Obj (FunctorCat C SetCat ×C C) → Obj (SetCat' {suc (ℓ₁ ⊔ ℓ₀)})
     ObjF₀ (F , a) = Lift ([ F ]₀ a)
     
     ObjF₁ : {x y : Obj (FunctorCat C SetCat ×C C)}
-          → Hom (FunctorCat C SetCat ×C C) x y → Hom (SetCat' {suc ℓ₁ ⊔ ℓ₀}) (ObjF₀ x) (ObjF₀ y)
+          → Hom (FunctorCat C SetCat ×C C) x y → Hom (SetCat' {suc (ℓ₁ ⊔ ℓ₀)}) (ObjF₀ x) (ObjF₀ y)
     ObjF₁ {F , a} {G , b} (Φ , f) = lift ∘F ([ G ]₁ f ∘F η Φ a) ∘F lower -- same as 'η Φ b ∘ [ F ]₁ f' due to naturality 
     
-    id-ObjF : {a : Obj (FunctorCat C SetCat ×C C)} → ObjF₁ {a} {a} (id (FunctorCat C SetCat ×C C)) ≡ id (SetCat' {suc ℓ₁ ⊔ ℓ₀})
+    id-ObjF : {a : Obj (FunctorCat C SetCat ×C C)} → ObjF₁ {a} {a} (id (FunctorCat C SetCat ×C C)) ≡ id (SetCat' {suc (ℓ₁ ⊔ ℓ₀)})
     id-ObjF {F , a} = cong (λ P → lift ∘F P ∘F lower) $ begin
       [ F ]₁ (id C {a}) ∘F η Id⟨ F ⟩ a
         ≡⟨ refl ⟩
@@ -81,14 +81,14 @@ yonedaObjFunctor = functor ObjF₀ ObjF₁ (λ {a} → id-ObjF {a}) (λ {a} {b} 
         ≡⟨ assoc SetCat {f = [ G ]₁ f ∘F η Φ a} {η Ψ b} {[ H ]₁ g} ⟩
       ([ H ]₁ g ∘F η Ψ b) ∘F ([ G ]₁ f ∘F η Φ a) ∎
 
-yonedaNatTransFunctor : Functor (FunctorCat C SetCat ×C C ) (SetCat' {suc ℓ₁ ⊔ ℓ₀})
+yonedaNatTransFunctor : Functor (FunctorCat C SetCat ×C C ) (SetCat' {suc (ℓ₁ ⊔ ℓ₀)})
 yonedaNatTransFunctor = functor NatTransF₀ NatTransF₁ id-NatTransF (λ {a} {b} {c} {f} {g} → compose-NatTransF {a} {b} {c} {f} {g})
   where
-    NatTransF₀ : Obj (FunctorCat C SetCat ×C C) → Obj (SetCat' {ℓ₀ ⊔ suc ℓ₁})
+    NatTransF₀ : Obj (FunctorCat C SetCat ×C C) → Obj (SetCat' {suc (ℓ₀ ⊔ ℓ₁)})
     NatTransF₀ (F , a) = NaturalTransformation Hom[ a ,-] F
     
     NatTransF₁ : {x y : Obj (FunctorCat C SetCat ×C C)}
-               → Hom (FunctorCat C SetCat ×C C) x y → Hom (SetCat' {ℓ₀ ⊔ suc ℓ₁}) (NatTransF₀ x) (NatTransF₀ y)
+               → Hom (FunctorCat C SetCat ×C C) x y → Hom (SetCat' {suc (ℓ₀ ⊔ ℓ₁)}) (NatTransF₀ x) (NatTransF₀ y)
     NatTransF₁ {F , a} {G , b} (Φ , f) Ψ = Φ ∘Func (Ψ ∘Func [ YonedaEmbedding ]₁ f)
 
     id-NatTransF : {a : Obj (FunctorCat C SetCat ×C C)} → NatTransF₁ {a} {a} (id (FunctorCat C SetCat ×C C)) ≡ id SetCat'
@@ -105,8 +105,8 @@ yonedaNatTransFunctor = functor NatTransF₀ NatTransF₁ id-NatTransF (λ {a} {
         ≡⟨⟩
       id SetCat' ∎ 
     
-    compose-NatTransF : {a b c : Obj (FunctorCat C SetCat ×C C)}
-                      → {f : Hom (FunctorCat C SetCat ×C C) a b} {g : Hom (FunctorCat C SetCat ×C C) b c}
+    compose-NatTransF : {a b c : Obj (FunctorCat C (SetCat' {(ℓ₀ ⊔ ℓ₁)}) ×C C)}
+                      → {f : Hom (FunctorCat C (SetCat' {(ℓ₀ ⊔ ℓ₁)}) ×C C) a b} {g : Hom (FunctorCat C (SetCat' {(ℓ₀ ⊔ ℓ₁)}) ×C C) b c}
                       → NatTransF₁ (g ∘CSet×C f) ≡ NatTransF₁ g ∘Set' NatTransF₁ f
     compose-NatTransF {F , a} {G , b} {H , c} {Φ , f} {Ψ , g} = begin
       NatTransF₁ ((Ψ , g) ∘CSet×C (Φ , f)) 
@@ -134,19 +134,19 @@ yoneda-isomorphism = naturalIsomorphism (naturalTransformation η (λ {a} {b} {f
     η (F , a) (lift Fa) = naturalTransformation η' natural'
       where
         η' : (x : Obj C) → [ Hom[ a ,-] ]₀ x → [ F ]₀ x
-        η' x f = [ F ]₁ f Fa
+        η' x f = [ F ]₁ (lower f) Fa
 
         natural' : {x y : Obj C} {f : Hom C x y} → [ F ]₁ f ∘Set η' x ≡ η' y ∘Set [ Hom[ a ,-] ]₁ f
         natural' {x} {y} {f} = begin
           [ F ]₁ f ∘Set η' x 
             ≡⟨⟩
-          [ F ]₁ f ∘F (λ g → [ F ]₁ g Fa) 
+          [ F ]₁ f ∘F (λ g → [ F ]₁ (lower g) Fa) 
             ≡⟨⟩
-          (λ g → [ F ]₁ f ([ F ]₁ g Fa))
+          (λ g → [ F ]₁ f ([ F ]₁ (lower g) Fa))
             ≡⟨ fun-ext (λ g → sym (cong (λ P → P Fa) (compose F))) ⟩
-          (λ g → [ F ]₁ (f ∘C g) Fa)
+          (λ g → [ F ]₁ (f ∘C lower g) Fa)
             ≡⟨⟩
-          (λ g → [ F ]₁ g Fa) ∘F (λ g → f ∘C g)
+          (λ g → [ F ]₁ (lower {ℓ = ℓ₀} g) Fa) ∘F (λ g → lift $ f ∘C lower g)
             ≡⟨⟩
           η' y ∘Set [ Hom[ a ,-] ]₁ f ∎
     
@@ -155,58 +155,58 @@ yoneda-isomorphism = naturalIsomorphism (naturalTransformation η (λ {a} {b} {f
     natural {F , a} {G , b} {Φ , f} = fun-ext $ λ Fa → begin
       ([ yonedaNatTransFunctor ]₁ (Φ , f) ∘Set' η (F , a)) Fa
         ≡⟨⟩
-      Φ ∘Func (η (F , a) Fa ∘Func yoneda← Hom[ a ,-] b f)
+      Φ ∘Func (η (F , a) Fa ∘Func yoneda← Hom[ a ,-] b (lift f))
         ≡⟨ natural-transformation-eq (fun-ext $ p Fa) ⟩
       η (G , b) ((lift ∘F [ G ]₁ f ∘F NaturalTransformation.η Φ a ∘F lower) Fa)
         ≡⟨⟩
       (η (G , b) ∘Set' [ yonedaObjFunctor ]₁ (Φ , f)) Fa ∎
       where
         p : (Fa : Lift ([ F ]₀ a)) → (x : Obj C) 
-          → NaturalTransformation.η (Φ ∘Func (η (F , a) Fa ∘Func yoneda← Hom[ a ,-] b f)) x 
+          → NaturalTransformation.η (Φ ∘Func (η (F , a) Fa ∘Func yoneda← Hom[ a ,-] b (lift f))) x 
           ≡ NaturalTransformation.η (η (G , b) ((lift ∘F [ G ]₁ f ∘F NaturalTransformation.η Φ a ∘F lower) Fa)) x
         p (lift Fa) x = fun-ext $ λ g → begin
-          NaturalTransformation.η (Φ ∘Func (η (F , a) (lift Fa) ∘Func yoneda← Hom[ a ,-] b f)) x g
+          NaturalTransformation.η (Φ ∘Func (η (F , a) (lift Fa) ∘Func yoneda← Hom[ a ,-] b (lift f))) x g
             ≡⟨⟩
-          NaturalTransformation.η Φ x (NaturalTransformation.η (η (F , a) (lift Fa)) x (NaturalTransformation.η (yoneda← Hom[ a ,-] b f) x g))
+          NaturalTransformation.η Φ x (NaturalTransformation.η (η (F , a) (lift Fa)) x (NaturalTransformation.η (yoneda← Hom[ a ,-] b (lift f)) x g))
             ≡⟨ cong (NaturalTransformation.η Φ x) (cong (λ P → P Fa) (compose F)) ⟩
-          NaturalTransformation.η Φ x ([ F ]₁ g ([ F ]₁ f Fa))
+          NaturalTransformation.η Φ x ([ F ]₁ (lower g) ([ F ]₁ f Fa))
             ≡⟨ cong (λ P → P ([ F ]₁ f Fa)) (sym $ NaturalTransformation.natural Φ) ⟩
-          [ G ]₁ g (NaturalTransformation.η Φ b ([ F ]₁ f Fa))
-            ≡⟨ cong ([ G ]₁ g) (cong (λ P → P Fa) (sym $ NaturalTransformation.natural Φ)) ⟩
-          [ G ]₁ g ([ G ]₁ f (NaturalTransformation.η Φ a Fa))
+          [ G ]₁ (lower g) (NaturalTransformation.η Φ b ([ F ]₁ f Fa))
+            ≡⟨ cong ([ G ]₁ (lower g)) (cong (λ P → P Fa) (sym $ NaturalTransformation.natural Φ)) ⟩
+          [ G ]₁ (lower g) ([ G ]₁ f (NaturalTransformation.η Φ a Fa))
             ≡⟨⟩
           NaturalTransformation.η (η (G , b) ((lift ∘F [ G ]₁ f ∘F NaturalTransformation.η Φ a) Fa)) x g ∎
     
     iso : (x : Obj (FunctorCat C SetCat ×C C)) → Isomorphism SetCat' (η x)
     iso (F , a) = isomorphism (lift ∘F inv) iso-left-id (fun-ext iso-right-id)
       where
-        inv : NaturalTransformation Hom[ a ,-] F -> [ F ]₀ a
-        inv (naturalTransformation η natural) = η a (id C)
+        inv : NaturalTransformation Hom[ a ,-] F → [ F ]₀ a
+        inv (naturalTransformation η natural) = η a (lift $ id C)
         
         iso-left-id : η (F , a) ∘Set' (lift ∘F inv) ≡ id SetCat'
         iso-left-id = fun-ext $ λ Φ → natural-transformation-eq $ fun-ext $ λ x → fun-ext $ λ f → begin
-          [ F ]₁ f (inv Φ)
+          [ F ]₁ (lower f) (inv Φ)
             ≡⟨⟩
-          ([ F ]₁ f ∘F NaturalTransformation.η Φ a) (id C {a})
-            ≡⟨ cong (λ P → P (id C {a})) (NaturalTransformation.natural Φ) ⟩
-          (NaturalTransformation.η Φ x ∘F [ Hom[ a ,-] ]₁ f) (id C {a})
+          ([ F ]₁ (lower f) ∘F NaturalTransformation.η Φ a) (lift $ id C {a})
+            ≡⟨ cong (λ P → P (lift $ id C {a})) (NaturalTransformation.natural Φ) ⟩
+          (NaturalTransformation.η Φ x ∘F [ Hom[ a ,-] ]₁ (lower f)) (lift $ id C {a})
             ≡⟨⟩
-          NaturalTransformation.η Φ x ([ Hom[ a ,-] ]₁ f (id C {a}))
+          NaturalTransformation.η Φ x ([ Hom[ a ,-] ]₁ (lower f) (lift $ id C {a}))
             ≡⟨⟩
-          NaturalTransformation.η Φ x (f ∘C (id C {a}))
-            ≡⟨ cong (NaturalTransformation.η Φ x) (left-id C) ⟩
+          NaturalTransformation.η Φ x (lift $ lower f ∘C (id C {a}))
+            ≡⟨ cong (NaturalTransformation.η Φ x ∘F lift) (left-id C) ⟩
           NaturalTransformation.η Φ x f ∎
         
         iso-right-id : (Fa : Lift ([ F ]₀ a)) → ((lift ∘F inv) ∘Set' η (F , a)) Fa ≡ (id SetCat') Fa
         iso-right-id (lift Fa) = begin
           ((lift ∘F inv) ∘Set' η (F , a)) (lift Fa) 
-            ≡⟨⟩ 
+            ≡⟨⟩
           lift ( inv (η (F , a) (lift Fa)) )
-            ≡⟨⟩ 
-          lift ( NaturalTransformation.η (η (F , a) (lift Fa)) a (id C) )
-            ≡⟨⟩ 
+            ≡⟨⟩
+          lift ( NaturalTransformation.η (η (F , a) (lift Fa)) a (lift $ id C) )
+            ≡⟨⟩
           lift ( [ F ]₁ (id C) Fa )
-            ≡⟨ cong (λ P → lift (P Fa)) (Functor.id F) ⟩ 
+            ≡⟨ cong lift (cong (λ P → P Fa) (Functor.id F)) ⟩
           lift Fa
-            ≡⟨⟩ 
+            ≡⟨⟩
           (id SetCat') (lift Fa) ∎
