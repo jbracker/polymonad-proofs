@@ -77,6 +77,11 @@ record CoEnd {ℓC₀ ℓC₁ ℓX₀ ℓX₁ : Level} {C : Category {ℓC₀} {
                                    , (extranatural-transformation-eq $ fun-ext $ λ a → fun-ext $ λ b → fun-ext $ λ c → cong (λ X → X b) (proj₂ (proj₂ (co-universal co-e'))))
   
 
+-- For functors into set the end and coend always exist, therefore we can postulate them.
+-- We had to postulate end and coends for set, because defining day convolution is otherwise
+-- close to impossible. Agda does not allow quotient types which are necessary to properly 
+-- define the result of the day convolution tensor product.
+
 postulate
   Set-∫ : {ℓ₀ ℓ₁ : Level} → (ℓS : Level) → {C : Category {ℓ₀} {ℓ₁}} → Functor (C op ×C C) (SetCat {ℓ₀ ⊔ ℓ₁ ⊔ ℓS}) → Set (ℓ₀ ⊔ ℓ₁ ⊔ ℓS)
   
