@@ -45,6 +45,6 @@ postulate
   {-
   day-triangle-id : {ℓC₀ ℓC₁ : Level} → (ℓSet : Level) → {C : Category {ℓC₀} {ℓC₁}} → (CMon : MonoidalCategory C) 
                   → (x y : Functor C (setCategory {ℓSet ⊔ ℓC₀ ⊔ ℓC₁})) 
-                  → F₁ (dayConvolution {ℓSet = ℓSet} CMon) (iso-η (dayRightUnitor ℓSet CMon) x , id (FunCat C (setCategory {ℓSet ⊔ ℓC₀ ⊔ ℓC₁})) {?} )
-                  ≡ ⟨ F₁ (dayConvolution {ℓSet = ℓSet} CMon) (id (FunCat C (setCategory {ℓSet ⊔ ℓC₀ ⊔ ℓC₁})) {?} , iso-η (dayLeftUnitor ℓSet CMon) y) ⟩∘ᵥ⟨ iso-η (dayAssociator ℓSet CMon) (x ,' dayUnit {ℓSet = ℓSet} CMon ,' y) ⟩
--}
+                  → F₁ (dayConvolution {ℓSet = ℓSet} CMon) (iso-η (dayRightUnitor ℓSet CMon) x , id (FunCat C (setCategory {ℓSet ⊔ ℓC₀ ⊔ ℓC₁})) {y} )
+                  ≡ ⟨ F₁ (dayConvolution {ℓSet = ℓSet} CMon) (id (FunCat C (setCategory {ℓSet ⊔ ℓC₀ ⊔ ℓC₁})) {x} , iso-η (dayLeftUnitor ℓSet CMon) y) ⟩∘ᵥ⟨ iso-η (dayAssociator ℓSet CMon) (x ,' dayUnit {ℓSet = ℓSet} CMon ,' y) ⟩
+  -}
