@@ -49,15 +49,16 @@ module BiFunctor {ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓE₀ ℓE₁ : Level}
       
       HomF : {a b : Obj D} → Hom D a b → Hom E (ObjF a) (ObjF b)
       HomF f = F₁ (id C {x} , f)
-      
-      composeF : {a b c : Obj D} {f : Hom D a b} {g : Hom D b c}
-               → HomF (g ∘D f) ≡ HomF g ∘E HomF f
-      composeF {a} {b} {c} {f} {g} = begin
-        F₁ (id C {x} , g ∘D f)
-          ≡⟨ cong (λ X → F₁ (X , g ∘D f)) (sym $ left-id C) ⟩
-        F₁ (id C {x} ∘C id C {x} , g ∘D f)
-          ≡⟨ compose ⟩
-        F₁ (id C {x} , g) ∘E F₁ (id C {x} , f) ∎
+
+      abstract
+        composeF : {a b c : Obj D} {f : Hom D a b} {g : Hom D b c}
+                 → HomF (g ∘D f) ≡ HomF g ∘E HomF f
+        composeF {a} {b} {c} {f} {g} = begin
+          F₁ (id C {x} , g ∘D f)
+            ≡⟨ cong (λ X → F₁ (X , g ∘D f)) (sym $ left-id C) ⟩
+          F₁ (id C {x} ∘C id C {x} , g ∘D f)
+            ≡⟨ compose ⟩
+          F₁ (id C {x} , g) ∘E F₁ (id C {x} , f) ∎
   
   constBiFunctor₂ : Obj D → Functor (C ×C D) E → Functor C E
   constBiFunctor₂ x (functor F₀ F₁ functor-id compose) = functor ObjF HomF functor-id composeF
@@ -67,15 +68,16 @@ module BiFunctor {ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓE₀ ℓE₁ : Level}
       
       HomF : {a b : Obj C} → Hom C a b → Hom E (ObjF a) (ObjF b)
       HomF f = F₁ (f , id D {x})
-      
-      composeF : {a b c : Obj C} {f : Hom C a b} {g : Hom C b c}
-               → HomF (g ∘C f) ≡ HomF g ∘E HomF f
-      composeF {a} {b} {c} {f} {g} = begin
-        F₁ (g ∘C f , id D {x})
-          ≡⟨ cong (λ X → F₁ (g ∘C f , X)) (sym $ left-id D) ⟩
-        F₁ (g ∘C f , id D {x} ∘D id D {x})
-          ≡⟨ compose ⟩
-        F₁ (g , id D {x}) ∘E F₁ (f , id D {x}) ∎
+
+      abstract
+        composeF : {a b c : Obj C} {f : Hom C a b} {g : Hom C b c}
+                 → HomF (g ∘C f) ≡ HomF g ∘E HomF f
+        composeF {a} {b} {c} {f} {g} = begin
+          F₁ (g ∘C f , id D {x})
+            ≡⟨ cong (λ X → F₁ (g ∘C f , X)) (sym $ left-id D) ⟩
+          F₁ (g ∘C f , id D {x} ∘D id D {x})
+            ≡⟨ compose ⟩
+          F₁ (g , id D {x}) ∘E F₁ (f , id D {x}) ∎
   
   constBiFunctor : Obj C → Obj D → Functor (C ×C D) E → Functor ⊤-Cat E
   constBiFunctor c d (functor F₀ F₁ functor-id compose)

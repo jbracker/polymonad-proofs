@@ -134,15 +134,18 @@ catCategory {ℓ₀} {ℓ₁} = record
   ; left-id = left-id
   ; right-id = right-id
   } where
-    assoc : {a b c d : Category} {f : Functor a b} {g : Functor b c} {h : Functor c d} 
-          → [ h ]∘[ [ g ]∘[ f ] ] ≡ [ [ h ]∘[ g ] ]∘[ f ]
-    assoc = functor-eq refl refl
-    
-    right-id : {a b : Category} {f : Functor a b} → [ Id[ b ] ]∘[ f ] ≡ f
-    right-id = functor-eq refl refl
+    abstract
+      assoc : {a b c d : Category} {f : Functor a b} {g : Functor b c} {h : Functor c d} 
+            → [ h ]∘[ [ g ]∘[ f ] ] ≡ [ [ h ]∘[ g ] ]∘[ f ]
+      assoc = functor-eq refl refl
 
-    left-id : {a b : Category} {f : Functor a b} → [ f ]∘[ Id[ a ] ] ≡ f
-    left-id = refl
+    abstract
+      right-id : {a b : Category} {f : Functor a b} → [ Id[ b ] ]∘[ f ] ≡ f
+      right-id = functor-eq refl refl
+
+    abstract
+      left-id : {a b : Category} {f : Functor a b} → [ f ]∘[ Id[ a ] ] ≡ f
+      left-id = functor-eq refl refl
 
 -- Category of functors and natural transformations
 functorCategory : {Cℓ₀ Cℓ₁ Dℓ₀ Dℓ₁ : Level} → Category {Cℓ₀} {Cℓ₁} → Category {Dℓ₀} {Dℓ₁} → Category
@@ -151,10 +154,25 @@ functorCategory C D = record
   ; Hom = NaturalTransformation {C = C} {D}
   ; _∘_ = λ {F} {G} {H} → ⟨_⟩∘ᵥ⟨_⟩ {C = C} {D} {F} {G} {H}
   ; id = λ {F} → Id⟨ F ⟩
-  ; assoc = natural-transformation-eq $ fun-ext $ λ _ → Category.assoc D
-  ; left-id = natural-transformation-eq $ fun-ext $ λ _ → Category.left-id D
-  ; right-id = natural-transformation-eq $ fun-ext $ λ _ → Category.right-id D
-  }
+  ; assoc = λ {a b c d} {f} {g} {h} → assoc' {a} {b} {c} {d} {f} {g} {h}
+  ; left-id = λ {a b} {f} → left-id' {a} {b} {f}
+  ; right-id = λ {a b} {f} → right-id' {a} {b} {f}
+  } where
+    abstract
+      assoc' : {a b c d : Functor C D} {f : NaturalTransformation a b}
+             → {g : NaturalTransformation b c} {h : NaturalTransformation c d}
+             → ⟨ h ⟩∘ᵥ⟨ ⟨ g ⟩∘ᵥ⟨ f ⟩ ⟩ ≡ ⟨ ⟨ h ⟩∘ᵥ⟨ g ⟩ ⟩∘ᵥ⟨ f ⟩
+      assoc' = natural-transformation-eq $ fun-ext $ λ _ → Category.assoc D
+
+    abstract
+      left-id' : {a b : Functor C D} {f : NaturalTransformation a b}
+               → ⟨ f ⟩∘ᵥ⟨ Id⟨ a ⟩ ⟩ ≡ f
+      left-id' = natural-transformation-eq $ fun-ext $ λ _ → Category.left-id D
+
+    abstract
+      right-id' : {a b : Functor C D} {f : NaturalTransformation a b}
+                → ⟨ Id⟨ b ⟩ ⟩∘ᵥ⟨ f ⟩ ≡ f
+      right-id' = natural-transformation-eq $ fun-ext $ λ _ → Category.right-id D
 
 [_,_] = functorCategory
 
@@ -178,16 +196,19 @@ preorderCategory P proof-irr-≤ = record
     
     _∘_ : {a b c : Preorder.Carrier P} → b ≤ c → a ≤ b → a ≤ c
     _∘_ b≤c a≤b = Preorder.trans P a≤b b≤c
-    
-    assoc : {a b c d : Preorder.Carrier P} {f : a ≤ b} {g : b ≤ c} {h : c ≤ d} 
-          → h ∘ (g ∘ f) ≡ (h ∘ g) ∘ f
-    assoc {a} {b} {c} {d} {f} {g} {h} = proof-irr-≤ a d (ptrans (ptrans f g) h) (ptrans f (ptrans g h))
-    
-    right-id : {a b : Preorder.Carrier P} {f : a ≤ b} → id ∘ f ≡ f
-    right-id {a} {b} {f} = proof-irr-≤ a b (ptrans f id) f
 
-    left-id : {a b : Preorder.Carrier P} {f : a ≤ b} → f ∘ id ≡ f
-    left-id {a} {b} {f} = proof-irr-≤ a b (ptrans id f) f
+    abstract
+      assoc : {a b c d : Preorder.Carrier P} {f : a ≤ b} {g : b ≤ c} {h : c ≤ d} 
+            → h ∘ (g ∘ f) ≡ (h ∘ g) ∘ f
+      assoc {a} {b} {c} {d} {f} {g} {h} = proof-irr-≤ a d (ptrans (ptrans f g) h) (ptrans f (ptrans g h))
+
+    abstract
+      right-id : {a b : Preorder.Carrier P} {f : a ≤ b} → id ∘ f ≡ f
+      right-id {a} {b} {f} = proof-irr-≤ a b (ptrans f id) f
+
+    abstract
+      left-id : {a b : Preorder.Carrier P} {f : a ≤ b} → f ∘ id ≡ f
+      left-id {a} {b} {f} = proof-irr-≤ a b (ptrans id f) f
 
 -------------------------------------------------------------------------------
 -- The Binary Category
@@ -222,29 +243,32 @@ binaryCategory = record
     id : {a : Bool} → Hom a a
     id {true}  = tt
     id {false} = tt
-    
-    assoc : {a b c d : Bool} {f : Hom a b} {g : Hom b c} {h : Hom c d} 
-          → comp {a} {c} {d} h (comp {a} {b} {c} g f) ≡ comp {a} {b} {d} (comp {b} {c} {d} h g) f
-    assoc {true}  {true}  {true}  {true}  {tt} {tt} {tt} = refl
-    assoc {true}  {true}  {true}  {false} {tt} {tt} {()}
-    assoc {true}  {true}  {false} {d}     {tt} {()} {h}
-    assoc {true}  {false} {c}     {d}     {()} {g}  {h}
-    assoc {false} {true}  {true}  {true}  {tt} {tt} {tt} = refl
-    assoc {false} {true}  {true}  {false} {tt} {tt} {()}
-    assoc {false} {true}  {false} {d}     {tt} {()} {h}
-    assoc {false} {false} {true}  {true}  {tt} {tt} {tt} = refl
-    assoc {false} {false} {true}  {false} {tt} {tt} {()}
-    assoc {false} {false} {false} {true}  {tt} {tt} {tt} = refl
-    assoc {false} {false} {false} {false} {tt} {tt} {tt} = refl
 
-    right-id : {a b : Bool} {f : Hom a b} → comp {a} {b} {b} (id {b}) f ≡ f
-    right-id {true} {true} {tt} = refl
-    right-id {true} {false} {()}
-    right-id {false} {true} {tt} = refl
-    right-id {false} {false} {tt} = refl
+    abstract
+      assoc : {a b c d : Bool} {f : Hom a b} {g : Hom b c} {h : Hom c d} 
+            → comp {a} {c} {d} h (comp {a} {b} {c} g f) ≡ comp {a} {b} {d} (comp {b} {c} {d} h g) f
+      assoc {true}  {true}  {true}  {true}  {tt} {tt} {tt} = refl
+      assoc {true}  {true}  {true}  {false} {tt} {tt} {()}
+      assoc {true}  {true}  {false} {d}     {tt} {()} {h}
+      assoc {true}  {false} {c}     {d}     {()} {g}  {h}
+      assoc {false} {true}  {true}  {true}  {tt} {tt} {tt} = refl
+      assoc {false} {true}  {true}  {false} {tt} {tt} {()}
+      assoc {false} {true}  {false} {d}     {tt} {()} {h}
+      assoc {false} {false} {true}  {true}  {tt} {tt} {tt} = refl
+      assoc {false} {false} {true}  {false} {tt} {tt} {()}
+      assoc {false} {false} {false} {true}  {tt} {tt} {tt} = refl
+      assoc {false} {false} {false} {false} {tt} {tt} {tt} = refl
 
-    left-id : {a b : Bool} {f : Hom a b} → comp {a} {a} {b} f (id {a}) ≡ f
-    left-id {true} {true} {tt} = refl
-    left-id {true} {false} {()}
-    left-id {false} {true} {tt} = refl
-    left-id {false} {false} {tt} = refl
+    abstract
+      right-id : {a b : Bool} {f : Hom a b} → comp {a} {b} {b} (id {b}) f ≡ f
+      right-id {true} {true} {tt} = refl
+      right-id {true} {false} {()}
+      right-id {false} {true} {tt} = refl
+      right-id {false} {false} {tt} = refl
+
+    abstract
+      left-id : {a b : Bool} {f : Hom a b} → comp {a} {a} {b} f (id {a}) ≡ f
+      left-id {true} {true} {tt} = refl
+      left-id {true} {false} {()}
+      left-id {false} {true} {tt} = refl
+      left-id {false} {false} {tt} = refl

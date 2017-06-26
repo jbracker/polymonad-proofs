@@ -37,46 +37,48 @@ record Category {ℓ₀ ℓ₁ : Level} : Set (lsuc (ℓ₀ ⊔ ℓ₁)) where
 -- Propositional equality of categories
 -------------------------------------------------------------------------------
 
-category-hom-eq : ∀ {ℓ₀ ℓ₁} 
-               → {ObjC ObjD : Set ℓ₀} → (eq₀ : ObjC ≡ ObjD)
-               → {HomC : ObjC → ObjC → Set ℓ₁} → {HomD : ObjD → ObjD → Set ℓ₁} → (eq₁ : subst (λ X → (X → X → Set ℓ₁)) eq₀ HomC ≡ HomD)
-               → {a b : ObjC} → HomD (subst idF eq₀ a) (subst idF eq₀ b) ≡ HomC a b
-category-hom-eq refl refl = refl
+abstract
+  category-hom-eq : ∀ {ℓ₀ ℓ₁} 
+                  → {ObjC ObjD : Set ℓ₀} → (eq₀ : ObjC ≡ ObjD)
+                  → {HomC : ObjC → ObjC → Set ℓ₁} → {HomD : ObjD → ObjD → Set ℓ₁} → (eq₁ : subst (λ X → (X → X → Set ℓ₁)) eq₀ HomC ≡ HomD)
+                  → {a b : ObjC} → HomD (subst idF eq₀ a) (subst idF eq₀ b) ≡ HomC a b
+  category-hom-eq refl refl = refl
 
-category-eq : ∀ {ℓ₀ ℓ₁} 
-            → {ObjC : Set ℓ₀}
-            → {ObjD : Set ℓ₀}
-            → {HomC : ObjC → ObjC → Set ℓ₁}
-            → {HomD : ObjD → ObjD → Set ℓ₁}
-            → {_∘C_ : ∀ {a b c} → HomC b c → HomC a b → HomC a c}
-            → {_∘D_ : ∀ {a b c} → HomD b c → HomD a b → HomD a c}
-            → {idC : {a : ObjC} → HomC a a}
-            → {idD : {a : ObjD} → HomD a a}
-            → {assocC : {a b c d : ObjC} {f : HomC a b} {g : HomC b c} {h : HomC c d} → h ∘C (g ∘C f) ≡ (h ∘C g) ∘C f}
-            → {assocD : {a b c d : ObjD} {f : HomD a b} {g : HomD b c} {h : HomD c d} → h ∘D (g ∘D f) ≡ (h ∘D g) ∘D f}
-            → {right-idC : {a b : ObjC} {f : HomC a b} → idC ∘C f ≡ f}
-            → {right-idD : {a b : ObjD} {f : HomD a b} → idD ∘D f ≡ f}
-            → {left-idC : {a b : ObjC} {f : HomC a b} → f ∘C idC ≡ f}
-            → {left-idD : {a b : ObjD} {f : HomD a b} → f ∘D idD ≡ f}
-            → ObjC ≡ ObjD
-            → HomC ≅ HomD
-            → (λ {a} {b} {c} → _∘C_ {a} {b} {c}) ≅ (λ {a} {b} {c} → _∘D_ {a} {b} {c})
-            → (λ {a} → idC {a}) ≅ (λ {a} → idD {a})
-            → category ObjC HomC _∘C_ idC assocC right-idC left-idC ≡ category ObjD HomD _∘D_ idD assocD right-idD left-idD
-category-eq {ℓ₀} {ℓ₁} {ObjC} {.ObjC} {HomC} {.HomC}  {_∘C_} {._∘C_} {idC} {.idC} {assocC} {assocD} {right-idC} {right-idD} {left-idC} {left-idD} refl hrefl hrefl hrefl 
-  = cong₃ (category ObjC HomC _∘C_ idC) p1 p2 p3
-  where
-    p1 : (λ {a} {b} {c} {d} {f} {g} {h} → assocC {a} {b} {c} {d} {f} {g} {h}) ≡ assocD
-    p1 = implicit-fun-ext $ λ a → implicit-fun-ext $ λ b → implicit-fun-ext $ λ c → 
-         implicit-fun-ext $ λ d → implicit-fun-ext $ λ f → implicit-fun-ext $ λ g → 
-         implicit-fun-ext $ λ h → 
-         proof-irrelevance (assocC {a} {b} {c} {d} {f} {g} {h}) (assocD {a} {b} {c} {d} {f} {g} {h})
-    p2 : (λ {a} {b} {f} → right-idC {a} {b} {f}) ≡ (λ {a} {b} {f} → right-idD {a} {b} {f})
-    p2 = implicit-fun-ext $ λ a → implicit-fun-ext $ λ b → implicit-fun-ext $ λ f →
-         proof-irrelevance (right-idC {a} {b} {f}) (right-idD {a} {b} {f})
-    p3 : (λ {a} {b} {f} → left-idC {a} {b} {f}) ≡ (λ {a} {b} {f} → left-idD {a} {b} {f})
-    p3 = implicit-fun-ext $ λ a → implicit-fun-ext $ λ b → implicit-fun-ext $ λ f →
-         proof-irrelevance (left-idC {a} {b} {f}) (left-idD {a} {b} {f})
+abstract
+  category-eq : ∀ {ℓ₀ ℓ₁} 
+              → {ObjC : Set ℓ₀}
+              → {ObjD : Set ℓ₀}
+              → {HomC : ObjC → ObjC → Set ℓ₁}
+              → {HomD : ObjD → ObjD → Set ℓ₁}
+              → {_∘C_ : ∀ {a b c} → HomC b c → HomC a b → HomC a c}
+              → {_∘D_ : ∀ {a b c} → HomD b c → HomD a b → HomD a c}
+              → {idC : {a : ObjC} → HomC a a}
+              → {idD : {a : ObjD} → HomD a a}
+              → {assocC : {a b c d : ObjC} {f : HomC a b} {g : HomC b c} {h : HomC c d} → h ∘C (g ∘C f) ≡ (h ∘C g) ∘C f}
+              → {assocD : {a b c d : ObjD} {f : HomD a b} {g : HomD b c} {h : HomD c d} → h ∘D (g ∘D f) ≡ (h ∘D g) ∘D f}
+              → {right-idC : {a b : ObjC} {f : HomC a b} → idC ∘C f ≡ f}
+              → {right-idD : {a b : ObjD} {f : HomD a b} → idD ∘D f ≡ f}
+              → {left-idC : {a b : ObjC} {f : HomC a b} → f ∘C idC ≡ f}
+              → {left-idD : {a b : ObjD} {f : HomD a b} → f ∘D idD ≡ f}
+              → ObjC ≡ ObjD
+              → HomC ≅ HomD
+              → (λ {a} {b} {c} → _∘C_ {a} {b} {c}) ≅ (λ {a} {b} {c} → _∘D_ {a} {b} {c})
+              → (λ {a} → idC {a}) ≅ (λ {a} → idD {a})
+              → category ObjC HomC _∘C_ idC assocC right-idC left-idC ≡ category ObjD HomD _∘D_ idD assocD right-idD left-idD
+  category-eq {ℓ₀} {ℓ₁} {ObjC} {.ObjC} {HomC} {.HomC}  {_∘C_} {._∘C_} {idC} {.idC} {assocC} {assocD} {right-idC} {right-idD} {left-idC} {left-idD} refl hrefl hrefl hrefl 
+    = cong₃ (category ObjC HomC _∘C_ idC) p1 p2 p3
+    where
+      p1 : (λ {a} {b} {c} {d} {f} {g} {h} → assocC {a} {b} {c} {d} {f} {g} {h}) ≡ assocD
+      p1 = implicit-fun-ext $ λ a → implicit-fun-ext $ λ b → implicit-fun-ext $ λ c → 
+           implicit-fun-ext $ λ d → implicit-fun-ext $ λ f → implicit-fun-ext $ λ g → 
+           implicit-fun-ext $ λ h → 
+           proof-irrelevance (assocC {a} {b} {c} {d} {f} {g} {h}) (assocD {a} {b} {c} {d} {f} {g} {h})
+      p2 : (λ {a} {b} {f} → right-idC {a} {b} {f}) ≡ (λ {a} {b} {f} → right-idD {a} {b} {f})
+      p2 = implicit-fun-ext $ λ a → implicit-fun-ext $ λ b → implicit-fun-ext $ λ f →
+           proof-irrelevance (right-idC {a} {b} {f}) (right-idD {a} {b} {f})
+      p3 : (λ {a} {b} {f} → left-idC {a} {b} {f}) ≡ (λ {a} {b} {f} → left-idD {a} {b} {f})
+      p3 = implicit-fun-ext $ λ a → implicit-fun-ext $ λ b → implicit-fun-ext $ λ f →
+           proof-irrelevance (left-idC {a} {b} {f}) (left-idD {a} {b} {f})
 
 -------------------------------------------------------------------------------
 -- The Unit Category
@@ -119,15 +121,18 @@ emptyCategory = record
     
     id : {a : ⊥} → Hom a a
     id {()}
-    
-    assoc : {a b c d : ⊥} {f : Hom a b} {g : Hom b c} {h : Hom c d} → h ∘ (g ∘ f) ≡ (h ∘ g) ∘ f
-    assoc {()}
-    
-    left-id : {a b : ⊥} {f : Hom a b} → f ∘ id ≡ f
-    left-id {()}
-    
-    right-id : {a b : ⊥} {f : Hom a b} → id ∘ f ≡ f
-    right-id {()}
+
+    abstract
+      assoc : {a b c d : ⊥} {f : Hom a b} {g : Hom b c} {h : Hom c d} → h ∘ (g ∘ f) ≡ (h ∘ g) ∘ f
+      assoc {()}
+
+    abstract
+      left-id : {a b : ⊥} {f : Hom a b} → f ∘ id ≡ f
+      left-id {()}
+
+    abstract
+      right-id : {a b : ⊥} {f : Hom a b} → id ∘ f ≡ f
+      right-id {()}
 
 ⊥-Cat = emptyCategory
 
@@ -159,25 +164,27 @@ liftCategory {ℓC₀} {ℓC₁} {ℓL₀} {ℓL₁} C = record
     
     left-idift : {a : ObjL} → HomL a a
     left-idift = lift (id C)
-    
-    shiftL :  {a b c : Obj C} {f : Hom C a b} {g : Hom C b c} 
-           → lift g ∘L lift f ≡ lift (g ∘C f)
-    shiftL = refl
-    
-    assocL : {a b c d : ObjL} {f : HomL a b} {g : HomL b c} {h : HomL c d} 
-           → h ∘L (g ∘L f) ≡ (h ∘L g) ∘L f
-    assocL {f = lift f} {lift g} {lift h} = begin
-      lift h ∘L (lift g ∘L lift f) 
-        ≡⟨ cong (λ X → lift h ∘L X) shiftL ⟩ 
-      lift h ∘L lift (g ∘C f) 
-        ≡⟨ shiftL ⟩ 
-      lift (h ∘C (g ∘C f))
-        ≡⟨ cong lift (assoc C) ⟩
-      lift ((h ∘C g) ∘C f)
-        ≡⟨ sym shiftL ⟩
-      lift (h ∘C g) ∘L lift f 
-        ≡⟨ cong (λ X → X ∘L lift f) (sym shiftL) ⟩
-      (lift h ∘L lift g) ∘L lift f ∎
+
+    abstract
+      shiftL :  {a b c : Obj C} {f : Hom C a b} {g : Hom C b c} 
+             → lift g ∘L lift f ≡ lift (g ∘C f)
+      shiftL = refl
+
+    abstract
+      assocL : {a b c d : ObjL} {f : HomL a b} {g : HomL b c} {h : HomL c d} 
+             → h ∘L (g ∘L f) ≡ (h ∘L g) ∘L f
+      assocL {f = lift f} {lift g} {lift h} = begin
+        lift h ∘L (lift g ∘L lift f) 
+          ≡⟨ cong (λ X → lift h ∘L X) shiftL ⟩ 
+        lift h ∘L lift (g ∘C f) 
+          ≡⟨ shiftL ⟩ 
+        lift (h ∘C (g ∘C f))
+          ≡⟨ cong lift (assoc C) ⟩
+        lift ((h ∘C g) ∘C f)
+          ≡⟨ sym shiftL ⟩
+        lift (h ∘C g) ∘L lift f 
+          ≡⟨ cong (λ X → X ∘L lift f) (sym shiftL) ⟩
+        (lift h ∘L lift g) ∘L lift f ∎
 
 -------------------------------------------------------------------------------
 -- Product of Categories

@@ -70,11 +70,12 @@ record MonoidalCategory {ℓ₀ ℓ₁ : Level} (C : Category {ℓ₀} {ℓ₁})
     
   category : Category
   category = Category.category Obj Hom _∘_ id assoc right-id left-id
-  
-  exchange : {a b c d e i : Obj} 
-           → {f : Hom b c} {g : Hom a b} {h : Hom e i} {k : Hom d e} 
-           → (f ∘ g) ⊗₁ (h ∘ k) ≡ (f ⊗₁ h) ∘ (g ⊗₁ k)
-  exchange {f = f} {g} {h} {k} = compose tensor
+
+  abstract
+    exchange : {a b c d e i : Obj} 
+             → {f : Hom b c} {g : Hom a b} {h : Hom e i} {k : Hom d e} 
+             → (f ∘ g) ⊗₁ (h ∘ k) ≡ (f ⊗₁ h) ∘ (g ⊗₁ k)
+    exchange {f = f} {g} {h} {k} = compose tensor
   
 
 private

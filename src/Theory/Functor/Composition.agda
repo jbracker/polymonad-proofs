@@ -26,13 +26,15 @@ compFunctor {C = C} {D = D} {E = E} F G = record
     
     F₁ : {a b : Obj C} → Hom C a b → Hom E (F₀ a) (F₀ b)
     F₁ f = [ F ]₁ ( [ G ]₁ f )
-    
-    id : ∀ {a : Obj C} → F₁ {a = a} (Category.id C) ≡ Category.id E
-    id = trans (cong (λ X → Functor.F₁ F X) (Functor.id G)) (Functor.id F)
-    
-    compose : ∀ {a b c} {f : Hom C a b} {g : Hom C b c} 
-         → F₁ (_∘_ C g f) ≡ _∘_ E (F₁ g) (F₁ f)
-    compose = trans (cong (λ X → Functor.F₁ F X) (Functor.compose G)) (Functor.compose F)
+
+    abstract
+      id : ∀ {a : Obj C} → F₁ {a = a} (Category.id C) ≡ Category.id E
+      id = trans (cong (λ X → Functor.F₁ F X) (Functor.id G)) (Functor.id F)
+
+    abstract
+      compose : ∀ {a b c} {f : Hom C a b} {g : Hom C b c} 
+              → F₁ (_∘_ C g f) ≡ _∘_ E (F₁ g) (F₁ f)
+      compose = trans (cong (λ X → Functor.F₁ F X) (Functor.compose G)) (Functor.compose F)
 
 [_]∘[_] = compFunctor
 
