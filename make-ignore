@@ -19,8 +19,7 @@ src/Theory/Haskell/Applicative.agda
 src/Theory/TwoFunctor/Properties/FromRelativeMonad.agda
 src/Theory/TwoFunctor/Properties/ToAtkeyParameterizedMonad.agda
 
-src/Theory/End/DayConvolution.agda
+src/Theory/Natural/Isomorphism/Examples/DayConvolutionAssociator.agda
+src/Theory/Natural/Transformation/Examples/DayConvolutionAssociator.agda
 src/Theory/End/Examples.agda
-
-src/Theory/Natural/Isomorphism/Examples/FunctorCompositionAssociator.agda
-src/Theory/Category/Monoidal/Examples/FunctorWithComposition.agda
+src/Theory/Category/Monoidal/Examples/FunctorWithDayConvolution.agda

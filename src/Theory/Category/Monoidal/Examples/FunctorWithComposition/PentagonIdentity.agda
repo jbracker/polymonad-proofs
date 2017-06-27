@@ -31,34 +31,35 @@ open Functor renaming ( id to functor-id )
 open NaturalTransformation renaming ( η to nat-η )
 open NaturalIsomorphism renaming ( η to iso-η )
 
-pentagon-id 
-  : {ℓC₀ ℓC₁ : Level} (C : Category {ℓC₀} {ℓC₁}) 
-  → (F G H I : Obj (Fun C C)) 
-  → (Fun C C ∘ F₁ (CompF C C C) (id (Fun C C) {F} , iso-η (fcaIso C) (G ,' H ,' I))) ((Fun C C ∘ iso-η (fcaIso C) (F ,' F₀ (CompF C C C) (G , H) ,' I)) (F₁ (CompF C C C) (iso-η (fcaIso C) (F ,' G ,' H) , id (Fun C C) {I})))
-  ≡ (Fun C C ∘ iso-η (fcaIso C) (F ,' G ,' F₀ (CompF C C C) (H , I))) (iso-η (fcaIso C) (F₀ (CompF C C C) (F , G) ,' H ,' I))
-pentagon-id C F G H I = natural-transformation-eq $ fun-ext $ λ (c : Obj C) → begin
-  nat-η ⟨ ⟨ id (Fun C C) {F} ⟩∘ₕ⟨ iso-η (fcaIso C) (G ,' H ,' I) ⟩ ⟩∘ᵥ⟨ ⟨ iso-η (fcaIso C) (F ,' F₀ (CompF C C C) (G , H) ,' I) ⟩∘ᵥ⟨ ⟨ iso-η (fcaIso C) (F ,' G ,' H) ⟩∘ₕ⟨ id (Fun C C) {I} ⟩ ⟩ ⟩ c
-    ≡⟨⟩ 
-  nat-η ⟨ id (Fun C C) {F} ⟩∘ₕ⟨ iso-η (fcaIso C) (G ,' H ,' I) ⟩ c ∘C (id C ∘C nat-η ⟨ iso-η (fcaIso C) (F ,' G ,' H) ⟩∘ₕ⟨ id (Fun C C) {I} ⟩ c)
-    ≡⟨ cong (λ X → nat-η ⟨ id (Fun C C) {F} ⟩∘ₕ⟨ iso-η (fcaIso C) (G ,' H ,' I) ⟩ c ∘C X) (right-id C) ⟩ 
-  nat-η ⟨ id (Fun C C) {F} ⟩∘ₕ⟨ iso-η (fcaIso C) (G ,' H ,' I) ⟩ c ∘C nat-η ⟨ iso-η (fcaIso C) (F ,' G ,' H) ⟩∘ₕ⟨ id (Fun C C) {I} ⟩ c
-    ≡⟨⟩ 
-  (id C ∘C [ F ]₁ (id C)) ∘C (nat-η ⟨ iso-η (fcaIso C) (F ,' G ,' H) ⟩∘ₕ⟨ id (Fun C C) {I} ⟩ c)
-    ≡⟨ cong (λ X → X ∘C (nat-η ⟨ iso-η (fcaIso C) (F ,' G ,' H) ⟩∘ₕ⟨ id (Fun C C) {I} ⟩ c)) (right-id C) ⟩ 
-  [ F ]₁ (id C) ∘C (nat-η ⟨ iso-η (fcaIso C) (F ,' G ,' H) ⟩∘ₕ⟨ id (Fun C C) {I} ⟩ c)
-    ≡⟨ cong (λ X → X ∘C (nat-η ⟨ iso-η (fcaIso C) (F ,' G ,' H) ⟩∘ₕ⟨ id (Fun C C) {I} ⟩ c)) (functor-id F)⟩ 
-  id C ∘C (nat-η ⟨ iso-η (fcaIso C) (F ,' G ,' H) ⟩∘ₕ⟨ id (Fun C C) {I} ⟩ c)
-    ≡⟨ right-id C ⟩ 
-  nat-η ⟨ iso-η (fcaIso C) (F ,' G ,' H) ⟩∘ₕ⟨ id (Fun C C) {I} ⟩ c
-    ≡⟨⟩ 
-  id C ∘C [ [ F ]∘[ [ G ]∘[ H ] ] ]₁ (id C)
-    ≡⟨ right-id C ⟩ 
-  [ [ F ]∘[ [ G ]∘[ H ] ] ]₁ (id C)
-    ≡⟨ functor-id [ F ]∘[ [ G ]∘[ H ] ] ⟩ 
-  id C
-    ≡⟨ sym (left-id C) ⟩ 
-  id C ∘C id C
-    ≡⟨⟩ 
-  nat-η ⟨ iso-η (fcaIso C) (F ,' G ,' F₀ (CompF C C C) (H , I)) ⟩∘ᵥ⟨ iso-η (fcaIso C) (F₀ (CompF C C C) (F , G) ,' H ,' I) ⟩ c ∎
-  where _∘C_ = _∘_ C
+abstract
+  pentagon-id 
+    : {ℓC₀ ℓC₁ : Level} (C : Category {ℓC₀} {ℓC₁}) 
+    → (F G H I : Obj (Fun C C)) 
+    → (Fun C C ∘ F₁ (CompF C C C) (id (Fun C C) {F} , iso-η (fcaIso C) (G ,' H ,' I))) ((Fun C C ∘ iso-η (fcaIso C) (F ,' F₀ (CompF C C C) (G , H) ,' I)) (F₁ (CompF C C C) (iso-η (fcaIso C) (F ,' G ,' H) , id (Fun C C) {I})))
+    ≡ (Fun C C ∘ iso-η (fcaIso C) (F ,' G ,' F₀ (CompF C C C) (H , I))) (iso-η (fcaIso C) (F₀ (CompF C C C) (F , G) ,' H ,' I))
+  pentagon-id C F G H I = natural-transformation-eq $ fun-ext $ λ (c : Obj C) → begin
+    nat-η ⟨ ⟨ id (Fun C C) {F} ⟩∘ₕ⟨ iso-η (fcaIso C) (G ,' H ,' I) ⟩ ⟩∘ᵥ⟨ ⟨ iso-η (fcaIso C) (F ,' F₀ (CompF C C C) (G , H) ,' I) ⟩∘ᵥ⟨ ⟨ iso-η (fcaIso C) (F ,' G ,' H) ⟩∘ₕ⟨ id (Fun C C) {I} ⟩ ⟩ ⟩ c
+      ≡⟨⟩ 
+    nat-η ⟨ id (Fun C C) {F} ⟩∘ₕ⟨ iso-η (fcaIso C) (G ,' H ,' I) ⟩ c ∘C (id C ∘C nat-η ⟨ iso-η (fcaIso C) (F ,' G ,' H) ⟩∘ₕ⟨ id (Fun C C) {I} ⟩ c)
+      ≡⟨ cong (λ X → nat-η ⟨ id (Fun C C) {F} ⟩∘ₕ⟨ iso-η (fcaIso C) (G ,' H ,' I) ⟩ c ∘C X) (right-id C) ⟩ 
+    nat-η ⟨ id (Fun C C) {F} ⟩∘ₕ⟨ iso-η (fcaIso C) (G ,' H ,' I) ⟩ c ∘C nat-η ⟨ iso-η (fcaIso C) (F ,' G ,' H) ⟩∘ₕ⟨ id (Fun C C) {I} ⟩ c
+      ≡⟨⟩ 
+    (id C ∘C [ F ]₁ (id C)) ∘C (nat-η ⟨ iso-η (fcaIso C) (F ,' G ,' H) ⟩∘ₕ⟨ id (Fun C C) {I} ⟩ c)
+      ≡⟨ cong (λ X → X ∘C (nat-η ⟨ iso-η (fcaIso C) (F ,' G ,' H) ⟩∘ₕ⟨ id (Fun C C) {I} ⟩ c)) (right-id C) ⟩ 
+    [ F ]₁ (id C) ∘C (nat-η ⟨ iso-η (fcaIso C) (F ,' G ,' H) ⟩∘ₕ⟨ id (Fun C C) {I} ⟩ c)
+      ≡⟨ cong (λ X → X ∘C (nat-η ⟨ iso-η (fcaIso C) (F ,' G ,' H) ⟩∘ₕ⟨ id (Fun C C) {I} ⟩ c)) (functor-id F)⟩ 
+    id C ∘C (nat-η ⟨ iso-η (fcaIso C) (F ,' G ,' H) ⟩∘ₕ⟨ id (Fun C C) {I} ⟩ c)
+      ≡⟨ right-id C ⟩ 
+    nat-η ⟨ iso-η (fcaIso C) (F ,' G ,' H) ⟩∘ₕ⟨ id (Fun C C) {I} ⟩ c
+      ≡⟨⟩ 
+    id C ∘C [ [ F ]∘[ [ G ]∘[ H ] ] ]₁ (id C)
+      ≡⟨ right-id C ⟩ 
+    [ [ F ]∘[ [ G ]∘[ H ] ] ]₁ (id C)
+      ≡⟨ functor-id [ F ]∘[ [ G ]∘[ H ] ] ⟩ 
+    id C
+      ≡⟨ sym (left-id C) ⟩ 
+    id C ∘C id C
+      ≡⟨⟩ 
+    nat-η ⟨ iso-η (fcaIso C) (F ,' G ,' F₀ (CompF C C C) (H , I)) ⟩∘ᵥ⟨ iso-η (fcaIso C) (F₀ (CompF C C C) (F , G) ,' H ,' I) ⟩ c ∎
+    where _∘C_ = _∘_ C
 
