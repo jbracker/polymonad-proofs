@@ -39,8 +39,10 @@ functorCompositionAssociatorIso C = naturalIsomorphism (functorCompositionAssoci
     iso : (x : Obj (Fun ×C Fun ×C Fun)) → Isomorphism Fun (nat-η (functorCompositionAssociator C) x)
     iso x = isomorphism (nat-η (functorCompositionAssociator' C) x) iso-id₁ iso-id₂
       where
-        iso-id₁ : ⟨ nat-η (functorCompositionAssociator C) x ⟩∘ᵥ⟨ nat-η (functorCompositionAssociator' C) x ⟩ ≡ id Fun
-        iso-id₁ = natural-transformation-eq $ fun-ext $ λ (c : Obj C) → left-id C
+        abstract
+          iso-id₁ : ⟨ nat-η (functorCompositionAssociator C) x ⟩∘ᵥ⟨ nat-η (functorCompositionAssociator' C) x ⟩ ≡ id Fun
+          iso-id₁ = natural-transformation-eq $ fun-ext $ λ (c : Obj C) → left-id C
         
-        iso-id₂ : ⟨ nat-η (functorCompositionAssociator' C) x ⟩∘ᵥ⟨ nat-η (functorCompositionAssociator C) x ⟩ ≡ id Fun
-        iso-id₂ = natural-transformation-eq $ fun-ext $ λ (c : Obj C) → left-id C
+        abstract
+          iso-id₂ : ⟨ nat-η (functorCompositionAssociator' C) x ⟩∘ᵥ⟨ nat-η (functorCompositionAssociator C) x ⟩ ≡ id Fun
+          iso-id₂ = natural-transformation-eq $ fun-ext $ λ (c : Obj C) → left-id C

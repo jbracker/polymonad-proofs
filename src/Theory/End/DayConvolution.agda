@@ -76,6 +76,7 @@ dayConvolution {ℓC₀} {ℓC₁} {ℓSet} {C} CMon = functor day₀ day₁ (λ
               ≡⟨ sym (coend-morph-unique (Id⟨ dayF F G a ⟩) (λ x → x)) ⟩
             (λ x → x) ∎
         
+        abstract
           d0-compose : {a b c : Obj C} {f : Hom C a b} {g : Hom C b c} → d0₁ (g ∘C f) ≡ d0₁ g ∘F d0₁ f
           d0-compose {a} {b} {c} {f} {g} = begin
             coendMorph (convolutionTransObj F G (g ∘C f))

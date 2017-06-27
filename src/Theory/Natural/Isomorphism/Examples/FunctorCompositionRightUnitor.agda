@@ -1,6 +1,6 @@
 
 open import Level
-open import Function hiding ( id )
+open import Function hiding ( id ) renaming ( _∘_ to _∘F_ )
 
 open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning
@@ -31,5 +31,14 @@ functorCompositionRightUnitorIso C = naturalIsomorphism (functorCompositionRight
     comp = compositionFunctor C C C
 
     iso : (F : Functor C C) → Isomorphism Fun (nat-η (functorCompositionRightUnitor C) F)
-    iso (functor F₀ F₁ F-id F-compose) = isomorphism (nat-η (functorCompositionRightUnitor' C) F) (left-id Fun) (right-id Fun)
-      where F = functor F₀ F₁ F-id F-compose
+    iso (functor F₀ F₁ F-id F-compose) = isomorphism (nat-η (functorCompositionRightUnitor' C) F) left-id' right-id'
+      where 
+        F = functor F₀ F₁ F-id F-compose
+        
+        abstract
+          left-id' : ⟨ nat-η (functorCompositionRightUnitor C) F ⟩∘ᵥ⟨ nat-η (functorCompositionRightUnitor' C) F ⟩ ≡ id Fun
+          left-id' = natural-transformation-eq $ fun-ext $ λ (c : Obj C) → right-id C
+        
+        abstract
+          right-id' : ⟨ nat-η (functorCompositionRightUnitor' C) F ⟩∘ᵥ⟨ nat-η (functorCompositionRightUnitor C) F ⟩ ≡ id Fun
+          right-id' = natural-transformation-eq $ fun-ext $ λ (c : Obj C) → right-id C

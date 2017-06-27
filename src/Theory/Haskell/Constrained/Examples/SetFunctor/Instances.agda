@@ -47,23 +47,26 @@ EqList {ℓ} {ℓEq} {A} EqA = record
     (x ∷ xs) == [] = Lift ⊥
     (x ∷ xs) == (y ∷ ys) = (x =A= y) × (xs == ys)
     
-    lrefl : {xs : List A} → xs == xs
-    lrefl {[]} = lift tt
-    lrefl {x ∷ xs} = EqInstance.refl-eq EqA {x} , lrefl {xs}
+    abstract
+      lrefl : {xs : List A} → xs == xs
+      lrefl {[]} = lift tt
+      lrefl {x ∷ xs} = EqInstance.refl-eq EqA {x} , lrefl {xs}
     
-    lsym : {xs ys : List A} → xs == ys → ys == xs
-    lsym {[]} {[]} (lift tt) = lift tt
-    lsym {[]} {x ∷ ys} (lift ())
-    lsym {x ∷ xs} {[]} (lift ())
-    lsym {x ∷ xs} {y ∷ ys} (x==y , xs==ys) = EqInstance.sym-eq EqA x==y , lsym {xs} {ys} xs==ys
-    
-    ltrans : {xs ys zs : List A} → xs == ys → ys == zs → xs == zs
-    ltrans {[]} {[]} {[]} (lift tt) (lift tt) = lift tt
-    ltrans {[]} {[]} {z ∷ zs} (lift tt) (lift ())
-    ltrans {[]} {y ∷ ys} (lift ()) ys==zs
-    ltrans {x ∷ xs} {[]} (lift ()) ys==zs
-    ltrans {x ∷ xs} {y ∷ ys} {[]} (x==y , xs==ys) (lift ())
-    ltrans {x ∷ xs} {y ∷ ys} {z ∷ zs} (x==y , xs==ys) (y==z , ys==zs) = EqInstance.trans-eq EqA x==y y==z , ltrans {xs} {ys} {zs} xs==ys ys==zs
+    abstract
+      lsym : {xs ys : List A} → xs == ys → ys == xs
+      lsym {[]} {[]} (lift tt) = lift tt
+      lsym {[]} {x ∷ ys} (lift ())
+      lsym {x ∷ xs} {[]} (lift ())
+      lsym {x ∷ xs} {y ∷ ys} (x==y , xs==ys) = EqInstance.sym-eq EqA x==y , lsym {xs} {ys} xs==ys
+      
+    abstract
+      ltrans : {xs ys zs : List A} → xs == ys → ys == zs → xs == zs
+      ltrans {[]} {[]} {[]} (lift tt) (lift tt) = lift tt
+      ltrans {[]} {[]} {z ∷ zs} (lift tt) (lift ())
+      ltrans {[]} {y ∷ ys} (lift ()) ys==zs
+      ltrans {x ∷ xs} {[]} (lift ()) ys==zs
+      ltrans {x ∷ xs} {y ∷ ys} {[]} (x==y , xs==ys) (lift ())
+      ltrans {x ∷ xs} {y ∷ ys} {z ∷ zs} (x==y , xs==ys) (y==z , ys==zs) = EqInstance.trans-eq EqA x==y y==z , ltrans {xs} {ys} {zs} xs==ys ys==zs
     
     _=?=_ : (x y : List A) → Dec (x == y)
     [] =?= [] = yes (lift tt)
@@ -153,59 +156,62 @@ OrdList {ℓ} {ℓEq} {ℓOrd} {A} OrdA = record
     total' (x ∷ xs) (y ∷ ys) | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x = inj₂ (lift tt)
     total' (x ∷ xs) (y ∷ ys) | no ¬x=y | no ¬y=x | no ¬x≤y | no ¬y≤x = ⊥-elim (total-contr OrdA ¬y≤x ¬x≤y)
     
-    antisym : {xs ys : List A} → ord xs ys → ord ys xs → eq xs ys
-    antisym {[]} {[]} (lift tt) (lift tt) = lift tt
-    antisym {[]} {y ∷ ys} (lift tt) (lift ())
-    antisym {x ∷ xs} {[]} (lift ()) (lift tt)
-    antisym {x ∷ xs} {y ∷ ys} xs≤ys ys≤xs with dec-eq EqA x y | dec-eq EqA y x
-    antisym {x ∷ xs} {y ∷ ys} xs≤ys ys≤xs | yes x=y | yes y=x = x=y , antisym {xs} {ys} xs≤ys ys≤xs
-    antisym {x ∷ xs} {y ∷ ys} xs≤ys ys≤xs | yes x=y | no ¬y=x = ⊥-elim (¬y=x (sym-eq EqA x=y))
-    antisym {x ∷ xs} {y ∷ ys} xs≤ys ys≤xs | no ¬x=y | yes y=x = ⊥-elim (¬x=y (sym-eq EqA y=x))
-    antisym {x ∷ xs} {y ∷ ys} xs≤ys ys≤xs | no ¬x=y | no ¬y=x with dec-ord OrdA x y | dec-ord OrdA y x
-    antisym {x ∷ xs} {y ∷ ys} xs≤ys ys≤xs | no ¬x=y | no ¬y=x | yes x≤y | yes y≤x = ⊥-elim (¬x=y (antisym-ord OrdA x≤y y≤x))
-    antisym {x ∷ xs} {y ∷ ys} xs≤ys (lift ()) | no ¬x=y | no ¬y=x | yes x≤y | no ¬y≤x
-    antisym {x ∷ xs} {y ∷ ys} (lift ()) ys≤xs | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x
-    antisym {x ∷ xs} {y ∷ ys} xs≤ys ys≤xs | no ¬x=y | no ¬y=x | no ¬x≤y | no ¬y≤x = ⊥-elim (total-contr OrdA ¬x≤y ¬y≤x)
+    abstract
+      antisym : {xs ys : List A} → ord xs ys → ord ys xs → eq xs ys
+      antisym {[]} {[]} (lift tt) (lift tt) = lift tt
+      antisym {[]} {y ∷ ys} (lift tt) (lift ())
+      antisym {x ∷ xs} {[]} (lift ()) (lift tt)
+      antisym {x ∷ xs} {y ∷ ys} xs≤ys ys≤xs with dec-eq EqA x y | dec-eq EqA y x
+      antisym {x ∷ xs} {y ∷ ys} xs≤ys ys≤xs | yes x=y | yes y=x = x=y , antisym {xs} {ys} xs≤ys ys≤xs
+      antisym {x ∷ xs} {y ∷ ys} xs≤ys ys≤xs | yes x=y | no ¬y=x = ⊥-elim (¬y=x (sym-eq EqA x=y))
+      antisym {x ∷ xs} {y ∷ ys} xs≤ys ys≤xs | no ¬x=y | yes y=x = ⊥-elim (¬x=y (sym-eq EqA y=x))
+      antisym {x ∷ xs} {y ∷ ys} xs≤ys ys≤xs | no ¬x=y | no ¬y=x with dec-ord OrdA x y | dec-ord OrdA y x
+      antisym {x ∷ xs} {y ∷ ys} xs≤ys ys≤xs | no ¬x=y | no ¬y=x | yes x≤y | yes y≤x = ⊥-elim (¬x=y (antisym-ord OrdA x≤y y≤x))
+      antisym {x ∷ xs} {y ∷ ys} xs≤ys (lift ()) | no ¬x=y | no ¬y=x | yes x≤y | no ¬y≤x
+      antisym {x ∷ xs} {y ∷ ys} (lift ()) ys≤xs | no ¬x=y | no ¬y=x | no ¬x≤y | yes y≤x
+      antisym {x ∷ xs} {y ∷ ys} xs≤ys ys≤xs | no ¬x=y | no ¬y=x | no ¬x≤y | no ¬y≤x = ⊥-elim (total-contr OrdA ¬x≤y ¬y≤x)
     
-    refl-transfer : {xs ys : List A} → eq xs ys → ord xs ys
-    refl-transfer {[]} {[]} (lift tt) = lift tt
-    refl-transfer {[]} {y ∷ ys} (lift ())
-    refl-transfer {x ∷ xs} {[]} (lift ())
-    refl-transfer {x ∷ xs} {y ∷ ys} eq with dec-eq EqA x y
-    refl-transfer {x ∷ xs} {y ∷ ys} eq | yes x=y = refl-transfer {xs} {ys} (proj₂ eq)
-    refl-transfer {x ∷ xs} {y ∷ ys} eq | no ¬x=y = ⊥-elim (¬x=y (proj₁ eq))
+    abstract
+      refl-transfer : {xs ys : List A} → eq xs ys → ord xs ys
+      refl-transfer {[]} {[]} (lift tt) = lift tt
+      refl-transfer {[]} {y ∷ ys} (lift ())
+      refl-transfer {x ∷ xs} {[]} (lift ())
+      refl-transfer {x ∷ xs} {y ∷ ys} eq with dec-eq EqA x y
+      refl-transfer {x ∷ xs} {y ∷ ys} eq | yes x=y = refl-transfer {xs} {ys} (proj₂ eq)
+      refl-transfer {x ∷ xs} {y ∷ ys} eq | no ¬x=y = ⊥-elim (¬x=y (proj₁ eq))
     
-    trans' : {xs ys zs : List A} → ord xs ys → ord ys zs → ord xs zs
-    trans' {[]}     {ys}     {zs} (lift tt) ys≤zs = lift tt
-    trans' {x ∷ xs} {[]}     {zs} (lift ()) (lift tt)
-    trans' {x ∷ xs} {y ∷ ys} {[]} xs≤ys (lift ())
-    trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} xs≤ys ys≤zs with dec-eq EqA x y
-    trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} xs≤ys ys≤zs | yes x=y with dec-eq EqA y z 
-    trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} xs≤ys ys≤zs | yes x=y | yes y=z with dec-eq EqA x z
-    trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} xs≤ys ys≤zs | yes x=y | yes y=z | yes x=z = trans' {xs} {ys} {zs} xs≤ys ys≤zs
-    trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} xs≤ys ys≤zs | yes x=y | yes y=z | no ¬x=z = ⊥-elim (¬x=z (trans-eq EqA x=y y=z))
-    trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} xs≤ys ys≤zs | yes x=y | no ¬y=z with dec-ord OrdA y z
-    trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} xs≤ys (lift tt) | yes x=y | no ¬y=z | yes y≤z with dec-eq EqA x z
-    trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} xs≤ys (lift tt) | yes x=y | no ¬y=z | yes y≤z | yes x=z = ⊥-elim (¬y=z (trans-eq EqA (sym-eq EqA x=y) x=z))
-    trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} xs≤ys (lift tt) | yes x=y | no ¬y=z | yes y≤z | no ¬x=z with dec-ord OrdA x z
-    trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} xs≤ys (lift tt) | yes x=y | no ¬y=z | yes y≤z | no ¬x=z | yes x≤z = lift tt
-    trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} xs≤ys (lift tt) | yes x=y | no ¬y=z | yes y≤z | no ¬x=z | no ¬x≤z = ⊥-elim (¬x≤z (eq-ord-comp OrdA x=y y≤z))
-    trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} xs≤ys (lift ()) | yes x=y | no ¬y=z | no ¬y≤z
-    trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} xs≤ys ys≤zs | no ¬x=y with dec-ord OrdA x y
-    trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} xs≤ys ys≤zs | no ¬x=y | yes x≤y with dec-eq EqA y z
-    trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} xs≤ys ys≤zs | no ¬x=y | yes x≤y | yes y=z with dec-eq EqA x z
-    trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} xs≤ys ys≤zs | no ¬x=y | yes x≤y | yes y=z | yes x=z = ⊥-elim (¬x=y (trans-eq EqA x=z (sym-eq EqA y=z)))
-    trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} xs≤ys ys≤zs | no ¬x=y | yes x≤y | yes y=z | no ¬x=z with dec-ord OrdA x z
-    trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} xs≤ys ys≤zs | no ¬x=y | yes x≤y | yes y=z | no ¬x=z | yes x≤z = lift tt
-    trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} xs≤ys ys≤zs | no ¬x=y | yes x≤y | yes y=z | no ¬x=z | no ¬x≤z = ⊥-elim (¬x≤z (ord-eq-comp OrdA x≤y y=z))
-    trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} xs≤ys ys≤zs | no ¬x=y | yes x≤y | no ¬y=z with dec-ord OrdA y z
-    trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} (lift tt) (lift tt) | no ¬x=y | yes x≤y | no ¬y=z | yes y≤z with dec-eq EqA x z
-    trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} (lift tt) (lift tt) | no ¬x=y | yes x≤y | no ¬y=z | yes y≤z | yes x=z = ⊥-elim (¬x=y (antisym-ord OrdA x≤y (ord-eq-comp OrdA y≤z (sym-eq EqA x=z))))
-    trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} (lift tt) (lift tt) | no ¬x=y | yes x≤y | no ¬y=z | yes y≤z | no ¬x=z with dec-ord OrdA x z
-    trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} (lift tt) (lift tt) | no ¬x=y | yes x≤y | no ¬y=z | yes y≤z | no ¬x=z | yes x≤z = lift tt
-    trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} (lift tt) (lift tt) | no ¬x=y | yes x≤y | no ¬y=z | yes y≤z | no ¬x=z | no ¬x≤z = ⊥-elim (¬x≤z (trans-ord OrdA x≤y y≤z))
-    trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} (lift tt) (lift ()) | no ¬x=y | yes x≤y | no ¬y=z | no ¬y≤z
-    trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} (lift ()) ys≤zs | no ¬x=y | no ¬x≤y
+    abstract
+      trans' : {xs ys zs : List A} → ord xs ys → ord ys zs → ord xs zs
+      trans' {[]}     {ys}     {zs} (lift tt) ys≤zs = lift tt
+      trans' {x ∷ xs} {[]}     {zs} (lift ()) (lift tt)
+      trans' {x ∷ xs} {y ∷ ys} {[]} xs≤ys (lift ())
+      trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} xs≤ys ys≤zs with dec-eq EqA x y
+      trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} xs≤ys ys≤zs | yes x=y with dec-eq EqA y z 
+      trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} xs≤ys ys≤zs | yes x=y | yes y=z with dec-eq EqA x z
+      trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} xs≤ys ys≤zs | yes x=y | yes y=z | yes x=z = trans' {xs} {ys} {zs} xs≤ys ys≤zs
+      trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} xs≤ys ys≤zs | yes x=y | yes y=z | no ¬x=z = ⊥-elim (¬x=z (trans-eq EqA x=y y=z))
+      trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} xs≤ys ys≤zs | yes x=y | no ¬y=z with dec-ord OrdA y z
+      trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} xs≤ys (lift tt) | yes x=y | no ¬y=z | yes y≤z with dec-eq EqA x z
+      trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} xs≤ys (lift tt) | yes x=y | no ¬y=z | yes y≤z | yes x=z = ⊥-elim (¬y=z (trans-eq EqA (sym-eq EqA x=y) x=z))
+      trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} xs≤ys (lift tt) | yes x=y | no ¬y=z | yes y≤z | no ¬x=z with dec-ord OrdA x z
+      trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} xs≤ys (lift tt) | yes x=y | no ¬y=z | yes y≤z | no ¬x=z | yes x≤z = lift tt
+      trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} xs≤ys (lift tt) | yes x=y | no ¬y=z | yes y≤z | no ¬x=z | no ¬x≤z = ⊥-elim (¬x≤z (eq-ord-comp OrdA x=y y≤z))
+      trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} xs≤ys (lift ()) | yes x=y | no ¬y=z | no ¬y≤z
+      trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} xs≤ys ys≤zs | no ¬x=y with dec-ord OrdA x y
+      trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} xs≤ys ys≤zs | no ¬x=y | yes x≤y with dec-eq EqA y z
+      trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} xs≤ys ys≤zs | no ¬x=y | yes x≤y | yes y=z with dec-eq EqA x z
+      trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} xs≤ys ys≤zs | no ¬x=y | yes x≤y | yes y=z | yes x=z = ⊥-elim (¬x=y (trans-eq EqA x=z (sym-eq EqA y=z)))
+      trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} xs≤ys ys≤zs | no ¬x=y | yes x≤y | yes y=z | no ¬x=z with dec-ord OrdA x z
+      trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} xs≤ys ys≤zs | no ¬x=y | yes x≤y | yes y=z | no ¬x=z | yes x≤z = lift tt
+      trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} xs≤ys ys≤zs | no ¬x=y | yes x≤y | yes y=z | no ¬x=z | no ¬x≤z = ⊥-elim (¬x≤z (ord-eq-comp OrdA x≤y y=z))
+      trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} xs≤ys ys≤zs | no ¬x=y | yes x≤y | no ¬y=z with dec-ord OrdA y z
+      trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} (lift tt) (lift tt) | no ¬x=y | yes x≤y | no ¬y=z | yes y≤z with dec-eq EqA x z
+      trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} (lift tt) (lift tt) | no ¬x=y | yes x≤y | no ¬y=z | yes y≤z | yes x=z = ⊥-elim (¬x=y (antisym-ord OrdA x≤y (ord-eq-comp OrdA y≤z (sym-eq EqA x=z))))
+      trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} (lift tt) (lift tt) | no ¬x=y | yes x≤y | no ¬y=z | yes y≤z | no ¬x=z with dec-ord OrdA x z
+      trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} (lift tt) (lift tt) | no ¬x=y | yes x≤y | no ¬y=z | yes y≤z | no ¬x=z | yes x≤z = lift tt
+      trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} (lift tt) (lift tt) | no ¬x=y | yes x≤y | no ¬y=z | yes y≤z | no ¬x=z | no ¬x≤z = ⊥-elim (¬x≤z (trans-ord OrdA x≤y y≤z))
+      trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} (lift tt) (lift ()) | no ¬x=y | yes x≤y | no ¬y=z | no ¬y≤z
+      trans' {x ∷ xs} {y ∷ ys} {z ∷ zs} (lift ()) ys≤zs | no ¬x=y | no ¬x≤y
     
 
 IsStructuralEquality-List : {ℓ ℓEq : Level} {A : Set ℓ} → (EqA : EqInstance {ℓ} {ℓEq} A) → IsStructuralEquality EqA → IsStructuralEquality (EqList {ℓ} {ℓEq} EqA)

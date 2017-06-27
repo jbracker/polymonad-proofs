@@ -69,61 +69,69 @@ private
   fmap : {i : Eff} {α β : Type} → (α → β) → M i α → M i β
   fmap {i} = [ [ P₁ {lift tt} {lift tt} ]₀ i ]₁
 
-  η-extract : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} {F G : Functor C D} 
-            → (NT₀ NT₁ : NaturalTransformation F G) 
-            → NT₀ ≡ NT₁ 
-            → (x : Category.Obj C) 
-            → nat-η NT₀ x ≡ nat-η NT₁ x
-  η-extract NT₀ .NT₀ refl x = refl
+  abstract
+    η-extract : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} {F G : Functor C D} 
+              → (NT₀ NT₁ : NaturalTransformation F G) 
+              → NT₀ ≡ NT₁ 
+              → (x : Category.Obj C) 
+              → nat-η NT₀ x ≡ nat-η NT₁ x
+    η-extract NT₀ .NT₀ refl x = refl
 
-η-lax-id₁ : {i : Eff} (x : Type) (ma : M i x)
-          → nat-η ([ P₁ ]₁ (λ' MonCat₂ i)) x (join (fmap return ma)) ≡ ma
-η-lax-id₁ {i} x ma = cong (λ X → X ma) 
-                   $ η-extract ⟨ [ P₁ ]₁ (λ' MonCat₂ i) ⟩∘ᵥ⟨ ⟨ μ {f = ε} {i} ⟩∘ᵥ⟨ ⟨ Id⟨ [ P₁ ]₀ i ⟩ ⟩∘ₕ⟨ η ⟩ ⟩ ⟩ 
-                               (StrictTwoCategory.λ' Cat' ([ P₁ ]₀ i)) 
-                               (laxFunId₁ {f = i}) x
+abstract
+  η-lax-id₁ : {i : Eff} (x : Type) (ma : M i x)
+            → nat-η ([ P₁ ]₁ (λ' MonCat₂ i)) x (join (fmap return ma)) ≡ nat-η (λ' Cat' ([ P₁ ]₀ i)) x ma
+  η-lax-id₁ {i} x ma = cong (λ X → X ma) 
+                     $ η-extract ⟨ [ P₁ ]₁ (λ' MonCat₂ i) ⟩∘ᵥ⟨ ⟨ μ {f = ε} {i} ⟩∘ᵥ⟨ ⟨ Id⟨ [ P₁ ]₀ i ⟩ ⟩∘ₕ⟨ η ⟩ ⟩ ⟩ 
+                                 (StrictTwoCategory.λ' Cat' ([ P₁ ]₀ i)) 
+                                 (laxFunId₁ {f = i}) x
 
-η-lax-id₂ : {i : Eff} (x : Type) (ma : M i x)
-          → nat-η ([ P₁ ]₁ (ρ MonCat₂ i)) x (join (return ma))
-          ≡ nat-η (ρ Cat' ([ P₁ ]₀ i)) x ma
-η-lax-id₂ {i} x ma = cong (λ X → X ma) 
-                   $ η-extract ( ⟨ [ P₁ ]₁ (ρ MonCat₂ i) ⟩∘ᵥ⟨ ⟨ μ {f = i} {id₁ MonCat₂} ⟩∘ᵥ⟨ ⟨ η ⟩∘ₕ⟨ id₂ Cat' {f = [ P₁ ]₀ i} ⟩ ⟩ ⟩ )
-                               (StrictTwoCategory.ρ Cat' ([ P₁ ]₀ i)) 
-                               (laxFunId₂ {f = i}) x
+abstract
+  η-lax-id₂ : {i : Eff} (x : Type) (ma : M i x)
+            → nat-η ([ P₁ ]₁ (ρ MonCat₂ i)) x (join (return ma))
+            ≡ nat-η (ρ Cat' ([ P₁ ]₀ i)) x ma
+  η-lax-id₂ {i} x ma = cong (λ X → X ma) 
+                     $ η-extract ( ⟨ [ P₁ ]₁ (ρ MonCat₂ i) ⟩∘ᵥ⟨ ⟨ μ {f = i} {id₁ MonCat₂} ⟩∘ᵥ⟨ ⟨ η ⟩∘ₕ⟨ id₂ Cat' {f = [ P₁ ]₀ i} ⟩ ⟩ ⟩ )
+                                 (StrictTwoCategory.ρ Cat' ([ P₁ ]₀ i)) 
+                                 (laxFunId₂ {f = i}) x
 
-η-lax-assoc : {i j k : Eff} (x : Type) (ma : M i (M j (M k x)))
-            → (nat-η ([ P₁ ]₁ (α MonCat₂ k j i)) x ∘F join ∘F fmap join) ma
-            ≡ (join ∘F join ∘F fmap (fmap (λ x → x)) ∘F nat-η (α Cat' ([ P₁ ]₀ k) ([ P₁ ]₀ j) ([ P₁ ]₀ i)) x) ma
-η-lax-assoc {i} {j} {k} x ma = cong (λ X → X ma) 
-                             $ η-extract ( ⟨ [ P₁ ]₁ (α MonCat₂ k j i) ⟩∘ᵥ⟨ ⟨ μ ⟩∘ᵥ⟨ ⟨ id₂ Cat' {f = [ P₁ ]₀ i} ⟩∘ₕ⟨ μ ⟩ ⟩ ⟩ )
-                                         ( ⟨ μ ⟩∘ᵥ⟨ ⟨ ⟨ μ ⟩∘ₕ⟨ id₂ Cat' {f = [ P₁ ]₀ k} ⟩ ⟩∘ᵥ⟨ α Cat' ([ P₁ ]₀ k) ([ P₁ ]₀ j) ([ P₁ ]₀ i) ⟩ ⟩) 
-                                         (laxFunAssoc {f = k} {j} {i}) x
+abstract
+  η-lax-assoc : {i j k : Eff} (x : Type) (ma : M i (M j (M k x)))
+              → (nat-η ([ P₁ ]₁ (α MonCat₂ k j i)) x ∘F join ∘F fmap join) ma
+              ≡ (join ∘F join ∘F fmap (fmap (λ x → x)) ∘F nat-η (α Cat' ([ P₁ ]₀ k) ([ P₁ ]₀ j) ([ P₁ ]₀ i)) x) ma
+  η-lax-assoc {i} {j} {k} x ma = cong (λ X → X ma) 
+                               $ η-extract ( ⟨ [ P₁ ]₁ (α MonCat₂ k j i) ⟩∘ᵥ⟨ ⟨ μ ⟩∘ᵥ⟨ ⟨ id₂ Cat' {f = [ P₁ ]₀ i} ⟩∘ₕ⟨ μ ⟩ ⟩ ⟩ )
+                                           ( ⟨ μ ⟩∘ᵥ⟨ ⟨ ⟨ μ ⟩∘ₕ⟨ id₂ Cat' {f = [ P₁ ]₀ k} ⟩ ⟩∘ᵥ⟨ α Cat' ([ P₁ ]₀ k) ([ P₁ ]₀ j) ([ P₁ ]₀ i) ⟩ ⟩) 
+                                           (laxFunAssoc {f = k} {j} {i}) x
 
-subst-refl-id : {α : Type} {i j : Eff} → (eq : i ≡ j) → (ma : M j α) → nat-η ([ P₁ ]₁ (subst₂ _≡_ eq refl (refl {ℓ} {Eff} {i}))) α ma ≅ nat-η (Id⟨ Fun j ⟩) α ma
-subst-refl-id {α} {i} {.i} refl ma = hcong (λ X → nat-η X α ma) (≡-to-≅ (Functor.id P₁))
+abstract
+  subst-refl-id : {α : Type} {i j : Eff} → (eq : i ≡ j) → (ma : M j α) → nat-η ([ P₁ ]₁ (subst₂ _≡_ eq refl (refl {ℓ} {Eff} {i}))) α ma ≅ nat-η (Id⟨ Fun j ⟩) α ma
+  subst-refl-id {α} {i} {.i} refl ma = hcong (λ X → nat-η X α ma) (≡-to-≅ (Functor.id P₁))
 
-subst-refl-id' : {α : Type} {i j : Eff} → (eq : i ≡ j) → (ma : M i α) → nat-η ([ P₁ ]₁ (subst₂ _≡_ refl eq (refl {ℓ} {Eff} {i}))) α ma ≅ nat-η (Id⟨ Fun i ⟩) α ma
-subst-refl-id' {α} {i} {.i} refl ma = hcong (λ X → nat-η X α ma) (≡-to-≅ (Functor.id P₁))
+abstract
+  subst-refl-id' : {α : Type} {i j : Eff} → (eq : i ≡ j) → (ma : M i α) → nat-η ([ P₁ ]₁ (subst₂ _≡_ refl eq (refl {ℓ} {Eff} {i}))) α ma ≅ nat-η (Id⟨ Fun i ⟩) α ma
+  subst-refl-id' {α} {i} {.i} refl ma = hcong (λ X → nat-η X α ma) (≡-to-≅ (Functor.id P₁))
 
-join-assoc : {i j k : Eff} (x : Type) (ma : M k (M j (M i x)))
-           → join (fmap join ma) ≅ join (join (fmap (fmap (λ x → x)) ma))
-join-assoc {i} {j} {k} x ma = hbegin
-  (M (k ∘Eff (j ∘Eff i)) x ∋ join (fmap join ma) )
-    ≅⟨ hsym (subst-refl-id' assoc (join (fmap join ma))) ⟩
-  (M ((k ∘Eff j) ∘Eff i) x ∋ nat-η ([ P₁ ]₁ (α MonCat₂ i j k)) x (join (fmap join ma)) )
-    ≅⟨ ≡-to-≅ (η-lax-assoc x ma) ⟩
-  (M ((k ∘Eff j) ∘Eff i) x ∋ join (join (fmap (fmap (λ x → x)) (nat-η (α Cat' ([ P₁ ]₀ i) ([ P₁ ]₀ j) ([ P₁ ]₀ k)) x ma))) )
-    ≅⟨ hcong (λ X → join (join (fmap (fmap (λ x → x)) X))) (het-cat-α-id {F = Fun i} {G = Fun j} {Fun k} x ma) ⟩
-  (M ((k ∘Eff j) ∘Eff i) x ∋ join (join (fmap (fmap (λ x → x)) ma)) ) ∎h
+abstract
+  join-assoc : {i j k : Eff} (x : Type) (ma : M k (M j (M i x)))
+             → join (fmap join ma) ≅ join (join (fmap (fmap (λ x → x)) ma))
+  join-assoc {i} {j} {k} x ma = hbegin
+    (M (k ∘Eff (j ∘Eff i)) x ∋ join (fmap join ma) )
+      ≅⟨ hsym (subst-refl-id' assoc (join (fmap join ma))) ⟩
+    (M ((k ∘Eff j) ∘Eff i) x ∋ nat-η ([ P₁ ]₁ (α MonCat₂ i j k)) x (join (fmap join ma)) )
+      ≅⟨ ≡-to-≅ (η-lax-assoc x ma) ⟩
+    (M ((k ∘Eff j) ∘Eff i) x ∋ join (join (fmap (fmap (λ x → x)) (nat-η (α Cat' ([ P₁ ]₀ i) ([ P₁ ]₀ j) ([ P₁ ]₀ k)) x ma))) )
+      ≅⟨ hcong (λ X → join (join (fmap (fmap (λ x → x)) X))) (het-cat-α-id {F = Fun i} {G = Fun j} {Fun k} x ma) ⟩
+    (M ((k ∘Eff j) ∘Eff i) x ∋ join (join (fmap (fmap (λ x → x)) ma)) ) ∎h
 
-join-return-id : {i : Eff} → (x : Type) → (ma : M i x) → join {x} {ε} {i} (return ma) ≅ ma
-join-return-id {i} x ma = hbegin
-  (M (ε ∘Eff i) x ∋ join {x} (return ma))
-    ≅⟨ hrefl ⟩
-  (M (ε ∘Eff i) x ∋ nat-η (Id⟨ [ P₁ {lift tt} {lift tt} ]₀ (ε ∘Eff i) ⟩) x (join {x} (return ma)) )
-    ≅⟨ hsym (subst-refl-id (sym left-id) (join (return ma))) ⟩
-  (M i x ∋ nat-η ([ P₁ ]₁ (ρ MonCat₂ i)) x (join {x} (return ma)) )
-    ≅⟨ ≡-to-≅ $ η-lax-id₂ x ma ⟩ -- η-lax-id₂ x 
-  (M i x ∋ nat-η (ρ Cat' ([ P₁ ]₀ i)) x ma)
-    ≅⟨ het-cat-ρ-id x ma ⟩
-  (M i x ∋ ma) ∎h
+abstract
+  join-return-id : {i : Eff} → (x : Type) → (ma : M i x) → join {x} {ε} {i} (return ma) ≅ ma
+  join-return-id {i} x ma = hbegin
+    (M (ε ∘Eff i) x ∋ join {x} (return ma))
+      ≅⟨ hrefl ⟩
+    (M (ε ∘Eff i) x ∋ nat-η (Id⟨ [ P₁ {lift tt} {lift tt} ]₀ (ε ∘Eff i) ⟩) x (join {x} (return ma)) )
+      ≅⟨ hsym (subst-refl-id (sym left-id) (join (return ma))) ⟩
+    (M i x ∋ nat-η ([ P₁ ]₁ (ρ MonCat₂ i)) x (join {x} (return ma)) )
+      ≅⟨ ≡-to-≅ $ η-lax-id₂ x ma ⟩ -- η-lax-id₂ x 
+    (M i x ∋ nat-η (ρ Cat' ([ P₁ ]₀ i)) x ma)
+      ≅⟨ het-cat-ρ-id x ma ⟩
+    (M i x ∋ ma) ∎h

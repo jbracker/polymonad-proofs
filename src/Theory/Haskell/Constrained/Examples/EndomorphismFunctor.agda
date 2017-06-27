@@ -44,20 +44,23 @@ ConstraintCategoryEndomorphisms
     HomCts : {α β : Type} → ObjCts α → ObjCts β → (α → β) → Set (lsuc ℓ)
     HomCts {α} {β} _ _ _ = α ≡ β
     
-    assoc : {α β γ δ : Type} 
-          → {f : α → β} {g : β → γ} {h : γ → δ}
-          → {α' : ObjCts α} {β' : ObjCts β} {γ' : ObjCts γ} {δ' : ObjCts δ}
-          → (f' : HomCts α' β' f) (g' : HomCts β' γ' g) (h' : HomCts γ' δ' h) 
-          → flip trans h' (flip trans g' f') ≡ flip trans (flip trans h' g') f'
-    assoc refl refl refl = refl
+    abstract
+      assoc : {α β γ δ : Type} 
+            → {f : α → β} {g : β → γ} {h : γ → δ}
+            → {α' : ObjCts α} {β' : ObjCts β} {γ' : ObjCts γ} {δ' : ObjCts δ}
+            → (f' : HomCts α' β' f) (g' : HomCts β' γ' g) (h' : HomCts γ' δ' h) 
+            → flip trans h' (flip trans g' f') ≡ flip trans (flip trans h' g') f'
+      assoc refl refl refl = refl
     
-    right-id : {α β : Type} {f : α → β} {α' : ObjCts α} {β' : ObjCts β} 
-             → (f' : HomCts α' β' f) → flip trans refl f' ≡ f'
-    right-id refl = refl
+    abstract
+      right-id : {α β : Type} {f : α → β} {α' : ObjCts α} {β' : ObjCts β} 
+               → (f' : HomCts α' β' f) → flip trans refl f' ≡ f'
+      right-id refl = refl
     
-    left-id : {α β : Type} {f : α → β} {α' : ObjCts α} {β' : ObjCts β}
-            → (f' : HomCts α' β' f) → flip trans f' refl ≡ f'
-    left-id refl = refl
+    abstract
+      left-id : {α β : Type} {f : α → β} {α' : ObjCts α} {β' : ObjCts β}
+              → (f' : HomCts α' β' f) → flip trans f' refl ≡ f'
+      left-id refl = refl
 
 -- The categorical structure of the constrained functor.
 FunctorEndomorphisms : ConstrainedFunctor ConstraintCategoryEndomorphisms
@@ -79,16 +82,18 @@ FunctorEndomorphisms = record
     map : {α β : Obj} → (Hom α β) → F α → F β
     map (f , refl) x = endomap f x
     
-    functor-id : {α : Obj} → endomap {α = proj₁ α} idF ≡ idF
-    functor-id {α , lift tt} = fun-ext helper
-      where helper : (x : Endo α) → endomap idF x ≡ idF x
-            helper (endo f) = refl
+    abstract
+      functor-id : {α : Obj} → endomap {α = proj₁ α} idF ≡ idF
+      functor-id {α , lift tt} = fun-ext helper
+        where helper : (x : Endo α) → endomap idF x ≡ idF x
+              helper (endo f) = refl
     
-    functor-compose : {α β γ : Obj} {f : Hom α β} {g : Hom β γ}
-                    → map (proj₁ g ∘F proj₁ f , flip trans (proj₂ g) (proj₂ f)) ≡ map g ∘F map f
-    functor-compose {α , lift tt} {.α , lift tt} {.α , lift tt} {f , refl} {g , refl} = fun-ext helper
-      where helper : (x : Endo α) → endomap (g ∘F f) x ≡ (endomap g ∘F endomap f) x
-            helper (endo h) = refl
+    abstract
+      functor-compose : {α β γ : Obj} {f : Hom α β} {g : Hom β γ}
+                      → map (proj₁ g ∘F proj₁ f , flip trans (proj₂ g) (proj₂ f)) ≡ map g ∘F map f
+      functor-compose {α , lift tt} {.α , lift tt} {.α , lift tt} {f , refl} {g , refl} = fun-ext helper
+        where helper : (x : Endo α) → endomap (g ∘F f) x ≡ (endomap g ∘F endomap f) x
+              helper (endo h) = refl
 
 FunctorEndomorphisms-DependentHomUniqueness : DependentHomUniqueness (ConstrainedFunctor.Cts FunctorEndomorphisms)
 FunctorEndomorphisms-DependentHomUniqueness (f₁ , refl) (.f₁ , refl) refl = refl
@@ -102,14 +107,16 @@ FunctorEndomorphisms-UniqueInstances = unique-type-inst , unique-hom-inst
     open DependentCategory (ConstrainedFunctor.Cts FunctorEndomorphisms)
     open Category DepCat
     
-    unique-type-inst : (α : Type) → (αCts αCts' : DepObj α) → αCts ≡ αCts'
-    unique-type-inst α (lift tt) (lift tt) = refl
+    abstract
+      unique-type-inst : (α : Type) → (αCts αCts' : DepObj α) → αCts ≡ αCts'
+      unique-type-inst α (lift tt) (lift tt) = refl
     
-    unique-hom-inst : {α β : Type} → (f g : α → β)
-                    → (αCt : DepObj α) → (βCt : DepObj β) 
-                    → (fCt : DepHom αCt βCt f) → (gCt : DepHom αCt βCt g)
-                    → fCt ≅ gCt
-    unique-hom-inst f g (lift tt) (lift tt) refl refl = refl
+    abstract
+      unique-hom-inst : {α β : Type} → (f g : α → β)
+                      → (αCt : DepObj α) → (βCt : DepObj β) 
+                      → (fCt : DepHom αCt βCt f) → (gCt : DepHom αCt βCt g)
+                      → fCt ≅ gCt
+      unique-hom-inst f g (lift tt) (lift tt) refl refl = refl
 
 FunctorEndomorphismsCodomain-IsConcreteCategory : IsConcreteCategory (DependentCategory.DepCat (ConstrainedFunctor.Cts FunctorEndomorphisms))
 FunctorEndomorphismsCodomain-IsConcreteCategory = ConstraintCategory→ConcreteCategory (ConstrainedFunctor.Cts FunctorEndomorphisms) FunctorEndomorphisms-DependentHomUniqueness

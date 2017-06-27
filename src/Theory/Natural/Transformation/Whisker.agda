@@ -72,104 +72,106 @@ rightWhiskerNatTrans {C = C} {D} {E} {G} {H} F α = record
 -- Laws about whiskering
 -------------------------------------------------------------------------------
 
-rightWhiskerDist 
-  : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓE₀ ℓE₁ : Level} 
-  → {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} {E : Category {ℓE₀} {ℓE₁}}
-  → {F G H : Functor C D} 
-  → (K : Functor D E)
-  → (α : NaturalTransformation F G)
-  → (β : NaturalTransformation G H)
-  → [ K ]∘⟨ ⟨ β ⟩∘ᵥ⟨ α ⟩ ⟩ ≡ ⟨ [ K ]∘⟨ β ⟩ ⟩∘ᵥ⟨ [ K ]∘⟨ α ⟩ ⟩
-rightWhiskerDist {C = C} {D} {E} {F} {G} {H} K α β =
-  natural-transformation-eq $ fun-ext $ λ (x : Obj C) → begin
-    η [ K ]∘⟨ ⟨ β ⟩∘ᵥ⟨ α ⟩ ⟩ x 
-      ≡⟨ refl ⟩
-    [ K ]₁ (η β x ∘D η α x)
-      ≡⟨ compose K ⟩
-    [ K ]₁ (η β x) ∘E [ K ]₁ (η α x)
-      ≡⟨ refl ⟩
-    η ⟨ [ K ]∘⟨ β ⟩ ⟩∘ᵥ⟨ [ K ]∘⟨ α ⟩ ⟩ x ∎
-  where _∘E_ = _∘_ E ; _∘D_ = _∘_ D
+abstract
+  rightWhiskerDist 
+    : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓE₀ ℓE₁ : Level} 
+    → {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} {E : Category {ℓE₀} {ℓE₁}}
+    → {F G H : Functor C D} 
+    → (K : Functor D E)
+    → (α : NaturalTransformation F G)
+    → (β : NaturalTransformation G H)
+    → [ K ]∘⟨ ⟨ β ⟩∘ᵥ⟨ α ⟩ ⟩ ≡ ⟨ [ K ]∘⟨ β ⟩ ⟩∘ᵥ⟨ [ K ]∘⟨ α ⟩ ⟩
+  rightWhiskerDist {C = C} {D} {E} {F} {G} {H} K α β =
+    natural-transformation-eq $ fun-ext $ λ (x : Obj C) → begin
+      η [ K ]∘⟨ ⟨ β ⟩∘ᵥ⟨ α ⟩ ⟩ x 
+        ≡⟨ refl ⟩
+      [ K ]₁ (η β x ∘D η α x)
+        ≡⟨ compose K ⟩
+      [ K ]₁ (η β x) ∘E [ K ]₁ (η α x)
+        ≡⟨ refl ⟩
+      η ⟨ [ K ]∘⟨ β ⟩ ⟩∘ᵥ⟨ [ K ]∘⟨ α ⟩ ⟩ x ∎
+    where _∘E_ = _∘_ E ; _∘D_ = _∘_ D
 
+abstract
+  leftWhiskerDist 
+    : {ℓB₀ ℓB₁ ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} 
+    → {B : Category {ℓB₀} {ℓB₁}} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} 
+    → {F G H : Functor C D} 
+    → (K : Functor B C)
+    → (α : NaturalTransformation F G)
+    → (β : NaturalTransformation G H)
+    → ⟨ ⟨ β ⟩∘ᵥ⟨ α ⟩ ⟩∘[ K ] ≡ ⟨ ⟨ β ⟩∘[ K ] ⟩∘ᵥ⟨ ⟨ α ⟩∘[ K ] ⟩
+  leftWhiskerDist {B = B} K α β =
+    natural-transformation-eq $ fun-ext $ λ (x : Obj B) → refl
 
-leftWhiskerDist 
-  : {ℓB₀ ℓB₁ ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} 
-  → {B : Category {ℓB₀} {ℓB₁}} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} 
-  → {F G H : Functor C D} 
-  → (K : Functor B C)
-  → (α : NaturalTransformation F G)
-  → (β : NaturalTransformation G H)
-  → ⟨ ⟨ β ⟩∘ᵥ⟨ α ⟩ ⟩∘[ K ] ≡ ⟨ ⟨ β ⟩∘[ K ] ⟩∘ᵥ⟨ ⟨ α ⟩∘[ K ] ⟩
-leftWhiskerDist {B = B} K α β =
-  natural-transformation-eq $ fun-ext $ λ (x : Obj B) → refl
+abstract
+  leftWhiskerId₁
+    : {ℓB₀ ℓB₁ ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} 
+    → {B : Category {ℓB₀} {ℓB₁}} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} 
+    → {F : Functor C D} 
+    → (K : Functor B C)
+    → ⟨ Id⟨ F ⟩ ⟩∘[ K ] ≡ Id⟨ [ F ]∘[ K ] ⟩
+  leftWhiskerId₁ {B = B} K = 
+    natural-transformation-eq $ fun-ext $ λ (x : Obj B) → refl
 
+abstract
+  leftWhiskerId₂
+    : {ℓB₀ ℓB₁ ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} 
+    → {B : Category {ℓB₀} {ℓB₁}} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} 
+    → {F G : Functor C D} 
+    → (K : Functor B C)
+    → (α : NaturalTransformation F G)
+    → ⟨ α ⟩∘ₕ⟨ Id⟨ K ⟩ ⟩ ≡ ⟨ α ⟩∘[ K ]
+  leftWhiskerId₂ {B = B} {C} {D} {F} {G} K α = 
+    natural-transformation-eq $ fun-ext $ λ (x : Obj B) → begin
+      η ⟨ α ⟩∘ₕ⟨ Id⟨ K ⟩ ⟩ x 
+        ≡⟨ refl ⟩
+      η α ([ K ]₀ x) ∘D [ F ]₁ (Category.id C) 
+        ≡⟨ cong (λ X → η α ([ K ]₀ x) ∘D X) (Functor.id F) ⟩
+      η α ([ K ]₀ x) ∘D Category.id D 
+        ≡⟨ left-id D ⟩
+      η α ([ K ]₀ x)
+        ≡⟨ refl ⟩
+      η ⟨ α ⟩∘[ K ] x ∎
+    where _∘D_ = _∘_ D
 
-leftWhiskerId₁
-  : {ℓB₀ ℓB₁ ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} 
-  → {B : Category {ℓB₀} {ℓB₁}} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} 
-  → {F : Functor C D} 
-  → (K : Functor B C)
-  → ⟨ Id⟨ F ⟩ ⟩∘[ K ] ≡ Id⟨ [ F ]∘[ K ] ⟩
-leftWhiskerId₁ {B = B} K = 
-  natural-transformation-eq $ fun-ext $ λ (x : Obj B) → refl
+abstract
+  rightWhiskerId₁ 
+    : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓE₀ ℓE₁ : Level} 
+    → {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} {E : Category {ℓE₀} {ℓE₁}} 
+    → {F : Functor C D} 
+    → (K : Functor D E)
+    → [ K ]∘⟨ Id⟨ F ⟩ ⟩ ≡ Id⟨ [ K ]∘[ F ] ⟩
+  rightWhiskerId₁ {C = C} K = 
+    natural-transformation-eq $ fun-ext $ λ (x : Obj C) → Functor.id K
 
+abstract
+  rightWhiskerId₂
+    : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓE₀ ℓE₁ : Level} 
+    → {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} {E : Category {ℓE₀} {ℓE₁}} 
+    → {F G : Functor C D} 
+    → (K : Functor D E)
+    → (α : NaturalTransformation F G)
+    → ⟨ Id⟨ K ⟩ ⟩∘ₕ⟨ α ⟩ ≡ [ K ]∘⟨ α ⟩
+  rightWhiskerId₂ {C = C} {D} {E} {F} {G} K α = 
+    natural-transformation-eq $ fun-ext $ λ (x : Obj C) → right-id E
 
-leftWhiskerId₂
-  : {ℓB₀ ℓB₁ ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} 
-  → {B : Category {ℓB₀} {ℓB₁}} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} 
-  → {F G : Functor C D} 
-  → (K : Functor B C)
-  → (α : NaturalTransformation F G)
-  → ⟨ α ⟩∘ₕ⟨ Id⟨ K ⟩ ⟩ ≡ ⟨ α ⟩∘[ K ]
-leftWhiskerId₂ {B = B} {C} {D} {F} {G} K α = 
-  natural-transformation-eq $ fun-ext $ λ (x : Obj B) → begin
-    η ⟨ α ⟩∘ₕ⟨ Id⟨ K ⟩ ⟩ x 
-      ≡⟨ refl ⟩
-    η α ([ K ]₀ x) ∘D [ F ]₁ (Category.id C) 
-      ≡⟨ cong (λ X → η α ([ K ]₀ x) ∘D X) (Functor.id F) ⟩
-    η α ([ K ]₀ x) ∘D Category.id D 
-      ≡⟨ left-id D ⟩
-    η α ([ K ]₀ x)
-      ≡⟨ refl ⟩
-    η ⟨ α ⟩∘[ K ] x ∎
-  where _∘D_ = _∘_ D
-
-rightWhiskerId₁ 
-  : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓE₀ ℓE₁ : Level} 
-  → {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} {E : Category {ℓE₀} {ℓE₁}} 
-  → {F : Functor C D} 
-  → (K : Functor D E)
-  → [ K ]∘⟨ Id⟨ F ⟩ ⟩ ≡ Id⟨ [ K ]∘[ F ] ⟩
-rightWhiskerId₁ {C = C} K = 
-  natural-transformation-eq $ fun-ext $ λ (x : Obj C) → Functor.id K
-
-
-rightWhiskerId₂
-  : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓE₀ ℓE₁ : Level} 
-  → {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} {E : Category {ℓE₀} {ℓE₁}} 
-  → {F G : Functor C D} 
-  → (K : Functor D E)
-  → (α : NaturalTransformation F G)
-  → ⟨ Id⟨ K ⟩ ⟩∘ₕ⟨ α ⟩ ≡ [ K ]∘⟨ α ⟩
-rightWhiskerId₂ {C = C} {D} {E} {F} {G} K α = 
-  natural-transformation-eq $ fun-ext $ λ (x : Obj C) → right-id E
-
-
-whiskerCompositionHorzEq 
-  : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓE₀ ℓE₁ : Level} 
-  → {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} {E : Category {ℓE₀} {ℓE₁}}
-  → {F G : Functor C D}
-  → {H K : Functor D E}
-  → (α : NaturalTransformation F G)
-  → (β : NaturalTransformation H K)
-  → ⟨ [ K ]∘⟨ α ⟩ ⟩∘ᵥ⟨ ⟨ β ⟩∘[ F ] ⟩ ≡ ⟨ ⟨ β ⟩∘[ G ] ⟩∘ᵥ⟨ [ H ]∘⟨ α ⟩ ⟩
-whiskerCompositionHorzEq {C = C} {D} {E} {F} {G} {H} {K} α β = 
-  natural-transformation-eq $ fun-ext $ λ (x : Obj C) → begin
-    η ⟨ [ K ]∘⟨ α ⟩ ⟩∘ᵥ⟨ ⟨ β ⟩∘[ F ] ⟩ x
-      ≡⟨ refl ⟩ 
-    [ K ]₁ (η α x) ∘E η β ([ F ]₀ x)
-      ≡⟨ natural β ⟩ 
-    η β ([ G ]₀ x) ∘E [ H ]₁ (η α x)
-      ≡⟨ refl ⟩ 
-    η ⟨ ⟨ β ⟩∘[ G ] ⟩∘ᵥ⟨ [ H ]∘⟨ α ⟩ ⟩ x ∎
-  where _∘E_ = _∘_ E
+abstract
+  whiskerCompositionHorzEq 
+    : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓE₀ ℓE₁ : Level} 
+    → {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} {E : Category {ℓE₀} {ℓE₁}}
+    → {F G : Functor C D}
+    → {H K : Functor D E}
+    → (α : NaturalTransformation F G)
+    → (β : NaturalTransformation H K)
+    → ⟨ [ K ]∘⟨ α ⟩ ⟩∘ᵥ⟨ ⟨ β ⟩∘[ F ] ⟩ ≡ ⟨ ⟨ β ⟩∘[ G ] ⟩∘ᵥ⟨ [ H ]∘⟨ α ⟩ ⟩
+  whiskerCompositionHorzEq {C = C} {D} {E} {F} {G} {H} {K} α β = 
+    natural-transformation-eq $ fun-ext $ λ (x : Obj C) → begin
+      η ⟨ [ K ]∘⟨ α ⟩ ⟩∘ᵥ⟨ ⟨ β ⟩∘[ F ] ⟩ x
+        ≡⟨ refl ⟩ 
+      [ K ]₁ (η α x) ∘E η β ([ F ]₀ x)
+        ≡⟨ natural β ⟩ 
+      η β ([ G ]₀ x) ∘E [ H ]₁ (η α x)
+        ≡⟨ refl ⟩ 
+      η ⟨ ⟨ β ⟩∘[ G ] ⟩∘ᵥ⟨ [ H ]∘⟨ α ⟩ ⟩ x ∎
+    where _∘E_ = _∘_ E

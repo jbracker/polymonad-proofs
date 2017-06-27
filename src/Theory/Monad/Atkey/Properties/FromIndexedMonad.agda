@@ -57,14 +57,16 @@ IxTyCon→AtkeyFunctor Ixs M monad = functor F₀ F₁ (λ {a} → law-id {a}) (
     F₁ : {a b : Obj ((S op) ×C S ×C H)} → Hom ((S op) ×C S ×C H) a b → Hom H (F₀ a) (F₀ b)
     F₁ {sa₀ , sa₁ , a} {.sa₀ , .sa₁ , b} (refl , refl , f) ma = IxMonad.fmap monad f ma
     
-    law-id : {a : Obj ((S op) ×C S ×C H)} → IxMonad.fmap monad (id H) ≡ id H
-    law-id {s₀ , s₁ , α} = HaskFunctor.law-id (IxMonad.functor monad s₀ s₁)
-
-    law-compose : {a b c : Obj ((S op) ×C S ×C H)}
-                → {f : Hom ((S op) ×C S ×C H) a b}
-                → {g : Hom ((S op) ×C S ×C H) b c}
-                → F₁ (g ∘SSH f) ≡ F₁ g ∘F F₁ f
-    law-compose {a₀ , a₁ , α} {f = refl , refl , f} {refl , refl , g} = HaskFunctor.law-compose (IxMonad.functor monad a₀ a₁) g f
+    abstract
+      law-id : {a : Obj ((S op) ×C S ×C H)} → IxMonad.fmap monad (id H) ≡ id H
+      law-id {s₀ , s₁ , α} = HaskFunctor.law-id (IxMonad.functor monad s₀ s₁)
+  
+    abstract
+      law-compose : {a b c : Obj ((S op) ×C S ×C H)}
+                  → {f : Hom ((S op) ×C S ×C H) a b}
+                  → {g : Hom ((S op) ×C S ×C H) b c}
+                  → F₁ (g ∘SSH f) ≡ F₁ g ∘F F₁ f
+      law-compose {a₀ , a₁ , α} {f = refl , refl , f} {refl , refl , g} = HaskFunctor.law-compose (IxMonad.functor monad a₀ a₁) g f
 
 IxMonad→AtkeyParameterizedMonad
   : {ℓ : Level}
@@ -91,76 +93,85 @@ IxMonad→AtkeyParameterizedMonad Ixs M monad = record
     
     open IxMonad monad hiding ( bind )
     
-    naturalη : {s : Ixs} {a b : Type} {f : Hom Hask a b} 
-             → IxMonad.fmap monad f ∘F return ≡ return ∘F f
-    naturalη {s} {f = f} = fun-ext $ λ x → begin
-      fmap f (return x)
-        ≡⟨ sym (law-monad-fmap f (return x)) ⟩
-      return x >>= (return ∘F f)
-        ≡⟨ law-right-id x (return ∘F f) ⟩
-      return (f x) ∎
+    abstract
+      naturalη : {s : Ixs} {a b : Type} {f : Hom Hask a b} 
+               → IxMonad.fmap monad f ∘F return ≡ return ∘F f
+      naturalη {s} {f = f} = fun-ext $ λ x → begin
+        fmap f (return x)
+          ≡⟨ sym (law-monad-fmap f (return x)) ⟩
+        return x >>= (return ∘F f)
+          ≡⟨ law-right-id x (return ∘F f) ⟩
+        return (f x) ∎
     
-    dinaturalη : {x : Type} {a b : Ixs} {f : Hom S a b} 
-               → [ IxTyCon→AtkeyFunctor Ixs M monad ]₁ (refl , f , (λ x → x)) ∘F return
-               ≡ [ IxTyCon→AtkeyFunctor Ixs M monad ]₁ (f , refl , (λ x → x)) ∘F return
-    dinaturalη {f = refl} = refl
+    abstract
+      dinaturalη : {x : Type} {a b : Ixs} {f : Hom S a b} 
+                 → [ IxTyCon→AtkeyFunctor Ixs M monad ]₁ (refl , f , (λ x → x)) ∘F return
+                 ≡ [ IxTyCon→AtkeyFunctor Ixs M monad ]₁ (f , refl , (λ x → x)) ∘F return
+      dinaturalη {f = refl} = refl
+      
+    abstract
+      naturalμ : {s₁ s₂ s₃ : Ixs} {a b : Type} {f : Hom Hask a b} 
+               → fmap f ∘F join ≡ join ∘F fmap (fmap f)
+      naturalμ {f = f} = fun-ext $ λ mma → begin
+        fmap f (join mma) 
+          ≡⟨ sym (law-monad-fmap f (join mma)) ⟩ 
+        (mma >>= (λ x → x)) >>= (return ∘F f)
+          ≡⟨ sym (law-assoc mma (λ x → x) (return ∘F f)) ⟩ 
+        mma >>= (λ ma → ma >>= (return ∘F f))
+          ≡⟨ cong (λ X → mma >>= X) (fun-ext (λ ma → sym (law-right-id (ma >>= (return ∘F f)) (λ x → x)))) ⟩ 
+        mma >>= (λ ma → (return (ma >>= (return ∘F f))) >>= (λ x → x))
+          ≡⟨ law-assoc mma (return ∘F (λ ma → ma >>= (return ∘F f))) (λ x → x) ⟩ 
+        (mma >>= (return ∘F (λ ma → ma >>= (return ∘F f)))) >>= (λ x → x)
+          ≡⟨ cong (λ X → _>>=_ X (λ x → x)) (law-monad-fmap (λ ma → ma >>= (return ∘F f)) mma) ⟩ 
+        join (fmap (λ ma → ma >>= (return ∘F f)) mma)
+          ≡⟨ cong (λ X → join (fmap X mma)) (fun-ext (λ ma → law-monad-fmap f ma)) ⟩ 
+        join (fmap (fmap f) mma) ∎
     
-    naturalμ : {s₁ s₂ s₃ : Ixs} {a b : Type} {f : Hom Hask a b} 
-             → fmap f ∘F join ≡ join ∘F fmap (fmap f)
-    naturalμ {f = f} = fun-ext $ λ mma → begin
-      fmap f (join mma) 
-        ≡⟨ sym (law-monad-fmap f (join mma)) ⟩ 
-      (mma >>= (λ x → x)) >>= (return ∘F f)
-        ≡⟨ sym (law-assoc mma (λ x → x) (return ∘F f)) ⟩ 
-      mma >>= (λ ma → ma >>= (return ∘F f))
-        ≡⟨ cong (λ X → mma >>= X) (fun-ext (λ ma → sym (law-right-id (ma >>= (return ∘F f)) (λ x → x)))) ⟩ 
-      mma >>= (λ ma → (return (ma >>= (return ∘F f))) >>= (λ x → x))
-        ≡⟨ law-assoc mma (return ∘F (λ ma → ma >>= (return ∘F f))) (λ x → x) ⟩ 
-      (mma >>= (return ∘F (λ ma → ma >>= (return ∘F f)))) >>= (λ x → x)
-        ≡⟨ cong (λ X → _>>=_ X (λ x → x)) (law-monad-fmap (λ ma → ma >>= (return ∘F f)) mma) ⟩ 
-      join (fmap (λ ma → ma >>= (return ∘F f)) mma)
-        ≡⟨ cong (λ X → join (fmap X mma)) (fun-ext (λ ma → law-monad-fmap f ma)) ⟩ 
-      join (fmap (fmap f) mma) ∎
-
-    naturalμ₁ : {s₂ s₃ : Ixs} {x : Type} {a b : Ixs} {f : Hom (S op) a b} 
-              → [ IxTyCon→AtkeyFunctor Ixs M monad ]₁ (f , refl , (λ x → x)) ∘F join
-              ≡ join ∘F ([ IxTyCon→AtkeyFunctor Ixs M monad ]₁ (f , refl , fmap (λ x → x)))
-    naturalμ₁ {f = refl} = naturalμ {f = λ x → x}
+    abstract
+      naturalμ₁ : {s₂ s₃ : Ixs} {x : Type} {a b : Ixs} {f : Hom (S op) a b} 
+                → [ IxTyCon→AtkeyFunctor Ixs M monad ]₁ (f , refl , (λ x → x)) ∘F join
+                ≡ join ∘F ([ IxTyCon→AtkeyFunctor Ixs M monad ]₁ (f , refl , fmap (λ x → x)))
+      naturalμ₁ {f = refl} = naturalμ {f = λ x → x}
+      
+    abstract
+      naturalμ₂ : {s₁ s₂ : Ixs} {x : Type} {a b : Ixs} {f : Hom S a b} 
+                → ([ IxTyCon→AtkeyFunctor Ixs M monad ]₁ (refl , f , (λ x → x))) ∘F join
+                ≡ join ∘F (fmap ([ IxTyCon→AtkeyFunctor Ixs M monad ]₁ (refl , f , (λ x → x))))
+      naturalμ₂ {f = refl} = naturalμ {f = λ x → x}
     
-    naturalμ₂ : {s₁ s₂ : Ixs} {x : Type} {a b : Ixs} {f : Hom S a b} 
-              → ([ IxTyCon→AtkeyFunctor Ixs M monad ]₁ (refl , f , (λ x → x))) ∘F join
-              ≡ join ∘F (fmap ([ IxTyCon→AtkeyFunctor Ixs M monad ]₁ (refl , f , (λ x → x))))
-    naturalμ₂ {f = refl} = naturalμ {f = λ x → x}
-
-    dinaturalμ : {s₁ s₃ : Ixs} {x : Type} {a b : Ixs} {f : Hom S a b} 
-               → join ∘F (fmap ([ IxTyCon→AtkeyFunctor Ixs M monad ]₁ (f , refl , (λ x → x))))
-               ≡ join ∘F ([ IxTyCon→AtkeyFunctor Ixs M monad ]₁ (refl , f , fmap (λ x → x)))
-    dinaturalμ {f = refl} = refl
+    abstract
+      dinaturalμ : {s₁ s₃ : Ixs} {x : Type} {a b : Ixs} {f : Hom S a b} 
+                 → join ∘F (fmap ([ IxTyCon→AtkeyFunctor Ixs M monad ]₁ (f , refl , (λ x → x))))
+                 ≡ join ∘F ([ IxTyCon→AtkeyFunctor Ixs M monad ]₁ (refl , f , fmap (λ x → x)))
+      dinaturalμ {f = refl} = refl
     
-    assoc' : {x : Type} {s₀ s₁ s₂ s₃ : Ixs} 
-           → join ∘F (fmap join) ≡ join ∘F join
-    assoc' = fun-ext $ λ mma → begin
-      fmap (λ ma → ma >>= (λ x → x)) mma >>= (λ x → x) 
-        ≡⟨ cong (λ X → _>>=_ X (λ x → x)) (sym (law-monad-fmap (λ ma → ma >>= (λ x → x)) mma)) ⟩ 
-      (mma >>= (λ ma → return (ma >>= (λ x → x)))) >>= (λ x → x) 
-        ≡⟨ sym (law-assoc mma (λ ma → return (ma >>= (λ x → x))) (λ x → x)) ⟩ 
-      mma >>= (λ ma → return (ma >>= (λ x → x)) >>= (λ x → x))
-        ≡⟨ cong (λ X → _>>=_ mma X) (fun-ext (λ ma → law-right-id (ma >>= (λ x → x)) (λ x → x))) ⟩  
-      mma >>= (λ ma → ma >>= (λ x → x))
-        ≡⟨ law-assoc mma (λ x → x) (λ x → x) ⟩ 
-      (mma >>= (λ x → x)) >>= (λ x → x) ∎
-
-    left-id' : {x : Type} {s₁ s₂ : Ixs} → join ∘F (fmap return) ≡ (λ x → x)
-    left-id' = fun-ext $ λ mma → begin
-      (fmap return mma) >>= (λ x → x) 
-        ≡⟨ cong (λ X → _>>=_ X (λ x → x)) (sym (law-monad-fmap return mma)) ⟩ 
-      (mma >>= (return ∘F return)) >>= (λ x → x) 
-        ≡⟨ sym (law-assoc mma (return ∘F return) (λ x → x)) ⟩ 
-      mma >>= (λ ma → return (return ma) >>= (λ x → x)) 
-        ≡⟨ cong (λ X → _>>=_ mma X) (fun-ext (λ ma → law-right-id (return ma) (λ x → x))) ⟩ 
-      mma >>= return
-        ≡⟨ law-left-id mma ⟩ 
-      mma ∎
+    abstract
+      assoc' : {x : Type} {s₀ s₁ s₂ s₃ : Ixs} 
+             → join ∘F (fmap join) ≡ join ∘F join
+      assoc' = fun-ext $ λ mma → begin
+        fmap (λ ma → ma >>= (λ x → x)) mma >>= (λ x → x) 
+          ≡⟨ cong (λ X → _>>=_ X (λ x → x)) (sym (law-monad-fmap (λ ma → ma >>= (λ x → x)) mma)) ⟩ 
+        (mma >>= (λ ma → return (ma >>= (λ x → x)))) >>= (λ x → x) 
+          ≡⟨ sym (law-assoc mma (λ ma → return (ma >>= (λ x → x))) (λ x → x)) ⟩ 
+        mma >>= (λ ma → return (ma >>= (λ x → x)) >>= (λ x → x))
+          ≡⟨ cong (λ X → _>>=_ mma X) (fun-ext (λ ma → law-right-id (ma >>= (λ x → x)) (λ x → x))) ⟩  
+        mma >>= (λ ma → ma >>= (λ x → x))
+          ≡⟨ law-assoc mma (λ x → x) (λ x → x) ⟩ 
+        (mma >>= (λ x → x)) >>= (λ x → x) ∎
     
-    right-id' : {x : Type} {s₁ s₂ : Ixs} → join ∘F return ≡ (λ x → x)
-    right-id' = fun-ext $ λ ma → law-right-id ma (λ x → x)
+    abstract
+      left-id' : {x : Type} {s₁ s₂ : Ixs} → join ∘F (fmap return) ≡ (λ x → x)
+      left-id' = fun-ext $ λ mma → begin
+        (fmap return mma) >>= (λ x → x) 
+          ≡⟨ cong (λ X → _>>=_ X (λ x → x)) (sym (law-monad-fmap return mma)) ⟩ 
+        (mma >>= (return ∘F return)) >>= (λ x → x) 
+          ≡⟨ sym (law-assoc mma (return ∘F return) (λ x → x)) ⟩ 
+        mma >>= (λ ma → return (return ma) >>= (λ x → x)) 
+          ≡⟨ cong (λ X → _>>=_ mma X) (fun-ext (λ ma → law-right-id (return ma) (λ x → x))) ⟩ 
+        mma >>= return
+          ≡⟨ law-left-id mma ⟩ 
+        mma ∎
+    
+    abstract
+      right-id' : {x : Type} {s₁ s₂ : Ixs} → join ∘F return ≡ (λ x → x)
+      right-id' = fun-ext $ λ ma → law-right-id ma (λ x → x)

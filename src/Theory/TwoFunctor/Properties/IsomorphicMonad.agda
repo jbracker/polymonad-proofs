@@ -37,25 +37,27 @@ Monad↔LaxTwoFunctor {ℓC₀} {ℓC₁} = bijection l→r r→l r→l→r l→
     r→l : LaxTwoFunctor ⊤-TwoCat Cat' → Σ Category' (λ C → Σ (Functor C C) Monad)
     r→l F = LaxTwoFunctor.P₀ F tt , Functor.F₀ (LaxTwoFunctor.P₁ F) tt , LaxTwoFunctor→Monad F
     
-    r→l→r : (F : LaxTwoFunctor ⊤-TwoCat Cat) → l→r (r→l F) ≡ F
-    r→l→r F = lax-two-functor-eq refl (≡-to-≅ P₁-eq) (≡-to-≅ (implicit-fun-ext (λ x → refl))) (≡-to-≅ (implicit-fun-ext (λ x → refl)))
-      where
-        p : (c : Category.Obj (LaxTwoFunctor.P₀ (l→r (r→l F)) tt)) 
-          → Category.id (proj₁ (r→l F)) ≡ NaturalTransformation.η (Functor.F₁ (LaxTwoFunctor.P₁ F) tt) c
-        p c = begin
-          Category.id (proj₁ (r→l F))
-            ≡⟨ refl ⟩
-          NaturalTransformation.η (Id⟨ Functor.F₀ (LaxTwoFunctor.P₁ F) tt ⟩) c
-            ≡⟨ cong (λ X → NaturalTransformation.η X c) (sym (Functor.id (LaxTwoFunctor.P₁ F))) ⟩
-          NaturalTransformation.η (Functor.F₁ (LaxTwoFunctor.P₁ F) tt) c ∎
-        
-        P₁-eq : (λ {x y} → LaxTwoFunctor.P₁ (l→r (r→l F)) {x} {y}) ≡ LaxTwoFunctor.P₁ F
-        P₁-eq = implicit-fun-ext $ λ x → implicit-fun-ext $ λ y → functor-eq refl $ ≡-to-≅ $ implicit-fun-ext 
-              $ λ f → implicit-fun-ext $ λ g → fun-ext 
-              $ λ F → natural-transformation-eq $ fun-ext $ p
-
-    l→r→l : (M : Σ Category (λ C → Σ (Functor C C) Monad)) → r→l (l→r M) ≡ M
-    l→r→l (C , F , monad) = Σ-eq refl (het-Σ-eq refl (≡-to-≅ (monad-eq refl refl)))
+    abstract
+      r→l→r : (F : LaxTwoFunctor ⊤-TwoCat Cat) → l→r (r→l F) ≡ F
+      r→l→r F = lax-two-functor-eq refl (≡-to-≅ P₁-eq) (≡-to-≅ (implicit-fun-ext (λ x → refl))) (≡-to-≅ (implicit-fun-ext (λ x → refl)))
+        where
+          p : (c : Category.Obj (LaxTwoFunctor.P₀ (l→r (r→l F)) tt)) 
+            → Category.id (proj₁ (r→l F)) ≡ NaturalTransformation.η (Functor.F₁ (LaxTwoFunctor.P₁ F) tt) c
+          p c = begin
+            Category.id (proj₁ (r→l F))
+              ≡⟨ refl ⟩
+            NaturalTransformation.η (Id⟨ Functor.F₀ (LaxTwoFunctor.P₁ F) tt ⟩) c
+              ≡⟨ cong (λ X → NaturalTransformation.η X c) (sym (Functor.id (LaxTwoFunctor.P₁ F))) ⟩
+            NaturalTransformation.η (Functor.F₁ (LaxTwoFunctor.P₁ F) tt) c ∎
+          
+          P₁-eq : (λ {x y} → LaxTwoFunctor.P₁ (l→r (r→l F)) {x} {y}) ≡ LaxTwoFunctor.P₁ F
+          P₁-eq = implicit-fun-ext $ λ x → implicit-fun-ext $ λ y → functor-eq refl $ ≡-to-≅ $ implicit-fun-ext 
+                $ λ f → implicit-fun-ext $ λ g → fun-ext 
+                $ λ F → natural-transformation-eq $ fun-ext $ p
+    
+    abstract
+      l→r→l : (M : Σ Category (λ C → Σ (Functor C C) Monad)) → r→l (l→r M) ≡ M
+      l→r→l (C , F , monad) = Σ-eq refl (het-Σ-eq refl (≡-to-≅ (monad-eq refl refl)))
 
 
 

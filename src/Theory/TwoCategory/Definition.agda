@@ -118,25 +118,31 @@ record StrictTwoCategory {ℓ₀ ℓ₁ ℓ₂ : Level} : Set (lsuc (ℓ₀ ⊔ 
   id→functor : {a : Cell₀} → Functor ⊤-Cat (HomCat a a)
   id→functor {a} = constObjFunctor (HomCat a a) (id₁ {a})
 
-  vIdL : {a b : Cell₀} {f g : Cell₁ a b} {θ : Cell₂ f g} → θ ∘ᵥ id₂ {f = f} ≡ θ
-  vIdL {a} {b} = Category.left-id (HomCat a b)
-
-  vIdR : {a b : Cell₀} {f g : Cell₁ a b} {θ : Cell₂ f g} → id₂ {f = g} ∘ᵥ θ ≡ θ
-  vIdR {a} {b} = Category.right-id (HomCat a b)
+  abstract
+    vIdL : {a b : Cell₀} {f g : Cell₁ a b} {θ : Cell₂ f g} → θ ∘ᵥ id₂ {f = f} ≡ θ
+    vIdL {a} {b} = Category.left-id (HomCat a b)
   
-  vAssoc : {a b : Cell₀} {f g h i : Cell₁ a b} {η : Cell₂ f g} {θ : Cell₂ g h} {ι : Cell₂ h i}
-                → ι ∘ᵥ (θ ∘ᵥ η) ≡ (ι ∘ᵥ θ) ∘ᵥ η
-  vAssoc {a} {b} = Category.assoc (HomCat a b)
+  abstract
+    vIdR : {a b : Cell₀} {f g : Cell₁ a b} {θ : Cell₂ f g} → id₂ {f = g} ∘ᵥ θ ≡ θ
+    vIdR {a} {b} = Category.right-id (HomCat a b)
   
-  hIdL₁ : {a b : Cell₀} {f : Cell₁ a b} → f ∘ₕ id₁ {a} ≡ f
-  hIdL₁ = horizontalIdL₁
+  abstract
+    vAssoc : {a b : Cell₀} {f g h i : Cell₁ a b} {η : Cell₂ f g} {θ : Cell₂ g h} {ι : Cell₂ h i}
+                  → ι ∘ᵥ (θ ∘ᵥ η) ≡ (ι ∘ᵥ θ) ∘ᵥ η
+    vAssoc {a} {b} = Category.assoc (HomCat a b)
   
-  hIdR₁ :  {a b : Cell₀} {f : Cell₁ a b} → id₁ {b} ∘ₕ f ≡ f
-  hIdR₁ = horizontalIdR₁
-
-  hIdL₂ : {a b : Cell₀} {f g : Cell₁ a b} {η : Cell₂ f g} 
-        → η ∘ₕ₂ id₂ {a} {a} ≡ subst₂ Cell₂ (sym hIdL₁) (sym hIdL₁) η
-  hIdL₂ = horizontalIdL₂
+  abstract
+    hIdL₁ : {a b : Cell₀} {f : Cell₁ a b} → f ∘ₕ id₁ {a} ≡ f
+    hIdL₁ = horizontalIdL₁
+  
+  abstract
+    hIdR₁ :  {a b : Cell₀} {f : Cell₁ a b} → id₁ {b} ∘ₕ f ≡ f
+    hIdR₁ = horizontalIdR₁
+  
+  abstract
+    hIdL₂ : {a b : Cell₀} {f g : Cell₁ a b} {η : Cell₂ f g} 
+          → η ∘ₕ₂ id₂ {a} {a} ≡ subst₂ Cell₂ (sym hIdL₁) (sym hIdL₁) η
+    hIdL₂ = horizontalIdL₂
   
   private
     het-help : {a b : Cell₀} 
@@ -146,49 +152,61 @@ record StrictTwoCategory {ℓ₀ ℓ₁ ℓ₂ : Level} : Set (lsuc (ℓ₀ ⊔ 
              → η ≡ subst₂ Cell₂ p q ι → η ≅ ι
     het-help η ι refl refl refl = refl
   
-  hIdL₂' : {a b : Cell₀} {f g : Cell₁ a b} {η : Cell₂ f g} → η ∘ₕ₂ (id₂ {a} {a} {id₁}) ≅ η
-  hIdL₂' {a} {b} {η = η} = het-help (η ∘ₕ₂ (id₂ {a} {a})) η (sym hIdL₁) (sym hIdL₁) hIdL₂
+  abstract
+    hIdL₂' : {a b : Cell₀} {f g : Cell₁ a b} {η : Cell₂ f g} → η ∘ₕ₂ (id₂ {a} {a} {id₁}) ≅ η
+    hIdL₂' {a} {b} {η = η} = het-help (η ∘ₕ₂ (id₂ {a} {a})) η (sym hIdL₁) (sym hIdL₁) hIdL₂
   
-  hIdR₂ : {a b : Cell₀} {f g : Cell₁ a b} {η : Cell₂ f g} 
-        → id₂ {b} {b} ∘ₕ₂ η ≡ subst₂ Cell₂ (sym hIdR₁) (sym hIdR₁) η
-  hIdR₂ = horizontalIdR₂
+  abstract
+    hIdR₂ : {a b : Cell₀} {f g : Cell₁ a b} {η : Cell₂ f g} 
+          → id₂ {b} {b} ∘ₕ₂ η ≡ subst₂ Cell₂ (sym hIdR₁) (sym hIdR₁) η
+    hIdR₂ = horizontalIdR₂
   
-  hIdR₂' : {a b : Cell₀} {f g : Cell₁ a b} {η : Cell₂ f g} → id₂ {b} {b} {id₁} ∘ₕ₂ η ≅ η
-  hIdR₂' {a} {b} {η = η} = het-help (id₂ {b} {b} ∘ₕ₂ η) η (sym hIdR₁) (sym hIdR₁) hIdR₂
+  abstract
+    hIdR₂' : {a b : Cell₀} {f g : Cell₁ a b} {η : Cell₂ f g} → id₂ {b} {b} {id₁} ∘ₕ₂ η ≅ η
+    hIdR₂' {a} {b} {η = η} = het-help (id₂ {b} {b} ∘ₕ₂ η) η (sym hIdR₁) (sym hIdR₁) hIdR₂
   
-  hAssoc₁ : {a b c d : Cell₀} {f : Cell₁ a b} {g : Cell₁ b c} {h : Cell₁ c d} 
-          → h ∘ₕ (g ∘ₕ f) ≡ (h ∘ₕ g) ∘ₕ f
-  hAssoc₁ = horizontalAssoc₁
+  abstract
+    hAssoc₁ : {a b c d : Cell₀} {f : Cell₁ a b} {g : Cell₁ b c} {h : Cell₁ c d} 
+            → h ∘ₕ (g ∘ₕ f) ≡ (h ∘ₕ g) ∘ₕ f
+    hAssoc₁ = horizontalAssoc₁
 
-  hAssoc₂ : {a b c d : Cell₀} {f f' : Cell₁ a b} {g g' : Cell₁ b c} {h h' : Cell₁ c d}
-          → {η : Cell₂ h h'} {θ : Cell₂ g g'} {ι : Cell₂ f f'}
-          → η ∘ₕ₂ (θ ∘ₕ₂ ι) ≡ subst₂ Cell₂ (sym hAssoc₁) (sym hAssoc₁) ((η ∘ₕ₂ θ) ∘ₕ₂ ι)
-  hAssoc₂ = horizontalAssoc₂
+  abstract
+    hAssoc₂ : {a b c d : Cell₀} {f f' : Cell₁ a b} {g g' : Cell₁ b c} {h h' : Cell₁ c d}
+            → {η : Cell₂ h h'} {θ : Cell₂ g g'} {ι : Cell₂ f f'}
+            → η ∘ₕ₂ (θ ∘ₕ₂ ι) ≡ subst₂ Cell₂ (sym hAssoc₁) (sym hAssoc₁) ((η ∘ₕ₂ θ) ∘ₕ₂ ι)
+    hAssoc₂ = horizontalAssoc₂
   
-  hAssoc₂' : {a b c d : Cell₀} {f f' : Cell₁ a b} {g g' : Cell₁ b c} {h h' : Cell₁ c d}
-          → {η : Cell₂ h h'} {θ : Cell₂ g g'} {ι : Cell₂ f f'}
-          → η ∘ₕ₂ (θ ∘ₕ₂ ι) ≅ (η ∘ₕ₂ θ) ∘ₕ₂ ι
-  hAssoc₂' {η = η} {θ} {ι} = het-help (η ∘ₕ₂ (θ ∘ₕ₂ ι)) ((η ∘ₕ₂ θ) ∘ₕ₂ ι) (sym hAssoc₁) (sym hAssoc₁) hAssoc₂
+  abstract
+    hAssoc₂' : {a b c d : Cell₀} {f f' : Cell₁ a b} {g g' : Cell₁ b c} {h h' : Cell₁ c d}
+             → {η : Cell₂ h h'} {θ : Cell₂ g g'} {ι : Cell₂ f f'}
+             → η ∘ₕ₂ (θ ∘ₕ₂ ι) ≅ (η ∘ₕ₂ θ) ∘ₕ₂ ι
+    hAssoc₂' {η = η} {θ} {ι} = het-help (η ∘ₕ₂ (θ ∘ₕ₂ ι)) ((η ∘ₕ₂ θ) ∘ₕ₂ ι) (sym hAssoc₁) (sym hAssoc₁) hAssoc₂
   
-  whiskerLeftId₁ : {a b c : Cell₀} {f : Cell₁ a b} {g : Cell₁ b c} 
-                → id₂ {f = g} ◁ f ≡ id₂ {f = g ∘ₕ f}
-  whiskerLeftId₁ = Functor.id comp
+  abstract
+    whiskerLeftId₁ : {a b c : Cell₀} {f : Cell₁ a b} {g : Cell₁ b c} 
+                   → id₂ {f = g} ◁ f ≡ id₂ {f = g ∘ₕ f}
+    whiskerLeftId₁ = Functor.id comp
   
-  whiskerRightId₁ : {a b c : Cell₀} {f : Cell₁ a b} {g : Cell₁ b c}
-                 → g ▷ id₂ {f = f} ≡ id₂ {f = g ∘ₕ f}
-  whiskerRightId₁ = Functor.id comp
+  abstract
+    whiskerRightId₁ : {a b c : Cell₀} {f : Cell₁ a b} {g : Cell₁ b c}
+                    → g ▷ id₂ {f = f} ≡ id₂ {f = g ∘ₕ f}
+    whiskerRightId₁ = Functor.id comp
   
-  whiskerRightId₂ : {a b : Cell₀} {f g : Cell₁ a b} {η : Cell₂ f g} → η ◁ id₁ {a} ≡ subst₂ Cell₂ (sym hIdL₁) (sym hIdL₁) η
-  whiskerRightId₂ = horizontalIdL₂
+  abstract
+    whiskerRightId₂ : {a b : Cell₀} {f g : Cell₁ a b} {η : Cell₂ f g} → η ◁ id₁ {a} ≡ subst₂ Cell₂ (sym hIdL₁) (sym hIdL₁) η
+    whiskerRightId₂ = horizontalIdL₂
   
-  whiskerRightId₂' : {a b : Cell₀} {f g : Cell₁ a b} {η : Cell₂ f g} → η ◁ id₁ {a} ≅ η
-  whiskerRightId₂' {a} {b} {η = η} = het-help (η ◁ id₁ {a}) (η) (sym hIdL₁) (sym hIdL₁) whiskerRightId₂
+  abstract
+    whiskerRightId₂' : {a b : Cell₀} {f g : Cell₁ a b} {η : Cell₂ f g} → η ◁ id₁ {a} ≅ η
+    whiskerRightId₂' {a} {b} {η = η} = het-help (η ◁ id₁ {a}) (η) (sym hIdL₁) (sym hIdL₁) whiskerRightId₂
   
-  whiskerLeftId₂ : {a b : Cell₀} {f g : Cell₁ a b} {η : Cell₂ f g} → id₁ {b} ▷ η ≡ subst₂ Cell₂ (sym hIdR₁) (sym hIdR₁) η
-  whiskerLeftId₂ = horizontalIdR₂
-
-  whiskerLeftId₂' : {a b : Cell₀} {f g : Cell₁ a b} {η : Cell₂ f g} → id₁ {b} ▷ η ≅ η
-  whiskerLeftId₂' {a} {b} {η = η} = het-help (id₁ {b} ▷ η) (η) (sym hIdR₁) (sym hIdR₁) whiskerLeftId₂
+  abstract
+    whiskerLeftId₂ : {a b : Cell₀} {f g : Cell₁ a b} {η : Cell₂ f g} → id₁ {b} ▷ η ≡ subst₂ Cell₂ (sym hIdR₁) (sym hIdR₁) η
+    whiskerLeftId₂ = horizontalIdR₂
+  
+  abstract
+    whiskerLeftId₂' : {a b : Cell₀} {f g : Cell₁ a b} {η : Cell₂ f g} → id₁ {b} ▷ η ≅ η
+    whiskerLeftId₂' {a} {b} {η = η} = het-help (id₁ {b} ▷ η) (η) (sym hIdR₁) (sym hIdR₁) whiskerLeftId₂
   
   private
     compᵥ-cong₂ : {a b : Cell₀} {f g h i j k : Cell₁ a b} {ι : Cell₂ f g} {η : Cell₂ g h} {γ : Cell₂ i j} {θ : Cell₂ j k}
@@ -241,46 +259,54 @@ record StrictTwoCategory {ℓ₀ ℓ₁ ℓ₂ : Level} : Set (lsuc (ℓ₀ ⊔ 
   private
     het-id-id = id≅id
   
-  whiskerRightDist : {a b c : Cell₀} {f : Cell₁ a b} {g h i : Cell₁ b c} {η : Cell₂ g h} {θ : Cell₂ h i}
-                  → (θ ◁ f) ∘ᵥ (η ◁ f) ≡ (θ ∘ᵥ η) ◁ f
-  whiskerRightDist {a} {b} {c} {f} {η = η} {θ} = 
-    let _∘bc_ = Category._∘_ (HomCat b c)
-    in trans (sym (Functor.compose comp)) (cong (λ X → [ comp ]₁ (θ ∘bc η , X)) vIdL)
+  abstract
+    whiskerRightDist : {a b c : Cell₀} {f : Cell₁ a b} {g h i : Cell₁ b c} {η : Cell₂ g h} {θ : Cell₂ h i}
+                     → (θ ◁ f) ∘ᵥ (η ◁ f) ≡ (θ ∘ᵥ η) ◁ f
+    whiskerRightDist {a} {b} {c} {f} {η = η} {θ} = 
+      let _∘bc_ = Category._∘_ (HomCat b c)
+      in trans (sym (Functor.compose comp)) (cong (λ X → [ comp ]₁ (θ ∘bc η , X)) vIdL)
+  
+  abstract
+    whiskerLeftDist : {a b c : Cell₀} {f g h : Cell₁ a b} {i : Cell₁ b c} {η : Cell₂ f g} {θ : Cell₂ g h}
+                    → (i ▷ θ) ∘ᵥ (i ▷ η) ≡ i ▷ (θ ∘ᵥ η)
+    whiskerLeftDist {a} {b} {c} {η = η} {θ} = 
+      let _∘ab_ = Category._∘_ (HomCat a b)
+      in trans (sym (Functor.compose comp)) (cong (λ X → [ comp ]₁ (X , θ ∘ab η)) vIdL)
+  
+  abstract
+    whiskerCoher1 : {a b c d : Cell₀} {f : Cell₁ a b} {g : Cell₁ b c} {h i : Cell₁ c d} {η : Cell₂ h i}
+                  → η ◁ (g ∘ₕ f) ≡ subst₂ Cell₂ (sym hAssoc₁) (sym hAssoc₁) ((η ◁ g) ◁ f)
+    whiskerCoher1 = whiskerCoher1'
+  
+  abstract
+    whiskerCoher1-het : {a b c d : Cell₀} {f : Cell₁ a b} {g : Cell₁ b c} {h i : Cell₁ c d} {η : Cell₂ h i}
+                      → η ◁ (g ∘ₕ f) ≅ (η ◁ g) ◁ f
+    whiskerCoher1-het {f = f} {g} {η = η} = het-help (η ◁ (g ∘ₕ f)) ((η ◁ g) ◁ f) (sym hAssoc₁) (sym hAssoc₁) whiskerCoher1
+  
+  abstract
+    whiskerCoher2 : {a b c d : Cell₀} {f : Cell₁ a b} {g h : Cell₁ b c} {i : Cell₁ c d} {η : Cell₂ g h} 
+                  → i ▷ (η ◁ f) ≡ subst₂ Cell₂ (sym hAssoc₁) (sym hAssoc₁) ((i ▷ η) ◁ f)
+    whiskerCoher2 = whiskerCoher2'
+  
+  abstract
+    whiskerCoher2-het : {a b c d : Cell₀} {f : Cell₁ a b} {g h : Cell₁ b c} {i : Cell₁ c d} {η : Cell₂ g h} 
+                      → i ▷ (η ◁ f) ≅ (i ▷ η) ◁ f
+    whiskerCoher2-het {f = f} {g} {h} {i} {η} = het-help (i ▷ (η ◁ f)) ((i ▷ η) ◁ f) (sym hAssoc₁) (sym hAssoc₁) whiskerCoher2
+  
+  abstract
+    whiskerCoher3 : {a b c d : Cell₀} {f g : Cell₁ a b} {h : Cell₁ b c} {i : Cell₁ c d} {η : Cell₂ f g}
+                  → i ▷ (h ▷ η) ≡ subst₂ Cell₂ (sym hAssoc₁) (sym hAssoc₁) ((i ∘ₕ h) ▷ η)
+    whiskerCoher3 = whiskerCoher3'
+  
+  abstract
+    whiskerCoher3-het : {a b c d : Cell₀} {f g : Cell₁ a b} {h : Cell₁ b c} {i : Cell₁ c d} {η : Cell₂ f g}
+                      → i ▷ (h ▷ η) ≅ (i ∘ₕ h) ▷ η
+    whiskerCoher3-het {f = f} {g} {h} {i} {η} = het-help (i ▷ (h ▷ η)) ((i ∘ₕ h) ▷ η) (sym hAssoc₁) (sym hAssoc₁) whiskerCoher3
 
-  whiskerLeftDist : {a b c : Cell₀} {f g h : Cell₁ a b} {i : Cell₁ b c} {η : Cell₂ f g} {θ : Cell₂ g h}
-                   → (i ▷ θ) ∘ᵥ (i ▷ η) ≡ i ▷ (θ ∘ᵥ η)
-  whiskerLeftDist {a} {b} {c} {η = η} {θ} = 
-    let _∘ab_ = Category._∘_ (HomCat a b)
-    in trans (sym (Functor.compose comp)) (cong (λ X → [ comp ]₁ (X , θ ∘ab η)) vIdL)
-  
-  
-  whiskerCoher1 : {a b c d : Cell₀} {f : Cell₁ a b} {g : Cell₁ b c} {h i : Cell₁ c d} {η : Cell₂ h i}
-                 → η ◁ (g ∘ₕ f) ≡ subst₂ Cell₂ (sym hAssoc₁) (sym hAssoc₁) ((η ◁ g) ◁ f)
-  whiskerCoher1 = whiskerCoher1'
-
-  whiskerCoher1-het : {a b c d : Cell₀} {f : Cell₁ a b} {g : Cell₁ b c} {h i : Cell₁ c d} {η : Cell₂ h i}
-                    → η ◁ (g ∘ₕ f) ≅ (η ◁ g) ◁ f
-  whiskerCoher1-het {f = f} {g} {η = η} = het-help (η ◁ (g ∘ₕ f)) ((η ◁ g) ◁ f) (sym hAssoc₁) (sym hAssoc₁) whiskerCoher1
-  
-  whiskerCoher2 : {a b c d : Cell₀} {f : Cell₁ a b} {g h : Cell₁ b c} {i : Cell₁ c d} {η : Cell₂ g h} 
-                → i ▷ (η ◁ f) ≡ subst₂ Cell₂ (sym hAssoc₁) (sym hAssoc₁) ((i ▷ η) ◁ f)
-  whiskerCoher2 = whiskerCoher2'
-  
-  whiskerCoher2-het : {a b c d : Cell₀} {f : Cell₁ a b} {g h : Cell₁ b c} {i : Cell₁ c d} {η : Cell₂ g h} 
-                    → i ▷ (η ◁ f) ≅ (i ▷ η) ◁ f
-  whiskerCoher2-het {f = f} {g} {h} {i} {η} = het-help (i ▷ (η ◁ f)) ((i ▷ η) ◁ f) (sym hAssoc₁) (sym hAssoc₁) whiskerCoher2
-  
-  whiskerCoher3 : {a b c d : Cell₀} {f g : Cell₁ a b} {h : Cell₁ b c} {i : Cell₁ c d} {η : Cell₂ f g}
-                → i ▷ (h ▷ η) ≡ subst₂ Cell₂ (sym hAssoc₁) (sym hAssoc₁) ((i ∘ₕ h) ▷ η)
-  whiskerCoher3 = whiskerCoher3'
-  
-  whiskerCoher3-het : {a b c d : Cell₀} {f g : Cell₁ a b} {h : Cell₁ b c} {i : Cell₁ c d} {η : Cell₂ f g}
-                    → i ▷ (h ▷ η) ≅ (i ∘ₕ h) ▷ η
-  whiskerCoher3-het {f = f} {g} {h} {i} {η} = het-help (i ▷ (h ▷ η)) ((i ∘ₕ h) ▷ η) (sym hAssoc₁) (sym hAssoc₁) whiskerCoher3
-
-  whiskerCoher4 : {a b c : Cell₀} {f g : Cell₁ a b} {h i : Cell₁ b c} {η : Cell₂ f g} {θ : Cell₂ h i}
-                → (i ▷ η) ∘ᵥ (θ ◁ f) ≡ (θ ◁ g) ∘ᵥ (h ▷ η)
-  whiskerCoher4 = whiskerCoher4'
+  abstract
+    whiskerCoher4 : {a b c : Cell₀} {f g : Cell₁ a b} {h i : Cell₁ b c} {η : Cell₂ f g} {θ : Cell₂ h i}
+                  → (i ▷ η) ∘ᵥ (θ ◁ f) ≡ (θ ◁ g) ∘ᵥ (h ▷ η)
+    whiskerCoher4 = whiskerCoher4'
 
   -- Unitors
   lUnitor : {a b : Cell₀} {f : Cell₁ a b} → Cell₂ (f ∘ₕ id₁) f
@@ -318,21 +344,25 @@ record StrictTwoCategory {ℓ₀ ℓ₁ ℓ₂ : Level} : Set (lsuc (ℓ₀ ⊔ 
                → (subst₂ Cell₂ eq refl id₂) ∘ᵥ (subst₂ Cell₂ refl eq id₂) ≡ id₂ ∘ᵥ id₂
     substComp₂ refl = refl
   
-  lUnitorId : {a b : Cell₀} {f : Cell₁ a b} 
-            → lUnitor {a} {b} {f} ∘ᵥ lUnitorInv {a} {b} {f} ≡ id₂ {f = f}
-  lUnitorId {a} {b} {f} = trans (substComp₂ (sym hIdL₁)) vIdL
+  abstract
+    lUnitorId : {a b : Cell₀} {f : Cell₁ a b} 
+              → lUnitor {a} {b} {f} ∘ᵥ lUnitorInv {a} {b} {f} ≡ id₂ {f = f}
+    lUnitorId {a} {b} {f} = trans (substComp₂ (sym hIdL₁)) vIdL
   
-  lUnitorId' : {a b : Cell₀} {f : Cell₁ a b} 
-             → lUnitorInv {a} {b} {f} ∘ᵥ lUnitor {a} {b} {f} ≡ id₂
-  lUnitorId' {a} {b} {f} = trans (substComp₁ (sym hIdL₁)) vIdL
+  abstract
+    lUnitorId' : {a b : Cell₀} {f : Cell₁ a b} 
+               → lUnitorInv {a} {b} {f} ∘ᵥ lUnitor {a} {b} {f} ≡ id₂
+    lUnitorId' {a} {b} {f} = trans (substComp₁ (sym hIdL₁)) vIdL
   
-  rUnitorId : {a b : Cell₀} {f : Cell₁ a b} 
-            → rUnitor {a} {b} {f} ∘ᵥ rUnitorInv {a} {b} {f} ≡ id₂ {f = f}
-  rUnitorId {a} {b} {f} = trans (substComp₂ (sym hIdR₁)) vIdR
-
-  rUnitorId' : {a b : Cell₀} {f : Cell₁ a b} 
-             → rUnitorInv {a} {b} {f} ∘ᵥ rUnitor {a} {b} {f} ≡ id₂
-  rUnitorId' {a} {b} {f} = trans (substComp₁ (sym hIdR₁)) vIdR
+  abstract
+    rUnitorId : {a b : Cell₀} {f : Cell₁ a b} 
+              → rUnitor {a} {b} {f} ∘ᵥ rUnitorInv {a} {b} {f} ≡ id₂ {f = f}
+    rUnitorId {a} {b} {f} = trans (substComp₂ (sym hIdR₁)) vIdR
+  
+  abstract
+    rUnitorId' : {a b : Cell₀} {f : Cell₁ a b} 
+               → rUnitorInv {a} {b} {f} ∘ᵥ rUnitor {a} {b} {f} ≡ id₂
+    rUnitorId' {a} {b} {f} = trans (substComp₁ (sym hIdR₁)) vIdR
   
   -- Associators
   associator : {a b c d : Cell₀} {f : Cell₁ a b} {g : Cell₁ b c} {h : Cell₁ c d}
@@ -343,13 +373,15 @@ record StrictTwoCategory {ℓ₀ ℓ₁ ℓ₂ : Level} : Set (lsuc (ℓ₀ ⊔ 
                 → Cell₂ ((h ∘ₕ g) ∘ₕ f) (h ∘ₕ (g ∘ₕ f)) 
   associatorInv {a} {b} {c} {d} {f} {g} {h} = subst₂ Cell₂ (hAssoc₁ {a} {b} {c} {d} {f} {g} {h}) refl (id₂ {a} {d} {h ∘ₕ (g ∘ₕ f)})
 
-  associatorId : {a b c d : Cell₀} {f : Cell₁ a b} {g : Cell₁ b c} {h : Cell₁ c d}
-               → associator {a} {b} {c} {d} {f = f} {g} {h} ∘ᵥ associatorInv {a} {b} {c} {d} {f = f} {g} {h} ≡ id₂
-  associatorId = trans (substComp₁ hAssoc₁) vIdR
+  abstract
+    associatorId : {a b c d : Cell₀} {f : Cell₁ a b} {g : Cell₁ b c} {h : Cell₁ c d}
+                 → associator {a} {b} {c} {d} {f = f} {g} {h} ∘ᵥ associatorInv {a} {b} {c} {d} {f = f} {g} {h} ≡ id₂
+    associatorId = trans (substComp₁ hAssoc₁) vIdR
   
-  associatorId' : {a b c d : Cell₀} {f : Cell₁ a b} {g : Cell₁ b c} {h : Cell₁ c d}
-                → associatorInv {a} {b} {c} {d} {f = f} {g} {h} ∘ᵥ associator {a} {b} {c} {d} {f = f} {g} {h} ≡ id₂
-  associatorId' = trans (substComp₂ hAssoc₁) vIdR
+  abstract
+    associatorId' : {a b c d : Cell₀} {f : Cell₁ a b} {g : Cell₁ b c} {h : Cell₁ c d}
+                  → associatorInv {a} {b} {c} {d} {f = f} {g} {h} ∘ᵥ associator {a} {b} {c} {d} {f = f} {g} {h} ≡ id₂
+    associatorId' = trans (substComp₂ hAssoc₁) vIdR
   
   α : {a b c d : Cell₀} 
     → (f : Cell₁ a b) (g : Cell₁ b c) (h : Cell₁ c d)
@@ -367,34 +399,36 @@ record StrictTwoCategory {ℓ₀ ℓ₁ ℓ₂ : Level} : Set (lsuc (ℓ₀ ⊔ 
     where
       _∘HC_ = _∘_ (HomCat a b)
       
-      natural : {f g : Obj (HomCat a b)} {η : Hom (HomCat a b) f g} 
-              → η ∘ᵥ ρ f ≡ ρ g ∘ᵥ (id₁ ▷ η)
-      natural {f} {g} {η} = ≅-to-≡ $ hbegin
-        η ∘ᵥ ρ f 
-          ≅⟨ compᵥ-cong₂ hIdR₁ refl refl refl (het-help (ρ f) id₂ (sym hIdR₁) refl refl) ⟩ 
-        η ∘ᵥ id₂
-          ≅⟨ ≡-to-≅ vIdL ⟩ 
-        η
-          ≅⟨ ≡-to-≅ (sym vIdR) ⟩ 
-        id₂ ∘ᵥ η
-          ≅⟨ compᵥ-cong₂ (sym hIdR₁) (sym hIdR₁) refl (het-help id₂ (ρ g) hIdR₁ refl (subst-swap {η = ρ g} hIdR₁ refl refl)) (hsym whiskerLeftId₂') ⟩ 
-        ρ g ∘ᵥ (id₁ ▷ η) ∎h
+      abstract
+        natural : {f g : Obj (HomCat a b)} {η : Hom (HomCat a b) f g} 
+                → η ∘ᵥ ρ f ≡ ρ g ∘ᵥ (id₁ ▷ η)
+        natural {f} {g} {η} = ≅-to-≡ $ hbegin
+          η ∘ᵥ ρ f 
+            ≅⟨ compᵥ-cong₂ hIdR₁ refl refl refl (het-help (ρ f) id₂ (sym hIdR₁) refl refl) ⟩ 
+          η ∘ᵥ id₂
+            ≅⟨ ≡-to-≅ vIdL ⟩ 
+          η
+            ≅⟨ ≡-to-≅ (sym vIdR) ⟩ 
+          id₂ ∘ᵥ η
+            ≅⟨ compᵥ-cong₂ (sym hIdR₁) (sym hIdR₁) refl (het-help id₂ (ρ g) hIdR₁ refl (subst-swap {η = ρ g} hIdR₁ refl refl)) (hsym whiskerLeftId₂') ⟩ 
+          ρ g ∘ᵥ (id₁ ▷ η) ∎h
 
   right-unitor-iso : {a b : Cell₀} → NaturalIsomorphism ([-, id₁ {a} ] comp {a} {a} {b}) Id[ HomCat a b ]
   right-unitor-iso {a} {b} = naturalIsomorphism (naturalTransformation λ' natural) (λ x → isomorphism (λ'' x) lUnitorId lUnitorId')
     where
-      natural : {f g : Obj (HomCat a b)} {η : Hom (HomCat a b) f g} 
-              → η ∘ᵥ λ' f ≡ λ' g ∘ᵥ (η ◁ id₁)
-      natural {f} {g} {η} = ≅-to-≡ $ hbegin
-        η ∘ᵥ λ' f 
-          ≅⟨ compᵥ-cong₂ hIdL₁ refl refl refl (het-help (λ' f) id₂ (sym hIdL₁) refl refl) ⟩
-        η ∘ᵥ id₂
-          ≅⟨ ≡-to-≅ vIdL ⟩
-        η
-          ≅⟨ ≡-to-≅ (sym vIdR) ⟩
-        id₂ ∘ᵥ η
-          ≅⟨ compᵥ-cong₂ (sym hIdL₁) (sym hIdL₁) refl (het-help id₂ (λ' g) hIdL₁ refl (subst-swap hIdL₁ refl refl)) (hsym whiskerRightId₂') ⟩
-        λ' g ∘ᵥ (η ◁ id₁) ∎h
+      abstract
+        natural : {f g : Obj (HomCat a b)} {η : Hom (HomCat a b) f g} 
+                → η ∘ᵥ λ' f ≡ λ' g ∘ᵥ (η ◁ id₁)
+        natural {f} {g} {η} = ≅-to-≡ $ hbegin
+          η ∘ᵥ λ' f 
+            ≅⟨ compᵥ-cong₂ hIdL₁ refl refl refl (het-help (λ' f) id₂ (sym hIdL₁) refl refl) ⟩
+          η ∘ᵥ id₂
+            ≅⟨ ≡-to-≅ vIdL ⟩
+          η
+            ≅⟨ ≡-to-≅ (sym vIdR) ⟩
+          id₂ ∘ᵥ η
+            ≅⟨ compᵥ-cong₂ (sym hIdL₁) (sym hIdL₁) refl (het-help id₂ (λ' g) hIdL₁ refl (subst-swap hIdL₁ refl refl)) (hsym whiskerRightId₂') ⟩
+          λ' g ∘ᵥ (η ◁ id₁) ∎h
   
   open Theory.Triple.Triple
   
@@ -404,73 +438,77 @@ record StrictTwoCategory {ℓ₀ ℓ₁ ℓ₂ : Level} : Set (lsuc (ℓ₀ ⊔ 
     where
       _∘HC_ = _∘_ (HomCat a d)
       
-      natural : {f g : Obj (HomCat c d ×C HomCat b c ×C HomCat a b)} {η : Hom (HomCat c d ×C HomCat b c ×C HomCat a b) f g} 
-              → (proj₁ η ∘ₕ₂ (proj₂ η ∘ₕ₂ proj₃ η)) ∘ᵥ α' (proj₃ f) (proj₂ f) (proj₁ f)
-              ≡ α' (proj₃ g) (proj₂ g) (proj₁ g) ∘ᵥ ((proj₁ η ∘ₕ₂ proj₂ η) ∘ₕ₂ proj₃ η) -- [ [ biAssocFunctorL comp comp ]∘[ assocFunctorL ] ]₁ η
-      natural {f ,' f' ,' f''} {g ,' g' ,' g''} {η ,' η' ,' η''} = ≅-to-≡ $ hbegin
-        (η ∘ₕ₂ (η' ∘ₕ₂ η'')) ∘ᵥ α' f'' f' f
-          ≅⟨ compᵥ-cong₂ (sym hAssoc₁) refl refl refl (het-help (α' f'' f' f) id₂ hAssoc₁ refl refl) ⟩
-        (η ∘ₕ₂ (η' ∘ₕ₂ η'')) ∘ᵥ id₂
-          ≅⟨ ≡-to-≅ vIdL ⟩
-        η ∘ₕ₂ (η' ∘ₕ₂ η'')
-          ≅⟨ ≡-to-≅ (sym vIdR) ⟩
-        id₂ ∘ᵥ (η ∘ₕ₂ (η' ∘ₕ₂ η''))
-          ≅⟨ compᵥ-cong₂ hAssoc₁ hAssoc₁ refl (het-help id₂ (α' g'' g' g) (sym hAssoc₁) refl (subst-swap' hAssoc₁ refl refl)) hAssoc₂' ⟩
-        α' g'' g' g ∘ᵥ ((η ∘ₕ₂ η') ∘ₕ₂ η'') ∎h
+      abstract
+        natural : {f g : Obj (HomCat c d ×C HomCat b c ×C HomCat a b)} {η : Hom (HomCat c d ×C HomCat b c ×C HomCat a b) f g} 
+                → (proj₁ η ∘ₕ₂ (proj₂ η ∘ₕ₂ proj₃ η)) ∘ᵥ α' (proj₃ f) (proj₂ f) (proj₁ f)
+                ≡ α' (proj₃ g) (proj₂ g) (proj₁ g) ∘ᵥ ((proj₁ η ∘ₕ₂ proj₂ η) ∘ₕ₂ proj₃ η) -- [ [ biAssocFunctorL comp comp ]∘[ assocFunctorL ] ]₁ η
+        natural {f ,' f' ,' f''} {g ,' g' ,' g''} {η ,' η' ,' η''} = ≅-to-≡ $ hbegin
+          (η ∘ₕ₂ (η' ∘ₕ₂ η'')) ∘ᵥ α' f'' f' f
+            ≅⟨ compᵥ-cong₂ (sym hAssoc₁) refl refl refl (het-help (α' f'' f' f) id₂ hAssoc₁ refl refl) ⟩
+          (η ∘ₕ₂ (η' ∘ₕ₂ η'')) ∘ᵥ id₂
+            ≅⟨ ≡-to-≅ vIdL ⟩
+          η ∘ₕ₂ (η' ∘ₕ₂ η'')
+            ≅⟨ ≡-to-≅ (sym vIdR) ⟩
+          id₂ ∘ᵥ (η ∘ₕ₂ (η' ∘ₕ₂ η''))
+            ≅⟨ compᵥ-cong₂ hAssoc₁ hAssoc₁ refl (het-help id₂ (α' g'' g' g) (sym hAssoc₁) refl (subst-swap' hAssoc₁ refl refl)) hAssoc₂' ⟩
+          α' g'' g' g ∘ᵥ ((η ∘ₕ₂ η') ∘ₕ₂ η'') ∎h
   
-  triangle-id : {a b c : Cell₀} (f : Cell₁ a b) (g : Cell₁ b c) 
-              → λ' g ∘ₕ₂ id₂ ≡ (id₂ ∘ₕ₂ ρ f) ∘ᵥ α' f id₁ g
-  triangle-id f g = ≅-to-≡ $ hbegin
-    λ' g ∘ₕ₂ id₂ 
-      ≅⟨ compₕ-cong₂ hIdL₁ refl refl refl refl (het-help (λ' g) id₂ (sym hIdL₁) refl refl) ⟩
-    id₂ {f = g} ∘ₕ₂ id₂ {f = f}
-      ≅⟨ compₕ-cong₂ refl refl (sym hIdR₁) (sym hIdR₁) (het-id-id (sym hIdR₁)) refl ⟩
-    id₂ {f = g} ∘ₕ₂ id₂ {f = id₁ ∘ₕ f}
-      ≅⟨ ≡-to-≅ (sym vIdL) ⟩
-    (id₂ ∘ₕ₂ id₂) ∘ᵥ id₂
-      ≅⟨ compᵥ-cong₂ hAssoc₁ refl (cong (λ X → g ∘ₕ X) hIdR₁) 
-                     (compₕ-cong₂ refl refl refl hIdR₁ (het-help id₂ (ρ f) refl (sym hIdR₁) (subst-swap refl (sym hIdR₁) p)) refl) 
-                     (het-help id₂ (α' f id₁ g) (sym hAssoc₁) refl (subst-swap' hAssoc₁ refl refl)) ⟩
-    (id₂ ∘ₕ₂ ρ f) ∘ᵥ α' f id₁ g ∎h
-    where
-      p : subst₂ Cell₂ refl (sym (sym hIdR₁)) id₂ ≡ ρ f
-      p = ≅-to-≡ $ hbegin
-        subst₂ Cell₂ refl (sym (sym hIdR₁)) id₂ 
-          ≅⟨ subst-id refl (sym (sym hIdR₁)) ⟩
-        id₂ {f = f}
-          ≅⟨ hsym (subst-id (sym hIdR₁) refl) ⟩
-        subst₂ Cell₂ (sym hIdR₁) refl id₂
-          ≅⟨ refl ⟩
-        ρ f ∎h
+  abstract
+    triangle-id : {a b c : Cell₀} (f : Cell₁ a b) (g : Cell₁ b c) 
+                → λ' g ∘ₕ₂ id₂ ≡ (id₂ ∘ₕ₂ ρ f) ∘ᵥ α' f id₁ g
+    triangle-id f g = ≅-to-≡ $ hbegin
+      λ' g ∘ₕ₂ id₂ 
+        ≅⟨ compₕ-cong₂ hIdL₁ refl refl refl refl (het-help (λ' g) id₂ (sym hIdL₁) refl refl) ⟩
+      id₂ {f = g} ∘ₕ₂ id₂ {f = f}
+        ≅⟨ compₕ-cong₂ refl refl (sym hIdR₁) (sym hIdR₁) (het-id-id (sym hIdR₁)) refl ⟩
+      id₂ {f = g} ∘ₕ₂ id₂ {f = id₁ ∘ₕ f}
+        ≅⟨ ≡-to-≅ (sym vIdL) ⟩
+      (id₂ ∘ₕ₂ id₂) ∘ᵥ id₂
+        ≅⟨ compᵥ-cong₂ hAssoc₁ refl (cong (λ X → g ∘ₕ X) hIdR₁) 
+                       (compₕ-cong₂ refl refl refl hIdR₁ (het-help id₂ (ρ f) refl (sym hIdR₁) (subst-swap refl (sym hIdR₁) p)) refl) 
+                       (het-help id₂ (α' f id₁ g) (sym hAssoc₁) refl (subst-swap' hAssoc₁ refl refl)) ⟩
+      (id₂ ∘ₕ₂ ρ f) ∘ᵥ α' f id₁ g ∎h
+      where
+        abstract
+          p : subst₂ Cell₂ refl (sym (sym hIdR₁)) id₂ ≡ ρ f
+          p = ≅-to-≡ $ hbegin
+            subst₂ Cell₂ refl (sym (sym hIdR₁)) id₂ 
+              ≅⟨ subst-id refl (sym (sym hIdR₁)) ⟩
+            id₂ {f = f}
+              ≅⟨ hsym (subst-id (sym hIdR₁) refl) ⟩
+            subst₂ Cell₂ (sym hIdR₁) refl id₂
+              ≅⟨ refl ⟩
+            ρ f ∎h
   
-  pentagon-id : {a b c d e : Cell₀} 
-              → (f : Cell₁ a b) (g : Cell₁ b c) (h : Cell₁ c d) (k : Cell₁ d e)
-              → (id₂ {f = k} ∘ₕ₂ α' f g h) ∘ᵥ (α' f (h ∘ₕ g) k ∘ᵥ (α' g h k ∘ₕ₂ id₂ {f = f}))
-              ≡ α' (g ∘ₕ f) h k ∘ᵥ α' f g (k ∘ₕ h)
-  pentagon-id f g h k = ≅-to-≡ $ hbegin
-    (id₂ {f = k} ∘ₕ₂ α' f g h) ∘ᵥ (α' f (h ∘ₕ g) k ∘ᵥ (α' g h k ∘ₕ₂ id₂ {f = f}))
-      ≅⟨ compᵥ-cong₂ refl refl (cong (λ X → k ∘ₕ X) hAssoc₁) (compₕ-cong₂ refl refl refl hAssoc₁ (het-help (α' f g h) id₂ refl (sym hAssoc₁) (subst-swap'' hAssoc₁)) refl) refl ⟩
-    (id₂ {f = k} ∘ₕ₂ id₂ {f = (h ∘ₕ g) ∘ₕ f}) ∘ᵥ (α' f (h ∘ₕ g) k ∘ᵥ (α' g h k ∘ₕ₂ id₂ {f = f}))
-      ≅⟨ compᵥ-cong₂ refl refl refl (≡-to-≅ id∘ₕ₂id≡id) refl ⟩
-    (id₂ {f = k ∘ₕ ((h ∘ₕ g) ∘ₕ f)}) ∘ᵥ (α' f (h ∘ₕ g) k ∘ᵥ (α' g h k ∘ₕ₂ id₂ {f = f}))
-      ≅⟨ ≡-to-≅ vIdR ⟩
-    α' f (h ∘ₕ g) k ∘ᵥ (α' g h k ∘ₕ₂ id₂ {f = f})
-      ≅⟨ compᵥ-cong₂ refl refl hAssoc₁ (het-help (α' f (h ∘ₕ g) k) id₂ refl (sym hAssoc₁) (subst-swap'' hAssoc₁)) refl ⟩
-    id₂ {f = (k ∘ₕ (h ∘ₕ g)) ∘ₕ f} ∘ᵥ (α' g h k ∘ₕ₂ id₂ {f = f})
-      ≅⟨ ≡-to-≅ vIdR ⟩
-    α' g h k ∘ₕ₂ id₂ {f = f}
-      ≅⟨ compₕ-cong₂ refl hAssoc₁ refl refl refl (het-help (α' g h k) id₂ refl (sym hAssoc₁) (subst-swap'' hAssoc₁)) ⟩
-    id₂ {f = (k ∘ₕ h) ∘ₕ g} ∘ₕ₂ id₂ {f = f}
-      ≅⟨ ≡-to-≅ id∘ₕ₂id≡id ⟩
-    id₂ {f = ((k ∘ₕ h) ∘ₕ g) ∘ₕ f}
-      ≅⟨ id≅id (sym hAssoc₁) ⟩
-    id₂ {f = (k ∘ₕ h) ∘ₕ (g ∘ₕ f)}
-      ≅⟨ ≡-to-≅ (sym vIdR) ⟩
-    id₂ {f = (k ∘ₕ h) ∘ₕ (g ∘ₕ f)} ∘ᵥ id₂ {f = (k ∘ₕ h) ∘ₕ (g ∘ₕ f)} 
-      ≅⟨ compᵥ-cong₂ hAssoc₁ refl (sym hAssoc₁) (het-help id₂ (α' (g ∘ₕ f) h k) refl hAssoc₁ 
-                     (subst-swap refl hAssoc₁ (sym (subst-swap'' hAssoc₁)))) 
-                     (het-help id₂ (α' f g (k ∘ₕ h)) (sym hAssoc₁) refl (subst-swap' hAssoc₁ refl refl)) ⟩
-    α' (g ∘ₕ f) h k ∘ᵥ α' f g (k ∘ₕ h) ∎h
+  abstract
+    pentagon-id : {a b c d e : Cell₀} 
+                → (f : Cell₁ a b) (g : Cell₁ b c) (h : Cell₁ c d) (k : Cell₁ d e)
+                → (id₂ {f = k} ∘ₕ₂ α' f g h) ∘ᵥ (α' f (h ∘ₕ g) k ∘ᵥ (α' g h k ∘ₕ₂ id₂ {f = f}))
+                ≡ α' (g ∘ₕ f) h k ∘ᵥ α' f g (k ∘ₕ h)
+    pentagon-id f g h k = ≅-to-≡ $ hbegin
+      (id₂ {f = k} ∘ₕ₂ α' f g h) ∘ᵥ (α' f (h ∘ₕ g) k ∘ᵥ (α' g h k ∘ₕ₂ id₂ {f = f}))
+        ≅⟨ compᵥ-cong₂ refl refl (cong (λ X → k ∘ₕ X) hAssoc₁) (compₕ-cong₂ refl refl refl hAssoc₁ (het-help (α' f g h) id₂ refl (sym hAssoc₁) (subst-swap'' hAssoc₁)) refl) refl ⟩
+      (id₂ {f = k} ∘ₕ₂ id₂ {f = (h ∘ₕ g) ∘ₕ f}) ∘ᵥ (α' f (h ∘ₕ g) k ∘ᵥ (α' g h k ∘ₕ₂ id₂ {f = f}))
+        ≅⟨ compᵥ-cong₂ refl refl refl (≡-to-≅ id∘ₕ₂id≡id) refl ⟩
+      (id₂ {f = k ∘ₕ ((h ∘ₕ g) ∘ₕ f)}) ∘ᵥ (α' f (h ∘ₕ g) k ∘ᵥ (α' g h k ∘ₕ₂ id₂ {f = f}))
+        ≅⟨ ≡-to-≅ vIdR ⟩
+      α' f (h ∘ₕ g) k ∘ᵥ (α' g h k ∘ₕ₂ id₂ {f = f})
+        ≅⟨ compᵥ-cong₂ refl refl hAssoc₁ (het-help (α' f (h ∘ₕ g) k) id₂ refl (sym hAssoc₁) (subst-swap'' hAssoc₁)) refl ⟩
+      id₂ {f = (k ∘ₕ (h ∘ₕ g)) ∘ₕ f} ∘ᵥ (α' g h k ∘ₕ₂ id₂ {f = f})
+        ≅⟨ ≡-to-≅ vIdR ⟩
+      α' g h k ∘ₕ₂ id₂ {f = f}
+        ≅⟨ compₕ-cong₂ refl hAssoc₁ refl refl refl (het-help (α' g h k) id₂ refl (sym hAssoc₁) (subst-swap'' hAssoc₁)) ⟩
+      id₂ {f = (k ∘ₕ h) ∘ₕ g} ∘ₕ₂ id₂ {f = f}
+        ≅⟨ ≡-to-≅ id∘ₕ₂id≡id ⟩
+      id₂ {f = ((k ∘ₕ h) ∘ₕ g) ∘ₕ f}
+        ≅⟨ id≅id (sym hAssoc₁) ⟩
+      id₂ {f = (k ∘ₕ h) ∘ₕ (g ∘ₕ f)}
+        ≅⟨ ≡-to-≅ (sym vIdR) ⟩
+      id₂ {f = (k ∘ₕ h) ∘ₕ (g ∘ₕ f)} ∘ᵥ id₂ {f = (k ∘ₕ h) ∘ₕ (g ∘ₕ f)} 
+        ≅⟨ compᵥ-cong₂ hAssoc₁ refl (sym hAssoc₁) (het-help id₂ (α' (g ∘ₕ f) h k) refl hAssoc₁ 
+                       (subst-swap refl hAssoc₁ (sym (subst-swap'' hAssoc₁)))) 
+                       (het-help id₂ (α' f g (k ∘ₕ h)) (sym hAssoc₁) refl (subst-swap' hAssoc₁ refl refl)) ⟩
+      α' (g ∘ₕ f) h k ∘ᵥ α' f g (k ∘ₕ h) ∎h
 
 -------------------------------------------------------------------------------
 -- Unit strict 2-category

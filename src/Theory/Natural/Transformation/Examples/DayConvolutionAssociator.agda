@@ -43,28 +43,29 @@ postulate
              → (Hom C (MonoidalCategory._⊗₀_ CMon c₀⁻ c₁⁻) c × (Set-co-∫ ℓSet (convolutionFunctor {ℓSet = ℓSet} CMon F G c₀⁺) × F₀ H c₁⁺)) 
              ↔ (Hom C (MonoidalCategory._⊗₀_ CMon c₀⁻ c₁⁻) c × (F₀ F c₀⁺ × Set-co-∫ ℓSet (convolutionFunctor {ℓSet = ℓSet} CMon G H c₁⁺)))
 
-
-q : {ℓC₀ ℓC₁ : Level} → (ℓSet : Level) → {C : Category {ℓC₀} {ℓC₁}} → (CMon : MonoidalCategory C) 
-  → (F G H : Functor C (SetCat {ℓSet ⊔ ℓC₀ ⊔ ℓC₁})) → (c : Obj C)
-  → convolutionFunctor {ℓSet = ℓSet} CMon (F₀ (dayConvolution {ℓC₀} {ℓC₁} {ℓSet} CMon) (F , G)) H c ≡ convolutionFunctor {ℓSet = ℓSet} CMon F (F₀ (dayConvolution {ℓC₀} {ℓC₁} {ℓSet} CMon) (G , H)) c
-q {ℓC₀} {ℓC₁} ℓSet {C} CMon F G H c = functor-eq eq1 {!!}
-  where
-    _⊗C₀_ = MonoidalCategory._⊗₀_ CMon
-    
-    eq1 : F₀ (convolutionFunctor {ℓSet = ℓSet} CMon (F₀ (dayConvolution {ℓC₀} {ℓC₁} {ℓSet} CMon) (F , G)) H c) 
-        ≡ F₀ (convolutionFunctor {ℓSet = ℓSet} CMon F (F₀ (dayConvolution {ℓC₀} {ℓC₁} {ℓSet} CMon) (G , H)) c)
-    eq1 = fun-ext (λ {((c₀⁻ , c₁⁻) , (c₀⁺ , c₁⁺)) → begin 
-      F₀ (convolutionFunctor {ℓSet = ℓSet} CMon (F₀ (dayConvolution CMon) (F , G)) H c) ((c₀⁻ , c₁⁻) , (c₀⁺ , c₁⁺))
-        ≡⟨⟩
-      (Hom C (c₀⁻ ⊗C₀ c₁⁻) c × (F₀ (F₀ (dayConvolution CMon) (F , G)) c₀⁺ × F₀ H c₁⁺))
-        ≡⟨⟩
-      (Hom C (c₀⁻ ⊗C₀ c₁⁻) c × (Set-co-∫ ℓSet (convolutionFunctor {ℓSet = ℓSet} CMon F G c₀⁺) × F₀ H c₁⁺))
-        ≡⟨ {!Bijection.f (day-end-eq ℓSet CMon F G H c c₀⁻ c₁⁻ c₀⁺ c₁⁺)!} ⟩
-      (Hom C (c₀⁻ ⊗C₀ c₁⁻) c × (F₀ F c₀⁺ × Set-co-∫ ℓSet (convolutionFunctor {ℓSet = ℓSet} CMon G H c₁⁺)))
-        ≡⟨⟩
-      (Hom C (c₀⁻ ⊗C₀ c₁⁻) c × (F₀ F c₀⁺ × F₀ (F₀ (dayConvolution CMon) (G , H)) c₁⁺))
-        ≡⟨⟩
-      F₀ (convolutionFunctor {ℓSet = ℓSet} CMon F (F₀ (dayConvolution CMon) (G , H)) c) ((c₀⁻ , c₁⁻) , (c₀⁺ , c₁⁺)) ∎})
+abstract
+  q : {ℓC₀ ℓC₁ : Level} → (ℓSet : Level) → {C : Category {ℓC₀} {ℓC₁}} → (CMon : MonoidalCategory C) 
+    → (F G H : Functor C (SetCat {ℓSet ⊔ ℓC₀ ⊔ ℓC₁})) → (c : Obj C)
+    → convolutionFunctor {ℓSet = ℓSet} CMon (F₀ (dayConvolution {ℓC₀} {ℓC₁} {ℓSet} CMon) (F , G)) H c ≡ convolutionFunctor {ℓSet = ℓSet} CMon F (F₀ (dayConvolution {ℓC₀} {ℓC₁} {ℓSet} CMon) (G , H)) c
+  q {ℓC₀} {ℓC₁} ℓSet {C} CMon F G H c = functor-eq eq1 {!!}
+    where
+      _⊗C₀_ = MonoidalCategory._⊗₀_ CMon
+      
+      abstract
+        eq1 : F₀ (convolutionFunctor {ℓSet = ℓSet} CMon (F₀ (dayConvolution {ℓC₀} {ℓC₁} {ℓSet} CMon) (F , G)) H c) 
+            ≡ F₀ (convolutionFunctor {ℓSet = ℓSet} CMon F (F₀ (dayConvolution {ℓC₀} {ℓC₁} {ℓSet} CMon) (G , H)) c)
+        eq1 = fun-ext (λ {((c₀⁻ , c₁⁻) , (c₀⁺ , c₁⁺)) → begin 
+          F₀ (convolutionFunctor {ℓSet = ℓSet} CMon (F₀ (dayConvolution CMon) (F , G)) H c) ((c₀⁻ , c₁⁻) , (c₀⁺ , c₁⁺))
+            ≡⟨⟩
+          (Hom C (c₀⁻ ⊗C₀ c₁⁻) c × (F₀ (F₀ (dayConvolution CMon) (F , G)) c₀⁺ × F₀ H c₁⁺))
+            ≡⟨⟩
+          (Hom C (c₀⁻ ⊗C₀ c₁⁻) c × (Set-co-∫ ℓSet (convolutionFunctor {ℓSet = ℓSet} CMon F G c₀⁺) × F₀ H c₁⁺))
+            ≡⟨ {!Bijection.f (day-end-eq ℓSet CMon F G H c c₀⁻ c₁⁻ c₀⁺ c₁⁺)!} ⟩
+          (Hom C (c₀⁻ ⊗C₀ c₁⁻) c × (F₀ F c₀⁺ × Set-co-∫ ℓSet (convolutionFunctor {ℓSet = ℓSet} CMon G H c₁⁺)))
+            ≡⟨⟩
+          (Hom C (c₀⁻ ⊗C₀ c₁⁻) c × (F₀ F c₀⁺ × F₀ (F₀ (dayConvolution CMon) (G , H)) c₁⁺))
+            ≡⟨⟩
+          F₀ (convolutionFunctor {ℓSet = ℓSet} CMon F (F₀ (dayConvolution CMon) (G , H)) c) ((c₀⁻ , c₁⁻) , (c₀⁺ , c₁⁺)) ∎})
 
 q' : {ℓC₀ ℓC₁ : Level} → (ℓSet : Level) → {C : Category {ℓC₀} {ℓC₁}} → (CMon : MonoidalCategory C) 
    → (F G H : Functor C (SetCat {ℓSet ⊔ ℓC₀ ⊔ ℓC₁})) → (c₀⁺ c₁⁺ : Obj C)

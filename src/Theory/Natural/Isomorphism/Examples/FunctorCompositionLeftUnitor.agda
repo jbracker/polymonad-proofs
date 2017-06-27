@@ -34,5 +34,12 @@ functorCompositionLeftUnitorIso C = naturalIsomorphism (functorCompositionLeftUn
     _∘C_ = Category._∘_ C
     
     iso : (F : Functor C C) → Isomorphism Fun (nat-η (functorCompositionLeftUnitor C) F)
-    iso F = isomorphism (nat-η (functorCompositionLeftUnitor' C) F) (left-id Fun) (right-id Fun)
-    
+    iso F = isomorphism (nat-η (functorCompositionLeftUnitor' C) F) left-id' right-id'
+      where
+        abstract
+          left-id' : ⟨ nat-η (functorCompositionLeftUnitor C) F ⟩∘ᵥ⟨ nat-η (functorCompositionLeftUnitor' C) F ⟩ ≡ id Fun
+          left-id' = natural-transformation-eq $ fun-ext $ λ (c : Obj C) → left-id C
+        
+        abstract
+          right-id' : ⟨ nat-η (functorCompositionLeftUnitor' C) F ⟩∘ᵥ⟨ nat-η (functorCompositionLeftUnitor C) F ⟩ ≡ id Fun
+          right-id' = natural-transformation-eq $ fun-ext $ λ (c : Obj C) → left-id C

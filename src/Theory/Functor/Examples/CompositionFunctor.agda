@@ -48,18 +48,20 @@ compositionFunctor = functor cf₀ cf₁ (λ {a} → cf-id {a}) (λ {a b c} {f} 
     cf₁ : {a b : Obj Src} → Hom Src a b → Hom Dst (cf₀ a) (cf₀ b)
     cf₁ {F ,' G} {F' ,' G'} (α ,' β) = ⟨ α ⟩∘ₕ⟨ β ⟩
     
-    cf-id : {a : Obj Src} → ⟨ id Src₁ {proj₁ a} ⟩∘ₕ⟨ id Src₂ {proj₂ a} ⟩ ≡ id Dst {cf₀ a}
-    cf-id {F ,' G} = natural-transformation-eq $ fun-ext $ λ (c : Obj C) → begin
-          η (⟨ id Src₁ {F} ⟩∘ₕ⟨ id Src₂ {G} ⟩) c
-            ≡⟨⟩
-          η (id Src₁ {F}) ([ G ]₀ c) ∘E [ F ]₁ (η (id Src₂ {G}) c)
-            ≡⟨⟩
-          id E {[ F ]₀ ([ G ]₀ c)} ∘E [ F ]₁ (id D {[ G ]₀ c})
-            ≡⟨ cong (λ X → id E {[ F ]₀ ([ G ]₀ c)} ∘E X) (Functor.id F) ⟩ 
-          id E {[ F ]₀ ([ G ]₀ c)} ∘E id E {[ F ]₀ ([ G ]₀ c)}
-            ≡⟨ left-id E ⟩
-          id E {[ F ]₀ ([ G ]₀ c)} ∎
-    
-    cf-comp : {a b c : Obj Src} {f : Hom Src a b} {g : Hom Src b c} 
-            → cf₁ (g ∘Src f) ≡ ⟨ cf₁ g ⟩∘ᵥ⟨ cf₁ f ⟩
-    cf-comp {F ,' G} {F' ,' G'} {F'' ,' G''} {α ,' β} {α' ,' β'} = composition-exchange {F = F} {F'} {F''} {G} {G'} {G''} α' α β' β
+    abstract
+      cf-id : {a : Obj Src} → ⟨ id Src₁ {proj₁ a} ⟩∘ₕ⟨ id Src₂ {proj₂ a} ⟩ ≡ id Dst {cf₀ a}
+      cf-id {F ,' G} = natural-transformation-eq $ fun-ext $ λ (c : Obj C) → begin
+        η (⟨ id Src₁ {F} ⟩∘ₕ⟨ id Src₂ {G} ⟩) c
+          ≡⟨⟩
+        η (id Src₁ {F}) ([ G ]₀ c) ∘E [ F ]₁ (η (id Src₂ {G}) c)
+          ≡⟨⟩
+        id E {[ F ]₀ ([ G ]₀ c)} ∘E [ F ]₁ (id D {[ G ]₀ c})
+          ≡⟨ cong (λ X → id E {[ F ]₀ ([ G ]₀ c)} ∘E X) (Functor.id F) ⟩ 
+        id E {[ F ]₀ ([ G ]₀ c)} ∘E id E {[ F ]₀ ([ G ]₀ c)}
+          ≡⟨ left-id E ⟩
+        id E {[ F ]₀ ([ G ]₀ c)} ∎
+  
+    abstract
+      cf-comp : {a b c : Obj Src} {f : Hom Src a b} {g : Hom Src b c} 
+              → cf₁ (g ∘Src f) ≡ ⟨ cf₁ g ⟩∘ᵥ⟨ cf₁ f ⟩
+      cf-comp {F ,' G} {F' ,' G'} {F'' ,' G''} {α ,' β} {α' ,' β'} = composition-exchange {F = F} {F'} {F''} {G} {G'} {G''} α' α β' β

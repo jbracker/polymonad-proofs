@@ -40,31 +40,33 @@ YonedaEmbedding = functor EmbF₀ EmbF₁ id-Emb compose-Emb
     EmbF₁ : {a b : Obj C} → Hom (C op) a b → Hom (FunctorCat C SetCat) Hom[ a ,-] Hom[ b ,-]
     EmbF₁ {a} {b} f = yoneda← Hom[ b ,-] a (lift f)
     
-    id-Emb : {a : Obj (C op)} → EmbF₁ {a} {a} (id (C op)) ≡ id (FunctorCat C SetCat)
-    id-Emb {A} = natural-transformation-eq $ fun-ext $ λ X → fun-ext $ λ f → begin
-      NaturalTransformation.η (yoneda← Hom[ A ,-] A (lift $ id (C op))) X f 
-        ≡⟨ refl ⟩
-      (F₁ Hom[ A ,-] (lower f)) (lift $ id (C op) {A}) 
-        ≡⟨ refl ⟩
-      lift (lower f ∘C id (C op))
-        ≡⟨ cong lift (left-id C) ⟩
-      f
-        ≡⟨⟩
-      id SetCat f ∎
+    abstract
+      id-Emb : {a : Obj (C op)} → EmbF₁ {a} {a} (id (C op)) ≡ id (FunctorCat C SetCat)
+      id-Emb {A} = natural-transformation-eq $ fun-ext $ λ X → fun-ext $ λ f → begin
+        NaturalTransformation.η (yoneda← Hom[ A ,-] A (lift $ id (C op))) X f 
+          ≡⟨ refl ⟩
+        (F₁ Hom[ A ,-] (lower f)) (lift $ id (C op) {A}) 
+          ≡⟨ refl ⟩
+        lift (lower f ∘C id (C op))
+          ≡⟨ cong lift (left-id C) ⟩
+        f
+          ≡⟨⟩
+        id SetCat f ∎
     
-    compose-Emb : {a b c : Obj (C op)} {f : Hom (C op) a b} {g : Hom (C op) b c}
-                → EmbF₁ (g ∘Cop f) ≡ (EmbF₁ g) ∘Func (EmbF₁ f)
-    compose-Emb {a} {b} {c} {f} {g} = natural-transformation-eq $ fun-ext $ λ X → fun-ext $ λ h → begin
-      NaturalTransformation.η (EmbF₁ (g ∘Cop f)) X h
-        ≡⟨⟩
-      (F₁ Hom[ c ,-] (lower h)) (lift $ g ∘Cop f) 
-        ≡⟨⟩
-      lift ((g ∘Cop f) ∘Cop (lower h)) 
-        ≡⟨ cong lift (sym (assoc (C op))) ⟩
-      lift (g ∘Cop (f ∘Cop lower h))
-        ≡⟨⟩
-      (F₁ Hom[ c ,-] (lower ((F₁ Hom[ b ,-] (lower h)) (lift f)))) (lift g)
-        ≡⟨⟩
-      NaturalTransformation.η (EmbF₁ g) X (NaturalTransformation.η (EmbF₁ f) X h)
-        ≡⟨⟩
-      NaturalTransformation.η (EmbF₁ g ∘Func EmbF₁ f) X h ∎
+    abstract
+      compose-Emb : {a b c : Obj (C op)} {f : Hom (C op) a b} {g : Hom (C op) b c}
+                  → EmbF₁ (g ∘Cop f) ≡ (EmbF₁ g) ∘Func (EmbF₁ f)
+      compose-Emb {a} {b} {c} {f} {g} = natural-transformation-eq $ fun-ext $ λ X → fun-ext $ λ h → begin
+        NaturalTransformation.η (EmbF₁ (g ∘Cop f)) X h
+          ≡⟨⟩
+        (F₁ Hom[ c ,-] (lower h)) (lift $ g ∘Cop f) 
+          ≡⟨⟩
+        lift ((g ∘Cop f) ∘Cop (lower h)) 
+          ≡⟨ cong lift (sym (assoc (C op))) ⟩
+        lift (g ∘Cop (f ∘Cop lower h))
+          ≡⟨⟩
+        (F₁ Hom[ c ,-] (lower ((F₁ Hom[ b ,-] (lower h)) (lift f)))) (lift g)
+          ≡⟨⟩
+        NaturalTransformation.η (EmbF₁ g) X (NaturalTransformation.η (EmbF₁ f) X h)
+          ≡⟨⟩
+        NaturalTransformation.η (EmbF₁ g ∘Func EmbF₁ f) X h ∎

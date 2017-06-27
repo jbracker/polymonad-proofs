@@ -52,10 +52,11 @@ codiscreteHomCatTwoCategory {ℓObj} {ℓHom} C = record
         F₁ : {x y : Obj (HomCat b c ×C HomCat a b)} → Hom (HomCat b c ×C HomCat a b) x y → Hom (HomCat a c) (F₀ x) (F₀ y)
         F₁ (lift tt , lift tt) = lift tt
         
-        compose : {x y z : Obj (HomCat b c ×C HomCat a b)} 
-                → {f : Hom (HomCat b c ×C HomCat a b) x y} {g : Hom (HomCat b c ×C HomCat a b) y z}
-                → F₁ {x} {z} (_∘Comp_ {x} {y} {z} g f) ≡ _∘AC_ {a = F₀ x} {F₀ y} {F₀ z} (F₁ {x} {y} g) (F₁ {y} {z} f)
-        compose {f = lift tt , lift tt} {lift tt , lift tt} = refl
+        abstract
+          compose : {x y z : Obj (HomCat b c ×C HomCat a b)} 
+                  → {f : Hom (HomCat b c ×C HomCat a b) x y} {g : Hom (HomCat b c ×C HomCat a b) y z}
+                  → F₁ {x} {z} (_∘Comp_ {x} {y} {z} g f) ≡ _∘AC_ {a = F₀ x} {F₀ y} {F₀ z} (F₁ {x} {y} g) (F₁ {y} {z} f)
+          compose {f = lift tt , lift tt} {lift tt , lift tt} = refl
     
     id₁ : {a : Obj C} → Obj (HomCat a a)
     id₁ {a} = id C {a}

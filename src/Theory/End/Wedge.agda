@@ -52,20 +52,21 @@ record Wedge {ℓC₀ ℓC₁ ℓX₀ ℓX₁ : Level} {C : Category {ℓC₀} {
     ; extranatural-op = λ a c f → refl
     }
 
-wedge-eq : {ℓC₀ ℓC₁ ℓX₀ ℓX₁ : Level} 
-         → {C : Category {ℓC₀} {ℓC₁}} {X : Category {ℓX₀} {ℓX₁}} 
-         → {w : Obj X}
-         → {F : Functor (C op ×C C) X} 
-         → {e₀ : (c : Obj C) → Hom X w (F₀ F (c , c))}
-         → {e₁ : (c : Obj C) → Hom X w (F₀ F (c , c))}
-         → {coher₀ : {c c' : Obj C} (f : Hom C c c') → _∘_ X (F₁ F (f , id C {c'})) (e₀ c') ≡ _∘_ X (F₁ F (id C {c} , f)) (e₀ c)}
-         → {coher₁ : {c c' : Obj C} (f : Hom C c c') → _∘_ X (F₁ F (f , id C {c'})) (e₁ c') ≡ _∘_ X (F₁ F (id C {c} , f)) (e₁ c)}
-         → e₀ ≡ e₁
-         → wedge {C = C} {X} {w} {F} e₀ coher₀ ≡ wedge {C = C} {X} {w} {F} e₁ coher₁
-wedge-eq {C = C} {X} {w} {F} {e} {.e} {coher₀} {coher₁} refl 
-  = cong (wedge {C = C} {X} {w} {F} e) 
-  $ implicit-fun-ext $ λ c → implicit-fun-ext $ λ c' → fun-ext 
-  $ λ f → proof-irrelevance (coher₀ f) (coher₁ f)
+abstract
+  wedge-eq : {ℓC₀ ℓC₁ ℓX₀ ℓX₁ : Level} 
+           → {C : Category {ℓC₀} {ℓC₁}} {X : Category {ℓX₀} {ℓX₁}} 
+           → {w : Obj X}
+           → {F : Functor (C op ×C C) X} 
+           → {e₀ : (c : Obj C) → Hom X w (F₀ F (c , c))}
+           → {e₁ : (c : Obj C) → Hom X w (F₀ F (c , c))}
+           → {coher₀ : {c c' : Obj C} (f : Hom C c c') → _∘_ X (F₁ F (f , id C {c'})) (e₀ c') ≡ _∘_ X (F₁ F (id C {c} , f)) (e₀ c)}
+           → {coher₁ : {c c' : Obj C} (f : Hom C c c') → _∘_ X (F₁ F (f , id C {c'})) (e₁ c') ≡ _∘_ X (F₁ F (id C {c} , f)) (e₁ c)}
+           → e₀ ≡ e₁
+           → wedge {C = C} {X} {w} {F} e₀ coher₀ ≡ wedge {C = C} {X} {w} {F} e₁ coher₁
+  wedge-eq {C = C} {X} {w} {F} {e} {.e} {coher₀} {coher₁} refl 
+    = cong (wedge {C = C} {X} {w} {F} e) 
+    $ implicit-fun-ext $ λ c → implicit-fun-ext $ λ c' → fun-ext 
+    $ λ f → proof-irrelevance (coher₀ f) (coher₁ f)
 
 --------------------------------------------------------------------------------
 -- Definition of cowedges
@@ -100,17 +101,18 @@ record CoWedge {ℓC₀ ℓC₁ ℓX₀ ℓX₁ : Level} {C : Category {ℓC₀}
     ; extranatural-op = λ a c f → co-coher f
     }
 
-cowedge-eq : {ℓC₀ ℓC₁ ℓX₀ ℓX₁ : Level} 
-           → {C : Category {ℓC₀} {ℓC₁}} {X : Category {ℓX₀} {ℓX₁}} 
-           → {F : Functor (C op ×C C) X} 
-           → {w : Obj X}
-           → {co-e₀ : (c : Obj C) → Hom X (F₀ F (c , c)) w}
-           → {co-e₁ : (c : Obj C) → Hom X (F₀ F (c , c)) w}
-           → {coher₀ : {c c' : Obj C} (f : Hom C c c') → _∘_ X (co-e₀ c') (F₁ F (id C {c'} , f)) ≡ _∘_ X (co-e₀ c) (F₁ F (f , id C {c}))}
-           → {coher₁ : {c c' : Obj C} (f : Hom C c c') → _∘_ X (co-e₁ c') (F₁ F (id C {c'} , f)) ≡ _∘_ X (co-e₁ c) (F₁ F (f , id C {c}))}
-           → co-e₀ ≡ co-e₁
-           → cowedge {C = C} {X} {F} {w} co-e₀ coher₀ ≡ cowedge {C = C} {X} {F} {w} co-e₁ coher₁
-cowedge-eq {C = C} {X} {F} {w} {co-e} {.co-e} {coher₀} {coher₁} refl 
-  = cong (cowedge {C = C} {X} {F} {w} co-e) 
-  $ implicit-fun-ext $ λ c → implicit-fun-ext $ λ c' → fun-ext 
-  $ λ f → proof-irrelevance (coher₀ f) (coher₁ f)
+abstract
+  cowedge-eq : {ℓC₀ ℓC₁ ℓX₀ ℓX₁ : Level} 
+             → {C : Category {ℓC₀} {ℓC₁}} {X : Category {ℓX₀} {ℓX₁}} 
+             → {F : Functor (C op ×C C) X} 
+             → {w : Obj X}
+             → {co-e₀ : (c : Obj C) → Hom X (F₀ F (c , c)) w}
+             → {co-e₁ : (c : Obj C) → Hom X (F₀ F (c , c)) w}
+             → {coher₀ : {c c' : Obj C} (f : Hom C c c') → _∘_ X (co-e₀ c') (F₁ F (id C {c'} , f)) ≡ _∘_ X (co-e₀ c) (F₁ F (f , id C {c}))}
+             → {coher₁ : {c c' : Obj C} (f : Hom C c c') → _∘_ X (co-e₁ c') (F₁ F (id C {c'} , f)) ≡ _∘_ X (co-e₁ c) (F₁ F (f , id C {c}))}
+             → co-e₀ ≡ co-e₁
+             → cowedge {C = C} {X} {F} {w} co-e₀ coher₀ ≡ cowedge {C = C} {X} {F} {w} co-e₁ coher₁
+  cowedge-eq {C = C} {X} {F} {w} {co-e} {.co-e} {coher₀} {coher₁} refl 
+    = cong (cowedge {C = C} {X} {F} {w} co-e) 
+    $ implicit-fun-ext $ λ c → implicit-fun-ext $ λ c' → fun-ext 
+    $ λ f → proof-irrelevance (coher₀ f) (coher₁ f)

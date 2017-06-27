@@ -56,45 +56,54 @@ record OrdInstance {ℓEq ℓOrd : Level} (A : Type) : Set (suc (ℓ ⊔ ℓEq �
   
   open Relation.Binary.IsDecTotalOrder isDecTotalOrder public renaming ( trans to trans-ord ; antisym to antisym-ord ; refl to refl-ord )
   
-  total-contr : {x y : A} → ¬ (x ≤ y) → ¬ (y ≤ x) → ⊥
-  total-contr {x} {y} ¬x≤y ¬y≤x with total x y
-  total-contr ¬x≤y ¬y≤x | inj₁ x≤y = ¬x≤y x≤y
-  total-contr ¬x≤y ¬y≤x | inj₂ y≤x = ¬y≤x y≤x
+  abstract
+    total-contr : {x y : A} → ¬ (x ≤ y) → ¬ (y ≤ x) → ⊥
+    total-contr {x} {y} ¬x≤y ¬y≤x with total x y
+    total-contr ¬x≤y ¬y≤x | inj₁ x≤y = ¬x≤y x≤y
+    total-contr ¬x≤y ¬y≤x | inj₂ y≤x = ¬y≤x y≤x
   
-  sym-not-eq : {x y : A} → ¬ (x == y) → ¬ (y == x)
-  sym-not-eq {x} {y} ¬x==y y==x = ¬x==y (sym-eq y==x)
+  abstract
+    sym-not-eq : {x y : A} → ¬ (x == y) → ¬ (y == x)
+    sym-not-eq {x} {y} ¬x==y y==x = ¬x==y (sym-eq y==x)
   
-  eq-ord-comp : {x y z : A} → x == y → y ≤ z → x ≤ z
-  eq-ord-comp x==y y≤z = proj₂ (IsPartialOrder.≤-resp-≈ isPartialOrder) (sym-eq x==y) y≤z
+  abstract
+    eq-ord-comp : {x y z : A} → x == y → y ≤ z → x ≤ z
+    eq-ord-comp x==y y≤z = proj₂ (IsPartialOrder.≤-resp-≈ isPartialOrder) (sym-eq x==y) y≤z
   
-  ord-eq-comp : {x y z : A} → x ≤ y → y == z → x ≤ z
-  ord-eq-comp x≤y y==z = proj₁ (IsPartialOrder.≤-resp-≈ isPartialOrder) y==z x≤y
+  abstract
+    ord-eq-comp : {x y z : A} → x ≤ y → y == z → x ≤ z
+    ord-eq-comp x≤y y==z = proj₁ (IsPartialOrder.≤-resp-≈ isPartialOrder) y==z x≤y
 
-  eq-contr : {x y : A} → x == y → (¬ (x ≤ y) ⊎ ¬ (y ≤ x)) → ⊥
-  eq-contr {x} {y} x==y (inj₁ ¬x≤y) with total x y
-  eq-contr x==y (inj₁ ¬x≤y) | inj₁ x≤y = ¬x≤y x≤y
-  eq-contr x==y (inj₁ ¬x≤y) | inj₂ y≤x = ¬x≤y (eq-ord-comp x==y (ord-eq-comp y≤x x==y))
-  eq-contr {x} {y} x==y (inj₂ ¬y≤x) with total x y
-  eq-contr x==y (inj₂ ¬y≤x) | inj₁ x≤y = ¬y≤x (ord-eq-comp (eq-ord-comp (sym-eq x==y) x≤y) (sym-eq x==y))
-  eq-contr x==y (inj₂ ¬y≤x) | inj₂ y≤x = ¬y≤x y≤x
+  abstract
+    eq-contr : {x y : A} → x == y → (¬ (x ≤ y) ⊎ ¬ (y ≤ x)) → ⊥
+    eq-contr {x} {y} x==y (inj₁ ¬x≤y) with total x y
+    eq-contr x==y (inj₁ ¬x≤y) | inj₁ x≤y = ¬x≤y x≤y
+    eq-contr x==y (inj₁ ¬x≤y) | inj₂ y≤x = ¬x≤y (eq-ord-comp x==y (ord-eq-comp y≤x x==y))
+    eq-contr {x} {y} x==y (inj₂ ¬y≤x) with total x y
+    eq-contr x==y (inj₂ ¬y≤x) | inj₁ x≤y = ¬y≤x (ord-eq-comp (eq-ord-comp (sym-eq x==y) x≤y) (sym-eq x==y))
+    eq-contr x==y (inj₂ ¬y≤x) | inj₂ y≤x = ¬y≤x y≤x
 
-  excluded-middle-ord : {x y : A} → ¬ (x ≤ y) → (y ≤ x)
-  excluded-middle-ord {x} {y} ¬x≤y with total x y
-  excluded-middle-ord {x} {y} ¬x≤y | inj₁ x≤y = ⊥-elim (¬x≤y x≤y)
-  excluded-middle-ord {x} {y} ¬x≤y | inj₂ y≤x = y≤x
+  abstract
+    excluded-middle-ord : {x y : A} → ¬ (x ≤ y) → (y ≤ x)
+    excluded-middle-ord {x} {y} ¬x≤y with total x y
+    excluded-middle-ord {x} {y} ¬x≤y | inj₁ x≤y = ⊥-elim (¬x≤y x≤y)
+    excluded-middle-ord {x} {y} ¬x≤y | inj₂ y≤x = y≤x
   
-  excluded-middle-ord' : {x y : A} → ¬ (x == y) → x ≤ y → ¬ (y ≤ x)
-  excluded-middle-ord' {x} {y} ¬x==y x≤y y≤x = ¬x==y (antisym-ord x≤y y≤x)
+  abstract
+    excluded-middle-ord' : {x y : A} → ¬ (x == y) → x ≤ y → ¬ (y ≤ x)
+    excluded-middle-ord' {x} {y} ¬x==y x≤y y≤x = ¬x==y (antisym-ord x≤y y≤x)
   
-  antisym-ord' : {x y : A} → x == y → (x ≤ y) × (y ≤ x)
-  antisym-ord' {x} {y} x==y with dec-ord x y | dec-ord y x
-  antisym-ord' x==y | yes x≤y | yes y≤x = x≤y , y≤x
-  antisym-ord' x==y | yes x≤y | no ¬y≤x = ⊥-elim (eq-contr x==y (inj₂ ¬y≤x))
-  antisym-ord' x==y | no ¬x≤y | yes y≤x = ⊥-elim (eq-contr x==y (inj₁ ¬x≤y))
-  antisym-ord' x==y | no ¬x≤y | no ¬y≤x = ⊥-elim (¬x≤y (excluded-middle-ord ¬y≤x))
+  abstract
+    antisym-ord' : {x y : A} → x == y → (x ≤ y) × (y ≤ x)
+    antisym-ord' {x} {y} x==y with dec-ord x y | dec-ord y x
+    antisym-ord' x==y | yes x≤y | yes y≤x = x≤y , y≤x
+    antisym-ord' x==y | yes x≤y | no ¬y≤x = ⊥-elim (eq-contr x==y (inj₂ ¬y≤x))
+    antisym-ord' x==y | no ¬x≤y | yes y≤x = ⊥-elim (eq-contr x==y (inj₁ ¬x≤y))
+    antisym-ord' x==y | no ¬x≤y | no ¬y≤x = ⊥-elim (¬x≤y (excluded-middle-ord ¬y≤x))
   
-  ord-not-eq : {x y : A} → x ≤ y → ¬ (y ≤ x) → ¬ (x == y)
-  ord-not-eq x≤y ¬y≤x x==y = ¬y≤x (eq-ord-comp (sym-eq x==y) (ord-eq-comp x≤y (sym-eq x==y)))
+  abstract
+    ord-not-eq : {x y : A} → x ≤ y → ¬ (y ≤ x) → ¬ (x == y)
+    ord-not-eq x≤y ¬y≤x x==y = ¬y≤x (eq-ord-comp (sym-eq x==y) (ord-eq-comp x≤y (sym-eq x==y)))
 
 -------------------------------------------------------------------------------
 -- Definition of predicates on lists
@@ -272,11 +281,12 @@ record LSet {ℓEq ℓOrd : Level} (A : Σ Type (OrdInstance {ℓEq} {ℓOrd})) 
     xs : List (proj₁ A) 
     sorted : IsSortedNoDupList (proj₂ A) xs
 
-lset-eq : {ℓEq ℓOrd : Level}
-        → {A : Type} {OrdA : OrdInstance {ℓEq} {ℓOrd} A} 
-        → (xs ys : List A)
-        → (sortedX : IsSortedNoDupList OrdA xs) → (sortedY : IsSortedNoDupList OrdA ys)
-        → xs ≡ ys
-        → lset xs sortedX ≡ lset ys sortedY
-lset-eq {A = A} {OrdA} xs .xs sortedX sortedY refl with proof-irr-IsSortedNoDupList OrdA xs sortedX sortedY
-lset-eq {A = A} {OrdA} xs .xs sortedX .sortedX refl | refl = refl 
+abstract
+  lset-eq : {ℓEq ℓOrd : Level}
+          → {A : Type} {OrdA : OrdInstance {ℓEq} {ℓOrd} A} 
+          → (xs ys : List A)
+          → (sortedX : IsSortedNoDupList OrdA xs) → (sortedY : IsSortedNoDupList OrdA ys)
+          → xs ≡ ys
+          → lset xs sortedX ≡ lset ys sortedY
+  lset-eq {A = A} {OrdA} xs .xs sortedX sortedY refl with proof-irr-IsSortedNoDupList OrdA xs sortedX sortedY
+  lset-eq {A = A} {OrdA} xs .xs sortedX .sortedX refl | refl = refl 

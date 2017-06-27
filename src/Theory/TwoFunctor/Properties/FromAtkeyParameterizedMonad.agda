@@ -93,7 +93,7 @@ AtkeyParameterizedMonad→LaxTwoFunctor {C = C} {S} F = record
     
     laxFunId₁ : (x y : Obj S) (f : Hom S x y)
               → ⟨ stateHomIndep f f ⟩∘ᵥ⟨ ⟨ μ' x x y (id S) f ⟩∘ᵥ⟨ ⟨ Id⟨ ApplyT f ⟩ ⟩∘ₕ⟨ (η' x) ⟩ ⟩ ⟩
-              ≡ stateHomIndep f f
+              ≡ λ' functorTwoCategory ([ P ]₀ f)
     laxFunId₁ x y f = natural-transformation-eq $ fun-ext $ λ (c : Obj C) → begin
       η ⟨ stateHomIndep f f ⟩∘ᵥ⟨ ⟨ μ' x x y (id S) f ⟩∘ᵥ⟨ ⟨ Id⟨ ApplyT f ⟩ ⟩∘ₕ⟨ (η' x) ⟩ ⟩ ⟩ c
         ≡⟨⟩
@@ -104,9 +104,9 @@ AtkeyParameterizedMonad→LaxTwoFunctor {C = C} {S} F = record
       id C {[ ApplyT f ]₀ c} ∘C id C
         ≡⟨ left-id C ⟩
       id C {[ ApplyT f ]₀ c}
-        ≡⟨⟩
-      η (stateHomIndep f f) c ∎
-
+        ≡⟨ cat-λ-id c ⟩
+      η (λ' functorTwoCategory ([ P ]₀ f)) c ∎
+    
     laxFunId₂ : (x y : Obj S) (f : Hom S x y)
               → ⟨ stateHomIndep (id S ∘S f) f ⟩∘ᵥ⟨ ⟨ μ' x y y f (id S) ⟩∘ᵥ⟨ ⟨ η' y ⟩∘ₕ⟨ Id⟨ ApplyT f ⟩ ⟩ ⟩ ⟩
               ≡ ρ functorTwoCategory ([ P ]₀ f)
@@ -122,43 +122,7 @@ AtkeyParameterizedMonad→LaxTwoFunctor {C = C} {S} F = record
       η (stateHomIndep (id S ∘S f) f) c
         ≡⟨⟩
       id C {[ ApplyT (id S ∘S f) ]₀ c}
-        ≡⟨⟩
-      η Id⟨ ApplyT (id S ∘S f) ⟩ c
-        ≡⟨ helper c (sym $ functor-eq refl hrefl) ⟩
-      η (subst₂ NaturalTransformation
-                (sym $ functor-eq {idF = λ {a} → Functor.id T {y , x , a}}
-                                  {composeF = λ {a} {b} {c} {h} {k} → Functor.compose (ApplyT (id S ∘S f)) {a} {b} {c} {h} {k}}
-                                  refl hrefl)
-                refl Id⟨ ApplyT f ⟩) c
-        ≡⟨ cong (λ X → η (subst₂ NaturalTransformation (sym $ functor-eq {idF = λ {a} → X {a}}
-                                                                         {composeF = λ {a} {b} {c} {h} {k} → Functor.compose (ApplyT (id S ∘S f)) {a} {b} {c} {h} {k}}
-                                                                         refl hrefl)
-                                                        refl Id⟨ ApplyT f ⟩) c)
-                         (implicit-fun-ext (λ a → proof-irrelevance (Functor.id T) (trans (cong (Functor.F₁ Id[ C ]) (Functor.id T)) (Functor.id Id[ C ])))) ⟩
-        η (subst₂ NaturalTransformation
-                (sym $ functor-eq {F₀ = [ ApplyT f ]₀} {G₀ = [ ApplyT (id S ∘S f) ]₀}
-                                  {F₁ = λ {a} {b} h → Functor.F₁ (ApplyT f) {a} {b} h} {G₁ = λ {a} {b} h → Functor.F₁ (ApplyT (id S ∘S f)) {a} {b} h}
-                                  {idF = trans (cong (Functor.F₁ Id[ C ]) (Functor.id T)) (Functor.id Id[ C ])}
-                                  {composeF = λ {a} {b} {c} {h} {k} → Functor.compose (ApplyT (id S ∘S f)) {a} {b} {c} {h} {k}}
-                                  refl hrefl)
-                refl Id⟨ ApplyT f ⟩) c
-        ≡⟨ cong (λ X → η (subst₂ NaturalTransformation (sym $ functor-eq {idF = trans (cong (Functor.F₁ Id[ C ]) (Functor.id T)) (Functor.id Id[ C ])}
-                                                                         {composeF = λ {a} {b} {c} {h} {k} → X {a} {b} {c} {h} {k}} refl hrefl) refl Id⟨ ApplyT f ⟩) c)
-                (implicit-fun-ext (λ a → implicit-fun-ext (λ b → implicit-fun-ext (λ c → implicit-fun-ext (λ h → implicit-fun-ext (λ k →
-                  proof-irrelevance (Functor.compose (ApplyT (id S ∘S f)) {a} {b} {c} {h} {k})
-                                    (trans (cong (Functor.F₁ Id[ C ]) (trans (cong₂ (λ X Y → Functor.F₁ T (X , Y , (k ∘C h))) (sym $ left-id S) (sym $ left-id S))
-                                                                             (Functor.compose T)))
-                                           (Functor.compose Id[ C ]))
-                )))))) ⟩
-      η (subst₂ NaturalTransformation
-                (sym $ functor-eq {idF = trans (cong (Functor.F₁ Id[ C ]) (Functor.id T)) (Functor.id Id[ C ])}
-                                  {composeF = λ {a} {b} {c} {h} {k} → trans (cong (Functor.F₁ Id[ C ])
-                                                                                  (trans (cong₂ (λ X Y → Functor.F₁ T (X , Y , (k ∘C h))) (sym $ left-id S) (sym $ left-id S))
-                                                                                         (Functor.compose T)))
-                                                                            (Functor.compose Id[ C ])}
-                                  refl hrefl)
-                refl Id⟨ ApplyT f ⟩) c
-        ≡⟨⟩
+        ≡⟨ cat-ρ-id c ⟩
       η (ρ functorTwoCategory (ApplyT f)) c ∎
       where
         helper : (c : Obj C)

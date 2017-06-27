@@ -36,45 +36,50 @@ yoneda← F A FA = naturalTransformation η' natural-η
     η' : (x : Obj C) → Hom SetCat ([ Hom[ A ,-] ]₀ x) ([ F ]₀ x)
     η' x f = (F₁ F $ lower f) FA
     
-    -- h A f = λ g → f ∘C g
-    natural-η : {a b : Obj C} {f : Hom C a b} → ([ F ]₁ f) ∘Set (η' a) ≡ (η' b) ∘Set ([ Hom[ A ,-] ]₁ f)
-    natural-η {a} {b} {f} = begin
-      ([ F ]₁ f) ∘Set (η' a)
-        ≡⟨⟩
-      ( λ g → ([ F ]₁ f) (([ F ]₁ $ lower g) FA) )
-        ≡⟨ fun-ext (λ g → cong (λ P → P FA) (sym $ compose F)) ⟩
-      ( λ g → ([ F ]₁ (f ∘C lower g)) FA )
-        ≡⟨⟩
-      (η' b) ∘Set ([ Hom[ A ,-] ]₁ f) ∎
+    abstract
+      -- h A f = λ g → f ∘C g
+      natural-η : {a b : Obj C} {f : Hom C a b} → ([ F ]₁ f) ∘Set (η' a) ≡ (η' b) ∘Set ([ Hom[ A ,-] ]₁ f)
+      natural-η {a} {b} {f} = begin
+        ([ F ]₁ f) ∘Set (η' a)
+          ≡⟨⟩
+        ( λ g → ([ F ]₁ f) (([ F ]₁ $ lower g) FA) )
+          ≡⟨ fun-ext (λ g → cong (λ P → P FA) (sym $ compose F)) ⟩
+        ( λ g → ([ F ]₁ (f ∘C lower g)) FA )
+          ≡⟨⟩
+        (η' b) ∘Set ([ Hom[ A ,-] ]₁ f) ∎
 
-yoneda-right-id : (F : Functor C SetCat) → (A : Obj C) → yoneda→ F A ∘F yoneda← F A ≡ (λ x → x)
-yoneda-right-id F A = fun-ext p
-  where
-    p : (FA : F₀ F A) → (yoneda→ F A ∘F yoneda← F A) FA ≡ FA
-    p FA with yoneda← F A FA 
-    p FA | naturalTransformation η natural = begin
-      F₁ F (id C) FA 
-        ≡⟨ cong (λ P → P FA) (Functor.id F) ⟩
-      FA ∎
+abstract
+  yoneda-right-id : (F : Functor C SetCat) → (A : Obj C) → yoneda→ F A ∘F yoneda← F A ≡ (λ x → x)
+  yoneda-right-id F A = fun-ext p
+    where
+      abstract
+        p : (FA : F₀ F A) → (yoneda→ F A ∘F yoneda← F A) FA ≡ FA
+        p FA with yoneda← F A FA 
+        p FA | naturalTransformation η natural = begin
+          F₁ F (id C) FA 
+            ≡⟨ cong (λ P → P FA) (Functor.id F) ⟩
+          FA ∎
 
-yoneda-left-id : (F : Functor C SetCat) → (A : Obj C) → yoneda← F A ∘F yoneda→ F A ≡ (λ x → x)
-yoneda-left-id F A = fun-ext $ λ NatTrans → natural-transformation-eq (p NatTrans)
-  where
-    open NaturalTransformation
-    
-    p : (NatTrans : NaturalTransformation Hom[ A ,-] F) → η (yoneda← F A (yoneda→ F A NatTrans)) ≡ η NatTrans
-    p (naturalTransformation η' natural) = fun-ext $ λ x → fun-ext $ λ f → begin
-      η (yoneda← F A (yoneda→ F A (naturalTransformation η' natural))) x f
-        ≡⟨⟩
-      ([ F ]₁ (lower f) ∘Set η' A) (lift $ id C {A})
-        ≡⟨ cong (λ P → P (lift $ id C {A})) (natural {A} {x} {lower f}) ⟩
-      (η' x ∘Set ([ Hom[ A ,-] ]₁ (lower f))) (lift $ id C {A})
-        ≡⟨⟩
-      η' x (lift (lower f ∘C id C {A}))
-        ≡⟨ cong (η' x ∘F lift) (left-id C) ⟩
-      η' x f ∎
-
-yoneda-bijection : (F : Functor C SetCat) → (A : Obj C) → NaturalTransformation Hom[ A ,-] F ↔ [ F ]₀ A
+abstract
+  yoneda-left-id : (F : Functor C SetCat) → (A : Obj C) → yoneda← F A ∘F yoneda→ F A ≡ (λ x → x)
+  yoneda-left-id F A = fun-ext $ λ NatTrans → natural-transformation-eq (p NatTrans)
+    where
+      open NaturalTransformation
+      
+      abstract
+        p : (NatTrans : NaturalTransformation Hom[ A ,-] F) → η (yoneda← F A (yoneda→ F A NatTrans)) ≡ η NatTrans
+        p (naturalTransformation η' natural) = fun-ext $ λ x → fun-ext $ λ f → begin
+          η (yoneda← F A (yoneda→ F A (naturalTransformation η' natural))) x f
+            ≡⟨⟩
+          ([ F ]₁ (lower f) ∘Set η' A) (lift $ id C {A})
+            ≡⟨ cong (λ P → P (lift $ id C {A})) (natural {A} {x} {lower f}) ⟩
+          (η' x ∘Set ([ Hom[ A ,-] ]₁ (lower f))) (lift $ id C {A})
+            ≡⟨⟩
+          η' x (lift (lower f ∘C id C {A}))
+            ≡⟨ cong (η' x ∘F lift) (left-id C) ⟩
+          η' x f ∎
+             
+yoneda-bijection : (F : Functor C SetCat) → (A : Obj C) → (NaturalTransformation Hom[ A ,-] F ↔ [ F ]₀ A)
 yoneda-bijection F A = record
   { f = yoneda→ F A
   ; inv = yoneda← F A

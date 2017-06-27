@@ -39,24 +39,25 @@ functorCompositionLeftUnitor C = naturalTransformation η (λ {a b} {f} → natu
             
         η' : (c : Obj C) → Hom C ([ [ [ Id[ C ] ,-] comp ]₀ F ]₀ c) ([ [ Id[ Fun ] ]₀ F ]₀ c)
         η' c = id C {F₀ c}
-         
-    natural' : {a b : Functor C C} {f : Hom Fun a b} → ⟨ [ Id[ Fun ] ]₁ f ⟩∘ᵥ⟨ η a ⟩ ≡ ⟨ η b ⟩∘ᵥ⟨ [ [ Id[ C ] ,-] comp ]₁ f ⟩
-    natural' {F} {G} {α} = natural-transformation-eq $ fun-ext $ λ (c : Obj C) → begin
-      nat-η  ⟨ [ Id[ Fun ] ]₁ α ⟩∘ᵥ⟨ η F ⟩ c 
-        ≡⟨⟩
-      nat-η ([ Id[ Fun ] ]₁ α) c ∘C id C
-        ≡⟨ left-id C ⟩
-      nat-η ([ Id[ Fun ] ]₁ α) c
-        ≡⟨⟩
-      nat-η α c
-        ≡⟨ sym (right-id C) ⟩
-      id C ∘C nat-η α c
-        ≡⟨⟩
-      nat-η ([ [ Id[ C ] ,-] comp ]₁ α) c
-        ≡⟨ sym (right-id C) ⟩
-      id C ∘C nat-η ([ [ Id[ C ] ,-] comp ]₁ α) c
-        ≡⟨⟩
-      nat-η ⟨ η G ⟩∘ᵥ⟨ [ [ Id[ C ] ,-] comp ]₁ α ⟩ c ∎
+    
+    abstract
+      natural' : {a b : Functor C C} {f : Hom Fun a b} → ⟨ [ Id[ Fun ] ]₁ f ⟩∘ᵥ⟨ η a ⟩ ≡ ⟨ η b ⟩∘ᵥ⟨ [ [ Id[ C ] ,-] comp ]₁ f ⟩
+      natural' {F} {G} {α} = natural-transformation-eq $ fun-ext $ λ (c : Obj C) → begin
+        nat-η  ⟨ [ Id[ Fun ] ]₁ α ⟩∘ᵥ⟨ η F ⟩ c 
+          ≡⟨⟩
+        nat-η ([ Id[ Fun ] ]₁ α) c ∘C id C
+          ≡⟨ left-id C ⟩
+        nat-η ([ Id[ Fun ] ]₁ α) c
+          ≡⟨⟩
+        nat-η α c
+          ≡⟨ sym (right-id C) ⟩
+        id C ∘C nat-η α c
+          ≡⟨⟩
+        nat-η ([ [ Id[ C ] ,-] comp ]₁ α) c
+          ≡⟨ sym (right-id C) ⟩
+        id C ∘C nat-η ([ [ Id[ C ] ,-] comp ]₁ α) c
+          ≡⟨⟩
+        nat-η ⟨ η G ⟩∘ᵥ⟨ [ [ Id[ C ] ,-] comp ]₁ α ⟩ c ∎
 
 functorCompositionLeftUnitor' : {ℓC₀ ℓC₁ : Level} (C : Category {ℓC₀} {ℓC₁}) → NaturalTransformation Id[ functorCategory C C ] ([ Id[ C ] ,-] (compositionFunctor C C C))
 functorCompositionLeftUnitor' C = naturalTransformation η (λ {a b} {f} → natural' {a} {b} {f})
@@ -72,21 +73,22 @@ functorCompositionLeftUnitor' C = naturalTransformation η (λ {a b} {f} → nat
             
         η' : (c : Obj C) → Hom C ([ [ Id[ Fun ] ]₀ F ]₀ c) ([ [ [ Id[ C ] ,-] comp ]₀ F ]₀ c)
         η' c = id C {F₀ c}
-
-    natural' : {a b : Functor C C} {f : Hom Fun a b} → ⟨ [ [ Id[ C ] ,-] comp ]₁ f ⟩∘ᵥ⟨ η a ⟩ ≡ ⟨ η b ⟩∘ᵥ⟨ [ Id[ Fun ] ]₁ f ⟩
-    natural' {F} {G} {α} = natural-transformation-eq $ fun-ext $ λ (c : Obj C) → begin
-      nat-η ⟨ [ [ Id[ C ] ,-] comp ]₁ α ⟩∘ᵥ⟨ η F ⟩ c 
-        ≡⟨⟩
-      nat-η ([ [ Id[ C ] ,-] comp ]₁ α) c ∘C id C
-        ≡⟨ left-id C ⟩
-      nat-η ([ [ Id[ C ] ,-] comp ]₁ α) c
-        ≡⟨⟩
-      id C ∘C nat-η α c
-        ≡⟨ right-id C ⟩
-      nat-η α c
-        ≡⟨⟩
-      nat-η ([ Id[ Fun ] ]₁ α) c
-        ≡⟨ sym (right-id C) ⟩
-      id C ∘C nat-η ([ Id[ Fun ] ]₁ α) c
-        ≡⟨⟩
-      nat-η ⟨ η G ⟩∘ᵥ⟨ [ Id[ Fun ] ]₁ α ⟩ c ∎ 
+    
+    abstract
+      natural' : {a b : Functor C C} {f : Hom Fun a b} → ⟨ [ [ Id[ C ] ,-] comp ]₁ f ⟩∘ᵥ⟨ η a ⟩ ≡ ⟨ η b ⟩∘ᵥ⟨ [ Id[ Fun ] ]₁ f ⟩
+      natural' {F} {G} {α} = natural-transformation-eq $ fun-ext $ λ (c : Obj C) → begin
+        nat-η ⟨ [ [ Id[ C ] ,-] comp ]₁ α ⟩∘ᵥ⟨ η F ⟩ c 
+          ≡⟨⟩
+        nat-η ([ [ Id[ C ] ,-] comp ]₁ α) c ∘C id C
+          ≡⟨ left-id C ⟩
+        nat-η ([ [ Id[ C ] ,-] comp ]₁ α) c
+          ≡⟨⟩
+        id C ∘C nat-η α c
+          ≡⟨ right-id C ⟩
+        nat-η α c
+          ≡⟨⟩
+        nat-η ([ Id[ Fun ] ]₁ α) c
+          ≡⟨ sym (right-id C) ⟩
+        id C ∘C nat-η ([ Id[ Fun ] ]₁ α) c
+          ≡⟨⟩
+        nat-η ⟨ η G ⟩∘ᵥ⟨ [ Id[ Fun ] ]₁ α ⟩ c ∎ 
