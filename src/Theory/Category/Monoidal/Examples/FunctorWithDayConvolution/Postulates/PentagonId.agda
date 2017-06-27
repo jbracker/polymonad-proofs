@@ -25,33 +25,20 @@ open import Theory.Natural.Isomorphism
 open import Theory.End.DayConvolution
 open import Theory.End.DayUnit
 
+open import Theory.Category.Monoidal.Examples.FunctorWithDayConvolution.Postulates
+
 open import Extensionality
 
-module Theory.Category.Monoidal.Examples.FunctorWithDayConvolution.Postulates where
+module Theory.Category.Monoidal.Examples.FunctorWithDayConvolution.Postulates.PentagonId where
 
 open Category
 open Functor hiding ( id )
-open NaturalIsomorphism renaming ( η to iso-η )
-
+open NaturalIsomorphism renaming ( η to iso-η ) 
+ 
 postulate
-  dayAssociator : {ℓC₀ ℓC₁ : Level} → (ℓSet : Level) → {C : Category {ℓC₀} {ℓC₁}} → (CMon : MonoidalCategory C) 
-                → NaturalIsomorphism (leftAssociator (dayConvolution {ℓSet = ℓSet} CMon)) (rightAssociator (dayConvolution {ℓSet = ℓSet} CMon))
-  
-  dayLeftUnitor : {ℓC₀ ℓC₁ : Level} → (ℓSet : Level) → {C : Category {ℓC₀} {ℓC₁}} → (CMon : MonoidalCategory C) 
-                → NaturalIsomorphism ([ dayUnit {ℓSet = ℓSet} CMon ,-] (dayConvolution {ℓSet = ℓSet} CMon)) Id[ FunCat C (setCategory {ℓSet ⊔ ℓC₀ ⊔ ℓC₁}) ]
-
-  dayRightUnitor : {ℓC₀ ℓC₁ : Level} → (ℓSet : Level) → {C : Category {ℓC₀} {ℓC₁}} → (CMon : MonoidalCategory C) 
-                 → NaturalIsomorphism ([-, dayUnit {ℓSet = ℓSet} CMon ] (dayConvolution {ℓSet = ℓSet} CMon)) Id[ FunCat C (setCategory {ℓSet ⊔ ℓC₀ ⊔ ℓC₁}) ]
-  {-
-  day-triangle-id : {ℓC₀ ℓC₁ : Level} → (ℓSet : Level) → {C : Category {ℓC₀} {ℓC₁}} → (CMon : MonoidalCategory C) 
-                  → (x y : Functor C (setCategory {ℓSet ⊔ ℓC₀ ⊔ ℓC₁})) 
-                  → F₁ (dayConvolution {ℓSet = ℓSet} CMon) (iso-η (dayRightUnitor ℓSet CMon) x , id (FunCat C (setCategory {ℓSet ⊔ ℓC₀ ⊔ ℓC₁})) {y} )
-                  ≡ ⟨ F₁ (dayConvolution {ℓSet = ℓSet} CMon) (id (FunCat C (setCategory {ℓSet ⊔ ℓC₀ ⊔ ℓC₁})) {x} , iso-η (dayLeftUnitor ℓSet CMon) y) ⟩∘ᵥ⟨ iso-η (dayAssociator ℓSet CMon) (x ,' dayUnit {ℓSet = ℓSet} CMon ,' y) ⟩
-  
   day-pentagon-id : {ℓC₀ ℓC₁ : Level} → (ℓSet : Level) → {C : Category {ℓC₀} {ℓC₁}} → (CMon : MonoidalCategory C) 
                   → (w x y z : Functor C (setCategory {ℓSet ⊔ ℓC₀ ⊔ ℓC₁})) 
                   → ⟨ F₁ (dayConvolution {ℓSet = ℓSet} CMon) (id [ C , setCategory {ℓSet ⊔ ℓC₀ ⊔ ℓC₁} ] , iso-η (dayAssociator ℓSet CMon) (x ,' y ,' z)) ⟩∘ᵥ⟨ 
                       ⟨ iso-η (dayAssociator ℓSet CMon) (w ,' F₀ (dayConvolution {ℓSet = ℓSet} CMon) (x , y) ,' z) ⟩∘ᵥ⟨ 
                         F₁ (dayConvolution {ℓSet = ℓSet} CMon) (iso-η (dayAssociator ℓSet CMon) (w ,' x ,' y) , id [ C , setCategory {ℓSet ⊔ ℓC₀ ⊔ ℓC₁} ]) ⟩ ⟩
                   ≡ ⟨ iso-η (dayAssociator ℓSet CMon) (w ,' x ,' F₀ (dayConvolution {ℓSet = ℓSet} CMon) (y , z)) ⟩∘ᵥ⟨ iso-η (dayAssociator ℓSet CMon) (F₀ (dayConvolution {ℓSet = ℓSet} CMon) (w , x) ,' y ,' z) ⟩
-  -}
