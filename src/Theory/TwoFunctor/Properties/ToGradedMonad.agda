@@ -130,7 +130,7 @@ LaxTwoFunctor→GradedMonad {ℓ} {Eff} mon F = record
         (M (i ∘Eff ε) α ∋ (join ∘F fmap (return {α})) m)
           ≅⟨ hrefl ⟩ 
         (M (i ∘Eff ε) α ∋ (nat-η (Id⟨ [ P₁ ]₀ (i ∘Eff ε) ⟩) α ∘F join ∘F fmap return) m)
-          ≅⟨ hsym (subst-refl-id (sym right-id) (join (fmap return m))) ⟩
+          ≅⟨ hsym (subst-refl-id (sym (hIdL₁ MonCat₂)) (join (fmap return m))) ⟩
         (M i α ∋ (nat-η ([ P₁ ]₁ ((λ' MonCat₂ i))) α ∘F join ∘F fmap return) m)
           ≅⟨ ≡-to-≅ $ η-lax-id₁ {i} α m ⟩
         (M i α ∋ nat-η (λ' Cat' ([ P₁ ]₀ i)) α m)
