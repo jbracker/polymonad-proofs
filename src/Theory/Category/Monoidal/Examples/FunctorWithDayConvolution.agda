@@ -26,6 +26,10 @@ open import Theory.End.DayUnit
 
 open import Extensionality
 
+open import Theory.Category.Monoidal.Examples.FunctorWithDayConvolution.Postulates
+open import Theory.Category.Monoidal.Examples.FunctorWithDayConvolution.Postulates.TriangleId
+open import Theory.Category.Monoidal.Examples.FunctorWithDayConvolution.Postulates.PentagonId
+
 module Theory.Category.Monoidal.Examples.FunctorWithDayConvolution where
 
 open Category
@@ -36,9 +40,9 @@ functorDayMonoidalCategory : {ℓC₀ ℓC₁ : Level} → (ℓSet : Level) → 
 functorDayMonoidalCategory {ℓC₀} {ℓC₁} ℓSet {C} CMon = record
   { tensor = dayConvolution {ℓSet = ℓSet} CMon
   ; unit = dayUnit {ℓSet = ℓSet} CMon
-  ; associator = {!!}
-  ; left-unitor = {!!}
-  ; right-unitor = {!!}
-  ; triangle-id = {!!}
-  ; pentagon-id = {!!}
+  ; associator = dayAssociator ℓSet CMon
+  ; left-unitor = dayLeftUnitor ℓSet CMon
+  ; right-unitor = dayRightUnitor ℓSet CMon
+  ; triangle-id = day-triangle-id ℓSet CMon
+  ; pentagon-id = day-pentagon-id ℓSet CMon
   }

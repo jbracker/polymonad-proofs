@@ -22,4 +22,3 @@ src/Theory/TwoFunctor/Properties/ToAtkeyParameterizedMonad.agda
 src/Theory/Natural/Isomorphism/Examples/DayConvolutionAssociator.agda
 src/Theory/Natural/Transformation/Examples/DayConvolutionAssociator.agda
 src/Theory/End/Examples.agda
-src/Theory/Category/Monoidal/Examples/FunctorWithDayConvolution.agda
