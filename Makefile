@@ -3,8 +3,10 @@ SOURCE_DIR = src
 
 AGDA = agda
 
+AGDA_FLAGS = 
+
 # Especially the Polymonad.Union proof runs out of stack space quickly.
-AGDA_TC = $(AGDA) -i$(SOURCE_DIR) -v 0 +RTS -K40m -RTS
+AGDA_TC = $(AGDA) $(AGDA_FLAGS) -i$(SOURCE_DIR) -v 0 +RTS -K40m -RTS
 
 
 define agda-files-in
@@ -16,7 +18,7 @@ define agda-files-in-root
 endef
 
 define agda-type-check
-	$(AGDA_TC) $(1) && echo "Checked $(1)"
+	echo "Checking $(1)" && $(AGDA_TC) $(1)
 endef
 
 define agda-check-all-in
