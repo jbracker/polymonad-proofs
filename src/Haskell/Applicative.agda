@@ -59,8 +59,8 @@ record Applicative (F : TyCon) : Set₁ where
   
   _<$>_ = fmap
   
-  unit : F ⊤
-  unit = pure tt
+  unit : F (Lift ⊤)
+  unit = pure (lift tt)
   
   _**_ : {α β : Type} → F α → F β → F (α × β)
   _**_ u v = fmap (_,_) u <*> v
@@ -115,40 +115,54 @@ record Applicative (F : TyCon) : Set₁ where
   
   abstract
     law-left-identity : {α : Type} → (v : F α) 
-                      → unit ** v ≡ fmap (λ a → (tt , a)) v
+                      → unit ** v ≡ fmap (λ a → (lift tt , a)) v
     law-left-identity v = begin
       unit ** v 
         ≡⟨⟩
-      fmap (_,_) (pure tt) <*> v 
-        ≡⟨ cong (λ X → X <*> v) (law-applicative-fmap _,_ (pure tt)) ⟩
-      pure (_,_) <*> pure tt <*> v 
-        ≡⟨ cong (λ X → X <*> v) (law-homomorphism tt _,_) ⟩
-      pure (λ a → (tt , a)) <*> v
-        ≡⟨ sym (law-applicative-fmap (λ a → (tt , a)) v) ⟩
-      fmap (λ a → (tt , a)) v ∎
+      fmap (_,_) (pure (lift tt)) <*> v 
+        ≡⟨ cong (λ X → X <*> v) (law-applicative-fmap _,_ (pure (lift tt))) ⟩
+      pure (_,_) <*> pure (lift tt) <*> v 
+        ≡⟨ cong (λ X → X <*> v) (law-homomorphism (lift tt) _,_) ⟩
+      pure (λ a → (lift tt , a)) <*> v
+        ≡⟨ sym (law-applicative-fmap (λ a → (lift tt , a)) v) ⟩
+      fmap (λ a → (lift tt , a)) v ∎
     
   abstract
+    law-left-identity' : {α : Type} → (v : F α) 
+                       → fmap proj₂ (unit ** v) ≡ v
+    law-left-identity' {α} v = trans (cong (λ X → fmap proj₂ X) (law-left-identity v)) 
+                                     (trans (cong (λ X → X v) (sym $ law-compose proj₂ (λ a → lift tt , a))) 
+                                            (cong (λ X → X v) law-functor-id)) 
+  
+  abstract
     law-right-identity : {α : Type} → (v : F α) 
-                       → v ** unit ≡ fmap (λ a → (a , tt)) v
+                       → v ** unit ≡ fmap (λ a → (a , lift tt)) v
     law-right-identity v = begin
       v ** unit 
         ≡⟨⟩
-      fmap (_,_) v <*> pure tt
-        ≡⟨ cong (λ X → X <*> pure tt) (law-applicative-fmap _,_ v) ⟩
-      pure (_,_) <*> v <*> pure tt
-        ≡⟨ law-interchange (pure (_,_) <*> v) tt ⟩
-      pure (λ f → f tt) <*> (pure (_,_) <*> v)
-        ≡⟨ sym (law-composition (pure (λ f → f tt)) (pure (_,_)) v) ⟩
-      pure (_∘_) <*> pure (λ f → f tt) <*> pure (_,_) <*> v
-        ≡⟨ cong (λ X → X <*> pure (_,_) <*> v) (law-homomorphism (λ f → f tt) _∘_) ⟩
-      pure (_∘_ (λ f → f tt)) <*> pure (_,_) <*> v
-        ≡⟨ cong (λ X → X <*> v) (law-homomorphism _,_ (_∘_ (λ f → f tt))) ⟩
-      pure ((λ f → f tt) ∘ _,_) <*> v
+      fmap (_,_) v <*> pure (lift tt)
+        ≡⟨ cong (λ X → X <*> pure (lift tt)) (law-applicative-fmap _,_ v) ⟩
+      pure (_,_) <*> v <*> pure (lift tt)
+        ≡⟨ law-interchange (pure (_,_) <*> v) (lift tt) ⟩
+      pure (λ f → f (lift tt)) <*> (pure (_,_) <*> v)
+        ≡⟨ sym (law-composition (pure (λ f → f (lift tt))) (pure (_,_)) v) ⟩
+      pure (_∘_) <*> pure (λ f → f (lift tt)) <*> pure (_,_) <*> v
+        ≡⟨ cong (λ X → X <*> pure (_,_) <*> v) (law-homomorphism (λ f → f (lift tt)) _∘_) ⟩
+      pure (_∘_ (λ f → f (lift tt))) <*> pure (_,_) <*> v
+        ≡⟨ cong (λ X → X <*> v) (law-homomorphism _,_ (_∘_ (λ f → f (lift tt)))) ⟩
+      pure ((λ f → f (lift tt)) ∘ _,_) <*> v
         ≡⟨⟩
-      pure (λ a → (a , tt)) <*> v
-        ≡⟨ sym (law-applicative-fmap (λ a → (a , tt)) v) ⟩
-      fmap (λ a → (a , tt)) v ∎
+      pure (λ a → (a , lift tt)) <*> v
+        ≡⟨ sym (law-applicative-fmap (λ a → (a , lift tt)) v) ⟩
+      fmap (λ a → (a , lift tt)) v ∎
   
+  abstract
+    law-right-identity' : {α : Type} → (v : F α) 
+                        → fmap proj₁ (v ** unit) ≡ v
+    law-right-identity' {α} v = trans (cong (λ X → fmap proj₁ X) (law-right-identity v)) 
+                                      (trans (cong (λ X → X v) (sym $ law-compose proj₁ (λ a → a , lift tt))) 
+                                             (cong (λ X → X v) law-functor-id)) 
+
   abstract
     law-associativity : {α β γ : Type} → (u : F α) (v : F β) (w : F γ) 
                       → u ** (v ** w) ≡ fmap (λ {((a , b) , c) → (a , (b , c))}) ( (u ** v) ** w ) 
