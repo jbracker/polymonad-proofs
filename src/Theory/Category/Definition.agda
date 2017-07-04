@@ -85,12 +85,12 @@ abstract
 -------------------------------------------------------------------------------
 
 -- The unit category with exactly one element and one morphism.
-unitCategory : Category
-unitCategory = record
-  { Obj = ⊤
-  ; Hom = λ _ _ → ⊤
-  ; _∘_ = λ _ _ → tt
-  ; id = tt
+unitCategory : {ℓ₀ ℓ₁ : Level} → Category {ℓ₀} {ℓ₁}
+unitCategory {ℓ₀} {ℓ₁} = record
+  { Obj = Lift {ℓ = ℓ₀} ⊤
+  ; Hom = λ _ _ → Lift {ℓ = ℓ₁} ⊤
+  ; _∘_ = λ _ _ → lift tt
+  ; id = lift tt
   ; assoc = refl
   ; left-id = refl
   ; right-id = refl

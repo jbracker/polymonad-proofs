@@ -2,7 +2,7 @@
 module Theory.TwoCategory.Definition where
 
 -- Stdlib
-open import Level renaming ( suc to lsuc ; zero to lzero )
+open import Level
 open import Function hiding ( id ) renaming ( _∘_ to _∘F_ )
 open import Data.Product
 open import Data.Sum
@@ -35,7 +35,7 @@ open import Theory.Natural.Isomorphism
 
 open Category hiding ( left-id ; right-id ; assoc ) renaming ( id to idC )
 
-record StrictTwoCategory {ℓ₀ ℓ₁ ℓ₂ : Level} : Set (lsuc (ℓ₀ ⊔ ℓ₁ ⊔ ℓ₂)) where
+record StrictTwoCategory {ℓ₀ ℓ₁ ℓ₂ : Level} : Set (suc (ℓ₀ ⊔ ℓ₁ ⊔ ℓ₂)) where
   field
     -- Names and structure base on: https://ncatlab.org/nlab/show/strict+2-category
     --                              https://ncatlab.org/nlab/show/bicategory
@@ -115,7 +115,7 @@ record StrictTwoCategory {ℓ₀ ℓ₁ ℓ₂ : Level} : Set (lsuc (ℓ₀ ⊔ 
   _◁_ {a = a} {b = b} η h = η ∘ₕ₂ id₂ {a} {b}
   
   -- The functor designated by id
-  id→functor : {a : Cell₀} → Functor ⊤-Cat (HomCat a a)
+  id→functor : {a : Cell₀} → Functor (⊤-Cat {zero} {zero}) (HomCat a a)
   id→functor {a} = constObjFunctor (HomCat a a) (id₁ {a})
 
   abstract
@@ -514,9 +514,9 @@ record StrictTwoCategory {ℓ₀ ℓ₁ ℓ₂ : Level} : Set (lsuc (ℓ₀ ⊔ 
 -- Unit strict 2-category
 -------------------------------------------------------------------------------
 
-unitStrictTwoCategory : StrictTwoCategory
-unitStrictTwoCategory = record
-  { Cell₀ = ⊤
+unitStrictTwoCategory : {ℓ₀ ℓ₁ ℓ₂ : Level} → StrictTwoCategory {ℓ₀} {ℓ₁} {ℓ₂}
+unitStrictTwoCategory {ℓ₀} {ℓ₁} {ℓ₂} = record
+  { Cell₀ = Lift {ℓ = ℓ₀} ⊤
   ; HomCat = HomCat
   ; comp = comp
   ; id₁ = id₁
@@ -531,25 +531,27 @@ unitStrictTwoCategory = record
   ; whiskerCoher3' = refl
   ; whiskerCoher4' = refl
   } where
-    HomCat : ⊤ → ⊤ → Category
-    HomCat tt tt = ⊤-Cat
+    HomCat : Lift {ℓ = ℓ₀} ⊤ → Lift {ℓ = ℓ₀} ⊤ → Category
+    HomCat (lift tt) (lift tt) = ⊤-Cat {ℓ₁} {ℓ₂}
     
-    F₀ : Obj (HomCat tt tt ×C HomCat tt tt) → Obj (HomCat tt tt)
-    F₀ (tt , tt) = tt
+    F₀ : Obj (HomCat (lift tt) (lift tt) ×C HomCat (lift tt) (lift tt)) → Obj (HomCat (lift tt) (lift tt))
+    F₀ (lift tt , lift tt) = lift tt
     
-    F₁ : {a b : Obj (HomCat tt tt ×C HomCat tt tt)} → Hom (HomCat tt tt ×C HomCat tt tt) a b → Hom (HomCat tt tt) tt tt
-    F₁ {tt , tt} {tt , tt} (tt , tt) = tt
+    F₁ : {a b : Obj (HomCat (lift tt) (lift tt) ×C HomCat (lift tt) (lift tt))} 
+       → Hom (HomCat (lift tt) (lift tt) ×C HomCat (lift tt) (lift tt)) a b 
+       → Hom (HomCat (lift tt) (lift tt)) (lift tt) (lift tt)
+    F₁ {lift tt , lift tt} {lift tt , lift tt} (lift tt , lift tt) = lift tt
     
-    comp : {a b c : ⊤} → Functor (HomCat b c ×C HomCat a b) (HomCat a c)
-    comp {tt} {tt} {tt} = record 
+    comp : {a b c : Lift {ℓ = ℓ₀} ⊤} → Functor (HomCat b c ×C HomCat a b) (HomCat a c)
+    comp {lift tt} {lift tt} {lift tt} = record 
       { F₀ = F₀
       ; F₁ = F₁
       ; id = refl
       ; compose = refl
       }
     
-    id₁ : {a : ⊤} → Obj (HomCat a a)
-    id₁ {tt} = tt
+    id₁ : {a : Lift {ℓ = ℓ₀} ⊤} → Obj (HomCat a a)
+    id₁ {lift tt} = lift tt
 
 ⊤-TwoCat = unitStrictTwoCategory
 

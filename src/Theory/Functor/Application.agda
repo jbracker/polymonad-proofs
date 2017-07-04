@@ -11,18 +11,18 @@ open import Theory.Functor.Definition
 module Theory.Functor.Application where
 
 private
-  module BiFunctorUnitApplication {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} 
+  module BiFunctorUnitApplication {ℓ₀ ℓ₁ ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} 
                                   {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} where
     open import Data.Product
     open import Data.Unit
     
-    [⊤,_] : Functor (⊤-Cat ×C C) D → Functor C D
+    [⊤,_] : Functor (⊤-Cat {ℓ₀} {ℓ₁} ×C C) D → Functor C D
     [⊤,_] (functor F₀ F₁ id compose)
-      = functor (λ x → F₀ (tt , x)) (λ f → F₁ (tt , f)) id compose
+      = functor (λ x → F₀ (lift tt , x)) (λ f → F₁ (lift tt , f)) id compose
 
-    [_,⊤] : Functor (C ×C ⊤-Cat) D → Functor C D
+    [_,⊤] : Functor (C ×C ⊤-Cat {ℓ₀} {ℓ₁}) D → Functor C D
     [_,⊤] (functor F₀ F₁ id compose)
-      = functor (λ x → F₀ (x , tt)) (λ f → F₁ (f , tt)) id compose
+      = functor (λ x → F₀ (x , lift tt)) (λ f → F₁ (f , lift tt)) id compose
 
 open BiFunctorUnitApplication public
 
@@ -79,7 +79,7 @@ module BiFunctor {ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓE₀ ℓE₁ : Level}
             ≡⟨ compose ⟩
           F₁ (g , id D {x}) ∘E F₁ (f , id D {x}) ∎
   
-  constBiFunctor : Obj C → Obj D → Functor (C ×C D) E → Functor ⊤-Cat E
+  constBiFunctor : {ℓ₀ ℓ₁ : Level} → Obj C → Obj D → Functor (C ×C D) E → Functor (⊤-Cat {ℓ₀} {ℓ₁}) E
   constBiFunctor c d (functor F₀ F₁ functor-id compose)
     = functor (λ _ → F₀ (c , d)) (λ _ → F₁ (id C , id D)) functor-id
     $ λ {x} {y} {z} {f} {g} → trans (cong₂ (λ X Y → F₁ (X , Y)) (sym $ left-id C) (sym $ left-id D)) compose
