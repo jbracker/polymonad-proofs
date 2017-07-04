@@ -20,7 +20,7 @@ open import Theory.Category.Subcategory.Examples
 open import Theory.Category.Closed.Dependent
 open import Theory.Category.Closed.Examples
 open import Theory.Category.Monoidal.Dependent
-open import Theory.Category.Monoidal.Examples
+open import Theory.Category.Monoidal.Examples.SetCat
 
 open import Theory.Functor.Definition
  

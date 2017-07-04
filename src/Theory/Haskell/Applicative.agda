@@ -13,7 +13,7 @@ open import Theory.Category.Examples
 open import Theory.Category.Closed
 open import Theory.Category.Closed.Examples
 open import Theory.Category.Monoidal
-open import Theory.Category.Monoidal.Examples
+open import Theory.Category.Monoidal.Examples.SetCat
 open import Theory.Functor.Definition
 open import Theory.Functor.Closed
 open import Theory.Functor.Monoidal
@@ -207,9 +207,6 @@ LaxMonoidalFunctor→Applicative LMF = record
       (F₁ (λ x → (proj₁ x) (proj₂ x)) ∘ μ (α → α) α) (F₁ (λ _ → (λ x → x)) (ε (lift tt)) ,' v)
         ≡⟨ {!!} ⟩
       v ∎
-    
-    _***_ : {α β γ δ : Type} → (f : α → β) → (g : γ → δ) → α × γ → β × δ
-    (f *** g) (a ,' c) = (f a ,' g c)
     
     naturality : {α β γ δ : Type} → (f : α → β) → (g : γ → δ) → (u : F₀ α) → (v : F₀ γ)
                → fmap (f *** g) (u ** v) ≡ fmap f u ** fmap g v
