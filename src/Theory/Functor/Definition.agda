@@ -140,26 +140,24 @@ productFunctor {C = C} {D} {E} {K} F G = record
 -------------------------------------------------------------------------------
 -- Constant Functor
 -------------------------------------------------------------------------------
-constObjFunctor : {ℓ₀ ℓ₁ ℓC₀ ℓC₁ : Level} 
+constObjFunctor : {ℓC₀ ℓC₁ : Level} 
                 → (C : Category {ℓC₀} {ℓC₁}) → (c : Obj C) 
-                → Functor (⊤-Cat {ℓ₀} {ℓ₁}) C
-constObjFunctor {ℓ₀} {ℓ₁} C c = record
+                → Functor ⊤-Cat C
+constObjFunctor C c = record
   { F₀ = F₀
   ; F₁ = F₁
   ; id = refl
   ; compose = sym (Category.left-id C)
   } where
-    ⊤-Cat' = ⊤-Cat {ℓ₀} {ℓ₁}
+    F₀ : Obj ⊤-Cat → Obj C
+    F₀ tt = c
     
-    F₀ : Obj ⊤-Cat' → Obj C
-    F₀ (lift tt) = c
-    
-    F₁ : {a b : Obj ⊤-Cat'} → Hom ⊤-Cat a b → Hom C (F₀ a) (F₀ b)
-    F₁ {a = lift tt} {b = lift tt} (lift tt) = Category.id C {c}
+    F₁ : {a b : Obj ⊤-Cat} → Hom ⊤-Cat a b → Hom C (F₀ a) (F₀ b)
+    F₁ {a = tt} {b = tt} tt = Category.id C {c}
 
-constToAnyFunctor : {ℓ₀ ℓ₁ ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} (C : Category {ℓC₀} {ℓC₁}) {D : Category {ℓD₀} {ℓD₁}}
-                  → Functor (⊤-Cat {ℓ₀} {ℓ₁}) D → Functor C D
-constToAnyFunctor C (functor F₀ F₁ id compose) = functor (λ _ → F₀ (lift tt)) (λ _ → F₁ (lift tt)) id compose
+constToAnyFunctor : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} (C : Category {ℓC₀} {ℓC₁}) {D : Category {ℓD₀} {ℓD₁}}
+                  → Functor ⊤-Cat D → Functor C D
+constToAnyFunctor C (functor F₀ F₁ id compose) = functor (λ _ → F₀ tt) (λ _ → F₁ tt) id compose
 
 -------------------------------------------------------------------------------
 -- Left and right extensions of a Functors result
