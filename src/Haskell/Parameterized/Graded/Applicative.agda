@@ -23,9 +23,9 @@ module Haskell.Parameterized.Graded.Applicative where
 _***_ : {ℓ : Level} {α β γ δ : Set ℓ} → (α → β) → (γ → δ) → ( (α × γ) → (β × δ) )
 (f *** g) (a , b) = f a , g b
 
-record GradedApplicative {ℓ : Level} {M : Set ℓ} (monoid : Monoid M) (mon : Monoid M) (F : M → TyCon) : Set (suc ℓ) where
-  constructor applicative
-  infixl 5 _<*>_ _<$>_ -- _*>_ _<*_
+record GradedApplicative {ℓ : Level} {M : Set ℓ} (monoid : Monoid M) (F : M → TyCon) : Set (suc ℓ) where
+  constructor graded-applicative
+  infixl 5 _<*>_ _<$>_ _*>_ _<*_
 
   open Monoid monoid
   
