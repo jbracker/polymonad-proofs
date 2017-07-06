@@ -21,7 +21,7 @@ open import Haskell.Functor hiding ( functor ) renaming ( Functor to HaskellFunc
 open import Haskell.Parameterized.Indexed.Monad
 open import Theory.Triple
 open import Theory.Category.Definition
-open import Theory.Category.Examples
+open import Theory.Category.Examples.Codiscrete
 open import Theory.Functor.Definition hiding ( functor )
 open import Theory.Functor.Composition
 open import Theory.Functor.Properties.IsomorphicHaskellFunctor

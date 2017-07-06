@@ -12,7 +12,7 @@ open import Theory.Category.Definition
 open import Theory.Functor.Definition
 open import Theory.TwoCategory.Definition
 
-open import Theory.Category.Examples
+open import Theory.Category.Examples.Codiscrete
 
 module Theory.TwoCategory.Examples.CodiscreteHomCat where
 

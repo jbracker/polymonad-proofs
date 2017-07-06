@@ -18,7 +18,7 @@ open import Haskell
 open import Haskell.Parameterized.Indexed.Monad
 open import Haskell.Functor renaming ( Functor to HaskellFunctor ; functor-eq to haskell-functor-eq )
 open import Theory.Category.Definition
-open import Theory.Category.Examples
+open import Theory.Category.Examples.Codiscrete
 open import Theory.Functor.Definition
 open import Theory.Functor.Properties.IsomorphicHaskellFunctor
 open import Theory.Natural.Transformation

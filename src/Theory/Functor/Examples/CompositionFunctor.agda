@@ -13,7 +13,7 @@ open import Theory.Triple renaming ( _,_,_ to _,'_,'_ )
 open import Theory.Category.Definition
 open import Theory.Category.Monoidal
 open import Theory.Category.Isomorphism
-open import Theory.Category.Examples
+open import Theory.Category.Examples.Functor
 open import Theory.Functor.Definition
 open import Theory.Functor.Composition
 open import Theory.Natural.Transformation

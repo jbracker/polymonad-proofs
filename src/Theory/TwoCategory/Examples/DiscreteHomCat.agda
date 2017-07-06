@@ -11,7 +11,7 @@ open import Theory.Category.Definition
 open import Theory.Functor.Definition
 open import Theory.TwoCategory.Definition
 
-open import Theory.Category.Examples
+open import Theory.Category.Examples.Discrete
 
 module Theory.TwoCategory.Examples.DiscreteHomCat where
 

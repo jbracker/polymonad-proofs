@@ -22,7 +22,7 @@ open import Theory.Functor.Composition
 open import Theory.Natural.Transformation
 open import Theory.Natural.Transformation.Whisker
 
-open import Theory.Category.Examples renaming ( functorCategory to Fun )
+open import Theory.Category.Examples.Functor renaming ( functorCategory to Fun )
 
 -------------------------------------------------------------------------------
 -- Horizontal composition functor for natural transformations.

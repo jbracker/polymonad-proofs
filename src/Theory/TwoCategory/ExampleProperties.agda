@@ -12,7 +12,7 @@ open ≅-Reasoning hiding ( _≡⟨_⟩_ ; _≡⟨⟩_ ) renaming ( begin_ to hb
 open import Extensionality
 
 open import Theory.Category.Definition
-open import Theory.Category.Examples renaming ( setCategory to SetCat )
+open import Theory.Category.Examples.SetCat renaming ( setCategory to SetCat )
 open import Theory.Functor.Definition
 open import Theory.Functor.Composition
 open import Theory.Natural.Transformation

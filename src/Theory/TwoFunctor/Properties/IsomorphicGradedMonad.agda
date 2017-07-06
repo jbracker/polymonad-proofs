@@ -21,7 +21,7 @@ open import Haskell.Functor renaming ( Functor to HaskellFunctor ; functor-eq to
 
 open import Theory.Monoid
 open import Theory.Category.Definition
-open import Theory.Category.Examples
+open import Theory.Category.Examples.Monoid
 open import Theory.Functor.Definition
 open import Theory.Functor.Properties.IsomorphicHaskellFunctor
 open import Theory.Natural.Transformation

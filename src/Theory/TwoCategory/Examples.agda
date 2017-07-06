@@ -25,8 +25,6 @@ open import Theory.Monad.Definition
 open import Theory.TwoCategory.Definition
 open import Theory.TwoFunctor.Definition
 
-open import Theory.Category.Examples
-
 open NaturalTransformation
 
 -------------------------------------------------------------------------------
@@ -63,7 +61,7 @@ functorTwoCategory {ℓObj} {ℓHom} = record
           → Cell₁ A B → Cell₁ A B → Set (ℓB₁ ⊔ ℓB₀ ⊔ ℓA₁ ⊔ ℓA₀)
     Cell₂ {A = A} {B} F G = NaturalTransformation F G
     
-    open import Theory.Category.Examples renaming ( functorCategory to Fun )
+    open import Theory.Category.Examples.Functor renaming ( functorCategory to Fun )
     open import Theory.Functor.Examples renaming ( natTransCompositionHorzFunctor to CompFunc )
     
     HomCat : ∀ {ℓA₀ ℓA₁ ℓB₀ ℓB₁} 

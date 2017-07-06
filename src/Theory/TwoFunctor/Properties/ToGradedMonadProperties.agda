@@ -21,7 +21,7 @@ open import Haskell.Parameterized.Graded.Monad
 open import Theory.Triple
 open import Theory.Monoid
 open import Theory.Category.Definition
-open import Theory.Category.Examples
+open import Theory.Category.Examples.Monoid
 open import Theory.Functor.Definition hiding ( functor )
 open import Theory.Functor.Composition
 open import Theory.Natural.Transformation

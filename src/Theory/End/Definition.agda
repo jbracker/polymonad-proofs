@@ -9,7 +9,7 @@ open import Relation.Binary.PropositionalEquality
 open import Utilities
 open import Extensionality
 open import Theory.Category.Definition
-open import Theory.Category.Examples renaming ( setCategory to SetCat )
+open import Theory.Category.Examples.SetCat renaming ( setCategory to SetCat )
 open import Theory.Functor.Definition
 open import Theory.Functor.Constant
 open import Theory.Functor.Application

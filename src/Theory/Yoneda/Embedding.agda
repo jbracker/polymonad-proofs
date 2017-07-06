@@ -9,7 +9,8 @@ open import Extensionality
 
 open import Theory.Category.Definition
 open import Theory.Category.Isomorphism
-open import Theory.Category.Examples renaming ( setCategory to SetCat' ; functorCategory to FunctorCat )
+open import Theory.Category.Examples.SetCat renaming ( setCategory to SetCat' )
+open import Theory.Category.Examples.Functor renaming ( functorCategory to FunctorCat )
 
 open import Theory.Functor.Definition
 open import Theory.Natural.Transformation

@@ -19,7 +19,7 @@ open import Haskell.Parameterized.Graded.Monad hiding ( graded-monad )
 open import Theory.Triple
 open import Theory.Monoid
 open import Theory.Category.Definition hiding ( category )
-open import Theory.Category.Examples
+open import Theory.Category.Examples.Monoid
 open import Theory.Functor.Definition hiding ( functor )
 open import Theory.Functor.Composition
 open import Theory.Functor.Properties.IsomorphicHaskellFunctor
