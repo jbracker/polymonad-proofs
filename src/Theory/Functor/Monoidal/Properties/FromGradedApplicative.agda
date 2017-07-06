@@ -8,12 +8,14 @@ open import Theory.Monoid
 open import Theory.Category.Monoidal.Product
 open import Theory.Category.Monoidal.Examples.SetCat
 open import Theory.Category.Monoidal.Examples.Monoid
+open import Theory.Functor.Definition
 open import Theory.Functor.Monoidal
 
 module Theory.Functor.Monoidal.Properties.FromGradedApplicative where
 
+
 GradedApplicative→MonoidalFunctor : {ℓ : Level} {M : Set ℓ} {mon : Monoid M} {F : M → TyCon}
-                                  → GradedApplicative mon F → MonoidalFunctor (monoidMonoidalCategory mon ×CMon setMonoidalCategory {ℓ}) (setMonoidalCategory {ℓ})
-GradedApplicative→MonoidalFunctor {ℓ} {M} {mon} {F} applic = monoidalFunctor {!!} {!!} {!!} {!!}
+                                  → GradedApplicative mon F → LaxMonoidalFunctor (monoidMonoidalCategory mon ×CMon setMonoidalCategory {ℓ}) (setMonoidalCategory {ℓ})
+GradedApplicative→MonoidalFunctor {ℓ} {M} {mon} {F} applic = laxMonoidalFunctor {!!} {!!} {!!} {!!} {!!} {!!}
   where
     

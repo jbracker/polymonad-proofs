@@ -14,10 +14,10 @@ open import Theory.Functor.Monoidal
 
 module Theory.Functor.Monoidal.Properties.ToGradedApplicative where
 
-open MonoidalFunctor hiding ( F )
+open LaxMonoidalFunctor hiding ( F )
 
 MonoidalFunctor→GradedApplicative : {ℓ : Level} {M : Set ℓ} {mon : Monoid M}
-                                  → (FMon : MonoidalFunctor (monoidMonoidalCategory mon ×CMon setMonoidalCategory {zero}) (setMonoidalCategory {zero}))
+                                  → (FMon : LaxMonoidalFunctor (monoidMonoidalCategory mon ×CMon setMonoidalCategory {zero}) (setMonoidalCategory {zero}))
                                   → GradedApplicative mon (λ i α → F₀ FMon (i , α))
 MonoidalFunctor→GradedApplicative {ℓ} {M} {mon} FMon = graded-applicative {!!} {!!} {!!} {!!} {!!} {!!} {!!} {!!}
   where
