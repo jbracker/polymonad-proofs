@@ -6,8 +6,8 @@ open import Data.Unit
 open import Data.Product
 
 open import Relation.Binary.PropositionalEquality
-open import Relation.Binary.HeterogeneousEquality renaming (subst to hsubst)
-open ≡-Reasoning
+open import Relation.Binary.HeterogeneousEquality renaming (sym to hsym ; trans to htrans ; subst to hsubst ; cong to hcong ; cong₂ to hcong₂ )
+open ≅-Reasoning
 
 open import Extensionality
 open import Congruence
@@ -72,54 +72,66 @@ record GradedApplicative {ℓ : Level} {M : Set ℓ} (monoid : Monoid M) (F : M 
   
   _**_ : {i j : M} {α β : Type} → F i α → F j β → F (i ∙ j) (α × β)
   _**_ u v = fmap (_,_) u <*> v
-  {-
+
+  p : {i j : M} {α β γ δ : Type} → (f : α → β) (g : γ → δ) (u : F i α) (v : F j γ)
+    → (F (ε ∙ (i ∙ j)) (β × δ) ∋ (pure (f *** g) <*> (fmap (_,_) u <*> v)))
+    ≅ (F (ε ∙ ((ε ∙ i) ∙ j)) (β × δ) ∋ (pure (f *** g) <*> (pure (_,_) <*> u <*> v)))
+  p {i} {j} {α} {β} {γ} {δ} f g u v = hcong₂ (λ X Y  → (F (ε ∙ (X ∙ j)) (β × δ) ∋ (pure (f *** g) <*> (Y <*> v)))) (≡-to-≅ $ sym left-id) (law-applicative-fmap _,_ u)
+  
+
   abstract
-    law-naturality : {α β γ δ : Type} → (f : α → β) (g : γ → δ) (u : F α) (v : F γ) 
+    law-naturality : {i j : M} {α β γ δ : Type} → (f : α → β) (g : γ → δ) (u : F i α) (v : F j γ) 
                    → fmap (f *** g) (u ** v) ≡ fmap f u ** fmap g v
-    law-naturality f g u v = begin
-      fmap (f *** g) (u ** v) 
-        ≡⟨ law-applicative-fmap (f *** g) (u ** v) ⟩
-      pure (f *** g) <*> (fmap (_,_) u <*> v) 
-        ≡⟨ cong (λ X → pure (f *** g) <*> (X <*> v) ) (law-applicative-fmap _,_ u) ⟩
-      pure (f *** g) <*> (pure (_,_) <*> u <*> v) 
-        ≡⟨ sym (law-composition (pure (f *** g)) (pure (_,_) <*> u) v) ⟩
-      pure (_∘_) <*> pure (f *** g) <*> (pure (_,_) <*> u) <*> v 
-        ≡⟨ cong (λ X → X <*> (pure (_,_) <*> u) <*> v) (law-homomorphism (f *** g) _∘_) ⟩
-      pure (_∘_ (f *** g)) <*> (pure (_,_) <*> u) <*> v 
-        ≡⟨ cong (λ X → X <*> v) (sym (law-composition (pure (_∘_ (f *** g))) (pure (_,_)) u)) ⟩
-      pure (_∘_) <*> pure (_∘_ (f *** g)) <*> pure (_,_) <*> u <*> v 
-        ≡⟨ cong (λ X → X <*> pure (_,_) <*> u <*> v) (law-homomorphism (_∘_ (f *** g)) _∘_) ⟩
-      pure (_∘_ (_∘_ (f *** g))) <*> pure (_,_) <*> u <*> v 
-        ≡⟨ cong (λ X → X <*> u <*> v) (law-homomorphism _,_ (_∘_ (_∘_ (f *** g)))) ⟩
-      pure ((_∘_ (f *** g)) ∘ (_,_)) <*> u <*> v 
-        ≡⟨ refl ⟩ -- Of course, how obvious...
-      pure (_∘_ (λ h → h g) ((_∘_) ∘ ((_,_) ∘ f))) <*> u <*> v
-        ≡⟨ cong (λ X → X <*> u <*> v)  (sym (law-homomorphism ((_∘_) ∘ ((_,_) ∘ f)) (_∘_ (λ h → h g)))) ⟩
-      pure (_∘_ (λ h → h g)) <*> pure ((_∘_) ∘ ((_,_) ∘ f)) <*> u <*> v
-        ≡⟨ cong (λ X → X <*> pure ((_∘_) ∘ ((_,_) ∘ f)) <*> u <*> v) (sym (law-homomorphism (λ h → h g) _∘_)) ⟩
-      pure (_∘_) <*> pure (λ h → h g) <*> pure ((_∘_) ∘ ((_,_) ∘ f)) <*> u <*> v
-        ≡⟨ cong (λ X → X <*> v) (law-composition (pure (λ h → h g)) (pure ((_∘_) ∘ ((_,_) ∘ f))) u) ⟩
-      pure (λ h → h g) <*> (pure ((_∘_) ∘ ((_,_) ∘ f)) <*> u) <*> v
-        ≡⟨ cong (λ X → X <*> v) (sym (law-interchange (pure ((_∘_) ∘ ((_,_) ∘ f)) <*> u) g)) ⟩
-      pure ((_∘_) ∘ ((_,_) ∘ f)) <*> u <*> pure g <*> v
-        ≡⟨ cong (λ X → X <*> u <*> pure g <*> v) (sym (law-homomorphism ((_,_) ∘ f) (_∘_ (_∘_)))) ⟩
-      pure (_∘_ (_∘_)) <*> pure ((_,_) ∘ f) <*> u <*> pure g <*> v
-        ≡⟨ cong (λ X → X <*> pure ((_,_) ∘ f) <*> u <*> pure g <*> v) (sym (law-homomorphism _∘_ _∘_)) ⟩
-      pure (_∘_) <*> pure (_∘_) <*> pure ((_,_) ∘ f) <*> u <*> pure g <*> v
-        ≡⟨ cong (λ X → X <*> pure g <*> v) (law-composition (pure (_∘_)) (pure ((_,_) ∘ f)) u) ⟩
-      pure (_∘_) <*> (pure ((_,_) ∘ f) <*> u) <*> pure g <*> v
-        ≡⟨ law-composition (pure ((_,_) ∘ f) <*> u) (pure g) v ⟩
-      pure ((_,_) ∘ f) <*> u <*> (pure g <*> v)
-        ≡⟨ cong (λ X → X <*> u <*> (pure g <*> v)) (sym (law-homomorphism f (_∘_ (_,_)))) ⟩
-      pure (_∘_ (_,_)) <*> pure f <*> u <*> (pure g <*> v)
-        ≡⟨ cong (λ X → X <*> pure f <*> u <*> (pure g <*> v)) (sym (law-homomorphism _,_ _∘_)) ⟩
-      pure (_∘_) <*> pure (_,_) <*> pure f <*> u <*> (pure g <*> v)
-        ≡⟨ cong (λ X → X <*> (pure g <*> v)) (law-composition (pure (_,_)) (pure f) u) ⟩
-      pure (_,_) <*> (pure f <*> u) <*> (pure g <*> v)
-        ≡⟨ cong (λ X → X <*> (pure g <*> v)) (sym (law-applicative-fmap _,_ (pure f <*> u))) ⟩
-      fmap (_,_) (pure f <*> u) <*> (pure g <*> v)
-        ≡⟨ cong₂ (λ X Y → X ** Y) (sym (law-applicative-fmap f u)) (sym (law-applicative-fmap g v)) ⟩
-      fmap f u ** fmap g v ∎
+    law-naturality {i} {j} {α} {β} {γ} {δ} f g u v = ≅-to-≡ $ begin
+      fmap (f *** g) (u ** v)
+        ≅⟨ law-applicative-fmap (f *** g) (u ** v) ⟩
+      (F (ε ∙ (i ∙ j)) (β × δ) ∋ (pure (f *** g) <*> (fmap (_,_) u <*> v)))
+        ≅⟨ hcong₂ (λ X Y  → (F (ε ∙ (X ∙ j)) (β × δ) ∋ (pure (f *** g) <*> (Y <*> v)))) (≡-to-≅ $ sym left-id) (law-applicative-fmap _,_ u) ⟩
+      (F (ε ∙ ((ε ∙ i) ∙ j)) (β × δ) ∋ (pure (f *** g) <*> (pure (_,_) <*> u <*> v)))
+        ≅⟨ hcong₂ (λ X Y → F X (β × δ) ∋ Y) (≡-to-≅ (trans assoc (cong (λ Z → (Z ∙ (ε ∙ i)) ∙ j) (sym left-id)))) (hsym (law-composition (pure (f *** g)) (pure (_,_) <*> u) v)) ⟩
+      (F (((ε ∙ ε) ∙ (ε ∙ i)) ∙ j) (β × δ) ∋ (pure (_∘_) <*> pure (f *** g) <*> (pure (_,_) <*> u) <*> v))
+        ≅⟨ hcong₂ (λ X Y → F ((X ∙ (ε ∙ i)) ∙ j) (β × δ) ∋ (Y <*> (pure (_,_) <*> u) <*> v)) (≡-to-≅ left-id) (law-homomorphism (f *** g) _∘_) ⟩
+      (F ((ε ∙ (ε ∙ i)) ∙ j) (β × δ) ∋ (pure (_∘_ (f *** g)) <*> (pure (_,_) <*> u) <*> v))
+        ≅⟨ hcong₂ (λ X Y → F (X ∙ j) (β × δ) ∋ _<*>_ Y v) (≡-to-≅ (trans assoc (cong (λ Z → (Z ∙ ε) ∙ i) (sym left-id)))) (hsym (law-composition (pure (_∘_ (f *** g))) (pure (_,_)) u)) ⟩
+      (F ((((ε ∙ ε) ∙ ε) ∙ i) ∙ j) (β × δ) ∋ (pure (_∘_) <*> pure (_∘_ (f *** g)) <*> pure (_,_) <*> u <*> v ))
+        ≅⟨ hcong₂ (λ X Y → F (((X ∙ ε) ∙ i) ∙ j) (β × δ) ∋ (Y <*> pure (_,_) <*> u <*> v)) (≡-to-≅ left-id) (law-homomorphism (_∘_ (f *** g)) _∘_) ⟩
+      (F (((ε ∙ ε) ∙ i) ∙ j) (β × δ) ∋ (pure (_∘_ (_∘_ (f *** g))) <*> pure (_,_) <*> u <*> v))
+        ≅⟨ hcong₂ (λ X Y → F ((X ∙ i) ∙ j) (β × δ) ∋ Y <*> u <*> v) (≡-to-≅ left-id) (law-homomorphism _,_ (_∘_ (_∘_ (f *** g)))) ⟩
+      (F ((ε ∙ i) ∙ j) (β × δ) ∋ (pure ((_∘_ (f *** g)) ∘ (_,_)) <*> u <*> v ))
+        ≅⟨ refl ⟩ -- Of course, how obvious...
+      (F ((ε ∙ i) ∙ j) (β × δ) ∋ (pure (_∘_ (λ h → h g) ((_∘_) ∘ ((_,_) ∘ f))) <*> u <*> v))
+        ≅⟨ hcong₂ (λ X Y → (F ((X ∙ i) ∙ j) (β × δ) ∋ Y <*> u <*> v)) (≡-to-≅ (sym left-id)) (hsym (law-homomorphism ((_∘_) ∘ ((_,_) ∘ f)) (_∘_ (λ h → h g)))) ⟩
+      (F (((ε ∙ ε) ∙ i) ∙ j) (β × δ) ∋ (pure (_∘_ (λ h → h g)) <*> pure ((_∘_) ∘ ((_,_) ∘ f)) <*> u <*> v))
+        ≅⟨ hcong₂ (λ X Y → F (((X ∙ ε) ∙ i) ∙ j) (β × δ) ∋ Y <*> pure ((_∘_) ∘ ((_,_) ∘ f)) <*> u <*> v) (≡-to-≅ (sym left-id)) (hsym (law-homomorphism (λ h → h g) _∘_)) ⟩
+      (F ((((ε ∙ ε) ∙ ε) ∙ i) ∙ j) (β × δ) ∋ (pure (_∘_) <*> pure (λ h → h g) <*> pure ((_∘_) ∘ ((_,_) ∘ f)) <*> u <*> v))
+        ≅⟨ hcong₂ (λ X Y → F (X ∙ j) (β × δ) ∋ Y <*> v) (≡-to-≅ (trans (cong (λ Z → (Z ∙ ε) ∙ i) left-id) (sym assoc))) (law-composition (pure (λ h → h g)) (pure ((_∘_) ∘ ((_,_) ∘ f))) u) ⟩
+      (F ((ε ∙ (ε ∙ i)) ∙ j) (β × δ) ∋ (pure (λ h → h g) <*> (pure ((_∘_) ∘ ((_,_) ∘ f)) <*> u) <*> v))
+        ≅⟨ hcong₂ (λ X Y → F (X ∙ j) (β × δ) ∋ Y <*> v) (≡-to-≅ (trans left-id (sym right-id))) (hsym (law-interchange (pure ((_∘_) ∘ ((_,_) ∘ f)) <*> u) g)) ⟩
+      (F (((ε ∙ i) ∙ ε) ∙ j) (β × δ) ∋ (pure ((_∘_) ∘ ((_,_) ∘ f)) <*> u <*> pure g <*> v))
+        ≅⟨ hcong₂ (λ X Y → F (((X ∙ i) ∙ ε) ∙ j) (β × δ) ∋ Y <*> u <*> pure g <*> v) (≡-to-≅ (sym left-id)) (hsym (law-homomorphism ((_,_) ∘ f) (_∘_ (_∘_)))) ⟩
+      (F ((((ε ∙ ε) ∙ i) ∙ ε) ∙ j) (β × δ) ∋ (pure (_∘_ (_∘_)) <*> pure ((_,_) ∘ f) <*> u <*> pure g <*> v))
+        ≅⟨ hcong₂ (λ X Y → F ((((X ∙ ε) ∙ i) ∙ ε) ∙ j) (β × δ) ∋ Y <*> pure ((_,_) ∘ f) <*> u <*> pure g <*> v) (≡-to-≅ (sym left-id)) (hsym (law-homomorphism _∘_ _∘_)) ⟩
+      (F (((((ε ∙ ε) ∙ ε) ∙ i) ∙ ε) ∙ j) (β × δ) ∋ (pure (_∘_) <*> pure (_∘_) <*> pure ((_,_) ∘ f) <*> u <*> pure g <*> v))
+        ≅⟨ hcong₂ (λ X Y → F ((X ∙ ε) ∙ j) (β × δ) ∋ Y <*> pure g <*> v) (≡-to-≅ $ trans (cong (λ Z → (Z ∙ ε) ∙ i) left-id) (sym assoc)) (law-composition (pure (_∘_)) (pure (_,_ ∘ f)) u) ⟩
+      (F (((ε ∙ (ε ∙ i)) ∙ ε) ∙ j) (β × δ) ∋ (pure (_∘_) <*> (pure (_,_ ∘ f) <*> u) <*> pure g <*> v))
+        ≅⟨ hcong₂ (λ X Y → F X (β × δ) ∋ Y) (≡-to-≅ (trans (sym assoc) (cong (λ Z → Z ∙ (ε ∙ j)) left-id))) (law-composition (pure ((_,_) ∘ f) <*> u) (pure g) v) ⟩
+      (F ((ε ∙ i) ∙ (ε ∙ j)) (β × δ) ∋ (pure ((_,_) ∘ f) <*> u <*> (pure g <*> v)))
+        ≅⟨ hcong₂ (λ X Y → F ((X ∙ i) ∙ (ε ∙ j)) (β × δ) ∋ Y <*> u <*> (pure g <*> v)) (≡-to-≅ (sym left-id)) (hsym (law-homomorphism f (_∘_ (_,_)))) ⟩
+      (F (((ε ∙ ε) ∙ i) ∙ (ε ∙ j)) (β × δ) ∋ (pure (_∘_ (_,_)) <*> pure f <*> u <*> (pure g <*> v)))
+        ≅⟨ hcong₂ (λ X Y → F (((X ∙ ε) ∙ i) ∙ (ε ∙ j)) (β × δ) ∋ Y <*> pure f <*> u <*> (pure g <*> v)) (≡-to-≅ (sym left-id)) (hsym (law-homomorphism _,_ _∘_)) ⟩
+      (F ((((ε ∙ ε) ∙ ε) ∙ i) ∙ (ε ∙ j)) (β × δ) ∋ (pure (_∘_) <*> pure (_,_) <*> pure f <*> u <*> (pure g <*> v)))
+        ≅⟨ hcong₂ (λ X Y → F (X ∙ (ε ∙ j)) (β × δ) ∋ Y <*> (pure g <*> v)) (≡-to-≅ (trans (cong (λ Z → Z ∙ i) right-id) (sym assoc))) (law-composition (pure (_,_)) (pure f) u) ⟩
+      (F ((ε ∙ (ε ∙ i)) ∙ (ε ∙ j)) (β × δ) ∋ (pure (_,_) <*> (pure f <*> u) <*> (pure g <*> v)))
+        ≅⟨ hcong₂ (λ X Y → F (X ∙ (ε ∙ j)) (β × δ) ∋ Y <*> (pure g <*> v)) (≡-to-≅ left-id) (hsym (law-applicative-fmap _,_ (pure f <*> u))) ⟩
+      (F ((ε ∙ i) ∙ (ε ∙ j)) (β × δ) ∋ (fmap _,_ (pure f <*> u) <*> (pure g <*> v)))
+        ≅⟨ hcong₂ (λ X Y → F ((ε ∙ i) ∙ X) (β × δ) ∋ fmap _,_ (pure f <*> u) <*> Y) (≡-to-≅ left-id) (hsym (law-applicative-fmap g v)) ⟩
+      (F ((ε ∙ i) ∙ j) (β × δ) ∋ (fmap _,_ (pure f <*> u) <*> fmap g v))
+        ≅⟨ hcong₂ (λ X Y → F (X ∙ j) (β × δ) ∋ fmap _,_ Y <*> fmap g v) (≡-to-≅ left-id) (hsym (law-applicative-fmap f u)) ⟩
+      (F (i ∙ j) (β × δ) ∋ (fmap _,_ (fmap f u) <*> fmap g v))
+        ≅⟨ refl ⟩
+      (F (i ∙ j) (β × δ) ∋ (fmap f u ** fmap g v)) ∎
+  
+  {-
   
   abstract
     law-left-identity : {α : Type} → (v : F α) 
