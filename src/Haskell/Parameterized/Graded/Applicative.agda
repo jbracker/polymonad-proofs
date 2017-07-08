@@ -77,7 +77,7 @@ record GradedApplicative {ℓ : Level} {M : Set ℓ} (monoid : Monoid M) (F : M 
     → (F (ε ∙ (i ∙ j)) (β × δ) ∋ (pure (f *** g) <*> (fmap (_,_) u <*> v)))
     ≅ (F (ε ∙ ((ε ∙ i) ∙ j)) (β × δ) ∋ (pure (f *** g) <*> (pure (_,_) <*> u <*> v)))
   p {i} {j} {α} {β} {γ} {δ} f g u v = hcong₂ (λ X Y  → (F (ε ∙ (X ∙ j)) (β × δ) ∋ (pure (f *** g) <*> (Y <*> v)))) (≡-to-≅ $ sym left-id) (law-applicative-fmap _,_ u)
-  
+  {-
   abstract
     law-naturality : {i j : M} {α β γ δ : Type} → (f : α → β) (g : γ → δ) (u : F i α) (v : F j γ) 
                    → fmap (f *** g) (u ** v) ≡ fmap f u ** fmap g v
@@ -158,37 +158,43 @@ record GradedApplicative {ℓ : Level} {M : Set ℓ} (monoid : Monoid M) (F : M 
         ≅⟨ hcong (λ X → X v) (≡-to-≅ (Functor.law-id (functor i))) ⟩
       v ∎
 
+-}
 -- WORK
-  {-
-  abstract
-    law-right-identity : {α : Type} → (v : F α) 
-                       → v ** unit ≡ fmap (λ a → (a , lift tt)) v
-    law-right-identity v = begin
-      v ** unit 
-        ≡⟨⟩
-      fmap (_,_) v <*> pure (lift tt)
-        ≡⟨ cong (λ X → X <*> pure (lift tt)) (law-applicative-fmap _,_ v) ⟩
-      pure (_,_) <*> v <*> pure (lift tt)
-        ≡⟨ law-interchange (pure (_,_) <*> v) (lift tt) ⟩
-      pure (λ f → f (lift tt)) <*> (pure (_,_) <*> v)
-        ≡⟨ sym (law-composition (pure (λ f → f (lift tt))) (pure (_,_)) v) ⟩
-      pure (_∘_) <*> pure (λ f → f (lift tt)) <*> pure (_,_) <*> v
-        ≡⟨ cong (λ X → X <*> pure (_,_) <*> v) (law-homomorphism (λ f → f (lift tt)) _∘_) ⟩
-      pure (_∘_ (λ f → f (lift tt))) <*> pure (_,_) <*> v
-        ≡⟨ cong (λ X → X <*> v) (law-homomorphism _,_ (_∘_ (λ f → f (lift tt)))) ⟩
-      pure ((λ f → f (lift tt)) ∘ _,_) <*> v
-        ≡⟨⟩
-      pure (λ a → (a , lift tt)) <*> v
-        ≡⟨ sym (law-applicative-fmap (λ a → (a , lift tt)) v) ⟩
-      fmap (λ a → (a , lift tt)) v ∎
   
   abstract
-    law-right-identity' : {α : Type} → (v : F α) 
-                        → fmap proj₁ (v ** unit) ≡ v
-    law-right-identity' {α} v = trans (cong (λ X → fmap proj₁ X) (law-right-identity v)) 
-                                      (trans (cong (λ X → X v) (sym $ law-compose proj₁ (λ a → a , lift tt))) 
-                                             (cong (λ X → X v) law-functor-id)) 
-
+    law-right-identity : {i : M} {α : Type} → (v : F i α) 
+                       → v ** unit ≅ fmap (λ a → (a , lift tt)) v
+    law-right-identity {i} {α} v = begin
+      v ** unit
+        ≅⟨ refl ⟩
+      (F (i ∙ ε) (α × Lift ⊤) ∋ (fmap _,_ v <*> pure (lift tt)))
+        ≅⟨ hcong₂ (λ X Y → F (X ∙ ε) (α × Lift ⊤) ∋ Y <*> pure (lift tt)) (≡-to-≅ (sym left-id)) (law-applicative-fmap _,_ v) ⟩
+      (F ((ε ∙ i) ∙ ε) (α × Lift ⊤) ∋ (pure (_,_) <*> v <*> pure (lift tt)))
+        ≅⟨ hcong₂ (λ X Y → F X (α × Lift ⊤) ∋ Y) (≡-to-≅ (trans right-id (sym left-id))) (law-interchange (pure (_,_) <*> v) (lift tt)) ⟩
+      (F (ε ∙ (ε ∙ i)) (α × Lift ⊤) ∋ (pure (λ f → f (lift tt)) <*> (pure (_,_) <*> v)))
+        ≅⟨ hcong₂ (λ X Y → F X (α × Lift ⊤) ∋ Y) (≡-to-≅ (trans (cong (λ Z → Z ∙ (ε ∙ i)) (sym left-id)) assoc)) (hsym (law-composition (pure (λ f → f (lift tt))) (pure (_,_)) v)) ⟩
+      (F (((ε ∙ ε) ∙ ε) ∙ i) (α × Lift ⊤) ∋ (pure (_∘_) <*> pure (λ f → f (lift tt)) <*> pure (_,_) <*> v))
+        ≅⟨ hcong₂ (λ X Y → F ((X ∙ ε) ∙ i) (α × Lift ⊤) ∋ Y <*> pure (_,_) <*> v) (≡-to-≅ left-id) (law-homomorphism (λ f → f (lift tt)) _∘_) ⟩
+      (F ((ε ∙ ε) ∙ i) (α × Lift ⊤) ∋ (pure (_∘_ (λ f → f (lift tt))) <*> pure (_,_) <*> v))
+        ≅⟨ hcong₂ (λ X Y → F (X ∙ i) (α × Lift ⊤) ∋ Y <*> v) (≡-to-≅ left-id) (law-homomorphism _,_ (_∘_ (λ f → f (lift tt)))) ⟩
+      (F (ε ∙ i) (α × Lift ⊤) ∋ (pure ((λ f → f (lift tt)) ∘ _,_) <*> v))
+        ≅⟨ refl ⟩
+      (F (ε ∙ i) (α × Lift ⊤) ∋ (pure (λ a → (a , lift tt)) <*> v))
+        ≅⟨ hcong₂ (λ X Y → F X (α × Lift ⊤) ∋ Y) (≡-to-≅ left-id) (hsym (law-applicative-fmap (λ a → (a , lift tt)) v)) ⟩
+      (F i (α × Lift ⊤) ∋ (fmap (λ a → (a , lift tt)) v)) ∎
+  
+  abstract
+    law-right-identity' : {i : M} {α : Type} → (v : F i α) 
+                        → fmap proj₁ (v ** unit) ≅ v
+    law-right-identity' {i} {α} v = begin
+      (F (i ∙ ε) α ∋ (fmap proj₁ (v ** unit)))
+        ≅⟨ hcong₂ (λ X Y → F X α ∋ fmap proj₁ Y) (≡-to-≅ right-id) (law-right-identity v) ⟩
+      (F i α ∋ (fmap proj₁ (fmap (λ a → (a , lift tt)) v)))
+        ≅⟨ hcong (λ X → F i α ∋ X v) (≡-to-≅ (sym $ Functor.law-compose (functor i) proj₁ (λ a → (a , lift tt)))) ⟩
+      (F i α ∋ (fmap (proj₁ {b = ℓ} ∘ (λ a → (a , lift tt))) v))
+        ≅⟨ hcong (λ X → X v) (≡-to-≅ (Functor.law-id (functor i))) ⟩
+      v ∎
+{-
   abstract
     law-associativity : {α β γ : Type} → (u : F α) (v : F β) (w : F γ) 
                       → u ** (v ** w) ≡ fmap (λ {((a , b) , c) → (a , (b , c))}) ( (u ** v) ** w ) 
