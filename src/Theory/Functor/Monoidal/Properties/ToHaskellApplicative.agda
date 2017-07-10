@@ -154,7 +154,7 @@ LaxMonoidalFunctor→HaskellApplicative FMon = applicative pure _<*>_ haskFuncto
     abstract
       law-associativity : {α β γ : Type} → (u : F₀ α) (v : F₀ β) (w : F₀ γ) 
                         → u ** (v ** w) ≡ fmap (λ {((a , b) , c) → (a , (b , c))}) ( (u ** v) ** w ) 
-      law-associativity {α} {β} {γ} u v w = 
+      law-associativity {α} {β} {γ} u v w = begin
         (nat-η monNatTrans (α , (β × γ)) ∘F (idF *** nat-η monNatTrans (β , γ))) (u , (v , w)) 
           ≡⟨ cong (λ X → X ((u , v) , w)) (sym $ assoc FMon α β γ) ⟩
         (F₁ (λ {((a , b) , c) → (a , (b , c))}) ∘F nat-η monNatTrans ((α × β) , γ) ∘F (nat-η monNatTrans (α , β) *** idF)) ((u , v) , w) ∎
