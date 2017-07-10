@@ -37,7 +37,7 @@ open NaturalTransformation renaming ( η to nat-η )
 MonoidalFunctor→GradedApplicative : {ℓ : Level} {M : Set ℓ} {mon : Monoid M}
                                   → (FMon : LaxMonoidalFunctor (monoidMonoidalCategory mon ×CMon setMonoidalCategory {zero}) (setMonoidalCategory {zero}))
                                   → GradedApplicative mon (λ i α → F₀ FMon (i , α))
-MonoidalFunctor→GradedApplicative {ℓ} {M} {mon} FMon = graded-applicative pure _<*>_ fun law-id {!!} law-homomorphism {!!} law-applicative-fmap
+MonoidalFunctor→GradedApplicative {ℓ} {M} {mon} FMon = graded-applicative pure _<*>_ fun law-id law-composition law-homomorphism law-interchange law-applicative-fmap
   where
     open Monoid mon
 
@@ -197,3 +197,78 @@ MonoidalFunctor→GradedApplicative {ℓ} {M} {mon} FMon = graded-applicative pu
         fmap ((λ {(f , a) → f a}) ∘F ((λ _ → f) *** (λ _ → x))) (fmap (λ a → (lift tt , a)) unit)
           ≅⟨ hcong (λ X → X unit) (≡-to-≅ $ sym $ Functor.compose (F' FMon)) ⟩
         fmap (λ _ → f x) unit ∎h
+
+    abstract
+      law-interchange : {i : M} {α β : Type} 
+                      → (u : F i (α → β)) → (x : α) 
+                      → (u <*> pure x) ≅ (pure (λ f → f x) <*> u)
+      law-interchange {i} {α} {β} u x = hbegin
+        fmap (λ {(f , a) → f a}) (u ** fmap (λ _ → x) unit)
+          ≅⟨ hcong (λ X → fmap (λ {(f , a) → f a}) (X u ** fmap (λ _ → x) unit)) (≡-to-≅ $ sym $ Functor.id (F' FMon)) ⟩
+        fmap (λ {(f , a) → f a}) (fmap (λ x → x) u ** fmap (λ _ → x) unit)
+          ≅⟨ hcong (fmap (λ {(f , a) → f a})) (≡-to-≅ $ sym $ law-naturality refl refl (λ x → x) (λ _ → x) u unit) ⟩
+        fmap (λ {(f , a) → f a}) (fmap ((λ x → x) *** (λ _ → x)) (u ** unit))
+          ≅⟨ hcong (λ X → X (u ** unit)) (≡-to-≅ $ sym $ Functor.compose (F' FMon)) ⟩
+        fmap ((λ {(f , a) → f a}) ∘F ((λ x → x) *** (λ _ → x))) (u ** unit)
+          ≅⟨ hcong₂ (λ X Y → F X β ∋ (fmap ((λ {(f , a) → f a}) ∘F ((λ x → x) *** (λ _ → x))) Y)) (≡-to-≅ right-id) (law-right-identity u) ⟩
+        fmap ((λ {(f , a) → f a}) ∘F ((λ x → x) *** (λ _ → x))) (fmap (λ a → (a , lift tt)) u)
+          ≅⟨ hcong (λ X → X u) (≡-to-≅ $ sym $ Functor.compose (F' FMon)) ⟩
+        fmap ((λ {(f , a) → f a}) ∘F ((λ _ → (λ f → f x)) *** (λ x → x)) ∘F (λ a → (lift tt , a))) u 
+          ≅⟨ hcong (λ X → X u) (≡-to-≅ $ Functor.compose (F' FMon)) ⟩
+        fmap ((λ {(f , a) → f a}) ∘F ((λ _ → (λ f → f x)) *** (λ x → x))) (fmap (λ a → (lift tt , a)) u)
+          ≅⟨ hcong₂ (λ X Y → F X β ∋ (fmap ((λ {(f , a) → f a}) ∘F ((λ _ → (λ f → f x)) *** (λ x → x))) Y)) (hsym (≡-to-≅ left-id)) (hsym $ law-left-identity u) ⟩
+        fmap ((λ {(f , a) → f a}) ∘F ((λ _ → (λ f → f x)) *** (λ x → x))) (unit ** u)
+          ≅⟨ hcong (λ X → X (unit ** u)) (≡-to-≅ $ Functor.compose (F' FMon)) ⟩
+        fmap (λ {(f , a) → f a}) (fmap ((λ _ → (λ f → f x)) *** (λ x → x)) (unit ** u))
+          ≅⟨ hcong (fmap (λ {(f , a) → f a})) (≡-to-≅ $ law-naturality refl refl (λ _ f → f x) (λ x → x) unit u) ⟩
+        fmap (λ {(f , a) → f a}) (fmap (λ _ → (λ f → f x)) unit ** fmap (λ x → x) u)
+          ≅⟨ hcong (λ X → fmap (λ {(f , a) → f a}) (fmap (λ _ → (λ f → f x)) unit ** X u)) (≡-to-≅ $ Functor.id (F' FMon)) ⟩
+        fmap (λ {(f , a) → f a}) (fmap (λ _ → (λ f → f x)) unit ** u) ∎h
+
+    abstract
+      law-composition : {i j k : M} {α β γ : Type} 
+                      → (u : F i (β → γ)) (v : F j (α → β)) (w : F k α)
+                      → (((pure _∘′_ <*> u) <*> v) <*> w) ≅ (u <*> (v <*> w))
+      law-composition {i} {j} {k} {α} {β} {γ} u v w = hbegin
+        fmap (λ {(f , a) → f a}) (fmap (λ {(f , a) → f a}) ((fmap (λ {(f , a) → f a}) (fmap (λ _ → _∘′_) unit ** u)) ** v) ** w) 
+          ≅⟨ hcong (λ X → fmap (λ {(f , a) → f a}) (fmap (λ {(f , a) → f a}) ((fmap (λ {(f , a) → f a}) (fmap (λ _ → _∘′_) unit ** X u)) ** v) ** w)) (≡-to-≅ $ sym $ Functor.id (F' FMon)) ⟩
+        fmap (λ {(f , a) → f a}) (fmap (λ {(f , a) → f a}) ((fmap (λ {(f , a) → f a}) (fmap (λ _ → _∘′_) unit ** fmap (λ x → x) u)) ** v) ** w) 
+          ≅⟨ hcong (λ X → fmap (λ { (f , a) → f a }) (fmap (λ { (f , a) → f a }) (fmap (λ { (f , a) → f a }) X ** v) ** w))
+                  (≡-to-≅ $ sym $ law-naturality refl refl (λ _ → _∘′_) (λ x → x) unit u) ⟩
+        fmap (λ {(f , a) → f a}) (fmap (λ {(f , a) → f a}) ((fmap (λ {(f , a) → f a}) (fmap ((λ _ → _∘′_) *** (λ x → x)) (unit ** u))) ** v) ** w) 
+          ≅⟨ hcong₂ (λ X Y → F ((X ∙ j) ∙ k) γ ∋ (fmap (λ {(f , a) → f a}) (fmap (λ {(f , a) → f a}) ((fmap (λ {(f , a) → f a}) (fmap ((λ _ → _∘′_) *** (λ x → x)) Y)) ** v) ** w)) )
+                    (≡-to-≅ left-id)
+                    (law-left-identity u) ⟩
+        fmap (λ {(f , a) → f a}) (fmap (λ {(f , a) → f a}) ((fmap (λ {(f , a) → f a}) (fmap ((λ _ → _∘′_) *** (λ x → x)) (fmap (λ a → (lift tt , a)) u))) ** v) ** w) 
+          ≅⟨ hcong (λ X → fmap (λ {(f , a) → f a}) (fmap (λ {(f , a) → f a}) ((X (fmap (λ a → (lift tt , a)) u)) ** v) ** w)) (≡-to-≅ $ sym $ Functor.compose (F' FMon)) ⟩
+        fmap (λ {(f , a) → f a}) (fmap (λ {(f , a) → f a}) ((fmap ((λ {(f , a) → f a}) ∘F ((λ _ → _∘′_) *** (λ x → x))) (fmap (λ a → (lift tt , a)) u)) ** v) ** w)
+          ≅⟨ hcong (λ X → fmap (λ {(f , a) → f a}) (fmap (λ {(f , a) → f a}) ((X u) ** v) ** w)) (≡-to-≅ $ sym $ Functor.compose (F' FMon)) ⟩
+        fmap (λ {(f , a) → f a}) (fmap (λ {(f , a) → f a}) ((fmap g u) ** v) ** w)
+          ≅⟨ hcong (λ X → fmap (λ {(f , a) → f a}) (fmap (λ {(f , a) → f a}) ((fmap g u) ** X v) ** w)) (≡-to-≅ $ sym $ Functor.id (F' FMon)) ⟩
+        fmap (λ {(f , a) → f a}) (fmap (λ {(f , a) → f a}) ((fmap g u) ** fmap (λ x → x) v) ** w)
+          ≅⟨ hcong (λ X → fmap (λ {(f , a) → f a}) (fmap (λ {(f , a) → f a}) X ** w)) (≡-to-≅ $ sym $ law-naturality refl refl g (λ x → x) u v) ⟩
+        fmap (λ {(f , a) → f a}) (fmap (λ {(f , a) → f a}) (fmap (g *** (λ x → x)) (u ** v)) ** w)
+          ≅⟨ hcong (λ X → fmap (λ {(f , a) → f a}) (X (u ** v) ** w)) (≡-to-≅ $ sym $ Functor.compose (F' FMon)) ⟩
+        fmap (λ {(f , a) → f a}) (fmap ((λ {(f , a) → f a}) ∘F (g *** (λ x → x))) (u ** v) ** w)
+          ≅⟨ hcong (λ X → fmap (λ {(f , a) → f a}) (fmap ((λ {(f , a) → f a}) ∘F (g *** (λ x → x))) (u ** v) ** X w)) (≡-to-≅ $ sym $ Functor.id (F' FMon)) ⟩
+        fmap (λ {(f , a) → f a}) (fmap ((λ {(f , a) → f a}) ∘F (g *** (λ x → x))) (u ** v) ** fmap (λ x → x) w)
+          ≅⟨ hcong (fmap (λ {(f , a) → f a})) (≡-to-≅ $ sym $ law-naturality refl refl ((λ {(f , a) → f a}) ∘F (g *** (λ x → x))) (λ x → x) (u ** v) w) ⟩
+        fmap (λ {(f , a) → f a}) (fmap (((λ {(f , a) → f a}) ∘F (g *** (λ x → x))) *** (λ x → x)) ((u ** v) ** w))
+          ≅⟨ hcong (λ X → X ((u ** v) ** w)) (≡-to-≅ $ sym $ Functor.compose (F' FMon)) ⟩
+        fmap h ((u ** v) ** w)
+          ≅⟨ refl ⟩
+        fmap (h' ∘F (λ {((a , b) , c) → (a , (b , c))})) ( (u ** v) ** w )
+          ≅⟨ hcong (λ X → X ( (u ** v) ** w )) (≡-to-≅ $ Functor.compose (F' FMon)) ⟩
+        fmap h' (fmap (λ {((a , b) , c) → (a , (b , c))}) ( (u ** v) ** w ) )
+          ≅⟨ hcong₂ (λ X Y → F X γ ∋ fmap h' Y) (≡-to-≅ $ sym $ Monoid.assoc mon) (hsym $ law-associativity u v w) ⟩
+        fmap h' (u ** (v ** w))
+          ≅⟨ hcong (λ X → X (u ** (v ** w))) (≡-to-≅ $ Functor.compose (F' FMon)) ⟩
+        fmap (λ {(f , a) → f a}) (fmap ((λ x → x) *** (λ {(f , a) → f a})) (u ** (v ** w)))
+          ≅⟨ hcong (fmap (λ { (f , a) → f a })) (≡-to-≅ $ law-naturality refl refl (λ x → x) (λ {(f , a) → f a}) u (v ** w)) ⟩
+        fmap (λ {(f , a) → f a}) (fmap (λ x → x) u ** fmap (λ {(f , a) → f a}) (v ** w))
+          ≅⟨ hcong (λ X → fmap (λ { (f , a) → f a }) (X u ** fmap (λ { (f , a) → f a }) (v ** w))) (≡-to-≅ $ Functor.id (F' FMon)) ⟩
+        fmap (λ {(f , a) → f a}) (u ** fmap (λ {(f , a) → f a}) (v ** w)) ∎h
+        where
+          g = (((λ {(f , a) → f a}) ∘F ((λ _ → _∘′_) *** (λ x → x))) ∘F (λ a → (lift tt , a)))
+          h = ((λ {(f , a) → f a}) ∘F (((λ {(f , a) → f a}) ∘F (g *** (λ x → x))) *** (λ x → x)))
+          h' = ((λ {(f , a) → f a}) ∘F ((λ x → x) *** (λ {(f , a) → f a})))
