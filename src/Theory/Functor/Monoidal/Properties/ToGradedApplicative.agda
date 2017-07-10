@@ -34,10 +34,10 @@ open LaxMonoidalFunctor renaming ( ε to ε' ; F to F' )
 open MonoidalCategory renaming ( unit to unit' ; α to ass ) hiding ( left-id ; right-id ; assoc )
 open NaturalTransformation renaming ( η to nat-η )
 
-MonoidalFunctor→GradedApplicative : {ℓ : Level} {M : Set ℓ} {mon : Monoid M}
-                                  → (FMon : LaxMonoidalFunctor (monoidMonoidalCategory mon ×CMon setMonoidalCategory {zero}) (setMonoidalCategory {zero}))
-                                  → GradedApplicative mon (λ i α → F₀ FMon (i , α))
-MonoidalFunctor→GradedApplicative {ℓ} {M} {mon} FMon = graded-applicative pure _<*>_ fun law-id law-composition law-homomorphism law-interchange law-applicative-fmap
+LaxMonoidalFunctor→GradedApplicative : {ℓ : Level} {M : Set ℓ} {mon : Monoid M}
+                                     → (FMon : LaxMonoidalFunctor (monoidMonoidalCategory mon ×CMon setMonoidalCategory {zero}) (setMonoidalCategory {zero}))
+                                     → GradedApplicative mon (λ i α → F₀ FMon (i , α))
+LaxMonoidalFunctor→GradedApplicative {ℓ} {M} {mon} FMon = graded-applicative pure _<*>_ fun law-id law-composition law-homomorphism law-interchange law-applicative-fmap
   where
     open Monoid mon
 

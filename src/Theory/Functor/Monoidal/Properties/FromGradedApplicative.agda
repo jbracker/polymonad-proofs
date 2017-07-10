@@ -31,9 +31,9 @@ open import Theory.Natural.Transformation
 module Theory.Functor.Monoidal.Properties.FromGradedApplicative where
 
 
-GradedApplicative→MonoidalFunctor : {ℓ : Level} {M : Set ℓ} {mon : Monoid M} {F : M → TyCon}
-                                  → GradedApplicative mon F → LaxMonoidalFunctor (monoidMonoidalCategory mon ×CMon setMonoidalCategory {zero}) (setMonoidalCategory {zero})
-GradedApplicative→MonoidalFunctor {ℓ} {M} {mon} {F} applic = laxMonoidalFunctor fun ε' μ' assoc' left-id' right-id'
+GradedApplicative→LaxMonoidalFunctor : {ℓ : Level} {M : Set ℓ} {mon : Monoid M} {F : M → TyCon}
+                                     → GradedApplicative mon F → LaxMonoidalFunctor (monoidMonoidalCategory mon ×CMon setMonoidalCategory {zero}) (setMonoidalCategory {zero})
+GradedApplicative→LaxMonoidalFunctor {ℓ} {M} {mon} {F} applic = laxMonoidalFunctor fun ε' μ' assoc' left-id' right-id'
   where
     open Category
     open Functor
