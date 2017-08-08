@@ -8,7 +8,7 @@ open import Relation.Binary.HeterogeneousEquality using ( _≅_ ; ≡-to-≅ ; �
 
 open import Equality
 open import Theory.Category.Definition
-open import Theory.Category.Examples
+open import Theory.Category.Examples.SetCat
 open import Theory.Category.Concrete
 open import Theory.Functor.Definition
 

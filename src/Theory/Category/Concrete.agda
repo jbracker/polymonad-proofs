@@ -5,7 +5,7 @@ open import Function
 open import Data.Product
 
 open import Theory.Category.Definition
-open import Theory.Category.Examples
+open import Theory.Category.Examples.SetCat
 open import Theory.Functor.Definition
 
 module Theory.Category.Concrete {ℓ ℓC₀ ℓC₁ : Level} where
