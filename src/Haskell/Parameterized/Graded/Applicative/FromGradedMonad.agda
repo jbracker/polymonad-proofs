@@ -59,8 +59,62 @@ GradedMonad→GradedApplicative {ℓ} {Eff} {mon} {M} monad
     law-composition : {i j k : Eff} {α β γ : Type}
                     → (u : M i (β → γ)) (v : M j (α → β)) (w : M k α)
                     → (((pure _∘_ <*> u) <*> v) <*> w) ≅ (u <*> (v <*> w))
-    law-composition {i} {j} {k} {α} {β} {γ} u v w = {!!}
-
+    law-composition {i} {j} {k} {α} {β} {γ} u v w = begin
+      (M (((ε ∙ i) ∙ j) ∙ k) γ ∋ (((pure _∘_ <*> u) <*> v) <*> w))
+        ≡⟨⟩
+      (M (((ε ∙ i) ∙ j) ∙ k) γ ∋ (((return _∘_ >>= (λ h → fmap h u)) >>= (λ f → fmap f v)) >>= (λ g → fmap g w)))
+        ≅⟨ hcong₂ (λ X Y → M ((X ∙ j) ∙ k) γ ∋ ((Y >>= (λ f → fmap f v)) >>= (λ g → fmap g w))) (≡-to-≅ left-id) (law-left-id _∘_ (λ h → fmap h u)) ⟩
+      (M ((i ∙ j) ∙ k) γ ∋ (((fmap _∘_ u) >>= (λ f → fmap f v)) >>= (λ g → fmap g w)))
+        ≅⟨ hcong₂ (λ X Y → M ((X ∙ j) ∙ k) γ ∋ (Y >>= (λ f → fmap f v)) >>= (λ g → fmap g w)) (≡-to-≅ (sym right-id)) (hsym (law-monad-fmap _∘_ u)) ⟩
+      (M (((i ∙ ε) ∙ j) ∙ k) γ ∋ (((u >>= (return ∘ _∘_)) >>= (λ f → fmap f v)) >>= (λ g → fmap g w)))
+        ≅⟨ hcong₂ (λ X Y → M (X ∙ k) γ ∋ Y >>= (λ g → fmap g w)) (≡-to-≅ (sym assoc)) (hsym (law-assoc u (return ∘ _∘_) (λ f → fmap f v))) ⟩
+      (M ((i ∙ (ε ∙ j)) ∙ k) γ ∋ ((u >>= (λ x → return (_∘_ x) >>= (λ f → fmap f v) )) >>= (λ g → fmap g w)))
+        ≅⟨ hcong₂ (λ X Y → M X γ ∋ Y) (≡-to-≅ (sym assoc)) (hsym (law-assoc u (λ x → return (_∘_ x) >>= (λ f → fmap f v)) (λ g → fmap g w))) ⟩
+      (M (i ∙ ((ε ∙ j) ∙ k)) γ ∋ (u >>= (λ f → (return (_∘_ f) >>= (λ f → fmap f v)) >>= (λ g → fmap g w) ) ))
+        ≅⟨ hcong₂ (λ X Y → M (i ∙ X) γ ∋ (u >>= Y))
+                  (≡-to-≅ $ cong (λ X → X ∙ k) left-id)
+                  (het-fun-ext (≡-to-≅ (cong (λ X → (λ _ → M (X ∙ k) γ)) left-id))
+                               (λ f → hcong₂ (λ X Y → M (X ∙ k) γ ∋ Y >>= (λ g → fmap g w))
+                                             (≡-to-≅ left-id)
+                                             (law-left-id (_∘_ f) (λ f → fmap f v)))) ⟩
+      (M (i ∙ (j ∙ k)) γ ∋ (u >>= (λ f → (fmap (_∘_ f) v) >>= (λ g → fmap g w) ) ))
+        ≅⟨ hcong₂ (λ X Y → M (i ∙ X) γ ∋ (u >>= Y))
+                  (≡-to-≅ $ cong (λ X → X ∙ k) (sym right-id))
+                  (het-fun-ext (≡-to-≅ (cong (λ X → (λ _ → M (X ∙ k) γ)) (sym right-id)))
+                               (λ f → hcong₂ (λ X Y → M (X ∙ k) γ ∋ Y >>= (λ g → fmap g w))
+                                             (≡-to-≅ (sym right-id))
+                                             (hsym (law-monad-fmap (_∘_ f) v)))) ⟩
+      (M (i ∙ ((j ∙ ε) ∙ k)) γ ∋ (u >>= (λ f → (v >>= (return ∘ (_∘_ f))) >>= (λ g → fmap g w) ) ))
+        ≅⟨ hcong₂ (λ X Y → M (i ∙ X) γ ∋ (u >>= Y))
+                  (≡-to-≅ (sym assoc))
+                  (het-fun-ext (≡-to-≅ (cong (λ X → (λ _ → M X γ)) (sym assoc)))
+                               (λ f → hsym (law-assoc v (return ∘ (_∘_ f)) (λ g → fmap g w)) )) ⟩
+      (M (i ∙ (j ∙ (ε ∙ k))) γ ∋ (u >>= (λ f → v >>= (λ x → return (f ∘ x) >>= (λ g → fmap g w)) ) ))
+        ≅⟨ hcong₂ (λ X Y → M (i ∙ X) γ ∋ (u >>= Y))
+                  (≡-to-≅ (cong (_∙_ j) left-id))
+                  (het-fun-ext (≡-to-≅ (cong (λ X → (λ _ → M X γ)) (cong (_∙_ j) left-id)))
+                               (λ f → hcong₂ (λ X Y → M (j ∙ X) γ ∋ (v >>= Y))
+                                             (≡-to-≅ left-id)
+                                             (het-fun-ext (≡-to-≅ (cong (λ X → (λ _ → M X γ)) left-id))
+                                                          (λ x → law-left-id (f ∘ x) (λ g → fmap g w))))) ⟩
+      (M (i ∙ (j ∙ k)) γ ∋ (u >>= (λ f → v >>= (λ x → fmap (f ∘ x) w) ) ))
+        ≅⟨ ≡-to-≅ (cong (λ X → _>>=_ u X) (fun-ext (λ f → cong (λ X → _>>=_ v X) (fun-ext (λ x → cong (λ X → X w) (Functor.law-compose (functor k) f x)))))) ⟩
+      (M (i ∙ (j ∙ k)) γ ∋ (u >>= (λ f → v >>= (λ x → fmap f (fmap x w) ) )))
+        ≅⟨ hcong₂ (λ X Y → M (i ∙ X) γ ∋ u >>= Y)
+                  (≡-to-≅ $ cong (_∙_ j) (sym right-id))
+                  (het-fun-ext (≡-to-≅ (cong (λ X → (λ _ → M (j ∙ X) γ)) (sym right-id)))
+                               (λ f → hcong₂ (λ X Y → M (j ∙ X) γ ∋ v >>= Y)
+                                             (≡-to-≅ (sym right-id))
+                                             (het-fun-ext (≡-to-≅ (cong (λ X → (λ _ → M X γ)) (sym right-id)))
+                                                          (λ x → hsym (law-monad-fmap f (fmap x w)))))) ⟩
+      (M (i ∙ (j ∙ (k ∙ ε))) γ ∋ (u >>= (λ f → v >>= (λ x → fmap x w >>= (return ∘ f) ) )))
+        ≅⟨ hcong₂ (λ X Y → M (i ∙ X) γ ∋ u >>= Y) (≡-to-≅ assoc) (het-fun-ext (≡-to-≅ (fun-ext (λ _ → cong (λ X → M X γ) assoc))) (λ f → law-assoc v (λ g → fmap g w) (return ∘ f))) ⟩
+      (M (i ∙ ((j ∙ k) ∙ ε)) γ ∋ (u >>= (λ f → (v >>= (λ g → fmap g w)) >>= (return ∘ f) )))
+        ≅⟨ hcong₂ (λ X Y → M (i ∙ X) γ ∋ u >>= Y) (≡-to-≅ right-id) (het-fun-ext (≡-to-≅ (fun-ext (λ _ → cong (λ X → M X γ) right-id))) (λ f → law-monad-fmap f (v >>= (λ g → fmap g w)))) ⟩
+      (M (i ∙ (j ∙ k)) γ ∋ (u >>= (λ f → fmap f (v >>= (λ g → fmap g w)))))
+        ≡⟨⟩
+      (M (i ∙ (j ∙ k)) γ ∋ (u <*> (v <*> w))) ∎
+    
     law-homomorphism : {α β : Type} → (x : α) (f : α → β)
                      → (pure f <*> pure x) ≅ pure (f x)
     law-homomorphism {α} {β} x f = begin
