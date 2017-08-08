@@ -13,7 +13,7 @@ open import Haskell.Functor hiding ( functor )
 open import Haskell.Parameterized.Indexed.Applicative
 open import Haskell.Parameterized.Indexed.Monad
 
-module Haskell.Parameterized.Indexed.Applicative.FromMonad where
+module Haskell.Parameterized.Indexed.Applicative.FromIndexedMonad where
 
 IxMonad→IxApplicative
   : {ℓ : Level} {Ixs : Set ℓ} {M : Ixs → Ixs → TyCon}
