@@ -35,7 +35,7 @@ record RelativeMonad {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} {C : Category {�
     left-id : {a : Obj C} → kext η ≡ id D {a = T a}
     
     coher : {a b c : Obj C} {k : Hom D ([ J ]₀ a) (T b)} {l : Hom D ([ J ]₀ b) (T c)} 
-          → kext ( kext l ∘D k ) ≡ kext l ∘D kext k
+          → kext ( (kext l) ∘D k ) ≡ kext l ∘D kext k
   
   FunctorT : Functor C D
   FunctorT = functor T (λ f → kext (η ∘D [ J ]₁ f)) fun-id compose
@@ -48,6 +48,10 @@ record RelativeMonad {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} {C : Category {�
         compose : {a b c : Obj C} {f : Hom C a b} {g : Hom C b c}
                 → kext (η ∘D [ J ]₁ (g ∘C f)) ≡ kext (η ∘D [ J ]₁ g) ∘D (kext (η ∘D [ J ]₁ f))
         compose {f = f} {g} = trans (cong kext (trans (trans (trans (cong (λ X → η ∘D X) (Functor.compose J)) (assoc D)) (cong (λ X → X ∘D [ J ]₁ f) (sym right-id))) (sym $ assoc D))) coher
+  
+  functor-kext-coher : {a b : Obj C} → (f : Hom C a b)
+                     → [ FunctorT ]₁ f ≡ kext (η ∘D [ J ]₁ f)
+  functor-kext-coher f = refl
   
   NaturalTransformation-η : NaturalTransformation J FunctorT
   NaturalTransformation-η = naturalTransformation (λ _ → η) right-id
