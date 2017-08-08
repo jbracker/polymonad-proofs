@@ -67,10 +67,12 @@ record GradedApplicative {ℓ : Level} {M : Set ℓ} (monoid : Monoid M) (F : M 
   _**_ : {i j : M} {α β : Type} → F i α → F j β → F (i ∙ j) (α × β)
   _**_ u v = fmap (_,_) u <*> v
 
-  p : {i j : M} {α β γ δ : Type} → (f : α → β) (g : γ → δ) (u : F i α) (v : F j γ)
-    → (F (ε ∙ (i ∙ j)) (β × δ) ∋ (pure (f *** g) <*> (fmap (_,_) u <*> v)))
-    ≅ (F (ε ∙ ((ε ∙ i) ∙ j)) (β × δ) ∋ (pure (f *** g) <*> (pure (_,_) <*> u <*> v)))
-  p {i} {j} {α} {β} {γ} {δ} f g u v = hcong₂ (λ X Y  → (F (ε ∙ (X ∙ j)) (β × δ) ∋ (pure (f *** g) <*> (Y <*> v)))) (≡-to-≅ $ sym left-id) (law-applicative-fmap _,_ u)
+  private
+    abstract
+      p : {i j : M} {α β γ δ : Type} → (f : α → β) (g : γ → δ) (u : F i α) (v : F j γ)
+        → (F (ε ∙ (i ∙ j)) (β × δ) ∋ (pure (f *** g) <*> (fmap (_,_) u <*> v)))
+        ≅ (F (ε ∙ ((ε ∙ i) ∙ j)) (β × δ) ∋ (pure (f *** g) <*> (pure (_,_) <*> u <*> v)))
+      p {i} {j} {α} {β} {γ} {δ} f g u v = hcong₂ (λ X Y  → (F (ε ∙ (X ∙ j)) (β × δ) ∋ (pure (f *** g) <*> (Y <*> v)))) (≡-to-≅ $ sym left-id) (law-applicative-fmap _,_ u)
   
   abstract
     law-naturality : {i j : M} {α β γ δ : Type} → (f : α → β) (g : γ → δ) (u : F i α) (v : F j γ) 
