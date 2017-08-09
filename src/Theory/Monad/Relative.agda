@@ -53,6 +53,10 @@ record RelativeMonad {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} {C : Category {�
                      → [ FunctorT ]₁ f ≡ kext (η ∘D [ J ]₁ f)
   functor-kext-coher f = refl
   
+  functor-kext-compose : {a b c : Obj C} {f : Hom C a b} {g : Hom C b c} 
+                       → kext (η ∘D [ J ]₁ (g ∘C f)) ≡ kext (η ∘D [ J ]₁ g) ∘D (kext (η ∘D [ J ]₁ f))
+  functor-kext-compose = Functor.compose FunctorT
+  
   NaturalTransformation-η : NaturalTransformation J FunctorT
   NaturalTransformation-η = naturalTransformation (λ _ → η) right-id
   
