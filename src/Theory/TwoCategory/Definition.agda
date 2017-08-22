@@ -16,7 +16,7 @@ open ≅-Reasoning renaming ( begin_ to hbegin_ ; _∎ to _∎h ) hiding ( _≡�
 -- Local
 open import Utilities
 open import Theory.Triple renaming ( _,_,_ to _,'_,'_ )
-open import Theory.Category.Definition
+open import Theory.Category.Definition hiding ( category )
 open import Theory.Category.Isomorphism
 open import Theory.Functor.Definition
 open import Theory.Functor.Examples
@@ -509,6 +509,19 @@ record StrictTwoCategory {ℓ₀ ℓ₁ ℓ₂ : Level} : Set (lsuc (ℓ₀ ⊔ 
                        (subst-swap refl hAssoc₁ (sym (subst-swap'' hAssoc₁)))) 
                        (het-help id₂ (α' f g (k ∘ₕ h)) (sym hAssoc₁) refl (subst-swap' hAssoc₁ refl refl)) ⟩
       α' (g ∘ₕ f) h k ∘ᵥ α' f g (k ∘ₕ h) ∎h
+    
+  abstract
+    interchange : {a b c : Cell₀} 
+                → {x y z : Obj (HomCat a b)} {x' y' z' : Obj (HomCat b c)}
+                → (f : Hom (HomCat a b) x y) (f' : Hom (HomCat b c) x' y') (g : Hom (HomCat a b) y z) (g' : Hom (HomCat b c) y' z')
+                → (g' ∘ᵥ f') ∘ₕ₂ (g ∘ᵥ f) ≡ (g' ∘ₕ₂ g) ∘ᵥ (f' ∘ₕ₂ f)
+    interchange {x} {y} {z} {x'} {y'} {z'} f f' g g' = begin
+      [ comp ]₁ ((g' ∘ᵥ f') , (g ∘ᵥ f)) 
+        ≡⟨ Functor.compose comp ⟩
+      ([ comp ]₁ (g' , g)) ∘ᵥ ([ comp ]₁ (f' , f)) ∎
+  
+  category : Category {ℓ₀} {ℓ₁}
+  category = Category.category Cell₀ Cell₁ _∘ₕ_ id₁ hAssoc₁ hIdR₁ hIdL₁
 
 -------------------------------------------------------------------------------
 -- Unit strict 2-category
