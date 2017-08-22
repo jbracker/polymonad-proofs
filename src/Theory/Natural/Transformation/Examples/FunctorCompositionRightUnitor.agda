@@ -8,7 +8,7 @@ open ≡-Reasoning
 open import Extensionality
 
 open import Theory.Category.Definition
-open import Theory.Category.Examples using ( functorCategory )
+open import Theory.Category.Examples.Functor using ( functorCategory )
 open import Theory.Functor.Definition
 open import Theory.Functor.Composition
 open import Theory.Functor.Application

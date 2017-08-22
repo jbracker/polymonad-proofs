@@ -3,7 +3,8 @@ open import Level
 
 
 open import Theory.Category.Definition
-open import Theory.Category.Examples
+open import Theory.Category.Examples.SetCat
+open import Theory.Category.Examples.Functor
 open import Theory.Category.Monoidal
 open import Theory.Functor.Definition
 open import Theory.Functor.Examples.HomFunctor

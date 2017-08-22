@@ -10,7 +10,7 @@ open ≡-Reasoning
 open import Utilities
 
 open import Theory.Category.Definition
-open import Theory.Category.Examples
+open import Theory.Category.Examples.SetCat
 
 open import Theory.Functor.Definition
 open import Theory.Natural.Transformation

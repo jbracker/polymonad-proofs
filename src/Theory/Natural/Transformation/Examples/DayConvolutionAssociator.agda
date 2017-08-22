@@ -11,7 +11,8 @@ open import Theory.Triple renaming ( _,_,_ to _,'_,'_ )
 open import Theory.Category.Definition
 open import Theory.Category.Monoidal
 open import Theory.Category.Isomorphism
-open import Theory.Category.Examples renaming ( functorCategory to FunCat ; setCategory to SetCat )
+open import Theory.Category.Examples.Functor renaming ( functorCategory to FunCat )
+open import Theory.Category.Examples.SetCat renaming ( setCategory to SetCat )
 open import Theory.Functor.Definition
 open import Theory.Functor.Composition
 open import Theory.Functor.Association
