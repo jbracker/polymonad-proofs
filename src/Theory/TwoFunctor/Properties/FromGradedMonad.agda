@@ -33,7 +33,7 @@ open import Theory.TwoFunctor.ConstZeroCell
  
 module Theory.TwoFunctor.Properties.FromGradedMonad where
 
-open Category hiding ( right-id ; left-id ; assoc )
+open Category hiding ( right-id ; left-id ; assoc ) renaming ( id to idC )
 open StrictTwoCategory
 open Triple
 
@@ -51,6 +51,8 @@ GradedMonad→LaxTwoFunctor {ℓ} {Eff} {monoid} M monad = record
   ; laxFunId₁ = λ {x} {y} {i} → lawFunId₁ {x} {y} {i}
   ; laxFunId₂ = λ {x} {y} {i} → lawFunId₂ {x} {y} {i}
   ; laxFunAssoc = λ {w} {x} {y} {z} {i} {j} {k} → lawFunAssoc {w} {x} {y} {z} {i} {j} {k}
+  ; μ-natural₁ = λ {a b c} f {x y} {α} → μ-natural₁ {a} {b} {c} f {x} {y} {α}
+  ; μ-natural₂ = λ {a b c} g {x y} {α} → μ-natural₂ {a} {b} {c} g {x} {y} {α}
   }
   where
     monCat₁ = monoidCategory monoid
@@ -117,6 +119,26 @@ GradedMonad→LaxTwoFunctor {ℓ} {Eff} {monoid} M monad = record
     abstract
       subst-refl-id : {α : Type} {i j : Eff} → (eq : i ≡ j) → (ma : M j α) → nat-η ([ P ]₁ (subst₂ _≡_ eq refl (refl {ℓ} {Eff} {i}))) α ma ≅ nat-η (Id⟨ F j ⟩) α ma
       subst-refl-id {α} {i} {.i} refl ma = hrefl
+    
+    abstract
+      μ-natural₁ : {a b c : Lift ⊤}
+                 → (f : Cell₁ (discreteHomCatTwoCategory (monoidCategory monoid)) a b)
+                 → {x y : Cell₁ (discreteHomCatTwoCategory (monoidCategory monoid)) b c}
+                 → {α : x ≡ y}
+                 → ⟨ [ P ]₁ ((discreteHomCatTwoCategory (monoidCategory monoid) ∘ₕ₂ α) refl) ⟩∘ᵥ⟨ μ ⟩
+                 ≡ ⟨ μ ⟩∘ᵥ⟨ ⟨ [ P ]₁ α ⟩∘ₕ⟨ [ P ]₁ refl ⟩ ⟩
+      μ-natural₁ {lift tt} {lift tt} {lift tt} f {x} {y} {refl} 
+        = natural-transformation-eq $ fun-ext $ λ (c : Obj Hask') → cong (λ X → nat-η μ c ∘F X) (sym (Functor.id (F x)))
+      
+    abstract
+      μ-natural₂ : {a b c : Lift ⊤}
+                 → (g : Cell₁ (discreteHomCatTwoCategory (monoidCategory monoid)) b c)
+                 → {x y : Cell₁ (discreteHomCatTwoCategory (monoidCategory monoid)) a b}
+                 → {α : x ≡ y} 
+                 → ⟨ [ P ]₁ ((discreteHomCatTwoCategory (monoidCategory monoid) ∘ₕ₂ refl) α) ⟩∘ᵥ⟨ μ ⟩
+                 ≡ (Cat ∘ᵥ μ) ((Cat ∘ₕ₂ [ P ]₁ refl) ([ P ]₁ α))
+      μ-natural₂ {lift tt} {lift tt} {lift tt} g {x} {y} {refl}
+        = natural-transformation-eq $ fun-ext $ λ (c : Obj Hask') → cong (λ X → nat-η μ c ∘F X) (sym (Functor.id (F g)))
     
     abstract
       lawFunId₁ : {x y : Obj monCat₁} {i : Hom monCat₁ x y} 

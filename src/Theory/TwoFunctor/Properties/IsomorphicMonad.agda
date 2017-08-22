@@ -19,6 +19,7 @@ open import Theory.Monad.Definition hiding ( monad )
 open import Theory.TwoCategory.Definition
 open import Theory.TwoCategory.Examples
 open import Theory.TwoFunctor.Definition
+open import Theory.TwoFunctor.Equality
 open import Theory.TwoFunctor.Properties.ToMonad
 open import Theory.TwoFunctor.Properties.FromMonad
  

@@ -27,6 +27,7 @@ open import Theory.TwoCategory.Examples
 open import Theory.TwoCategory.Examples.CodiscreteHomCat
 open import Theory.TwoFunctor.Definition
 open import Theory.TwoFunctor.ConstZeroCell
+open import Theory.TwoFunctor.ConstZeroCell.Equality
 open import Theory.TwoFunctor.Properties.FromIndexedMonad
 open import Theory.TwoFunctor.Properties.ToIndexedMonad
 

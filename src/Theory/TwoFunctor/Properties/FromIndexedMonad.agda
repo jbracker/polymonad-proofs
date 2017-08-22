@@ -51,6 +51,8 @@ IndexedMonad→LaxTwoFunctor {ℓ} Ixs M monad = record
   ; laxFunId₁ = λ {i} {j} {_} → lawFunId₁ {i} {j}
   ; laxFunId₂ = λ {i} {j} {_} → lawFunId₂ {i} {j}
   ; laxFunAssoc = λ {i} {j} {k} {l} {_} {_} {_} → lawFunAssoc {i} {j} {k} {l}
+  ; μ-natural₁ = λ {i j k} _ {_ _} {_} → μ-natural {i} {j} {k} 
+  ; μ-natural₂ = λ {i j k} _ {_ _} {_} → μ-natural {i} {j} {k} 
   }
   where
     Ixs₁ = codiscreteCategory Ixs
@@ -109,6 +111,13 @@ IndexedMonad→LaxTwoFunctor {ℓ} Ixs M monad = record
             (mma >>= (return ∘F fmap f)) >>= (λ x → x)
               ≡⟨ cong (λ X → _>>=_ X (λ x → x)) (law-monad-fmap (fmap f) mma) ⟩
             fmap (fmap f) mma >>= (λ x → x) ∎
+    
+    abstract
+      μ-natural : {i j k : Obj Ixs₁}
+                → ⟨ [ P {i} {k} ]₁ (lift tt) ⟩∘ᵥ⟨ μ ⟩
+                ≡ ⟨ μ ⟩∘ᵥ⟨ ⟨ [ P {j} {k} ]₁ (lift tt) ⟩∘ₕ⟨ [ P {i} {j} ]₁ (lift tt) ⟩ ⟩
+      μ-natural {i} {j} {k} 
+        = natural-transformation-eq $ fun-ext $ λ (c : Obj Hask') → cong (λ X → nat-η μ c ∘F X) (sym (Functor.id (HaskellFunctor→Functor (functor k j))))
     
     abstract
       lawFunId₁ : {i j : Ixs}

@@ -30,6 +30,7 @@ open import Theory.TwoCategory.Examples
 open import Theory.TwoCategory.Examples.DiscreteHomCat
 open import Theory.TwoFunctor.Definition
 open import Theory.TwoFunctor.ConstZeroCell
+open import Theory.TwoFunctor.ConstZeroCell.Equality
 open import Theory.TwoFunctor.Properties.FromGradedMonad
 open import Theory.TwoFunctor.Properties.ToGradedMonad
 
