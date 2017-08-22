@@ -15,7 +15,8 @@ open import Haskell.Functor hiding ( functor ) renaming ( Functor to HaskellFunc
 open import Haskell.Applicative
 
 open import Theory.Category.Definition
-open import Theory.Category.Examples
+open import Theory.Category.Examples.SetCat
+open import Theory.Category.Examples.Functor
 open import Theory.Category.Monoidal
 open import Theory.Category.Monoidal.Examples.Unit
 open import Theory.Category.Monoidal.Examples.SetCat

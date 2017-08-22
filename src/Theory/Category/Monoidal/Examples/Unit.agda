@@ -10,7 +10,7 @@ open import Relation.Binary.PropositionalEquality
 open import Theory.Category.Definition
 open import Theory.Category.Monoidal
 open import Theory.Category.Isomorphism
-open import Theory.Category.Examples renaming ( setCategory to SetCat )
+open import Theory.Category.Examples.SetCat renaming ( setCategory to SetCat )
 open import Theory.Functor.Definition
 open import Theory.Natural.Transformation
 open import Theory.Natural.Isomorphism

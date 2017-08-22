@@ -22,7 +22,7 @@ open import Theory.Category.Definition
 open import Theory.Category.Dependent
 open import Theory.Category.Monoidal
 open import Theory.Category.Monoidal.Dependent
-open import Theory.Category.Examples
+open import Theory.Category.Examples.SetCat
 
 open import Theory.Functor.Definition
 

@@ -12,7 +12,7 @@ open import ProofIrrelevance
 open import Haskell
 
 open import Theory.Category.Definition
-open import Theory.Category.Examples
+open import Theory.Category.Examples.SetCat
 open import Theory.Category.Concrete
 open import Theory.Category.Dependent
 open import Theory.Category.Subcategory
