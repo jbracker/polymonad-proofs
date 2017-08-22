@@ -4,24 +4,15 @@ module Theory.TwoFunctor.Equality where
 -- Stdlib
 open import Level renaming ( suc to lsuc ; zero to lzero )
 open import Function hiding ( id ) renaming ( _∘_ to _∘F_ )
-open import Data.Product
-open import Data.Sum
-open import Data.Unit
-open import Data.Empty
 open import Relation.Binary.PropositionalEquality
 open import Relation.Binary.HeterogeneousEquality renaming ( refl to hrefl ; proof-irrelevance to het-proof-irrelevance )
-open ≡-Reasoning
 
 -- Local
-open import Utilities
 open import Extensionality
 open import Congruence
 open import Theory.Category.Definition
 open import Theory.Functor.Definition
-open import Theory.Functor.Examples
-open import Theory.Natural.Transformation
 open import Theory.TwoCategory.Definition
-open import Theory.TwoCategory.Examples.CodiscreteHomCat
 open import Theory.TwoFunctor.Definition
 
 -------------------------------------------------------------------------------
