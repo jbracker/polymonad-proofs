@@ -57,25 +57,65 @@ abstract
                             → _∘ᵥ_ D ([ P₁₁ {w} {z} ]₁ (α C f g h)) (_∘ᵥ_ D (μ₁ {w} {y} {z} {_∘ₕ_ C g f} {h}) (_∘ₕ₂_ D (id₂ D {P₀₁ y} {P₀₁ z} {[ P₁₁ {y} {z} ]₀ h}) (μ₁ {w} {x} {y} {f} {g})) ) 
                             ≡ _∘ᵥ_ D (μ₁ {w} {x} {z} {f} {_∘ₕ_ C h g}) 
                                      (_∘ᵥ_ D (_∘ₕ₂_ D (μ₁ {x} {y} {z} {g} {h}) (id₂ D {P₀₁ w} {P₀₁ x} {[ P₁₁ {w} {x} ]₀ f})) (α D ([ P₁₁ {w} {x} ]₀ f) ([ P₁₁ {x} {y} ]₀ g) ([ P₁₁ {y} {z} ]₀ h)) )}
+                     → {μnat₁₀ : {a b c : Cell₀ C} → (f : Cell₁ C a b) → {x y : Cell₁ C b c} {α : Cell₂ C x y} 
+                               → _∘ᵥ_ D ([ P₁₀ ]₁ (_∘ₕ₂_ C α (id₂ C {a}))) (μ₀ {f = f} {x}) ≡ _∘ᵥ_ D (μ₀ {f = f} {y}) (_∘ₕ₂_ D ([ P₁₀ ]₁ α) ([ P₁₀ ]₁ (id₂ C {a})))}
+                     → {μnat₁₁ : {a b c : Cell₀ C} → (f : Cell₁ C a b) → {x y : Cell₁ C b c} {α : Cell₂ C x y} 
+                               → _∘ᵥ_ D ([ P₁₁ ]₁ (_∘ₕ₂_ C α (id₂ C {a}))) (μ₁ {f = f} {x}) ≡ _∘ᵥ_ D (μ₁ {f = f} {y}) (_∘ₕ₂_ D ([ P₁₁ ]₁ α) ([ P₁₁ ]₁ (id₂ C {a})))}
+                     → {μnat₂₀ : {a b c : Cell₀ C} → (g : Cell₁ C b c) {x y : Cell₁ C a b} {α : Cell₂ C x y}
+                               → _∘ᵥ_ D ([ P₁₀ ]₁ (_∘ₕ₂_ C (id₂ C {b}) α)) (μ₀ {f = x} {g}) ≡ _∘ᵥ_ D (μ₀ {f = y} {g}) (_∘ₕ₂_ D ([ P₁₀ ]₁ (id₂ C {b})) ([ P₁₀ ]₁ α))}
+                     → {μnat₂₁ : {a b c : Cell₀ C} → (g : Cell₁ C b c) {x y : Cell₁ C a b} {α : Cell₂ C x y}
+                               → _∘ᵥ_ D ([ P₁₁ ]₁ (_∘ₕ₂_ C (id₂ C {b}) α)) (μ₁ {f = x} {g}) ≡ _∘ᵥ_ D (μ₁ {f = y} {g}) (_∘ₕ₂_ D ([ P₁₁ ]₁ (id₂ C {b})) ([ P₁₁ ]₁ α))}
                      → (eqP₀ : P₀₀ ≡ P₀₁)
                      → (eqP₁ : (λ {x} {y} → P₁₀ {x} {y}) ≅ (λ {x} {y} → P₁₁ {x} {y}))
                      → (eq-η : (λ {x} → η₀ {x}) ≅ (λ {x} → η₁ {x}))
                      → (eq-μ : (λ {x} {y} {z} {f} {g} → μ₀ {x} {y} {z} {f} {g}) ≅ (λ {x} {y} {z} {f} {g} → μ₁ {x} {y} {z} {f} {g}))
-                     → lax-two-functor {C = C} {D} P₀₀ P₁₀ η₀ μ₀ lfi₁₀ lfi₂₀ la₀ ≡ lax-two-functor {C = C} {D} P₀₁ P₁₁ η₁ μ₁ lfi₁₁ lfi₂₁ la₁
-  lax-two-functor-eq {C = C} {D} {P₀} {.P₀} {P₁} {.P₁} {η} {.η} {μ} {.μ} {lfi₁₀} {lfi₁₁} {lfi₂₀} {lfi₂₁} {la₀} {la₁} refl hrefl hrefl hrefl 
-    = cong₃ (lax-two-functor {C = C} {D} P₀ P₁ η μ) p1 p2 p3
+                     → lax-two-functor {C = C} {D} P₀₀ P₁₀ η₀ μ₀ lfi₁₀ lfi₂₀ la₀ μnat₁₀ μnat₂₀ ≡ lax-two-functor {C = C} {D} P₀₁ P₁₁ η₁ μ₁ lfi₁₁ lfi₂₁ la₁ μnat₁₁ μnat₂₁
+  lax-two-functor-eq {C = C} {D} {P₀} {.P₀} {P₁} {.P₁} {η} {.η} {μ} {.μ} {lfi₁₀} {lfi₁₁} {lfi₂₀} {lfi₂₁} {la₀} {la₁} {μnat₁₀} {μnat₁₁} {μnat₂₀} {μnat₂₁} refl hrefl hrefl hrefl 
+    = cong₅ (lax-two-functor {C = C} {D} P₀ P₁ η μ) p1 p2 p3 p4 p5
     where
       abstract
         p1 : (λ {x} {y} {f} → lfi₁₀ {x} {y} {f}) ≡ lfi₁₁
-        p1 = implicit-fun-ext $ λ x → implicit-fun-ext $ λ y → implicit-fun-ext 
+        p1 = implicit-fun-ext
+           $ λ x → implicit-fun-ext 
+           $ λ y → implicit-fun-ext 
            $ λ f → proof-irrelevance (lfi₁₀ {x} {y} {f}) (lfi₁₁ {x} {y} {f})
       
       abstract
         p2 : (λ {x} {y} {f} → lfi₂₀ {x} {y} {f}) ≡ lfi₂₁
-        p2 = implicit-fun-ext $ λ x → implicit-fun-ext $ λ y → implicit-fun-ext 
+        p2 = implicit-fun-ext 
+           $ λ x → implicit-fun-ext 
+           $ λ y → implicit-fun-ext 
            $ λ f → proof-irrelevance (lfi₂₀ {x} {y} {f}) (lfi₂₁ {x} {y} {f})
       
       abstract
         p3 : (λ {w} {x} {y} {z} {f} {g} {h} → la₀ {w} {x} {y} {z} {f} {g} {h}) ≡ la₁
-        p3 = implicit-fun-ext $ λ w → implicit-fun-ext $ λ x → implicit-fun-ext $ λ y → implicit-fun-ext $ λ z → implicit-fun-ext 
-           $ λ f → implicit-fun-ext $ λ g → implicit-fun-ext $ λ h → proof-irrelevance (la₀ {w} {x} {y} {z} {f} {g} {h}) (la₁ {w} {x} {y} {z} {f} {g} {h})
+        p3 = implicit-fun-ext 
+           $ λ w → implicit-fun-ext 
+           $ λ x → implicit-fun-ext 
+           $ λ y → implicit-fun-ext 
+           $ λ z → implicit-fun-ext 
+           $ λ f → implicit-fun-ext 
+           $ λ g → implicit-fun-ext 
+           $ λ h → proof-irrelevance (la₀ {w} {x} {y} {z} {f} {g} {h}) (la₁ {w} {x} {y} {z} {f} {g} {h})
+      
+      abstract
+        p4 : (λ {a b c} → μnat₁₀ {a} {b} {c}) ≡ μnat₁₁
+        p4 = implicit-fun-ext 
+           $ λ a → implicit-fun-ext 
+           $ λ b → implicit-fun-ext 
+           $ λ c → fun-ext 
+           $ λ f → implicit-fun-ext 
+           $ λ x → implicit-fun-ext 
+           $ λ y → implicit-fun-ext 
+           $ λ α → proof-irrelevance (μnat₁₀ {a} {b} {c} f {x} {y} {α}) (μnat₁₁ {a} {b} {c} f {x} {y} {α}) 
+      
+      abstract
+        p5 : (λ {a b c} → μnat₂₀ {a} {b} {c}) ≡ μnat₂₁
+        p5 = implicit-fun-ext 
+           $ λ a → implicit-fun-ext 
+           $ λ b → implicit-fun-ext 
+           $ λ c → fun-ext 
+           $ λ g → implicit-fun-ext 
+           $ λ x → implicit-fun-ext 
+           $ λ y → implicit-fun-ext 
+           $ λ α → proof-irrelevance (μnat₂₀ {a} {b} {c} g {x} {y} {α}) (μnat₂₁ {a} {b} {c} g {x} {y} {α})
