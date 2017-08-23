@@ -25,7 +25,7 @@ open import Theory.Functor.Composition
 open import Theory.Functor.Properties.IsomorphicHaskellFunctor
 open import Theory.Natural.Transformation
 open import Theory.TwoCategory.Definition
-open import Theory.TwoCategory.Examples
+open import Theory.TwoCategory.Examples.Functor
 open import Theory.TwoCategory.ExampleProperties
 open import Theory.TwoCategory.Examples.DiscreteHomCat
 open import Theory.TwoFunctor.Definition

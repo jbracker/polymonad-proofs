@@ -18,7 +18,7 @@ open import Theory.Functor.Composition
 open import Theory.Natural.Transformation
 open import Theory.Natural.Transformation.Examples
 open import Theory.TwoCategory.Definition
-open import Theory.TwoCategory.Examples
+open import Theory.TwoCategory.Examples.Functor
 
 module Theory.TwoCategory.ExampleProperties where
 

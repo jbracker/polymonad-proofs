@@ -29,7 +29,7 @@ open import Theory.TwoCategory.Definition
 open import Theory.TwoFunctor.Definition
 open import Theory.Monad.Atkey
 open import Theory.Category.Examples.SetCat
-open import Theory.TwoCategory.Examples
+open import Theory.TwoCategory.Examples.Functor
 
 open StrictTwoCategory
 open Category 

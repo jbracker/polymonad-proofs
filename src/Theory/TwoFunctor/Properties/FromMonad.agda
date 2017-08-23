@@ -24,7 +24,8 @@ open import Theory.Functor.Composition
 open import Theory.Natural.Transformation
 open import Theory.Monad.Definition hiding ( monad )
 open import Theory.TwoCategory.Definition
-open import Theory.TwoCategory.Examples
+open import Theory.TwoCategory.Examples.Functor
+open import Theory.TwoCategory.Examples.Unit
 open import Theory.TwoFunctor.Definition
 
 open StrictTwoCategory

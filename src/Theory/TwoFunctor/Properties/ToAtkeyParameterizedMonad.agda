@@ -19,14 +19,14 @@ open import Utilities
 open import Haskell
 open import Theory.Triple
 open import Theory.Category.Definition
-open import Theory.Category.Examples
+open import Theory.Category.Examples.Codiscrete
 open import Theory.Functor.Definition
 open import Theory.Functor.Composition
 open import Theory.Natural.Transformation
 open import Theory.Natural.Transformation.Examples
 open import Theory.Monad.Atkey
 open import Theory.TwoCategory.Definition
-open import Theory.TwoCategory.Examples
+open import Theory.TwoCategory.Examples.Functor
 open import Theory.TwoCategory.Examples.CodiscreteHomCat
 open import Theory.TwoCategory.ExampleProperties
 open import Theory.TwoFunctor.Definition
