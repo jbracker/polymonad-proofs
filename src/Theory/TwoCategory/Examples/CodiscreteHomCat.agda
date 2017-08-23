@@ -6,6 +6,7 @@ open import Data.Product
 open import Data.Unit
 
 open import Relation.Binary.PropositionalEquality
+open import Relation.Binary.HeterogeneousEquality
 
 open import Extensionality
 open import Theory.Category.Definition
@@ -28,10 +29,6 @@ codiscreteHomCatTwoCategory {ℓObj} {ℓHom} C = record
   ; horizontalIdR₂ = refl
   ; horizontalAssoc₁ = assoc C
   ; horizontalAssoc₂ = refl
-  ; whiskerCoher1' = refl
-  ; whiskerCoher2' = refl
-  ; whiskerCoher3' = refl
-  ; whiskerCoher4' = refl
   } where
     open Category
 
