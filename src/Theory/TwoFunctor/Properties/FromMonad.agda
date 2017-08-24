@@ -51,7 +51,7 @@ Monad→LaxTwoFunctor {ℓC₀} {ℓC₁} {C} {M} monad = record
     _∘C_ = Category._∘_ C
 
     _∘V_ = _∘ᵥ_ FunTwoCat
-    _∘H2_ = _∘ₕ₂_ FunTwoCat
+    _∘H2_ = _∘ₕ_ FunTwoCat
     
     P₀ : Cell₀ ⊤-TwoCat → Cell₀ FunTwoCat
     P₀ tt = C
@@ -82,8 +82,8 @@ Monad→LaxTwoFunctor {ℓC₀} {ℓC₁} {C} {M} monad = record
           compose : {a b c : Obj (HomCat ⊤-TwoCat tt tt)}
                   → {f : Hom (HomCat ⊤-TwoCat tt tt) a b}
                   → {g : Hom (HomCat ⊤-TwoCat tt tt) b c} 
-                  → F₁ ((HomCat ⊤-TwoCat tt tt ∘ g) f) 
-                  ≡ _∘_ (HomCat FunTwoCat C C) (F₁ g) (F₁ f)
+                  → F₁ (Category._∘_ (HomCat ⊤-TwoCat tt tt) g f) 
+                  ≡ ⟨ F₁ g ⟩∘ᵥ⟨ F₁ f ⟩
           compose {tt} {tt} {tt} {tt} {tt} = 
             natural-transformation-eq $ fun-ext $ λ (x : Obj C) → begin
               ηF x 
@@ -99,7 +99,7 @@ Monad→LaxTwoFunctor {ℓC₀} {ℓC₁} {C} {M} monad = record
     
     μP : {x y z : Cell₀ ⊤-TwoCat}
        → {f : Cell₁ ⊤-TwoCat x y} {g : Cell₁ ⊤-TwoCat y z}
-       → Cell₂ FunTwoCat (_∘ₕ_ FunTwoCat ([ P₁ ]₀ g) ([ P₁ ]₀ f)) ([ P₁ ]₀ (_∘ₕ_ ⊤-TwoCat g f))
+       → Cell₂ FunTwoCat (StrictTwoCategory._∘_ FunTwoCat ([ P₁ ]₀ g) ([ P₁ ]₀ f)) ([ P₁ ]₀ (StrictTwoCategory._∘_ ⊤-TwoCat g f))
     μP {tt} {tt} {tt} {tt} {tt} = Monad.μ monad
         
     abstract
@@ -117,7 +117,7 @@ Monad→LaxTwoFunctor {ℓC₀} {ℓC₁} {C} {M} monad = record
         nat-η (Monad.μ monad) x ∘C [ M ]₁ (nat-η (Monad.η monad) x)
           ≡⟨ Monad.η-left-coher monad ⟩
         Category.id C
-          ≡⟨ ≅-to-≡ $ subst₂-insert (sym (hIdL₁ FunTwoCat)) refl Id⟨ M ⟩ x ⟩
+          ≡⟨ ≅-to-≡ $ subst₂-insert (sym (StrictTwoCategory.left-id FunTwoCat)) refl Id⟨ M ⟩ x ⟩
         nat-η (λ' FunTwoCat ([ P₁ ]₀ tt)) x ∎
     
     abstract
@@ -134,8 +134,8 @@ Monad→LaxTwoFunctor {ℓC₀} {ℓC₁} {C} {M} monad = record
         nat-η μP x ∘C nat-η ηP ([ M ]₀ x)
           ≡⟨ Monad.η-right-coher monad ⟩
         Category.id C -- η Id⟨ M ⟩ x
-          ≡⟨ ≅-to-≡ $ subst₂-insert (sym (hIdR₁ FunTwoCat)) refl Id⟨ M ⟩ x ⟩
-        nat-η (subst₂ NaturalTransformation (sym (hIdR₁ FunTwoCat)) refl Id⟨ M ⟩) x
+          ≡⟨ ≅-to-≡ $ subst₂-insert (sym (StrictTwoCategory.right-id FunTwoCat)) refl Id⟨ M ⟩ x ⟩
+        nat-η (subst₂ NaturalTransformation (sym (StrictTwoCategory.right-id FunTwoCat)) refl Id⟨ M ⟩) x
           ≡⟨ refl ⟩
         nat-η (ρ FunTwoCat ([ P₁ ]₀ tt)) x ∎
     
@@ -144,7 +144,7 @@ Monad→LaxTwoFunctor {ℓC₀} {ℓC₁} {C} {M} monad = record
                   → {f : Cell₁ ⊤-TwoCat w x} {g : Cell₁ ⊤-TwoCat x y} {h : Cell₁ ⊤-TwoCat y z} 
                   → (x : Obj C)
                   → Category.id C ∘C (nat-η μP x ∘C (Category.id C ∘C [ M ]₁ (nat-η μP x) ))
-                  ≡ nat-η μP x ∘C (( nat-η μP ([ M ]₀ x) ∘C [ M ]₁ ([ M ]₁ (Category.id C)) ) ∘C nat-η (subst₂ NaturalTransformation refl (hAssoc₁ FunTwoCat {f = M} {M} {M}) Id⟨ [ M ]∘[ [ M ]∘[ M ] ] ⟩) x)
+                  ≡ nat-η μP x ∘C (( nat-η μP ([ M ]₀ x) ∘C [ M ]₁ ([ M ]₁ (Category.id C)) ) ∘C nat-η (subst₂ NaturalTransformation refl (StrictTwoCategory.assoc FunTwoCat {f = M} {M} {M}) Id⟨ [ M ]∘[ [ M ]∘[ M ] ] ⟩) x)
       laxFunAssoc {tt} {tt} {tt} {tt} {tt} {tt} {tt} x = begin 
         Category.id C ∘C (nat-η μP x ∘C (Category.id C ∘C [ M ]₁ (nat-η μP x) ))
           ≡⟨ right-id C ⟩
@@ -161,6 +161,6 @@ Monad→LaxTwoFunctor {ℓC₀} {ℓC₁} {C} {M} monad = record
         nat-η μP x ∘C ( nat-η μP ([ M ]₀ x) ∘C [ M ]₁ ([ M ]₁ (Category.id C)) )
           ≡⟨ cong (λ X → nat-η μP x ∘C X) (sym (left-id C)) ⟩
         nat-η μP x ∘C (( nat-η μP ([ M ]₀ x) ∘C [ M ]₁ ([ M ]₁ (Category.id C)) ) ∘C Category.id C)
-          ≡⟨ cong (λ X → nat-η μP x ∘C (( nat-η μP ([ M ]₀ x) ∘C [ M ]₁ ([ M ]₁ (Category.id C)) ) ∘C X)) (≅-to-≡ $ subst₂-insert refl (hAssoc₁ FunTwoCat {f = M} {M} {M}) Id⟨ [ M ]∘[ [ M ]∘[ M ] ] ⟩ x) ⟩
-        nat-η μP x ∘C (( nat-η μP ([ M ]₀ x) ∘C [ M ]₁ ([ M ]₁ (Category.id C)) ) ∘C nat-η (subst₂ NaturalTransformation refl (hAssoc₁ FunTwoCat {f = M} {M} {M}) Id⟨ [ M ]∘[ [ M ]∘[ M ] ] ⟩) x) ∎
+          ≡⟨ cong (λ X → nat-η μP x ∘C (( nat-η μP ([ M ]₀ x) ∘C [ M ]₁ ([ M ]₁ (Category.id C)) ) ∘C X)) (≅-to-≡ $ subst₂-insert refl (StrictTwoCategory.assoc FunTwoCat {f = M} {M} {M}) Id⟨ [ M ]∘[ [ M ]∘[ M ] ] ⟩ x) ⟩
+        nat-η μP x ∘C (( nat-η μP ([ M ]₀ x) ∘C [ M ]₁ ([ M ]₁ (Category.id C)) ) ∘C nat-η (subst₂ NaturalTransformation refl (StrictTwoCategory.assoc FunTwoCat {f = M} {M} {M}) Id⟨ [ M ]∘[ [ M ]∘[ M ] ] ⟩) x) ∎
 

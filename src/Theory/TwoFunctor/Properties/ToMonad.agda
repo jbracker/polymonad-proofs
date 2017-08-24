@@ -62,7 +62,7 @@ LaxTwoFunctor→Monad {ℓC₀} {ℓC₁} F = record
     
     _∘C_ = Category._∘_ C
     _∘V_ = StrictTwoCategory._∘ᵥ_ FunTwoCat
-    _∘H2_ = StrictTwoCategory._∘ₕ₂_ FunTwoCat
+    _∘H2_ = StrictTwoCategory._∘ₕ_ FunTwoCat
     
     open Category
     
@@ -92,8 +92,8 @@ LaxTwoFunctor→Monad {ℓC₀} {ℓC₁} F = record
           ≡⟨ laxFunAssoc x ⟩
         μ x ∘C ( ( μ ([ M ]₀ x) ∘C [ M ]₁ ([ M ]₁ (id C)) ) ∘C natη (α FunTwoCat M M M) x )
           ≡⟨ refl ⟩
-        μ x ∘C (( μ ([ M ]₀ x) ∘C [ M ]₁ ([ M ]₁ (id C)) ) ∘C natη (subst₂ NaturalTransformation refl (hAssoc₁ FunTwoCat {f = M} {M} {M}) Id⟨ [ M ]∘[ [ M ]∘[ M ] ] ⟩) x)
-          ≡⟨ cong (λ X → μ x ∘C (( μ ([ M ]₀ x) ∘C [ M ]₁ ([ M ]₁ (id C)) ) ∘C X)) (sym $ ≅-to-≡ $ subst₂-insert refl (hAssoc₁ FunTwoCat {f = M} {M} {M}) Id⟨ [ M ]∘[ [ M ]∘[ M ] ] ⟩ x) ⟩
+        μ x ∘C (( μ ([ M ]₀ x) ∘C [ M ]₁ ([ M ]₁ (id C)) ) ∘C natη (subst₂ NaturalTransformation refl (StrictTwoCategory.assoc FunTwoCat {f = M} {M} {M}) Id⟨ [ M ]∘[ [ M ]∘[ M ] ] ⟩) x)
+          ≡⟨ cong (λ X → μ x ∘C (( μ ([ M ]₀ x) ∘C [ M ]₁ ([ M ]₁ (id C)) ) ∘C X)) (sym $ ≅-to-≡ $ subst₂-insert refl (StrictTwoCategory.assoc FunTwoCat {f = M} {M} {M}) Id⟨ [ M ]∘[ [ M ]∘[ M ] ] ⟩ x) ⟩
         μ x ∘C (( μ ([ M ]₀ x) ∘C [ M ]₁ ([ M ]₁ (id C)) ) ∘C id C)
           ≡⟨ cong (λ X → μ x ∘C X) (left-id C) ⟩
         μ x ∘C ( μ ([ M ]₀ x) ∘C [ M ]₁ ([ M ]₁ (id C)) )
@@ -125,7 +125,7 @@ LaxTwoFunctor→Monad {ℓC₀} {ℓC₁} F = record
         natη ([ LaxTwoFunctor.P₁ F ]₁ tt) x ∘C (μ x ∘C (id C ∘C [ M ]₁ (η x)))
           ≡⟨ laxFunId₁ x ⟩
         natη (λ' FunTwoCat M) x
-          ≡⟨ sym $ ≅-to-≡ $ subst₂-insert (sym (hIdL₁ FunTwoCat)) refl Id⟨ M ⟩ x ⟩
+          ≡⟨ sym $ ≅-to-≡ $ subst₂-insert (sym (StrictTwoCategory.left-id FunTwoCat)) refl Id⟨ M ⟩ x ⟩
         nat-η Id⟨ M ⟩ x ∎
 
     abstract
@@ -149,6 +149,6 @@ LaxTwoFunctor→Monad {ℓC₀} {ℓC₁} F = record
         natη ([ LaxTwoFunctor.P₁ F ]₁ tt) x ∘C (μ x ∘C (η ([ M ]₀ x) ∘C id C))
           ≡⟨ laxFunId₂ x ⟩
         natη (ρ FunTwoCat M) x
-          ≡⟨ sym $ ≅-to-≡ $ subst₂-insert (sym (hIdR₁ FunTwoCat)) refl Id⟨ M ⟩ x ⟩
+          ≡⟨ sym $ ≅-to-≡ $ subst₂-insert (sym (StrictTwoCategory.right-id FunTwoCat)) refl Id⟨ M ⟩ x ⟩
         nat-η Id⟨ M ⟩ x ∎
 

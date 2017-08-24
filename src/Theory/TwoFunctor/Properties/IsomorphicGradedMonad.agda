@@ -36,7 +36,7 @@ open import Theory.TwoFunctor.Properties.ToGradedMonad
 
 module Theory.TwoFunctor.Properties.IsomorphicGradedMonad where
 
-open StrictTwoCategory
+open StrictTwoCategory hiding ( right-id ; left-id ; assoc )
 
 private
   Cat' = Cat {suc zero} {zero}

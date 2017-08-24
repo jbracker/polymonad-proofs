@@ -22,12 +22,12 @@ discreteHomCatTwoCategory {ℓObj} {ℓHom} C = record
   ; HomCat = HomCat
   ; comp = comp
   ; id₁ = id₁
-  ; horizontalIdL₁ = left-id C
-  ; horizontalIdL₂ = hIdL₂
-  ; horizontalIdR₁ = right-id C
-  ; horizontalIdR₂ = hIdR₂
-  ; horizontalAssoc₁ = assoc C
-  ; horizontalAssoc₂ = hAss₂
+  ; left-id = Category.left-id C
+  ; horizontal-left-id = hIdL₂
+  ; right-id = Category.right-id C
+  ; horizontal-right-id = hIdR₂
+  ; assoc = Category.assoc C
+  ; horizontal-assoc = hAss₂
   } where
     open Category
 

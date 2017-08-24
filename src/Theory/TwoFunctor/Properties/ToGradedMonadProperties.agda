@@ -116,7 +116,7 @@ abstract
              → join (fmap join ma) ≅ join (join (fmap (fmap (λ x → x)) ma))
   join-assoc {i} {j} {k} x ma = hbegin
     (M (k ∘Eff (j ∘Eff i)) x ∋ join (fmap join ma) )
-      ≅⟨ hsym (subst-refl-id' (hAssoc₁ MonCat₂) (join (fmap join ma))) ⟩
+      ≅⟨ hsym (subst-refl-id' (StrictTwoCategory.assoc MonCat₂) (join (fmap join ma))) ⟩
     (M ((k ∘Eff j) ∘Eff i) x ∋ nat-η ([ P₁ ]₁ (α MonCat₂ i j k)) x (join (fmap join ma)) )
       ≅⟨ ≡-to-≅ (η-lax-assoc x ma) ⟩
     (M ((k ∘Eff j) ∘Eff i) x ∋ join (join (fmap (fmap (λ x → x)) (nat-η (α Cat' ([ P₁ ]₀ i) ([ P₁ ]₀ j) ([ P₁ ]₀ k)) x ma))) )
@@ -129,7 +129,7 @@ abstract
     (M (ε ∘Eff i) x ∋ join {x} (return ma))
       ≅⟨ hrefl ⟩
     (M (ε ∘Eff i) x ∋ nat-η (Id⟨ [ P₁ {lift tt} {lift tt} ]₀ (ε ∘Eff i) ⟩) x (join {x} (return ma)) )
-      ≅⟨ hsym (subst-refl-id (sym (hIdR₁ MonCat₂)) (join (return ma))) ⟩
+      ≅⟨ hsym (subst-refl-id (sym (StrictTwoCategory.right-id MonCat₂)) (join (return ma))) ⟩
     (M i x ∋ nat-η ([ P₁ ]₁ (ρ MonCat₂ i)) x (join {x} (return ma)) )
       ≅⟨ ≡-to-≅ $ η-lax-id₂ x ma ⟩ -- η-lax-id₂ x 
     (M i x ∋ nat-η (ρ Cat' ([ P₁ ]₀ i)) x ma)

@@ -137,7 +137,7 @@ RelativeMonad→LaxTwoFunctor {ℓ₀} {ℓ₁} {C} {D} {T} {J} M = record
         fun-id {()}
         
         fun-compose : {a b c : Obj (HomCat RelIxCat₂ two one)} {f : Hom (HomCat RelIxCat₂ two one) a b} {g : Hom (HomCat RelIxCat₂ two one) b c}
-                    → F₁ ((HomCat RelIxCat₂ two one ∘ g) f) ≡ (HomCat Cat' D C ∘ F₁ g) (F₁ f)
+                    → F₁ (Category._∘_ (HomCat RelIxCat₂ two one) g f) ≡ ⟨ F₁ g ⟩∘ᵥ⟨ F₁ f ⟩
         fun-compose {()} {()} {()}
     
     P₁ : {x y : Binary} → Functor (HomCat RelIxCat₂ x y) (HomCat Cat' (P₀ x) (P₀ y))
@@ -154,7 +154,7 @@ RelativeMonad→LaxTwoFunctor {ℓ₀} {ℓ₁} {C} {D} {T} {J} M = record
         F₁ {one} {.one} refl = Id⟨ J ⟩
         F₁ {two} {.two} refl = Id⟨ RelativeMonad.FunctorT M ⟩
         
-        _∘D_ = _∘_ D
+        _∘D_ = Category._∘_ D
         
         fun-id : {a : Obj (HomCat RelIxCat₂ one two)} → F₁ {a} {a} (id (HomCat RelIxCat₂ one two)) ≡ id (HomCat Cat' C D)
         fun-id {one} = refl
@@ -162,7 +162,7 @@ RelativeMonad→LaxTwoFunctor {ℓ₀} {ℓ₁} {C} {D} {T} {J} M = record
         
         fun-compose : {a b c : Obj (HomCat RelIxCat₂ one two)} 
                     → {f : Hom (HomCat RelIxCat₂ one two) a b} {g : Hom (HomCat RelIxCat₂ one two) b c}
-                    → F₁ ((HomCat RelIxCat₂ one two ∘ g) f) ≡ (HomCat Cat' C D ∘ F₁ g) (F₁ f)
+                    → F₁ (Category._∘_ (HomCat RelIxCat₂ one two) g f) ≡ ⟨ F₁ g ⟩∘ᵥ⟨ F₁ f ⟩
         fun-compose {one} {._} {._} {refl} {refl} = natural-transformation-eq (fun-ext (λ x → sym (right-id D)))
         fun-compose {two} {._} {._} {refl} {refl} = natural-transformation-eq (fun-ext (λ x → sym (right-id D)))
     

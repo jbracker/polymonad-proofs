@@ -37,12 +37,12 @@ functorTwoCategory {ℓObj} {ℓHom} = record
   ; HomCat = HomCat
   ; comp = λ {A} {B} {C} → comp {A = A} {B} {C}
   ; id₁ = id₁
-  ; horizontalIdR₁ = λ {A} {B} {F} → horizontalIdR₁ {A = A} {B} {F}
-  ; horizontalIdR₂ = λ {A} {B} {F} {G} {α} → horizontalIdR₂ {A = A} {B} {F} {G} {α}
-  ; horizontalIdL₁ = λ {A} {B} {F} → horizontalIdL₁ {A = A} {B} {F}
-  ; horizontalIdL₂ = λ {A} {B} {F} {G} {α} → horizontalIdL₂ {A = A} {B} {F} {G} {α}
-  ; horizontalAssoc₁ = λ {A} {B} {C} {D} {F} {G} {H} → horizontalAssoc₁ {ℓB₀ = ℓObj} {ℓHom} {ℓObj} {ℓHom} {A = A} {B} {C} {D} {F} {G} {H}
-  ; horizontalAssoc₂ = λ {A} {B} {C} {D} {F} {F'} {G} {G'} {H} {H'} {α} {β} {γ} → horizontalAssoc₂ {A = A} {B} {C} {D} {F} {F'} {G} {G'} {H} {H'} {α} {β} {γ}
+  ; right-id = λ {A} {B} {F} → horizontalIdR₁ {A = A} {B} {F}
+  ; horizontal-right-id = λ {A} {B} {F} {G} {α} → horizontalIdR₂ {A = A} {B} {F} {G} {α}
+  ; left-id = λ {A} {B} {F} → horizontalIdL₁ {A = A} {B} {F}
+  ; horizontal-left-id = λ {A} {B} {F} {G} {α} → horizontalIdL₂ {A = A} {B} {F} {G} {α}
+  ; assoc = λ {A} {B} {C} {D} {F} {G} {H} → horizontalAssoc₁ {ℓB₀ = ℓObj} {ℓHom} {ℓObj} {ℓHom} {A = A} {B} {C} {D} {F} {G} {H}
+  ; horizontal-assoc = λ {A} {B} {C} {D} {F} {F'} {G} {G'} {H} {H'} {α} {β} {γ} → horizontalAssoc₂ {A = A} {B} {C} {D} {F} {F'} {G} {G'} {H} {H'} {α} {β} {γ}
   } where
     open Category renaming ( id to idC )
     

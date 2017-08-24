@@ -23,12 +23,12 @@ codiscreteHomCatTwoCategory {ℓObj} {ℓHom} C = record
   ; HomCat = HomCat
   ; comp = comp
   ; id₁ = id₁
-  ; horizontalIdL₁ = left-id C
-  ; horizontalIdL₂ = refl
-  ; horizontalIdR₁ = right-id C
-  ; horizontalIdR₂ = refl
-  ; horizontalAssoc₁ = assoc C
-  ; horizontalAssoc₂ = refl
+  ; left-id = left-id C
+  ; horizontal-left-id = refl
+  ; right-id = right-id C
+  ; horizontal-right-id = refl
+  ; assoc = assoc C
+  ; horizontal-assoc = refl
   } where
     open Category
 

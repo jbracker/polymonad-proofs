@@ -34,7 +34,7 @@ open import Theory.TwoFunctor.ConstZeroCell
 module Theory.TwoFunctor.Properties.FromGradedMonad where
 
 open Category hiding ( right-id ; left-id ; assoc ) renaming ( id to idC )
-open StrictTwoCategory
+open StrictTwoCategory hiding ( right-id ; left-id ; assoc )
 open Triple
 
 GradedMonad→LaxTwoFunctor
@@ -80,7 +80,7 @@ GradedMonad→LaxTwoFunctor {ℓ} {Eff} {monoid} M monad = record
         abstract
           compose : {a b c : Obj (HomCat monCat₂ (lift tt) (lift tt))}
                   → {f : Hom (HomCat monCat₂ (lift tt) (lift tt)) a b} {g : Hom (HomCat monCat₂ (lift tt) (lift tt)) b c}
-                  → P₁ ((HomCat monCat₂ (lift tt) (lift tt) ∘ g) f) ≡ (HomCat Cat' Hask Hask ∘ P₁ g) (P₁ f)
+                  → P₁ (Category._∘_ (HomCat monCat₂ (lift tt) (lift tt)) g f) ≡ ⟨ P₁ g ⟩∘ᵥ⟨ P₁ f ⟩
           compose {a} {.a} {.a} {refl} {refl} = sym (Category.left-id (HomCat Cat' Hask Hask))
     
     η : NaturalTransformation Id[ Hask' ] ([ P ]₀ ε)
@@ -125,7 +125,7 @@ GradedMonad→LaxTwoFunctor {ℓ} {Eff} {monoid} M monad = record
                  → (f : Cell₁ (discreteHomCatTwoCategory (monoidCategory monoid)) a b)
                  → {x y : Cell₁ (discreteHomCatTwoCategory (monoidCategory monoid)) b c}
                  → {α : x ≡ y}
-                 → ⟨ [ P ]₁ ((discreteHomCatTwoCategory (monoidCategory monoid) ∘ₕ₂ α) refl) ⟩∘ᵥ⟨ μ ⟩
+                 → ⟨ [ P ]₁ ((discreteHomCatTwoCategory (monoidCategory monoid) ∘ₕ α) refl) ⟩∘ᵥ⟨ μ ⟩
                  ≡ ⟨ μ ⟩∘ᵥ⟨ ⟨ [ P ]₁ α ⟩∘ₕ⟨ [ P ]₁ refl ⟩ ⟩
       μ-natural₁ {lift tt} {lift tt} {lift tt} f {x} {y} {refl} 
         = natural-transformation-eq $ fun-ext $ λ (c : Obj Hask') → cong (λ X → nat-η μ c ∘F X) (sym (Functor.id (F x)))
@@ -135,8 +135,8 @@ GradedMonad→LaxTwoFunctor {ℓ} {Eff} {monoid} M monad = record
                  → (g : Cell₁ (discreteHomCatTwoCategory (monoidCategory monoid)) b c)
                  → {x y : Cell₁ (discreteHomCatTwoCategory (monoidCategory monoid)) a b}
                  → {α : x ≡ y} 
-                 → ⟨ [ P ]₁ ((discreteHomCatTwoCategory (monoidCategory monoid) ∘ₕ₂ refl) α) ⟩∘ᵥ⟨ μ ⟩
-                 ≡ (Cat ∘ᵥ μ) ((Cat ∘ₕ₂ [ P ]₁ refl) ([ P ]₁ α))
+                 → ⟨ [ P ]₁ ((discreteHomCatTwoCategory (monoidCategory monoid) ∘ₕ refl) α) ⟩∘ᵥ⟨ μ ⟩
+                 ≡ (Cat ∘ᵥ μ) ((Cat ∘ₕ [ P ]₁ refl) ([ P ]₁ α))
       μ-natural₂ {lift tt} {lift tt} {lift tt} g {x} {y} {refl}
         = natural-transformation-eq $ fun-ext $ λ (c : Obj Hask') → cong (λ X → nat-η μ c ∘F X) (sym (Functor.id (F g)))
     
@@ -147,7 +147,7 @@ GradedMonad→LaxTwoFunctor {ℓ} {Eff} {monoid} M monad = record
         nat-η (⟨ [ P ]₁ (λ' monCat₂ i) ⟩∘ᵥ⟨ ⟨ μ ⟩∘ᵥ⟨ ⟨ id₂ Cat' {f = F i} ⟩∘ₕ⟨ η ⟩ ⟩ ⟩) α ma
           ≅⟨ hrefl ⟩
         (M i α                   ∋ nat-η ([ P ]₁ (λ' monCat₂ i)) α (fmap return ma >>= (λ x → x)))
-          ≅⟨ subst-refl-id (sym $ hIdL₁ monCat₂ {lift tt} {lift tt} {i}) (fmap return ma >>= (λ x → x)) ⟩
+          ≅⟨ subst-refl-id (sym $ StrictTwoCategory.left-id monCat₂ {lift tt} {lift tt} {i}) (fmap return ma >>= (λ x → x)) ⟩
         (M (i ∘Eff ε) α          ∋ nat-η (Id⟨ F (i ∘Eff ε) ⟩) α (fmap return ma >>= (λ x → x)))
           ≅⟨ hrefl ⟩
         (M (i ∘Eff ε) α          ∋ fmap return ma >>= (λ x → x))
@@ -167,7 +167,7 @@ GradedMonad→LaxTwoFunctor {ℓ} {Eff} {monoid} M monad = record
                 → ⟨ [ P ]₁ (ρ monCat₂ i) ⟩∘ᵥ⟨ ⟨ μ ⟩∘ᵥ⟨ ⟨ η ⟩∘ₕ⟨ Id⟨ F i ⟩ ⟩ ⟩ ⟩ ≡ ρ Cat' ([ P ]₀ i)
       lawFunId₂ {lift tt} {lift tt} {i} = natural-transformation-eq $ fun-ext $ λ (α : Type) → fun-ext $ λ (ma : M i α) → ≅-to-≡ $ hbegin
         (M i α          ∋ nat-η ([ P ]₁ (ρ monCat₂ i)) α (join (return ma)))
-          ≅⟨ subst-refl-id (sym $ hIdR₁ monCat₂ {lift tt} {lift tt} {i}) (join (return ma)) ⟩
+          ≅⟨ subst-refl-id (sym $ StrictTwoCategory.right-id monCat₂ {lift tt} {lift tt} {i}) (join (return ma)) ⟩
         (M (ε ∘Eff i) α ∋ nat-η (Id⟨ F (ε ∘Eff i) ⟩) α (join (return ma)))
           ≅⟨ hrefl ⟩
         (M (ε ∘Eff i) α ∋ return ma >>= (λ x → x))
@@ -189,7 +189,7 @@ GradedMonad→LaxTwoFunctor {ℓ} {Eff} {monoid} M monad = record
         nat-η (⟨ [ P ]₁ (α monCat₂ i j k) ⟩∘ᵥ⟨ ⟨ μ {k} {j ∘Eff i} ⟩∘ᵥ⟨ ⟨ id₂ Cat {f = F k} ⟩∘ₕ⟨ μ {j} {i} ⟩ ⟩ ⟩) β ma
           ≅⟨ hrefl ⟩
         (M ((k ∘Eff j) ∘Eff i) β ∋ nat-η ([ P ]₁ (α monCat₂ i j k)) β (join {β} {k} {j ∘Eff i} (fmap (join {β} {j} {i}) ma)))
-          ≅⟨ subst-refl-id' (hAssoc₁ monCat₂ {f = i} {j} {k}) (join {β} {k} {j ∘Eff i} (fmap (join {β} {j} {i}) ma)) ⟩
+          ≅⟨ subst-refl-id' (StrictTwoCategory.assoc monCat₂ {f = i} {j} {k}) (join {β} {k} {j ∘Eff i} (fmap (join {β} {j} {i}) ma)) ⟩
         (M (k ∘Eff (j ∘Eff i)) β ∋ join {β} {k} {j ∘Eff i} (fmap (join {β} {j} {i}) ma))
           ≅⟨ hrefl ⟩
         (M (k ∘Eff (j ∘Eff i)) β ∋ fmap (join {β} {j} {i}) ma >>= (λ x → x))

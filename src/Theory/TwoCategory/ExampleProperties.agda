@@ -48,8 +48,8 @@ abstract
                 → (H : Functor C D)
                 → StrictTwoCategory.α (functorTwoCategory {ℓObj} {ℓHom}) F G H ≡ functorAssociator H G F
   associator-eq {ℓObj} {ℓHom} {A} {B} {C} {D} F G H = natural-transformation-eq $ fun-ext $ λ (x : Obj A) → begin
-    η (subst₂ NaturalTransformation refl (hAssoc₁ (functorTwoCategory {ℓObj} {ℓHom})) (Id⟨ [ H ]∘[ [ G ]∘[ F ] ] ⟩)) x
-      ≡⟨ helper Id⟨ [ H ]∘[ [ G ]∘[ F ] ] ⟩ (hAssoc₁ (functorTwoCategory {ℓObj} {ℓHom})) x refl ⟩
+    η (subst₂ NaturalTransformation refl (assoc (functorTwoCategory {ℓObj} {ℓHom})) (Id⟨ [ H ]∘[ [ G ]∘[ F ] ] ⟩)) x
+      ≡⟨ helper Id⟨ [ H ]∘[ [ G ]∘[ F ] ] ⟩ (assoc (functorTwoCategory {ℓObj} {ℓHom})) x refl ⟩
     subst₂ (Hom D) refl refl (η (Id⟨ [ H ]∘[ [ G ]∘[ F ] ] ⟩) x)
       ≡⟨ refl ⟩
     Category.id D {[ H ]₀ ([ G ]₀ ([ F ]₀ x))} ∎
@@ -71,8 +71,8 @@ abstract
   het-cat-λ-id {ℓ} {F} a x = hbegin
     nat-η (λ' Cat F) a x
       ≅⟨ hrefl ⟩
-    nat-η (subst₂ NaturalTransformation (sym $ hIdL₁ Cat {SetCat {ℓ}} {SetCat {ℓ}} {F}) refl (Id⟨ F ⟩)) a x
-      ≅⟨ nat-helper (sym $ hIdL₁ Cat {SetCat {ℓ}} {SetCat {ℓ}} {F}) a x ⟩
+    nat-η (subst₂ NaturalTransformation (sym $ left-id Cat {SetCat {ℓ}} {SetCat {ℓ}} {F}) refl (Id⟨ F ⟩)) a x
+      ≅⟨ nat-helper (sym $ left-id Cat {SetCat {ℓ}} {SetCat {ℓ}} {F}) a x ⟩
     x ∎h
 
 abstract
@@ -80,8 +80,8 @@ abstract
   het-cat-ρ-id {ℓ} {F} a x = hbegin
     nat-η (ρ Cat F) a x 
       ≅⟨ hrefl ⟩
-    nat-η (subst₂ NaturalTransformation (sym $ hIdR₁ Cat {SetCat {ℓ}} {SetCat {ℓ}} {F}) refl (Id⟨ F ⟩)) a x
-      ≅⟨ nat-helper (sym $ hIdR₁ Cat {SetCat {ℓ}} {SetCat {ℓ}} {F}) a x ⟩
+    nat-η (subst₂ NaturalTransformation (sym $ right-id Cat {SetCat {ℓ}} {SetCat {ℓ}} {F}) refl (Id⟨ F ⟩)) a x
+      ≅⟨ nat-helper (sym $ right-id Cat {SetCat {ℓ}} {SetCat {ℓ}} {F}) a x ⟩
     x ∎h
 
 private
@@ -96,8 +96,8 @@ abstract
                 → (c : Obj C) → id C ≡ nat-η (λ' Cat F) c
   cat-λ-id {C = C} {F} c = begin
     id C {[ F ]₀ c}
-      ≡⟨ ≅-to-≡ $ nat-subst-elim (id₂ Cat {C} {C}) (sym $ hIdL₁ Cat {a = C} {C} {F}) c ⟩
-    nat-η (subst₂ (Cell₂ Cat) (sym $ hIdL₁ Cat {a = C} {C} {F}) refl (id₂ Cat {C} {C})) c
+      ≡⟨ ≅-to-≡ $ nat-subst-elim (id₂ Cat {C} {C}) (sym $ left-id Cat {a = C} {C} {F}) c ⟩
+    nat-η (subst₂ (Cell₂ Cat) (sym $ left-id Cat {a = C} {C} {F}) refl (id₂ Cat {C} {C})) c
       ≡⟨⟩
     nat-η (λ' Cat F) c ∎
   
@@ -105,8 +105,8 @@ abstract
                 → (c : Obj C) → id C ≡ nat-η (ρ Cat F) c
   cat-ρ-id {C = C} {F} c = begin
     id C {[ F ]₀ c}
-      ≡⟨ ≅-to-≡ $ nat-subst-elim (id₂ Cat {C} {C}) (sym $ hIdR₁ Cat {a = C} {C} {F}) c ⟩
-    nat-η (subst₂ (Cell₂ Cat) (sym $ hIdR₁ Cat {a = C} {C} {F}) refl (id₂ Cat {C} {C})) c
+      ≡⟨ ≅-to-≡ $ nat-subst-elim (id₂ Cat {C} {C}) (sym $ right-id Cat {a = C} {C} {F}) c ⟩
+    nat-η (subst₂ (Cell₂ Cat) (sym $ right-id Cat {a = C} {C} {F}) refl (id₂ Cat {C} {C})) c
       ≡⟨⟩
     nat-η (ρ Cat F) c ∎
 
@@ -117,7 +117,7 @@ abstract
   het-cat-α-id {ℓ} {F} {G} {H} x y = hbegin
     nat-η (α Cat F G H) x y
       ≅⟨ hrefl ⟩
-    nat-η (subst₂ NaturalTransformation refl (hAssoc₁ Cat {f = F} {G} {H}) (Id⟨ [ H ]∘[ [ G ]∘[ F ] ] ⟩) ) x y
-      ≅⟨ nat-helper2 (hAssoc₁ Cat {f = F} {G} {H}) x y ⟩
+    nat-η (subst₂ NaturalTransformation refl (assoc Cat {f = F} {G} {H}) (Id⟨ [ H ]∘[ [ G ]∘[ F ] ] ⟩) ) x y
+      ≅⟨ nat-helper2 (assoc Cat {f = F} {G} {H}) x y ⟩
     y ∎h
 

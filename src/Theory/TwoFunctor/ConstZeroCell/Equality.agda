@@ -1,6 +1,6 @@
 
 open import Level
-open import Function
+open import Function renaming ( _∘_ to _∘F_ )
 
 open import Relation.Binary.PropositionalEquality
 open import Relation.Binary.HeterogeneousEquality renaming ( refl to hrefl ; proof-irrelevance to het-proof-irrelevance )
@@ -13,7 +13,7 @@ open import Theory.TwoCategory.Definition
 open import Theory.TwoFunctor.Definition
 open import Theory.TwoFunctor.ConstZeroCell
 
-open Category
+open Category hiding ( _∘_ )
 open StrictTwoCategory
 
 module Theory.TwoFunctor.ConstZeroCell.Equality where
@@ -27,28 +27,28 @@ abstract
                            → {P₁₁ : {x y : Cell₀ C} → Functor (HomCat C x y) (HomCat D constD constD)}
                            → {η₀ : {x : Cell₀ C} → Cell₂ D (id₁ D {constD}) ([ P₁₀ {x} {x} ]₀ (id₁ C {x}))}
                            → {η₁ : {x : Cell₀ C} → Cell₂ D (id₁ D {constD}) ([ P₁₁ {x} {x} ]₀ (id₁ C {x}))}
-                           → {μ₀ : {x y z : Cell₀ C} {f : Cell₁ C x y} {g : Cell₁ C y z} → Cell₂ D (_∘ₕ_ D ([ P₁₀ ]₀ g) ([ P₁₀ ]₀ f)) ([ P₁₀ ]₀ (_∘ₕ_ C g f))}
-                           → {μ₁ : {x y z : Cell₀ C} {f : Cell₁ C x y} {g : Cell₁ C y z} → Cell₂ D (_∘ₕ_ D ([ P₁₁ ]₀ g) ([ P₁₁ ]₀ f)) ([ P₁₁ ]₀ (_∘ₕ_ C g f))}
-                           → {lfi₁₀ : {x y : Cell₀ C} {f : Cell₁ C x y} → _∘ᵥ_ D ([ P₁₀ {x} {y} ]₁ (λ' C f)) (_∘ᵥ_ D (μ₀ {x} {x} {y} {id₁ C {x}} {f}) (_∘ₕ₂_ D (id₂ D {f = [ P₁₀ {x} {y} ]₀ f}) (η₀ {x})) ) ≡ λ' D ([ P₁₀ {x} {y} ]₀ f)}
-                           → {lfi₁₁ : {x y : Cell₀ C} {f : Cell₁ C x y} → _∘ᵥ_ D ([ P₁₁ {x} {y} ]₁ (λ' C f)) (_∘ᵥ_ D (μ₁ {x} {x} {y} {id₁ C {x}} {f}) (_∘ₕ₂_ D (id₂ D {f = [ P₁₁ {x} {y} ]₀ f}) (η₁ {x})) ) ≡ λ' D ([ P₁₁ {x} {y} ]₀ f)}
-                           → {lfi₂₀ : {x y : Cell₀ C} {f : Cell₁ C x y} → _∘ᵥ_ D ([ P₁₀ {x} {y} ]₁ (ρ C f)) (_∘ᵥ_ D (μ₀ {x} {y} {y} {f} {id₁ C {y}}) (_∘ₕ₂_ D (η₀ {y}) (id₂ D {f = [ P₁₀ {x} {y} ]₀ f})) ) ≡ ρ D ([ P₁₀ {x} {y} ]₀ f)}
-                           → {lfi₂₁ : {x y : Cell₀ C} {f : Cell₁ C x y} → _∘ᵥ_ D ([ P₁₁ {x} {y} ]₁ (ρ C f)) (_∘ᵥ_ D (μ₁ {x} {y} {y} {f} {id₁ C {y}}) (_∘ₕ₂_ D (η₁ {y}) (id₂ D {f = [ P₁₁ {x} {y} ]₀ f})) ) ≡ ρ D ([ P₁₁ {x} {y} ]₀ f)}
+                           → {μ₀ : {x y z : Cell₀ C} {f : Cell₁ C x y} {g : Cell₁ C y z} → Cell₂ D (_∘_ D ([ P₁₀ ]₀ g) ([ P₁₀ ]₀ f)) ([ P₁₀ ]₀ (_∘_ C g f))}
+                           → {μ₁ : {x y z : Cell₀ C} {f : Cell₁ C x y} {g : Cell₁ C y z} → Cell₂ D (_∘_ D ([ P₁₁ ]₀ g) ([ P₁₁ ]₀ f)) ([ P₁₁ ]₀ (_∘_ C g f))}
+                           → {lfi₁₀ : {x y : Cell₀ C} {f : Cell₁ C x y} → _∘ᵥ_ D ([ P₁₀ {x} {y} ]₁ (λ' C f)) (_∘ᵥ_ D (μ₀ {x} {x} {y} {id₁ C {x}} {f}) (_∘ₕ_ D (id₂ D {f = [ P₁₀ {x} {y} ]₀ f}) (η₀ {x})) ) ≡ λ' D ([ P₁₀ {x} {y} ]₀ f)}
+                           → {lfi₁₁ : {x y : Cell₀ C} {f : Cell₁ C x y} → _∘ᵥ_ D ([ P₁₁ {x} {y} ]₁ (λ' C f)) (_∘ᵥ_ D (μ₁ {x} {x} {y} {id₁ C {x}} {f}) (_∘ₕ_ D (id₂ D {f = [ P₁₁ {x} {y} ]₀ f}) (η₁ {x})) ) ≡ λ' D ([ P₁₁ {x} {y} ]₀ f)}
+                           → {lfi₂₀ : {x y : Cell₀ C} {f : Cell₁ C x y} → _∘ᵥ_ D ([ P₁₀ {x} {y} ]₁ (ρ C f)) (_∘ᵥ_ D (μ₀ {x} {y} {y} {f} {id₁ C {y}}) (_∘ₕ_ D (η₀ {y}) (id₂ D {f = [ P₁₀ {x} {y} ]₀ f})) ) ≡ ρ D ([ P₁₀ {x} {y} ]₀ f)}
+                           → {lfi₂₁ : {x y : Cell₀ C} {f : Cell₁ C x y} → _∘ᵥ_ D ([ P₁₁ {x} {y} ]₁ (ρ C f)) (_∘ᵥ_ D (μ₁ {x} {y} {y} {f} {id₁ C {y}}) (_∘ₕ_ D (η₁ {y}) (id₂ D {f = [ P₁₁ {x} {y} ]₀ f})) ) ≡ ρ D ([ P₁₁ {x} {y} ]₀ f)}
                            → {la₀ : {w x y z : Cell₀ C} {f : Cell₁ C w x} {g : Cell₁ C x y} {h : Cell₁ C y z} 
-                                  → _∘ᵥ_ D ([ P₁₀ {w} {z} ]₁ (α C f g h)) (_∘ᵥ_ D (μ₀ {w} {y} {z} {_∘ₕ_ C g f} {h}) (_∘ₕ₂_ D (id₂ D {constD} {constD} {[ P₁₀ {y} {z} ]₀ h}) (μ₀ {w} {x} {y} {f} {g})) ) 
-                                  ≡ _∘ᵥ_ D (μ₀ {w} {x} {z} {f} {_∘ₕ_ C h g}) 
-                                           (_∘ᵥ_ D (_∘ₕ₂_ D (μ₀ {x} {y} {z} {g} {h}) (id₂ D {constD} {constD} {[ P₁₀ {w} {x} ]₀ f})) (α D ([ P₁₀ {w} {x} ]₀ f) ([ P₁₀ {x} {y} ]₀ g) ([ P₁₀ {y} {z} ]₀ h)) )}
+                                  → _∘ᵥ_ D ([ P₁₀ {w} {z} ]₁ (α C f g h)) (_∘ᵥ_ D (μ₀ {w} {y} {z} {_∘_ C g f} {h}) (_∘ₕ_ D (id₂ D {constD} {constD} {[ P₁₀ {y} {z} ]₀ h}) (μ₀ {w} {x} {y} {f} {g})) ) 
+                                  ≡ _∘ᵥ_ D (μ₀ {w} {x} {z} {f} {_∘_ C h g}) 
+                                           (_∘ᵥ_ D (_∘ₕ_ D (μ₀ {x} {y} {z} {g} {h}) (id₂ D {constD} {constD} {[ P₁₀ {w} {x} ]₀ f})) (α D ([ P₁₀ {w} {x} ]₀ f) ([ P₁₀ {x} {y} ]₀ g) ([ P₁₀ {y} {z} ]₀ h)) )}
                            → {la₁ : {w x y z : Cell₀ C} {f : Cell₁ C w x} {g : Cell₁ C x y} {h : Cell₁ C y z} 
-                                  → _∘ᵥ_ D ([ P₁₁ {w} {z} ]₁ (α C f g h)) (_∘ᵥ_ D (μ₁ {w} {y} {z} {_∘ₕ_ C g f} {h}) (_∘ₕ₂_ D (id₂ D {constD} {constD} {[ P₁₁ {y} {z} ]₀ h}) (μ₁ {w} {x} {y} {f} {g})) ) 
-                                  ≡ _∘ᵥ_ D (μ₁ {w} {x} {z} {f} {_∘ₕ_ C h g}) 
-                                           (_∘ᵥ_ D (_∘ₕ₂_ D (μ₁ {x} {y} {z} {g} {h}) (id₂ D {constD} {constD} {[ P₁₁ {w} {x} ]₀ f})) (α D ([ P₁₁ {w} {x} ]₀ f) ([ P₁₁ {x} {y} ]₀ g) ([ P₁₁ {y} {z} ]₀ h)) )}
+                                  → _∘ᵥ_ D ([ P₁₁ {w} {z} ]₁ (α C f g h)) (_∘ᵥ_ D (μ₁ {w} {y} {z} {_∘_ C g f} {h}) (_∘ₕ_ D (id₂ D {constD} {constD} {[ P₁₁ {y} {z} ]₀ h}) (μ₁ {w} {x} {y} {f} {g})) ) 
+                                  ≡ _∘ᵥ_ D (μ₁ {w} {x} {z} {f} {_∘_ C h g}) 
+                                           (_∘ᵥ_ D (_∘ₕ_ D (μ₁ {x} {y} {z} {g} {h}) (id₂ D {constD} {constD} {[ P₁₁ {w} {x} ]₀ f})) (α D ([ P₁₁ {w} {x} ]₀ f) ([ P₁₁ {x} {y} ]₀ g) ([ P₁₁ {y} {z} ]₀ h)) )}
                            → {μnat₁₀ : {a b c : Cell₀ C} → (f : Cell₁ C a b) → {x y : Cell₁ C b c} {α : Cell₂ C x y} 
-                                     → _∘ᵥ_ D ([ P₁₀ ]₁ (_∘ₕ₂_ C α (id₂ C {a}))) (μ₀ {f = f} {x}) ≡ _∘ᵥ_ D (μ₀ {f = f} {y}) (_∘ₕ₂_ D ([ P₁₀ ]₁ α) ([ P₁₀ ]₁ (id₂ C {a})))}
+                                     → _∘ᵥ_ D ([ P₁₀ ]₁ (_∘ₕ_ C α (id₂ C {a}))) (μ₀ {f = f} {x}) ≡ _∘ᵥ_ D (μ₀ {f = f} {y}) (_∘ₕ_ D ([ P₁₀ ]₁ α) ([ P₁₀ ]₁ (id₂ C {a})))}
                            → {μnat₁₁ : {a b c : Cell₀ C} → (f : Cell₁ C a b) → {x y : Cell₁ C b c} {α : Cell₂ C x y} 
-                                     → _∘ᵥ_ D ([ P₁₁ ]₁ (_∘ₕ₂_ C α (id₂ C {a}))) (μ₁ {f = f} {x}) ≡ _∘ᵥ_ D (μ₁ {f = f} {y}) (_∘ₕ₂_ D ([ P₁₁ ]₁ α) ([ P₁₁ ]₁ (id₂ C {a})))}
+                                     → _∘ᵥ_ D ([ P₁₁ ]₁ (_∘ₕ_ C α (id₂ C {a}))) (μ₁ {f = f} {x}) ≡ _∘ᵥ_ D (μ₁ {f = f} {y}) (_∘ₕ_ D ([ P₁₁ ]₁ α) ([ P₁₁ ]₁ (id₂ C {a})))}
                            → {μnat₂₀ : {a b c : Cell₀ C} → (g : Cell₁ C b c) {x y : Cell₁ C a b} {α : Cell₂ C x y}
-                                     → _∘ᵥ_ D ([ P₁₀ ]₁ (_∘ₕ₂_ C (id₂ C {b}) α)) (μ₀ {f = x} {g}) ≡ _∘ᵥ_ D (μ₀ {f = y} {g}) (_∘ₕ₂_ D ([ P₁₀ ]₁ (id₂ C {b})) ([ P₁₀ ]₁ α))}
+                                     → _∘ᵥ_ D ([ P₁₀ ]₁ (_∘ₕ_ C (id₂ C {b}) α)) (μ₀ {f = x} {g}) ≡ _∘ᵥ_ D (μ₀ {f = y} {g}) (_∘ₕ_ D ([ P₁₀ ]₁ (id₂ C {b})) ([ P₁₀ ]₁ α))}
                            → {μnat₂₁ : {a b c : Cell₀ C} → (g : Cell₁ C b c) {x y : Cell₁ C a b} {α : Cell₂ C x y}
-                                     → _∘ᵥ_ D ([ P₁₁ ]₁ (_∘ₕ₂_ C (id₂ C {b}) α)) (μ₁ {f = x} {g}) ≡ _∘ᵥ_ D (μ₁ {f = y} {g}) (_∘ₕ₂_ D ([ P₁₁ ]₁ (id₂ C {b})) ([ P₁₁ ]₁ α))}
+                                     → _∘ᵥ_ D ([ P₁₁ ]₁ (_∘ₕ_ C (id₂ C {b}) α)) (μ₁ {f = x} {g}) ≡ _∘ᵥ_ D (μ₁ {f = y} {g}) (_∘ₕ_ D ([ P₁₁ ]₁ (id₂ C {b})) ([ P₁₁ ]₁ α))}
                            → (eqP : (λ {x} {y} → P₁₀ {x} {y}) ≡ P₁₁)
                            → (eq-η : (λ {x} → η₀ {x}) ≅ (λ {x} → η₁ {x}))
                            → (eq-μ : (λ {x} {y} {z} {f} {g} → μ₀ {x} {y} {z} {f} {g}) ≅ (λ {x} {y} {z} {f} {g} → μ₁ {x} {y} {z} {f} {g}))

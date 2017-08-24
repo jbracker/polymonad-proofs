@@ -76,7 +76,7 @@ IndexedMonad→LaxTwoFunctor {ℓ} Ixs M monad = record
         
         abstract
           P-compose : {a b c : Obj (HomCat Ixs₂ i j)} {f : Hom (HomCat Ixs₂ i j) a b} {g : Hom (HomCat Ixs₂ i j) b c}
-                    → P₁ ((HomCat Ixs₂ i j ∘ g) f) ≡ (HomCat Cat' Hask Hask ∘ P₁ g) (P₁ f)
+                    → P₁ (Category._∘_ (HomCat Ixs₂ i j) g f) ≡ ⟨ P₁ g ⟩∘ᵥ⟨ P₁ f ⟩
           P-compose {a} {b} {c} {lift tt} {lift tt} = sym (left-id (HomCat Cat' Hask Hask))
     
     η : {i : Ixs} → NaturalTransformation Id[ Hask' ] ([ P {i} {i} ]₀ (lift tt))

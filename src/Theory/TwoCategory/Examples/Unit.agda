@@ -25,12 +25,12 @@ unitStrictTwoCategory = record
   ; HomCat = HomCat
   ; comp = comp
   ; id₁ = id₁
-  ; horizontalIdR₁ = refl
-  ; horizontalIdR₂ = refl
-  ; horizontalIdL₁ = refl
-  ; horizontalIdL₂ = refl
-  ; horizontalAssoc₁ = refl
-  ; horizontalAssoc₂ = refl
+  ; right-id = refl
+  ; horizontal-right-id = refl
+  ; left-id = refl
+  ; horizontal-left-id = refl
+  ; assoc = refl
+  ; horizontal-assoc = refl
   } where
     HomCat : ⊤ → ⊤ → Category
     HomCat tt tt = ⊤-Cat
