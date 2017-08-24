@@ -32,7 +32,7 @@ open import Theory.Category.Examples.SetCat
 open import Theory.TwoCategory.Examples.Functor
 
 open StrictTwoCategory
-open Category 
+open Category
 
 AtkeyFunctor→IxTyCon
   : {ℓS₀ ℓS₁ : Level}
@@ -64,8 +64,8 @@ AtkeyParameterizedMonad→IxMonad S monad = record
     M = AtkeyFunctor→IxTyCon monad
     Ixs = Obj S
     
-    _∘S_ = _∘_ S
-    _∘Sop_ = _∘_ (S op)
+    _∘S_ = Category._∘_ S
+    _∘Sop_ = Category._∘_ (S op)
 
     fmap : {α β : Type} {i j : Ixs}
          → (α → β) → M i j α → M i j β
