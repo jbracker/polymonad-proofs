@@ -2,15 +2,16 @@
 module Substitution where
 
 open import Level
-open import Relation.Binary.HeterogeneousEquality renaming ( trans to htrans ; cong to hcong ; subst to hsubst ; subst₂ to hsubst₂ ; sym to hsym ) -- ≅
+open import Relation.Binary.HeterogeneousEquality renaming ( refl to hrefl ; trans to htrans ; cong to hcong ; subst to hsubst ; subst₂ to hsubst₂ ; sym to hsym ) -- ≅
 open import Relation.Binary.PropositionalEquality using ( refl ; _≡_ ; subst ; subst₂ )
 
-subst₂-removable : ∀ {a b p} {A : Set a} {B : Set b} (P : A → B → Set p) 
-                 → ∀ {x₁ x₂ y₁ y₂}
-                 → (eqx : x₁ ≡ x₂ ) → (eqy : y₁ ≡ y₂) 
-                 → (z : P x₁ y₁)
-                 → subst₂ P eqx eqy z ≅ z
-subst₂-removable P refl refl z = refl
+abstract
+  subst₂-removable : ∀ {a b p} {A : Set a} {B : Set b} (P : A → B → Set p) 
+                   → ∀ {x₁ x₂ y₁ y₂}
+                   → (eqx : x₁ ≡ x₂ ) → (eqy : y₁ ≡ y₂) 
+                   → (z : P x₁ y₁)
+                   → subst₂ P eqx eqy z ≅ z
+  subst₂-removable P refl refl z = hrefl
 
 
 -- Substitution with three arguments.
@@ -18,6 +19,15 @@ subst₃ : ∀ {a b c d} {A : Set a} {B : Set b} {C : Set c}
          (P : A → B → C → Set d) {x₁ x₂ y₁ y₂ z₁ z₂} 
        → x₁ ≡ x₂ → y₁ ≡ y₂ → z₁ ≡ z₂ → P x₁ y₁ z₁ → P x₂ y₂ z₂
 subst₃ P refl refl refl p = p
+
+-- Substitution with three arguments.
+het-subst₃-dep : {a b c d : Level}
+               → {A : Set a} {B : A → Set b} {C : (a : A) → B a → Set c} 
+               → (P : (a : A) → (b : B a) → C a b → Set d)
+               → {x₁ x₂ : A} {y₁ : B x₁} {y₂ : B x₂} {z₁ : C x₁ y₁} {z₂ : C x₂ y₂} 
+               → x₁ ≡ x₂ → y₁ ≅ y₂ → z₁ ≅ z₂
+               → P x₁ y₁ z₁ → P x₂ y₂ z₂
+het-subst₃-dep P refl hrefl hrefl p = p
 
 -- Substitution with four arguments.
 subst₄ : ∀ {a b c d p} {A : Set a} {B : Set b} {C : Set c} {D : Set d} 
@@ -147,3 +157,11 @@ subst₉dep : ∀ {a b c d e f g h i j}
           → {x9 : I x1 x2 x3 x4 x5 x6 x7 x8} → {y9 : I y1 y2 y3 y4 y5 y6 y7 y8} → (eq9 : subst₈dep I eq1 eq2 eq3 eq4 eq5 eq6 eq7 eq8 x9 ≡ y9)
           → P x1 x2 x3 x4 x5 x6 x7 x8 x9 → P y1 y2 y3 y4 y5 y6 y7 y8 y9
 subst₉dep P refl refl refl refl refl refl refl refl refl p = p
+
+
+het-subst₂-dep : {a b p : Level} {A : Set a} {B : A → Set b}
+               → (P : (a : A) → B a → Set p)
+               → {x₁ x₂ : A} {y₁ : B x₁} {y₂ : B x₂}
+               → x₁ ≡ x₂ → y₁ ≅ y₂
+               → P x₁ y₁ → P x₂ y₂
+het-subst₂-dep P refl hrefl p = p
