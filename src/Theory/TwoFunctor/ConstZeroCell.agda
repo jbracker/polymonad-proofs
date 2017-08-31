@@ -3,7 +3,9 @@ open import Level
 open import Function renaming ( _∘_ to _∘F_ )
 
 open import Relation.Binary.PropositionalEquality
---open import Relation.Binary.HeterogeneousEquality renaming ( refl to hrefl ; proof-irrelevance to het-proof-irrelevance )
+open import Relation.Binary.HeterogeneousEquality renaming ( refl to hrefl ; sym to hsym ; trans to htrans ; cong to hcong ; cong₂ to hcong₂ ; subst to hsubst ; subst₂ to hsubst₂ ; proof-irrelevance to het-proof-irrelevance )
+open ≡-Reasoning hiding ( _≅⟨_⟩_ )
+open ≅-Reasoning renaming ( begin_ to hbegin_ ; _∎ to _∎h ) hiding ( _≡⟨_⟩_ )
 
 open import Congruence
 open import Extensionality
@@ -65,13 +67,10 @@ record ConstLaxTwoFunctor {ℓC₀ ℓC₁ ℓC₂ ℓD₀ ℓD₁ ℓD₂ : Lev
             ∘Dᵥ   (η {y} ∘Dₕ id₂ D {f = [ P₁ {x} {y} ]₀ f}) ) 
               ≡ ρ D ([ P₁ {x} {y} ]₀ f)
 
+    -- μ ∘ᵥ (id₂ ∘ₕ μ) ≅ μ ∘ᵥ (μ ∘ₕ id₂)
     laxFunAssoc : {w x y z : Cell₀ C} {f : Cell₁ C w x} {g : Cell₁ C x y} {h : Cell₁ C y z}
-               → ([ P₁ {w} {z} ]₁ (α C f g h)) 
-             ∘Dᵥ ( (μ {w} {y} {z} {g ∘C f} {h}) 
-             ∘Dᵥ   (id₂ D {P₀ y} {P₀ z} {[ P₁ {y} {z} ]₀ h} ∘Dₕ μ {w} {x} {y} {f} {g}) ) 
-               ≡ μ {w} {x} {z} {f} {h ∘C g} 
-             ∘Dᵥ ( (μ {x} {y} {z} {g} {h} ∘Dₕ id₂ D {P₀ w} {P₀ x} {[ P₁ {w} {x} ]₀ f}) 
-             ∘Dᵥ   (α D ([ P₁ {w} {x} ]₀ f) ([ P₁ {x} {y} ]₀ g) ([ P₁ {y} {z} ]₀ h)) )
+                → μ {w} {y} {z} {g ∘C f} {h} ∘Dᵥ (id₂ D {P₀ y} {P₀ z} {[ P₁ {y} {z} ]₀ h} ∘Dₕ μ {w} {x} {y} {f} {g})
+                ≅ μ {w} {x} {z} {f} {h ∘C g} ∘Dᵥ (μ {x} {y} {z} {g} {h} ∘Dₕ id₂ D {P₀ w} {P₀ x} {[ P₁ {w} {x} ]₀ f})
     
     μ-natural₁ : {a b c : Cell₀ C} → (f : Cell₁ C a b) → {x y : Cell₁ C b c} {α : Cell₂ C x y} 
                → [ P₁ ]₁ (α ∘Cₕ id₂ C {a}) ∘Dᵥ μ {f = f} {x} ≡ μ {f = f} {y} ∘Dᵥ ([ P₁ ]₁ α ∘Dₕ [ P₁ ]₁ (id₂ C {a}))
