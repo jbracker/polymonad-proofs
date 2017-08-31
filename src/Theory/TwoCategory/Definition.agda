@@ -242,6 +242,11 @@ record StrictTwoCategory {ℓ₀ ℓ₁ ℓ₂ : Level} : Set (lsuc (ℓ₀ ⊔ 
                → (p : f ≡ g) → (q : f ≡ h)
                → subst₂ Cell₂ p q id₂ ≅ id₂ {f = h}
       subst-id refl refl = refl
+      
+      subst-id' : {a b : Cell₀} {f g h : Cell₁ a b} 
+                → (p : f ≡ g) → (q : f ≡ h)
+                → subst₂ Cell₂ p q id₂ ≅ id₂ {f = g}
+      subst-id' refl refl = refl
     
   abstract
     id≅id : {a b : Cell₀} {f g : Cell₁ a b} → f ≡ g → id₂ {f = f} ≅ id₂ {f = g}
@@ -263,6 +268,12 @@ record StrictTwoCategory {ℓ₀ ℓ₁ ℓ₂ : Level} : Set (lsuc (ℓ₀ ⊔ 
   
   λ'' : {a b : Cell₀} (f : Cell₁ a b) → Cell₂ f (f ∘ id₁)
   λ'' {a} {b} f = lUnitorInv {a} {b} {f}
+
+  λ'≅id₂ : {a b : Cell₀} → (f : Cell₁ a b) → λ' f ≅ id₂ {f = f}
+  λ'≅id₂ {a} {b} f = subst-id (sym $ left-id {a} {b} {f}) refl
+  
+  λ''≅id₂ : {a b : Cell₀} → (f : Cell₁ a b) → λ'' f ≅ id₂ {f = f}
+  λ''≅id₂ {a} {b} f = subst-id' refl (sym left-id)
   
   rUnitor : {a b : Cell₀} {f : Cell₁ a b} → Cell₂ (id₁ ∘ f) f
   rUnitor {a} {b} {f} = subst₂ Cell₂ (sym $ right-id {a} {b} {f}) refl (id₂ {a} {b})
@@ -275,6 +286,12 @@ record StrictTwoCategory {ℓ₀ ℓ₁ ℓ₂ : Level} : Set (lsuc (ℓ₀ ⊔ 
   
   ρ' : {a b : Cell₀} (f : Cell₁ a b) → Cell₂ f (id₁ ∘ f)
   ρ' {a} {b} f = rUnitorInv {a} {b} {f}
+  
+  ρ≅id₂ : {a b : Cell₀} → (f : Cell₁ a b) → ρ f ≅ id₂ {f = f}
+  ρ≅id₂ {a} {b} f = subst-id (sym $ right-id {a} {b} {f}) refl
+  
+  ρ'≅id₂ : {a b : Cell₀} → (f : Cell₁ a b) → ρ' f ≅ id₂ {f = f}
+  ρ'≅id₂ {a} {b} f = subst-id' refl (sym $ right-id {a} {b} {f})
   
   private
     abstract
@@ -338,6 +355,15 @@ record StrictTwoCategory {ℓ₀ ℓ₁ ℓ₂ : Level} : Set (lsuc (ℓ₀ ⊔ 
      → Cell₂ ((h ∘ g) ∘ f) (h ∘ (g ∘ f)) 
   α' {a} {b} {c} {d} f g h = associatorInv {a} {b} {c} {d} {f = f} {g} {h}
   
+  α≅id₂ : {a b c d : Cell₀} 
+        → (f : Cell₁ a b) (g : Cell₁ b c) (h : Cell₁ c d)
+        → α f g h ≅ id₂ {f = (h ∘ g) ∘ f}
+  α≅id₂ {a} {b} {c} {d} f g h = subst-id refl (assoc {a} {b} {c} {d} {f} {g} {h})
+  
+  α'≅id₂ : {a b c d : Cell₀} 
+        → (f : Cell₁ a b) (g : Cell₁ b c) (h : Cell₁ c d)
+        → α' f g h ≅ id₂ {f = (h ∘ g) ∘ f}
+  α'≅id₂ {a} {b} {c} {d} f g h = subst-id' (assoc {a} {b} {c} {d} {f} {g} {h}) refl
   
   left-unitor-iso : {a b : Cell₀} → NaturalIsomorphism ([ id₁ {b} ,-] comp {a} {b} {b}) Id[ HomCat a b ]
   left-unitor-iso {a} {b} = naturalIsomorphism (naturalTransformation ρ natural) (λ x → isomorphism (ρ' x) rUnitorId rUnitorId')
