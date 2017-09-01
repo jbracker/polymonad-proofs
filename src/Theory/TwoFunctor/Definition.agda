@@ -75,16 +75,12 @@ record LaxTwoFunctor {ℓC₀ ℓC₁ ℓC₂ ℓD₀ ℓD₁ ℓD₂ : Level}
          → Cell₂ D ([ P₁ ]₀ g  ∘D  [ P₁ ]₀ f) ([ P₁ ]₀ (g ∘C f))
     
     laxFunId₁ : {x y : Cell₀ C} {f : Cell₁ C x y} 
-              → ([ P₁ {x} {y} ]₁ (λ' C f)) 
-            ∘Dᵥ ( (μ {x} {x} {y} {id₁ C {x}} {f}) 
-            ∘Dᵥ   (id₂ D {f = [ P₁ {x} {y} ]₀ f} ∘Dₕ η {x}) )
-              ≡ λ' D ([ P₁ {x} {y} ]₀ f)
+              → μ {x} {x} {y} {id₁ C {x}} {f} ∘Dᵥ (id₂ D {f = [ P₁ {x} {y} ]₀ f} ∘Dₕ η {x})
+              ≅ id₂ D {f = [ P₁ {x} {y} ]₀ f}
     
     laxFunId₂ : {x y : Cell₀ C} {f : Cell₁ C x y} 
-              → ([ P₁ {x} {y} ]₁ (ρ C f)) 
-            ∘Dᵥ ( (μ {x} {y} {y} {f} {id₁ C {y}}) 
-            ∘Dᵥ   (η {y} ∘Dₕ id₂ D {f = [ P₁ {x} {y} ]₀ f}) ) 
-              ≡ ρ D ([ P₁ {x} {y} ]₀ f)
+              → μ {x} {y} {y} {f} {id₁ C {y}} ∘Dᵥ (η {y} ∘Dₕ id₂ D {f = [ P₁ {x} {y} ]₀ f}) 
+              ≅ id₂ D {f = [ P₁ {x} {y} ]₀ f}
 
     -- μ ∘ᵥ (id₂ ∘ₕ μ) ≅ μ ∘ᵥ (μ ∘ₕ id₂)
     laxFunAssoc : {w x y z : Cell₀ C} {f : Cell₁ C w x} {g : Cell₁ C x y} {h : Cell₁ C y z}
@@ -114,7 +110,7 @@ record LaxTwoFunctor {ℓC₀ ℓC₁ ℓC₂ ℓD₀ ℓD₁ ℓD₂ : Level}
       id₂ D {f = [ P₁ {x} {y} ]₀ (f ∘C id₁ C)} ∘Dᵥ ( (μ {x} {x} {y} {id₁ C {x}} {f}) ∘Dᵥ (id₂ D {f = [ P₁ {x} {y} ]₀ f} ∘Dₕ η {x}) )
         ≅⟨ ≡-to-≅ (vertical-right-id D) ⟩
       μ {x} {x} {y} {id₁ C {x}} {f} ∘Dᵥ (id₂ D {f = [ P₁ {x} {y} ]₀ f} ∘Dₕ η {x})
-        ≅⟨ {!!} ⟩
+        ≅⟨ laxFunId₁ ⟩
       id₂ D {f = [ P₁ {x} {y} ]₀ f}
         ≅⟨ hsym (λ'≅id₂ D ([ P₁ {x} {y} ]₀ f)) ⟩
       λ' D ([ P₁ {x} {y} ]₀ f) ∎h
@@ -125,7 +121,20 @@ record LaxTwoFunctor {ℓC₀ ℓC₁ ℓC₂ ℓD₀ ℓD₁ ℓD₂ : Level}
                  ∘Dᵥ ( (μ {x} {y} {y} {f} {id₁ C {y}}) 
                  ∘Dᵥ   (η {y} ∘Dₕ id₂ D {f = [ P₁ {x} {y} ]₀ f}) ) 
                ≡ ρ D ([ P₁ {x} {y} ]₀ f)
-    laxFunId-ρ = {!!}
+    laxFunId-ρ {x} {y} {f} = ≅-to-≡ $ hbegin
+      ([ P₁ {x} {y} ]₁ (Cell₂ C (id₁ C ∘C f) f ∋ ρ C f)) ∘Dᵥ ( (μ {x} {y} {y} {f} {id₁ C {y}}) ∘Dᵥ (η {y} ∘Dₕ id₂ D {f = [ P₁ {x} {y} ]₀ f}) ) 
+        ≅⟨ hcong₂ (λ X Y → ([ P₁ {x} {y} ]₁ (Cell₂ C (id₁ C ∘C f) X ∋ Y)) ∘Dᵥ ( (μ {x} {y} {y} {f} {id₁ C {y}}) ∘Dᵥ (η {y} ∘Dₕ id₂ D {f = [ P₁ {x} {y} ]₀ f}) ) ) 
+                  (≡-to-≅ (sym (right-id C))) 
+                  (htrans (ρ≅id₂ C f) (id≅id C (sym (right-id C)))) ⟩
+      ([ P₁ {x} {y} ]₁ (Cell₂ C (id₁ C ∘C f) (id₁ C ∘C f) ∋ id₂ C {f = id₁ C ∘C f})) ∘Dᵥ ( (μ {x} {y} {y} {f} {id₁ C {y}}) ∘Dᵥ (η {y} ∘Dₕ id₂ D {f = [ P₁ {x} {y} ]₀ f}) ) 
+        ≅⟨ hcong (λ X → X ∘Dᵥ ( (μ {x} {y} {y} {f} {id₁ C {y}}) ∘Dᵥ (η {y} ∘Dₕ id₂ D {f = [ P₁ {x} {y} ]₀ f}) ) ) (≡-to-≅ (Functor.id (P₁ {x} {y}))) ⟩
+      id₂ D {f = [ P₁ {x} {y} ]₀ (id₁ C ∘C f)} ∘Dᵥ ( (μ {x} {y} {y} {f} {id₁ C {y}}) ∘Dᵥ (η {y} ∘Dₕ id₂ D {f = [ P₁ {x} {y} ]₀ f}) ) 
+        ≅⟨ ≡-to-≅ $ vertical-right-id D ⟩
+      μ {x} {y} {y} {f} {id₁ C {y}} ∘Dᵥ (η {y} ∘Dₕ id₂ D {f = [ P₁ {x} {y} ]₀ f}) 
+        ≅⟨ laxFunId₂ ⟩
+      id₂ D {f = [ P₁ {x} {y} ]₀ f}
+        ≅⟨ hsym (ρ≅id₂ D ([ P₁ {x} {y} ]₀ f)) ⟩
+      ρ D ([ P₁ {x} {y} ]₀ f) ∎h
   
   -- P₂ α ∘ᵥ μ ∘ᵥ (id₂ ∘ₕ μ) ≡ μ ∘ᵥ (μ ∘ₕ id₂) ∘ᵥ α P₁
   abstract
