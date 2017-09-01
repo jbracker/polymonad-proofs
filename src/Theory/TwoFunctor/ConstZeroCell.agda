@@ -56,16 +56,12 @@ record ConstLaxTwoFunctor {ℓC₀ ℓC₁ ℓC₂ ℓD₀ ℓD₁ ℓD₂ : Lev
          → Cell₂ D ([ P₁ ]₀ g  ∘D  [ P₁ ]₀ f) ([ P₁ ]₀ (g ∘C f))
     
     laxFunId₁ : {x y : Cell₀ C} {f : Cell₁ C x y} 
-              → ([ P₁ {x} {y} ]₁ (λ' C f)) 
-            ∘Dᵥ ( (μ {x} {x} {y} {id₁ C {x}} {f}) 
-            ∘Dᵥ   (id₂ D {f = [ P₁ {x} {y} ]₀ f} ∘Dₕ η {x}) )
-              ≡ λ' D ([ P₁ {x} {y} ]₀ f)
+              → μ {x} {x} {y} {id₁ C {x}} {f} ∘Dᵥ (id₂ D {f = [ P₁ {x} {y} ]₀ f} ∘Dₕ η {x})
+              ≅ id₂ D {f = [ P₁ {x} {y} ]₀ f}
     
     laxFunId₂ : {x y : Cell₀ C} {f : Cell₁ C x y} 
-              → ([ P₁ {x} {y} ]₁ (ρ C f)) 
-            ∘Dᵥ ( (μ {x} {y} {y} {f} {id₁ C {y}}) 
-            ∘Dᵥ   (η {y} ∘Dₕ id₂ D {f = [ P₁ {x} {y} ]₀ f}) ) 
-              ≡ ρ D ([ P₁ {x} {y} ]₀ f)
+              → μ {x} {y} {y} {f} {id₁ C {y}} ∘Dᵥ (η {y} ∘Dₕ id₂ D {f = [ P₁ {x} {y} ]₀ f}) 
+              ≅ id₂ D {f = [ P₁ {x} {y} ]₀ f}
 
     -- μ ∘ᵥ (id₂ ∘ₕ μ) ≅ μ ∘ᵥ (μ ∘ₕ id₂)
     laxFunAssoc : {w x y z : Cell₀ C} {f : Cell₁ C w x} {g : Cell₁ C x y} {h : Cell₁ C y z}
