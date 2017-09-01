@@ -37,19 +37,19 @@ open import Theory.TwoFunctor.Definition
 open Category hiding ( left-id ; right-id ; assoc )
 open StrictTwoCategory hiding ( left-id ; right-id ; assoc )
 
-module Theory.TwoFunctor.Properties.ToMonoidalFunctor where 
+module Theory.TwoFunctor.Properties.ToLaxMonoidalFunctor where 
 
 open ConstLaxTwoFunctor
 open StrictTwoCategory
 open MonoidalCategory
 
-LaxTwoFunctor→MonoidalFunctor : {ℓE ℓC₀ ℓC₁ : Level}
-                              → {Eff : Set ℓE}
-                              → (mon : Monoid Eff)
-                              → (C : Category {ℓC₀} {ℓC₁})
-                              → ConstLaxTwoFunctor (discreteHomCatTwoCategory (monoidCategory mon)) Cat' C
-                              → LaxMonoidalFunctor (monoidMonoidalCategory mon) (Fun C)
-LaxTwoFunctor→MonoidalFunctor {ℓE} {ℓC₀} {ℓC₁} {Eff} mon C F 
+LaxTwoFunctor→LaxMonoidalFunctor : {ℓE ℓC₀ ℓC₁ : Level}
+                                 → {Eff : Set ℓE}
+                                 → (mon : Monoid Eff)
+                                 → (C : Category {ℓC₀} {ℓC₁})
+                                 → ConstLaxTwoFunctor (discreteHomCatTwoCategory (monoidCategory mon)) Cat' C
+                                 → LaxMonoidalFunctor (monoidMonoidalCategory mon) (Fun C)
+LaxTwoFunctor→LaxMonoidalFunctor {ℓE} {ℓC₀} {ℓC₁} {Eff} mon C F 
   = laxMonoidalFunctor (P₁ F {lift tt} {lift tt}) (η F {lift tt}) μ' assoc' left-unitality' right-unitality'
   where
     open Monoid mon
