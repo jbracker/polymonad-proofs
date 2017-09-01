@@ -112,38 +112,57 @@ LaxTwoFunctor→MonoidalFunctor {ℓE} {ℓC₀} {ℓC₁} {Eff} mon C F
           ≡⟨ cong (λ X → ⟨ μ F {f = y ∙ z} {x} ⟩∘ᵥ⟨ ⟨ ⟨ Id⟨ [ P₁ F ]₀ x ⟩ ⟩∘ₕ⟨ μ F {f = z} {y} ⟩ ⟩∘ᵥ⟨ X ⟩ ⟩) (natural-transformation-eq associator-eq) ⟩
         ⟨ μ F {f = y ∙ z} {x} ⟩∘ᵥ⟨ ⟨ ⟨ Id⟨ [ P₁ F ]₀ x ⟩ ⟩∘ₕ⟨ μ F {f = z} {y} ⟩ ⟩∘ᵥ⟨ MonoidalCategory.α (Fun C) ([ P₁ F ]₀ x) ([ P₁ F ]₀ y) ([ P₁ F ]₀ z) ⟩ ⟩ ∎
           where
-            associator-eq : (λ c → nat-η (StrictTwoCategory.α' Cat' ([ P₁ F ]₀ z) ([ P₁ F ]₀ y) ([ P₁ F ]₀ x)) c) ≡ (λ c → nat-η (MonoidalCategory.α (Fun C) ([ P₁ F ]₀ x) ([ P₁ F ]₀ y) ([ P₁ F ]₀ z)) c)
-            associator-eq = fun-ext $ λ (c : Obj C) → ≅-to-≡ $ hbegin
-              nat-η (α' Cat' ([ P₁ F ]₀ z) ([ P₁ F ]₀ y) ([ P₁ F ]₀ x)) c 
-                ≅⟨ nat-trans-subst (α' Cat' ([ P₁ F ]₀ z) ([ P₁ F ]₀ y) ([ P₁ F ]₀ x)) (id₂ Cat' {f = [ [ [ P₁ F ]₀ x ]∘[ [ P₁ F ]₀ y ] ]∘[ [ P₁ F ]₀ z ]}) c (assoc Cat') (α'≅id₂ Cat' ([ P₁ F ]₀ z) ([ P₁ F ]₀ y) ([ P₁ F ]₀ x)) ⟩
-              nat-η (id₂ Cat' {f = [ [ [ P₁ F ]₀ x ]∘[ [ P₁ F ]₀ y ] ]∘[ [ P₁ F ]₀ z ]}) c 
-                ≅⟨ hrefl ⟩
-              Category.id C {[ [ P₁ F ]₀ x ]₀ ([ [ P₁ F ]₀ y ]₀ ([ [ P₁ F ]₀ z ]₀ c))}
-                ≅⟨ hrefl ⟩
-              nat-η (MonoidalCategory.α (Fun C) ([ P₁ F ]₀ x) ([ P₁ F ]₀ y) ([ P₁ F ]₀ z)) c ∎h
+            abstract
+              associator-eq : (λ c → nat-η (StrictTwoCategory.α' Cat' ([ P₁ F ]₀ z) ([ P₁ F ]₀ y) ([ P₁ F ]₀ x)) c) ≡ (λ c → nat-η (MonoidalCategory.α (Fun C) ([ P₁ F ]₀ x) ([ P₁ F ]₀ y) ([ P₁ F ]₀ z)) c)
+              associator-eq = fun-ext $ λ (c : Obj C) → ≅-to-≡ $ hbegin
+                nat-η (α' Cat' ([ P₁ F ]₀ z) ([ P₁ F ]₀ y) ([ P₁ F ]₀ x)) c 
+                  ≅⟨ nat-trans-subst (α' Cat' ([ P₁ F ]₀ z) ([ P₁ F ]₀ y) ([ P₁ F ]₀ x)) (id₂ Cat' {f = [ [ [ P₁ F ]₀ x ]∘[ [ P₁ F ]₀ y ] ]∘[ [ P₁ F ]₀ z ]}) c (assoc Cat') (α'≅id₂ Cat' ([ P₁ F ]₀ z) ([ P₁ F ]₀ y) ([ P₁ F ]₀ x)) ⟩
+                nat-η (id₂ Cat' {f = [ [ [ P₁ F ]₀ x ]∘[ [ P₁ F ]₀ y ] ]∘[ [ P₁ F ]₀ z ]}) c 
+                  ≅⟨ hrefl ⟩
+                Category.id C {[ [ P₁ F ]₀ x ]₀ ([ [ P₁ F ]₀ y ]₀ ([ [ P₁ F ]₀ z ]₀ c))}
+                  ≅⟨ hrefl ⟩
+                nat-η (MonoidalCategory.α (Fun C) ([ P₁ F ]₀ x) ([ P₁ F ]₀ y) ([ P₁ F ]₀ z)) c ∎h
     
     abstract
       left-unitality' : (x : Eff)
-                      → MonoidalCategory.λ' (Fun C) (Functor.F₀ (P₁ F) x)
-                      ≡ ⟨ Functor.F₁ (P₁ F) (MonoidalCategory.λ' Mon x) ⟩∘ᵥ⟨ ⟨ nat-η μ' (unit Mon , x) ⟩∘ᵥ⟨ ⟨ η F ⟩∘ₕ⟨ MonoidalCategory.id (Fun C) ⟩ ⟩ ⟩
-      left-unitality' = {!!}
+                      → MonoidalCategory.λ' (Fun C) ([ P₁ F ]₀ x)
+                      ≡ ⟨ [ P₁ F ]₁ (MonoidalCategory.λ' Mon x) ⟩∘ᵥ⟨ ⟨ μ F {f = x} {unit Mon} ⟩∘ᵥ⟨ ⟨ η F ⟩∘ₕ⟨ MonoidalCategory.id (Fun C) ⟩ ⟩ ⟩
+      left-unitality' x = begin
+        MonoidalCategory.λ' (Fun C) ([ P₁ F ]₀ x)
+          ≡⟨ natural-transformation-eq left-unitor-eq ⟩ 
+        StrictTwoCategory.ρ Cat' ([ P₁ F ]₀ x)
+          ≡⟨ sym $ LaxTwoFunctor.laxFunId-ρ (ConstLaxTwoFunctor.laxTwoFunctor F) {lift tt} {lift tt} {x} ⟩ 
+        ⟨ [ P₁ F ]₁ (StrictTwoCategory.ρ Mon₂ x) ⟩∘ᵥ⟨ ⟨ μ F {f = x} {unit Mon} ⟩∘ᵥ⟨ ⟨ η F ⟩∘ₕ⟨ MonoidalCategory.id (Fun C) ⟩ ⟩ ⟩
+          ≡⟨ cong (λ X → ⟨ [ P₁ F ]₁ X ⟩∘ᵥ⟨ ⟨ μ F {f = x} {unit Mon} ⟩∘ᵥ⟨ ⟨ η F ⟩∘ₕ⟨ MonoidalCategory.id (Fun C) ⟩ ⟩ ⟩) (proof-irrelevance (StrictTwoCategory.ρ Mon₂ x) (MonoidalCategory.λ' Mon x)) ⟩ 
+        ⟨ [ P₁ F ]₁ (MonoidalCategory.λ' Mon x) ⟩∘ᵥ⟨ ⟨ μ F {f = x} {unit Mon} ⟩∘ᵥ⟨ ⟨ η F ⟩∘ₕ⟨ MonoidalCategory.id (Fun C) ⟩ ⟩ ⟩ ∎ 
+          where
+            abstract
+              left-unitor-eq : (λ c → nat-η (MonoidalCategory.λ' (Fun C) ([ P₁ F ]₀ x)) c) ≡ (λ c → nat-η (StrictTwoCategory.ρ Cat' ([ P₁ F ]₀ x)) c)
+              left-unitor-eq = fun-ext $ λ (c : Obj C) → ≅-to-≡ 
+                             $ nat-trans-subst (id₂ Cat' {f = [ id₁ Cat' ]∘[ [ P₁ F ]₀ x ]}) 
+                                               (StrictTwoCategory.ρ Cat' ([ P₁ F ]₀ x)) 
+                                               c 
+                                               (right-id Cat') 
+                                               (hsym (htrans (ρ≅id₂ Cat' ([ P₁ F ]₀ x)) (id≅id Cat' (sym (right-id Cat')))))
 
     abstract
       right-unitality' : (x : Eff) 
-                       → MonoidalCategory.ρ (Fun C) (Functor.F₀ (P₁ F) x) 
-                       ≡ ⟨ Functor.F₁ (P₁ F) (MonoidalCategory.ρ Mon x) ⟩∘ᵥ⟨ ⟨ nat-η μ' (x , unit Mon) ⟩∘ᵥ⟨ ⟨ MonoidalCategory.id (Fun C) ⟩∘ₕ⟨ η F ⟩ ⟩ ⟩
-      right-unitality' = {!!}
-{-
-
-    laxFunId₁ : {x y : Cell₀ C} {f : Cell₁ C x y} 
-              → ([ P₁ {x} {y} ]₁ (λ' C f)) 
-            ∘Dᵥ ( (μ {x} {x} {y} {id₁ C {x}} {f}) 
-            ∘Dᵥ   (id₂ D {f = [ P₁ {x} {y} ]₀ f} ∘Dₕ η {x}) )
-              ≡ λ' D ([ P₁ {x} {y} ]₀ f)
-    
-    laxFunId₂ : {x y : Cell₀ C} {f : Cell₁ C x y} 
-              → ([ P₁ {x} {y} ]₁ (ρ C f)) 
-            ∘Dᵥ ( (μ {x} {y} {y} {f} {id₁ C {y}}) 
-            ∘Dᵥ   (η {y} ∘Dₕ id₂ D {f = [ P₁ {x} {y} ]₀ f}) ) 
-              ≡ ρ D ([ P₁ {x} {y} ]₀ f)
--}
+                       → MonoidalCategory.ρ (Fun C) ([ P₁ F ]₀ x) 
+                       ≡ ⟨ [ P₁ F ]₁ (MonoidalCategory.ρ Mon x) ⟩∘ᵥ⟨ ⟨ nat-η μ' (x , unit Mon) ⟩∘ᵥ⟨ ⟨ MonoidalCategory.id (Fun C) ⟩∘ₕ⟨ η F ⟩ ⟩ ⟩
+      right-unitality' x = begin
+        MonoidalCategory.ρ (Fun C) ([ P₁ F ]₀ x) 
+          ≡⟨ natural-transformation-eq right-unitor-eq ⟩
+        StrictTwoCategory.λ' Cat' ([ P₁ F ]₀ x) 
+          ≡⟨ sym $ LaxTwoFunctor.laxFunId-λ' (ConstLaxTwoFunctor.laxTwoFunctor F) {lift tt} {lift tt} {x} ⟩
+        ⟨ [ P₁ F ]₁ (StrictTwoCategory.λ' Mon₂ x) ⟩∘ᵥ⟨ ⟨ nat-η μ' (x , unit Mon) ⟩∘ᵥ⟨ ⟨ MonoidalCategory.id (Fun C) ⟩∘ₕ⟨ η F ⟩ ⟩ ⟩
+          ≡⟨ cong (λ X → ⟨ [ P₁ F ]₁ X ⟩∘ᵥ⟨ ⟨ nat-η μ' (x , unit Mon) ⟩∘ᵥ⟨ ⟨ MonoidalCategory.id (Fun C) ⟩∘ₕ⟨ η F ⟩ ⟩ ⟩) (proof-irrelevance (StrictTwoCategory.λ' Mon₂ x) (MonoidalCategory.ρ Mon x)) ⟩
+        ⟨ [ P₁ F ]₁ (MonoidalCategory.ρ Mon x) ⟩∘ᵥ⟨ ⟨ nat-η μ' (x , unit Mon) ⟩∘ᵥ⟨ ⟨ MonoidalCategory.id (Fun C) ⟩∘ₕ⟨ η F ⟩ ⟩ ⟩ ∎
+          where
+            abstract
+              right-unitor-eq : (λ c → nat-η (MonoidalCategory.ρ (Fun C) ([ P₁ F ]₀ x)) c) ≡ (λ c → nat-η (StrictTwoCategory.λ' Cat' ([ P₁ F ]₀ x)) c)
+              right-unitor-eq = fun-ext $ λ (c : Obj C) → ≅-to-≡ 
+                              $ nat-trans-subst (id₂ Cat' {f = [ [ P₁ F ]₀ x ]∘[ id₁ Cat' ]}) 
+                                                (StrictTwoCategory.λ' Cat' ([ P₁ F ]₀ x)) 
+                                                c 
+                                                (left-id Cat')
+                                                (hsym (htrans (λ'≅id₂ Cat' ([ P₁ F ]₀ x)) (id≅id Cat' (sym (left-id Cat')))))
