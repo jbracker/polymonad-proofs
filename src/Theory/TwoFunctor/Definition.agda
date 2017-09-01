@@ -96,9 +96,7 @@ record LaxTwoFunctor {ℓC₀ ℓC₁ ℓC₂ ℓD₀ ℓD₁ ℓD₂ : Level}
 
   abstract
     laxFunId-λ' : {x y : Cell₀ C} {f : Cell₁ C x y} 
-                → ([ P₁ {x} {y} ]₁ (λ' C f)) 
-                  ∘Dᵥ ( (μ {x} {x} {y} {id₁ C {x}} {f}) 
-                  ∘Dᵥ   (id₂ D {f = [ P₁ {x} {y} ]₀ f} ∘Dₕ η {x}) )
+                → ([ P₁ {x} {y} ]₁ (λ' C f)) ∘Dᵥ ( (μ {x} {x} {y} {id₁ C {x}} {f}) ∘Dᵥ (id₂ D {f = [ P₁ {x} {y} ]₀ f} ∘Dₕ η {x}) )
                 ≡ λ' D ([ P₁ {x} {y} ]₀ f)
     laxFunId-λ' {x} {y} {f} = ≅-to-≡ $ hbegin
       ([ P₁ {x} {y} ]₁ (Cell₂ C (f ∘C id₁ C) f ∋ λ' C f)) ∘Dᵥ ( (μ {x} {x} {y} {id₁ C {x}} {f}) ∘Dᵥ (id₂ D {f = [ P₁ {x} {y} ]₀ f} ∘Dₕ η {x}) )
@@ -117,9 +115,7 @@ record LaxTwoFunctor {ℓC₀ ℓC₁ ℓC₂ ℓD₀ ℓD₁ ℓD₂ : Level}
   
   abstract
     laxFunId-ρ : {x y : Cell₀ C} {f : Cell₁ C x y} 
-               → ([ P₁ {x} {y} ]₁ (ρ C f)) 
-                 ∘Dᵥ ( (μ {x} {y} {y} {f} {id₁ C {y}}) 
-                 ∘Dᵥ   (η {y} ∘Dₕ id₂ D {f = [ P₁ {x} {y} ]₀ f}) ) 
+               → ([ P₁ {x} {y} ]₁ (ρ C f)) ∘Dᵥ ( (μ {x} {y} {y} {f} {id₁ C {y}}) ∘Dᵥ (η {y} ∘Dₕ id₂ D {f = [ P₁ {x} {y} ]₀ f}) ) 
                ≡ ρ D ([ P₁ {x} {y} ]₀ f)
     laxFunId-ρ {x} {y} {f} = ≅-to-≡ $ hbegin
       ([ P₁ {x} {y} ]₁ (Cell₂ C (id₁ C ∘C f) f ∋ ρ C f)) ∘Dᵥ ( (μ {x} {y} {y} {f} {id₁ C {y}}) ∘Dᵥ (η {y} ∘Dₕ id₂ D {f = [ P₁ {x} {y} ]₀ f}) ) 
