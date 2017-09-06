@@ -30,6 +30,7 @@ open import Theory.TwoCategory.Definition
 open import Theory.TwoCategory.Examples.Functor
 open import Theory.TwoCategory.Examples.DiscreteHomCat
 open import Theory.TwoCategory.ExampleProperties
+open import Theory.TwoFunctor.Definition
 open import Theory.TwoFunctor.ConstZeroCell
 
 module Theory.TwoFunctor.Properties.ToGradedMonadProperties 
@@ -83,7 +84,7 @@ abstract
   η-lax-id₁ {i} x ma = cong (λ X → X ma) 
                      $ η-extract ⟨ [ P₁ ]₁ (λ' MonCat₂ i) ⟩∘ᵥ⟨ ⟨ μ {f = ε} {i} ⟩∘ᵥ⟨ ⟨ Id⟨ [ P₁ ]₀ i ⟩ ⟩∘ₕ⟨ η ⟩ ⟩ ⟩ 
                                  (StrictTwoCategory.λ' Cat' ([ P₁ ]₀ i)) 
-                                 (laxFunId₁ {f = i}) x
+                                 (LaxTwoFunctor.laxFunId-λ' laxTwoFunctor {f = i}) x
 
 abstract
   η-lax-id₂ : {i : Eff} (x : Type) (ma : M i x)
@@ -92,7 +93,7 @@ abstract
   η-lax-id₂ {i} x ma = cong (λ X → X ma) 
                      $ η-extract ( ⟨ [ P₁ ]₁ (ρ MonCat₂ i) ⟩∘ᵥ⟨ ⟨ μ {f = i} {id₁ MonCat₂} ⟩∘ᵥ⟨ ⟨ η ⟩∘ₕ⟨ id₂ Cat' {f = [ P₁ ]₀ i} ⟩ ⟩ ⟩ )
                                  (StrictTwoCategory.ρ Cat' ([ P₁ ]₀ i)) 
-                                 (laxFunId₂ {f = i}) x
+                                 (LaxTwoFunctor.laxFunId-ρ laxTwoFunctor {f = i}) x
 
 abstract
   η-lax-assoc : {i j k : Eff} (x : Type) (ma : M i (M j (M k x)))
@@ -101,7 +102,7 @@ abstract
   η-lax-assoc {i} {j} {k} x ma = cong (λ X → X ma) 
                                $ η-extract ( ⟨ [ P₁ ]₁ (α MonCat₂ k j i) ⟩∘ᵥ⟨ ⟨ μ ⟩∘ᵥ⟨ ⟨ id₂ Cat' {f = [ P₁ ]₀ i} ⟩∘ₕ⟨ μ ⟩ ⟩ ⟩ )
                                            ( ⟨ μ ⟩∘ᵥ⟨ ⟨ ⟨ μ ⟩∘ₕ⟨ id₂ Cat' {f = [ P₁ ]₀ k} ⟩ ⟩∘ᵥ⟨ α Cat' ([ P₁ ]₀ k) ([ P₁ ]₀ j) ([ P₁ ]₀ i) ⟩ ⟩) 
-                                           (laxFunAssoc {f = k} {j} {i}) x
+                                           (LaxTwoFunctor.laxFunAssoc-α laxTwoFunctor {f = k} {j} {i}) x
 
 abstract
   subst-refl-id : {α : Type} {i j : Eff} → (eq : i ≡ j) → (ma : M j α) → nat-η ([ P₁ ]₁ (subst₂ _≡_ eq refl (refl {ℓ} {Eff} {i}))) α ma ≅ nat-η (Id⟨ Fun j ⟩) α ma

@@ -17,7 +17,7 @@ open ≅-Reasoning hiding ( _≡⟨_⟩_ ; _≡⟨⟩_ ) renaming ( begin_ to hb
 open import Extensionality
 open import Utilities
 open import Haskell
-open import Haskell.Functor hiding ( functor ) renaming ( Functor to HaskellFunctor )
+open import Haskell.Functor hiding ( functor ; functor-eq ) renaming ( Functor to HaskellFunctor )
 open import Haskell.Parameterized.Indexed.Monad
 open import Theory.Triple
 open import Theory.Category.Definition
@@ -121,55 +121,55 @@ IndexedMonad→LaxTwoFunctor {ℓ} Ixs M monad = record
     
     abstract
       lawFunId₁ : {i j : Ixs}
-                → ⟨ Id⟨ [ P {i} {j} ]₀ (lift tt) ⟩ ⟩∘ᵥ⟨ ⟨ μ {i} {i} {j} ⟩∘ᵥ⟨ ⟨ Id⟨ [ P {i} {j} ]₀ (lift tt) ⟩ ⟩∘ₕ⟨ η {i} ⟩ ⟩ ⟩ ≡ λ' Cat ([ P {i} {j} ]₀ (lift tt))
-      lawFunId₁ {i} {j} = natural-transformation-eq $ fun-ext $ λ (α : Type) → fun-ext $ λ (ma : M j i α) → begin
+                → ⟨ μ {i} {i} {j} ⟩∘ᵥ⟨ ⟨ Id⟨ [ P {i} {j} ]₀ (lift tt) ⟩ ⟩∘ₕ⟨ η {i} ⟩ ⟩ ≅ id₂ Cat {Hask'}
+      lawFunId₁ {i} {j} = het-natural-transformation-eq (functor-eq refl hrefl) refl 
+                        $ het-fun-ext hrefl $ λ (α : Type) → het-fun-ext hrefl 
+                        $ λ (ma : M j i α) → hbegin
         join (fmap return ma)
-          ≡⟨⟩
+          ≅⟨ hrefl ⟩
         fmap return ma >>= (λ x → x)
-          ≡⟨ cong (λ X → X >>= (λ x → x)) (sym (law-monad-fmap return ma)) ⟩
+          ≅⟨ hcong (λ X → X >>= (λ x → x)) (hsym (≡-to-≅ $ law-monad-fmap return ma)) ⟩
         (ma >>= (return ∘F return)) >>= (λ x → x)
-          ≡⟨ sym (law-assoc ma (return ∘F return) (λ x → x)) ⟩
+          ≅⟨ hsym (≡-to-≅ $ law-assoc ma (return ∘F return) (λ x → x)) ⟩
         ma >>= (λ ma' → return (return ma') >>= (λ x → x))
-          ≡⟨ cong (λ X → ma >>= X) (fun-ext (λ ma' → law-right-id (return ma') (λ x → x))) ⟩
+          ≅⟨ hcong (λ X → ma >>= X) (het-fun-ext hrefl (λ ma' → ≡-to-≅ $ law-right-id (return ma') (λ x → x))) ⟩
         ma >>= return
-          ≡⟨ law-left-id ma ⟩
-        ma
-          ≡⟨ sym (≅-to-≡ (het-cat-λ-id α ma)) ⟩
-        nat-η (λ' Cat ([ P {i} {j} ]₀ (lift tt))) α ma ∎
+          ≅⟨ ≡-to-≅ $ law-left-id ma ⟩
+        ma ∎h
     
     abstract
-      lawFunId₂ : {i j : Ixs}-- tt =  ρ Ixs₂ (lift tt)
-                  → ⟨ Id⟨ [ P {i} {j} ]₀ (lift tt) ⟩ ⟩∘ᵥ⟨ ⟨ μ {i} {j} {j} ⟩∘ᵥ⟨ ⟨ η {j} ⟩∘ₕ⟨ Id⟨ [ P {i} {j} ]₀ (lift tt) ⟩ ⟩ ⟩ ⟩ ≡ ρ Cat' ([ P {i} {j} ]₀ (lift tt))
-      lawFunId₂ {i} {j} = natural-transformation-eq $ fun-ext $ λ (α : Type) → fun-ext $ λ (ma : M j i α) → begin
+      lawFunId₂ : {i j : Ixs}
+                  → ⟨ μ {i} {j} {j} ⟩∘ᵥ⟨ ⟨ η {j} ⟩∘ₕ⟨ Id⟨ [ P {i} {j} ]₀ (lift tt) ⟩ ⟩ ⟩ ≅ id₂ Cat' {Hask'}
+      lawFunId₂ {i} {j} = het-natural-transformation-eq (functor-eq refl hrefl) refl 
+                        $ het-fun-ext hrefl $ λ (α : Type) → het-fun-ext hrefl 
+                        $ λ (ma : M j i α) → hbegin
         join (return ma)
-          ≡⟨⟩
+          ≅⟨ hrefl ⟩
         return ma >>= (λ x → x)
-          ≡⟨ law-right-id ma (λ x → x) ⟩
-        ma
-          ≡⟨ sym (≅-to-≡ (het-cat-ρ-id {F = [ P {i} {j} ]₀ (lift tt)} α ma)) ⟩
-        (nat-η (ρ Cat' ([ P {i} {j} ]₀ (lift tt))) α) ma ∎
+          ≅⟨ ≡-to-≅ $ law-right-id ma (λ x → x) ⟩
+        ma ∎h
     
     abstract
       lawFunAssoc : {i j k l : Ixs}
-                  → ⟨ Id⟨ [ P {i} {l} ]₀ (lift tt) ⟩ ⟩∘ᵥ⟨ ⟨ μ {i} {k} {l} ⟩∘ᵥ⟨ ⟨ Id⟨ [ P {k} {l} ]₀ (lift tt) ⟩ ⟩∘ₕ⟨ μ {i} {j} {k} ⟩ ⟩ ⟩
-                  ≡ ⟨ μ {i} {j} {l} ⟩∘ᵥ⟨ ⟨ ⟨ μ {j} {k} {l} ⟩∘ₕ⟨ Id⟨ [ P {i} {j} ]₀ (lift tt) ⟩ ⟩ ⟩∘ᵥ⟨ α Cat' ([ P {i} {j} ]₀ (lift tt)) ([ P {j} {k} ]₀ (lift tt)) ([ P {k} {l} ]₀ (lift tt)) ⟩ ⟩
-      lawFunAssoc {i} {j} {k} {l} = natural-transformation-eq $ fun-ext $ λ (A : Type) → fun-ext $ λ (ma : M l k (M k j (M j i A))) → begin
+                  → ⟨ μ {i} {k} {l} ⟩∘ᵥ⟨ ⟨ Id⟨ [ P {k} {l} ]₀ (lift tt) ⟩ ⟩∘ₕ⟨ μ {i} {j} {k} ⟩ ⟩
+                  ≅ ⟨ μ {i} {j} {l} ⟩∘ᵥ⟨ ⟨ μ {j} {k} {l} ⟩∘ₕ⟨ Id⟨ [ P {i} {j} ]₀ (lift tt) ⟩ ⟩ ⟩
+      lawFunAssoc {i} {j} {k} {l} = het-natural-transformation-eq (functor-eq refl hrefl) refl 
+                                  $ het-fun-ext hrefl $ λ (A : Type) → het-fun-ext hrefl 
+                                  $ λ (ma : M l k (M k j (M j i A))) → hbegin
         join {A} {l} {k} {i} (fmap (join {A} {k} {j} {i}) ma)
-          ≡⟨⟩
+          ≅⟨ hrefl ⟩
         fmap (join {A} {k} {j} {i}) ma >>= (λ x → x)
-          ≡⟨ cong (λ X → X >>= (λ x → x)) (sym (law-monad-fmap join ma)) ⟩
+          ≅⟨ ≡-to-≅ $ cong (λ X → X >>= (λ x → x)) (sym (law-monad-fmap join ma)) ⟩
         (ma >>= (return ∘F join {A} {k} {j} {i})) >>= (λ x → x)
-          ≡⟨ sym (law-assoc ma (return ∘F join) (λ x → x)) ⟩
+          ≅⟨ ≡-to-≅ $ sym (law-assoc ma (return ∘F join) (λ x → x)) ⟩
         ma >>= (λ mma → return (join {A} {k} {j} {i} mma) >>= (λ x → x))
-          ≡⟨ cong (λ X → ma >>= X) (fun-ext (λ mma → law-right-id (join mma) (λ x → x))) ⟩
+          ≅⟨ ≡-to-≅ $ cong (λ X → ma >>= X) (fun-ext (λ mma → law-right-id (join mma) (λ x → x))) ⟩
         ma >>= (λ mma → mma >>= (λ x → x))
-          ≡⟨ cong (λ X → X ma >>= (λ mma → mma >>= (λ x → x))) (sym (HaskellFunctor.law-id (functor l k))) ⟩
+          ≅⟨ ≡-to-≅ $ cong (λ X → X ma >>= (λ mma → mma >>= (λ x → x))) (sym (HaskellFunctor.law-id (functor l k))) ⟩
         fmap (λ x → x) ma >>= (λ ma → ma >>= (λ x → x))
-          ≡⟨ cong (λ X → fmap X ma >>= (λ mma → mma >>= (λ x → x))) (sym (HaskellFunctor.law-id (functor k j))) ⟩
+          ≅⟨ ≡-to-≅ $ cong (λ X → fmap X ma >>= (λ mma → mma >>= (λ x → x))) (sym (HaskellFunctor.law-id (functor k j))) ⟩
         fmap (fmap (λ x → x)) ma >>= (λ ma → ma >>= (λ x → x))
-          ≡⟨ law-assoc (fmap (fmap (λ x → x)) ma) (λ x → x) (λ x → x) ⟩
+          ≅⟨ ≡-to-≅ $ law-assoc (fmap (fmap (λ x → x)) ma) (λ x → x) (λ x → x) ⟩
         (fmap (fmap (λ x → x)) ma >>= (λ x → x)) >>= (λ x → x)
-          ≡⟨⟩
-        join {A} {l} {j} {i} (join {M j i A} {l} {k} {j} (fmap (fmap (λ x → x)) ma))
-          ≡⟨ cong (λ X → join {A} {l} {j} {i} (join {M j i A} {l} {k} {j} (fmap (fmap (λ x → x)) X))) (sym (≅-to-≡ (het-cat-α-id {F = [ P {i} {j} ]₀ (lift tt)} {[ P {j} {k} ]₀ (lift tt)} {[ P {k} {l} ]₀ (lift tt)} A ma))) ⟩
-        join {A} {l} {j} {i} (join {M j i A} {l} {k} {j} (fmap (fmap (λ x → x)) ((nat-η (α Cat' ([ P {i} {j} ]₀ (lift tt)) ([ P {j} {k} ]₀ (lift tt)) ([ P {k} {l} ]₀ (lift tt))) A) ma))) ∎
+          ≅⟨ hrefl ⟩
+        join {A} {l} {j} {i} (join {M j i A} {l} {k} {j} (fmap (fmap (λ x → x)) ma)) ∎h

@@ -13,7 +13,7 @@ open ≅-Reasoning hiding ( _≡⟨⟩_ ; _≡⟨_⟩_ ) renaming ( begin_ to hb
 open import Extensionality
 
 open import Haskell
-open import Haskell.Functor hiding ( functor ) renaming ( Functor to HaskellFunctor )
+open import Haskell.Functor hiding ( functor ; functor-eq ) renaming ( Functor to HaskellFunctor )
 open import Haskell.Parameterized.Graded.Monad hiding ( graded-monad )
 
 open import Theory.Triple
@@ -117,15 +117,11 @@ GradedMonad→LaxTwoFunctor {ℓ} {Eff} {monoid} M monad = record
             (M (i ∘Eff j) β          ∋ fmap {i = i} (fmap {i = j} f) mma >>= (λ x → x)) ∎h
     
     abstract
-      subst-refl-id : {α : Type} {i j : Eff} → (eq : i ≡ j) → (ma : M j α) → nat-η ([ P ]₁ (subst₂ _≡_ eq refl (refl {ℓ} {Eff} {i}))) α ma ≅ nat-η (Id⟨ F j ⟩) α ma
-      subst-refl-id {α} {i} {.i} refl ma = hrefl
-    
-    abstract
       μ-natural₁ : {a b c : Lift ⊤}
-                 → (f : Cell₁ (discreteHomCatTwoCategory (monoidCategory monoid)) a b)
-                 → {x y : Cell₁ (discreteHomCatTwoCategory (monoidCategory monoid)) b c}
+                 → (f : Cell₁ monCat₂ a b)
+                 → {x y : Cell₁ monCat₂ b c}
                  → {α : x ≡ y}
-                 → ⟨ [ P ]₁ ((discreteHomCatTwoCategory (monoidCategory monoid) ∘ₕ α) refl) ⟩∘ᵥ⟨ μ ⟩
+                 → ⟨ [ P ]₁ ((monCat₂ ∘ₕ α) refl) ⟩∘ᵥ⟨ μ ⟩
                  ≡ ⟨ μ ⟩∘ᵥ⟨ ⟨ [ P ]₁ α ⟩∘ₕ⟨ [ P ]₁ refl ⟩ ⟩
       μ-natural₁ {lift tt} {lift tt} {lift tt} f {x} {y} {refl} 
         = natural-transformation-eq $ fun-ext $ λ (c : Obj Hask') → cong (λ X → nat-η μ c ∘F X) (sym (Functor.id (F x)))
@@ -135,79 +131,76 @@ GradedMonad→LaxTwoFunctor {ℓ} {Eff} {monoid} M monad = record
                  → (g : Cell₁ (discreteHomCatTwoCategory (monoidCategory monoid)) b c)
                  → {x y : Cell₁ (discreteHomCatTwoCategory (monoidCategory monoid)) a b}
                  → {α : x ≡ y} 
-                 → ⟨ [ P ]₁ ((discreteHomCatTwoCategory (monoidCategory monoid) ∘ₕ refl) α) ⟩∘ᵥ⟨ μ ⟩
+                 → ⟨ [ P ]₁ ((monCat₂ ∘ₕ refl) α) ⟩∘ᵥ⟨ μ ⟩
                  ≡ (Cat ∘ᵥ μ) ((Cat ∘ₕ [ P ]₁ refl) ([ P ]₁ α))
       μ-natural₂ {lift tt} {lift tt} {lift tt} g {x} {y} {refl}
         = natural-transformation-eq $ fun-ext $ λ (c : Obj Hask') → cong (λ X → nat-η μ c ∘F X) (sym (Functor.id (F g)))
     
     abstract
       lawFunId₁ : {x y : Obj monCat₁} {i : Hom monCat₁ x y} 
-                → ⟨ [ P ]₁ (λ' monCat₂ i) ⟩∘ᵥ⟨ ⟨ μ ⟩∘ᵥ⟨ ⟨ id₂ Cat' {f = F i} ⟩∘ₕ⟨ η ⟩ ⟩ ⟩ ≡ λ' Cat' ([ P ]₀ i)
-      lawFunId₁ {lift tt} {lift tt} {i} = natural-transformation-eq $ fun-ext $ λ (α : Type) → fun-ext $ λ (ma : M i α) → ≅-to-≡ $ hbegin
-        nat-η (⟨ [ P ]₁ (λ' monCat₂ i) ⟩∘ᵥ⟨ ⟨ μ ⟩∘ᵥ⟨ ⟨ id₂ Cat' {f = F i} ⟩∘ₕ⟨ η ⟩ ⟩ ⟩) α ma
-          ≅⟨ hrefl ⟩
-        (M i α                   ∋ nat-η ([ P ]₁ (λ' monCat₂ i)) α (fmap return ma >>= (λ x → x)))
-          ≅⟨ subst-refl-id (sym $ StrictTwoCategory.left-id monCat₂ {lift tt} {lift tt} {i}) (fmap return ma >>= (λ x → x)) ⟩
-        (M (i ∘Eff ε) α          ∋ nat-η (Id⟨ F (i ∘Eff ε) ⟩) α (fmap return ma >>= (λ x → x)))
-          ≅⟨ hrefl ⟩
-        (M (i ∘Eff ε) α          ∋ fmap return ma >>= (λ x → x))
-          ≅⟨ bind-arg₁ (sym right-id) (fmap return ma) (ma >>= (return ∘F return)) (hsym (law-monad-fmap return ma)) (λ x → x) ⟩
-        (M ((i ∘Eff ε) ∘Eff ε) α ∋ (ma >>= (return ∘F return)) >>= (λ x → x))
-          ≅⟨ hsym (law-assoc ma (return ∘F return) (λ x → x)) ⟩
-        (M (i ∘Eff (ε ∘Eff ε)) α ∋ ma >>= (λ a → return (return a) >>= (λ x → x)))
-          ≅⟨ bind-arg₂ left-id ma (λ a → return (return a) >>= (λ x → x)) return (het-fun-ext (het-fun-ext hrefl (λ _ → hsym Mi≅Miε)) (λ a → law-left-id (return a) (λ x → x))) ⟩
-        (M (i ∘Eff ε) α          ∋ ma >>= return) 
-          ≅⟨ law-right-id ma ⟩
-        (M i α                   ∋ ma)
-          ≅⟨ hsym (het-cat-λ-id α ma) ⟩
-        (M i α                   ∋ nat-η (λ' Cat' ([ P ]₀ i)) α ma) ∎h
+                → ⟨ μ ⟩∘ᵥ⟨ ⟨ id₂ Cat' {f = F i} ⟩∘ₕ⟨ η ⟩ ⟩ ≅ id₂ Cat' {Hask'}
+      lawFunId₁ {lift tt} {lift tt} {i} 
+        = het-natural-transformation-eq (functor-eq refl hrefl) (cong (λ X → [ P ]₀ X) (Monoid.right-id monoid)) 
+        $ het-fun-ext (het-fun-ext hrefl (λ X → hcong (λ Y → Hom Hask ([ F i ]₀ X) ([ [ P ]₀ Y ]₀ X)) (≡-to-≅ (Monoid.right-id monoid)))) 
+        $ λ (α : Type) → het-fun-ext (hcong (λ X → (λ _ → [ [ P ]₀ X ]₀ α)) (≡-to-≅ (Monoid.right-id monoid))) 
+        $ λ (ma : M i α) → hbegin
+          nat-η (⟨ μ ⟩∘ᵥ⟨ ⟨ id₂ Cat' {f = F i} ⟩∘ₕ⟨ η ⟩ ⟩) α ma
+            ≅⟨ hrefl ⟩
+          fmap return ma >>= (λ x → x)
+            ≅⟨ bind-arg₁ (sym right-id) (fmap return ma) (ma >>= (return ∘F return)) (hsym (law-monad-fmap return ma)) (λ x → x) ⟩
+          (ma >>= (return ∘F return)) >>= (λ x → x)
+            ≅⟨ hsym (law-assoc ma (return ∘F return) (λ x → x)) ⟩
+          ma >>= (λ a → return (return a) >>= (λ x → x))
+            ≅⟨ bind-arg₂ left-id ma (λ a → return (return a) >>= (λ x → x)) return (het-fun-ext (het-fun-ext hrefl (λ _ → hsym Mi≅Miε)) (λ a → law-left-id (return a) (λ x → x))) ⟩
+          ma >>= return
+            ≅⟨ law-right-id ma ⟩
+          ma
+            ≅⟨ hrefl ⟩
+          nat-η {F = F i} (id₂ Cat' {Hask'}) α ma ∎h
     
     abstract
       lawFunId₂ : {x y : Obj monCat₁} {i : Hom monCat₁ x y} 
-                → ⟨ [ P ]₁ (ρ monCat₂ i) ⟩∘ᵥ⟨ ⟨ μ ⟩∘ᵥ⟨ ⟨ η ⟩∘ₕ⟨ Id⟨ F i ⟩ ⟩ ⟩ ⟩ ≡ ρ Cat' ([ P ]₀ i)
-      lawFunId₂ {lift tt} {lift tt} {i} = natural-transformation-eq $ fun-ext $ λ (α : Type) → fun-ext $ λ (ma : M i α) → ≅-to-≡ $ hbegin
-        (M i α          ∋ nat-η ([ P ]₁ (ρ monCat₂ i)) α (join (return ma)))
-          ≅⟨ subst-refl-id (sym $ StrictTwoCategory.right-id monCat₂ {lift tt} {lift tt} {i}) (join (return ma)) ⟩
-        (M (ε ∘Eff i) α ∋ nat-η (Id⟨ F (ε ∘Eff i) ⟩) α (join (return ma)))
-          ≅⟨ hrefl ⟩
-        (M (ε ∘Eff i) α ∋ return ma >>= (λ x → x))
-          ≅⟨ law-left-id ma (λ x → x) ⟩
-        (M i α          ∋ ma)
-          ≅⟨ hsym (het-cat-ρ-id α ma) ⟩
-        (M i α          ∋ nat-η (ρ Cat' ([ P ]₀ i)) α ma) ∎h
-    
-    abstract
-      subst-refl-id' : {α : Type} {i j : Eff} → (eq : i ≡ j) → (ma : M i α) → nat-η ([ P ]₁ (subst₂ _≡_ refl eq (refl {ℓ} {Eff} {i}))) α ma ≅ nat-η (Id⟨ F i ⟩) α ma
-      subst-refl-id' {α} {i} {.i} refl ma = hrefl
+                → ⟨ μ ⟩∘ᵥ⟨ ⟨ η ⟩∘ₕ⟨ Id⟨ F i ⟩ ⟩ ⟩ ≅ id₂ Cat'
+      lawFunId₂ {lift tt} {lift tt} {i} 
+        = het-natural-transformation-eq (functor-eq refl hrefl) (cong (λ X → [ P ]₀ X) (Monoid.left-id monoid)) 
+        $ het-fun-ext (het-fun-ext hrefl (λ z → hcong (λ X → (a : M i z) → [ [ P ]₀ X ]₀ z) (≡-to-≅ (Monoid.left-id monoid)))) 
+        $ λ (α : Type) → het-fun-ext (hcong (λ X → (λ _ → [ [ P ]₀ X ]₀ α)) (≡-to-≅ (Monoid.left-id monoid))) 
+        $ λ (ma : M i α) → hbegin
+          join (return ma)
+            ≅⟨ hrefl ⟩
+          return ma >>= (λ x → x)
+            ≅⟨ law-left-id ma (λ x → x) ⟩
+          ma
+            ≅⟨ hrefl ⟩
+          nat-η {F = F i} (id₂ Cat' {Hask'}) α ma ∎h
     
     abstract
       lawFunAssoc : {w x y z : Obj monCat₁}
                   → {i : Hom monCat₁ w x} {j : Hom monCat₁ x y} {k : Hom monCat₁ y z} 
-                  → ⟨ [ P ]₁ (α monCat₂ i j k) ⟩∘ᵥ⟨ ⟨ μ ⟩∘ᵥ⟨ ⟨ id₂ Cat {f = F k} ⟩∘ₕ⟨ μ ⟩ ⟩ ⟩
-                  ≡ ⟨ μ ⟩∘ᵥ⟨ ⟨ ⟨ μ ⟩∘ₕ⟨ id₂ Cat {f = F i} ⟩ ⟩∘ᵥ⟨ α Cat ([ P ]₀ i) ([ P ]₀ j) ([ P ]₀ k) ⟩ ⟩
-      lawFunAssoc {lift tt} {lift tt} {lift tt} {lift tt} {i} {j} {k} = natural-transformation-eq $ fun-ext $ λ (β : Type) → fun-ext $ λ (ma : M k (M j (M i β))) → ≅-to-≡ $ hbegin
-        nat-η (⟨ [ P ]₁ (α monCat₂ i j k) ⟩∘ᵥ⟨ ⟨ μ {k} {j ∘Eff i} ⟩∘ᵥ⟨ ⟨ id₂ Cat {f = F k} ⟩∘ₕ⟨ μ {j} {i} ⟩ ⟩ ⟩) β ma
-          ≅⟨ hrefl ⟩
-        (M ((k ∘Eff j) ∘Eff i) β ∋ nat-η ([ P ]₁ (α monCat₂ i j k)) β (join {β} {k} {j ∘Eff i} (fmap (join {β} {j} {i}) ma)))
-          ≅⟨ subst-refl-id' (StrictTwoCategory.assoc monCat₂ {f = i} {j} {k}) (join {β} {k} {j ∘Eff i} (fmap (join {β} {j} {i}) ma)) ⟩
-        (M (k ∘Eff (j ∘Eff i)) β ∋ join {β} {k} {j ∘Eff i} (fmap (join {β} {j} {i}) ma))
-          ≅⟨ hrefl ⟩
-        (M (k ∘Eff (j ∘Eff i)) β ∋ fmap (join {β} {j} {i}) ma >>= (λ x → x))
-          ≅⟨ bind-arg₁ (sym right-id) (fmap (join {β} {j} {i}) ma) (ma >>= (return ∘F join {β} {j} {i})) (hsym (law-monad-fmap (join {β} {j} {i}) ma)) (λ x → x) ⟩
-        (M ((k ∘Eff ε) ∘Eff (j ∘Eff i)) β ∋ (ma >>= (return ∘F join {β} {j} {i})) >>= (λ x → x))
-          ≅⟨ hsym (law-assoc ma (return ∘F join) (λ x → x)) ⟩
-        (M (k ∘Eff (ε ∘Eff (j ∘Eff i))) β ∋ ma >>= (λ a → return (join {β} {j} {i} a) >>= (λ x → x)))
-          ≅⟨ bind-arg₂ left-id ma (λ a → return (join a) >>= (λ x → x)) (λ mma → mma >>= (λ x → x)) (het-fun-ext (het-fun-ext hrefl (λ _ → hsym Mi≅Mεi)) (λ x → law-left-id (join x) (λ x → x))) ⟩
-        (M (k ∘Eff (j ∘Eff i)) β ∋ ma >>= (λ mma → mma >>= (λ x → x)))
-          ≅⟨ law-assoc ma (λ x → x) (λ x → x) ⟩
-        (M ((k ∘Eff j) ∘Eff i) β ∋ (ma >>= (λ x → x)) >>= (λ x → x))
-          ≅⟨ hcong (λ X → (X ma >>= (λ x → x)) >>= (λ x → x)) (≡-to-≅ (sym (HaskellFunctor.law-id (functor k)))) ⟩
-        (M ((k ∘Eff j) ∘Eff i) β ∋ (fmap (λ x → x) ma >>= (λ x → x)) >>= (λ x → x))
-          ≅⟨ hcong (λ X → _>>=_ (_>>=_ (fmap X ma) (λ x → x)) (λ x → x)) (≡-to-≅ (sym (HaskellFunctor.law-id (functor j)))) ⟩
-        (M ((k ∘Eff j) ∘Eff i) β ∋ (fmap (fmap (λ x → x)) ma >>= (λ x → x)) >>= (λ x → x))
-          ≅⟨ hrefl ⟩
-        (M ((k ∘Eff j) ∘Eff i) β ∋ join {β} {k ∘Eff j} {i} (join {M i β} {k} {j} (fmap (fmap (λ x → x)) ma)))
-          ≅⟨ hcong (λ X → join {β} {k ∘Eff j} {i} (join {M i β} {k} {j} (fmap (fmap (λ x → x)) X))) (hsym (het-cat-α-id {F = [ P ]₀ i} {[ P ]₀ j} {[ P ]₀ k} β ma)) ⟩
-        (M ((k ∘Eff j) ∘Eff i) β ∋ join {β} {k ∘Eff j} {i} (join {M i β} {k} {j} (fmap (fmap (λ x → x)) (nat-η (α Cat ([ P ]₀ i) ([ P ]₀ j) ([ P ]₀ k)) β ma))))
-          ≅⟨ hrefl ⟩
-        nat-η (⟨ μ {k ∘Eff j} {i} ⟩∘ᵥ⟨ ⟨ ⟨ μ {k} {j} ⟩∘ₕ⟨ id₂ Cat {f = F i} ⟩ ⟩∘ᵥ⟨ α Cat ([ P ]₀ i) ([ P ]₀ j) ([ P ]₀ k) ⟩ ⟩) β ma ∎h
+                  → ⟨ μ ⟩∘ᵥ⟨ ⟨ id₂ Cat {f = F k} ⟩∘ₕ⟨ μ ⟩ ⟩ ≅ ⟨ μ ⟩∘ᵥ⟨ ⟨ μ ⟩∘ₕ⟨ id₂ Cat {f = F i} ⟩ ⟩
+      lawFunAssoc {lift tt} {lift tt} {lift tt} {lift tt} {i} {j} {k} 
+        = het-natural-transformation-eq (functor-eq refl hrefl) (cong (λ X → [ P ]₀ X) (Monoid.assoc monoid)) 
+        $ het-fun-ext (hcong (λ X → (λ z → (a : M k (M j (M i z))) → [ [ P ]₀ X ]₀ z)) (≡-to-≅ (Monoid.assoc monoid))) 
+        $ λ (β : Type) → het-fun-ext (hcong (λ X → (λ _ → [ [ P ]₀ X ]₀ β)) (≡-to-≅ (Monoid.assoc monoid))) 
+        $ λ (ma : M k (M j (M i β))) → hbegin
+          nat-η (⟨ μ {k} {j ∘Eff i} ⟩∘ᵥ⟨ ⟨ id₂ Cat {f = F k} ⟩∘ₕ⟨ μ {j} {i} ⟩ ⟩) β ma
+            ≅⟨ hrefl ⟩
+          join {β} {k} {j ∘Eff i} (fmap (join {β} {j} {i}) ma)
+            ≅⟨ hrefl ⟩
+          fmap (join {β} {j} {i}) ma >>= (λ x → x)
+            ≅⟨ bind-arg₁ (sym right-id) (fmap (join {β} {j} {i}) ma) (ma >>= (return ∘F join {β} {j} {i})) (hsym (law-monad-fmap (join {β} {j} {i}) ma)) (λ x → x) ⟩
+          (ma >>= (return ∘F join {β} {j} {i})) >>= (λ x → x)
+            ≅⟨ hsym (law-assoc ma (return ∘F join) (λ x → x)) ⟩
+          ma >>= (λ a → return (join {β} {j} {i} a) >>= (λ x → x))
+            ≅⟨ bind-arg₂ left-id ma (λ a → return (join a) >>= (λ x → x)) (λ mma → mma >>= (λ x → x)) (het-fun-ext (het-fun-ext hrefl (λ _ → hsym Mi≅Mεi)) (λ x → law-left-id (join x) (λ x → x))) ⟩
+          ma >>= (λ mma → mma >>= (λ x → x))
+            ≅⟨ law-assoc ma (λ x → x) (λ x → x) ⟩
+          (ma >>= (λ x → x)) >>= (λ x → x)
+            ≅⟨ hcong (λ X → (X ma >>= (λ x → x)) >>= (λ x → x)) (≡-to-≅ (sym (HaskellFunctor.law-id (functor k)))) ⟩
+          (fmap (λ x → x) ma >>= (λ x → x)) >>= (λ x → x)
+            ≅⟨ hcong (λ X → _>>=_ (_>>=_ (fmap X ma) (λ x → x)) (λ x → x)) (≡-to-≅ (sym (HaskellFunctor.law-id (functor j)))) ⟩
+          (fmap (fmap (λ x → x)) ma >>= (λ x → x)) >>= (λ x → x)
+            ≅⟨ hrefl ⟩
+          join {β} {k ∘Eff j} {i} (join {M i β} {k} {j} (fmap (fmap (λ x → x)) ma))
+            ≅⟨ hrefl ⟩
+          nat-η (⟨ μ {k ∘Eff j} {i} ⟩∘ᵥ⟨ ⟨ μ {k} {j} ⟩∘ₕ⟨ id₂ Cat {f = F i} ⟩ ⟩) β ma ∎h

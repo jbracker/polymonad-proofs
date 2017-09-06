@@ -30,6 +30,7 @@ open import Theory.TwoCategory.Definition
 open import Theory.TwoCategory.Examples.Functor
 open import Theory.TwoCategory.Examples.CodiscreteHomCat
 open import Theory.TwoCategory.ExampleProperties
+open import Theory.TwoFunctor.Definition
 open import Theory.TwoFunctor.ConstZeroCell
 
 module Theory.TwoFunctor.Properties.ToIndexedMonadProperties 
@@ -77,7 +78,7 @@ abstract
             ≡ nat-η (λ' Cat' ([ P₁ {i} {j} ]₀ (lift tt))) x
   η-lax-id₁ {i} {j} x = η-extract ⟨ [ P₁ {i} {j} ]₁ (lift tt) ⟩∘ᵥ⟨ ⟨ μ {i} {i} {j} ⟩∘ᵥ⟨ ⟨ Id⟨ [ P₁ {i} {j} ]₀ (lift tt) ⟩ ⟩∘ₕ⟨ η {i} ⟩ ⟩ ⟩ 
                                   (StrictTwoCategory.λ' Cat' ([ P₁ {i} {j} ]₀ (lift tt))) 
-                                  (laxFunId₁ {i} {j} {lift tt}) x
+                                  (LaxTwoFunctor.laxFunId-λ' laxTwoFunctor {i} {j} {lift tt}) x
 
 abstract
   η-lax-id₂ : {i j : Ixs} → (x : Type)
@@ -85,7 +86,7 @@ abstract
             ≡ nat-η (ρ Cat' ([ P₁ {i} {j} ]₀ (lift tt))) x
   η-lax-id₂ {i} {j} x = η-extract ( ⟨ [ P₁ {i} {j} ]₁ (lift tt) ⟩∘ᵥ⟨ ⟨ μ {i} {j} {j} {lift tt} {id₁ S₂ {j}} ⟩∘ᵥ⟨ ⟨ η {j} ⟩∘ₕ⟨ id₂ Cat' {f = [ P₁ {i} {j} ]₀ (lift tt)} ⟩ ⟩ ⟩ )
                                   (StrictTwoCategory.ρ Cat' ([ P₁ {i} {j} ]₀ (lift tt))) 
-                                  (laxFunId₂ {i} {j} {lift tt}) x
+                                  (LaxTwoFunctor.laxFunId-ρ laxTwoFunctor {i} {j} {lift tt}) x
     
 --_∘Dᵥ_ = StrictTwoCategory._∘ᵥ_ Cat'
 --_∘Dₕ₂_ = StrictTwoCategory._∘ₕ₂_ Cat' -- l k  (k j )
@@ -99,7 +100,7 @@ abstract
                                               ⟩∘ᵥ⟨ ⟨ ⟨ μ {j} {k} {l} {lift tt} {lift tt} ⟩∘ₕ⟨ id₂ Cat' {Hask} {Hask} {[ P₁ {i} {j} ]₀ (lift tt)} ⟩ 
                                                    ⟩∘ᵥ⟨ α Cat' ([ P₁ {i} {j} ]₀ (lift tt)) ([ P₁ {j} {k} ]₀ (lift tt)) ([ P₁ {k} {l} ]₀ (lift tt)) ⟩ 
                                               ⟩) 
-                                              (laxFunAssoc {i} {j} {k} {l} {lift tt}) x
+                                              (LaxTwoFunctor.laxFunAssoc-α laxTwoFunctor {i} {j} {k} {l} {lift tt}) x
 
 abstract
   join-assoc : {i j k l : Ixs} (x : Type) 

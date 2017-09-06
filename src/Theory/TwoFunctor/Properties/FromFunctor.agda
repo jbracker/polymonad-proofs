@@ -5,6 +5,7 @@ module Theory.TwoFunctor.Properties.FromFunctor where
 open import Level renaming ( suc to lsuc ; zero to lzero )
 open import Data.Unit
 open import Relation.Binary.PropositionalEquality
+open import Relation.Binary.HeterogeneousEquality renaming ( refl to hrefl )
 
 -- Local
 open import Theory.Category.Definition
@@ -24,9 +25,9 @@ Functor→LaxTwoFunctor {ℓ₀} {ℓ₁} {C} {D} F = record
   ; P₁ = P₁
   ; η = lift tt
   ; μ = lift tt
-  ; laxFunId₁ = refl
-  ; laxFunId₂ = refl
-  ; laxFunAssoc = refl
+  ; laxFunId₁ = hrefl
+  ; laxFunId₂ = hrefl
+  ; laxFunAssoc = hrefl
   ; μ-natural₁ = λ f → refl
   ; μ-natural₂ = λ g → refl
   } where
