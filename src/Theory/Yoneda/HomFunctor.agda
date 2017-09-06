@@ -10,11 +10,13 @@ open import Extensionality
 open import Theory.Category.Definition
 open import Theory.Category.Examples.SetCat
 open import Theory.Functor.Definition
+open import Theory.Functor.Application
 open import Theory.Functor.Examples.HomFunctor
 
 module Theory.Yoneda.HomFunctor {ℓC₀ ℓC₁ : Level} {C : Category {ℓC₀} {ℓC₁}} where
 
 open Category
+open Theory.Functor.Application.BiFunctor
 
 private
   SetCat = setCategory {ℓC₀ ⊔ ℓC₁}
@@ -23,4 +25,4 @@ private
 
 -- Definition of the Hom-Functor Hom[A,-] from C to Set.
 Hom[_,-] : (a : Obj C) → Functor C SetCat
-Hom[_,-] a = homFunctor ℓC₀ a
+Hom[_,-] a = constBiFunctor₁ a (homFunctor ℓC₁ C)
