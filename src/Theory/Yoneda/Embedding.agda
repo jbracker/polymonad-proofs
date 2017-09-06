@@ -48,7 +48,9 @@ YonedaEmbedding = functor EmbF₀ EmbF₁ id-Emb compose-Emb
           ≡⟨ refl ⟩
         (F₁ Hom[ A ,-] (lower f)) (lift $ id (C op) {A}) 
           ≡⟨ refl ⟩
-        lift (lower f ∘C id (C op))
+        lift (lower f ∘C (id (C op) {A} ∘C id C))
+          ≡⟨ cong (λ X → lift (lower f ∘C X)) (left-id C) ⟩
+        lift (lower f ∘C id (C op) {A})
           ≡⟨ cong lift (left-id C) ⟩
         f
           ≡⟨⟩
@@ -62,9 +64,13 @@ YonedaEmbedding = functor EmbF₀ EmbF₁ id-Emb compose-Emb
           ≡⟨⟩
         (F₁ Hom[ c ,-] (lower h)) (lift $ g ∘Cop f) 
           ≡⟨⟩
+        lift ((id C ∘Cop (g ∘Cop f)) ∘Cop (lower h)) 
+          ≡⟨ cong (λ X → lift (X ∘Cop (lower h))) (right-id (C op)) ⟩
         lift ((g ∘Cop f) ∘Cop (lower h)) 
           ≡⟨ cong lift (sym (assoc (C op))) ⟩
         lift (g ∘Cop (f ∘Cop lower h))
+          ≡⟨ cong₂ (λ X Y → lift (X ∘Cop (Y ∘Cop lower h))) (sym (right-id (C op))) (sym (right-id (C op))) ⟩
+        lift ((id C ∘Cop g) ∘Cop ((id C ∘Cop f) ∘Cop lower h))
           ≡⟨⟩
         (F₁ Hom[ c ,-] (lower ((F₁ Hom[ b ,-] (lower h)) (lift f)))) (lift g)
           ≡⟨⟩

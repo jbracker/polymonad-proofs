@@ -45,6 +45,8 @@ yoneda← F A FA = naturalTransformation η' natural-η
         ( λ g → ([ F ]₁ f) (([ F ]₁ $ lower g) FA) )
           ≡⟨ fun-ext (λ g → cong (λ P → P FA) (sym $ compose F)) ⟩
         ( λ g → ([ F ]₁ (f ∘C lower g)) FA )
+          ≡⟨ fun-ext (λ g → cong (λ X → ([ F ]₁ (f ∘C X)) FA) (sym (left-id C))) ⟩
+        ( λ g → ([ F ]₁ (f ∘C (lower g ∘C id C))) FA )
           ≡⟨⟩
         (η' b) ∘Set ([ Hom[ A ,-] ]₁ f) ∎
 
@@ -74,6 +76,10 @@ abstract
           ([ F ]₁ (lower f) ∘Set η' A) (lift $ id C {A})
             ≡⟨ cong (λ P → P (lift $ id C {A})) (natural {A} {x} {lower f}) ⟩
           (η' x ∘Set ([ Hom[ A ,-] ]₁ (lower f))) (lift $ id C {A})
+            ≡⟨⟩
+          (η' x ∘Set (λ h → lift (lower f ∘C (lower h ∘C id C)))) (lift $ id C {A})
+            ≡⟨ cong (λ X → (η' x ∘Set X) (lift $ id C {A})) (fun-ext (λ h → cong (λ X → lift (lower f ∘C X)) (left-id C))) ⟩
+          (η' x ∘Set (λ h → lift (lower f ∘C lower {ℓ = ℓ₀} h))) (lift $ id C {A})
             ≡⟨⟩
           η' x (lift (lower f ∘C id C {A}))
             ≡⟨ cong (η' x ∘F lift) (left-id C) ⟩

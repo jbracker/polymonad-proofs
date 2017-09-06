@@ -153,6 +153,8 @@ yoneda-isomorphism = naturalIsomorphism (naturalTransformation η (λ {a} {b} {f
             (λ g → [ F ]₁ (f ∘C lower g) Fa)
               ≡⟨⟩
             (λ g → [ F ]₁ (lower {ℓ = ℓ₀} g) Fa) ∘F (λ g → lift $ f ∘C lower g)
+              ≡⟨ {!!} ⟩
+            (λ g → [ F ]₁ (lower {ℓ = ℓ₀} g) Fa) ∘F (λ g → lift $ f ∘C (lower g ∘C id C))
               ≡⟨⟩
             η' y ∘Set [ Hom[ a ,-] ]₁ f ∎
     
@@ -177,6 +179,8 @@ yoneda-isomorphism = naturalIsomorphism (naturalTransformation η (λ {a} {b} {f
                 ≡⟨⟩
               NaturalTransformation.η Φ x (NaturalTransformation.η (η (F , a) (lift Fa)) x (NaturalTransformation.η (yoneda← Hom[ a ,-] b (lift f)) x g))
                 ≡⟨ cong (NaturalTransformation.η Φ x) (cong (λ P → P Fa) (compose F)) ⟩
+              NaturalTransformation.η Φ x ([ F ]₁ (lower g) ([ F ]₁ (f ∘C id C) Fa))
+                ≡⟨ cong (λ X → NaturalTransformation.η Φ x ([ F ]₁ (lower g) ([ F ]₁ X Fa))) (left-id C) ⟩
               NaturalTransformation.η Φ x ([ F ]₁ (lower g) ([ F ]₁ f Fa))
                 ≡⟨ cong (λ P → P ([ F ]₁ f Fa)) (sym $ NaturalTransformation.natural Φ) ⟩
               [ G ]₁ (lower g) (NaturalTransformation.η Φ b ([ F ]₁ f Fa))
@@ -202,6 +206,8 @@ yoneda-isomorphism = naturalIsomorphism (naturalTransformation η (λ {a} {b} {f
               ≡⟨⟩
             NaturalTransformation.η Φ x ([ Hom[ a ,-] ]₁ (lower f) (lift $ id C {a}))
               ≡⟨⟩
+            NaturalTransformation.η Φ x (lift $ lower f ∘C (id C {a} ∘C id C))
+              ≡⟨ cong (λ X → NaturalTransformation.η Φ x (lift $ lower f ∘C X) ) (left-id C) ⟩
             NaturalTransformation.η Φ x (lift $ lower f ∘C (id C {a}))
               ≡⟨ cong (NaturalTransformation.η Φ x ∘F lift) (left-id C) ⟩
             NaturalTransformation.η Φ x f ∎
