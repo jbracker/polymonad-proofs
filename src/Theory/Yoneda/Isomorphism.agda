@@ -153,7 +153,7 @@ yoneda-isomorphism = naturalIsomorphism (naturalTransformation η (λ {a} {b} {f
             (λ g → [ F ]₁ (f ∘C lower g) Fa)
               ≡⟨⟩
             (λ g → [ F ]₁ (lower {ℓ = ℓ₀} g) Fa) ∘F (λ g → lift $ f ∘C lower g)
-              ≡⟨ {!!} ⟩
+              ≡⟨ cong (λ X → (λ g → [ F ]₁ (lower {ℓ = ℓ₀} g) Fa) ∘F X) (fun-ext (λ g → cong (λ X → lift $ f ∘C X) (sym (left-id C)))) ⟩
             (λ g → [ F ]₁ (lower {ℓ = ℓ₀} g) Fa) ∘F (λ g → lift $ f ∘C (lower g ∘C id C))
               ≡⟨⟩
             η' y ∘Set [ Hom[ a ,-] ]₁ f ∎
