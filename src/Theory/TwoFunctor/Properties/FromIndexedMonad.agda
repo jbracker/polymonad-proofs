@@ -29,7 +29,7 @@ open import Theory.Natural.Transformation
 open import Theory.Natural.Transformation.Examples
 open import Theory.TwoCategory.Definition
 open import Theory.TwoCategory.Examples.Functor
-open import Theory.TwoCategory.Examples.CodiscreteHomCat
+open import Theory.TwoCategory.Examples.DiscreteHomCat
 open import Theory.TwoCategory.ExampleProperties
 open import Theory.TwoFunctor.ConstZeroCell
 
@@ -43,7 +43,7 @@ IndexedMonad→LaxTwoFunctor
   → (Ixs : Set ℓ)
   → (M : Ixs → Ixs → TyCon)
   → (monad : IxMonad Ixs M)
-  → ConstLaxTwoFunctor (codiscreteHomCatTwoCategory (codiscreteCategory Ixs)) (Cat {suc zero} {zero}) (Hask {zero})
+  → ConstLaxTwoFunctor (discreteHomCatTwoCategory (codiscreteCategory Ixs)) (Cat {suc zero} {zero}) (Hask {zero})
 IndexedMonad→LaxTwoFunctor {ℓ} Ixs M monad = record
   { P₁ = λ {i} {j} → P {i} {j}
   ; η = λ {i} → η {i}
@@ -51,12 +51,12 @@ IndexedMonad→LaxTwoFunctor {ℓ} Ixs M monad = record
   ; laxFunId₁ = λ {i} {j} {_} → lawFunId₁ {i} {j}
   ; laxFunId₂ = λ {i} {j} {_} → lawFunId₂ {i} {j}
   ; laxFunAssoc = λ {i} {j} {k} {l} {_} {_} {_} → lawFunAssoc {i} {j} {k} {l}
-  ; μ-natural₁ = λ {i j k} _ {_ _} {_} → μ-natural {i} {j} {k} 
-  ; μ-natural₂ = λ {i j k} _ {_ _} {_} → μ-natural {i} {j} {k} 
+  ; μ-natural₁ = λ {i j k} f {x y} {α} → μ-natural₁ {i} {j} {k} f {x} {y} {α}
+  ; μ-natural₂ = λ {i j k} f {x y} {α} → μ-natural₂ {i} {j} {k} f {x} {y} {α}
   }
   where
     Ixs₁ = codiscreteCategory Ixs
-    Ixs₂ = codiscreteHomCatTwoCategory Ixs₁
+    Ixs₂ = discreteHomCatTwoCategory Ixs₁
     Cat' = Cat {suc zero} {zero}
     Hask' = Hask {zero}
 
@@ -72,12 +72,12 @@ IndexedMonad→LaxTwoFunctor {ℓ} Ixs M monad = record
         P₀ (lift tt) = HaskellFunctor→Functor (functor j i)
         
         P₁ : {a b : Obj (HomCat Ixs₂ i j)} → Hom (HomCat Ixs₂ i j) a b → Hom (HomCat Cat' Hask Hask) (P₀ a) (P₀ b)
-        P₁ {lift tt} {lift tt} (lift tt) = Id⟨ P₀ (lift tt) ⟩
+        P₁ {lift tt} {lift tt} refl = Id⟨ P₀ (lift tt) ⟩
         
         abstract
           P-compose : {a b c : Obj (HomCat Ixs₂ i j)} {f : Hom (HomCat Ixs₂ i j) a b} {g : Hom (HomCat Ixs₂ i j) b c}
                     → P₁ (Category._∘_ (HomCat Ixs₂ i j) g f) ≡ ⟨ P₁ g ⟩∘ᵥ⟨ P₁ f ⟩
-          P-compose {a} {b} {c} {lift tt} {lift tt} = sym (left-id (HomCat Cat' Hask Hask))
+          P-compose {lift tt} {lift tt} {lift tt} {refl} {refl} = sym (left-id (HomCat Cat' Hask Hask))
     
     η : {i : Ixs} → NaturalTransformation Id[ Hask' ] ([ P {i} {i} ]₀ (lift tt))
     η {i} = naturalTransformation (λ α x → return {α} {i} x) $ fun-ext $ λ a → natural a
@@ -113,11 +113,18 @@ IndexedMonad→LaxTwoFunctor {ℓ} Ixs M monad = record
             fmap (fmap f) mma >>= (λ x → x) ∎
     
     abstract
-      μ-natural : {i j k : Obj Ixs₁}
-                → ⟨ [ P {i} {k} ]₁ (lift tt) ⟩∘ᵥ⟨ μ ⟩
-                ≡ ⟨ μ ⟩∘ᵥ⟨ ⟨ [ P {j} {k} ]₁ (lift tt) ⟩∘ₕ⟨ [ P {i} {j} ]₁ (lift tt) ⟩ ⟩
-      μ-natural {i} {j} {k} 
+      μ-natural₁ : {i j k : Obj Ixs₁} (f : Cell₁ Ixs₂ i j) {x y : Cell₁ Ixs₂ j k} {α : Cell₂ Ixs₂ x y}
+                 → ⟨ [ P {i} {k} ]₁ (_∘ₕ_ Ixs₂ α (id₂ Ixs₂)) ⟩∘ᵥ⟨ μ ⟩
+                 ≡ ⟨ μ ⟩∘ᵥ⟨ ⟨ [ P {j} {k} ]₁ α ⟩∘ₕ⟨ [ P {i} {j} ]₁ refl ⟩ ⟩
+      μ-natural₁ {i} {j} {k} (lift tt) {x} {.x} {refl} 
         = natural-transformation-eq $ fun-ext $ λ (c : Obj Hask') → cong (λ X → nat-η μ c ∘F X) (sym (Functor.id (HaskellFunctor→Functor (functor k j))))
+      
+    abstract
+      μ-natural₂ : {i j k : Obj Ixs₁} (f : Cell₁ Ixs₂ i j) {x y : Cell₁ Ixs₂ j k} {α : Cell₂ Ixs₂ x y}
+                 → (Cat ∘ᵥ [ P ]₁ ((Ixs₂ ∘ₕ id₂ Ixs₂) α)) μ
+                 ≡ (Cat ∘ᵥ μ) ((Cat ∘ₕ [ P ]₁ (id₂ Ixs₂)) ([ P ]₁ α))
+      μ-natural₂ {i} {j} {k} (lift tt) {x} {.x} {refl} 
+        = natural-transformation-eq $ fun-ext $ (λ (c : Obj Hask') → cong (λ X → nat-η μ c ∘F X) (sym (Functor.id (HaskellFunctor→Functor (functor k j)))))
     
     abstract
       lawFunId₁ : {i j : Ixs}

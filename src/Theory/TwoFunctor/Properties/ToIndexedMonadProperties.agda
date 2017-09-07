@@ -28,7 +28,7 @@ open import Theory.Natural.Transformation
 open import Theory.Natural.Transformation.Examples
 open import Theory.TwoCategory.Definition
 open import Theory.TwoCategory.Examples.Functor
-open import Theory.TwoCategory.Examples.CodiscreteHomCat
+open import Theory.TwoCategory.Examples.DiscreteHomCat
 open import Theory.TwoCategory.ExampleProperties
 open import Theory.TwoFunctor.Definition
 open import Theory.TwoFunctor.ConstZeroCell
@@ -36,7 +36,7 @@ open import Theory.TwoFunctor.ConstZeroCell
 module Theory.TwoFunctor.Properties.ToIndexedMonadProperties 
   {ℓS : Level} 
   (Ixs : Set ℓS)
-  (F : ConstLaxTwoFunctor (codiscreteHomCatTwoCategory (codiscreteCategory Ixs)) (Cat {suc zero} {zero}) (Hask {zero})) 
+  (F : ConstLaxTwoFunctor (discreteHomCatTwoCategory (codiscreteCategory Ixs)) (Cat {suc zero} {zero}) (Hask {zero})) 
   where
 
 open NaturalTransformation renaming ( η to nat-η )
@@ -50,7 +50,7 @@ private
   S : Category
   S = codiscreteCategory Ixs
     
-  S₂ = codiscreteHomCatTwoCategory S
+  S₂ = discreteHomCatTwoCategory S
   
   M : Ixs → Ixs → TyCon
   M i j α = [ [ P₁ {j} {i} ]₀ (lift tt) ]₀ α
@@ -74,17 +74,17 @@ abstract
 
 abstract
   η-lax-id₁ : {i j : Ixs} → (x : Type)
-            → nat-η ([ P₁ {i} {j} ]₁ (lift tt)) x ∘F join {x} {j} {i} {i} ∘F fmap {j} {i} (return {x}) 
+            → nat-η ([ P₁ {i} {j} ]₁ refl) x ∘F join {x} {j} {i} {i} ∘F fmap {j} {i} (return {x}) 
             ≡ nat-η (λ' Cat' ([ P₁ {i} {j} ]₀ (lift tt))) x
-  η-lax-id₁ {i} {j} x = η-extract ⟨ [ P₁ {i} {j} ]₁ (lift tt) ⟩∘ᵥ⟨ ⟨ μ {i} {i} {j} ⟩∘ᵥ⟨ ⟨ Id⟨ [ P₁ {i} {j} ]₀ (lift tt) ⟩ ⟩∘ₕ⟨ η {i} ⟩ ⟩ ⟩ 
+  η-lax-id₁ {i} {j} x = η-extract ⟨ [ P₁ {i} {j} ]₁ refl ⟩∘ᵥ⟨ ⟨ μ {i} {i} {j} ⟩∘ᵥ⟨ ⟨ Id⟨ [ P₁ {i} {j} ]₀ (lift tt) ⟩ ⟩∘ₕ⟨ η {i} ⟩ ⟩ ⟩ 
                                   (StrictTwoCategory.λ' Cat' ([ P₁ {i} {j} ]₀ (lift tt))) 
                                   (LaxTwoFunctor.laxFunId-λ' laxTwoFunctor {i} {j} {lift tt}) x
 
 abstract
   η-lax-id₂ : {i j : Ixs} → (x : Type)
-            → nat-η ([ P₁ {i} {j} ]₁ (lift tt)) x ∘F join {x} {j} {j} {i} ∘F return {M j i x}
+            → nat-η ([ P₁ {i} {j} ]₁ refl) x ∘F join {x} {j} {j} {i} ∘F return {M j i x}
             ≡ nat-η (ρ Cat' ([ P₁ {i} {j} ]₀ (lift tt))) x
-  η-lax-id₂ {i} {j} x = η-extract ( ⟨ [ P₁ {i} {j} ]₁ (lift tt) ⟩∘ᵥ⟨ ⟨ μ {i} {j} {j} {lift tt} {id₁ S₂ {j}} ⟩∘ᵥ⟨ ⟨ η {j} ⟩∘ₕ⟨ id₂ Cat' {f = [ P₁ {i} {j} ]₀ (lift tt)} ⟩ ⟩ ⟩ )
+  η-lax-id₂ {i} {j} x = η-extract ( ⟨ [ P₁ {i} {j} ]₁ refl ⟩∘ᵥ⟨ ⟨ μ {i} {j} {j} {lift tt} {id₁ S₂ {j}} ⟩∘ᵥ⟨ ⟨ η {j} ⟩∘ₕ⟨ id₂ Cat' {f = [ P₁ {i} {j} ]₀ (lift tt)} ⟩ ⟩ ⟩ )
                                   (StrictTwoCategory.ρ Cat' ([ P₁ {i} {j} ]₀ (lift tt))) 
                                   (LaxTwoFunctor.laxFunId-ρ laxTwoFunctor {i} {j} {lift tt}) x
     
@@ -93,9 +93,9 @@ abstract
     
 abstract
   η-lax-assoc : {i j k l : Ixs} (x : Type)
-              → nat-η ([ P₁ {i} {l} ]₁ (lift tt)) x ∘F join {x} {l} {k} {i} ∘F fmap {l} {k} (join {x} {k} {j} {i})
+              → nat-η ([ P₁ {i} {l} ]₁ refl) x ∘F join {x} {l} {k} {i} ∘F fmap {l} {k} (join {x} {k} {j} {i})
               ≡ join {x} {l} {j} {i} ∘F join {M j i x} {l} {k} {j} ∘F fmap {l} {k} (fmap {k} {j} (λ x → x)) ∘F nat-η (α Cat' ([ P₁ {i} {j} ]₀ (lift tt)) ([ P₁ {j} {k} ]₀ (lift tt)) ([ P₁ {k} {l} ]₀ (lift tt))) x
-  η-lax-assoc {i} {j} {k} {l} x = η-extract ( ⟨ [ P₁ {i} {l} ]₁ (lift tt) ⟩∘ᵥ⟨ ⟨ μ {i} {k} {l} {lift tt} {lift tt} ⟩∘ᵥ⟨ ⟨ id₂ Cat' {Hask} {Hask} {[ P₁ {k} {l} ]₀ (lift tt)} ⟩∘ₕ⟨ μ {i} {j} {k} {lift tt} {lift tt} ⟩ ⟩ ⟩ )
+  η-lax-assoc {i} {j} {k} {l} x = η-extract ( ⟨ [ P₁ {i} {l} ]₁ refl ⟩∘ᵥ⟨ ⟨ μ {i} {k} {l} {lift tt} {lift tt} ⟩∘ᵥ⟨ ⟨ id₂ Cat' {Hask} {Hask} {[ P₁ {k} {l} ]₀ (lift tt)} ⟩∘ₕ⟨ μ {i} {j} {k} {lift tt} {lift tt} ⟩ ⟩ ⟩ )
                                             ( ⟨ μ {i} {j} {l} {lift tt} {lift tt} 
                                               ⟩∘ᵥ⟨ ⟨ ⟨ μ {j} {k} {l} {lift tt} {lift tt} ⟩∘ₕ⟨ id₂ Cat' {Hask} {Hask} {[ P₁ {i} {j} ]₀ (lift tt)} ⟩ 
                                                    ⟩∘ᵥ⟨ α Cat' ([ P₁ {i} {j} ]₀ (lift tt)) ([ P₁ {j} {k} ]₀ (lift tt)) ([ P₁ {k} {l} ]₀ (lift tt)) ⟩ 
@@ -109,7 +109,7 @@ abstract
   join-assoc {i} {j} {k} {l} x = begin
     join {x} {l} {k} {i} ∘F fmap {l} {k} (join {x} {k} {j} {i}) 
       ≡⟨ cong (λ X → nat-η X x ∘F join {x} {l} {k} {i} ∘F fmap {l} {k} (join {x} {k} {j} {i})) (sym (Functor.id (P₁ {i} {l}))) ⟩
-    nat-η ([ P₁ {i} {l} ]₁ (lift tt)) x ∘F join {x} {l} {k} {i} ∘F fmap {l} {k} (join {x} {k} {j} {i})
+    nat-η ([ P₁ {i} {l} ]₁ refl) x ∘F join {x} {l} {k} {i} ∘F fmap {l} {k} (join {x} {k} {j} {i})
       ≡⟨ η-lax-assoc {i} {j} {k} {l} x ⟩
     join {x} {l} {j} {i} ∘F join {M j i x} {l} {k} {j} ∘F fmap {l} {k} (fmap {k} {j} (λ x → x)) ∘F nat-η (α Cat' ([ P₁ {i} {j} ]₀ (lift tt)) ([ P₁ {j} {k} ]₀ (lift tt)) ([ P₁ {k} {l} ]₀ (lift tt))) x
       ≡⟨ cong (λ X → join {x} {l} {j} {i} ∘F join {M j i x} {l} {k} {j} ∘F fmap {l} {k} (fmap {k} {j} (λ x → x)) ∘F X) 

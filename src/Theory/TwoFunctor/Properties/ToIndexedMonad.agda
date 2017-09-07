@@ -29,7 +29,7 @@ open import Theory.Natural.Transformation
 open import Theory.Natural.Transformation.Examples
 open import Theory.TwoCategory.Definition
 open import Theory.TwoCategory.Examples.Functor
-open import Theory.TwoCategory.Examples.CodiscreteHomCat
+open import Theory.TwoCategory.Examples.DiscreteHomCat
 open import Theory.TwoCategory.ExampleProperties
 open import Theory.TwoFunctor.ConstZeroCell
 
@@ -40,14 +40,14 @@ module Theory.TwoFunctor.Properties.ToIndexedMonad where
 
 LaxTwoFunctor→IxMonadTyCon : {ℓS : Level}
   → (S : Set ℓS)
-  → (F : ConstLaxTwoFunctor (codiscreteHomCatTwoCategory (codiscreteCategory S)) (Cat {suc zero} {zero}) (Hask {zero}))
+  → (F : ConstLaxTwoFunctor (discreteHomCatTwoCategory (codiscreteCategory S)) (Cat {suc zero} {zero}) (Hask {zero}))
   → ( S → S → TyCon )
 LaxTwoFunctor→IxMonadTyCon S F i j A = [ [ ConstLaxTwoFunctor.P₁ F {j} {i} ]₀ (lift tt) ]₀ A
 
 LaxTwoFunctor→IndexedMonad
   : {ℓS : Level}
   → (S : Set ℓS)
-  → (F : ConstLaxTwoFunctor (codiscreteHomCatTwoCategory (codiscreteCategory S)) (Cat {suc zero} {zero}) (Hask {zero}))
+  → (F : ConstLaxTwoFunctor (discreteHomCatTwoCategory (codiscreteCategory S)) (Cat {suc zero} {zero}) (Hask {zero}))
   → IxMonad S (LaxTwoFunctor→IxMonadTyCon S F)
 LaxTwoFunctor→IndexedMonad {ℓS} ObjS F 
   = indexed-monad _>>=_ return functor law-left-id law-right-id law-assoc law-monad-fmap
@@ -61,7 +61,7 @@ LaxTwoFunctor→IndexedMonad {ℓS} ObjS F
     S : Category
     S = codiscreteCategory ObjS
     
-    S₂ = codiscreteHomCatTwoCategory S
+    S₂ = discreteHomCatTwoCategory S
     Cat' = Cat {suc zero} {zero}
 
     Ixs = Obj S
@@ -116,7 +116,7 @@ LaxTwoFunctor→IndexedMonad {ℓS} ObjS F
           ≡⟨ refl ⟩ 
         (nat-η (Id⟨ [ P₁ {j} {i} ]₀ (lift tt) ⟩) α ∘F join {α} {i} {j} {j} ∘F fmap {i} {j} (return {α})) m
           ≡⟨ cong (λ X → (nat-η X α ∘F join {α} {i} {j} {j} ∘F fmap {i} {j} (return {α})) m) (sym (Functor.id (P₁ {j} {i}))) ⟩ 
-        (nat-η ([ P₁ {j} {i} ]₁ (lift tt)) α ∘F join {α} {i} {j} {j} ∘F fmap {i} {j} (return {α})) m
+        (nat-η ([ P₁ {j} {i} ]₁ refl) α ∘F join {α} {i} {j} {j} ∘F fmap {i} {j} (return {α})) m
           ≡⟨ cong (λ X → X m) (η-lax-id₁ {j} {i} α) ⟩ 
         nat-η (λ' Cat' ([ P₁ {j} {i} ]₀ (lift tt))) α m
           ≡⟨ ≅-to-≡ (het-cat-λ-id α m) ⟩ 
