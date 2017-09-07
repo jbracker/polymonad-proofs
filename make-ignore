@@ -25,3 +25,5 @@ src/Theory/Natural/Transformation/Examples/DayConvolutionAssociator.agda
 src/Theory/End/Examples.agda
 
 src/Theory/Functor/Monoidal/Properties/ToMonoidalFunctorIntoDayFunctorCategory.agda
+
+src/Theory/Functor/Profunctor.agda
