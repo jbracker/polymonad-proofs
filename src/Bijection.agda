@@ -145,10 +145,6 @@ trans A↔B B↔C = record
 ≅-to-↔ : {ℓ : Level} {A B : Set ℓ} → A ≅ B → A ↔ B
 ≅-to-↔ hrefl = refl
 
-subst : {ℓA ℓP : Level} {A : Set ℓA} {a b : A} (P : A → Set ℓP) {Q : Set ℓP}     
-      → a ≡ b → (P a ↔ Q) → (P b ↔ Q) 
-subst P prefl bij = bij
-
 bijection-equivalence : {ℓ : Level} → IsEquivalence (Bijection {ℓ} {ℓ})
 bijection-equivalence {ℓ} = record 
   { refl = refl
