@@ -10,7 +10,7 @@ open import Theory.Category.Definition
 module Theory.Category.Examples.Monoid where  
 
 -- Category naturally formed by a monoid.
-monoidCategory : {ℓ : Level} {C : Set ℓ} → Monoid C → Category {ℓ₀ = ℓ}
+monoidCategory : {ℓ ℓM : Level} {M : Set ℓM} → Monoid M → Category {ℓ} {ℓM}
 monoidCategory {ℓ = ℓ} monoid = record
   { Obj = Lift ⊤
   ; Hom = \_ _ → Monoid.carrier monoid
