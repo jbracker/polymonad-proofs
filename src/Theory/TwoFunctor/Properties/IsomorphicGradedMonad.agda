@@ -27,7 +27,7 @@ open import Theory.Functor.Properties.IsomorphicHaskellFunctor
 open import Theory.Natural.Transformation
 open import Theory.TwoCategory.Definition
 open import Theory.TwoCategory.Examples.Functor
-open import Theory.TwoCategory.Examples.DiscreteHomCat
+open import Theory.TwoCategory.Examples.Monoid
 open import Theory.TwoFunctor.Definition
 open import Theory.TwoFunctor.ConstZeroCell
 open import Theory.TwoFunctor.ConstZeroCell.Equality
@@ -42,14 +42,14 @@ private
   Cat' = Cat {suc zero} {zero}
   Hask' = Hask {zero}
 
-GradedMonad↔LaxTwoFunctor : {ℓ : Level}
-                          → {Eff : Set ℓ}
+GradedMonad↔LaxTwoFunctor : {ℓ ℓE : Level}
+                          → {Eff : Set ℓE}
                           → (mon : Monoid Eff)
                           → (Σ (Eff → TyCon) (GradedMonad mon))
-                          ↔ (ConstLaxTwoFunctor (discreteHomCatTwoCategory (monoidCategory mon)) Cat' Hask')
-GradedMonad↔LaxTwoFunctor {ℓ} {Eff} mon = bijection l→r r→l l→r→l r→l→r
+                          ↔ (ConstLaxTwoFunctor (monoidTwoCategory {ℓ} mon) Cat' Hask')
+GradedMonad↔LaxTwoFunctor {ℓ} {ℓE} {Eff} mon = bijection l→r r→l l→r→l r→l→r
   where
-    MonCat₂ = discreteHomCatTwoCategory (monoidCategory mon)
+    MonCat₂ = monoidTwoCategory {ℓ} mon
     
     l→r : Σ (Eff → TyCon) (GradedMonad mon) → ConstLaxTwoFunctor MonCat₂ Cat' Hask'
     l→r (M , monad) = GradedMonad→LaxTwoFunctor M monad
@@ -128,10 +128,10 @@ GradedMonad↔LaxTwoFunctor {ℓ} {Eff} mon = bijection l→r r→l l→r→l r�
                       ma >>= f ∎h
 
 
-LaxTwoFunctor↔GradedMonad : {ℓ : Level}
-                          → {Eff : Set ℓ}
+LaxTwoFunctor↔GradedMonad : {ℓ ℓE : Level}
+                          → {Eff : Set ℓE}
                           → (mon : Monoid Eff)
-                          → (ConstLaxTwoFunctor (discreteHomCatTwoCategory (monoidCategory mon)) Cat' Hask')
+                          → (ConstLaxTwoFunctor (monoidTwoCategory {ℓ} mon) Cat' Hask')
                           ↔ (Σ (Eff → TyCon) (GradedMonad mon))
-LaxTwoFunctor↔GradedMonad {ℓ} {Eff} mon = Bijection.sym $ GradedMonad↔LaxTwoFunctor {ℓ} {Eff} mon
+LaxTwoFunctor↔GradedMonad {ℓ} {ℓE} {Eff} mon = Bijection.sym $ GradedMonad↔LaxTwoFunctor {ℓ} {ℓE} {Eff} mon
 

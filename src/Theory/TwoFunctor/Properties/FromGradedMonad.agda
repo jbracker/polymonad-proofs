@@ -27,7 +27,7 @@ open import Theory.Natural.Transformation
 open import Theory.TwoCategory.Definition
 open import Theory.TwoCategory.Examples.Functor
 open import Theory.TwoCategory.ExampleProperties
-open import Theory.TwoCategory.Examples.DiscreteHomCat
+open import Theory.TwoCategory.Examples.Monoid
 open import Theory.TwoFunctor.Definition
 open import Theory.TwoFunctor.ConstZeroCell
  
@@ -38,13 +38,13 @@ open StrictTwoCategory hiding ( right-id ; left-id ; assoc )
 open Triple
 
 GradedMonad→LaxTwoFunctor
-  : {ℓ : Level}
-  → {Effects : Set ℓ}
+  : {ℓ ℓE : Level}
+  → {Effects : Set ℓE}
   → {monoid : Monoid Effects}
   → (M : Effects → TyCon)
   → (monad : GradedMonad monoid M)
-  → ConstLaxTwoFunctor (discreteHomCatTwoCategory (monoidCategory monoid)) (Cat {suc zero} {zero}) (Hask {zero})
-GradedMonad→LaxTwoFunctor {ℓ} {Eff} {monoid} M monad = record
+  → ConstLaxTwoFunctor (monoidTwoCategory {ℓ} monoid) (Cat {suc zero} {zero}) (Hask {zero})
+GradedMonad→LaxTwoFunctor {ℓ} {ℓE} {Eff} {monoid} M monad = record
   { P₁ = λ {i} {j} → P
   ; η = λ {i} → η
   ; μ = λ {i} {j} {k} {f} {g} → μ {g} {f}
@@ -56,7 +56,7 @@ GradedMonad→LaxTwoFunctor {ℓ} {Eff} {monoid} M monad = record
   }
   where
     monCat₁ = monoidCategory monoid
-    monCat₂ = discreteHomCatTwoCategory monCat₁
+    monCat₂ = monoidTwoCategory {ℓ} monoid
     Cat' = Cat {suc zero} {zero}
     Hask' = Hask {zero}
 
@@ -128,8 +128,8 @@ GradedMonad→LaxTwoFunctor {ℓ} {Eff} {monoid} M monad = record
       
     abstract
       μ-natural₂ : {a b c : Lift ⊤}
-                 → (g : Cell₁ (discreteHomCatTwoCategory (monoidCategory monoid)) b c)
-                 → {x y : Cell₁ (discreteHomCatTwoCategory (monoidCategory monoid)) a b}
+                 → (g : Cell₁ monCat₂ b c)
+                 → {x y : Cell₁ monCat₂ a b}
                  → {α : x ≡ y} 
                  → ⟨ [ P ]₁ ((monCat₂ ∘ₕ refl) α) ⟩∘ᵥ⟨ μ ⟩
                  ≡ (Cat ∘ᵥ μ) ((Cat ∘ₕ [ P ]₁ refl) ([ P ]₁ α))

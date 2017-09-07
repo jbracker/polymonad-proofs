@@ -30,7 +30,7 @@ open import Theory.Natural.Transformation.Examples
 open import Theory.Natural.Transformation.Examples.FunctorCompositionAssociator
 open import Theory.TwoCategory.Definition
 open import Theory.TwoCategory.Examples.Functor renaming ( Cat to Cat' )
-open import Theory.TwoCategory.Examples.DiscreteHomCat
+open import Theory.TwoCategory.Examples.Monoid
 open import Theory.TwoFunctor.ConstZeroCell
 open import Theory.TwoFunctor.Definition
 
@@ -42,13 +42,13 @@ module Theory.TwoFunctor.Properties.FromLaxMonoidalFunctor where
 open StrictTwoCategory
 open MonoidalCategory
 
-LaxMonoidalFunctor→LaxTwoFunctor : {ℓE ℓC₀ ℓC₁ : Level}
+LaxMonoidalFunctor→LaxTwoFunctor : {ℓ ℓE ℓC₀ ℓC₁ : Level}
                                  → {Eff : Set ℓE}
                                  → (mon : Monoid Eff)
                                  → (C : Category {ℓC₀} {ℓC₁})
                                  → LaxMonoidalFunctor (monoidMonoidalCategory mon) (Fun C)
-                                 → ConstLaxTwoFunctor (discreteHomCatTwoCategory (monoidCategory mon)) Cat' C
-LaxMonoidalFunctor→LaxTwoFunctor {ℓE} {ℓC₀} {ℓC₁} {Eff} mon C MonF
+                                 → ConstLaxTwoFunctor (monoidTwoCategory {ℓ} mon) Cat' C
+LaxMonoidalFunctor→LaxTwoFunctor {ℓ} {ℓE} {ℓC₀} {ℓC₁} {Eff} mon C MonF
   = const-lax-two-functor F MonF-ε (λ {x y z} {f} {g} → μ g f) 
                           laxFunId₁ laxFunId₂ laxFunAssoc μ-natural₁ μ-natural₂
   where
@@ -57,7 +57,7 @@ LaxMonoidalFunctor→LaxTwoFunctor {ℓE} {ℓC₀} {ℓC₁} {Eff} mon C MonF
     open LaxMonoidalFunctor MonF renaming (ε to MonF-ε)
     
     Mon = monoidMonoidalCategory mon
-    Mon₂ = discreteHomCatTwoCategory (monoidCategory mon)
+    Mon₂ = monoidTwoCategory {ℓ} mon
     
     private
       abstract

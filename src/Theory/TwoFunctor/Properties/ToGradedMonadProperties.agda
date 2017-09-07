@@ -28,16 +28,16 @@ open import Theory.Natural.Transformation
 open import Theory.Natural.Transformation.Examples
 open import Theory.TwoCategory.Definition
 open import Theory.TwoCategory.Examples.Functor
-open import Theory.TwoCategory.Examples.DiscreteHomCat
+open import Theory.TwoCategory.Examples.Monoid
 open import Theory.TwoCategory.ExampleProperties
 open import Theory.TwoFunctor.Definition
 open import Theory.TwoFunctor.ConstZeroCell
 
 module Theory.TwoFunctor.Properties.ToGradedMonadProperties 
-  {ℓ : Level} 
-  {Eff : Set ℓ}
+  {ℓ ℓE : Level} 
+  {Eff : Set ℓE}
   (mon : Monoid Eff)
-  (F : ConstLaxTwoFunctor (discreteHomCatTwoCategory (monoidCategory mon)) (Cat {suc zero} {zero}) (Hask {zero})) 
+  (F : ConstLaxTwoFunctor (monoidTwoCategory {ℓ} mon) (Cat {suc zero} {zero}) (Hask {zero})) 
   where
 
 open NaturalTransformation renaming ( η to nat-η )
@@ -51,10 +51,10 @@ private
     
   _∘Eff_ = _∙_
     
-  MonCat₁ : Category
+  MonCat₁ : Category {ℓ} {ℓE}
   MonCat₁ = monoidCategory mon
   
-  MonCat₂ = discreteHomCatTwoCategory MonCat₁
+  MonCat₂ = monoidTwoCategory {ℓ} mon
   
   Fun = λ i → [ ConstLaxTwoFunctor.P₁ F {lift tt} {lift tt} ]₀ i
   
@@ -105,11 +105,11 @@ abstract
                                            (LaxTwoFunctor.laxFunAssoc-α laxTwoFunctor {f = k} {j} {i}) x
 
 abstract
-  subst-refl-id : {α : Type} {i j : Eff} → (eq : i ≡ j) → (ma : M j α) → nat-η ([ P₁ ]₁ (subst₂ _≡_ eq refl (refl {ℓ} {Eff} {i}))) α ma ≅ nat-η (Id⟨ Fun j ⟩) α ma
+  subst-refl-id : {α : Type} {i j : Eff} → (eq : i ≡ j) → (ma : M j α) → nat-η ([ P₁ ]₁ (subst₂ _≡_ eq refl (refl {ℓE} {Eff} {i}))) α ma ≅ nat-η (Id⟨ Fun j ⟩) α ma
   subst-refl-id {α} {i} {.i} refl ma = hcong (λ X → nat-η X α ma) (≡-to-≅ (Functor.id P₁))
 
 abstract
-  subst-refl-id' : {α : Type} {i j : Eff} → (eq : i ≡ j) → (ma : M i α) → nat-η ([ P₁ ]₁ (subst₂ _≡_ refl eq (refl {ℓ} {Eff} {i}))) α ma ≅ nat-η (Id⟨ Fun i ⟩) α ma
+  subst-refl-id' : {α : Type} {i j : Eff} → (eq : i ≡ j) → (ma : M i α) → nat-η ([ P₁ ]₁ (subst₂ _≡_ refl eq (refl {ℓE} {Eff} {i}))) α ma ≅ nat-η (Id⟨ Fun i ⟩) α ma
   subst-refl-id' {α} {i} {.i} refl ma = hcong (λ X → nat-η X α ma) (≡-to-≅ (Functor.id P₁))
 
 abstract

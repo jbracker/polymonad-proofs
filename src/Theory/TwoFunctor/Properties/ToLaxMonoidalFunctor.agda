@@ -30,7 +30,7 @@ open import Theory.Natural.Transformation.Examples
 open import Theory.Natural.Transformation.Examples.FunctorCompositionAssociator
 open import Theory.TwoCategory.Definition
 open import Theory.TwoCategory.Examples.Functor renaming ( Cat to Cat' )
-open import Theory.TwoCategory.Examples.DiscreteHomCat
+open import Theory.TwoCategory.Examples.Monoid
 open import Theory.TwoFunctor.ConstZeroCell
 open import Theory.TwoFunctor.Definition
 
@@ -43,20 +43,20 @@ open ConstLaxTwoFunctor
 open StrictTwoCategory
 open MonoidalCategory
 
-LaxTwoFunctor→LaxMonoidalFunctor : {ℓE ℓC₀ ℓC₁ : Level}
+LaxTwoFunctor→LaxMonoidalFunctor : {ℓ ℓE ℓC₀ ℓC₁ : Level}
                                  → {Eff : Set ℓE}
                                  → (mon : Monoid Eff)
                                  → (C : Category {ℓC₀} {ℓC₁})
-                                 → ConstLaxTwoFunctor (discreteHomCatTwoCategory (monoidCategory mon)) Cat' C
+                                 → ConstLaxTwoFunctor (monoidTwoCategory {ℓ} mon) Cat' C
                                  → LaxMonoidalFunctor (monoidMonoidalCategory mon) (Fun C)
-LaxTwoFunctor→LaxMonoidalFunctor {ℓE} {ℓC₀} {ℓC₁} {Eff} mon C F 
+LaxTwoFunctor→LaxMonoidalFunctor {ℓ} {ℓE} {ℓC₀} {ℓC₁} {Eff} mon C F 
   = laxMonoidalFunctor (P₁ F {lift tt} {lift tt}) (η F {lift tt}) μ' assoc' left-unitality' right-unitality'
   where
     open Monoid mon
     open NaturalTransformation renaming ( η to nat-η)
     
     Mon = monoidMonoidalCategory mon
-    Mon₂ = discreteHomCatTwoCategory (monoidCategory mon)
+    Mon₂ = monoidTwoCategory {ℓ} mon
     
     μ' : NaturalTransformation [ tensor (Fun C) ]∘[ [ P₁ F ]×[ P₁ F ] ] [ P₁ F ]∘[ tensor Mon ]
     μ' = naturalTransformation μ'-η μ'-natural

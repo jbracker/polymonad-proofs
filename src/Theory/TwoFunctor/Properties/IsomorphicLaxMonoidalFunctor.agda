@@ -1,4 +1,5 @@
 
+
 -- Stdlib
 open import Level
 open import Function renaming ( _∘_ to _∘F_ ; id to idF )
@@ -31,7 +32,7 @@ open import Theory.Natural.Transformation.Examples
 open import Theory.Natural.Transformation.Examples.FunctorCompositionAssociator
 open import Theory.TwoCategory.Definition
 open import Theory.TwoCategory.Examples.Functor renaming ( Cat to Cat' )
-open import Theory.TwoCategory.Examples.DiscreteHomCat
+open import Theory.TwoCategory.Examples.Monoid
 open import Theory.TwoFunctor.ConstZeroCell
 open import Theory.TwoFunctor.ConstZeroCell.Equality
 open import Theory.TwoFunctor.Definition
@@ -43,17 +44,17 @@ open StrictTwoCategory hiding ( left-id ; right-id ; assoc )
  
 module Theory.TwoFunctor.Properties.IsomorphicLaxMonoidalFunctor where
 
-LaxMonoidalFunctor↔LaxTwoFunctor : {ℓE ℓC₀ ℓC₁ : Level}
+LaxMonoidalFunctor↔LaxTwoFunctor : {ℓ ℓE ℓC₀ ℓC₁ : Level}
                                  → {Eff : Set ℓE}
                                  → (mon : Monoid Eff)
                                  → (C : Category {ℓC₀} {ℓC₁})
                                  → (LaxMonoidalFunctor (monoidMonoidalCategory mon) (Fun C))
-                                 ↔ (ConstLaxTwoFunctor (discreteHomCatTwoCategory (monoidCategory mon)) Cat' C)
-LaxMonoidalFunctor↔LaxTwoFunctor {ℓE} {ℓC₀} {ℓC₁} {Eff} mon C 
+                                 ↔ (ConstLaxTwoFunctor (monoidTwoCategory {ℓ} mon) Cat' C)
+LaxMonoidalFunctor↔LaxTwoFunctor {ℓ} {ℓE} {ℓC₀} {ℓC₁} {Eff} mon C 
   = bijection (LaxMonoidalFunctor→LaxTwoFunctor mon C) (LaxTwoFunctor→LaxMonoidalFunctor mon C) id' id''
   where
     Mon = monoidMonoidalCategory mon
-    Mon₂ = discreteHomCatTwoCategory (monoidCategory mon)
+    Mon₂ = monoidTwoCategory {ℓ} mon
     
     id' : (b : ConstLaxTwoFunctor Mon₂ Cat' C) 
         → LaxMonoidalFunctor→LaxTwoFunctor mon C (LaxTwoFunctor→LaxMonoidalFunctor mon C b) ≡ b

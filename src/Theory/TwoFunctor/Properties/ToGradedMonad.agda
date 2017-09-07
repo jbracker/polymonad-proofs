@@ -30,7 +30,7 @@ open import Theory.Natural.Transformation.Examples
 open import Theory.TwoCategory.Definition
 open import Theory.TwoCategory.Examples.Functor
 open import Theory.TwoCategory.ExampleProperties
-open import Theory.TwoCategory.Examples.DiscreteHomCat
+open import Theory.TwoCategory.Examples.Monoid
 open import Theory.TwoFunctor.ConstZeroCell
 
 open Category hiding ( left-id ; right-id ; assoc )
@@ -43,20 +43,20 @@ private
   Hask' = Hask {zero}
 
 LaxTwoFunctor→GradedMonadTyCon 
-  : {ℓ : Level}
-  → {Eff : Set ℓ}
+  : {ℓ ℓE : Level}
+  → {Eff : Set ℓE}
   → (mon : Monoid Eff)
-  → (F : ConstLaxTwoFunctor (discreteHomCatTwoCategory (monoidCategory mon)) Cat' Hask')
+  → (F : ConstLaxTwoFunctor (monoidTwoCategory {ℓ} mon) Cat' Hask')
   → ( Eff → TyCon )
 LaxTwoFunctor→GradedMonadTyCon S F i A = [ [ ConstLaxTwoFunctor.P₁ F {lift tt} {lift tt} ]₀ i ]₀ A
 
 LaxTwoFunctor→GradedMonad
-  : {ℓ : Level}
-  → {Eff : Set ℓ}
+  : {ℓ ℓE : Level}
+  → {Eff : Set ℓE}
   → (mon : Monoid Eff)
-  → (F : ConstLaxTwoFunctor (discreteHomCatTwoCategory (monoidCategory mon)) Cat' Hask')
+  → (F : ConstLaxTwoFunctor (monoidTwoCategory {ℓ} mon) Cat' Hask')
   → GradedMonad mon (LaxTwoFunctor→GradedMonadTyCon mon F)
-LaxTwoFunctor→GradedMonad {ℓ} {Eff} mon F = record
+LaxTwoFunctor→GradedMonad {ℓ} {ℓE} {Eff} mon F = record
   { _>>=_ = _>>=_
   ; return = return
   ; functor = functor
@@ -76,10 +76,10 @@ LaxTwoFunctor→GradedMonad {ℓ} {Eff} mon F = record
     
     _∘Eff_ = _∙_
     
-    MonCat₁ : Category
+    MonCat₁ : Category {ℓ} {ℓE}
     MonCat₁ = monoidCategory mon
     
-    MonCat₂ = discreteHomCatTwoCategory MonCat₁
+    MonCat₂ = monoidTwoCategory {ℓ} mon
     
     Fun = λ i → [ ConstLaxTwoFunctor.P₁ F {lift tt} {lift tt} ]₀ i
     
