@@ -22,5 +22,11 @@ record Monoid {ℓ} (C : Set ℓ) : Set ℓ where
   
   carrier : Set ℓ
   carrier = C
-
-    
+  
+unitMonoid : Monoid ⊤
+unitMonoid = record 
+  { ε = tt 
+  ; _∙_ = λ _ _ → tt 
+  ; right-id = refl
+  ; left-id = refl
+  ; assoc = refl }
