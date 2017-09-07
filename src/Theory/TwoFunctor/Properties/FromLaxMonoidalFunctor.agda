@@ -42,13 +42,13 @@ module Theory.TwoFunctor.Properties.FromLaxMonoidalFunctor where
 open StrictTwoCategory
 open MonoidalCategory
 
-LaxMonoidalFunctor→LaxTwoFunctor : {ℓ ℓE ℓC₀ ℓC₁ : Level}
+LaxMonoidalFunctor→LaxTwoFunctor : {ℓE ℓC₀ ℓC₁ : Level}
                                  → {Eff : Set ℓE}
                                  → (mon : Monoid Eff)
                                  → (C : Category {ℓC₀} {ℓC₁})
                                  → LaxMonoidalFunctor (monoidMonoidalCategory mon) (Fun C)
-                                 → ConstLaxTwoFunctor (monoidTwoCategory {ℓ} mon) Cat' C
-LaxMonoidalFunctor→LaxTwoFunctor {ℓ} {ℓE} {ℓC₀} {ℓC₁} {Eff} mon C MonF
+                                 → ConstLaxTwoFunctor (monoidTwoCategory mon) Cat' C
+LaxMonoidalFunctor→LaxTwoFunctor {ℓE} {ℓC₀} {ℓC₁} {Eff} mon C MonF
   = const-lax-two-functor F MonF-ε (λ {x y z} {f} {g} → μ g f) 
                           laxFunId₁ laxFunId₂ laxFunAssoc μ-natural₁ μ-natural₂
   where
@@ -57,7 +57,7 @@ LaxMonoidalFunctor→LaxTwoFunctor {ℓ} {ℓE} {ℓC₀} {ℓC₁} {Eff} mon C 
     open LaxMonoidalFunctor MonF renaming (ε to MonF-ε)
     
     Mon = monoidMonoidalCategory mon
-    Mon₂ = monoidTwoCategory {ℓ} mon
+    Mon₂ = monoidTwoCategory mon
     
     private
       abstract
@@ -72,7 +72,7 @@ LaxMonoidalFunctor→LaxTwoFunctor {ℓ} {ℓE} {ℓC₀} {ℓC₁} {Eff} mon C 
     abstract
       laxFunId₁ : {x y : Cell₀ Mon₂} {f : Cell₁ Mon₂ x y}
                 → ⟨ μ f (id₁ Mon₂) ⟩∘ᵥ⟨ ⟨ id₂ Cat' ⟩∘ₕ⟨ MonF-ε ⟩ ⟩ ≅ id₂ Cat' {f = [ F ]₀ f}
-      laxFunId₁ {lift tt} {lift tt} {f} = hbegin
+      laxFunId₁ {tt} {tt} {f} = hbegin
         ⟨ μ f (id₁ Mon₂) ⟩∘ᵥ⟨ ⟨ id₂ Cat' ⟩∘ₕ⟨ MonF-ε ⟩ ⟩ 
           ≅⟨ hsym (≡-to-≅ (vertical-right-id Cat')) ⟩
         ⟨ id₂ Cat' ⟩∘ᵥ⟨ ⟨ μ f (id₁ Mon₂) ⟩∘ᵥ⟨ ⟨ id₂ Cat' ⟩∘ₕ⟨ MonF-ε ⟩ ⟩  ⟩
@@ -103,7 +103,7 @@ LaxMonoidalFunctor→LaxTwoFunctor {ℓ} {ℓE} {ℓC₀} {ℓC₁} {Eff} mon C 
     abstract
       laxFunId₂ : {x y : Cell₀ Mon₂} {f : Cell₁ Mon₂ x y}
                 → ⟨ μ (id₁ Mon₂) f ⟩∘ᵥ⟨ ⟨ MonF-ε ⟩∘ₕ⟨ id₂ Cat' ⟩ ⟩ ≅ id₂ Cat' {f = [ F ]₀ f}
-      laxFunId₂ {lift tt} {lift tt} {f} = hbegin
+      laxFunId₂ {tt} {tt} {f} = hbegin
         ⟨ μ (id₁ Mon₂) f ⟩∘ᵥ⟨ ⟨ MonF-ε ⟩∘ₕ⟨ id₂ Cat' ⟩ ⟩ 
           ≅⟨ hsym (≡-to-≅ (vertical-right-id Cat')) ⟩
         ⟨ id₂ Cat' ⟩∘ᵥ⟨ ⟨ μ (id₁ Mon₂) f ⟩∘ᵥ⟨ ⟨ MonF-ε ⟩∘ₕ⟨ id₂ Cat' ⟩ ⟩ ⟩
@@ -135,7 +135,7 @@ LaxMonoidalFunctor→LaxTwoFunctor {ℓ} {ℓE} {ℓC₀} {ℓC₁} {Eff} mon C 
       laxFunAssoc : {w x y z : Cell₀ Mon₂} {f : Cell₁ Mon₂ w x} {g : Cell₁ Mon₂ x y} {h : Cell₁ Mon₂ y z} 
                   → ⟨ μ h (g ∙ f) ⟩∘ᵥ⟨ ⟨ id₂ Cat' ⟩∘ₕ⟨ μ g f ⟩ ⟩
                   ≅ ⟨ μ (h ∙ g) f ⟩∘ᵥ⟨ ⟨ μ h g ⟩∘ₕ⟨ id₂ Cat' ⟩ ⟩
-      laxFunAssoc {lift tt} {lift tt} {lift tt} {lift tt} {f} {g} {h} = hbegin
+      laxFunAssoc {tt} {tt} {tt} {tt} {f} {g} {h} = hbegin
         ⟨ μ h (g ∙ f) ⟩∘ᵥ⟨ ⟨ id₂ Cat' ⟩∘ₕ⟨ μ g f ⟩ ⟩
           ≅⟨ hcong (λ X → ⟨ μ h (g ∙ f) ⟩∘ᵥ⟨ X ⟩) (≡-to-≅ (sym (vertical-left-id Cat'))) ⟩
         ⟨ μ h (g ∙ f) ⟩∘ᵥ⟨ ⟨ ⟨ id₂ Cat' ⟩∘ₕ⟨ μ g f ⟩ ⟩∘ᵥ⟨ (Cell₂ Cat' ([ [ F ]₀ h ]∘[ [ [ F ]₀ g ]∘[ [ F ]₀ f ] ]) ([ [ F ]₀ h ]∘[ [ [ F ]₀ g ]∘[ [ F ]₀ f ] ]) ∋ id₂ Cat') ⟩ ⟩
@@ -176,7 +176,7 @@ LaxMonoidalFunctor→LaxTwoFunctor {ℓ} {ℓE} {ℓC₀} {ℓC₁} {Eff} mon C 
                  → {θ : Cell₂ Mon₂ x y} 
                  → ⟨ [ F ]₁ ((Mon₂ ∘ₕ θ) (id₂ Mon₂)) ⟩∘ᵥ⟨ μ x f ⟩
                  ≡ ⟨ μ y f ⟩∘ᵥ⟨ ⟨ [ F ]₁ θ ⟩∘ₕ⟨ [ F ]₁ (id₂ Mon₂) ⟩ ⟩
-      μ-natural₁ {lift tt} {lift tt} {lift tt} f {x} {.x} {refl} = begin
+      μ-natural₁ {tt} {tt} {tt} f {x} {.x} {refl} = begin
         ⟨ [ F ]₁ refl ⟩∘ᵥ⟨ μ x f ⟩
           ≡⟨ cong (λ X → ⟨ X ⟩∘ᵥ⟨ μ x f ⟩) (Functor.id F) ⟩  
         ⟨ id₂ Cat' ⟩∘ᵥ⟨ μ x f ⟩
@@ -196,7 +196,7 @@ LaxMonoidalFunctor→LaxTwoFunctor {ℓ} {ℓE} {ℓC₀} {ℓC₁} {Eff} mon C 
                  → {θ : Cell₂ Mon₂ x y} 
                  → ⟨ [ F ]₁ ((Mon₂ ∘ₕ id₂ Mon₂) θ) ⟩∘ᵥ⟨ μ g x ⟩
                  ≡ ⟨ μ g y ⟩∘ᵥ⟨ ⟨ [ F ]₁ (id₂ Mon₂) ⟩∘ₕ⟨ [ F ]₁ θ ⟩ ⟩
-      μ-natural₂ {lift tt} {lift tt} {lift tt} g {x} {.x} {refl} = begin
+      μ-natural₂ {tt} {tt} {tt} g {x} {.x} {refl} = begin
         ⟨ [ F ]₁ refl ⟩∘ᵥ⟨ μ g x ⟩
           ≡⟨ cong (λ X → ⟨ X ⟩∘ᵥ⟨ μ g x ⟩) (Functor.id F) ⟩ 
         ⟨ id₂ Cat' ⟩∘ᵥ⟨ μ g x ⟩

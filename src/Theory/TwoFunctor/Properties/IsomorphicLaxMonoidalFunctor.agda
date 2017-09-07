@@ -44,17 +44,17 @@ open StrictTwoCategory hiding ( left-id ; right-id ; assoc )
  
 module Theory.TwoFunctor.Properties.IsomorphicLaxMonoidalFunctor where
 
-LaxMonoidalFunctor↔LaxTwoFunctor : {ℓ ℓE ℓC₀ ℓC₁ : Level}
+LaxMonoidalFunctor↔LaxTwoFunctor : {ℓE ℓC₀ ℓC₁ : Level}
                                  → {Eff : Set ℓE}
                                  → (mon : Monoid Eff)
                                  → (C : Category {ℓC₀} {ℓC₁})
                                  → (LaxMonoidalFunctor (monoidMonoidalCategory mon) (Fun C))
-                                 ↔ (ConstLaxTwoFunctor (monoidTwoCategory {ℓ} mon) Cat' C)
-LaxMonoidalFunctor↔LaxTwoFunctor {ℓ} {ℓE} {ℓC₀} {ℓC₁} {Eff} mon C 
+                                 ↔ (ConstLaxTwoFunctor (monoidTwoCategory mon) Cat' C)
+LaxMonoidalFunctor↔LaxTwoFunctor {ℓE} {ℓC₀} {ℓC₁} {Eff} mon C 
   = bijection (LaxMonoidalFunctor→LaxTwoFunctor mon C) (LaxTwoFunctor→LaxMonoidalFunctor mon C) id' id''
   where
     Mon = monoidMonoidalCategory mon
-    Mon₂ = monoidTwoCategory {ℓ} mon
+    Mon₂ = monoidTwoCategory mon
     
     id' : (b : ConstLaxTwoFunctor Mon₂ Cat' C) 
         → LaxMonoidalFunctor→LaxTwoFunctor mon C (LaxTwoFunctor→LaxMonoidalFunctor mon C b) ≡ b

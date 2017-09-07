@@ -43,31 +43,31 @@ open ConstLaxTwoFunctor
 open StrictTwoCategory
 open MonoidalCategory
 
-LaxTwoFunctor→LaxMonoidalFunctor : {ℓ ℓE ℓC₀ ℓC₁ : Level}
+LaxTwoFunctor→LaxMonoidalFunctor : {ℓE ℓC₀ ℓC₁ : Level}
                                  → {Eff : Set ℓE}
                                  → (mon : Monoid Eff)
                                  → (C : Category {ℓC₀} {ℓC₁})
-                                 → ConstLaxTwoFunctor (monoidTwoCategory {ℓ} mon) Cat' C
+                                 → ConstLaxTwoFunctor (monoidTwoCategory mon) Cat' C
                                  → LaxMonoidalFunctor (monoidMonoidalCategory mon) (Fun C)
-LaxTwoFunctor→LaxMonoidalFunctor {ℓ} {ℓE} {ℓC₀} {ℓC₁} {Eff} mon C F 
-  = laxMonoidalFunctor (P₁ F {lift tt} {lift tt}) (η F {lift tt}) μ' assoc' left-unitality' right-unitality'
+LaxTwoFunctor→LaxMonoidalFunctor {ℓE} {ℓC₀} {ℓC₁} {Eff} mon C F 
+  = laxMonoidalFunctor (P₁ F {tt} {tt}) (η F {tt}) μ' assoc' left-unitality' right-unitality'
   where
     open Monoid mon
     open NaturalTransformation renaming ( η to nat-η)
     
     Mon = monoidMonoidalCategory mon
-    Mon₂ = monoidTwoCategory {ℓ} mon
+    Mon₂ = monoidTwoCategory mon
     
     μ' : NaturalTransformation [ tensor (Fun C) ]∘[ [ P₁ F ]×[ P₁ F ] ] [ P₁ F ]∘[ tensor Mon ]
     μ' = naturalTransformation μ'-η μ'-natural
       where
         μ'-η : (x : Eff × Eff)
              → NaturalTransformation ([ [ tensor (Fun C) ]∘[ [ P₁ F ]×[ P₁ F ] ] ]₀ x) ([ [ P₁ F ]∘[ tensor Mon ] ]₀ x)
-        μ'-η (i , j) = μ F {lift tt} {lift tt} {lift tt} {j} {i}
+        μ'-η (i , j) = μ F {tt} {tt} {tt} {j} {i}
         
         abstract
           μ'-natural : {a b : Eff × Eff}
-                     → {f : Hom (HomCat Mon₂ (lift tt) (lift tt) ×C HomCat Mon₂ (lift tt) (lift tt)) a b}
+                     → {f : Hom (HomCat Mon₂ tt tt ×C HomCat Mon₂ tt tt) a b}
                      → ⟨ [ [ P₁ F ]∘[ tensor Mon ] ]₁ f ⟩∘ᵥ⟨ μ'-η a ⟩
                      ≡ ⟨ μ'-η b ⟩∘ᵥ⟨ [ [ tensor (Fun C) ]∘[ [ P₁ F ]×[ P₁ F ] ] ]₁ f ⟩
           μ'-natural {i , j} {.i , .j} {refl , refl} = begin
@@ -75,7 +75,7 @@ LaxTwoFunctor→LaxMonoidalFunctor {ℓ} {ℓE} {ℓC₀} {ℓC₁} {Eff} mon C 
               ≡⟨⟩
             ⟨ [ P₁ F ]₁ refl ⟩∘ᵥ⟨ μ'-η (i , j) ⟩
               ≡⟨⟩
-            ⟨ [ P₁ F ]₁ (id₂ Mon₂ {lift tt}) ⟩∘ᵥ⟨ μ'-η (i , j) ⟩
+            ⟨ [ P₁ F ]₁ (id₂ Mon₂ {tt}) ⟩∘ᵥ⟨ μ'-η (i , j) ⟩
               ≡⟨ cong (λ X → ⟨ X ⟩∘ᵥ⟨ μ'-η (i , j) ⟩) (Functor.id (P₁ F)) ⟩
             ⟨ id₂ Cat' {C} ⟩∘ᵥ⟨ μ'-η (i , j) ⟩
               ≡⟨ vertical-right-id Cat' ⟩
@@ -131,7 +131,7 @@ LaxTwoFunctor→LaxMonoidalFunctor {ℓ} {ℓE} {ℓC₀} {ℓC₁} {Eff} mon C 
         MonoidalCategory.λ' (Fun C) ([ P₁ F ]₀ x)
           ≡⟨ natural-transformation-eq left-unitor-eq ⟩ 
         StrictTwoCategory.ρ Cat' ([ P₁ F ]₀ x)
-          ≡⟨ sym $ LaxTwoFunctor.laxFunId-ρ (ConstLaxTwoFunctor.laxTwoFunctor F) {lift tt} {lift tt} {x} ⟩ 
+          ≡⟨ sym $ LaxTwoFunctor.laxFunId-ρ (ConstLaxTwoFunctor.laxTwoFunctor F) {tt} {tt} {x} ⟩ 
         ⟨ [ P₁ F ]₁ (StrictTwoCategory.ρ Mon₂ x) ⟩∘ᵥ⟨ ⟨ μ F {f = x} {unit Mon} ⟩∘ᵥ⟨ ⟨ η F ⟩∘ₕ⟨ MonoidalCategory.id (Fun C) ⟩ ⟩ ⟩
           ≡⟨ cong (λ X → ⟨ [ P₁ F ]₁ X ⟩∘ᵥ⟨ ⟨ μ F {f = x} {unit Mon} ⟩∘ᵥ⟨ ⟨ η F ⟩∘ₕ⟨ MonoidalCategory.id (Fun C) ⟩ ⟩ ⟩) (proof-irrelevance (StrictTwoCategory.ρ Mon₂ x) (MonoidalCategory.λ' Mon x)) ⟩ 
         ⟨ [ P₁ F ]₁ (MonoidalCategory.λ' Mon x) ⟩∘ᵥ⟨ ⟨ μ F {f = x} {unit Mon} ⟩∘ᵥ⟨ ⟨ η F ⟩∘ₕ⟨ MonoidalCategory.id (Fun C) ⟩ ⟩ ⟩ ∎ 
@@ -153,7 +153,7 @@ LaxTwoFunctor→LaxMonoidalFunctor {ℓ} {ℓE} {ℓC₀} {ℓC₁} {Eff} mon C 
         MonoidalCategory.ρ (Fun C) ([ P₁ F ]₀ x) 
           ≡⟨ natural-transformation-eq right-unitor-eq ⟩
         StrictTwoCategory.λ' Cat' ([ P₁ F ]₀ x) 
-          ≡⟨ sym $ LaxTwoFunctor.laxFunId-λ' (ConstLaxTwoFunctor.laxTwoFunctor F) {lift tt} {lift tt} {x} ⟩
+          ≡⟨ sym $ LaxTwoFunctor.laxFunId-λ' (ConstLaxTwoFunctor.laxTwoFunctor F) {tt} {tt} {x} ⟩
         ⟨ [ P₁ F ]₁ (StrictTwoCategory.λ' Mon₂ x) ⟩∘ᵥ⟨ ⟨ nat-η μ' (x , unit Mon) ⟩∘ᵥ⟨ ⟨ MonoidalCategory.id (Fun C) ⟩∘ₕ⟨ η F ⟩ ⟩ ⟩
           ≡⟨ cong (λ X → ⟨ [ P₁ F ]₁ X ⟩∘ᵥ⟨ ⟨ nat-η μ' (x , unit Mon) ⟩∘ᵥ⟨ ⟨ MonoidalCategory.id (Fun C) ⟩∘ₕ⟨ η F ⟩ ⟩ ⟩) (proof-irrelevance (StrictTwoCategory.λ' Mon₂ x) (MonoidalCategory.ρ Mon x)) ⟩
         ⟨ [ P₁ F ]₁ (MonoidalCategory.ρ Mon x) ⟩∘ᵥ⟨ ⟨ nat-η μ' (x , unit Mon) ⟩∘ᵥ⟨ ⟨ MonoidalCategory.id (Fun C) ⟩∘ₕ⟨ η F ⟩ ⟩ ⟩ ∎

@@ -33,6 +33,7 @@ open Theory.Functor.Association.BiFunctor
 open Category hiding ( left-id ; right-id ; assoc ; _∘_ ) renaming ( id to idC )
 
 record StrictTwoCategory {ℓ₀ ℓ₁ ℓ₂ : Level} : Set (lsuc (ℓ₀ ⊔ ℓ₁ ⊔ ℓ₂)) where
+  constructor strictTwoCategory
   field
     -- Names and structure base on: https://ncatlab.org/nlab/show/strict+2-category
     --                              https://ncatlab.org/nlab/show/bicategory
