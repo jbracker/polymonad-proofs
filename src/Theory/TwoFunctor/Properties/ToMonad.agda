@@ -28,6 +28,7 @@ open import Theory.TwoCategory.Examples.Functor
 open import Theory.TwoCategory.Examples.Unit
 open import Theory.TwoCategory.ExampleProperties
 open import Theory.TwoFunctor.Definition
+open import Theory.TwoFunctor.ConstZeroCell
 
 open StrictTwoCategory
 open NaturalTransformation renaming ( η to nat-η ) 
@@ -152,3 +153,7 @@ LaxTwoFunctor→Monad {ℓC₀} {ℓC₁} F = record
           ≡⟨ sym $ ≅-to-≡ $ subst₂-insert (sym (StrictTwoCategory.right-id FunTwoCat)) refl Id⟨ M ⟩ x ⟩
         nat-η Id⟨ M ⟩ x ∎
 
+
+ConstLaxTwoFunctor→Monad : {ℓC₀ ℓC₁ : Level} {C : Category {ℓC₀} {ℓC₁}}
+                         → (ConstF : ConstLaxTwoFunctor ⊤-TwoCat (Cat {ℓC₀} {ℓC₁}) C) → Monad ([ ConstLaxTwoFunctor.P₁ ConstF ]₀ tt)
+ConstLaxTwoFunctor→Monad {ℓC₀} {ℓC₁} ConstF = LaxTwoFunctor→Monad (ConstLaxTwoFunctor.laxTwoFunctor ConstF)

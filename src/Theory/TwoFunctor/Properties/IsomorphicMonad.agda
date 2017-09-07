@@ -20,6 +20,8 @@ open import Theory.TwoCategory.Definition
 open import Theory.TwoCategory.Examples.Functor
 open import Theory.TwoCategory.Examples.Unit
 open import Theory.TwoFunctor.Definition
+open import Theory.TwoFunctor.ConstZeroCell
+open import Theory.TwoFunctor.ConstZeroCell.Equality
 open import Theory.TwoFunctor.Equality
 open import Theory.TwoFunctor.Properties.ToMonad
 open import Theory.TwoFunctor.Properties.FromMonad
@@ -66,3 +68,43 @@ Monad↔LaxTwoFunctor {ℓC₀} {ℓC₁} = bijection l→r r→l r→l→r l→
 
 LaxTwoFunctor↔Monad : {ℓC₀ ℓC₁ : Level} → LaxTwoFunctor ⊤-TwoCat (Cat {ℓC₀} {ℓC₁}) ↔ Σ (Category {ℓC₀} {ℓC₁}) (λ C → Σ (Functor C C) Monad)
 LaxTwoFunctor↔Monad {ℓC₀} {ℓC₁} = Bijection.sym $ Monad↔LaxTwoFunctor {ℓC₀} {ℓC₁}
+
+Monad↔ConstLaxTwoFunctor : {ℓC₀ ℓC₁ : Level} (C : Category {ℓC₀} {ℓC₁}) 
+                         → (Σ (Functor C C) Monad)
+                         ↔ (ConstLaxTwoFunctor ⊤-TwoCat (Cat {ℓC₀} {ℓC₁}) C)
+Monad↔ConstLaxTwoFunctor {ℓC₀} {ℓC₁} C = bijection l→r r→l r→l→r l→r→l
+  where
+    Category' = Category {ℓC₀} {ℓC₁}
+    Cat' = Cat {ℓC₀} {ℓC₁}
+    
+    l→r : Σ (Functor C C) Monad → ConstLaxTwoFunctor ⊤-TwoCat Cat' C
+    l→r (F , monad) = Monad→ConstLaxTwoFunctor {C = C} {M = F} monad
+    
+    r→l : ConstLaxTwoFunctor ⊤-TwoCat Cat' C → Σ (Functor C C) Monad
+    r→l F = Functor.F₀ (ConstLaxTwoFunctor.P₁ F) tt , ConstLaxTwoFunctor→Monad F
+    
+    abstract
+      r→l→r : (F : ConstLaxTwoFunctor ⊤-TwoCat Cat C) → l→r (r→l F) ≡ F
+      r→l→r F = const-lax-two-functor-eq P₁-eq (≡-to-≅ (implicit-fun-ext (λ x → refl))) (≡-to-≅ (implicit-fun-ext (λ x → refl)))
+        where
+          p : (c : Category.Obj (ConstLaxTwoFunctor.P₀ (l→r (r→l F)) tt)) 
+            → Category.id C ≡ NaturalTransformation.η (Functor.F₁ (ConstLaxTwoFunctor.P₁ F) tt) c
+          p c = begin
+            Category.id C
+              ≡⟨ refl ⟩
+            NaturalTransformation.η (Id⟨ Functor.F₀ (ConstLaxTwoFunctor.P₁ F) tt ⟩) c
+              ≡⟨ cong (λ X → NaturalTransformation.η X c) (sym (Functor.id (ConstLaxTwoFunctor.P₁ F))) ⟩
+            NaturalTransformation.η (Functor.F₁ (ConstLaxTwoFunctor.P₁ F) tt) c ∎
+          
+          P₁-eq : (λ {x y} → ConstLaxTwoFunctor.P₁ (l→r (r→l F)) {x} {y}) ≡ ConstLaxTwoFunctor.P₁ F
+          P₁-eq = implicit-fun-ext $ λ x → implicit-fun-ext $ λ y → functor-eq refl $ ≡-to-≅ $ implicit-fun-ext 
+                $ λ f → implicit-fun-ext $ λ g → fun-ext 
+                $ λ F → natural-transformation-eq $ fun-ext $ p
+    
+    abstract
+      l→r→l : (M : Σ (Functor C C) Monad) → r→l (l→r M) ≡ M
+      l→r→l (F , monad) = Σ-eq refl (≡-to-≅ (monad-eq refl refl))
+
+ConstLaxTwoFunctor↔Monad : {ℓC₀ ℓC₁ : Level} (C : Category {ℓC₀} {ℓC₁}) 
+                         → (ConstLaxTwoFunctor ⊤-TwoCat (Cat {ℓC₀} {ℓC₁}) C) ↔ (Σ (Functor C C) Monad)
+ConstLaxTwoFunctor↔Monad C = Bijection.sym $ Monad↔ConstLaxTwoFunctor C

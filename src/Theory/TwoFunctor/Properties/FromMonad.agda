@@ -27,15 +27,15 @@ open import Theory.TwoCategory.Definition
 open import Theory.TwoCategory.Examples.Functor
 open import Theory.TwoCategory.Examples.Unit
 open import Theory.TwoFunctor.Definition
+open import Theory.TwoFunctor.ConstZeroCell
 
 open StrictTwoCategory
 
-Monad→LaxTwoFunctor : ∀ {ℓC₀ ℓC₁} 
-                    → {C : Category {ℓC₀} {ℓC₁}} {M : Functor C C} 
-                    →  Monad M → LaxTwoFunctor ⊤-TwoCat (Cat {ℓC₀} {ℓC₁})
-Monad→LaxTwoFunctor {ℓC₀} {ℓC₁} {C} {M} monad = record
-  { P₀ = P₀
-  ; P₁ = P₁
+Monad→ConstLaxTwoFunctor : ∀ {ℓC₀ ℓC₁} 
+                         → {C : Category {ℓC₀} {ℓC₁}} {M : Functor C C} 
+                         → Monad M → ConstLaxTwoFunctor ⊤-TwoCat (Cat {ℓC₀} {ℓC₁}) C
+Monad→ConstLaxTwoFunctor {ℓC₀} {ℓC₁} {C} {M} monad = record
+  { P₁ = P₁
   ; η = ηP
   ; μ = μP
   ; laxFunId₁ = λ {x} {y} {f} → laxFunId₁ {x} {y} {f}
@@ -145,3 +145,8 @@ Monad→LaxTwoFunctor {ℓC₀} {ℓC₁} {C} {M} monad = record
           ≅⟨ ≡-to-≅ $ cong (λ X → nat-η μP x ∘C ( nat-η μP ([ M ]₀ x) ∘C [ M ]₁ X )) (sym (Functor.id M)) ⟩
         nat-η μP x ∘C ( nat-η μP ([ M ]₀ x) ∘C [ M ]₁ ([ M ]₁ (Category.id C)) ) ∎h
 
+
+Monad→LaxTwoFunctor : ∀ {ℓC₀ ℓC₁} 
+                    → {C : Category {ℓC₀} {ℓC₁}} {M : Functor C C} 
+                    →  Monad M → LaxTwoFunctor ⊤-TwoCat (Cat {ℓC₀} {ℓC₁})
+Monad→LaxTwoFunctor {ℓC₀} {ℓC₁} {C} {M} monad = ConstLaxTwoFunctor.laxTwoFunctor $ Monad→ConstLaxTwoFunctor monad
