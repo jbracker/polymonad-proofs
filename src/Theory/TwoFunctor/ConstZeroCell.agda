@@ -39,8 +39,8 @@ record ConstLaxTwoFunctor {ℓC₀ ℓC₁ ℓC₂ ℓD₀ ℓD₁ ℓD₂ : Lev
 
     id₁D = id₁ D
 
-    P₀ : Cell₀ C → Cell₀ D
-    P₀ _ = constD
+  P₀ : Cell₀ C → Cell₀ D
+  P₀ _ = constD
 
   field
     -- P_{x,y}
