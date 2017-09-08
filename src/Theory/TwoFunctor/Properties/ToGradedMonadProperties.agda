@@ -34,10 +34,10 @@ open import Theory.TwoFunctor.Definition
 open import Theory.TwoFunctor.ConstZeroCell
 
 module Theory.TwoFunctor.Properties.ToGradedMonadProperties 
-  {ℓ ℓE : Level} 
+  {ℓE : Level} 
   {Eff : Set ℓE}
   (mon : Monoid Eff)
-  (F : ConstLaxTwoFunctor (monoidTwoCategory {ℓ} mon) (Cat {suc zero} {zero}) (Hask {zero})) 
+  (F : ConstLaxTwoFunctor (monoidTwoCategory mon) (Cat {suc zero} {zero}) (Hask {zero})) 
   where
 
 open NaturalTransformation renaming ( η to nat-η )
@@ -51,24 +51,24 @@ private
     
   _∘Eff_ = _∙_
     
-  MonCat₁ : Category {ℓ} {ℓE}
+  MonCat₁ : Category {zero} {ℓE}
   MonCat₁ = monoidCategory mon
   
-  MonCat₂ = monoidTwoCategory {ℓ} mon
+  MonCat₂ = monoidTwoCategory mon
   
-  Fun = λ i → [ ConstLaxTwoFunctor.P₁ F {lift tt} {lift tt} ]₀ i
+  Fun = λ i → [ ConstLaxTwoFunctor.P₁ F {tt} {tt} ]₀ i
   
   M : Eff → TyCon
-  M i α = [ [ ConstLaxTwoFunctor.P₁ F {lift tt} {lift tt} ]₀ i ]₀ α
+  M i α = [ [ ConstLaxTwoFunctor.P₁ F {tt} {tt} ]₀ i ]₀ α
   
   return : {α : Type} → α → M ε α
-  return {α} a = nat-η (η {lift tt}) α a
+  return {α} a = nat-η (η {tt}) α a
   
   join : {α : Type} {i j : Eff} → M i (M j α) → M (i ∘Eff j) α
   join {α} {i} {j} mma = nat-η (μ {f = j} {i}) α mma 
     
   fmap : {i : Eff} {α β : Type} → (α → β) → M i α → M i β
-  fmap {i} = [ [ P₁ {lift tt} {lift tt} ]₀ i ]₁
+  fmap {i} = [ [ P₁ {tt} {tt} ]₀ i ]₁
 
   abstract
     η-extract : {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} {F G : Functor C D} 
@@ -129,7 +129,7 @@ abstract
   join-return-id {i} x ma = hbegin
     (M (ε ∘Eff i) x ∋ join {x} (return ma))
       ≅⟨ hrefl ⟩
-    (M (ε ∘Eff i) x ∋ nat-η (Id⟨ [ P₁ {lift tt} {lift tt} ]₀ (ε ∘Eff i) ⟩) x (join {x} (return ma)) )
+    (M (ε ∘Eff i) x ∋ nat-η (Id⟨ [ P₁ {tt} {tt} ]₀ (ε ∘Eff i) ⟩) x (join {x} (return ma)) )
       ≅⟨ hsym (subst-refl-id (sym (StrictTwoCategory.right-id MonCat₂)) (join (return ma))) ⟩
     (M i x ∋ nat-η ([ P₁ ]₁ (ρ MonCat₂ i)) x (join {x} (return ma)) )
       ≅⟨ ≡-to-≅ $ η-lax-id₂ x ma ⟩ -- η-lax-id₂ x 

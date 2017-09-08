@@ -43,20 +43,20 @@ private
   Hask' = Hask {zero}
 
 LaxTwoFunctor→GradedMonadTyCon 
-  : {ℓ ℓE : Level}
+  : {ℓE : Level}
   → {Eff : Set ℓE}
   → (mon : Monoid Eff)
-  → (F : ConstLaxTwoFunctor (monoidTwoCategory {ℓ} mon) Cat' Hask')
+  → (F : ConstLaxTwoFunctor (monoidTwoCategory mon) Cat' Hask')
   → ( Eff → TyCon )
-LaxTwoFunctor→GradedMonadTyCon S F i A = [ [ ConstLaxTwoFunctor.P₁ F {lift tt} {lift tt} ]₀ i ]₀ A
+LaxTwoFunctor→GradedMonadTyCon S F i A = [ [ ConstLaxTwoFunctor.P₁ F {tt} {tt} ]₀ i ]₀ A
 
 LaxTwoFunctor→GradedMonad
-  : {ℓ ℓE : Level}
+  : {ℓE : Level}
   → {Eff : Set ℓE}
   → (mon : Monoid Eff)
-  → (F : ConstLaxTwoFunctor (monoidTwoCategory {ℓ} mon) Cat' Hask')
+  → (F : ConstLaxTwoFunctor (monoidTwoCategory mon) Cat' Hask')
   → GradedMonad mon (LaxTwoFunctor→GradedMonadTyCon mon F)
-LaxTwoFunctor→GradedMonad {ℓ} {ℓE} {Eff} mon F = record
+LaxTwoFunctor→GradedMonad {ℓE} {Eff} mon F = record
   { _>>=_ = _>>=_
   ; return = return
   ; functor = functor
@@ -76,24 +76,24 @@ LaxTwoFunctor→GradedMonad {ℓ} {ℓE} {Eff} mon F = record
     
     _∘Eff_ = _∙_
     
-    MonCat₁ : Category {ℓ} {ℓE}
+    MonCat₁ : Category {zero} {ℓE}
     MonCat₁ = monoidCategory mon
     
-    MonCat₂ = monoidTwoCategory {ℓ} mon
+    MonCat₂ = monoidTwoCategory mon
     
-    Fun = λ i → [ ConstLaxTwoFunctor.P₁ F {lift tt} {lift tt} ]₀ i
+    Fun = λ i → [ ConstLaxTwoFunctor.P₁ F {tt} {tt} ]₀ i
     
     M : Eff → TyCon
     M = LaxTwoFunctor→GradedMonadTyCon mon F
     
     fmap : {i : Eff} {α β : Type} → (α → β) → M i α → M i β
-    fmap {i} = [ [ P₁ {lift tt} {lift tt} ]₀ i ]₁
+    fmap {i} = [ [ P₁ {tt} {tt} ]₀ i ]₁
     
     functor : (i : Eff) → HaskellFunctor (M i)
-    functor i = Functor→HaskellFunctor ([ P₁ {lift tt} {lift tt} ]₀ i)
+    functor i = Functor→HaskellFunctor ([ P₁ {tt} {tt} ]₀ i)
     
     return : {α : Type} → α → M ε α
-    return {α} a = nat-η (η {lift tt}) α a
+    return {α} a = nat-η (η {tt}) α a
 
     join : {α : Type} {i j : Eff} → M i (M j α) → M (i ∘Eff j) α
     join {α} {i} {j} mma = nat-η (μ {f = j} {i}) α mma 
@@ -109,7 +109,7 @@ LaxTwoFunctor→GradedMonad {ℓ} {ℓE} {Eff} mon F = record
     abstract
       natural-η : {i : Eff} → (α β : Type) → (f : α → β) 
                 → (fmap f) ∘F (return {α}) ≡ return {β} ∘F f 
-      natural-η {i} a b f = natural (η {lift tt}) {a = a} {b} {f} 
+      natural-η {i} a b f = natural (η {tt}) {a = a} {b} {f} 
     
     abstract
       law-left-id : {α β : Type} {i : Eff} → (a : α) → (k : α → M i β) → return a >>= k ≅ k a

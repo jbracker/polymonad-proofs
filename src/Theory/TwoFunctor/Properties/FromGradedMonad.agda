@@ -38,13 +38,13 @@ open StrictTwoCategory hiding ( right-id ; left-id ; assoc )
 open Triple
 
 GradedMonad→LaxTwoFunctor
-  : {ℓ ℓE : Level}
+  : {ℓE : Level}
   → {Effects : Set ℓE}
   → {monoid : Monoid Effects}
   → (M : Effects → TyCon)
   → (monad : GradedMonad monoid M)
-  → ConstLaxTwoFunctor (monoidTwoCategory {ℓ} monoid) (Cat {suc zero} {zero}) (Hask {zero})
-GradedMonad→LaxTwoFunctor {ℓ} {ℓE} {Eff} {monoid} M monad = record
+  → ConstLaxTwoFunctor (monoidTwoCategory monoid) (Cat {suc zero} {zero}) (Hask {zero})
+GradedMonad→LaxTwoFunctor {ℓE} {Eff} {monoid} M monad = record
   { P₁ = λ {i} {j} → P
   ; η = λ {i} → η
   ; μ = λ {i} {j} {k} {f} {g} → μ {g} {f}
@@ -56,7 +56,7 @@ GradedMonad→LaxTwoFunctor {ℓ} {ℓE} {Eff} {monoid} M monad = record
   }
   where
     monCat₁ = monoidCategory monoid
-    monCat₂ = monoidTwoCategory {ℓ} monoid
+    monCat₂ = monoidTwoCategory monoid
     Cat' = Cat {suc zero} {zero}
     Hask' = Hask {zero}
 
@@ -68,19 +68,19 @@ GradedMonad→LaxTwoFunctor {ℓ} {ℓE} {Eff} {monoid} M monad = record
     
     F = λ i → HaskellFunctor→Functor (functor i)
     
-    P : Functor (HomCat monCat₂ (lift tt) (lift tt)) (HomCat Cat' Hask Hask)
+    P : Functor (HomCat monCat₂ tt tt) (HomCat Cat' Hask Hask)
     P = Functor.functor P₀ P₁ refl compose
       where
-        P₀ : Obj (HomCat monCat₂ (lift tt) (lift tt)) → Obj (HomCat Cat' Hask Hask)
+        P₀ : Obj (HomCat monCat₂ tt tt) → Obj (HomCat Cat' Hask Hask)
         P₀ i = F i
        
-        P₁ : {a b : Obj (HomCat monCat₂ (lift tt) (lift tt))} → Hom (HomCat monCat₂ (lift tt) (lift tt)) a b → Hom (HomCat Cat' Hask Hask) (P₀ a) (P₀ b)
+        P₁ : {a b : Obj (HomCat monCat₂ tt tt)} → Hom (HomCat monCat₂ tt tt) a b → Hom (HomCat Cat' Hask Hask) (P₀ a) (P₀ b)
         P₁ {i} {.i} refl = Id⟨ P₀ i ⟩
         
         abstract
-          compose : {a b c : Obj (HomCat monCat₂ (lift tt) (lift tt))}
-                  → {f : Hom (HomCat monCat₂ (lift tt) (lift tt)) a b} {g : Hom (HomCat monCat₂ (lift tt) (lift tt)) b c}
-                  → P₁ (Category._∘_ (HomCat monCat₂ (lift tt) (lift tt)) g f) ≡ ⟨ P₁ g ⟩∘ᵥ⟨ P₁ f ⟩
+          compose : {a b c : Obj (HomCat monCat₂ tt tt)}
+                  → {f : Hom (HomCat monCat₂ tt tt) a b} {g : Hom (HomCat monCat₂ tt tt) b c}
+                  → P₁ (Category._∘_ (HomCat monCat₂ tt tt) g f) ≡ ⟨ P₁ g ⟩∘ᵥ⟨ P₁ f ⟩
           compose {a} {.a} {.a} {refl} {refl} = sym (Category.left-id (HomCat Cat' Hask Hask))
     
     η : NaturalTransformation Id[ Hask' ] ([ P ]₀ ε)
@@ -117,29 +117,29 @@ GradedMonad→LaxTwoFunctor {ℓ} {ℓE} {Eff} {monoid} M monad = record
             (M (i ∘Eff j) β          ∋ fmap {i = i} (fmap {i = j} f) mma >>= (λ x → x)) ∎h
     
     abstract
-      μ-natural₁ : {a b c : Lift ⊤}
+      μ-natural₁ : {a b c : ⊤}
                  → (f : Cell₁ monCat₂ a b)
                  → {x y : Cell₁ monCat₂ b c}
                  → {α : x ≡ y}
                  → ⟨ [ P ]₁ ((monCat₂ ∘ₕ α) refl) ⟩∘ᵥ⟨ μ ⟩
                  ≡ ⟨ μ ⟩∘ᵥ⟨ ⟨ [ P ]₁ α ⟩∘ₕ⟨ [ P ]₁ refl ⟩ ⟩
-      μ-natural₁ {lift tt} {lift tt} {lift tt} f {x} {y} {refl} 
+      μ-natural₁ {tt} {tt} {tt} f {x} {y} {refl} 
         = natural-transformation-eq $ fun-ext $ λ (c : Obj Hask') → cong (λ X → nat-η μ c ∘F X) (sym (Functor.id (F x)))
       
     abstract
-      μ-natural₂ : {a b c : Lift ⊤}
+      μ-natural₂ : {a b c : ⊤}
                  → (g : Cell₁ monCat₂ b c)
                  → {x y : Cell₁ monCat₂ a b}
                  → {α : x ≡ y} 
                  → ⟨ [ P ]₁ ((monCat₂ ∘ₕ refl) α) ⟩∘ᵥ⟨ μ ⟩
                  ≡ (Cat ∘ᵥ μ) ((Cat ∘ₕ [ P ]₁ refl) ([ P ]₁ α))
-      μ-natural₂ {lift tt} {lift tt} {lift tt} g {x} {y} {refl}
+      μ-natural₂ {tt} {tt} {tt} g {x} {y} {refl}
         = natural-transformation-eq $ fun-ext $ λ (c : Obj Hask') → cong (λ X → nat-η μ c ∘F X) (sym (Functor.id (F g)))
     
     abstract
       lawFunId₁ : {x y : Obj monCat₁} {i : Hom monCat₁ x y} 
                 → ⟨ μ ⟩∘ᵥ⟨ ⟨ id₂ Cat' {f = F i} ⟩∘ₕ⟨ η ⟩ ⟩ ≅ id₂ Cat' {Hask'}
-      lawFunId₁ {lift tt} {lift tt} {i} 
+      lawFunId₁ {tt} {tt} {i} 
         = het-natural-transformation-eq (functor-eq refl hrefl) (cong (λ X → [ P ]₀ X) (Monoid.right-id monoid)) 
         $ het-fun-ext (het-fun-ext hrefl (λ X → hcong (λ Y → Hom Hask ([ F i ]₀ X) ([ [ P ]₀ Y ]₀ X)) (≡-to-≅ (Monoid.right-id monoid)))) 
         $ λ (α : Type) → het-fun-ext (hcong (λ X → (λ _ → [ [ P ]₀ X ]₀ α)) (≡-to-≅ (Monoid.right-id monoid))) 
@@ -161,7 +161,7 @@ GradedMonad→LaxTwoFunctor {ℓ} {ℓE} {Eff} {monoid} M monad = record
     abstract
       lawFunId₂ : {x y : Obj monCat₁} {i : Hom monCat₁ x y} 
                 → ⟨ μ ⟩∘ᵥ⟨ ⟨ η ⟩∘ₕ⟨ Id⟨ F i ⟩ ⟩ ⟩ ≅ id₂ Cat'
-      lawFunId₂ {lift tt} {lift tt} {i} 
+      lawFunId₂ {tt} {tt} {i} 
         = het-natural-transformation-eq (functor-eq refl hrefl) (cong (λ X → [ P ]₀ X) (Monoid.left-id monoid)) 
         $ het-fun-ext (het-fun-ext hrefl (λ z → hcong (λ X → (a : M i z) → [ [ P ]₀ X ]₀ z) (≡-to-≅ (Monoid.left-id monoid)))) 
         $ λ (α : Type) → het-fun-ext (hcong (λ X → (λ _ → [ [ P ]₀ X ]₀ α)) (≡-to-≅ (Monoid.left-id monoid))) 
@@ -178,7 +178,7 @@ GradedMonad→LaxTwoFunctor {ℓ} {ℓE} {Eff} {monoid} M monad = record
       lawFunAssoc : {w x y z : Obj monCat₁}
                   → {i : Hom monCat₁ w x} {j : Hom monCat₁ x y} {k : Hom monCat₁ y z} 
                   → ⟨ μ ⟩∘ᵥ⟨ ⟨ id₂ Cat {f = F k} ⟩∘ₕ⟨ μ ⟩ ⟩ ≅ ⟨ μ ⟩∘ᵥ⟨ ⟨ μ ⟩∘ₕ⟨ id₂ Cat {f = F i} ⟩ ⟩
-      lawFunAssoc {lift tt} {lift tt} {lift tt} {lift tt} {i} {j} {k} 
+      lawFunAssoc {tt} {tt} {tt} {tt} {i} {j} {k} 
         = het-natural-transformation-eq (functor-eq refl hrefl) (cong (λ X → [ P ]₀ X) (Monoid.assoc monoid)) 
         $ het-fun-ext (hcong (λ X → (λ z → (a : M k (M j (M i z))) → [ [ P ]₀ X ]₀ z)) (≡-to-≅ (Monoid.assoc monoid))) 
         $ λ (β : Type) → het-fun-ext (hcong (λ X → (λ _ → [ [ P ]₀ X ]₀ β)) (≡-to-≅ (Monoid.assoc monoid))) 
