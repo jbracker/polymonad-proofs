@@ -59,3 +59,9 @@ LaxMonoidalFunctor↔Monad {ℓC₀} {ℓC₁} C = btrans (LaxMonoidalFunctor↔
                      → (f : Category.Hom (HomCat (monoidTwoCategory unitMonoid) tt tt) tt tt) 
                      → Functor.F₁ (ConstLaxTwoFunctor.P₁ (r→l (l→r F))) {a} {b} f ≅ Functor.F₁ (ConstLaxTwoFunctor.P₁ F) {a} {b} f
                   eq {tt} {tt} refl = hrefl
+
+Monad↔LaxMonoidalFunctor : {ℓC₀ ℓC₁ : Level}
+                         → (C : Category {ℓC₀} {ℓC₁})
+                         → (Σ (Functor C C) Monad)
+                         ↔ (LaxMonoidalFunctor (monoidMonoidalCategory unitMonoid) (Fun C)) 
+Monad↔LaxMonoidalFunctor C = bsym (LaxMonoidalFunctor↔Monad C)
