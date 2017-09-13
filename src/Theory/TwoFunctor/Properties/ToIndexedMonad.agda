@@ -16,9 +16,7 @@ open ≅-Reasoning hiding ( _≡⟨_⟩_ ; _≡⟨⟩_ ) renaming ( begin_ to hb
 -- Local
 open import Extensionality
 open import Utilities
-open import Haskell
-open import Haskell.Functor hiding ( functor ) renaming ( Functor to HaskellFunctor )
-open import Haskell.Parameterized.Indexed.Monad
+open import Theory.Haskell.Parameterized.Indexed.Monad
 open import Theory.Triple
 open import Theory.Category.Definition
 open import Theory.Category.Examples.Codiscrete
@@ -38,122 +36,69 @@ open StrictTwoCategory
 
 module Theory.TwoFunctor.Properties.ToIndexedMonad where
 
-LaxTwoFunctor→IxMonadTyCon : {ℓS : Level}
-  → (S : Set ℓS)
-  → (F : ConstLaxTwoFunctor (discreteHomCatTwoCategory (codiscreteCategory S)) (Cat {suc zero} {zero}) (Hask {zero}))
-  → ( S → S → TyCon )
-LaxTwoFunctor→IxMonadTyCon S F i j A = [ [ ConstLaxTwoFunctor.P₁ F {j} {i} ]₀ (lift tt) ]₀ A
-
 LaxTwoFunctor→IndexedMonad
-  : {ℓS : Level}
-  → (S : Set ℓS)
-  → (F : ConstLaxTwoFunctor (discreteHomCatTwoCategory (codiscreteCategory S)) (Cat {suc zero} {zero}) (Hask {zero}))
-  → IxMonad S (LaxTwoFunctor→IxMonadTyCon S F)
-LaxTwoFunctor→IndexedMonad {ℓS} ObjS F 
-  = indexed-monad _>>=_ return functor law-left-id law-right-id law-assoc law-monad-fmap
+  : {ℓIxs ℓC₀ ℓC₁ : Level}
+  → {C : Category {ℓC₀} {ℓC₁}}
+  → {Ixs : Set ℓIxs}
+  → (F : ConstLaxTwoFunctor (discreteHomCatTwoCategory (codiscreteCategory Ixs)) (Cat {ℓC₀} {ℓC₁}) C)
+  → IndexedMonad Ixs (λ i j → [ ConstLaxTwoFunctor.P₁ F {i} {j} ]₀ (lift tt))
+LaxTwoFunctor→IndexedMonad {ℓIxs} {ℓC₀} {ℓC₁} {C} {Ixs} F = indexed-monad (ConstLaxTwoFunctor.η F) (ConstLaxTwoFunctor.μ F) assoc' left-id' right-id'
   where
     open ConstLaxTwoFunctor F
     open NaturalTransformation renaming (η to nat-η)
     
-    import Theory.TwoFunctor.Properties.ToIndexedMonadProperties
-    open Theory.TwoFunctor.Properties.ToIndexedMonadProperties {ℓS} ObjS F
+    Ixs₁ = codiscreteCategory Ixs
+    Ixs₂ = discreteHomCatTwoCategory Ixs₁
+    Cat' = Cat {ℓC₀} {ℓC₁}
     
-    S : Category
-    S = codiscreteCategory ObjS
+    _∘C_ = Category._∘_ C
     
-    S₂ = discreteHomCatTwoCategory S
-    Cat' = Cat {suc zero} {zero}
-
-    Ixs = Obj S
-    
-    M : Ixs → Ixs → TyCon
-    M = LaxTwoFunctor→IxMonadTyCon ObjS F
-    
-    fmap : {i j : Ixs} {α β : Type} → (α → β) → M i j α → M i j β
-    fmap {i} {j} = [ [ P₁ {j} {i} ]₀ (lift tt) ]₁
-    
-    functor : (i j : Ixs) → HaskellFunctor (LaxTwoFunctor→IxMonadTyCon ObjS F i j)
-    functor i j = Functor→HaskellFunctor ([ P₁ {j} {i} ]₀ (lift tt))
-    
-    return : {α : Type} {i : Ixs} → α → M i i α
-    return {α} {i} a = nat-η (η {i}) α a
-
-    join : {α : Type} {i j k : Ixs} → M i j (M j k α) → M i k α
-    join {α} {i} {j} {k} mma = nat-η (μ {k} {j} {i}) α mma 
-     
-    _>>=_ : {α β : Type} {i j k : Ixs} → M i j α → (α → M j k β) → M i k β
-    _>>=_ {α} {β} {i} {j} {k} ma f = join (fmap f ma)
+    M : Ixs → Ixs → Functor C C
+    M i j = [ P₁ {i} {j} ]₀ (lift tt)
     
     abstract
-      natural-μ : {i j k : Ixs} → (α β : Type) → (f : α → β) 
-                → (fmap {i} {k} f) ∘F (join {α} {i} {j} {k}) ≡ join {β} {i} {j} {k} ∘F fmap {i} {j} (fmap {j} {k} f) 
-      natural-μ {i} {j} {k} a b f = natural (μ {k} {j} {i}) {a = a} {b} {f} 
+      nat-eq : {F G H I : Functor C C} → {α : NaturalTransformation F G} {β : NaturalTransformation H I}
+             → F ≡ H → G ≡ I → α ≅ β → (x : Obj C) 
+             → nat-η α x ≅ nat-η β x
+      nat-eq refl refl hrefl x = hrefl
     
     abstract
-      natural-η : {i : Ixs} → (α β : Type) → (f : α → β) 
-                → (fmap {i} {i} f) ∘F (return {α} {i}) ≡ return {β} {i} ∘F f 
-      natural-η {i} a b f = natural (η {i}) {a = a} {b} {f} 
-    
-    abstract
-      law-left-id : {α β : Type} {i j : ObjS} → (a : α) → (k : α → M i j β) → return a >>= k ≡ k a
-      law-left-id {α} {β} {i} {j} a k = begin
-        return a >>= k 
+      assoc' : {i j k l : Ixs} {x : Obj C}
+             → nat-η (μ {i} {j} {l}) x ∘C [ M j l ]₁ (nat-η (μ {i} {k} {j}) x) 
+             ≡ nat-η (μ {i} {k} {l}) x ∘C nat-η (μ {k} {j} {l}) ([ M i k ]₀ x)
+      assoc' {i} {j} {k} {l} {x} = begin
+        nat-η (μ {i} {j} {l}) x ∘C [ M j l ]₁ (nat-η (μ {i} {k} {j}) x) 
+          ≡⟨ cong (λ X → nat-η (μ {i} {j} {l}) x ∘C X) (sym (Category.right-id C)) ⟩
+        nat-η (μ {i} {j} {l}) x ∘C (id C {[ [ M j l ]∘[ M i j ] ]₀ x} ∘C [ M j l ]₁ (nat-η (μ {i} {k} {j}) x))
           ≡⟨⟩
-        (join ∘F fmap k ∘F return) a
-          ≡⟨ cong (λ X → (join ∘F X) a) (natural-η α (M i j β) k) ⟩
-        (join ∘F return ∘F k) a
+        nat-η ((Cat ∘ᵥ μ) ((Cat ∘ₕ id₂ Cat) μ)) x
+          ≡⟨ ≅-to-≡ (nat-eq (functor-eq refl hrefl) (functor-eq refl hrefl) (laxFunAssoc {i} {k} {j} {l}) x) ⟩
+        nat-η ((Cat ∘ᵥ μ) ((Cat ∘ₕ μ) (id₂ Cat))) x
           ≡⟨⟩
-        (join ∘F return) (k a)
-          ≡⟨ cong (λ X → X (k a)) (join-return-id {j} {i} β) ⟩
-        k a ∎
+        nat-η (μ {i} {k} {l}) x ∘C (nat-η (μ {k} {j} {l}) ([ M i k ]₀ x) ∘C [ [ M j l ]∘[ M k j ] ]₁ (id C {[ M i k ]₀ x}))
+          ≡⟨ cong (λ X → nat-η (μ {i} {k} {l}) x ∘C (nat-η (μ {k} {j} {l}) ([ M i k ]₀ x) ∘C [ M j l ]₁ X)) (Functor.id (M k j)) ⟩
+        nat-η (μ {i} {k} {l}) x ∘C (nat-η (μ {k} {j} {l}) ([ M i k ]₀ x) ∘C [ M j l ]₁ (id C {[ [ M k j ]∘[ M i k ] ]₀ x}))
+          ≡⟨ cong (λ X → nat-η (μ {i} {k} {l}) x ∘C (nat-η (μ {k} {j} {l}) ([ M i k ]₀ x) ∘C X)) (Functor.id (M j l)) ⟩
+        nat-η (μ {i} {k} {l}) x ∘C (nat-η (μ {k} {j} {l}) ([ M i k ]₀ x) ∘C id C {[ [ M j l ]∘[ [ M k j ]∘[ M i k ] ] ]₀ x})
+          ≡⟨ cong (λ X → nat-η (μ {i} {k} {l}) x ∘C X) (Category.left-id C) ⟩
+        nat-η (μ {i} {k} {l}) x ∘C nat-η (μ {k} {j} {l}) ([ M i k ]₀ x) ∎
+   
+    abstract
+      left-id' : {i j : Ixs} {x : Obj C}
+               → nat-η (μ {i} {i} {j}) x ∘C [ M i j ]₁ (nat-η (η {i}) x) ≡ nat-η Id⟨ M i j ⟩ x
+      left-id' {i} {j} {x} = begin
+        nat-η (μ {i} {i} {j}) x ∘C [ M i j ]₁ (nat-η (η {i}) x) 
+          ≡⟨ cong (λ X → nat-η (μ {i} {i} {j}) x ∘C X) (sym $ Category.right-id C) ⟩
+        nat-η (μ {i} {i} {j}) x ∘C (id C {[ [ M i j ]∘[ M i i ] ]₀ x} ∘C [ M i j ]₁ (nat-η (η {i}) x))
+          ≡⟨ ≅-to-≡ (nat-eq (functor-eq refl hrefl) (functor-eq refl hrefl) laxFunId₁ x) ⟩
+        nat-η Id⟨ M i j ⟩ x ∎
     
     abstract
-      law-right-id : {α : Type} {i j : Ixs} → (m : M i j α) → m >>= return ≡ m
-      law-right-id {α} {i} {j} m = begin
-        m >>= return 
-          ≡⟨ refl ⟩ 
-        (join {α} {i} {j} {j} ∘F fmap {i} {j} (return {α})) m 
-          ≡⟨ refl ⟩ 
-        (nat-η (Id⟨ [ P₁ {j} {i} ]₀ (lift tt) ⟩) α ∘F join {α} {i} {j} {j} ∘F fmap {i} {j} (return {α})) m
-          ≡⟨ cong (λ X → (nat-η X α ∘F join {α} {i} {j} {j} ∘F fmap {i} {j} (return {α})) m) (sym (Functor.id (P₁ {j} {i}))) ⟩ 
-        (nat-η ([ P₁ {j} {i} ]₁ refl) α ∘F join {α} {i} {j} {j} ∘F fmap {i} {j} (return {α})) m
-          ≡⟨ cong (λ X → X m) (η-lax-id₁ {j} {i} α) ⟩ 
-        nat-η (λ' Cat' ([ P₁ {j} {i} ]₀ (lift tt))) α m
-          ≡⟨ ≅-to-≡ (het-cat-λ-id α m) ⟩ 
-        m ∎
-    
-    abstract
-      law-right-id' : {α : Type} {i j : Ixs} → join {α} {i} {j} {j} ∘F fmap {i} {j} (return {α}) ≡ (λ (x : M i j α) → x)
-      law-right-id' {α} {i} {j} = fun-ext $ λ m → law-right-id {α} {i} {j} m
-    
-    abstract
-      law-assoc : {α β γ : Type} {i j k l : ObjS} 
-                → (m : M i j α) (f : α → M j k β) (g : β → M k l γ) 
-                → m >>= (λ x → f x >>= g) ≡ (m >>= f) >>= g
-      law-assoc {α} {β} {γ} {i} {j} {k} {l} m f g = begin
-        (join ∘F fmap (join ∘F fmap g ∘F f)) m
-          ≡⟨ cong (λ X → (join ∘F X) m) (Functor.compose ([ P₁ {j} {i} ]₀ (lift tt))) ⟩ 
-        (join ∘F fmap join ∘F fmap (fmap g ∘F f)) m
-          ≡⟨ cong (λ X → (join ∘F fmap join ∘F X) m) (Functor.compose ([ P₁ {j} {i} ]₀ (lift tt))) ⟩ 
-        (join ∘F fmap join ∘F fmap (fmap g) ∘F fmap f) m
-          ≡⟨ cong (λ X → (X ∘F fmap (fmap g) ∘F fmap f) m) (join-assoc γ) ⟩ 
-        (join ∘F join ∘F fmap (fmap (λ x → x)) ∘F fmap (fmap g) ∘F fmap f) m
-          ≡⟨ cong (λ X → (join ∘F join ∘F fmap X ∘F fmap (fmap g) ∘F fmap f) m) (Functor.id ([ P₁ {k} {j} ]₀ (lift tt))) ⟩
-        (join ∘F join ∘F fmap (λ x → x) ∘F fmap (fmap g) ∘F fmap f) m
-          ≡⟨ cong (λ X → (join ∘F join ∘F X ∘F fmap f) m) (sym (Functor.compose ([ P₁ {j} {i} ]₀ (lift tt)))) ⟩
-        (join ∘F join ∘F fmap (fmap g) ∘F fmap f) m
-          ≡⟨ cong (λ X → (join ∘F X ∘F fmap f) m) (sym (natural-μ β (M k l γ) g)) ⟩ 
-        (join ∘F fmap g ∘F join ∘F fmap f) m ∎
-    
-    abstract
-      law-monad-fmap : {α β : Type} {i j : ObjS} → (f : α → β) (ma : M i j α)
-                     → ma >>= (return ∘F f) ≡ fmap {i} {j} f ma
-      law-monad-fmap {α} {β} {i} {j} f ma = begin
-        (join ∘F fmap (return ∘F f)) ma 
-          ≡⟨ cong (λ X → (join ∘F X) ma) (Functor.compose ([ P₁ {j} {i} ]₀ (lift tt))) ⟩
-        (join ∘F fmap return ∘F fmap f) ma 
-          ≡⟨ cong (λ X → (X ∘F fmap f) ma) law-right-id' ⟩
-        fmap {i} {j} f ma ∎
-
-    
-  
+      right-id' : {i j : Ixs} {x : Obj C}
+                → nat-η (μ {i} {j} {j}) x ∘C (nat-η (η {j}) ([ M i j ]₀ x)) ≡ nat-η Id⟨ M i j ⟩ x
+      right-id' {i} {j} {x} = begin
+        nat-η (μ {i} {j} {j}) x ∘C nat-η (η {j}) ([ M i j ]₀ x) 
+          ≡⟨ cong (λ X → nat-η (μ {i} {j} {j}) x ∘C X) (sym (Category.left-id C)) ⟩
+        nat-η (μ {i} {j} {j}) x ∘C (nat-η (η {j}) ([ M i j ]₀ x) ∘C id C {[ M i j ]₀ x}) 
+          ≡⟨ ≅-to-≡ (nat-eq (functor-eq refl hrefl) (functor-eq refl hrefl) laxFunId₂ x) ⟩
+        nat-η Id⟨ M i j ⟩ x ∎
