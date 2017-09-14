@@ -92,61 +92,64 @@ HaskellGradedMonad→GradedMonad {ℓMon} {Mon} {monoid} (M , monad)
         ≅⟨ hrefl ⟩
       ((M i (M j α) → M (i ∙ j) β) ∋ (join ∘ fmap (fmap f))) ∎h
     
-    μ-coher : {i j k : Mon} {x : Type}
-            → nat-η (μ {i} {j ∙ k}) x ∘ [ F i ]₁ (nat-η (μ {j} {k}) x) 
-            ≅ nat-η (μ {i ∙ j} {k}) x ∘ nat-η (μ {i} {j}) ([ F k ]₀ x)
-    μ-coher {i} {j} {k} {α} = hbegin
-      ((M i (M j (M k α)) → M (i ∙ (j ∙ k)) α) ∋ (join ∘ fmap join))
-        ≅⟨ hrefl ⟩
-      ((M i (M j (M k α)) → M (i ∙ (j ∙ k)) α) ∋ (λ ma → (fmap (λ a → a >>= id) ma) >>= id))
-        ≅⟨ gcong (cong (λ X → X ∙ (j ∙ k)) (sym right-id)) 
-                 (het-fun-ext (hfe (cong (λ X → X ∙ (j ∙ k)) (sym right-id))) 
-                              (λ ma → hcong₂ (λ X Y → M (X ∙ (j ∙ k)) α ∋ Y >>= id) 
-                                             (≡-to-≅ (sym right-id)) 
-                                             (hsym (law-monad-fmap (λ a → a >>= id) ma)))) ⟩
-      ((M i (M j (M k α)) → M ((i ∙ ε) ∙ (j ∙ k)) α) ∋ (λ ma → (ma >>= (return ∘ (λ a → a >>= id))) >>= id))
-        ≅⟨ gcong (sym assoc) (het-fun-ext (hfe (sym assoc)) (λ ma → hsym $ law-assoc ma (return ∘ (λ a → a >>= id)) id)) ⟩
-      ((M i (M j (M k α)) → M (i ∙ (ε ∙ (j ∙ k))) α) ∋ (λ ma → ma >>= (λ x → return (x >>= id) >>= id)))
-        ≅⟨ gcong (cong (_∙_ i) left-id) 
-                 (het-fun-ext (hfe (cong (_∙_ i) left-id)) 
-                              (λ ma → hcong₂ (λ X Y → M (i ∙ X) α ∋ ma >>= Y) 
-                                             (≡-to-≅ left-id) 
-                                             (het-fun-ext (hfe left-id) (λ x → law-left-id (x >>= id) id)))) ⟩
-      ((M i (M j (M k α)) → M (i ∙ (j ∙ k)) α) ∋ (λ ma → ma >>= (λ x → x >>= id)))
-        ≅⟨ gcong assoc (het-fun-ext (hfe assoc) (λ ma → law-assoc ma id id)) ⟩
-      ((M i (M j (M k α)) → M ((i ∙ j) ∙ k) α) ∋ (λ ma → (ma >>= id) >>= id))
-        ≅⟨ hrefl ⟩
-      ((M i (M j (M k α)) → M ((i ∙ j) ∙ k) α) ∋ (join ∘ join)) ∎h
+    abstract
+      μ-coher : {i j k : Mon} {x : Type}
+              → nat-η (μ {i} {j ∙ k}) x ∘ [ F i ]₁ (nat-η (μ {j} {k}) x) 
+              ≅ nat-η (μ {i ∙ j} {k}) x ∘ nat-η (μ {i} {j}) ([ F k ]₀ x)
+      μ-coher {i} {j} {k} {α} = hbegin
+        ((M i (M j (M k α)) → M (i ∙ (j ∙ k)) α) ∋ (join ∘ fmap join))
+          ≅⟨ hrefl ⟩
+        ((M i (M j (M k α)) → M (i ∙ (j ∙ k)) α) ∋ (λ ma → (fmap (λ a → a >>= id) ma) >>= id))
+          ≅⟨ gcong (cong (λ X → X ∙ (j ∙ k)) (sym right-id)) 
+                   (het-fun-ext (hfe (cong (λ X → X ∙ (j ∙ k)) (sym right-id))) 
+                                (λ ma → hcong₂ (λ X Y → M (X ∙ (j ∙ k)) α ∋ Y >>= id) 
+                                               (≡-to-≅ (sym right-id)) 
+                                               (hsym (law-monad-fmap (λ a → a >>= id) ma)))) ⟩
+        ((M i (M j (M k α)) → M ((i ∙ ε) ∙ (j ∙ k)) α) ∋ (λ ma → (ma >>= (return ∘ (λ a → a >>= id))) >>= id))
+          ≅⟨ gcong (sym assoc) (het-fun-ext (hfe (sym assoc)) (λ ma → hsym $ law-assoc ma (return ∘ (λ a → a >>= id)) id)) ⟩
+        ((M i (M j (M k α)) → M (i ∙ (ε ∙ (j ∙ k))) α) ∋ (λ ma → ma >>= (λ x → return (x >>= id) >>= id)))
+          ≅⟨ gcong (cong (_∙_ i) left-id) 
+                   (het-fun-ext (hfe (cong (_∙_ i) left-id)) 
+                                (λ ma → hcong₂ (λ X Y → M (i ∙ X) α ∋ ma >>= Y) 
+                                               (≡-to-≅ left-id) 
+                                               (het-fun-ext (hfe left-id) (λ x → law-left-id (x >>= id) id)))) ⟩
+        ((M i (M j (M k α)) → M (i ∙ (j ∙ k)) α) ∋ (λ ma → ma >>= (λ x → x >>= id)))
+          ≅⟨ gcong assoc (het-fun-ext (hfe assoc) (λ ma → law-assoc ma id id)) ⟩
+        ((M i (M j (M k α)) → M ((i ∙ j) ∙ k) α) ∋ (λ ma → (ma >>= id) >>= id))
+          ≅⟨ hrefl ⟩
+        ((M i (M j (M k α)) → M ((i ∙ j) ∙ k) α) ∋ (join ∘ join)) ∎h
     
-    η-left-coher : {i : Mon} {x : Type}
-                 → nat-η (μ {i} {ε}) x ∘ [ F i ]₁ (nat-η η x) ≅ nat-η (Id⟨ F i ⟩) x
-    η-left-coher {i} {α} = hbegin
-      ((M i α → M (i ∙ ε) α) ∋ (join ∘ fmap return))
-        ≅⟨ hrefl ⟩
-      ((M i α → M (i ∙ ε) α) ∋ (λ ma → fmap return ma >>= id))
-        ≅⟨ gcong (sym right-id) 
-                 (het-fun-ext (hfe (sym right-id)) 
-                              (λ ma → hcong₂ (λ X Y → M (X ∙ ε) α ∋ Y >>= id) 
-                                             (≡-to-≅ (sym right-id)) 
-                                             (hsym $ law-monad-fmap return ma))) ⟩
-      ((M i α → M ((i ∙ ε) ∙ ε) α) ∋ (λ ma → (ma >>= (return ∘ return)) >>= id))
-        ≅⟨ gcong (sym assoc) (het-fun-ext (hfe (sym assoc)) (λ ma → hsym (law-assoc ma (return ∘ return) id))) ⟩
-      ((M i α → M (i ∙ (ε ∙ ε)) α) ∋ (λ ma → ma >>= (λ x → return (return x) >>= id)))
-        ≅⟨ gcong (cong (_∙_ i) left-id) 
-                 (het-fun-ext (hfe $ cong (_∙_ i) left-id) 
-                              (λ ma → hcong₂ (λ X Y → M (i ∙ X) α ∋ ma >>= Y) 
-                                             (≡-to-≅ left-id) 
-                                             (het-fun-ext (hfe left-id) (λ x → law-left-id (return x) id)))) ⟩
-      ((M i α → M (i ∙ ε) α) ∋ (λ ma → ma >>= return))
-        ≅⟨ gcong right-id (het-fun-ext (hfe right-id) law-right-id) ⟩
-      ((M i α → M i α) ∋ id) ∎h
+    abstract
+      η-left-coher : {i : Mon} {x : Type}
+                   → nat-η (μ {i} {ε}) x ∘ [ F i ]₁ (nat-η η x) ≅ nat-η (Id⟨ F i ⟩) x
+      η-left-coher {i} {α} = hbegin
+        ((M i α → M (i ∙ ε) α) ∋ (join ∘ fmap return))
+          ≅⟨ hrefl ⟩
+        ((M i α → M (i ∙ ε) α) ∋ (λ ma → fmap return ma >>= id))
+          ≅⟨ gcong (sym right-id) 
+                   (het-fun-ext (hfe (sym right-id)) 
+                                (λ ma → hcong₂ (λ X Y → M (X ∙ ε) α ∋ Y >>= id) 
+                                               (≡-to-≅ (sym right-id)) 
+                                               (hsym $ law-monad-fmap return ma))) ⟩
+        ((M i α → M ((i ∙ ε) ∙ ε) α) ∋ (λ ma → (ma >>= (return ∘ return)) >>= id))
+          ≅⟨ gcong (sym assoc) (het-fun-ext (hfe (sym assoc)) (λ ma → hsym (law-assoc ma (return ∘ return) id))) ⟩
+        ((M i α → M (i ∙ (ε ∙ ε)) α) ∋ (λ ma → ma >>= (λ x → return (return x) >>= id)))
+          ≅⟨ gcong (cong (_∙_ i) left-id) 
+                   (het-fun-ext (hfe $ cong (_∙_ i) left-id) 
+                                (λ ma → hcong₂ (λ X Y → M (i ∙ X) α ∋ ma >>= Y) 
+                                               (≡-to-≅ left-id) 
+                                               (het-fun-ext (hfe left-id) (λ x → law-left-id (return x) id)))) ⟩
+        ((M i α → M (i ∙ ε) α) ∋ (λ ma → ma >>= return))
+          ≅⟨ gcong right-id (het-fun-ext (hfe right-id) law-right-id) ⟩
+        ((M i α → M i α) ∋ id) ∎h
     
-    η-right-coher : {i : Mon} {x : Type}
-                  → nat-η (μ {ε} {i}) x ∘ nat-η η ([ F i ]₀ x) ≅ nat-η (Id⟨ F i ⟩) x
-    η-right-coher {i} {α} = hbegin
-      ((M i α → M (ε ∙ i) α) ∋ (join ∘ return))
-        ≅⟨ hrefl ⟩ 
-      ((M i α → M (ε ∙ i) α) ∋ (λ ma → return ma >>= id))
-        ≅⟨ gcong left-id (het-fun-ext (hfe left-id) (λ ma → law-left-id ma id)) ⟩
-      ((M i α → M i α) ∋ id) ∎h
+    abstract
+      η-right-coher : {i : Mon} {x : Type}
+                    → nat-η (μ {ε} {i}) x ∘ nat-η η ([ F i ]₀ x) ≅ nat-η (Id⟨ F i ⟩) x
+      η-right-coher {i} {α} = hbegin
+        ((M i α → M (ε ∙ i) α) ∋ (join ∘ return))
+          ≅⟨ hrefl ⟩ 
+        ((M i α → M (ε ∙ i) α) ∋ (λ ma → return ma >>= id))
+          ≅⟨ gcong left-id (het-fun-ext (hfe left-id) (λ ma → law-left-id ma id)) ⟩
+        ((M i α → M i α) ∋ id) ∎h
 

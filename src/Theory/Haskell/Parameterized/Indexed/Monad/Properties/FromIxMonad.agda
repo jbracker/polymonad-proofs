@@ -64,45 +64,48 @@ IxMonad→IndexedMonad {ℓIxs} {Ixs} (M , monad)
         ≡⟨ refl ⟩
       join ∘ fmap (fmap f) ∎
     
-    μ-coher : {i j k l : Ixs} {x : Type}
-            → nat-η (μ {i} {k} {l}) x ∘ [ F k l ]₁ (nat-η (μ {i} {j} {k}) x) 
-            ≡ nat-η (μ {i} {j} {l}) x ∘ nat-η (μ {j} {k} {l}) ([ F i j ]₀ x)
-    μ-coher {i} {j} {k} {l} {α} = begin
-      join ∘ fmap join
-        ≡⟨ refl ⟩
-      (λ ma → (fmap (λ a → a >>= id) ma) >>= id)
-        ≡⟨ fun-ext (λ ma → cong (λ X → X >>= id) (sym (law-monad-fmap (λ a → a >>= id) ma))) ⟩
-      (λ ma → (ma >>= (return ∘ (λ a → a >>= id))) >>= id)
-        ≡⟨ fun-ext (λ ma → sym (law-assoc ma (return ∘ (λ a → a >>= id)) id)) ⟩
-      (λ ma → ma >>= (λ x → return (x >>= id) >>= id))
-        ≡⟨ fun-ext (λ ma → cong (λ X → ma >>= X) (fun-ext (λ x → law-right-id (x >>= id) id))) ⟩
-      (λ ma → ma >>= (λ x → x >>= id))
-        ≡⟨ fun-ext (λ ma → law-assoc ma id id) ⟩
-      (λ ma → (ma >>= id) >>= id)
-        ≡⟨ refl ⟩
-      join ∘ join ∎
+    abstract
+      μ-coher : {i j k l : Ixs} {x : Type}
+              → nat-η (μ {i} {k} {l}) x ∘ [ F k l ]₁ (nat-η (μ {i} {j} {k}) x) 
+              ≡ nat-η (μ {i} {j} {l}) x ∘ nat-η (μ {j} {k} {l}) ([ F i j ]₀ x)
+      μ-coher {i} {j} {k} {l} {α} = begin
+        join ∘ fmap join
+          ≡⟨ refl ⟩
+        (λ ma → (fmap (λ a → a >>= id) ma) >>= id)
+          ≡⟨ fun-ext (λ ma → cong (λ X → X >>= id) (sym (law-monad-fmap (λ a → a >>= id) ma))) ⟩
+        (λ ma → (ma >>= (return ∘ (λ a → a >>= id))) >>= id)
+          ≡⟨ fun-ext (λ ma → sym (law-assoc ma (return ∘ (λ a → a >>= id)) id)) ⟩
+        (λ ma → ma >>= (λ x → return (x >>= id) >>= id))
+          ≡⟨ fun-ext (λ ma → cong (λ X → ma >>= X) (fun-ext (λ x → law-right-id (x >>= id) id))) ⟩
+        (λ ma → ma >>= (λ x → x >>= id))
+          ≡⟨ fun-ext (λ ma → law-assoc ma id id) ⟩
+        (λ ma → (ma >>= id) >>= id)
+          ≡⟨ refl ⟩
+        join ∘ join ∎
     
-    η-left-coher : {i j : Ixs} {x : Type}
-                 → nat-η (μ {i} {i} {j}) x ∘ [ F i j ]₁ (nat-η η x) ≡ nat-η (Id⟨ F i j ⟩) x
-    η-left-coher {i} {j} {α} = begin
-      join ∘ fmap return
-        ≡⟨ refl ⟩
-      (λ ma → fmap return ma >>= id)
-        ≡⟨ fun-ext (λ ma → cong (λ X → X >>= id) (sym $ law-monad-fmap return ma )) ⟩
-      (λ ma → (ma >>= (return ∘ return)) >>= id)
-        ≡⟨ fun-ext (λ ma → sym (law-assoc ma (return ∘ return) id)) ⟩
-      (λ ma → ma >>= (λ x → return (return x) >>= id))
-        ≡⟨ fun-ext (λ ma → cong (λ X → ma >>= X) (fun-ext (λ x → law-right-id (return x) id))) ⟩
-      (λ ma → ma >>= return)
-        ≡⟨ fun-ext (λ ma → law-left-id ma) ⟩
-      id ∎
+    abstract
+      η-left-coher : {i j : Ixs} {x : Type}
+                   → nat-η (μ {i} {i} {j}) x ∘ [ F i j ]₁ (nat-η η x) ≡ nat-η (Id⟨ F i j ⟩) x
+      η-left-coher {i} {j} {α} = begin
+        join ∘ fmap return
+          ≡⟨ refl ⟩
+        (λ ma → fmap return ma >>= id)
+          ≡⟨ fun-ext (λ ma → cong (λ X → X >>= id) (sym $ law-monad-fmap return ma )) ⟩
+        (λ ma → (ma >>= (return ∘ return)) >>= id)
+          ≡⟨ fun-ext (λ ma → sym (law-assoc ma (return ∘ return) id)) ⟩
+        (λ ma → ma >>= (λ x → return (return x) >>= id))
+          ≡⟨ fun-ext (λ ma → cong (λ X → ma >>= X) (fun-ext (λ x → law-right-id (return x) id))) ⟩
+        (λ ma → ma >>= return)
+          ≡⟨ fun-ext (λ ma → law-left-id ma) ⟩
+        id ∎
     
-    η-right-coher : {i j : Ixs} {x : Type}
-                  → nat-η (μ {i} {j} {j}) x ∘ nat-η (η {j}) ([ F i j ]₀ x) ≡ nat-η (Id⟨ F i j ⟩) x
-    η-right-coher {i} {j} {α} = begin
-      join ∘ return
-        ≡⟨ refl ⟩
-      (λ ma → return ma >>= id)
-        ≡⟨ fun-ext (λ ma → law-right-id ma id) ⟩
-      id ∎
+    abstract
+      η-right-coher : {i j : Ixs} {x : Type}
+                    → nat-η (μ {i} {j} {j}) x ∘ nat-η (η {j}) ([ F i j ]₀ x) ≡ nat-η (Id⟨ F i j ⟩) x
+      η-right-coher {i} {j} {α} = begin
+        join ∘ return
+          ≡⟨ refl ⟩
+        (λ ma → return ma >>= id)
+          ≡⟨ fun-ext (λ ma → law-right-id ma id) ⟩
+        id ∎
 

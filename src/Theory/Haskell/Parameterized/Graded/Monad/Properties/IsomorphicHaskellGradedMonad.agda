@@ -63,18 +63,19 @@ HaskellGradedMonad↔GradedMonad {ℓMon} {Mon} {monoid} = bijection HaskellGrad
           open HaskellGradedMonad monad
           open Category Hask hiding ( left-id ; right-id ; assoc )
           
-          bind-eq : (λ {α β} {i j} → _>>=₁_ {α} {β} {i} {j}) ≡ _>>=₀_
-          bind-eq = implicit-fun-ext $ λ α → implicit-fun-ext $ λ β → implicit-fun-ext $ λ i → implicit-fun-ext $ λ j → fun-ext $ λ ma → fun-ext $ λ f → ≅-to-≡ $ hbegin
-            ((fmap f ma) >>= id) 
-              ≅⟨ hcong₂ (λ X Y → M (X ∙ j) β ∋ Y >>= id) (≡-to-≅ (sym right-id)) (hsym (law-monad-fmap f ma)) ⟩
-            ((ma >>= (return ∘ f)) >>= id) 
-              ≅⟨ hcong₂ (λ X Y → M X β ∋ Y) (≡-to-≅ (sym assoc)) (hsym (law-assoc ma (return ∘ f) id)) ⟩
-            (ma >>= (λ x → return (f x) >>= id)) 
-              ≅⟨ hcong₂ (λ X Y → M (i ∙ X) β ∋ ma >>= Y) 
-                        (≡-to-≅ left-id) 
-                        (het-fun-ext (hcong (λ X → (λ _ → M X β)) (≡-to-≅ left-id)) 
-                                     (λ x → hcong₂ (λ X Y → M X β ∋ Y) (≡-to-≅ left-id) (law-left-id (f x) id))) ⟩
-            (ma >>= f) ∎h
+          abstract
+            bind-eq : (λ {α β} {i j} → _>>=₁_ {α} {β} {i} {j}) ≡ _>>=₀_
+            bind-eq = implicit-fun-ext $ λ α → implicit-fun-ext $ λ β → implicit-fun-ext $ λ i → implicit-fun-ext $ λ j → fun-ext $ λ ma → fun-ext $ λ f → ≅-to-≡ $ hbegin
+              ((fmap f ma) >>= id) 
+                ≅⟨ hcong₂ (λ X Y → M (X ∙ j) β ∋ Y >>= id) (≡-to-≅ (sym right-id)) (hsym (law-monad-fmap f ma)) ⟩
+              ((ma >>= (return ∘ f)) >>= id) 
+                ≅⟨ hcong₂ (λ X Y → M X β ∋ Y) (≡-to-≅ (sym assoc)) (hsym (law-assoc ma (return ∘ f) id)) ⟩
+              (ma >>= (λ x → return (f x) >>= id)) 
+                ≅⟨ hcong₂ (λ X Y → M (i ∙ X) β ∋ ma >>= Y) 
+                          (≡-to-≅ left-id) 
+                          (het-fun-ext (hcong (λ X → (λ _ → M X β)) (≡-to-≅ left-id)) 
+                                       (λ x → hcong₂ (λ X Y → M X β ∋ Y) (≡-to-≅ left-id) (law-left-id (f x) id))) ⟩
+              (ma >>= f) ∎h
     
 GradedMonad↔HaskellGradedMonad : {ℓMon : Level} {Mon : Set ℓMon} {monoid : Monoid Mon}
                                → (Σ (Mon → Functor Hask Hask) (GradedMonad monoid))

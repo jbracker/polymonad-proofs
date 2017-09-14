@@ -45,53 +45,57 @@ IndexedMonad→IxMonad {ℓIxs} {Ixs} (F , monad)
     return : {α : Type} {i : Ixs} → α → M i i α
     return {α} {i} = nat-η η α
     
-    law-right-id : {α β : Type} {i j : Ixs} (a : α) (k : α → M i j β)
-                 → (return a >>= k) ≡ k a
-    law-right-id {α} {β} {i} {j} a k = begin
-      ((nat-η (μ {j} {i} {i}) β) ∘ (([ F i i ]₁ k) ∘ (nat-η η α))) a 
-        ≡⟨ cong (λ X → ((nat-η (μ {j} {i} {i}) β) ∘ X) a ) (natural η) ⟩
-      ((nat-η (μ {j} {i} {i}) β) ∘ ((nat-η η ([ F j i ]₀ β)) ∘ k)) a 
-        ≡⟨ cong (λ X → X (k a)) η-right-coher ⟩
-      k a ∎
+    abstract
+      law-right-id : {α β : Type} {i j : Ixs} (a : α) (k : α → M i j β)
+                   → (return a >>= k) ≡ k a
+      law-right-id {α} {β} {i} {j} a k = begin
+        ((nat-η (μ {j} {i} {i}) β) ∘ (([ F i i ]₁ k) ∘ (nat-η η α))) a 
+          ≡⟨ cong (λ X → ((nat-η (μ {j} {i} {i}) β) ∘ X) a ) (natural η) ⟩
+        ((nat-η (μ {j} {i} {i}) β) ∘ ((nat-η η ([ F j i ]₀ β)) ∘ k)) a 
+          ≡⟨ cong (λ X → X (k a)) η-right-coher ⟩
+        k a ∎
     
-    law-left-id : {α : Type} {i j : Ixs} (m : M i j α) 
-                → (m >>= return) ≡ m
-    law-left-id {α} {i} {j} m = begin
-      nat-η (μ {j} {j} {i}) α ([ F j i ]₁ (nat-η η α) m)
-        ≡⟨ refl ⟩
-      ((nat-η (μ {j} {j} {i}) α) ∘ ([ F j i ]₁ (nat-η η α))) m
-        ≡⟨ cong (λ X → X m) η-left-coher ⟩
-      m ∎
+    abstract
+      law-left-id : {α : Type} {i j : Ixs} (m : M i j α) 
+                  → (m >>= return) ≡ m
+      law-left-id {α} {i} {j} m = begin
+        nat-η (μ {j} {j} {i}) α ([ F j i ]₁ (nat-η η α) m)
+          ≡⟨ refl ⟩
+        ((nat-η (μ {j} {j} {i}) α) ∘ ([ F j i ]₁ (nat-η η α))) m
+          ≡⟨ cong (λ X → X m) η-left-coher ⟩
+        m ∎
 
-    law-assoc : {α β γ : Type} {i j k l : Ixs}
-              → (m : M i j α) (f : α → M j k β) (g : β → M k l γ) 
-              → (m >>= (λ x → f x >>= g)) ≡ ((m >>= f) >>= g)
-    law-assoc {α} {β} {γ} {i} {j} {k} {l} m f g = begin
-      nat-η (μ {l} {j} {i}) γ ([ F j i ]₁ (λ x → f x >>= g) m)
-        ≡⟨ refl ⟩
-      ((nat-η (μ {l} {j} {i}) γ) ∘ ([ F j i ]₁ ( (nat-η (μ {l} {k} {j}) γ) ∘ (([ F k j ]₁ g) ∘ f) ))) m
-        ≡⟨ cong (λ X → ((nat-η (μ {l} {j} {i}) γ) ∘ X) m) (Functor.compose (F j i)) ⟩
-      ((nat-η (μ {l} {j} {i}) γ) ∘ ([ F j i ]₁ (nat-η (μ {l} {k} {j}) γ) ∘ [ F j i ]₁ (([ F k j ]₁ g) ∘ f) ) ) m
-        ≡⟨ refl ⟩
-      (((nat-η (μ {l} {j} {i}) γ) ∘ [ F j i ]₁ (nat-η (μ {l} {k} {j}) γ)) ∘ [ F j i ]₁ (([ F k j ]₁ g) ∘ f) ) m
-        ≡⟨ cong (λ X → (X ∘ [ F j i ]₁ (([ F k j ]₁ g) ∘ f) ) m) μ-coher ⟩
-      (nat-η (μ {l} {k} {i}) γ ∘ nat-η (μ {k} {j} {i}) ([ F l k ]₀ γ)) ([ F j i ]₁ ([ F k j ]₁ g ∘ f) m)
-        ≡⟨ cong (λ X → (nat-η (μ {l} {k} {i}) γ ∘ nat-η (μ {k} {j} {i}) ([ F l k ]₀ γ)) (X m)) (Functor.compose (F j i)) ⟩
-      (nat-η (μ {l} {k} {i}) γ ∘ nat-η (μ {k} {j} {i}) ([ F l k ]₀ γ)) ([ [ F j i ]∘[ F k j ] ]₁ g ([ F j i ]₁ f m))
-        ≡⟨ refl ⟩
-      ((nat-η (μ {l} {k} {i}) γ) ∘ ((nat-η (μ {k} {j} {i}) ([ F l k ]₀ γ)) ∘ ([ [ F j i ]∘[ F k j ] ]₁ g))) ([ F j i ]₁ f m)
-        ≡⟨ cong (λ X → ((nat-η (μ {l} {k} {i}) γ) ∘ X) ([ F j i ]₁ f m)) (sym $ natural (μ {k} {j} {i})) ⟩
-      ((nat-η (μ {l} {k} {i}) γ) ∘ (([ F k i ]₁ g) ∘ (nat-η (μ {k} {j} {i}) β))) ([ F j i ]₁ f m)
-        ≡⟨ refl ⟩
-      nat-η (μ {l} {k} {i}) γ ([ F k i ]₁ g (m >>= f)) ∎
+    abstract
+      law-assoc : {α β γ : Type} {i j k l : Ixs}
+                → (m : M i j α) (f : α → M j k β) (g : β → M k l γ) 
+                → (m >>= (λ x → f x >>= g)) ≡ ((m >>= f) >>= g)
+      law-assoc {α} {β} {γ} {i} {j} {k} {l} m f g = begin
+        nat-η (μ {l} {j} {i}) γ ([ F j i ]₁ (λ x → f x >>= g) m)
+          ≡⟨ refl ⟩
+        ((nat-η (μ {l} {j} {i}) γ) ∘ ([ F j i ]₁ ( (nat-η (μ {l} {k} {j}) γ) ∘ (([ F k j ]₁ g) ∘ f) ))) m
+          ≡⟨ cong (λ X → ((nat-η (μ {l} {j} {i}) γ) ∘ X) m) (Functor.compose (F j i)) ⟩
+        ((nat-η (μ {l} {j} {i}) γ) ∘ ([ F j i ]₁ (nat-η (μ {l} {k} {j}) γ) ∘ [ F j i ]₁ (([ F k j ]₁ g) ∘ f) ) ) m
+          ≡⟨ refl ⟩
+        (((nat-η (μ {l} {j} {i}) γ) ∘ [ F j i ]₁ (nat-η (μ {l} {k} {j}) γ)) ∘ [ F j i ]₁ (([ F k j ]₁ g) ∘ f) ) m
+          ≡⟨ cong (λ X → (X ∘ [ F j i ]₁ (([ F k j ]₁ g) ∘ f) ) m) μ-coher ⟩
+        (nat-η (μ {l} {k} {i}) γ ∘ nat-η (μ {k} {j} {i}) ([ F l k ]₀ γ)) ([ F j i ]₁ ([ F k j ]₁ g ∘ f) m)
+          ≡⟨ cong (λ X → (nat-η (μ {l} {k} {i}) γ ∘ nat-η (μ {k} {j} {i}) ([ F l k ]₀ γ)) (X m)) (Functor.compose (F j i)) ⟩
+        (nat-η (μ {l} {k} {i}) γ ∘ nat-η (μ {k} {j} {i}) ([ F l k ]₀ γ)) ([ [ F j i ]∘[ F k j ] ]₁ g ([ F j i ]₁ f m))
+          ≡⟨ refl ⟩
+        ((nat-η (μ {l} {k} {i}) γ) ∘ ((nat-η (μ {k} {j} {i}) ([ F l k ]₀ γ)) ∘ ([ [ F j i ]∘[ F k j ] ]₁ g))) ([ F j i ]₁ f m)
+          ≡⟨ cong (λ X → ((nat-η (μ {l} {k} {i}) γ) ∘ X) ([ F j i ]₁ f m)) (sym $ natural (μ {k} {j} {i})) ⟩
+        ((nat-η (μ {l} {k} {i}) γ) ∘ (([ F k i ]₁ g) ∘ (nat-η (μ {k} {j} {i}) β))) ([ F j i ]₁ f m)
+          ≡⟨ refl ⟩
+        nat-η (μ {l} {k} {i}) γ ([ F k i ]₁ g (m >>= f)) ∎
     
-    law-monad-fmap : {α β : Type} {i j : Ixs} (f : α → β) (ma : M i j α)
-                   → (ma >>= (return ∘ f)) ≡ [ F j i ]₁ f ma
-    law-monad-fmap {α} {β} {i} {j} f ma = begin
-      nat-η (μ {j} {j} {i}) β ([ F j i ]₁ (nat-η η β ∘ f) ma)
-        ≡⟨ refl ⟩
-      ((nat-η (μ {j} {j} {i}) β) ∘ ([ F j i ]₁ (nat-η η β ∘ f))) ma
-        ≡⟨ cong (λ X → ((nat-η (μ {j} {j} {i}) β) ∘ X) ma) (Functor.compose (F j i)) ⟩
-      ((nat-η (μ {j} {j} {i}) β) ∘ ([ F j i ]₁ (nat-η η β) ∘ [ F j i ]₁ f)) ma
-        ≡⟨ cong (λ X → (X ∘ [ F j i ]₁ f) ma) η-left-coher ⟩
-      [ F j i ]₁ f ma ∎
+    abstract
+      law-monad-fmap : {α β : Type} {i j : Ixs} (f : α → β) (ma : M i j α)
+                     → (ma >>= (return ∘ f)) ≡ [ F j i ]₁ f ma
+      law-monad-fmap {α} {β} {i} {j} f ma = begin
+        nat-η (μ {j} {j} {i}) β ([ F j i ]₁ (nat-η η β ∘ f) ma)
+          ≡⟨ refl ⟩
+        ((nat-η (μ {j} {j} {i}) β) ∘ ([ F j i ]₁ (nat-η η β ∘ f))) ma
+          ≡⟨ cong (λ X → ((nat-η (μ {j} {j} {i}) β) ∘ X) ma) (Functor.compose (F j i)) ⟩
+        ((nat-η (μ {j} {j} {i}) β) ∘ ([ F j i ]₁ (nat-η η β) ∘ [ F j i ]₁ f)) ma
+          ≡⟨ cong (λ X → (X ∘ [ F j i ]₁ f) ma) η-left-coher ⟩
+        [ F j i ]₁ f ma ∎

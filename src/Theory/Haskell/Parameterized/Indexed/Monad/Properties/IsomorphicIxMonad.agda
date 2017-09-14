@@ -64,15 +64,16 @@ IxMonad↔IndexedMonad {ℓIxs} {Ixs} = bijection IxMonad→IndexedMonad Indexed
           open IxMonad monad
           open Category Hask
           
-          bind-eq : (λ {α β} {i j k} → _>>=₁_ {α} {β} {i} {j} {k}) ≡ _>>=₀_
-          bind-eq = implicit-fun-ext $ λ α → implicit-fun-ext $ λ β → implicit-fun-ext $ λ i → implicit-fun-ext $ λ j → implicit-fun-ext $ λ k → fun-ext $ λ ma → fun-ext $ λ f → begin
-            ((fmap f ma) >>= (λ x → x)) 
-              ≡⟨ cong (λ X → X >>= id) (sym (law-monad-fmap f ma)) ⟩
-            ((ma >>= (return ∘ f)) >>= id) 
-              ≡⟨ sym (law-assoc ma (return ∘ f) id) ⟩
-            (ma >>= (λ x → return (f x) >>= id)) 
-              ≡⟨ cong (λ X → ma >>= X) (fun-ext (λ x → law-right-id (f x) id)) ⟩
-            (ma >>= f) ∎
+          abstract
+            bind-eq : (λ {α β} {i j k} → _>>=₁_ {α} {β} {i} {j} {k}) ≡ _>>=₀_
+            bind-eq = implicit-fun-ext $ λ α → implicit-fun-ext $ λ β → implicit-fun-ext $ λ i → implicit-fun-ext $ λ j → implicit-fun-ext $ λ k → fun-ext $ λ ma → fun-ext $ λ f → begin
+              ((fmap f ma) >>= (λ x → x)) 
+                ≡⟨ cong (λ X → X >>= id) (sym (law-monad-fmap f ma)) ⟩
+              ((ma >>= (return ∘ f)) >>= id) 
+                ≡⟨ sym (law-assoc ma (return ∘ f) id) ⟩
+              (ma >>= (λ x → return (f x) >>= id)) 
+                ≡⟨ cong (λ X → ma >>= X) (fun-ext (λ x → law-right-id (f x) id)) ⟩
+              (ma >>= f) ∎
     
 IndexedMonad↔IxMonad : {ℓIxs : Level} {Ixs : Set ℓIxs} 
                      → (Σ (Ixs → Ixs → Functor Hask Hask) (IndexedMonad Ixs))
