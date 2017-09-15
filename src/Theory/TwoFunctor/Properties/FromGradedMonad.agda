@@ -1,6 +1,6 @@
 
 open import Level
-open import Function renaming ( _∘_ to _∘F_ )
+open import Function hiding ( id ) renaming ( _∘_ to _∘F_ )
 
 open import Data.Unit
 open import Data.Product renaming ( _,_ to _,'_ )
@@ -41,7 +41,7 @@ GradedMonad→LaxTwoFunctor
   → {Mon : Set ℓMon}
   → {monoid : Monoid Mon}
   → (M : Mon → Functor C C)
-  → (monad : GradedMonad monoid M)
+  → GradedMonad monoid M
   → ConstLaxTwoFunctor (monoidTwoCategory monoid) (Cat {ℓC₀} {ℓC₁}) C
 GradedMonad→LaxTwoFunctor {ℓMon} {ℓC₀} {ℓC₁} {C} {Mon} {monoid} M monad = record
   { P₁ = λ {i} {j} → P
@@ -125,9 +125,9 @@ GradedMonad→LaxTwoFunctor {ℓMon} {ℓC₀} {ℓC₁} {C} {Mon} {monoid} M mo
         $ λ (c : Obj C) → hbegin
           nat-η ⟨ μ {ε} {i} ⟩∘ᵥ⟨ ⟨ η ⟩∘ₕ⟨ Id⟨ F i ⟩ ⟩ ⟩ c
             ≅⟨ hrefl ⟩
-          nat-η (μ {ε} {i}) c ∘C (nat-η η ([ F i ]₀ c) ∘C [ {!!} ]₁ (Category.id C {[ F i ]₀ c}))
-            ≅⟨ {!!} ⟩ -- hcong (λ X → nat-η (μ {ε} {i}) c ∘C (nat-η η ([ F i ]₀ c) ∘C X)) (≡-to-≅ $ Functor.id {!!}) ⟩
-          nat-η (μ {ε} {i}) c ∘C (nat-η η ([ F i ]₀ c) ∘C Category.id C {{!!}})
+          nat-η (μ {ε} {i}) c ∘C (nat-η η ([ F i ]₀ c) ∘C [ Id[ C ] ]₁ (Category.id C {[ F i ]₀ c}))
+            ≅⟨ hrefl ⟩
+          nat-η (μ {ε} {i}) c ∘C (nat-η η ([ F i ]₀ c) ∘C (Category.id C {[ F i ]₀ c}))
             ≅⟨ hcong (λ X → nat-η (μ {ε} {i}) c ∘C X) (≡-to-≅ $ Category.left-id C) ⟩
           nat-η (μ {ε} {i}) c ∘C (nat-η η ([ F i ]₀ c))
             ≅⟨ η-right-coher ⟩
@@ -138,29 +138,17 @@ GradedMonad→LaxTwoFunctor {ℓMon} {ℓC₀} {ℓC₁} {C} {Mon} {monoid} M mo
                   → {i : Hom monCat₁ w x} {j : Hom monCat₁ x y} {k : Hom monCat₁ y z} 
                   → ⟨ μ {k} {j ∙ i} ⟩∘ᵥ⟨ ⟨ id₂ Cat {f = F k} ⟩∘ₕ⟨ μ {j} {i} ⟩ ⟩ ≅ ⟨ μ {k ∙ j} {i} ⟩∘ᵥ⟨ ⟨ μ {k} {j} ⟩∘ₕ⟨ id₂ Cat {f = F i} ⟩ ⟩
       lawFunAssoc {tt} {tt} {tt} {tt} {i} {j} {k} 
-        = {!!} {- het-natural-transformation-eq (functor-eq refl hrefl) (cong (λ X → [ P ]₀ X) (Monoid.assoc monoid)) 
-        $ het-fun-ext (hcong (λ X → (λ z → (a : M k (M j (M i z))) → [ [ P ]₀ X ]₀ z)) (≡-to-≅ (Monoid.assoc monoid))) 
-        $ λ (β : Type) → het-fun-ext (hcong (λ X → (λ _ → [ [ P ]₀ X ]₀ β)) (≡-to-≅ (Monoid.assoc monoid))) 
-        $ λ (ma : M k (M j (M i β))) → hbegin
-          nat-η (⟨ μ {k} {j ∘Eff i} ⟩∘ᵥ⟨ ⟨ id₂ Cat {f = F k} ⟩∘ₕ⟨ μ {j} {i} ⟩ ⟩) β ma
-            ≅⟨ hrefl ⟩
-          join {β} {k} {j ∘Eff i} (fmap (join {β} {j} {i}) ma)
-            ≅⟨ hrefl ⟩
-          fmap (join {β} {j} {i}) ma >>= (λ x → x)
-            ≅⟨ bind-arg₁ (sym right-id) (fmap (join {β} {j} {i}) ma) (ma >>= (return ∘F join {β} {j} {i})) (hsym (law-monad-fmap (join {β} {j} {i}) ma)) (λ x → x) ⟩
-          (ma >>= (return ∘F join {β} {j} {i})) >>= (λ x → x)
-            ≅⟨ hsym (law-assoc ma (return ∘F join) (λ x → x)) ⟩
-          ma >>= (λ a → return (join {β} {j} {i} a) >>= (λ x → x))
-            ≅⟨ bind-arg₂ left-id ma (λ a → return (join a) >>= (λ x → x)) (λ mma → mma >>= (λ x → x)) (het-fun-ext (het-fun-ext hrefl (λ _ → hsym Mi≅Mεi)) (λ x → law-left-id (join x) (λ x → x))) ⟩
-          ma >>= (λ mma → mma >>= (λ x → x))
-            ≅⟨ law-assoc ma (λ x → x) (λ x → x) ⟩
-          (ma >>= (λ x → x)) >>= (λ x → x)
-            ≅⟨ hcong (λ X → (X ma >>= (λ x → x)) >>= (λ x → x)) (≡-to-≅ (sym (HaskellFunctor.law-id (functor k)))) ⟩
-          (fmap (λ x → x) ma >>= (λ x → x)) >>= (λ x → x)
-            ≅⟨ hcong (λ X → _>>=_ (_>>=_ (fmap X ma) (λ x → x)) (λ x → x)) (≡-to-≅ (sym (HaskellFunctor.law-id (functor j)))) ⟩
-          (fmap (fmap (λ x → x)) ma >>= (λ x → x)) >>= (λ x → x)
-            ≅⟨ hrefl ⟩
-          join {β} {k ∘Eff j} {i} (join {M i β} {k} {j} (fmap (fmap (λ x → x)) ma))
-            ≅⟨ hrefl ⟩
-          nat-η (⟨ μ {k ∘Eff j} {i} ⟩∘ᵥ⟨ ⟨ μ {k} {j} ⟩∘ₕ⟨ id₂ Cat {f = F i} ⟩ ⟩) β ma ∎h
--}
+        = het-natural-transformation-eq (functor-eq refl hrefl) (cong (λ X → [ P ]₀ X) (Monoid.assoc monoid)) 
+        $ het-fun-ext (hcong (λ X → (λ z → Hom C ([ M k ]₀ ([ M j ]₀ ([ M i ]₀ z))) ([ [ P ]₀ X ]₀ z))) (≡-to-≅ assoc)) 
+        $ λ (c : Obj C) → hbegin
+          (nat-η (μ {k} {j ∙ i}) c ∘C (idC C {[ M k ]₀ ([ M (j ∙ i) ]₀ c)} ∘C [ M k ]₁ (nat-η (μ {j} {i}) c)))
+            ≅⟨ ≡-to-≅ $ cong (λ X → nat-η (μ {k} {j ∙ i}) c ∘C X) (Category.right-id C) ⟩
+          (nat-η (μ {k} {j ∙ i}) c ∘C [ M k ]₁ (nat-η (μ {j} {i}) c))
+            ≅⟨ μ-coher ⟩
+          (nat-η (μ {k ∙ j} {i}) c ∘C nat-η (μ {k} {j}) ([ M i ]₀ c))
+            ≅⟨ ≡-to-≅ $ cong (λ X → nat-η (μ {k ∙ j} {i}) c ∘C X) (sym (Category.left-id C)) ⟩
+          (nat-η (μ {k ∙ j} {i}) c ∘C (nat-η (μ {k} {j}) ([ M i ]₀ c) ∘C (idC C {[ M k ]₀ ([ M j ]₀ ([ M i ]₀ c))})))
+            ≅⟨ ≡-to-≅ $ cong (λ X → (nat-η (μ {k ∙ j} {i}) c ∘C (nat-η (μ {k} {j}) ([ M i ]₀ c) ∘C X))) (sym (Functor.id (M k))) ⟩
+          (nat-η (μ {k ∙ j} {i}) c ∘C (nat-η (μ {k} {j}) ([ M i ]₀ c) ∘C [ M k ]₁ (idC C {[ M j ]₀ ([ M i ]₀ c)})))
+            ≅⟨ ≡-to-≅ $ cong (λ X → (nat-η (μ {k ∙ j} {i}) c ∘C (nat-η (μ {k} {j}) ([ M i ]₀ c) ∘C [ M k ]₁ X))) (sym (Functor.id (M j))) ⟩
+          (nat-η (μ {k ∙ j} {i}) c ∘C (nat-η (μ {k} {j}) ([ M i ]₀ c) ∘C [ [ M k ]∘[ M j ] ]₁ (idC C {[ M i ]₀ c}))) ∎h
