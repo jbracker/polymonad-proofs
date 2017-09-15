@@ -97,11 +97,6 @@ LaxTwoFunctor→GradedMonad {ℓMon} {ℓC₀} {ℓC₁} {C} {Mon} {monoid} F
           ≅⟨ nat-eq (StrictTwoCategory.left-id Cat') (cong M right-id) laxFunId₁ ⟩
         nat-η Id⟨ M i ⟩ c ∎h
     
-    p : {i : Mon} 
-      → (NaturalTransformation [ Id[ C ] ]∘[ M i ] (M (ε ∙ i)) ∋ ⟨ μ {f = i} {ε} ⟩∘ᵥ⟨ ⟨ η ⟩∘ₕ⟨ id₂ Cat' {f = M i} ⟩ ⟩) 
-      ≅ (NaturalTransformation (M i) (M i) ∋ Id⟨ M i ⟩)
-    p = laxFunId₂
-    
     abstract
       η-right-coher : {i : Mon} {c : Obj C} 
                     → nat-η μ c ∘C (nat-η η ([ M i ]₀ c)) 
@@ -110,18 +105,10 @@ LaxTwoFunctor→GradedMonad {ℓMon} {ℓC₀} {ℓC₁} {C} {Mon} {monoid} F
         nat-η μ c ∘C (nat-η η ([ M i ]₀ c)) 
           ≅⟨ ≡-to-≅ $ cong (λ X → nat-η μ c ∘C X) (sym (Category.left-id C)) ⟩
         nat-η μ c ∘C (nat-η η ([ M i ]₀ c) ∘C idC C {[ M i ]₀ c}) 
-          ≅⟨ ≡-to-≅ $ cong (λ X → nat-η μ c ∘C (nat-η η ([ M i ]₀ c) ∘C X)) (sym (Functor.id (M i))) ⟩
-        (Hom C ([ [ Id[ C ] ]∘[ M i ] ]₀ c) ([ M (ε ∙ i) ]₀ c) ∋ nat-η (μ {f = i} {ε}) c ∘C (nat-η η ([ M i ]₀ c) ∘C [ M i ]₁ (idC C {c})))
           ≅⟨ hrefl ⟩
-        (Hom C ([ [ Id[ C ] ]∘[ M i ] ]₀ c) ([ M (ε ∙ i) ]₀ c) ∋ nat-η (μ {f = i} {ε}) c ∘C (nat-η ⟨ η ⟩∘ₕ⟨ id₂ Cat' {f = {!M ?!}} ⟩ c))
-        -- (Hom C ([ [ Id[ C ] ]∘[ M i ] ]₀ c) ([ M (ε ∙ i) ]₀ c) ∋ nat-η ( ⟨ μ {f = i} {ε} ⟩∘ᵥ⟨ ⟨ η ⟩∘ₕ⟨ id₂ Cat' {f = M i} ⟩ ⟩ ) c)
-          ≅⟨ {!!} ⟩
+        nat-η (μ {f = i} {ε}) c ∘C (nat-η η ([ M i ]₀ c) ∘C [ Id[ C ] ]₁ (nat-η (id₂ Cat' {f = M i}) c))
+          ≅⟨ hrefl ⟩
+        (Hom C ([ [ Id[ C ] ]∘[ M i ] ]₀ c) ([ M (ε ∙ i) ]₀ c) ∋ nat-η ⟨ μ {f = i} {ε} ⟩∘ᵥ⟨ ⟨ η ⟩∘ₕ⟨ id₂ Cat' {f = M i} ⟩ ⟩ c)
+          ≅⟨ nat-eq (StrictTwoCategory.right-id Cat) (cong (λ X → M X) left-id) laxFunId₂ ⟩
         (Hom C ([ M i ]₀ c) ([ M i ]₀ c) ∋ nat-η Id⟨ M i ⟩ c) ∎h
-{-
 
-
-    laxFunId₂ : {x y : Cell₀ C} {f : Cell₁ C x y} 
-              → μ {x} {y} {y} {f} {id₁ C {y}} ∘Dᵥ (η {y} ∘Dₕ id₂ D {f = [ P₁ {x} {y} ]₀ f}) 
-              ≅ id₂ D {f = [ P₁ {x} {y} ]₀ f}
-
--}

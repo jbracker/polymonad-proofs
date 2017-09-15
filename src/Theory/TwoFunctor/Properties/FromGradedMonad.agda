@@ -40,10 +40,10 @@ GradedMonad→LaxTwoFunctor
   → {C : Category {ℓC₀} {ℓC₁}}
   → {Mon : Set ℓMon}
   → {monoid : Monoid Mon}
-  → (M : Mon → Functor C C)
+  → {M : Mon → Functor C C}
   → GradedMonad monoid M
   → ConstLaxTwoFunctor (monoidTwoCategory monoid) (Cat {ℓC₀} {ℓC₁}) C
-GradedMonad→LaxTwoFunctor {ℓMon} {ℓC₀} {ℓC₁} {C} {Mon} {monoid} M monad = record
+GradedMonad→LaxTwoFunctor {ℓMon} {ℓC₀} {ℓC₁} {C} {Mon} {monoid} {M} monad = record
   { P₁ = λ {i} {j} → P
   ; η = λ {i} → η
   ; μ = λ {i} {j} {k} {f} {g} → μ {g} {f}

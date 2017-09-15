@@ -15,9 +15,6 @@ open ≅-Reasoning hiding ( _≡⟨_⟩_ ; _≡⟨⟩_ ) renaming ( begin_ to hb
 open import Bijection hiding ( refl ; sym )
 open import Extensionality
 open import Equality
-open import Haskell
-open import Haskell.Parameterized.Graded.Monad
-open import Haskell.Functor renaming ( Functor to HaskellFunctor ; functor-eq to haskell-functor-eq )
 
 open import Theory.Monoid
 open import Theory.Category.Definition
@@ -33,48 +30,48 @@ open import Theory.TwoFunctor.ConstZeroCell
 open import Theory.TwoFunctor.ConstZeroCell.Equality
 open import Theory.TwoFunctor.Properties.FromGradedMonad
 open import Theory.TwoFunctor.Properties.ToGradedMonad
+open import Theory.Haskell.Parameterized.Graded.Monad
+open import Theory.Haskell.Parameterized.Graded.Monad.Equality
 
 module Theory.TwoFunctor.Properties.IsomorphicGradedMonad where
 
 open StrictTwoCategory hiding ( right-id ; left-id ; assoc )
 
-private
-  Cat' = Cat {suc zero} {zero}
-  Hask' = Hask {zero}
-
-GradedMonad↔LaxTwoFunctor : {ℓE : Level}
-                          → {Eff : Set ℓE}
-                          → (mon : Monoid Eff)
-                          → (Σ (Eff → TyCon) (GradedMonad mon))
-                          ↔ (ConstLaxTwoFunctor (monoidTwoCategory mon) Cat' Hask')
-GradedMonad↔LaxTwoFunctor {ℓE} {Eff} mon = bijection l→r r→l l→r→l r→l→r
+GradedMonad↔ConstLaxTwoFunctor : {ℓMon ℓC₀ ℓC₁ : Level}
+                          → {Mon : Set ℓMon}
+                          → (C : Category {ℓC₀} {ℓC₁})
+                          → (monoid : Monoid Mon)
+                          → (Σ (Mon → Functor C C) (GradedMonad monoid))
+                          ↔ (ConstLaxTwoFunctor (monoidTwoCategory monoid) Cat C)
+GradedMonad↔ConstLaxTwoFunctor {ℓMon} {ℓC₀} {ℓC₁} {Mon} C monoid = bijection l→r r→l l→r→l r→l→r
   where
-    MonCat₂ = monoidTwoCategory mon
+    Cat' = Cat {ℓC₀} {ℓC₁}
+    MonCat₂ = monoidTwoCategory monoid
     
-    l→r : Σ (Eff → TyCon) (GradedMonad mon) → ConstLaxTwoFunctor MonCat₂ Cat' Hask'
-    l→r (M , monad) = GradedMonad→LaxTwoFunctor M monad
+    l→r : Σ (Mon → Functor C C) (GradedMonad monoid) → ConstLaxTwoFunctor MonCat₂ Cat' C
+    l→r (M , monad) = GradedMonad→LaxTwoFunctor monad
 
-    r→l : ConstLaxTwoFunctor MonCat₂ Cat' Hask' → Σ (Eff → TyCon) (GradedMonad mon)
-    r→l F = LaxTwoFunctor→GradedMonadTyCon mon F , LaxTwoFunctor→GradedMonad mon F
+    r→l : ConstLaxTwoFunctor MonCat₂ Cat' C → Σ (Mon → Functor C C) (GradedMonad monoid)
+    r→l F = (λ i → [ ConstLaxTwoFunctor.P₁ F {tt} {tt} ]₀ i) , LaxTwoFunctor→GradedMonad F
     
     abstract
-      l→r→l : (F : ConstLaxTwoFunctor MonCat₂ Cat' Hask') → l→r (r→l F) ≡ F
-      l→r→l F = const-lax-two-functor-eq P-eq (≡-to-≅ η-eq) (≡-to-≅ μ-eq)
+      l→r→l : (F : ConstLaxTwoFunctor MonCat₂ Cat' C) → l→r (r→l F) ≡ F
+      l→r→l F = const-lax-two-functor-eq P-eq hrefl hrefl
         where
           P₁ = ConstLaxTwoFunctor.P₁ (l→r (r→l F))
           
-          M : Eff → TyCon
-          M i α = [ Functor.F₀ P₁ i ]₀ α
+          M : Mon → Functor C C
+          M i = Functor.F₀ P₁ i
           
           abstract
-            Cell₂-eq : {i j : Eff} → (f : Category.Hom (HomCat MonCat₂ tt tt) i j) 
+            Cell₂-eq : {i j : Mon} → (f : Category.Hom (HomCat MonCat₂ tt tt) i j) 
                      → Functor.F₁ (ConstLaxTwoFunctor.P₁ (l→r (r→l F))) f ≡ Functor.F₁ (ConstLaxTwoFunctor.P₁ F) f
-            Cell₂-eq {i} {.i} refl = natural-transformation-eq $ fun-ext $ λ α → fun-ext $ λ (ma : M i α) → begin
-              ma
-                ≡⟨⟩ 
-              NaturalTransformation.η (Id⟨ Functor.F₀ (ConstLaxTwoFunctor.P₁ F) i ⟩) α ma
-                ≡⟨ cong (λ X → NaturalTransformation.η X α ma) (sym (Functor.id (ConstLaxTwoFunctor.P₁ F))) ⟩ 
-              NaturalTransformation.η (Functor.F₁ (ConstLaxTwoFunctor.P₁ F) refl) α ma ∎
+            Cell₂-eq {i} {.i} refl = natural-transformation-eq $ fun-ext $ λ (c : Category.Obj C) → begin
+              Category.id C {[ M i ]₀ c}
+                ≡⟨ refl ⟩
+              NaturalTransformation.η (Id⟨ M i ⟩) c
+                ≡⟨ cong (λ X → NaturalTransformation.η X c) (sym (Functor.id (ConstLaxTwoFunctor.P₁ F))) ⟩
+              NaturalTransformation.η (Functor.F₁ (ConstLaxTwoFunctor.P₁ F) refl) c ∎
           
           abstract
             P₁-eq : (λ {a b} → Functor.F₁ (ConstLaxTwoFunctor.P₁ (l→r (r→l F))) {a} {b}) 
@@ -84,54 +81,17 @@ GradedMonad↔LaxTwoFunctor {ℓE} {Eff} mon = bijection l→r r→l l→r→l r
           abstract
             P-eq : (λ {x y} → ConstLaxTwoFunctor.P₁ (l→r (r→l F)) {x} {y}) ≡ (λ {x y} → ConstLaxTwoFunctor.P₁ F {x} {y})
             P-eq = implicit-fun-ext $ λ x → implicit-fun-ext $ λ y → functor-eq refl $ ≡-to-≅ $ P₁-eq
-          
-          abstract
-            η-eq : (λ {x} → ConstLaxTwoFunctor.η (l→r (r→l F)) {x}) ≡ (λ {x} → ConstLaxTwoFunctor.η F {x})
-            η-eq = implicit-fun-ext $ λ x → natural-transformation-eq refl
-          
-          abstract
-            μ-eq : (λ {x y z} {f} {g} → ConstLaxTwoFunctor.μ (l→r (r→l F)) {x} {y} {z} {f} {g}) 
-                 ≡ (λ {x y z} {f} {g} → ConstLaxTwoFunctor.μ F {x} {y} {z} {f} {g})
-            μ-eq = implicit-fun-ext $ λ x → implicit-fun-ext $ λ y → implicit-fun-ext $ λ z → implicit-fun-ext 
-                 $ λ f → implicit-fun-ext $ λ g → natural-transformation-eq $ fun-ext 
-                 $ λ (α : Type) → fun-ext $ λ mma → begin
-                   NaturalTransformation.η (ConstLaxTwoFunctor.μ (l→r (r→l F))) α mma
-                     ≡⟨⟩
-                   GradedMonad._>>=_ (proj₂ (r→l F)) mma (λ x → x)
-                     ≡⟨⟩
-                   NaturalTransformation.η (ConstLaxTwoFunctor.μ F) α ([ [ P₁ ]₀ g ]₁ (λ x → x) mma)
-                     ≡⟨ cong (λ X → NaturalTransformation.η (ConstLaxTwoFunctor.μ F) α X) (cong (λ X → X mma) (Functor.id ([ P₁ ]₀ g))) ⟩
-                   NaturalTransformation.η (ConstLaxTwoFunctor.μ F) α mma ∎
     
     abstract
-      r→l→r : (x : Σ (Eff → TyCon) (GradedMonad mon)) → r→l (l→r x) ≡ x
-      r→l→r (M , monad) = Σ-eq refl $ ≡-to-≅ $ graded-monad-eq bind-eq refl refl
-        where
-          open GradedMonad monad
-          open Monoid mon
-          
-          abstract
-            bind-eq : (λ {α β : Type} {i j : Eff} → GradedMonad._>>=_ (proj₂ (r→l (l→r (M , monad)))) {α} {β} {i} {j})
-                    ≡ (λ {α β : Type} {i j : Eff} → GradedMonad._>>=_ monad {α} {β} {i} {j})
-            bind-eq = implicit-fun-ext
-                    $ λ α → implicit-fun-ext $ λ β → implicit-fun-ext
-                    $ λ i → implicit-fun-ext $ λ j → fun-ext
-                    $ λ ma → fun-ext $ λ f → ≅-to-≡ $ hbegin
-                      GradedMonad._>>=_ (proj₂ (r→l (l→r (M , monad)))) ma f
-                        ≅⟨ hrefl ⟩
-                      fmap f ma >>= (λ x → x)
-                        ≅⟨ bind-arg₁ (sym right-id) (fmap f ma) (ma >>= (return ∘F f)) (hsym (law-monad-fmap f ma)) (λ x → x) ⟩ 
-                      (ma >>= (return ∘F f)) >>= (λ x → x)
-                        ≅⟨ hsym (law-assoc ma (return ∘F f) (λ x → x)) ⟩
-                      ma >>= (λ a → return (f a) >>= (λ x → x))
-                        ≅⟨ bind-arg₂ left-id ma (λ a → return (f a) >>= (λ x → x)) f (het-fun-ext (het-fun-ext hrefl (λ _ → hsym Mi≅Mεi)) (λ a → law-left-id (f a) (λ x → x))) ⟩
-                      ma >>= f ∎h
+      r→l→r : (x : Σ (Mon → Functor C C) (GradedMonad monoid)) → r→l (l→r x) ≡ x
+      r→l→r (M , monad) = Σ-eq refl $ ≡-to-≅ $ graded-monad-eq refl refl
 
 
-LaxTwoFunctor↔GradedMonad : {ℓE : Level}
-                          → {Eff : Set ℓE}
-                          → (mon : Monoid Eff)
-                          → (ConstLaxTwoFunctor (monoidTwoCategory mon) Cat' Hask')
-                          ↔ (Σ (Eff → TyCon) (GradedMonad mon))
-LaxTwoFunctor↔GradedMonad {ℓE} {Eff} mon = Bijection.sym $ GradedMonad↔LaxTwoFunctor {ℓE} {Eff} mon
+ConstLaxTwoFunctor↔GradedMonad : {ℓMon ℓC₀ ℓC₁ : Level}
+                               → {Mon : Set ℓMon}
+                               → (C : Category {ℓC₀} {ℓC₁})
+                               → (monoid : Monoid Mon)
+                               → (ConstLaxTwoFunctor (monoidTwoCategory monoid) Cat C)
+                               ↔ (Σ (Mon → Functor C C) (GradedMonad monoid))
+ConstLaxTwoFunctor↔GradedMonad C monoid = Bijection.sym $ GradedMonad↔ConstLaxTwoFunctor C monoid
 
