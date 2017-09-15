@@ -20,24 +20,24 @@ open import Theory.Functor.Definition
 open import Theory.Natural.Transformation
 open import Theory.Haskell.Parameterized.Indexed.Monad
 open import Theory.Haskell.Parameterized.Indexed.Monad.Equality
-open import Theory.Haskell.Parameterized.Indexed.Monad.Properties.FromIxMonad
-open import Theory.Haskell.Parameterized.Indexed.Monad.Properties.ToIxMonad
+open import Theory.Haskell.Parameterized.Indexed.Monad.Properties.FromHaskellIndexedMonad
+open import Theory.Haskell.Parameterized.Indexed.Monad.Properties.ToHaskellIndexedMonad
 
-module Theory.Haskell.Parameterized.Indexed.Monad.Properties.IsomorphicIxMonad where
+module Theory.Haskell.Parameterized.Indexed.Monad.Properties.IsomorphicHaskellIndexedMonad where
 
 private
   Hask = setCategory {zero}
 
-IxMonad↔IndexedMonad : {ℓIxs : Level} {Ixs : Set ℓIxs} 
-                     → (Σ (Ixs → Ixs → TyCon) (IxMonad Ixs))
-                     ↔ (Σ (Ixs → Ixs → Functor Hask Hask) (IndexedMonad Ixs))
-IxMonad↔IndexedMonad {ℓIxs} {Ixs} = bijection IxMonad→IndexedMonad IndexedMonad→IxMonad l→r→l r→l→r
+HaskellIndexedMonad↔IndexedMonad : {ℓIxs : Level} {Ixs : Set ℓIxs} 
+                                 → (Σ (Ixs → Ixs → TyCon) (IxMonad Ixs))
+                                 ↔ (Σ (Ixs → Ixs → Functor Hask Hask) (IndexedMonad Ixs))
+HaskellIndexedMonad↔IndexedMonad {ℓIxs} {Ixs} = bijection HaskellIndexedMonad→IndexedMonad IndexedMonad→HaskellIndexedMonad l→r→l r→l→r
   where
     open NaturalTransformation renaming ( η to nat-η )
     
     abstract
       l→r→l : (b : Σ (Ixs → Ixs → Functor Hask Hask) (IndexedMonad Ixs)) 
-            → IxMonad→IndexedMonad (IndexedMonad→IxMonad b) ≡ b
+            → HaskellIndexedMonad→IndexedMonad (IndexedMonad→HaskellIndexedMonad b) ≡ b
       l→r→l (F , monad) = Σ-eq refl $ ≡-to-≅ 
                         $ indexed-monad-eq (implicit-fun-ext (λ i → natural-transformation-eq (fun-ext (λ α → refl)))) 
                         $ implicit-fun-ext 
@@ -53,12 +53,12 @@ IxMonad↔IndexedMonad {ℓIxs} {Ixs} = bijection IxMonad→IndexedMonad Indexed
       
     abstract
       r→l→r : (a : Σ (Ixs → Ixs → TyCon) (IxMonad Ixs)) 
-            → IndexedMonad→IxMonad (IxMonad→IndexedMonad a) ≡ a
+            → IndexedMonad→HaskellIndexedMonad (HaskellIndexedMonad→IndexedMonad a) ≡ a
       r→l→r (M , monad) = Σ-eq refl $ ≡-to-≅ 
                         $ hask-indexed-monad-eq bind-eq (implicit-fun-ext $ λ α → implicit-fun-ext $ λ i → refl) 
                         $ fun-ext $ λ i → fun-ext $ λ j → hask-functor-eq refl
         where
-          _>>=₁_ = IxMonad._>>=_ (proj₂ (IndexedMonad→IxMonad (IxMonad→IndexedMonad (M , monad))))
+          _>>=₁_ = IxMonad._>>=_ (proj₂ (IndexedMonad→HaskellIndexedMonad (HaskellIndexedMonad→IndexedMonad (M , monad))))
           _>>=₀_ = IxMonad._>>=_ monad
           
           open IxMonad monad
@@ -75,7 +75,7 @@ IxMonad↔IndexedMonad {ℓIxs} {Ixs} = bijection IxMonad→IndexedMonad Indexed
                 ≡⟨ cong (λ X → ma >>= X) (fun-ext (λ x → law-right-id (f x) id)) ⟩
               (ma >>= f) ∎
     
-IndexedMonad↔IxMonad : {ℓIxs : Level} {Ixs : Set ℓIxs} 
-                     → (Σ (Ixs → Ixs → Functor Hask Hask) (IndexedMonad Ixs))
-                     ↔ (Σ (Ixs → Ixs → TyCon) (IxMonad Ixs))
-IndexedMonad↔IxMonad = Bijection.sym IxMonad↔IndexedMonad
+IndexedMonad↔HaskellIndexedMonad : {ℓIxs : Level} {Ixs : Set ℓIxs} 
+                                 → (Σ (Ixs → Ixs → Functor Hask Hask) (IndexedMonad Ixs))
+                                 ↔ (Σ (Ixs → Ixs → TyCon) (IxMonad Ixs))
+IndexedMonad↔HaskellIndexedMonad = Bijection.sym HaskellIndexedMonad↔IndexedMonad

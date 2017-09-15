@@ -18,15 +18,15 @@ open import Theory.Functor.Properties.IsomorphicHaskellFunctor
 open import Theory.Natural.Transformation
 open import Theory.Haskell.Parameterized.Indexed.Monad
 
-module Theory.Haskell.Parameterized.Indexed.Monad.Properties.ToIxMonad where
+module Theory.Haskell.Parameterized.Indexed.Monad.Properties.ToHaskellIndexedMonad where
 
 private
   Hask = setCategory {zero}
 
-IndexedMonad→IxMonad : {ℓIxs : Level} {Ixs : Set ℓIxs} 
-                     → (Σ (Ixs → Ixs → Functor Hask Hask) (IndexedMonad Ixs))
-                     → (Σ (Ixs → Ixs → TyCon) (IxMonad Ixs))
-IndexedMonad→IxMonad {ℓIxs} {Ixs} (F , monad) 
+IndexedMonad→HaskellIndexedMonad : {ℓIxs : Level} {Ixs : Set ℓIxs} 
+                                 → (Σ (Ixs → Ixs → Functor Hask Hask) (IndexedMonad Ixs))
+                                 → (Σ (Ixs → Ixs → TyCon) (IxMonad Ixs))
+IndexedMonad→HaskellIndexedMonad {ℓIxs} {Ixs} (F , monad) 
   = M , indexed-monad _>>=_ return functor law-right-id law-left-id law-assoc law-monad-fmap
   where
     open Category Hask
