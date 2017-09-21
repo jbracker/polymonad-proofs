@@ -36,8 +36,12 @@ open Category
 open Functor hiding ( id )
 open NaturalIsomorphism renaming ( η to iso-η ) 
 
+-- Agda does not seem to terminate in a reasonable amount of time...
+-- Last tested with Agda 2.5.3
+{- 
 postulate
   day-triangle-id : {ℓC₀ ℓC₁ : Level} → (ℓSet : Level) → {C : Category {ℓC₀} {ℓC₁}} → (CMon : MonoidalCategory C) 
                   → (x y : Functor C (setCategory {ℓSet ⊔ ℓC₀ ⊔ ℓC₁})) 
                   → F₁ (dayConvolution {ℓSet = ℓSet} CMon) (iso-η (dayRightUnitor ℓSet CMon) x , id (FunCat C (setCategory {ℓSet ⊔ ℓC₀ ⊔ ℓC₁})) {y} )
                   ≡ ⟨ F₁ (dayConvolution {ℓSet = ℓSet} CMon) (id (FunCat C (setCategory {ℓSet ⊔ ℓC₀ ⊔ ℓC₁})) {x} , iso-η (dayLeftUnitor ℓSet CMon) y) ⟩∘ᵥ⟨ iso-η (dayAssociator ℓSet CMon) (x ,' dayUnit {ℓSet = ℓSet} CMon ,' y) ⟩
+-}

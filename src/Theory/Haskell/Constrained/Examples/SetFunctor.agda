@@ -37,8 +37,8 @@ abstract
              → (xs : List A) → IsSortedNoDupList OrdA xs
              → mapList {OrdA = OrdA} {OrdA} (λ x → x) xs ≡ xs
   mapList-id [] (lift tt) = refl
-  mapList-id (x ∷ xs) (allX , sortedX) = begin
-    insert x (mapList (λ a → a) xs) 
+  mapList-id {OrdA = OrdA} (x ∷ xs) (allX , sortedX) = begin
+    insert x (mapList {OrdA = OrdA} (λ a → a) xs) 
       ≡⟨ cong (insert x) (mapList-id xs sortedX) ⟩
     insert x xs
       ≡⟨ insert-adds-in-front allX ⟩
@@ -52,12 +52,12 @@ abstract
                   → (f : A → B) → (g : B → C) → (xs : List A)
                   → mapList {OrdA = OrdA} {OrdC} (g ∘F f) xs ≡ mapList {OrdA = OrdB} {OrdC} g (mapList {OrdA = OrdA} {OrdB} f xs)
   mapList-compose struct-eqB struct-eqC f g [] = refl
-  mapList-compose {OrdA = OrdA} struct-eqB struct-eqC f g (x ∷ xs) = begin
-    insert (g (f x)) (mapList (g ∘F f) xs)
+  mapList-compose {OrdA = OrdA} {OrdB} {OrdC} struct-eqB struct-eqC f g (x ∷ xs) = begin
+    insert (g (f x)) (mapList {OrdA = OrdA} (g ∘F f) xs)
       ≡⟨ cong (insert (g (f x))) (mapList-compose {OrdA = OrdA} struct-eqB struct-eqC f g xs) ⟩
-    insert (g (f x)) (mapList g (mapList f xs))
-      ≡⟨ sym (map-insert-commute g (f x) (mapList f xs) struct-eqB struct-eqC) ⟩
-    mapList g (insert (f x) (mapList f xs)) ∎
+    insert (g (f x)) (mapList {OrdA = OrdB} g (mapList {OrdA = OrdA} f xs))
+      ≡⟨ sym (map-insert-commute g (f x) (mapList {OrdA = OrdA} f xs) struct-eqB struct-eqC) ⟩
+    mapList {OrdA = OrdB} g (insert (f x) (mapList {OrdA = OrdA} f xs)) ∎
 
 {-
 As a side condition for types with an ordering we say that they must provide 
@@ -187,13 +187,13 @@ private
                 helper (lset (x ∷ xs) (allX , sortedX)) = lset-eq _ _ _ _ $ begin
                   insert ((g ∘F f) x) (LSet.xs (mapSet (g ∘F f) (lset xs sortedX)))
                     ≡⟨ cong (insert (g (f x))) (map-structure (g ∘F f) (lset xs sortedX)) ⟩
-                  insert (g (f x)) (mapList (g ∘F f) xs)
+                  insert (g (f x)) (mapList {OrdA = OrdA} (g ∘F f) xs)
                     ≡⟨ cong (insert (g (f x))) (mapList-compose {OrdA = OrdA} struct-eqB struct-eqC f g xs) ⟩
-                  insert (g (f x)) (mapList g (mapList f xs))
-                    ≡⟨ sym (map-insert-commute g (f x) (mapList f xs) struct-eqB struct-eqC) ⟩
-                  mapList g (insert (f x) (mapList f xs))
+                  insert (g (f x)) (mapList {OrdA = OrdB} g (mapList {OrdA = OrdA} f xs))
+                    ≡⟨ sym (map-insert-commute g (f x) (mapList {OrdA = OrdA} f xs) struct-eqB struct-eqC) ⟩
+                  mapList {OrdA = OrdB} g (insert (f x) (mapList {OrdA = OrdA} f xs))
                     ≡⟨ cong (mapList {OrdA = OrdB} {OrdC} g ∘F insert (f x)) (sym (map-structure f (lset xs sortedX))) ⟩
-                  mapList g (insert (f x) (LSet.xs (mapSet f (lset xs sortedX))))
+                  mapList {OrdA = OrdB} g (insert (f x) (LSet.xs (mapSet f (lset xs sortedX))))
                     ≡⟨ sym (map-structure g (lset (insert (f x) (LSet.xs (mapSet f (lset xs sortedX)))) (insert-preserves-IsSortedNoDupList (LSet.sorted (mapSet f (lset xs sortedX)))))) ⟩
                   LSet.xs (mapSet g (lset (insert (f x) (LSet.xs (mapSet f (lset xs sortedX)))) (insert-preserves-IsSortedNoDupList (LSet.sorted (mapSet f (lset xs sortedX)))))) ∎
 
@@ -266,13 +266,13 @@ module NotApplicativeReady where
               helper (lset (x ∷ xs) (allX , sortedX)) = lset-eq _ _ _ _ $ begin
                 insert ((g ∘F f) x) (LSet.xs (mapSet (g ∘F f) (lset xs sortedX)))
                   ≡⟨ cong (insert (g (f x))) (map-structure (g ∘F f) (lset xs sortedX)) ⟩
-                insert (g (f x)) (mapList (g ∘F f) xs)
+                insert (g (f x)) (mapList {OrdA = OrdA} (g ∘F f) xs)
                   ≡⟨ cong (insert (g (f x))) (mapList-compose {OrdA = OrdA} struct-eqB struct-eqC f g xs) ⟩
-                insert (g (f x)) (mapList g (mapList f xs))
-                  ≡⟨ sym (map-insert-commute g (f x) (mapList f xs) struct-eqB struct-eqC) ⟩
-                mapList g (insert (f x) (mapList f xs))
+                insert (g (f x)) (mapList {OrdA = OrdB} g (mapList {OrdA = OrdA} f xs))
+                  ≡⟨ sym (map-insert-commute g (f x) (mapList {OrdA = OrdA} f xs) struct-eqB struct-eqC) ⟩
+                mapList {OrdA = OrdB} g (insert (f x) (mapList {OrdA = OrdA} f xs))
                   ≡⟨ cong (mapList {OrdA = OrdB} {OrdC} g ∘F insert (f x)) (sym (map-structure f (lset xs sortedX))) ⟩
-                mapList g (insert (f x) (LSet.xs (mapSet f (lset xs sortedX))))
+                mapList {OrdA = OrdB} g (insert (f x) (LSet.xs (mapSet f (lset xs sortedX))))
                   ≡⟨ sym (map-structure g (lset (insert (f x) (LSet.xs (mapSet f (lset xs sortedX)))) (insert-preserves-IsSortedNoDupList (LSet.sorted (mapSet f (lset xs sortedX)))))) ⟩
                 LSet.xs (mapSet g (lset (insert (f x) (LSet.xs (mapSet f (lset xs sortedX)))) (insert-preserves-IsSortedNoDupList (LSet.sorted (mapSet f (lset xs sortedX)))))) ∎
 

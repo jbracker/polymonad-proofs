@@ -73,16 +73,16 @@ abstract
         p (naturalTransformation η' natural) = fun-ext $ λ x → fun-ext $ λ f → begin
           η (yoneda← F A (yoneda→ F A (naturalTransformation η' natural))) x f
             ≡⟨⟩
-          ([ F ]₁ (lower f) ∘Set η' A) (lift $ id C {A})
-            ≡⟨ cong (λ P → P (lift $ id C {A})) (natural {A} {x} {lower f}) ⟩
-          (η' x ∘Set ([ Hom[ A ,-] ]₁ (lower f))) (lift $ id C {A})
+          ([ F ]₁ (lower {ℓ = ℓ₀ ⊔ ℓ₁} f) ∘Set η' A) (lift $ id C {A})
+            ≡⟨ cong (λ P → P (lift {ℓ = ℓ₁ ⊔ ℓ₀} $ id C {A})) (natural {A} {x} {lower {ℓ = ℓ₀ ⊔ ℓ₁} f}) ⟩
+          (η' x ∘Set ([ Hom[ A ,-] ]₁ (lower {ℓ = ℓ₀ ⊔ ℓ₁} f))) (lift $ id C {A})
             ≡⟨⟩
-          (η' x ∘Set (λ h → lift (lower f ∘C (lower h ∘C id C)))) (lift $ id C {A})
-            ≡⟨ cong (λ X → (η' x ∘Set X) (lift $ id C {A})) (fun-ext (λ h → cong (λ X → lift (lower f ∘C X)) (left-id C))) ⟩
-          (η' x ∘Set (λ h → lift (lower f ∘C lower {ℓ = ℓ₀} h))) (lift $ id C {A})
+          (η' x ∘Set (λ h → lift {ℓ = ℓ₁ ⊔ ℓ₀} (lower {ℓ = ℓ₀ ⊔ ℓ₁} f ∘C (lower {ℓ = ℓ₀} h ∘C id C)))) (lift $ id C {A})
+            ≡⟨ cong (λ X → (η' x ∘Set X) (lift {ℓ = ℓ₀} $ id C {A})) (fun-ext (λ h → cong (λ X → lift {ℓ = ℓ₀ ⊔ ℓ₁} (lower {ℓ = ℓ₀ ⊔ ℓ₁} f ∘C X)) {y = id C {A}} (left-id C))) ⟩
+          (η' x ∘Set (λ h → lift {ℓ = ℓ₁ ⊔ ℓ₀} (lower {ℓ = ℓ₀ ⊔ ℓ₁} f ∘C lower {ℓ = ℓ₀} h))) (lift {ℓ = ℓ₀} $ id C {A})
             ≡⟨⟩
-          η' x (lift (lower f ∘C id C {A}))
-            ≡⟨ cong (η' x ∘F lift) (left-id C) ⟩
+          η' x (lift {ℓ = ℓ₁ ⊔ ℓ₀} (lower {ℓ = ℓ₁ ⊔ ℓ₀} f ∘C id C {A}))
+            ≡⟨ cong (η' x ∘F lift {ℓ = ℓ₁ ⊔ ℓ₀}) (left-id C) ⟩
           η' x f ∎
              
 yoneda-bijection : (F : Functor C SetCat) → (A : Obj C) → (NaturalTransformation Hom[ A ,-] F ↔ [ F ]₀ A)

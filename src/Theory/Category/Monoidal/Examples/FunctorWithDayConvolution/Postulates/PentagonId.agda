@@ -35,7 +35,10 @@ module Theory.Category.Monoidal.Examples.FunctorWithDayConvolution.Postulates.Pe
 open Category
 open Functor hiding ( id )
 open NaturalIsomorphism renaming ( η to iso-η ) 
- 
+
+-- Agda does not seem to terminate in a reasonable amount of time...
+-- Last tested with Agda 2.5.3
+{- 
 postulate
   day-pentagon-id : {ℓC₀ ℓC₁ : Level} → (ℓSet : Level) → {C : Category {ℓC₀} {ℓC₁}} → (CMon : MonoidalCategory C) 
                   → (w x y z : Functor C (setCategory {ℓSet ⊔ ℓC₀ ⊔ ℓC₁})) 
@@ -43,3 +46,4 @@ postulate
                       ⟨ iso-η (dayAssociator ℓSet CMon) (w ,' F₀ (dayConvolution {ℓSet = ℓSet} CMon) (x , y) ,' z) ⟩∘ᵥ⟨ 
                         F₁ (dayConvolution {ℓSet = ℓSet} CMon) (iso-η (dayAssociator ℓSet CMon) (w ,' x ,' y) , id [ C , setCategory {ℓSet ⊔ ℓC₀ ⊔ ℓC₁} ]) ⟩ ⟩
                   ≡ ⟨ iso-η (dayAssociator ℓSet CMon) (w ,' x ,' F₀ (dayConvolution {ℓSet = ℓSet} CMon) (y , z)) ⟩∘ᵥ⟨ iso-η (dayAssociator ℓSet CMon) (F₀ (dayConvolution {ℓSet = ℓSet} CMon) (w , x) ,' y ,' z) ⟩
+-}

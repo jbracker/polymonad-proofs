@@ -50,7 +50,7 @@ RelativeMonad→LaxMonoidalFunctor {ℓ} {ℓCt₀} {ℓCt₁} {CtMonCat} {T} mo
     _⊗Dep₁_ = _Dep⊗₁_ CtMonCat
     
     ap-map : NaturalTransformation [ tensor SetMonCat ]∘[ [ FunctorT ]×[ FunctorT ] ] [ FunctorT ]∘[ tensor (DepMonCat CtMonCat) ]
-    ap-map = naturalTransformation η-map η-nat
+    ap-map = naturalTransformation η-map (λ {a b} {f} → η-nat {a} {b} {f})
       where
         η-map : (x : Obj (DepCat CtMonCat) × Obj (DepCat CtMonCat))
               → (T (proj₁ x) × T (proj₂ x))
@@ -160,7 +160,7 @@ RelativeMonad→LaxMonoidalFunctor {ℓ} {ℓCt₀} {ℓCt₁} {CtMonCat} {T} mo
           ≡⟨ cong (λ X → X Fa) $ sym $ RelativeMonad.left-id monad ⟩ 
         kext η Fa
           ≡⟨⟩ 
-        kext ((η ∘ proj₂) ∘ (λ b → (lift tt , b))) Fa
+        kext ((η ∘ proj₂ {a = ℓCt₀}) ∘ (λ b → (lift tt , b))) Fa
           ≡⟨ cong (λ X → kext (X ∘ (λ b → (lift tt , b))) Fa) (sym $ RelativeMonad.right-id monad) ⟩ 
         kext (kext (η ∘ proj₂) ∘ (η ∘ (λ b → (lift tt , b)))) Fa
           ≡⟨ cong (λ X → X Fa) (RelativeMonad.coher monad) ⟩ 
@@ -179,7 +179,7 @@ RelativeMonad→LaxMonoidalFunctor {ℓ} {ℓCt₀} {ℓCt₁} {CtMonCat} {T} mo
           ≡⟨ cong (λ X → X Fa) (sym $ RelativeMonad.left-id monad) ⟩
         kext η Fa
           ≡⟨⟩
-        kext ( (η ∘ proj₁) ∘ (λ a → (a , lift tt)) ) Fa
+        kext ( (η ∘ proj₁ {b = ℓCt₀}) ∘ (λ a → (a , lift tt)) ) Fa
           ≡⟨ cong (λ X → kext (X ∘ (λ a → (a , lift tt))) Fa) (sym $ RelativeMonad.right-id monad) ⟩
         kext ( (kext (η ∘ proj₁)) ∘ (η ∘ (λ a → (a , lift tt))) ) Fa
           ≡⟨⟩

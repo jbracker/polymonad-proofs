@@ -34,7 +34,9 @@ open import Theory.Category.Monoidal.Examples.FunctorWithDayConvolution.Postulat
 module Theory.Category.Monoidal.Examples.FunctorWithDayConvolution where
 
 open Category
-
+-- Agda does not seem to terminate in a reasonable amount of time...
+-- Last tested with Agda 2.5.3
+{- 
 functorDayMonoidalCategory : {ℓC₀ ℓC₁ : Level} → (ℓSet : Level) → {C : Category {ℓC₀} {ℓC₁}}
                         → MonoidalCategory C
                         → MonoidalCategory [ C , (setCategory {ℓSet ⊔ ℓC₀ ⊔ ℓC₁}) ]
@@ -47,3 +49,4 @@ functorDayMonoidalCategory {ℓC₀} {ℓC₁} ℓSet {C} CMon = record
   ; triangle-id = day-triangle-id ℓSet CMon
   ; pentagon-id = day-pentagon-id ℓSet CMon
   }
+-}

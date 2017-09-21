@@ -49,7 +49,7 @@ GradedApplicative→LaxMonoidalFunctor {ℓ} {M} {mon} {F} applic = laxMonoidalF
     SetCat = setCategory {zero}
     
     fun : Functor (MonCat ×C SetCat) SetCat
-    fun = functor fun₀ fun₁ fun-id fun-compose
+    fun = functor fun₀ fun₁ fun-id (λ {a b c} {f} {g} → fun-compose {a} {b} {c} {f} {g})
       where
         fun₀ : Obj (MonCat ×C SetCat) → Obj SetCat
         fun₀ (i , α) = F i α
@@ -78,7 +78,7 @@ GradedApplicative→LaxMonoidalFunctor {ℓ} {M} {mon} {F} applic = laxMonoidalF
     ε' (lift tt) = GradedApplicative.unit applic
     
     μ' : NaturalTransformation [ tensor SetMonCat ]∘[ [ fun ]×[ fun ] ] [ fun ]∘[ tensor (MonMonCat ×CMon SetMonCat) ]
-    μ' = naturalTransformation nat-μ natural
+    μ' = naturalTransformation nat-μ (λ {a b} {f} → natural {a} {b} {f})
       where
         nat-μ : (x : Obj ((MonCat ×C SetCat) ×C (MonCat ×C SetCat)))
               → Hom SetCat ([ [ tensor SetMonCat ]∘[ [ fun ]×[ fun ] ] ]₀ x) ([ [ fun ]∘[ tensor (MonMonCat ×CMon SetMonCat) ] ]₀ x)

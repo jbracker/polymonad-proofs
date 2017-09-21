@@ -93,9 +93,9 @@ GradedMonad→LaxTwoFunctor {ℓMon} {ℓC₀} {ℓC₁} {C} {Mon} {monoid} {M} 
       μ-natural f x 
         = natural-transformation-eq $ fun-ext $ λ (c : Obj C) → begin 
           nat-η ⟨ Id⟨ F (x ∙ f) ⟩ ⟩∘ᵥ⟨ μ {x} {f} ⟩ c
-            ≡⟨ nat-eq (vertical-right-id Cat') ⟩
+            ≡⟨ nat-eq {α = ⟨ Id⟨ F (x ∙ f) ⟩ ⟩∘ᵥ⟨ μ {x} {f} ⟩} {β = μ {x} {f}} (vertical-right-id Cat') {c = c} ⟩
           nat-η (μ {x} {f}) c
-            ≡⟨ nat-eq (sym $ vertical-left-id Cat') ⟩
+            ≡⟨ nat-eq {α = μ {x} {f}} {β = ⟨ μ {x} {f} ⟩∘ᵥ⟨ Id⟨ [ F x ]∘[ F f ] ⟩ ⟩} (sym $ vertical-left-id Cat') ⟩
           nat-η ⟨ μ {x} {f} ⟩∘ᵥ⟨ Id⟨ [ F x ]∘[ F f ] ⟩ ⟩ c
             ≡⟨ cong (λ X → nat-η ⟨ μ {x} {f} ⟩∘ᵥ⟨ X ⟩ c) (sym $ id∘ₕid≡id Cat') ⟩
           nat-η ⟨ μ {x} {f} ⟩∘ᵥ⟨ ⟨ Id⟨ F x ⟩ ⟩∘ₕ⟨ Id⟨ F f ⟩ ⟩ ⟩ c ∎

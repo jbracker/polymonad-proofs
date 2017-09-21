@@ -10,7 +10,7 @@ open import Data.Sum
 open import Data.Unit
 open import Data.Empty
 open import Data.Nat hiding ( _⊔_ )
-open import Data.Vec hiding ( _>>=_ )
+open import Data.Vec hiding ( _>>=_ ; functor )
 open import Data.List hiding ( sequence )
 open import Relation.Nullary
 open import Relation.Binary.PropositionalEquality
