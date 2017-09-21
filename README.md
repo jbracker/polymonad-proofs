@@ -5,16 +5,15 @@ This repository contains the formalization of supermonads and polymonads ( ["Pol
 as well as formalizations and proofs about category theory.
 
 The formalization is targeted to provide proofs that are useful for
-the Haskell implementations. Therefore, some of the
-formalizations assume we are working in a "Haskell World".
+the Haskell implementations.
 
 ## Type Checking and Versions
 
 Calling `make` should type check all files that don't contain 
 unsolved holes.
 
-This was tested with Agda in version `2.5.2` and the Adga standard library 
-in version `0.13`. If you have problems type checking the code, please contact
+This was tested with Agda in version `2.5.3` and the Adga standard library 
+in version `0.14`. If you have problems type checking the code, please contact
 me.
 
 Type checking the proof in `Polymonad.Union` is very memory hungry. Make sure you have 
