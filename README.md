@@ -111,7 +111,7 @@ Make sure you have few gigabytes of free RAM when type checking!
   Formalization of category theory to give a category theoretic model of supermonads.
   * `Monoid` and `Triple`:
     Definition of monoids and triples.
-  * `Category`:
+  * **`Category`**:
     Definition of categories, subcategories, monoidal categories and closed categories.
     * `Examples` and `Monoidal.Examples`:
       Examples for categories and monoidal categories, e.g., Set,
@@ -122,7 +122,7 @@ Make sure you have few gigabytes of free RAM when type checking!
       Definition of what it means for a morphism in a category to be an isomorphism.
       This definition is equivalent to the definition in the `Bijection` module
       when the underlying category is *Set*.
-  * `Functor`:
+  * **`Functor`**:
     Definition of functors, profunctors, (lax) monoidal functors and closed functors.
     * `Application`, `Association`, `Constant` and `Composition`:
       Combinators to manipulate functors, e.g., apply them to certain arguments, compose them or reassociate them.
@@ -138,11 +138,11 @@ Make sure you have few gigabytes of free RAM when type checking!
       Proof that monads in Haskell (*Set*) are isomorhic to certain lax monoidal functors.
     * `Monoidal.Properties.IsomorphicGradedMonad`:
       Proof that graded monads in Haskell (*Set*) are isomorhic to certain lax monoidal functors.
-  * `Natural`:
+  * **`Natural`**:
     Definition of (di/extra)natural transformations and isomorphisms.
     * `Transformation.Examples` and `Isomorphism.Examples`:
       Examples of natural transformations and isomorphism.
-  * `Monad`:
+  * **`Monad`**:
     Definition of different monadic notions.
     * `Definition`: Definition of standard categorical monads.
     * `Kleisli`: Definition of monads as Kleisli triples, together with proof of conversion between monads and kleisli triples.
@@ -150,7 +150,7 @@ Make sure you have few gigabytes of free RAM when type checking!
     * `Atkey`: Definition of indexed monads in category theory as suggested by Atkey [(Atkey, 2009)](https://bentnib.org/paramnotions-jfp.pdf)
     * `Properties.IsomorphicHaskellMonad`:
       Proof that monads in Haskell (*Set*) are isomorhic to categorical monads.
-  * `Haskell`:
+  * **`Haskell`**:
     Categorized definitionso of Haskell concepts.
     * `Parameterized.Graded`:
       Category theory version of graded monads that is isomorphic to Haskell (*Set*) 
@@ -162,9 +162,9 @@ Make sure you have few gigabytes of free RAM when type checking!
       Specialized definition for constrained functors and applicative functors, together with an example 
       of how endomorphism and `Set`s (as in Haskell finite unordered collection without duplicates) can 
       form constrained functors.
-  * `TwoCategory`:
+  * **`TwoCategory`**:
     Definition of strict 2-categories and bicategories. Examples can be found in the `Examples` submodules.
-  * `TwoFunctor`:
+  * **`TwoFunctor`**:
     Definition of lax 2-functors.
     * `ConstZeroCell`:
       A specialized definition of lax 2-functor that uses a constant mapping of 0-cells to ease some of the proofs.
@@ -178,10 +178,10 @@ Make sure you have few gigabytes of free RAM when type checking!
         Proof that certain lax 2-functors are isomorphic to our definition of categorical indexed monads.
       * `IsomorphicLaxMonoidalFunctor`:
         Proof that certain lax 2-functors are isomorphic to certain lax monoidal functors.
-  * `End`:
+  * **`End`**:
     Definition of ends, wedges and day convolution. This is unfinished and discontinued work due to the 
     difficulty to capture these notions in Agda.
-  * `Yoneda`: Proof of the Yoneda lemma.
+  * **`Yoneda`**: Proof of the Yoneda lemma.
 
 
 
