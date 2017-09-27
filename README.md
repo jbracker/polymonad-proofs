@@ -1,11 +1,13 @@
  
-# Formalization and Proofs of Polymonads, Supermonads and Category Theory
+# Formalizations and Proofs of Category Theory, Supermonads and Polymonads 
 
-This repository contains the formalization of supermonads and polymonads ( ["Polymonadic Programming" by Hicks et al. (MSFP 2014)](http://www.cs.bham.ac.uk/~pbl/msfp2014/polymonad.pdf) )
-as well as formalizations and proofs about category theory.
+This repository contains the formalization of supermonads [(Bracker and Nilsson 2016)](http://www.cs.nott.ac.uk/~psxjb5/publications/2016-BrackerNilsson-Supermonads.pdf) 
+and polymonads [(Hicks et al. 2014)](http://www.cs.bham.ac.uk/~pbl/msfp2014/polymonad.pdf)
+as well as formalizations and proofs about their connection to category theory.
 
-The formalization is targeted to provide proofs that are useful for
-the Haskell implementations.
+The connection between the categorical notions and Haskell is hinted at
+by proof of equivalency between Haskell-like notions in the category *Set*
+and their categorical counterparts.
 
 ## Type Checking and Versions
 
@@ -16,8 +18,8 @@ This was tested with Agda in version `2.5.3` and the Adga standard library
 in version `0.14`. If you have problems type checking the code, please contact
 me.
 
-Type checking the proof in `Polymonad.Union` is very memory hungry. Make sure you have 
-few gigabytes of free RAM when type checking!
+Type checking some of the proofs, e.g., `Polymonad.Union`, is very memory hungry. 
+Make sure you have few gigabytes of free RAM when type checking!
 
 ## Module Structure and Guide
 
