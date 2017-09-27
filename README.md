@@ -136,7 +136,18 @@ Make sure you have few gigabytes of free RAM when type checking!
       Proof that monads in Haskell (*Set*) are isomorhic to certain monoidal functors.
     * `Monoidal.Properties.IsomorphicGradedMonad`:
       Proof that graded monads in Haskell (*Set*) are isomorhic to certain monoidal functors.
-
+  * `Natural`:
+    Definition of (di/extra)natural transformations and isomorphisms.
+    * `Transformation.Examples` and `Isomorphism.Examples`:
+      Examples of natural transformations and isomorphism.
+  * `Monad`:
+    Definition of different monadic notions.
+    * `Definition`: Definition of standard categorical monads.
+    * `Kleisli`: Definition of monads as Kleisli triples, together with proof of conversion between monads and kleisli triples.
+    * `Relative`: Definition of relative monads [(Altenkirch et al., 2015)](http://www.cs.nott.ac.uk/~psztxa/publ/Relative_Monads.pdf)
+    * `Atkey`: Definition of indexed monads in category theory as suggested by Atkey [(Atkey, 2009)](https://bentnib.org/paramnotions-jfp.pdf)
+    * `Properties.IsomorphicHaskellMonad`:
+      Proof that monads in Haskell (*Set*) are isomorhic to categorical monads.
 
 
 
