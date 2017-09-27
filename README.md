@@ -23,6 +23,34 @@ Make sure you have few gigabytes of free RAM when type checking!
 
 ## Module Structure and Guide
 
+* **Top-level Modules**:
+  * `Identity`:
+    Contains some basic stuff about the identity and the identity type function.
+    Provides an identity Kleisli-arrow that is polymorphic over the identity type
+    constructor; this is central to the formalization of polymonads.
+  * `Utilities`:
+    Basic stuff to formalize things and provides utilities that
+    are used throughout.
+  * `Extensionality`:
+    We postulate function extensionality here and make extensive use of it accross all
+    modules. This modules contains helper to utilize function extensionality
+    in the context of heterogeneous equality and implicit arguments.
+  * `Equality`:
+    Helpers to prove equality of library data structures.
+  * `Congruence`:
+    Generalization of congruence for propositional equality up to nine arguments.
+    Usefulness is limited.
+  * `Substitution`:
+    Generalization of substitution for propositional equality up to nine arguments.
+    Usefulness is limited.
+  * `Bijection`:
+    Definition of what it means for a function to be bijective. 
+    These definitions are mainly used to prove that structures are
+    isomorphic in the `Theory` modules.
+  * `ProofIrrelevance`:
+    Proofs of proof irrelevance for several library data types.
+  * `Haskell`:
+    Collection of basic definitions and utilities in the category *Set*.
 * **`Haskell`**:
   Formalizations of Haskell-like structures in the category *Set*.
   * **`Functor`**:
@@ -92,34 +120,7 @@ Make sure you have few gigabytes of free RAM when type checking!
       Definition of what it means for a morphism in a category to be an isomorphism.
       This definition is equivalent to the definition in the `Bijection` module
       when the underlying category is *Set*.
-* **Top-level Modules**:
-  * `Identity`:
-    Contains some basic stuff about the identity and the identity type function.
-    Provides an identity Kleisli-arrow that is polymorphic over the identity type
-    constructor; this is central to the formalization of polymonads.
-  * `Utilities`:
-    Basic stuff to formalize things and provides utilities that
-    are used throughout.
-  * `Extensionality`:
-    We postulate function extensionality here and make extensive use of it accross all
-    modules. This modules contains helper to utilize function extensionality
-    in the context of heterogeneous equality and implicit arguments.
-  * `Equality`:
-    Helpers to prove equality of library data structures.
-  * `Congruence`:
-    Generalization of congruence for propositional equality up to nine arguments.
-    Usefulness is limited.
-  * `Substitution`:
-    Generalization of substitution for propositional equality up to nine arguments.
-    Usefulness is limited.
-  * `Bijection`:
-    Definition of what it means for a function to be bijective. 
-    These definitions are mainly used to prove that structures are
-    isomorphic in the `Theory` modules.
-  * `ProofIrrelevance`:
-    Proofs of proof irrelevance for several library data types.
-  * `Haskell`:
-    Collection of basic definitions and utilities in the category *Set*.
+
 
 
 
