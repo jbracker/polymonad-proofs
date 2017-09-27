@@ -109,6 +109,8 @@ Make sure you have few gigabytes of free RAM when type checking!
     formalization.
 * **`Theory`**:
   Formalization of category theory to give a category theoretic model of supermonads.
+  * `Monoid` and `Triple`:
+    Definition of monoids and triples.
   * `Category`:
     Definition of categories, subcategories, monoidal categories and closed categories.
     * `Examples` and `Monoidal.Examples`:
@@ -121,7 +123,7 @@ Make sure you have few gigabytes of free RAM when type checking!
       This definition is equivalent to the definition in the `Bijection` module
       when the underlying category is *Set*.
   * `Functor`:
-    Definition of functors, profunctors, monoidal functors and closed functors.
+    Definition of functors, profunctors, (lax) monoidal functors and closed functors.
     * `Application`, `Association`, `Constant` and `Composition`:
       Combinators to manipulate functors, e.g., apply them to certain arguments, compose them or reassociate them.
     * `Examples`:
@@ -129,13 +131,13 @@ Make sure you have few gigabytes of free RAM when type checking!
     * `Properties.IsomorphicHaskellFunctor`:
       Proof that functors in Haskell (*Set*) are isomorphic to categorical functors.
     * `Monoidal.Properties.IsomorphicHaskellApplicative`:
-      Proof that applicative functors in Haskell (*Set*) are isomorhic to certain monoidal functors.
+      Proof that applicative functors in Haskell (*Set*) are isomorhic to certain lax monoidal functors.
     * `Monoidal.Properties.IsomorphicGradedApplicative`:
-      Proof that graded applicative functors in Haskell (*Set*) are isomorhic to certain monoidal functors.
+      Proof that graded applicative functors in Haskell (*Set*) are isomorhic to certain lax monoidal functors.
     * `Monoidal.Properties.IsomorphicMonad`:
-      Proof that monads in Haskell (*Set*) are isomorhic to certain monoidal functors.
+      Proof that monads in Haskell (*Set*) are isomorhic to certain lax monoidal functors.
     * `Monoidal.Properties.IsomorphicGradedMonad`:
-      Proof that graded monads in Haskell (*Set*) are isomorhic to certain monoidal functors.
+      Proof that graded monads in Haskell (*Set*) are isomorhic to certain lax monoidal functors.
   * `Natural`:
     Definition of (di/extra)natural transformations and isomorphisms.
     * `Transformation.Examples` and `Isomorphism.Examples`:
@@ -148,7 +150,38 @@ Make sure you have few gigabytes of free RAM when type checking!
     * `Atkey`: Definition of indexed monads in category theory as suggested by Atkey [(Atkey, 2009)](https://bentnib.org/paramnotions-jfp.pdf)
     * `Properties.IsomorphicHaskellMonad`:
       Proof that monads in Haskell (*Set*) are isomorhic to categorical monads.
-
+  * `Haskell`:
+    Categorized definitionso of Haskell concepts.
+    * `Parameterized.Graded`:
+      Category theory version of graded monads that is isomorphic to Haskell (*Set*) 
+      graded monads if *Set* is used as the underlying category.
+    * `Parameterized.Indexed`:
+      Category theory version of indexed monads that is isomorphic to Haskell (*Set*) 
+      indexed monads if *Set* is used as the underlying category.
+    * `Constrained`:
+      Specialized definition for constrained functors and applicative functors, together with an example 
+      of how endomorphism and `Set`s (as in Haskell finite unordered collection without duplicates) can 
+      form constrained functors.
+  * `TwoCategory`:
+    Definition of strict 2-categories and bicategories. Examples can be found in the `Examples` submodules.
+  * `TwoFunctor`:
+    Definition of lax 2-functors.
+    * `ConstZeroCell`:
+      A specialized definition of lax 2-functor that uses a constant mapping of 0-cells to ease some of the proofs.
+      This definition yields a lax 2-functor and therefore captures a subset of all lax 2-functors.
+    * `Properties`:
+      * `IsomorphicMonad`: 
+        Proof that certain lax 2-functors are isomorphic to categorical monads.
+      * `IsomorphicGradedMonad`: 
+        Proof that certain lax 2-functors are isomorphic to our definition of categorical graded monads.
+      * `IsomorphicIndexedMonad`:
+        Proof that certain lax 2-functors are isomorphic to our definition of categorical indexed monads.
+      * `IsomorphicLaxMonoidalFunctor`:
+        Proof that certain lax 2-functors are isomorphic to certain lax monoidal functors.
+  * `End`:
+    Definition of ends, wedges and day convolution. This is unfinished and discontinued work due to the 
+    difficulty to capture these notions in Agda.
+  * `Yoneda`: Proof of the Yoneda lemma.
 
 
 
