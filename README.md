@@ -120,7 +120,22 @@ Make sure you have few gigabytes of free RAM when type checking!
       Definition of what it means for a morphism in a category to be an isomorphism.
       This definition is equivalent to the definition in the `Bijection` module
       when the underlying category is *Set*.
-
+  * `Functor`:
+    Definition of functors, profunctors, monoidal functors and closed functors.
+    * `Application`, `Association`, `Constant` and `Composition`:
+      Combinators to manipulate functors, e.g., apply them to certain arguments, compose them or reassociate them.
+    * `Examples`:
+      Some examples of functors.
+    * `Properties.IsomorphicHaskellFunctor`:
+      Proof that functors in Haskell (*Set*) are isomorphic to categorical functors.
+    * `Monoidal.Properties.IsomorphicHaskellApplicative`:
+      Proof that applicative functors in Haskell (*Set*) are isomorhic to certain monoidal functors.
+    * `Monoidal.Properties.IsomorphicGradedApplicative`:
+      Proof that graded applicative functors in Haskell (*Set*) are isomorhic to certain monoidal functors.
+    * `Monoidal.Properties.IsomorphicMonad`:
+      Proof that monads in Haskell (*Set*) are isomorhic to certain monoidal functors.
+    * `Monoidal.Properties.IsomorphicGradedMonad`:
+      Proof that graded monads in Haskell (*Set*) are isomorhic to certain monoidal functors.
 
 
 
