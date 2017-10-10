@@ -9,7 +9,7 @@ open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning
 
 open import Theory.Category.Definition
-open import Theory.Category.Examples
+open import Theory.Category.Examples.SetCat
 open import Theory.Category.Closed
 open import Theory.Category.Closed.Examples
 open import Theory.Category.Monoidal
