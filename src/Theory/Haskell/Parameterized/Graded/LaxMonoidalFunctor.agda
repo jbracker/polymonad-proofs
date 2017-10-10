@@ -15,7 +15,7 @@ open import Theory.Functor.Composition
 open import Theory.Natural.Isomorphism
 open import Theory.Natural.Transformation
 
-module Theory.Haskell.Parameterized.Graded.Applicative 
+module Theory.Haskell.Parameterized.Graded.LaxMonoidalFunctor 
   {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} 
   {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} where
 

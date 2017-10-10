@@ -15,9 +15,9 @@ open import Theory.Functor.Definition
 open import Theory.Functor.Composition
 open import Theory.Natural.Transformation
 
-open import Theory.Haskell.Parameterized.Graded.Applicative
+open import Theory.Haskell.Parameterized.Graded.LaxMonoidalFunctor
 
-module Theory.Haskell.Parameterized.Graded.Applicative.Equality 
+module Theory.Haskell.Parameterized.Graded.LaxMonoidalFunctor.Equality 
   {ℓMon ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} 
   {M : Set ℓMon} {Mon : Monoid M}
   {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}}
