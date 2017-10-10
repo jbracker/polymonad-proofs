@@ -1,8 +1,10 @@
  
 
 open import Level
-
 open import Function hiding ( id ; _∘_ ) renaming ( _∘′_ to _∘_ )
+
+open import Data.Product
+open import Data.Unit
 open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning
 
@@ -57,6 +59,12 @@ record IxApplicative {ℓ : Level} (Ixs : Set ℓ) (F : Ixs → Ixs → TyCon) :
   u <* v = pure const <*> u <*> v
   
   _<$>_ = fmap
+
+  _**_ : {α β : Type} {i j k : Ixs} → F i j α → F j k β → F i k (α × β)
+  fa ** fb = fmap (λ a b → a , b) fa <*> fb
+  
+  unit : {α : Type} {i : Ixs} → F i i ⊤
+  unit = pure tt 
 
 indexed-applicative-eq 
   : {ℓ : Level} {Ixs : Set ℓ} {F : Ixs → Ixs → TyCon}
