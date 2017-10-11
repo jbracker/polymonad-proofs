@@ -73,8 +73,6 @@ GradedLaxMonoidalFunctor→LaxMonoidalFunctor {ℓC₀} {ℓC₁} {ℓD₀} {ℓ
     
     μ-nat : NaturalTransformation [ tensor DM ]∘[ [ F ]×[ F ] ] [ F ]∘[ tensor (MonCat Mon ×CMon CM) ]
     μ-nat = naturalTransformation μ' (λ {a b} {f} → natural-μ' {a} {b} {f})
-
-    -- F₁ {m , a} {.m , b} (refl , f) = [ gradF m ]₁ f
     
     abstract
       gradF-helper1 : {a b : Obj C} {m m' : M} → (f : Hom C a b) → (p : m ≡ m') → F₁ (sym p , f) ≅ Functor.F₁ (gradF m') f
