@@ -35,36 +35,36 @@ private
   _∘D_ = _∘_ DM
 
 abstract
-  indexed-lax-monoidal-functor-eq : {F₀ : (i : M) → Functor C D}
-                                  → {F₁ : (i : M) → Functor C D}
-                                  → {ε₀ : Hom DM (unit DM) (Functor.F₀ (F₀ mon-ε) (unit CM))}
-                                  → {ε₁ : Hom DM (unit DM) (Functor.F₀ (F₁ mon-ε) (unit CM))}
-                                  → {μ₀ : (i j : M) → NaturalTransformation ([ tensor DM ]∘[ [ F₀ i ]×[ F₀ j ] ]) ([ F₀ (i ∙ j) ]∘[ tensor CM ])}
-                                  → {μ₁ : (i j : M) → NaturalTransformation ([ tensor DM ]∘[ [ F₁ i ]×[ F₁ j ] ]) ([ F₁ (i ∙ j) ]∘[ tensor CM ])}
-                                  → {assoc₀ : {i j k : M} → (x y z : Obj CM) 
-                                            → Functor.F₁ (F₀ ((i ∙ j) ∙ k)) (α CM x y z) ∘D ((nat-η (μ₀ (i ∙ j) k) ((x ⊗C₀ y) , z)) ∘D (nat-η (μ₀ i j) (x , y) ⊗D₁ cat-id DM {Functor.F₀ (F₀ k) z})) 
-                                            ≅ (nat-η (μ₀ i (j ∙ k)) (x , y ⊗C₀ z)) ∘D ((cat-id DM {Functor.F₀ (F₀ i) x} ⊗D₁ nat-η (μ₀ j k) (y , z)) ∘D (α DM (Functor.F₀ (F₀ i) x) (Functor.F₀ (F₀ j) y) (Functor.F₀ (F₀ k) z)))}
-                                  → {assoc₁ : {i j k : M} → (x y z : Obj CM) 
-                                            → Functor.F₁ (F₁ ((i ∙ j) ∙ k)) (α CM x y z) ∘D ((nat-η (μ₁ (i ∙ j) k) ((x ⊗C₀ y) , z)) ∘D (nat-η (μ₁ i j) (x , y) ⊗D₁ cat-id DM {Functor.F₀ (F₁ k) z})) 
-                                            ≅ (nat-η (μ₁ i (j ∙ k)) (x , y ⊗C₀ z)) ∘D ((cat-id DM {Functor.F₀ (F₁ i) x} ⊗D₁ nat-η (μ₁ j k) (y , z)) ∘D (α DM (Functor.F₀ (F₁ i) x) (Functor.F₀ (F₁ j) y) (Functor.F₀ (F₁ k) z)))}
-                                  → {left-u₀ : {i : M} → (x : Obj CM)
-                                             → λ' DM (Functor.F₀ (F₀ i) x)
-                                             ≅ Functor.F₁ (F₀ (mon-ε ∙ i)) (λ' CM x) ∘D (nat-η (μ₀ mon-ε i) (unit CM , x) ∘D (ε₀ ⊗D₁ cat-id DM {Functor.F₀ (F₀ i) x}))}
-                                  → {left-u₁ : {i : M} → (x : Obj CM)
-                                             → λ' DM (Functor.F₀ (F₁ i) x)
-                                             ≅ Functor.F₁ (F₁ (mon-ε ∙ i)) (λ' CM x) ∘D (nat-η (μ₁ mon-ε i) (unit CM , x) ∘D (ε₁ ⊗D₁ cat-id DM {Functor.F₀ (F₁ i) x}))}
-                                  → {right-u₀ : {i : M} (x : Obj CM)
-                                              → ρ DM (Functor.F₀ (F₀ i) x) 
-                                              ≅ Functor.F₁ (F₀ (i ∙ mon-ε)) (ρ CM x) ∘D (nat-η (μ₀ i mon-ε) (x , unit CM) ∘D (cat-id DM {Functor.F₀ (F₀ i) x} ⊗D₁ ε₀))}
-                                  → {right-u₁ : {i : M} (x : Obj CM)
-                                              → ρ DM (Functor.F₀ (F₁ i) x) 
-                                              ≅ Functor.F₁ (F₁ (i ∙ mon-ε)) (ρ CM x) ∘D (nat-η (μ₁ i mon-ε) (x , unit CM) ∘D (cat-id DM {Functor.F₀ (F₁ i) x} ⊗D₁ ε₁))}
-                                  → (F₀ ≡ F₁)
-                                  → (ε₀ ≅ ε₁)
-                                  → (μ₀ ≅ μ₁)
-                                  → gradedLaxMonoidalFunctor {Mon = Mon} {CM} {DM} F₀ ε₀ μ₀ assoc₀ left-u₀ right-u₀
-                                  ≡ gradedLaxMonoidalFunctor {Mon = Mon} {CM} {DM} F₁ ε₁ μ₁ assoc₁ left-u₁ right-u₁
-  indexed-lax-monoidal-functor-eq {F} {.F} {ε} {.ε} {μ} {.μ} {assoc₀} {assoc₁} {lu₀} {lu₁} {ru₀} {ru₁} refl refl refl
+  graded-lax-monoidal-functor-eq : {F₀ : (i : M) → Functor C D}
+                                 → {F₁ : (i : M) → Functor C D}
+                                 → {ε₀ : Hom DM (unit DM) (Functor.F₀ (F₀ mon-ε) (unit CM))}
+                                 → {ε₁ : Hom DM (unit DM) (Functor.F₀ (F₁ mon-ε) (unit CM))}
+                                 → {μ₀ : (i j : M) → NaturalTransformation ([ tensor DM ]∘[ [ F₀ i ]×[ F₀ j ] ]) ([ F₀ (i ∙ j) ]∘[ tensor CM ])}
+                                 → {μ₁ : (i j : M) → NaturalTransformation ([ tensor DM ]∘[ [ F₁ i ]×[ F₁ j ] ]) ([ F₁ (i ∙ j) ]∘[ tensor CM ])}
+                                 → {assoc₀ : {i j k : M} → (x y z : Obj CM) 
+                                           → Functor.F₁ (F₀ ((i ∙ j) ∙ k)) (α CM x y z) ∘D ((nat-η (μ₀ (i ∙ j) k) ((x ⊗C₀ y) , z)) ∘D (nat-η (μ₀ i j) (x , y) ⊗D₁ cat-id DM {Functor.F₀ (F₀ k) z})) 
+                                           ≅ (nat-η (μ₀ i (j ∙ k)) (x , y ⊗C₀ z)) ∘D ((cat-id DM {Functor.F₀ (F₀ i) x} ⊗D₁ nat-η (μ₀ j k) (y , z)) ∘D (α DM (Functor.F₀ (F₀ i) x) (Functor.F₀ (F₀ j) y) (Functor.F₀ (F₀ k) z)))}
+                                 → {assoc₁ : {i j k : M} → (x y z : Obj CM) 
+                                           → Functor.F₁ (F₁ ((i ∙ j) ∙ k)) (α CM x y z) ∘D ((nat-η (μ₁ (i ∙ j) k) ((x ⊗C₀ y) , z)) ∘D (nat-η (μ₁ i j) (x , y) ⊗D₁ cat-id DM {Functor.F₀ (F₁ k) z})) 
+                                           ≅ (nat-η (μ₁ i (j ∙ k)) (x , y ⊗C₀ z)) ∘D ((cat-id DM {Functor.F₀ (F₁ i) x} ⊗D₁ nat-η (μ₁ j k) (y , z)) ∘D (α DM (Functor.F₀ (F₁ i) x) (Functor.F₀ (F₁ j) y) (Functor.F₀ (F₁ k) z)))}
+                                 → {left-u₀ : {i : M} → (x : Obj CM)
+                                            → λ' DM (Functor.F₀ (F₀ i) x)
+                                            ≅ Functor.F₁ (F₀ (mon-ε ∙ i)) (λ' CM x) ∘D (nat-η (μ₀ mon-ε i) (unit CM , x) ∘D (ε₀ ⊗D₁ cat-id DM {Functor.F₀ (F₀ i) x}))}
+                                 → {left-u₁ : {i : M} → (x : Obj CM)
+                                            → λ' DM (Functor.F₀ (F₁ i) x)
+                                            ≅ Functor.F₁ (F₁ (mon-ε ∙ i)) (λ' CM x) ∘D (nat-η (μ₁ mon-ε i) (unit CM , x) ∘D (ε₁ ⊗D₁ cat-id DM {Functor.F₀ (F₁ i) x}))}
+                                 → {right-u₀ : {i : M} (x : Obj CM)
+                                             → ρ DM (Functor.F₀ (F₀ i) x) 
+                                             ≅ Functor.F₁ (F₀ (i ∙ mon-ε)) (ρ CM x) ∘D (nat-η (μ₀ i mon-ε) (x , unit CM) ∘D (cat-id DM {Functor.F₀ (F₀ i) x} ⊗D₁ ε₀))}
+                                 → {right-u₁ : {i : M} (x : Obj CM)
+                                             → ρ DM (Functor.F₀ (F₁ i) x) 
+                                             ≅ Functor.F₁ (F₁ (i ∙ mon-ε)) (ρ CM x) ∘D (nat-η (μ₁ i mon-ε) (x , unit CM) ∘D (cat-id DM {Functor.F₀ (F₁ i) x} ⊗D₁ ε₁))}
+                                 → (F₀ ≡ F₁)
+                                 → (ε₀ ≅ ε₁)
+                                 → (μ₀ ≅ μ₁)
+                                 → gradedLaxMonoidalFunctor {Mon = Mon} {CM} {DM} F₀ ε₀ μ₀ assoc₀ left-u₀ right-u₀
+                                 ≡ gradedLaxMonoidalFunctor {Mon = Mon} {CM} {DM} F₁ ε₁ μ₁ assoc₁ left-u₁ right-u₁
+  graded-lax-monoidal-functor-eq {F} {.F} {ε} {.ε} {μ} {.μ} {assoc₀} {assoc₁} {lu₀} {lu₁} {ru₀} {ru₁} refl refl refl
     = cong₃ (gradedLaxMonoidalFunctor {Mon = Mon} {CM} {DM} F ε μ) eq1 eq2 eq3
     where
       abstract
