@@ -12,7 +12,7 @@ open ≅-Reasoning hiding ( _≡⟨_⟩_ ) renaming ( begin_ to hbegin_ ; _∎ t
 
 open import Extensionality
 open import Equality
-open import Bijection hiding ( refl ; sym ; trans )
+open import Bijection hiding ( refl ; trans ) renaming ( sym to bsym )
 
 open import Haskell
 open import Haskell.Functor hiding ( functor ) renaming ( Functor to HaskellFunctor )
@@ -190,3 +190,8 @@ GradedApplicative↔LaxMonoidalFunctor {ℓ} {M} mon = bijection l→r r→l r�
           abstract
             fun-eq : GradedApplicative.functor (proj₂ $ r→l $ l→r (F , applic)) ≡ GradedApplicative.functor applic
             fun-eq = fun-ext $ λ (i : M) → Haskell.Functor.functor-eq refl
+
+LaxMonoidalFunctor↔GradedApplicative
+  : {ℓ : Level} → {M : Set ℓ} → (mon : Monoid M)
+  → LaxMonoidalFunctor (monoidMonoidalCategory mon ×CMon setMonoidalCategory {zero}) (setMonoidalCategory {zero}) ↔ (Σ (M → TyCon) (GradedApplicative mon))
+LaxMonoidalFunctor↔GradedApplicative {ℓ} {M} mon = bsym $ GradedApplicative↔LaxMonoidalFunctor mon
