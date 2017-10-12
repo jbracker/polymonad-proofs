@@ -48,12 +48,12 @@ IndexedMonad→LaxTwoFunctor
 IndexedMonad→LaxTwoFunctor {ℓIxs} {ℓC₀} {ℓC₁} {C} {Ixs} {M} monad = record
   { P₁ = λ {i} {j} → P {i} {j}
   ; η = λ {i} → η {i}
-  ; μ = λ {i} {j} {k} {_} {_} → μ {i} {j} {k}
-  ; laxFunId₁ = λ {i} {j} {_} → lawFunId₁ {i} {j}
-  ; laxFunId₂ = λ {i} {j} {_} → lawFunId₂ {i} {j}
-  ; laxFunAssoc = λ {i} {j} {k} {l} {_} {_} {_} → lawFunAssoc {i} {j} {k} {l}
-  ; μ-natural₁ = λ { {i} {j} {k} (lift tt) {lift tt} {lift tt} {refl} → μ-natural {i} {j} {k}}
-  ; μ-natural₂ = λ { {i} {j} {k} (lift tt) {lift tt} {lift tt} {refl} → μ-natural {i} {j} {k}}
+  ; μ = λ { {i} {j} {k} {codisc .i .j} {codisc .j .k} → μ }
+  ; laxFunId₁ = λ { {i} {j} {codisc .i .j} → lawFunId₁ }
+  ; laxFunId₂ = λ { {i} {j} {codisc .i .j} → lawFunId₂ }
+  ; laxFunAssoc = λ { {i} {j} {k} {l} {codisc .i .j} {codisc .j .k} {codisc .k .l} → lawFunAssoc }
+  ; μ-natural₁ = λ { {i} {j} {k} (codisc .i .j) {codisc .j .k} {codisc .j .k} {refl} → μ-natural }
+  ; μ-natural₂ = λ { {i} {j} {k} (codisc .j .k) {codisc .i .j} {codisc .i .j} {refl} → μ-natural }
   }
   where
     Ixs₁ = codiscreteCategory Ixs
@@ -67,18 +67,18 @@ IndexedMonad→LaxTwoFunctor {ℓIxs} {ℓC₀} {ℓC₁} {C} {Ixs} {M} monad = 
     open NaturalTransformation renaming ( η to nat-η ; natural to nat-natural )
     
     P : {i j : Ixs} → Functor (HomCat Ixs₂ i j) (HomCat Cat' C C)
-    P {i} {j} = Functor.functor P₀ P₁ refl (λ {a b c} {f} {g} → P-compose {a} {b} {c} {f} {g})
+    P {i} {j} = Functor.functor P₀ P₁ (λ { {codisc .i .j} → refl }) (λ {a b c} {f} {g} → P-compose {a} {b} {c} {f} {g})
       where
         P₀ : Obj (HomCat Ixs₂ i j) → Obj (HomCat Cat' C C)
-        P₀ (lift tt) = M i j
+        P₀ (codisc .i .j) = M i j
         
         P₁ : {a b : Obj (HomCat Ixs₂ i j)} → Hom (HomCat Ixs₂ i j) a b → Hom (HomCat Cat' C C) (P₀ a) (P₀ b)
-        P₁ {lift tt} {lift tt} refl = Id⟨ P₀ (lift tt) ⟩
+        P₁ {codisc .i .j} {codisc .i .j} refl = Id⟨ P₀ (codisc i j) ⟩
         
         abstract
           P-compose : {a b c : Obj (HomCat Ixs₂ i j)} {f : Hom (HomCat Ixs₂ i j) a b} {g : Hom (HomCat Ixs₂ i j) b c}
                     → P₁ (Category._∘_ (HomCat Ixs₂ i j) g f) ≡ ⟨ P₁ g ⟩∘ᵥ⟨ P₁ f ⟩
-          P-compose {lift tt} {lift tt} {lift tt} {refl} {refl} = sym (left-id (HomCat Cat' C C))
+          P-compose {codisc a b} {codisc c d} {codisc e f} {refl} {refl} = sym (left-id (HomCat Cat' C C))
 
     abstract
       μ-natural : {i j k : Ixs}
@@ -96,7 +96,7 @@ IndexedMonad→LaxTwoFunctor {ℓIxs} {ℓC₀} {ℓC₁} {C} {Ixs} {M} monad = 
     
     abstract
       lawFunId₂ : {i j : Ixs}
-                  → ⟨ μ {i} {j} {j} ⟩∘ᵥ⟨ ⟨ η {j} ⟩∘ₕ⟨ Id⟨ [ P {i} {j} ]₀ (lift tt) ⟩ ⟩ ⟩ ≅ id₂ Cat' {C}
+                  → ⟨ μ {i} {j} {j} ⟩∘ᵥ⟨ ⟨ η {j} ⟩∘ₕ⟨ Id⟨ [ P {i} {j} ]₀ (codisc i j) ⟩ ⟩ ⟩ ≅ id₂ Cat' {C}
       lawFunId₂ {i} {j} = het-natural-transformation-eq (StrictTwoCategory.right-id Cat) refl $ het-fun-ext hrefl 
                         $ λ x → ≡-to-≅ $ trans (cong (λ X → nat-η (μ {i} {j} {j}) x ∘C X) (Category.left-id C)) η-right-coher
     

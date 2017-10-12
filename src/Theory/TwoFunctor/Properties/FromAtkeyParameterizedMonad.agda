@@ -19,6 +19,7 @@ open import Utilities
 open import Haskell
 open import Theory.Triple
 open import Theory.Category.Definition
+open import Theory.Category.Examples.Codiscrete
 open import Theory.Functor.Definition
 open import Theory.Functor.Composition
 open import Theory.Natural.Transformation
@@ -76,9 +77,9 @@ AtkeyParameterizedMonad→LaxTwoFunctor {C = C} {S} F = record
       → Functor (HomCat (codiscreteHomCatTwoCategory S) x y) (HomCat functorTwoCategory C C)
     P {x} {y} = functor 
        (λ (fS : Hom S x y) → ApplyT fS) 
-       (λ {fS : Hom S x y} {gS : Hom S x y} (f : Lift ⊤) → stateHomIndep fS gS)
+       (λ {fS : Hom S x y} {gS : Hom S x y} (f : CodiscreteArrow fS gS) → stateHomIndep fS gS)
        (λ {fS : Hom S x y} → refl)
-       (λ {fS : Hom S x y} {gS : Hom S x y} {hS : Hom S x y} {f : Lift ⊤} {g : Lift ⊤} → natural-transformation-eq (fun-ext (λ x → sym (right-id C))))
+       (λ {fS : Hom S x y} {gS : Hom S x y} {hS : Hom S x y} {f : CodiscreteArrow fS gS} {g : CodiscreteArrow gS hS} → natural-transformation-eq (fun-ext (λ x → sym (right-id C))))
     
     η' : (s : Obj S) → NaturalTransformation Id[ C ] (ApplyT (id S {s}))
     η' s = naturalTransformation

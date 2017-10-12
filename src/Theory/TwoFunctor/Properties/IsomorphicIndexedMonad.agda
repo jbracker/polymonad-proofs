@@ -7,7 +7,7 @@ open import Data.Unit
 open import Data.Product
 
 open import Relation.Binary.PropositionalEquality
-open import Relation.Binary.HeterogeneousEquality renaming ( cong to hcong ; refl to hrefl ; sym to hsym )
+open import Relation.Binary.HeterogeneousEquality renaming ( cong to hcong ; cong₂ to hcong₂ ; refl to hrefl ; sym to hsym ; trans to htrans )
 open ≡-Reasoning
 
 -- Local
@@ -49,52 +49,66 @@ IndexedMonad↔LaxTwoFunctor {ℓIxs} {ℓC₀} {ℓC₁} {C} {Ixs} = bijection 
 
     r→l : (ConstLaxTwoFunctor (discreteHomCatTwoCategory (codiscreteCategory Ixs)) Cat' C)
         → (Σ (Ixs → Ixs → Functor C C) (IndexedMonad Ixs))
-    r→l F = (λ i j → [ ConstLaxTwoFunctor.P₁ F {i} {j} ]₀ (lift tt)) , LaxTwoFunctor→IndexedMonad F
+    r→l F = (λ i j → [ ConstLaxTwoFunctor.P₁ F {i} {j} ]₀ (codisc i j)) , LaxTwoFunctor→IndexedMonad F
     
     abstract
       l→r→l : (x : ConstLaxTwoFunctor (discreteHomCatTwoCategory (codiscreteCategory Ixs)) Cat' C)
             → l→r (r→l x) ≡ x
-      l→r→l F = const-lax-two-functor-eq P-eq (≡-to-≅ η-eq) (≡-to-≅ μ-eq)
+      l→r→l F = const-lax-two-functor-eq P-eq (≡-to-≅ η-eq) μ-eq -- (≡-to-≅ η-eq) (≡-to-≅ μ-eq)
         where
           P₁ = ConstLaxTwoFunctor.P₁ (l→r (r→l F))
           M : Ixs → Ixs → Functor C C
-          M i j = Functor.F₀ (P₁ {i} {j}) (lift tt) 
+          M i j = Functor.F₀ (P₁ {i} {j}) (codisc i j)
+          
+          I = discreteHomCatTwoCategory (codiscreteCategory Ixs)
+          _∘I_ = _∘_ I
           
           abstract
-            P₁-eq : {x y : Ixs} 
-                  → (λ {a b} → Functor.F₁ (ConstLaxTwoFunctor.P₁ (l→r (r→l F)) {x} {y}) {a} {b}) 
-                  ≡ (λ {a b} → Functor.F₁ (ConstLaxTwoFunctor.P₁ F {x} {y}) {a} {b})
-            P₁-eq {x} {y} = implicit-fun-ext $ λ {(lift tt) → implicit-fun-ext $ λ {(lift tt) → fun-ext $ λ f → eq' x y f}}
-              where
-                eq' : (i j : Ixs)
-                    → (f : Category.Hom (HomCat (discreteHomCatTwoCategory (codiscreteCategory Ixs)) i j) (lift tt) (lift tt))
-                    → Functor.F₁ (ConstLaxTwoFunctor.P₁ (l→r (r→l F)) {i} {j}) {lift tt} {lift tt} f
-                    ≡ Functor.F₁ (ConstLaxTwoFunctor.P₁ F {i} {j}) {lift tt} {lift tt} f
-                eq' i j refl = natural-transformation-eq $ fun-ext $ λ c → begin
-                  Category.id C
-                    ≡⟨ refl ⟩
-                  NaturalTransformation.η Id⟨ M i j ⟩ c
-                    ≡⟨ cong (λ X → NaturalTransformation.η X c) (sym $ Functor.id $ ConstLaxTwoFunctor.P₁ F) ⟩
-                  NaturalTransformation.η (Functor.F₁ (ConstLaxTwoFunctor.P₁ F) refl) c ∎ 
-        
+            P₀-eq : {x y : Ixs} 
+                  → Functor.F₀ (ConstLaxTwoFunctor.P₁ (l→r (r→l F)) {x} {y})
+                  ≡ Functor.F₀ (ConstLaxTwoFunctor.P₁ F {x} {y})
+            P₀-eq {x} {y} = fun-ext $ λ { (codisc .x .y) → refl }
+            
           abstract
             P-eq : (λ {i j} → ConstLaxTwoFunctor.P₁ (l→r (r→l F)) {i} {j}) ≡ (λ {i j} → ConstLaxTwoFunctor.P₁ F {i} {j})
-            P-eq = implicit-fun-ext $ λ i → implicit-fun-ext $ λ j → functor-eq refl $ ≡-to-≅ $ P₁-eq {i} {j} -- P₁-eq {x} {y}
+            P-eq = implicit-fun-ext 
+                 $ λ (i : Ixs) → implicit-fun-ext 
+                 $ λ (j : Ixs) → functor-eq (fun-ext $ λ { (codisc .i .j) → refl }) 
+                 $ het-implicit-fun-ext (het-fun-ext hrefl $ λ { (codisc .i .j) → hcong (λ X → ({b : CodiscreteArrow i j} → codisc i j ≡ b → Category.Hom (HomCat Cat' C C) (X (codisc i j)) (X b))) 
+                                                                                        (≡-to-≅ P₀-eq)}) 
+                 $ λ { (codisc .i .j) → het-implicit-fun-ext (het-fun-ext hrefl $ λ { (codisc .i .j) → hcong (λ X → (codisc i j ≡ codisc i j → NaturalTransformation (X (codisc i j)) (X (codisc i j)))) 
+                                                                                                             (≡-to-≅ P₀-eq) }) 
+                 $ λ { (codisc .i .j) → ≡-to-≅ $ fun-ext $ λ { refl → sym (Functor.id (ConstLaxTwoFunctor.P₁ F)) } } }
           
           abstract
             η-eq : (λ {x} → ConstLaxTwoFunctor.η (l→r (r→l F)) {x}) ≡ (λ {x} → ConstLaxTwoFunctor.η F {x})
             η-eq = implicit-fun-ext $ λ x → natural-transformation-eq refl
           
           abstract
-            μ-eq : (λ {x y z} {f} {g} → ConstLaxTwoFunctor.μ (l→r (r→l F)) {x} {y} {z} {f} {g}) 
-                 ≡ (λ {x y z} {f} {g} → ConstLaxTwoFunctor.μ F {x} {y} {z} {f} {g})
-            μ-eq = implicit-fun-ext 
-                 $ λ x → implicit-fun-ext 
-                 $ λ y → implicit-fun-ext 
-                 $ λ z → implicit-fun-ext 
-                 $ λ f → implicit-fun-ext 
-                 $ λ g → natural-transformation-eq $ fun-ext 
-                 $ λ (c : Category.Obj C) → refl
+            μ-eq : (λ {x} {y} {z} {f} {g} → ConstLaxTwoFunctor.μ (l→r (r→l F)) {x} {y} {z} {f} {g})
+                 ≅ (λ {x} {y} {z} {f} {g} → ConstLaxTwoFunctor.μ F {x} {y} {z} {f} {g})
+            μ-eq = het-implicit-fun-ext (het-fun-ext hrefl $ λ (x : Ixs) → hcong (λ X → ({y z : Ixs} {f : CodiscreteArrow x y} {g : CodiscreteArrow y z} 
+                                                                                      → NaturalTransformation ((Cat' ∘ [ X {y} {z} ]₀ g) ([ X {x} {y} ]₀ f))
+                                                                                                              ([ X {x} {z} ]₀ (g ∘I f)))) 
+                                                                                 (≡-to-≅ P-eq)) 
+                 $ λ (x : Ixs) → het-implicit-fun-ext (het-fun-ext hrefl $ λ (y : Ixs) → hcong (λ X → ({z : Ixs} {f : CodiscreteArrow x y} {g : CodiscreteArrow y z} 
+                                                                                                    → NaturalTransformation ((Cat' ∘ [ X {y} {z} ]₀ g) ([ X {x} {y} ]₀ f))
+                                                                                                                                   ([ X {x} {z} ]₀ (g ∘I f)))) 
+                                                                                               (≡-to-≅ P-eq))
+                 $ λ (y : Ixs) → het-implicit-fun-ext (het-fun-ext hrefl $ λ (z : Ixs) → hcong (λ X → ({f : CodiscreteArrow x y} {g : CodiscreteArrow y z} 
+                                                                                                    → NaturalTransformation ((Cat' ∘ [ X {y} {z} ]₀ g) ([ X {x} {y} ]₀ f)) 
+                                                                                                                            ([ X {x} {z} ]₀ (g ∘I f))))
+                                                                                               (≡-to-≅ P-eq))
+                 $ λ (z : Ixs) → het-implicit-fun-ext (het-fun-ext hrefl $ (λ { (codisc .x .y) → hcong (λ X → ({g : CodiscreteArrow y z} 
+                                                                                                            → NaturalTransformation ((Cat' ∘ [ X {y} {z} ]₀ g) ([ X {x} {y} ]₀ (codisc x y)))
+                                                                                                                                    ([ X {x} {z} ]₀ (g ∘I (codisc x y))))) 
+                                                                                                       (≡-to-≅ P-eq) }))
+                 $ λ { (codisc .x .y) → het-implicit-fun-ext (het-fun-ext hrefl $ (λ { (codisc .y .z) → 
+                                                                          hcong (λ X → NaturalTransformation ((Cat' ∘ [ X {y} {z} ]₀ (codisc y z)) ([ X {x} {y} ]₀ (codisc x y))) 
+                                                                                                                ([ X {x} {z} ]₀ ((codisc y z) ∘I (codisc x y))) ) 
+                                                                                (≡-to-≅ P-eq) }))
+                 $ λ { (codisc .y .z) → ≡-to-≅ (natural-transformation-eq $ fun-ext 
+                 $ λ (c : Category.Obj C) → refl) } }
     
     abstract
       r→l→r : (x : Σ (Ixs → Ixs → Functor C C) (IndexedMonad Ixs))

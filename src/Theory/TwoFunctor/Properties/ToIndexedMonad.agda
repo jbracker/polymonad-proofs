@@ -41,7 +41,7 @@ LaxTwoFunctor→IndexedMonad
   → {C : Category {ℓC₀} {ℓC₁}}
   → {Ixs : Set ℓIxs}
   → (F : ConstLaxTwoFunctor (discreteHomCatTwoCategory (codiscreteCategory Ixs)) (Cat {ℓC₀} {ℓC₁}) C)
-  → IndexedMonad Ixs (λ i j → [ ConstLaxTwoFunctor.P₁ F {i} {j} ]₀ (lift tt))
+  → IndexedMonad Ixs (λ i j → [ ConstLaxTwoFunctor.P₁ F {i} {j} ]₀ (codisc i j))
 LaxTwoFunctor→IndexedMonad {ℓIxs} {ℓC₀} {ℓC₁} {C} {Ixs} F = indexed-monad (ConstLaxTwoFunctor.η F) (ConstLaxTwoFunctor.μ F) assoc' left-id' right-id'
   where
     open ConstLaxTwoFunctor F
@@ -54,7 +54,7 @@ LaxTwoFunctor→IndexedMonad {ℓIxs} {ℓC₀} {ℓC₁} {C} {Ixs} F = indexed-
     _∘C_ = Category._∘_ C
     
     M : Ixs → Ixs → Functor C C
-    M i j = [ P₁ {i} {j} ]₀ (lift tt)
+    M i j = [ P₁ {i} {j} ]₀ (codisc i j)
     
     abstract
       nat-eq : {F G H I : Functor C C} → {α : NaturalTransformation F G} {β : NaturalTransformation H I}
