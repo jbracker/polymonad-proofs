@@ -7,8 +7,9 @@ open import Data.Unit
 open import Data.Product
 
 open import Relation.Binary.PropositionalEquality
-open import Relation.Binary.HeterogeneousEquality hiding ( sym ; trans ; cong )
-open ≡-Reasoning
+open import Relation.Binary.HeterogeneousEquality renaming ( refl to hrefl ; sym to hsym ; trans to htrans ; cong to hcong ; cong₂ to hcong₂ )
+open ≡-Reasoning hiding ( _≅⟨_⟩_ ) 
+open ≅-Reasoning renaming ( begin_ to hbegin_ ; _∎ to _∎h ) hiding ( _≡⟨_⟩_ ; _≡⟨⟩_ )
 
 open import Equality
 open import Extensionality
@@ -18,7 +19,8 @@ open import Haskell.Functor renaming ( Functor to HaskellFunctor ; functor-eq to
 open import Haskell.Applicative using ( _***_ )
 open import Haskell.Parameterized.Indexed.Applicative
 open import Theory.Category.Definition
-open import Theory.Category.Examples.SetCat
+open import Theory.Category.Examples.SetCat renaming ( setCategory to SetCat )
+open import Theory.Category.Examples.Codiscrete renaming ( codiscreteCategory to Codisc )
 open import Theory.Category.Monoidal
 open import Theory.Category.Monoidal.Examples.SetCat renaming ( setMonoidalCategory to SetMonCat )
 open import Theory.Functor.Definition
@@ -31,48 +33,87 @@ open import Theory.Haskell.Parameterized.Indexed.LaxMonoidalFunctor.Properties.T
 
 module Theory.Haskell.Parameterized.Indexed.LaxMonoidalFunctor.Properties.IsomorphicHaskellIndexedApplicative where
 
-private
-  Hask = setCategory {zero}
-
 HaskellIndexedApplicative↔IndexedLaxMonoidalFunctor : {ℓIxs : Level} {Ixs : Set ℓIxs} 
                                                     → (Σ (Ixs → Ixs → TyCon) (IxApplicative Ixs))
-                                                    ↔ (IndexedLaxMonoidalFunctor Ixs (SetMonCat {zero}) (SetMonCat {zero}))
+                                                    ↔ (IndexedLaxMonoidalFunctor (Codisc Ixs) (SetMonCat {zero}) (SetMonCat {zero}))
 HaskellIndexedApplicative↔IndexedLaxMonoidalFunctor {ℓIxs} {Ixs} = bijection HaskellIndexedApplicative→IndexedLaxMonoidalFunctor IndexedLaxMonoidalFunctor→HaskellIndexedApplicative l→r→l r→l→r
   where
     open NaturalTransformation renaming ( η to nat-η )
     
+    SetMonCat' = SetMonCat {zero}
+    
     abstract
-      l→r→l : (b : IndexedLaxMonoidalFunctor Ixs (SetMonCat {zero}) (SetMonCat {zero})) 
+      l→r→l : (b : IndexedLaxMonoidalFunctor (Codisc Ixs) (SetMonCat {zero}) (SetMonCat {zero})) 
             → HaskellIndexedApplicative→IndexedLaxMonoidalFunctor (IndexedLaxMonoidalFunctor→HaskellIndexedApplicative b) ≡ b
-      l→r→l FMon = indexed-lax-monoidal-functor-eq (fun-ext $ λ i → fun-ext $ λ j → refl) (≡-to-≅ ε-eq) (≡-to-≅ μ-eq)
+      l→r→l FMon = indexed-lax-monoidal-functor-eq F-eq (≡-to-≅ ε-eq) μ-eq
         where
+          open Category
+          open MonoidalCategory hiding ( Obj ; Hom )
           open IndexedLaxMonoidalFunctor renaming ( μ-natural-transformation to μ-nat )
           
-          ε-eq : ε (HaskellIndexedApplicative→IndexedLaxMonoidalFunctor (IndexedLaxMonoidalFunctor→HaskellIndexedApplicative FMon)) ≡ ε FMon
+          FMon' = HaskellIndexedApplicative→IndexedLaxMonoidalFunctor (IndexedLaxMonoidalFunctor→HaskellIndexedApplicative FMon)
+
+          I = Codisc Ixs
+          _∘I_ = Category._∘_ I
+          
+          F₀-eq : {i j : Ixs} → (f : CodiscreteArrow i j) → (α : Category.Obj SetCat) 
+                → (Functor.F₀ (F FMon' f) α) ≡ Functor.F₀ (F FMon f) α
+          F₀-eq f@(codisc i j) α = refl
+          
+          F₁-eq : {i j : Ixs} → (f : CodiscreteArrow i j) 
+                → (λ {a b} → Functor.F₁ (F FMon' f) {a} {b}) ≅ (λ {a b} → Functor.F₁ (F FMon f) {a} {b})
+          F₁-eq f@(codisc i j) = hrefl
+          
+          F-eq : (λ {i j} → F FMon' {i} {j}) ≡ F FMon
+          F-eq = implicit-fun-ext 
+               $ λ (i : Ixs) → implicit-fun-ext 
+               $ λ (j : Ixs) → fun-ext 
+               $ λ (f : CodiscreteArrow i j) → functor-eq (fun-ext $ λ (α : Category.Obj SetCat) → F₀-eq f α) (F₁-eq f)
+          
+          ε-eq : ε FMon' ≡ ε FMon
           ε-eq = fun-ext $ λ (i : Ixs) → begin
-            ε (HaskellIndexedApplicative→IndexedLaxMonoidalFunctor (IndexedLaxMonoidalFunctor→HaskellIndexedApplicative FMon)) i
+            ε FMon' i
               ≡⟨ refl ⟩
-            (λ x → Functor.F₁ (F FMon i i) (λ {(lift tt) → lift tt}) (ε FMon i x))
+            (λ x → Functor.F₁ (F FMon (codisc i i)) (λ {(lift tt) → lift tt}) (ε FMon i x))
               ≡⟨ refl ⟩
-            (λ x → Functor.F₁ (F FMon i i) (λ x → x) (ε FMon i x))
-              ≡⟨ fun-ext (λ x → cong (λ f → f (ε FMon i x)) (Functor.id (F FMon i i))) ⟩
+            (λ x → Functor.F₁ (F FMon (codisc i i)) (λ x → x) (ε FMon i x))
+              ≡⟨ fun-ext (λ x → cong (λ f → f (ε FMon i x)) (Functor.id (F FMon (codisc i i)))) ⟩
             ε FMon i ∎
           
-          μ-eq : μ-nat (HaskellIndexedApplicative→IndexedLaxMonoidalFunctor (IndexedLaxMonoidalFunctor→HaskellIndexedApplicative FMon)) ≡ μ-nat FMon
-          μ-eq = fun-ext $ λ (i : Ixs) → fun-ext $ λ (j : Ixs) → fun-ext $ λ (k : Ixs) → natural-transformation-eq $ fun-ext $ λ {(α , β) → fun-ext $ λ {(fa , fb) → begin
-            μ (HaskellIndexedApplicative→IndexedLaxMonoidalFunctor (IndexedLaxMonoidalFunctor→HaskellIndexedApplicative FMon)) i j k α β (fa , fb)
-              ≡⟨ refl ⟩
-            Functor.F₁ (F FMon i k) (λ {(f , a) → f a}) (μ FMon i j k (β → α × β) β (Functor.F₁ (F FMon i j) _,_ fa , fb))
-              ≡⟨ refl ⟩
-            Functor.F₁ (F FMon i k) (λ {(f , a) → f a}) (μ FMon i j k (β → α × β) β ((Functor.F₁ (F FMon i j) _,_ *** (λ x → x)) (fa , fb)))
-              ≡⟨ cong (λ X → (Functor.F₁ (F FMon i k) (λ {(f , a) → f a}) ∘F μ FMon i j k (β → α × β) β ∘F (Functor.F₁ (F FMon i j) _,_ *** X)) (fa , fb) ) (sym $ Functor.id (F FMon j k)) ⟩
-            (Functor.F₁ (F FMon i k) (λ {(f , a) → f a}) ∘F μ FMon i j k (β → α × β) β ∘F (Functor.F₁ (F FMon i j) _,_ *** Functor.F₁ (F FMon j k) (λ (x : β) → x)) ) (fa , fb)
-              ≡⟨ cong (λ X → (Functor.F₁ (F FMon i k) (λ { (f , a) → f a }) ∘F X) (fa , fb)) (sym $ natural (μ-nat FMon i j k)) ⟩
-            (Functor.F₁ (F FMon i k) (λ {(f , a) → f a}) ∘F Functor.F₁ (F FMon i k) (_,_ *** (λ x → x)) ∘F μ FMon i j k α β) (fa , fb)
-              ≡⟨ cong (λ X → (X ∘F μ FMon i j k α β) (fa , fb)) (sym $ Functor.compose (F FMon i k)) ⟩
-            (Functor.F₁ (F FMon i k) (λ x → x) ∘F μ FMon i j k α β) (fa , fb)
-              ≡⟨ cong (λ X → (X ∘F μ FMon i j k α β ) (fa , fb)) (Functor.id (F FMon i k)) ⟩
-            μ FMon i j k α β (fa , fb) ∎ } }
+          μ-eq : (λ {i j k} → μ-nat FMon' {i} {j} {k}) ≅ (λ {i j k} → μ-nat FMon {i} {j} {k})
+          μ-eq = het-implicit-fun-ext (het-fun-ext hrefl $ λ (i : Ixs) → hcong (λ X → {j k : Ixs} (f : Hom (Codisc Ixs) i j) (g : Hom (Codisc Ixs) j k) 
+                                                                                    → NaturalTransformation [ tensor SetMonCat ]∘[ [ X f ]×[ X g ] ] 
+                                                                                                            [ X (g ∘I f) ]∘[ tensor SetMonCat ]) 
+                                                                               (≡-to-≅ F-eq)) 
+               $ λ (i : Ixs) → het-implicit-fun-ext (het-fun-ext hrefl $ λ (j : Ixs) → hcong (λ X → {k : Ixs} (f : Hom (Codisc Ixs) i j) (g : Hom (Codisc Ixs) j k) 
+                                                                                                  → NaturalTransformation [ tensor SetMonCat ]∘[ [ X f ]×[ X g ] ] 
+                                                                                                                          [ X (g ∘I f) ]∘[ tensor SetMonCat ]) 
+                                                                                             (≡-to-≅ F-eq)) 
+               $ λ (j : Ixs) → het-implicit-fun-ext (het-fun-ext hrefl $ λ (k : Ixs) → hcong (λ X → (f : Hom (Codisc Ixs) i j) (g : Hom (Codisc Ixs) j k) 
+                                                                                                  → NaturalTransformation [ tensor SetMonCat ]∘[ [ X f ]×[ X g ] ]
+                                                                                                                          [ X (g ∘I f) ]∘[ tensor SetMonCat ]) 
+                                                                                             (≡-to-≅ F-eq)) 
+               $ λ (k : Ixs) → het-fun-ext (het-fun-ext hrefl $ λ (f : CodiscreteArrow i j) → hcong (λ X → (a : CodiscreteArrow j k) 
+                                                                                                         → NaturalTransformation [ tensor SetMonCat ]∘[ [ X f ]×[ X a ] ] [ X (a ∘I f) ]∘[ tensor SetMonCat ]) 
+                                                                                                    (≡-to-≅ F-eq)) 
+               $ λ { f@(codisc i j) → het-fun-ext (het-fun-ext hrefl $ λ (g : CodiscreteArrow j k) → hcong (λ X → NaturalTransformation [ tensor SetMonCat ]∘[ [ X f ]×[ X g ] ] 
+                                                                                                                                                 [ X (g ∘I f) ]∘[ tensor SetMonCat ]) 
+                                                                                                                    (≡-to-≅ F-eq)) 
+               $ λ { g@(codisc j k) → het-natural-transformation-eq (cong (λ X → [ tensor SetMonCat ]∘[ [ X f ]×[ X g ] ]) F-eq) 
+                                                                             (cong (λ X → [ X (g ∘I f) ]∘[ tensor SetMonCat ]) F-eq) 
+               $ het-fun-ext (het-fun-ext hrefl $ λ a×b → hcong (λ X → Hom SetCat ([ [ tensor SetMonCat ]∘[ [ X f ]×[ X g ] ] ]₀ a×b) ([ [ X (g ∘I f) ]∘[ tensor SetMonCat ] ]₀ a×b)) (≡-to-≅ F-eq)) 
+               $ λ {(α , β) → hbegin
+                 μ FMon' f g α β
+                   ≅⟨ hrefl ⟩
+                 (Functor.F₁ (F FMon (g ∘I f)) (λ {(f , a) → f a})) ∘F (μ FMon f g (β → α × β) β) ∘F (Functor.F₁ (F FMon f) _,_ *** (λ x → x))
+                   ≅⟨ ≡-to-≅ $ cong (λ X → (Functor.F₁ (F FMon (g ∘I f)) (λ {(f , a) → f a}) ∘F μ FMon f g (β → α × β) β ∘F (Functor.F₁ (F FMon f) _,_ *** X))) (sym $ Functor.id (F FMon g)) ⟩
+                 (Functor.F₁ (F FMon (g ∘I f)) (λ {(f , a) → f a})) ∘F (μ FMon f g (β → α × β) β) ∘F (Functor.F₁ (F FMon f) _,_ *** Functor.F₁ (F FMon g) (λ (x : β) → x))
+                   ≅⟨ ≡-to-≅ $ cong (λ X → (Functor.F₁ (F FMon (g ∘I f)) (λ { (f , a) → f a }) ∘F X)) (sym $ natural (μ-nat FMon f g)) ⟩
+                 (Functor.F₁ (F FMon (g ∘I f)) (λ {(f , a) → f a}) ∘F Functor.F₁ (F FMon (g ∘I f)) (_,_ *** (λ x → x)) ∘F μ FMon f g α β)
+                   ≅⟨ ≡-to-≅ $ cong (λ X → (X ∘F μ FMon f g α β)) (sym $ Functor.compose (F FMon (g ∘I f))) ⟩
+                 (Functor.F₁ (F FMon (g ∘I f)) (λ x → x) ∘F μ FMon f g α β)
+                   ≅⟨ ≡-to-≅ $ cong (λ X → (X ∘F μ FMon f g α β )) (Functor.id (F FMon (g ∘I f))) ⟩
+                 μ FMon f g α β ∎h } } }
     
     abstract
       r→l→r : (a : Σ (Ixs → Ixs → TyCon) (IxApplicative Ixs)) 
@@ -124,6 +165,6 @@ HaskellIndexedApplicative↔IndexedLaxMonoidalFunctor {ℓIxs} {Ixs} = bijection
 
           
 IndexedLaxMonoidalFunctor↔HaskellIndexedApplicative : {ℓIxs : Level} {Ixs : Set ℓIxs} 
-                                                    → (IndexedLaxMonoidalFunctor Ixs SetMonCat SetMonCat)
+                                                    → (IndexedLaxMonoidalFunctor (Codisc Ixs) SetMonCat SetMonCat)
                                                     ↔ (Σ (Ixs → Ixs → TyCon) (IxApplicative Ixs))
 IndexedLaxMonoidalFunctor↔HaskellIndexedApplicative = Bijection.sym HaskellIndexedApplicative↔IndexedLaxMonoidalFunctor
