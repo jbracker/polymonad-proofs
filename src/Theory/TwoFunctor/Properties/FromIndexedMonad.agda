@@ -38,75 +38,98 @@ open StrictTwoCategory
 
 module Theory.TwoFunctor.Properties.FromIndexedMonad where
 
+open Category
+
 IndexedMonad→LaxTwoFunctor
-  : {ℓIxs ℓC₀ ℓC₁ : Level}
+  : {ℓI₀ ℓI₁ ℓC₀ ℓC₁ : Level}
+  → {I : Category {ℓI₀} {ℓI₁}}
   → {C : Category {ℓC₀} {ℓC₁}}
-  → {Ixs : Set ℓIxs}
-  → {M : Ixs → Ixs → Functor C C}
-  → (monad : IndexedMonad Ixs M)
-  → ConstLaxTwoFunctor (discreteHomCatTwoCategory (codiscreteCategory Ixs)) (Cat {ℓC₀} {ℓC₁}) C
-IndexedMonad→LaxTwoFunctor {ℓIxs} {ℓC₀} {ℓC₁} {C} {Ixs} {M} monad = record
+  → {M : {a b : Obj I} → Hom I a b → Functor C C}
+  → (monad : IndexedMonad I M)
+  → ConstLaxTwoFunctor (discreteHomCatTwoCategory I) (Cat {ℓC₀} {ℓC₁}) C
+IndexedMonad→LaxTwoFunctor {ℓI₀} {ℓI₁} {ℓC₀} {ℓC₁} {I} {C} {M} monad = record
   { P₁ = λ {i} {j} → P {i} {j}
-  ; η = λ {i} → η {i}
-  ; μ = λ { {i} {j} {k} {codisc .i .j} {codisc .j .k} → μ }
-  ; laxFunId₁ = λ { {i} {j} {codisc .i .j} → lawFunId₁ }
-  ; laxFunId₂ = λ { {i} {j} {codisc .i .j} → lawFunId₂ }
-  ; laxFunAssoc = λ { {i} {j} {k} {l} {codisc .i .j} {codisc .j .k} {codisc .k .l} → lawFunAssoc }
-  ; μ-natural₁ = λ { {i} {j} {k} (codisc .i .j) {codisc .j .k} {codisc .j .k} {refl} → μ-natural }
-  ; μ-natural₂ = λ { {i} {j} {k} (codisc .j .k) {codisc .i .j} {codisc .i .j} {refl} → μ-natural }
+  ; η = η'
+  ; μ = μ'
+  ; laxFunId₁ = laxFunId₁
+  ; laxFunId₂ = laxFunId₂
+  ; laxFunAssoc = laxFunAssoc
+  ; μ-natural₁ = μ-natural₁
+  ; μ-natural₂ = μ-natural₂
   }
   where
-    Ixs₁ = codiscreteCategory Ixs
-    Ixs₂ = discreteHomCatTwoCategory Ixs₁
+    I₂ = discreteHomCatTwoCategory I
     Cat' = Cat {ℓC₀} {ℓC₁}
 
-    _∘Ixs_ = Category._∘_ Ixs₁
+    _∘Cat_ = StrictTwoCategory._∘_ Cat'
+    _∘I_ = Category._∘_ I
     _∘C_ = Category._∘_ C
 
     open IndexedMonad monad
     open NaturalTransformation renaming ( η to nat-η ; natural to nat-natural )
     
-    P : {i j : Ixs} → Functor (HomCat Ixs₂ i j) (HomCat Cat' C C)
-    P {i} {j} = Functor.functor P₀ P₁ (λ { {codisc .i .j} → refl }) (λ {a b c} {f} {g} → P-compose {a} {b} {c} {f} {g})
+    P : {i j : Obj I} → Functor (HomCat I₂ i j) (HomCat Cat' C C)
+    P {i} {j} = Functor.functor P₀ P₁ (λ { {f} → refl }) (λ {a b c} {f} {g} → P-compose {a} {b} {c} {f} {g})
       where
-        P₀ : Obj (HomCat Ixs₂ i j) → Obj (HomCat Cat' C C)
-        P₀ (codisc .i .j) = M i j
+        P₀ : Obj (HomCat I₂ i j) → Obj (HomCat Cat' C C)
+        P₀ f = M f
         
-        P₁ : {a b : Obj (HomCat Ixs₂ i j)} → Hom (HomCat Ixs₂ i j) a b → Hom (HomCat Cat' C C) (P₀ a) (P₀ b)
-        P₁ {codisc .i .j} {codisc .i .j} refl = Id⟨ P₀ (codisc i j) ⟩
+        P₁ : {a b : Obj (HomCat I₂ i j)} → Hom (HomCat I₂ i j) a b → Hom (HomCat Cat' C C) (P₀ a) (P₀ b)
+        P₁ {f} {.f} refl = Id⟨ P₀ f ⟩
         
         abstract
-          P-compose : {a b c : Obj (HomCat Ixs₂ i j)} {f : Hom (HomCat Ixs₂ i j) a b} {g : Hom (HomCat Ixs₂ i j) b c}
-                    → P₁ (Category._∘_ (HomCat Ixs₂ i j) g f) ≡ ⟨ P₁ g ⟩∘ᵥ⟨ P₁ f ⟩
-          P-compose {codisc a b} {codisc c d} {codisc e f} {refl} {refl} = sym (left-id (HomCat Cat' C C))
+          P-compose : {a b c : Obj (HomCat I₂ i j)} {f : Hom (HomCat I₂ i j) a b} {g : Hom (HomCat I₂ i j) b c}
+                    → P₁ (Category._∘_ (HomCat I₂ i j) g f) ≡ ⟨ P₁ g ⟩∘ᵥ⟨ P₁ f ⟩
+          P-compose {f} {.f} {.f} {refl} {refl} = sym (left-id (HomCat Cat' C C))
+
+    η' : {x : Cell₀ I₂} → Cell₂ Cat (id₁ Cat) ([ P {x} {x} ]₀ (id₁ I₂))
+    η' {i} = η i
+    
+    μ' : {x y z : Cell₀ I₂}
+       → {f : Cell₁ I₂ x y} {g : Cell₁ I₂ y z}
+       → Cell₂ Cat ([ P ]₀ g ∘Cat [ P ]₀ f) ([ P ]₀ (g ∘I f))
+    μ' {f = f} {g} = μ f g
+    
+    abstract
+      μ-natural₁ : {a b c : Obj I} (f : Hom I a b) {x y : Hom I b c} {α : Cell₂ I₂ x y}
+                 → ⟨ [ P ]₁ ((discreteHomCatTwoCategory I ∘ₕ α) (id₂ I₂)) ⟩∘ᵥ⟨ μ f x ⟩
+                 ≡ ⟨ μ f y ⟩∘ᵥ⟨ ((Cat ∘ₕ [ P ]₁ α) ([ P ]₁ (id₂ I₂))) ⟩
+      μ-natural₁ {a} {b} {c} f {x} {.x} {refl} = trans (StrictTwoCategory.vertical-right-id Cat) 
+                                               $ trans (sym (StrictTwoCategory.vertical-left-id Cat)) 
+                                               $ cong (λ X → ⟨ μ f x ⟩∘ᵥ⟨ X ⟩) (sym (id∘ₕid≡id Cat))
+      
+    abstract
+      μ-natural₂ : {a b c : Obj I} (g : Hom I b c) {x y : Hom I a b} {α : Cell₂ I₂ x y}
+                 → ⟨ [ P ]₁ ((discreteHomCatTwoCategory I ∘ₕ id₂ I₂) α) ⟩∘ᵥ⟨ μ x g ⟩
+                 ≡ ⟨ μ y g ⟩∘ᵥ⟨ ⟨ [ P ]₁ (id₂ I₂) ⟩∘ₕ⟨ [ P ]₁ α ⟩ ⟩
+      μ-natural₂ {a} {b} {c} g {x} {.x} {refl} = trans (StrictTwoCategory.vertical-right-id Cat) 
+                                               $ trans (sym (StrictTwoCategory.vertical-left-id Cat)) 
+                                               $ cong (λ X → ⟨ μ x g ⟩∘ᵥ⟨ X ⟩) (sym (id∘ₕid≡id Cat))
+
 
     abstract
-      μ-natural : {i j k : Ixs}
-                → ⟨ Id⟨ M i k ⟩ ⟩∘ᵥ⟨ μ ⟩
-                ≡ ⟨ μ ⟩∘ᵥ⟨ ⟨ Id⟨ M j k ⟩ ⟩∘ₕ⟨ Id⟨ M i j ⟩ ⟩ ⟩
-      μ-natural {i} {j} {k} = trans (StrictTwoCategory.vertical-right-id Cat) 
-                            $ trans (sym (StrictTwoCategory.vertical-left-id Cat)) 
-                            $ cong (λ X → ⟨ μ ⟩∘ᵥ⟨ X ⟩) (sym (id∘ₕid≡id Cat))
+      laxFunId₁ : {i j : Obj I} {f : Hom I i j}
+                → ⟨ μ (id I {i}) f ⟩∘ᵥ⟨ ⟨ Id⟨ M f ⟩ ⟩∘ₕ⟨ η i ⟩ ⟩ 
+                ≅ id₂ Cat {C}
+      laxFunId₁ {i} {j} {f} = het-natural-transformation-eq (StrictTwoCategory.left-id Cat) (cong M (left-id I)) 
+                            $ het-fun-ext (het-fun-ext hrefl $ λ (x : Obj C) → hcong (λ Y → Hom C ([ M f ]₀ x) ([ M Y ]₀ x)) (≡-to-≅ (left-id I))) 
+                            $ λ (x : Obj C) → htrans (hcong (λ X → nat-η (μ (id I) f) x ∘C X) (≡-to-≅ (Category.right-id C))) (η-left-coher {i} {j} {f} {x})
     
     abstract
-      lawFunId₁ : {i j : Ixs}
-                → ⟨ μ {i} {i} {j} ⟩∘ᵥ⟨ ⟨ Id⟨ M i j ⟩ ⟩∘ₕ⟨ η {i} ⟩ ⟩ ≅ id₂ Cat {C}
-      lawFunId₁ {i} {j} = het-natural-transformation-eq (StrictTwoCategory.left-id Cat) refl $ het-fun-ext hrefl 
-                        $ λ x → ≡-to-≅ $ trans (cong (λ X → nat-η (μ {i} {i} {j}) x ∘C X) (Category.right-id C)) η-left-coher
+      laxFunId₂ : {i j : Obj I} {f : Hom I i j}
+                → ⟨ μ f (id I {j}) ⟩∘ᵥ⟨ ⟨ η j ⟩∘ₕ⟨ Id⟨ [ P {i} {j} ]₀ f ⟩ ⟩ ⟩ 
+                ≅ id₂ Cat' {C}
+      laxFunId₂ {i} {j} {f} = het-natural-transformation-eq (StrictTwoCategory.right-id Cat) (cong M (right-id I)) 
+                            $ het-fun-ext (het-fun-ext hrefl $ (λ (x : Obj C) → hcong (λ Y → Hom C ([ M f ]₀ x) ([ M Y ]₀ x)) (≡-to-≅ (right-id I)))) 
+                            $ λ (x : Obj C) → htrans (hcong (λ X → nat-η (μ f (id I)) x ∘C X) (≡-to-≅ (Category.left-id C))) (η-right-coher {i} {j} {f} {x})
     
     abstract
-      lawFunId₂ : {i j : Ixs}
-                  → ⟨ μ {i} {j} {j} ⟩∘ᵥ⟨ ⟨ η {j} ⟩∘ₕ⟨ Id⟨ [ P {i} {j} ]₀ (codisc i j) ⟩ ⟩ ⟩ ≅ id₂ Cat' {C}
-      lawFunId₂ {i} {j} = het-natural-transformation-eq (StrictTwoCategory.right-id Cat) refl $ het-fun-ext hrefl 
-                        $ λ x → ≡-to-≅ $ trans (cong (λ X → nat-η (μ {i} {j} {j}) x ∘C X) (Category.left-id C)) η-right-coher
-    
-    abstract
-      lawFunAssoc : {i j k l : Ixs}
-                  → ⟨ μ {i} {k} {l} ⟩∘ᵥ⟨ ⟨ Id⟨ M k l ⟩ ⟩∘ₕ⟨ μ {i} {j} {k} ⟩ ⟩
-                  ≅ ⟨ μ {i} {j} {l} ⟩∘ᵥ⟨ ⟨ μ {j} {k} {l} ⟩∘ₕ⟨ Id⟨ M i j ⟩ ⟩ ⟩
-      lawFunAssoc {i} {j} {k} {l} = het-natural-transformation-eq (StrictTwoCategory.assoc Cat) refl  $ het-fun-ext hrefl 
-                                  $ λ x → ≡-to-≅ 
-                                  $ trans (cong (λ X → nat-η (μ {i} {k} {l}) x ∘C X) (Category.right-id C)) 
-                                  $ trans μ-coher 
-                                  $ cong (λ X → nat-η μ x ∘C X) $ sym 
-                                  $ trans (cong (λ X → nat-η μ ([ M i j ]₀ x) ∘C X) (Functor.id ([ M k l ]∘[ M j k ]))) (Category.left-id C)
+      laxFunAssoc : {i j k l : Obj I} {f : Hom I i j} {g : Hom I j k} {h : Hom I k l}
+                  → ⟨ μ (g ∘I f) h ⟩∘ᵥ⟨ ⟨ Id⟨ M h ⟩ ⟩∘ₕ⟨ μ f g ⟩ ⟩
+                  ≅ ⟨ μ f (h ∘I g) ⟩∘ᵥ⟨ ⟨ μ g h ⟩∘ₕ⟨ Id⟨ M f ⟩ ⟩ ⟩
+      laxFunAssoc {i} {j} {k} {l} {f} {g} {h} = het-natural-transformation-eq (StrictTwoCategory.assoc Cat) (cong M (assoc I))  
+                                              $ het-fun-ext (het-fun-ext hrefl $ λ (x : Obj C) → hcong (λ Y → Hom C ([ [ M h ]∘[ [ M g ]∘[ M f ] ] ]₀ x) ([ M Y ]₀ x)) (≡-to-≅ (assoc I))) 
+                                              $ λ (x : Obj C) → htrans (hcong (λ X → nat-η (μ (g ∘I f) h) x ∘C X) (≡-to-≅ $ Category.right-id C)) 
+                                              $ htrans μ-coher
+                                              $ hcong (λ X → nat-η (μ f (h ∘I g)) x ∘C X) $ hsym 
+                                              $ htrans (hcong (λ X → nat-η (μ g h) ([ M f ]₀ x) ∘C X) (≡-to-≅ $ Functor.id ([ M h ]∘[ M g ]))) (≡-to-≅ $ Category.left-id C)
