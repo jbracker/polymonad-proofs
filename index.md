@@ -28,6 +28,13 @@ structure in the category **Set** reflecting the way it is encoded in Haskell.
 | 303 | Kleisli Triple | [`Theory.Monad.Kleisli`](src/Theory/Monad/Kleisli.agda) |
 | 304 | Relative Monad | [`Theory.Monad.Relative`](src/Theory/Monad/Relative.agda) |
 | 305 | Atkey's Parameterized Monad | [`Theory.Monad.Atkey`](src/Theory/Monad/Atkey.agda) |
+| 400 | Natural Transformation | [`Theory.Natural.Transformation`](src/Theory/Natural/Transformation.agda) |
+| 401 | Natural Isomorphism | [`Theory.Natural.Isomorphism`](src/Theory/Natural/Isomorphism.agda) |
+| 500 | Strict 2-Category | [`Theory.TwoCategory.Definition`](src/Theory/TwoCategory/Definition.agda) |
+| 501 | Bicategory | [`Theory.TwoCategory.Bicategory`](src/Theory/TwoCategory/Bicategory.agda) |
+| 600 | Lax 2-Functor (on Strict 2-Categories) | [`Theory.TwoFunctor.Definition`](src/Theory/TwoFunctor/Definition.agda) |
+| 601 | Lax 2-Functor (constant 0-Cell mapping) | [`Theory.TwoFunctor.ConstZeroCell`](src/Theory/TwoFunctor/ConstZeroCell.agda) |
+| 900 | Monoid | [`Theory.Monoid`](src/Theory/Monoid.agda) |
 
 ## Relationships
 
@@ -52,17 +59,27 @@ Legend:
 | 007&cong;302 | [`Theory.Haskell.Parameterized.Indexed.Monad.Properties.IsomorphicHaskellIndexedMonad`](src/Theory/Haskell/Parameterized/Indexed/Monad/Properties/IsomorphicHaskellIndexedMonad.agda) |
 | 007&cong;305 | [`Theory.Monad.Atkey.Properties.IsomorphicIndexedMonad`](src/Theory/Monad/Atkey/Properties/IsomorphicIndexedMonad.agda) |
 | 200&cong;001 | [`Theory.Functor.Properties.IsomorphicHaskellFunctor`](src/Theory/Functor/Properties/IsomorphicHaskellFunctor.agda) |
+| 200&rArr;600 | [`Theory.TwoFunctor.Properties.FromFunctor`](src/Theory/TwoFunctor/Properties/FromFunctor.agda) |
 | 202&cong;002 | [`Theory.Functor.Monoidal.Properties.IsomorphicHaskellApplicative`](src/Theory/Functor/Monoidal/Properties/IsomorphicHaskellApplicative.agda) |
 | 202&cong;003 | [`Theory.Functor.Monoidal.Properties.IsomorphicMonad`](src/Theory/Functor/Monoidal/Properties/IsomorphicMonad.agda) |
 | 202&cong;004 | [`Theory.Functor.Monoidal.Properties.IsomorphicGradedApplicative`](src/Theory/Functor/Monoidal/Properties/IsomorphicGradedApplicative.agda) |
 | 202&cong;005 | [`Theory.Functor.Monoidal.Properties.IsomorphicGradedMonad`](src/Theory/Functor/Monoidal/Properties/IsomorphicGradedMonad.agda) |
 | 202&cong;203 | [`Theory.Haskell.Parameterized.Graded.LaxMonoidalFunctor.Properties.IsomorphicLaxMonoida`](src/Theory/Haskell/Parameterized/Graded/LaxMonoidalFunctor/Properties/IsomorphicLaxMonoidalFunctor.agda) |
+| 202&cong;601 | [`Theory.TwoFunctor.Properties.IsomorphicLaxMonoidalFunctor`](src/Theory/TwoFunctor/Properties/IsomorphicLaxMonoidalFunctor.agda) |
 | 203&cong;004 | [`Theory.Haskell.Parameterized.Graded.LaxMonoidalFunctor.Properties.IsomorphicHaskellGradedApplicative`](src/Theory/Haskell/Parameterized/Graded/LaxMonoidalFunctor/Properties/IsomorphicHaskellGradedApplicative.agda) |
 | 203&cong;202 | [`Theory.Haskell.Parameterized.Graded.LaxMonoidalFunctor.Properties.IsomorphicLaxMonoida`](src/Theory/Haskell/Parameterized/Graded/LaxMonoidalFunctor/Properties/IsomorphicLaxMonoidalFunctor.agda) |
 | 204&cong;006 | [`Theory.Haskell.Parameterized.Indexed.LaxMonoidalFunctor.Properties.IsomorphicHaskellIndexedApplicative`](src/Theory/Haskell/Parameterized/Indexed/LaxMonoidalFunctor/Properties/IsomorphicHaskellIndexedApplicative.agda) |
 | 300&cong;003 | [`Theory.Monad.Properties.IsomorphicHaskellMonad`](src/Theory/Monad/Properties/IsomorphicHaskellMonad.agda) |
+| 300&cong;600 | [`Theory.TwoFunctor.Properties.IsomorphicMonad`](src/Theory/TwoFunctor/Properties/IsomorphicMonad.agda) |
+| 301&cong;601 | [`Theory.TwoFunctor.Properties.IsomorphicGradedMonad`](src/Theory/TwoFunctor/Properties/IsomorphicGradedMonad.agda) |
 | 302&cong;007 | [`Theory.Haskell.Parameterized.Indexed.Monad.Properties.IsomorphicHaskellIndexedMonad`](src/Theory/Haskell/Parameterized/Indexed/Monad/Properties/IsomorphicHaskellIndexedMonad.agda) |
+| 302&cong;601 | [`Theory.TwoFunctor.Properties.IsomorphicIndexedMonad`](src/Theory/TwoFunctor/Properties/IsomorphicIndexedMonad.agda) |
 | 305&cong;007 | [`Theory.Monad.Atkey.Properties.IsomorphicIndexedMonad`](src/Theory/Monad/Atkey/Properties/IsomorphicIndexedMonad.agda) |
-
+| 305&rArr;600 | [`Theory.TwoFunctor.Properties.FromAtkeyParameterizedMonad`](src/Theory/TwoFunctor/Properties/FromAtkeyParameterizedMonad.agda) |
+| 600&cong;300 | [`Theory.TwoFunctor.Properties.IsomorphicMonad`](src/Theory/TwoFunctor/Properties/IsomorphicMonad.agda) |
+| 601&cong;202 | [`Theory.TwoFunctor.Properties.IsomorphicLaxMonoidalFunctor`](src/Theory/TwoFunctor/Properties/IsomorphicLaxMonoidalFunctor.agda) |
+| 601&cong;301 | [`Theory.TwoFunctor.Properties.IsomorphicGradedMonad`](src/Theory/TwoFunctor/Properties/IsomorphicGradedMonad.agda) |
+| 601&cong;302 | [`Theory.TwoFunctor.Properties.IsomorphicIndexedMonad`](src/Theory/TwoFunctor/Properties/IsomorphicIndexedMonad.agda) |
+| 601&rArr;600 | [`Theory.TwoFunctor.ConstZeroCell`](src/Theory/TwoFunctor/ConstZeroCell.agda) |
 
 
