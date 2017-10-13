@@ -1,13 +1,13 @@
 
 # Index
 
-## Structures
+## Formalizations and Examples
 
-Structures that are listed as _Haskell_ structures are a formalization of that 
-structure in the category **Set** as it is done in Haskell.
+Formalizations that are listed as _Haskell_ structures are a formalization of that 
+structure in the category **Set** reflecting the way it is encoded in Haskell.
 
-| # | Structure | Module |
-|---|-----------|--------|
+| # | Formalization | Module |
+|---|---------------|--------|
 | 1 | Haskell Functor | [`Haskell.Functor`](src/Haskell/Functor.agda) |
 | 2 | Haskell Applicative | [`Haskell.Applicative`](src/Haskell/Applicative.agda) |
 | 3 | Haskell Monad | [`Haskell.Monad`](src/Haskell/Monad.agda) |
@@ -20,7 +20,9 @@ structure in the category **Set** as it is done in Haskell.
 | 200 | Functor | [`Theory.Functor.Definition`](src/Theory/Functor/Definition.agda) |
 | 201 | Monoidal Functor | [`Theory.Functor.Monoidal`](src/Theory/Functor/Monoidal.agda) |
 | 202 | Lax Monoidal Functor | [`Theory.Functor.Monoidal`](src/Theory/Functor/Monoidal.agda) |
-| 300 |  | |
+| 203 | Graded Lax Monoidal Functor | [`Theory.Haskell.Parameterized.Graded.LaxMonoidalFunctor`](src/Theory/Haskell/Parameterized/Graded/LaxMonoidalFunctor.agda) |
+| 300 | Monad | [` `](http://localhost) |
+| 301 | Graded Monad | [`Theory.Haskell.Parameterized.Graded.Monad`](src/Theory/Haskell/Parameterized/Graded/Monad.agda) |
 
 ## Relationships
 
@@ -33,11 +35,21 @@ Legend:
 
 | Rel. | Module |
 |------|--------|
-| 4 &cong; 202 | [`Theory.Functor.Monoidal.Properties.IsomorphicGradedApplicative`](src/Theory/Functor/Monoidal/Properties/IsomorphicGradedApplicative.agda) |
-
-
-
-
+| 001&cong;200 | [`Theory.Functor.Properties.IsomorphicHaskellFunctor`](src/Theory/Functor/Properties/IsomorphicHaskellFunctor.agda) |
+| 002&cong;202 | [`Theory.Functor.Monoidal.Properties.IsomorphicHaskellApplicative`](src/Theory/Functor/Monoidal/Properties/IsomorphicHaskellApplicative.agda) |
+| 003&cong;202 | [`Theory.Functor.Monoidal.Properties.IsomorphicMonad`](src/Theory/Functor/Monoidal/Properties/IsomorphicMonad.agda) |
+| 004&cong;202 | [`Theory.Functor.Monoidal.Properties.IsomorphicGradedApplicative`](src/Theory/Functor/Monoidal/Properties/IsomorphicGradedApplicative.agda) |
+| 004&cong;203 | [`Theory.Haskell.Parameterized.Graded.LaxMonoidalFunctor.Properties.IsomorphicHaskellGradedApplicative`](src/Theory/Haskell/Parameterized/Graded/LaxMonoidalFunctor/Properties/IsomorphicHaskellGradedApplicative.agda) |
+| 005&cong;202 | [`Theory.Functor.Monoidal.Properties.IsomorphicGradedMonad`](src/Theory/Functor/Monoidal/Properties/IsomorphicGradedMonad.agda) |
+| 005&cong;301 | [`Theory.Haskell.Parameterized.Graded.Monad.Properties.IsomorphicHaskellGradedMonad`](src/Theory/Haskell/Parameterized/Graded/Monad/Properties/IsomorphicHaskellGradedMonad.agda) |
+| 200&cong;001 | [`Theory.Functor.Properties.IsomorphicHaskellFunctor`](src/Theory/Functor/Properties/IsomorphicHaskellFunctor.agda) |
+| 202&cong;002 | [`Theory.Functor.Monoidal.Properties.IsomorphicHaskellApplicative`](src/Theory/Functor/Monoidal/Properties/IsomorphicHaskellApplicative.agda) |
+| 202&cong;003 | [`Theory.Functor.Monoidal.Properties.IsomorphicMonad`](src/Theory/Functor/Monoidal/Properties/IsomorphicMonad.agda) |
+| 202&cong;004 | [`Theory.Functor.Monoidal.Properties.IsomorphicGradedApplicative`](src/Theory/Functor/Monoidal/Properties/IsomorphicGradedApplicative.agda) |
+| 202&cong;005 | [`Theory.Functor.Monoidal.Properties.IsomorphicGradedMonad`](src/Theory/Functor/Monoidal/Properties/IsomorphicGradedMonad.agda) |
+| 202&cong;203 | [`Theory.Haskell.Parameterized.Graded.LaxMonoidalFunctor.Properties.IsomorphicLaxMonoida`](src/Theory/Haskell/Parameterized/Graded/LaxMonoidalFunctor/Properties/IsomorphicLaxMonoidalFunctor.agda) |
+| 203&cong;004 | [`Theory.Haskell.Parameterized.Graded.LaxMonoidalFunctor.Properties.IsomorphicHaskellGradedApplicative`](src/Theory/Haskell/Parameterized/Graded/LaxMonoidalFunctor/Properties/IsomorphicHaskellGradedApplicative.agda) |
+| 203&cong;202 | [`Theory.Haskell.Parameterized.Graded.LaxMonoidalFunctor.Properties.IsomorphicLaxMonoida`](src/Theory/Haskell/Parameterized/Graded/LaxMonoidalFunctor/Properties/IsomorphicLaxMonoidalFunctor.agda) |
 
 
 
