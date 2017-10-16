@@ -54,6 +54,7 @@ Index:
 * [Graded Monad &cong; Haskell Graded Monad](src/Theory/Haskell/Parameterized/Graded/Monad/Properties/IsomorphicHaskellGradedMonad.agda)
 * [Graded Monad &cong; Lax 2-Functor](src/Theory/TwoFunctor/Properties/IsomorphicGradedMonad.agda)
 * [Indexed Lax Monoidal Functor &cong; Haskell Indexed Applicative](src/Theory/Haskell/Parameterized/Indexed/LaxMonoidalFunctor/Properties/IsomorphicHaskellIndexedApplicative.agda)
+* [Indexed Lax Monoidal Functor &cong; Graded Lax Monoidal Functor](src/Theory/Haskell/Parameterized/Indexed/LaxMonoidalFunctor/Properties/IsomorphicGradedLaxMonoidalFunctor.agda)
 * [Indexed Monad &cong; Haskell Indexed Monad](src/Theory/Haskell/Parameterized/Indexed/Monad/Properties/IsomorphicHaskellIndexedMonad.agda)
 * [Indexed Monad &cong; Lax 2-Functor](src/Theory/TwoFunctor/Properties/IsomorphicIndexedMonad.agda)
 * [Indexed Monad &cong; Graded Monad](src/Theory/Haskell/Parameterized/Indexed/Monad/Properties/IsomorphicGradedMonad.agda)
