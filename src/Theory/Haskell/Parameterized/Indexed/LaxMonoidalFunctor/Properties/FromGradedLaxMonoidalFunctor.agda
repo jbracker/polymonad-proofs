@@ -13,7 +13,7 @@ open import Equality
 open import Extensionality
 open import Theory.Monoid
 open import Theory.Category.Definition
-open import Theory.Category.Examples.Monoid renaming ( monoidCategory to MonCat )
+open import Theory.Category.Examples.Monoid renaming ( monoidCategory' to MonCat' )
 open import Theory.Category.Monoidal
 open import Theory.Functor.Definition
 open import Theory.Functor.Composition
@@ -32,7 +32,7 @@ GradedLaxMonoidalFunctor→IndexedLaxMonoidalFunctor : {ℓMon ℓC₀ ℓC₁ �
                                                    → (Mon : Monoid M)
                                                    → (CM : MonoidalCategory C) (DM : MonoidalCategory D)
                                                    → (GradedLaxMonoidalFunctor Mon CM DM)
-                                                   → (IndexedLaxMonoidalFunctor (MonCat Mon) CM DM)
+                                                   → (IndexedLaxMonoidalFunctor (MonCat' Mon) CM DM)
 GradedLaxMonoidalFunctor→IndexedLaxMonoidalFunctor Mon CM DM GLMF = 
   indexedLaxMonoidalFunctor F (λ i → ε) μ-nat assoc left-unitality right-unitality
   where

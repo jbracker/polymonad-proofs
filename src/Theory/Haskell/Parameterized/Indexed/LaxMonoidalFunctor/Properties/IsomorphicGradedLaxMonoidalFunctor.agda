@@ -14,7 +14,7 @@ open import Extensionality
 open import Bijection renaming ( refl to brefl ; sym to bsym )
 open import Theory.Monoid
 open import Theory.Category.Definition
-open import Theory.Category.Examples.Monoid renaming ( monoidCategory to MonCat )
+open import Theory.Category.Examples.Monoid renaming ( monoidCategory' to MonCat' )
 open import Theory.Category.Monoidal
 open import Theory.Functor.Definition
 open import Theory.Natural.Transformation
@@ -33,7 +33,7 @@ IndexedLaxMonoidalFunctor↔GradedLaxMonoidalFunctor : {ℓMon ℓC₀ ℓC₁ �
                                                    → {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}}
                                                    → (Mon : Monoid M)
                                                    → (CM : MonoidalCategory C) (DM : MonoidalCategory D)
-                                                   → (IndexedLaxMonoidalFunctor (MonCat Mon) CM DM)
+                                                   → (IndexedLaxMonoidalFunctor (MonCat' Mon) CM DM)
                                                    ↔ (GradedLaxMonoidalFunctor Mon CM DM)
 IndexedLaxMonoidalFunctor↔GradedLaxMonoidalFunctor Mon CM DM = 
   bijection (IndexedLaxMonoidalFunctor→GradedLaxMonoidalFunctor Mon CM DM) 
@@ -47,5 +47,5 @@ GradedLaxMonoidalFunctor↔IndexedLaxMonoidalFunctor : {ℓMon ℓC₀ ℓC₁ �
                                                    → (Mon : Monoid M)
                                                    → (CM : MonoidalCategory C) (DM : MonoidalCategory D)
                                                    → (GradedLaxMonoidalFunctor Mon CM DM)
-                                                   ↔ (IndexedLaxMonoidalFunctor (MonCat Mon) CM DM)
+                                                   ↔ (IndexedLaxMonoidalFunctor (MonCat' Mon) CM DM)
 GradedLaxMonoidalFunctor↔IndexedLaxMonoidalFunctor Mon CM DM = bsym $ IndexedLaxMonoidalFunctor↔GradedLaxMonoidalFunctor Mon CM DM

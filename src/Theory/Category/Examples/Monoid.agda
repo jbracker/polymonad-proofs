@@ -25,7 +25,7 @@ monoidCategory monoid = record
   ; left-id = Monoid.right-id monoid
   ; right-id = Monoid.left-id monoid
   }
-{-
+
 monoidCategory' : {ℓM : Level} {M : Set ℓM} → Monoid M → Category {zero} {ℓM}
 monoidCategory' monoid = record
   { Obj = ⊤
@@ -36,4 +36,4 @@ monoidCategory' monoid = record
   ; left-id = Monoid.left-id monoid
   ; right-id = Monoid.right-id monoid
   }
--}
+
