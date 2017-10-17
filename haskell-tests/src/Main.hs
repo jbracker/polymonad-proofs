@@ -17,6 +17,7 @@ import Test.Laws.Set.Functor ( checkSetFunctor )
 import Test.Laws.Set.Applicative ( checkSetApplicative )
 import Test.Laws.Endo.Functor ( checkEndoFunctor )
 import Test.Laws.Endo.Applicative ( checkFailEndoApplicative )
+import Test.Laws.ListSet ( checkAllListSet )
 
 
 options :: [(String, Int -> IO Result)]
@@ -40,6 +41,8 @@ options =
              )
   , ("ord", \n -> checkOrd n (Proxy :: Proxy IntMod2) 
              &&&& checkOrd n (Proxy :: Proxy IntMod3)
+             )
+  , ("listset", \n -> checkAllListSet n (Proxy :: Proxy (Int,String))
              )
   ]
 
