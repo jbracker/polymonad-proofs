@@ -281,6 +281,12 @@ record LSet {ℓEq ℓOrd : Level} (A : Σ Type (OrdInstance {ℓEq} {ℓOrd})) 
     xs : List (proj₁ A) 
     sorted : IsSortedNoDupList (proj₂ A) xs
 
+empty : {ℓEq ℓOrd : Level} → (A : Σ Type (OrdInstance {ℓEq} {ℓOrd})) → LSet A
+empty A = lset [] (lift tt)
+
+singleton : {ℓEq ℓOrd : Level} → (A : Σ Type (OrdInstance {ℓEq} {ℓOrd})) → (a : proj₁ A) → LSet A
+singleton A a = lset (a ∷ []) ([] , (lift tt))
+
 abstract
   lset-eq : {ℓEq ℓOrd : Level}
           → {A : Type} {OrdA : OrdInstance {ℓEq} {ℓOrd} A} 
