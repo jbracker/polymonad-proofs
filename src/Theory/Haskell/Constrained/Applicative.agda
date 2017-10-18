@@ -1,6 +1,6 @@
 
 open import Level
-open import Function renaming ( id to idF ;  _∘_ to _∘F_ )
+open import Function using ( _∘_ ) renaming ( id to idF )
 
 open import Data.Unit
 open import Data.Product hiding ( map )
@@ -25,10 +25,10 @@ open import Theory.Haskell.Constrained.Functor
 module Theory.Haskell.Constrained.Applicative {ℓ : Level} where
 
 private
-  Hask = setCategory {ℓ}
-  HaskMon = setMonoidalCategory {ℓ}
+  SetCat = setCategory {ℓ}
+  SetMonCat = setMonoidalCategory {ℓ}
   Type = Set ℓ
-  _∘Hask_ = Category._∘_ Hask
+  _∘F_ = Category._∘_ SetCat
 
 open import Theory.Functor.Composition
 record ConstrainedApplicative {ℓCt₀ ℓCt₁ : Level} (MCC : MonoidalConstraintCategory {ℓ} {ℓCt₀} {ℓCt₁}) : Set (suc (ℓ ⊔ ℓCt₀ ⊔ ℓCt₁)) where
@@ -47,7 +47,7 @@ record ConstrainedApplicative {ℓCt₀ ℓCt₁ : Level} (MCC : MonoidalConstra
   CtMonoidalCategory : MonoidalCategory CtCategory 
   CtMonoidalCategory = DependentMonoidalCategory.DepMonCat Cts
   
-  CtFunctor : Functor CtCategory Hask
+  CtFunctor : Functor CtCategory SetCat
   CtFunctor = ConstrainedFunctor.CtFunctor CtsFunctor
   
   open Functor CtFunctor using ( F₀ ; F₁ )
@@ -63,15 +63,15 @@ record ConstrainedApplicative {ℓCt₀ ℓCt₁ : Level} (MCC : MonoidalConstra
     
     associativity : (x y z : Obj CtCategory) 
                   → F₁ (α CtMonoidalCategory x y z) ∘F (prod-map (x ⊗₀ y) z ∘F (λ a → prod-map x y (proj₁ a) , proj₂ a))
-                  ≡ prod-map x (y ⊗₀ z) ∘F ((λ a → proj₁ a , prod-map y z (proj₂ a)) ∘F (α HaskMon (F₀ x) (F₀ y) (F₀ z)))
+                  ≡ prod-map x (y ⊗₀ z) ∘F ((λ a → proj₁ a , prod-map y z (proj₂ a)) ∘F (α SetMonCat (F₀ x) (F₀ y) (F₀ z)))
     
-    left-unitality : (x : Obj CtCategory) → λ' HaskMon (F₀ x) ≡ F₁ (λ' CtMonoidalCategory x) ∘F (prod-map unit-mc x ∘F (λ a → unit , proj₂ a))
+    left-unitality : (x : Obj CtCategory) → λ' SetMonCat (F₀ x) ≡ F₁ (λ' CtMonoidalCategory x) ∘F (prod-map unit-mc x ∘F (λ a → unit , proj₂ a))
 
-    right-unitality : (x : Obj CtCategory) → ρ HaskMon (F₀ x) ≡ F₁ (ρ  CtMonoidalCategory x) ∘F (prod-map x unit-mc ∘F (λ a → proj₁ a , unit))
+    right-unitality : (x : Obj CtCategory) → ρ SetMonCat (F₀ x) ≡ F₁ (ρ  CtMonoidalCategory x) ∘F (prod-map x unit-mc ∘F (λ a → proj₁ a , unit))
     
   map = ConstrainedFunctor.map CtsFunctor
 
-  CtApplicative : LaxMonoidalFunctor CtMonoidalCategory HaskMon
+  CtApplicative : LaxMonoidalFunctor CtMonoidalCategory SetMonCat
   CtApplicative = record 
     { F = CtFunctor
     ; ε = λ _ → unit
