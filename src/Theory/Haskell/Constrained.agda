@@ -9,10 +9,9 @@ open import Relation.Binary.HeterogeneousEquality hiding ( cong )
 
 open import Utilities
 open import ProofIrrelevance
-open import Haskell
 
 open import Theory.Category.Definition
-open import Theory.Category.Examples.SetCat
+open import Theory.Category.Examples.SetCat renaming ( setCategory to SetCat )
 open import Theory.Category.Concrete
 open import Theory.Category.Dependent
 open import Theory.Category.Subcategory
@@ -20,7 +19,7 @@ open import Theory.Category.Subcategory.Examples
 open import Theory.Category.Closed.Dependent
 open import Theory.Category.Closed.Examples
 open import Theory.Category.Monoidal.Dependent
-open import Theory.Category.Monoidal.Examples.SetCat
+open import Theory.Category.Monoidal.Examples.SetCat renaming ( setMonoidalCategory to SetMonCat )
 
 open import Theory.Functor.Definition
  
@@ -29,13 +28,13 @@ module Theory.Haskell.Constrained {ℓ : Level} where
 -- A constraint category adds constraints on the types and functions involving those types.
 -- Therefore, a constraint category is a category that depends on Hask for its definition.
 ConstraintCategory : {ℓCt₀ ℓCt₁ : Level} → Set (suc (ℓCt₁ ⊔ ℓCt₀ ⊔ ℓ))
-ConstraintCategory {ℓCt₀} {ℓCt₁} = DependentCategory {ℓDep₀ = ℓCt₀} {ℓDep₁ = ℓCt₁} (Hask {ℓ})
+ConstraintCategory {ℓCt₀} {ℓCt₁} = DependentCategory {ℓDep₀ = ℓCt₀} {ℓDep₁ = ℓCt₁} (SetCat {ℓ})
 
 ClosedConstraintCategory : {ℓCt₀ ℓCt₁ : Level} → Set (suc (ℓCt₁ ⊔ ℓCt₀ ⊔ ℓ))
 ClosedConstraintCategory {ℓCt₀} {ℓCt₁} = DependentClosedCategory {ℓDep₀ = ℓCt₀} {ℓDep₁ = ℓCt₁} (setClosedCategory {ℓ})
 
 MonoidalConstraintCategory : {ℓCt₀ ℓCt₁ : Level} → Set (suc (ℓCt₁ ⊔ ℓCt₀ ⊔ ℓ))
-MonoidalConstraintCategory {ℓCt₀} {ℓCt₁} = DependentMonoidalCategory {ℓDep₀ = ℓCt₀} {ℓDep₁ = ℓCt₁} (setMonoidalCategory {ℓ})
+MonoidalConstraintCategory {ℓCt₀} {ℓCt₁} = DependentMonoidalCategory {ℓDep₀ = ℓCt₀} {ℓDep₁ = ℓCt₁} (SetMonCat {ℓ})
 
 open Category
 open DependentCategory
@@ -45,15 +44,15 @@ ConstrainedHask : {ℓCt₀ ℓCt₁ : Level} → (Cts : ConstraintCategory {ℓ
 ConstrainedHask Cts = DepCat Cts
 
 -- The constraint embedding functor takes the elements of a constrained Hask and embeds them into Hask by forgetting the constraints.
-ConstraintEmbeddingFunctor : {ℓCt₀ ℓCt₁ : Level} → (Cts : ConstraintCategory {ℓCt₀} {ℓCt₁}) → Functor (ConstrainedHask Cts) Hask
+ConstraintEmbeddingFunctor : {ℓCt₀ ℓCt₁ : Level} → (Cts : ConstraintCategory {ℓCt₀} {ℓCt₁}) → Functor (ConstrainedHask Cts) (SetCat {ℓ})
 ConstraintEmbeddingFunctor Cts = functor proj₁ proj₁ refl refl
 
 -- Property that a constrained category only has one instance of a constraint per type.
 UniqueInstances : {ℓCt₀ ℓCt₁ : Level} → (Cts : ConstraintCategory {ℓCt₀} {ℓCt₁}) → Set (suc ℓ ⊔ ℓCt₀ ⊔ ℓCt₁)
 UniqueInstances {ℓCts₀} {ℓCt₁} Cts 
-  = ((α : Obj Hask) → ProofIrrelevance (DepObj Cts α)) 
+  = ((α : Obj (SetCat {ℓ})) → ProofIrrelevance (DepObj Cts α)) 
   -- For the homomorphisms the constraints may only depend on the type of the functions, not the functions themselves.
-  × ({α β : Obj Hask} → (f g : α → β) → (αCt : DepObj Cts α) → (βCt : DepObj Cts β) → (fCt : DepHom Cts αCt βCt f) → (gCt : DepHom Cts αCt βCt g) → fCt ≅ gCt)
+  × ({α β : Obj (SetCat {ℓ})} → (f g : α → β) → (αCt : DepObj Cts α) → (βCt : DepObj Cts β) → (fCt : DepHom Cts αCt βCt f) → (gCt : DepHom Cts αCt βCt g) → fCt ≅ gCt)
 
 -- A constraint category with unique instances implies that the homomorphisms of the underlying dependent category are unique as well.
 UniqueInstances→DependentHomUniqueness : {ℓCt₀ ℓCt₁ : Level} 
@@ -96,6 +95,6 @@ constraint-embedding-functor-is-injective Cts (uniqueObjInsts , uniqueHomInsts) 
 constraint-category-embedding-is-subcategory : {ℓCt₀ ℓCt₁ : Level} 
                                              → (Cts : ConstraintCategory {ℓCt₀} {ℓCt₁}) 
                                              → UniqueInstances Cts
-                                             → Subcategory (liftCategory Hask)
+                                             → Subcategory (liftCategory (SetCat {ℓ}))
 constraint-category-embedding-is-subcategory Cts uniqueInsts 
   = EmbeddingFunctor→LiftSubcategory (ConstraintEmbeddingFunctor Cts) (constraint-embedding-functor-is-injective Cts uniqueInsts)
