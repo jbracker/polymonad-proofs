@@ -216,3 +216,40 @@ abstract
   insert-elim {x} {y} {z ∷ zs} x=y | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | yes _ | no _ | yes x≤z = ⊥-elim (¬x≤z x≤z)
   insert-elim {x} {y} {z ∷ zs} x=y | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | yes _ | no _ | no _ = cong (_∷_ z) (insert-elim {zs = zs} x=y)
   insert-elim {x} {y} {z ∷ zs} x=y | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | no ¬x=y = ⊥-elim (¬x=y x=y)
+
+abstract
+  insert-elim' : {x y : A} {zs : List A} → IsStructuralEquality eqInstance → x == y → insert y (insert x zs) ≡ insert x zs
+  insert-elim' {x} {y} {[]} sEq x=y with dec-eq x y
+  insert-elim' {x} {y} {[]} sEq x=y | yes _ with dec-eq y x 
+  insert-elim' {x} {y} {[]} sEq x=y | yes _ | yes y=x = cong (λ X → X ∷ []) (sym (sEq x y x=y))
+  insert-elim' {x} {y} {[]} sEq x=y | yes _ | no ¬y=x = ⊥-elim (¬y=x (sym-eq x=y))
+  insert-elim' {x} {y} {[]} sEq x=y | no ¬x=y = ⊥-elim (¬x=y x=y)
+  insert-elim' {x} {y} {z ∷ zs} sEq x=y with dec-eq y z | dec-eq x z
+  insert-elim' {x} {y} {z ∷ zs} sEq x=y | yes y=z | yes x=z with dec-eq x y
+  insert-elim' {x} {y} {z ∷ zs} sEq x=y | yes y=z | yes x=z | yes _ with dec-eq y x
+  insert-elim' {x} {y} {z ∷ zs} sEq x=y | yes y=z | yes x=z | yes _ | yes y=x = cong (λ X → X ∷ zs) (sym (sEq x y x=y))
+  insert-elim' {x} {y} {z ∷ zs} sEq x=y | yes y=z | yes x=z | yes _ | no ¬y=x = ⊥-elim (¬y=x (sym-eq x=y))
+  insert-elim' {x} {y} {z ∷ zs} sEq x=y | yes y=z | yes x=z | no ¬x=y = ⊥-elim (¬x=y x=y)
+  insert-elim' {x} {y} {z ∷ zs} sEq x=y | yes y=z | no ¬x=z = ⊥-elim (¬x=z (trans-eq x=y y=z))
+  insert-elim' {x} {y} {z ∷ zs} sEq x=y | no ¬y=z | yes x=z = ⊥-elim (¬y=z (trans-eq (sym-eq x=y) x=z))
+  insert-elim' {x} {y} {z ∷ zs} sEq x=y | no ¬y=z | no ¬x=z with dec-ord y z | dec-ord x z
+  insert-elim' {x} {y} {z ∷ zs} sEq x=y | no ¬y=z | no ¬x=z | yes y≤z | yes x≤z with dec-eq x y
+  insert-elim' {x} {y} {z ∷ zs} sEq x=y | no ¬y=z | no ¬x=z | yes y≤z | yes x≤z | yes _ with dec-eq y x
+  insert-elim' {x} {y} {z ∷ zs} sEq x=y | no ¬y=z | no ¬x=z | yes y≤z | yes x≤z | yes _ | yes y=x = cong (λ X → X ∷ z ∷ zs) (sym (sEq x y x=y))
+  insert-elim' {x} {y} {z ∷ zs} sEq x=y | no ¬y=z | no ¬x=z | yes y≤z | yes x≤z | yes _ | no ¬y=x = ⊥-elim (¬y=x (sym-eq x=y))
+  insert-elim' {x} {y} {z ∷ zs} sEq x=y | no ¬y=z | no ¬x=z | yes y≤z | yes x≤z | no ¬x=y = ⊥-elim (¬x=y x=y)
+  insert-elim' {x} {y} {z ∷ zs} sEq x=y | no ¬y=z | no ¬x=z | yes y≤z | no ¬x≤z = ⊥-elim (¬x≤z (eq-ord-comp x=y y≤z))
+  insert-elim' {x} {y} {z ∷ zs} sEq x=y | no ¬y=z | no ¬x=z | no ¬y≤z | yes x≤z = ⊥-elim (¬y≤z (eq-ord-comp (sym-eq x=y) x≤z))
+  insert-elim' {x} {y} {z ∷ zs} sEq x=y | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z with dec-eq x y
+  insert-elim' {x} {y} {z ∷ zs} sEq x=y | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | yes _ with dec-eq x z
+  insert-elim' {x} {y} {z ∷ zs} sEq x=y | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | yes _ | yes x=z = ⊥-elim (¬x=z x=z)
+  insert-elim' {x} {y} {z ∷ zs} sEq x=y | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | yes _ | no _ with dec-ord x z
+  insert-elim' {x} {y} {z ∷ zs} sEq x=y | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | yes _ | no _ | yes x≤z = ⊥-elim (¬x≤z x≤z)
+  insert-elim' {x} {y} {z ∷ zs} sEq x=y | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | yes _ | no _ | no _ with dec-eq y x
+  insert-elim' {x} {y} {z ∷ zs} sEq x=y | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | yes _ | no _ | no _ | yes y=x with dec-eq y z
+  insert-elim' {x} {y} {z ∷ zs} sEq x=y | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | yes _ | no _ | no _ | yes y=x | yes y=z = ⊥-elim (¬y=z y=z)
+  insert-elim' {x} {y} {z ∷ zs} sEq x=y | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | yes _ | no _ | no _ | yes y=x | no _ with dec-ord y z 
+  insert-elim' {x} {y} {z ∷ zs} sEq x=y | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | yes _ | no _ | no _ | yes y=x | no _ | yes y≤z = ⊥-elim (¬y≤z y≤z)
+  insert-elim' {x} {y} {z ∷ zs} sEq x=y | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | yes _ | no _ | no _ | yes y=x | no _ | no _ = cong (_∷_ z) (insert-elim' {zs = zs} sEq x=y)
+  insert-elim' {x} {y} {z ∷ zs} sEq x=y | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | yes _ | no _ | no _ | no ¬y=x = ⊥-elim (¬y=x (sym-eq x=y)) -- 
+  insert-elim' {x} {y} {z ∷ zs} sEq x=y | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | no ¬x=y = ⊥-elim (¬x=y x=y)
