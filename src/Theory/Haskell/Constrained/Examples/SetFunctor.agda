@@ -98,105 +98,7 @@ they are equal, because it can inspect there internal representation, which shou
 not be possible for an abstract data type.
 -}
 LSetObj : {ℓ : Level} → Set ℓ → Set (suc ℓ)
-LSetObj {ℓ} A = Σ (OrdInstance {ℓ} {zero} {zero} A) (IsStructuralEquality ∘F OrdInstance.eqInstance)
-
-private
-  module ApplicativeReadyVersion where
-    data Constraint {ℓ₀ ℓ₁ : Level} (Ct : Set ℓ₀ → Set ℓ₁) (Ct-× : {A B : Set ℓ₀} → Ct A → Ct B → Ct (A × B)) : Set ℓ₀ → Set (suc (ℓ₀ ⊔ ℓ₁)) where
-      ProdCt : {A B : Set ℓ₀} → (ct₀ : Constraint Ct Ct-× A) → (ct₁ : Constraint Ct Ct-× B) → Constraint Ct Ct-× (A × B)
-      TheCt : {A : Set ℓ₀} → Ct A → Constraint Ct Ct-× A
-
-    getCt : {ℓ₀ ℓ₁ : Level} {Ct : Set ℓ₀ → Set ℓ₁} {Ct-× : {A B : Set ℓ₀} → Ct A → Ct B → Ct (A × B)} {A : Set ℓ₀}
-          → Constraint Ct Ct-× A → Ct A
-    getCt {Ct-× = Ct-×} (ProdCt cts₀ cts₁) = Ct-× (getCt cts₀) (getCt cts₁)
-    getCt (TheCt ct) = ct
-
-    OrdCt : {ℓ : Level} → Set ℓ → Set (suc (suc ℓ))
-    OrdCt {ℓ} = Constraint (LSetObj {ℓ}) (λ CtA CtB → (OrdInstance-× (proj₁ CtA) (proj₁ CtB)) , IsStructuralEquality-× (proj₁ CtA) (proj₁ CtB) (proj₂ CtA) (proj₂ CtB))
-
-    ConstraintCategoryLSet : {ℓ : Level} → ConstraintCategory {ℓ}
-    ConstraintCategoryLSet {ℓ} = dependentCategory (OrdCt {ℓ}) (λ _ _ _ → ⊤) (λ _ _ → tt) tt (λ _ _ _ → refl) (λ _ → refl) (λ _ → refl)
-    
-    FunctorLSet : {ℓ : Level} → ConstrainedFunctor (ConstraintCategoryLSet {ℓ})
-    FunctorLSet {ℓ} = record
-      { F = F
-      ; map = λ {α} {β} → fmap {α} {β}
-      ; functor-id = λ {α} → functor-id {α}
-      ; functor-compose = λ {α} {β} {γ} {f} {g} → functor-compose {α} {β} {γ} {f} {g}
-      } where
-        Type = Set ℓ
-        open import Theory.Haskell.Constrained {ℓ}
-    
-        ObjCt = OrdCt {ℓ}
-        
-        HomCt : {A B : Type} → ObjCt A → ObjCt B → (A → B) → Set zero
-        HomCt OrdA OrdB f = ⊤
-        
-        CtCat = ConstraintCategoryLSet {ℓ}
-        
-        open DependentCategory CtCat using ( DepCat )
-        open Category DepCat
-        
-        Obj' : Obj → Σ Type (OrdInstance {ℓ} {zero} {zero})
-        Obj' (A , Cts) = A , proj₁ (getCt Cts)
-        
-        F : Obj → Category.Obj Hask
-        F A = LSet (Obj' A)
-        
-        fmap : {A B : Obj} → Σ (proj₁ A → proj₁ B) (HomCt (proj₂ A) (proj₂ B)) → F A → F B
-        fmap (f , tt) set = mapSet f set
-        
-        open ≡-Reasoning
-        
-        abstract
-          functor-id : {A : Obj} → fmap {A} {A} (id {A}) ≡ idF
-          functor-id {A} = fun-ext helper
-            where
-              abstract
-                helper : (x : LSet (Obj' A)) → fmap {A} {A} (id {A}) x ≡ idF x
-                helper (lset [] sorted) = refl
-                helper (lset (x ∷ xs) (allX , sortedX)) = lset-eq _ (x ∷ xs) _ (allX , sortedX) $ begin
-                  insert {OrdA = proj₂ (Obj' A)} x (LSet.xs (mapSet (λ a → a) (lset xs sortedX)))
-                    ≡⟨ cong (insert {OrdA = proj₂ (Obj' A)} x) (map-structure (λ a → a) (lset xs sortedX)) ⟩
-                  insert {OrdA = proj₂ (Obj' A)} x (mapList {OrdA = proj₂ (Obj' A)} {proj₂ (Obj' A)} (λ a → a) xs)
-                    ≡⟨ cong (insert {OrdA = proj₂ (Obj' A)} x) (mapList-id xs sortedX) ⟩
-                  insert {OrdA = proj₂ (Obj' A)} x xs
-                    ≡⟨ insert-adds-in-front allX ⟩
-                  x ∷ xs ∎
-        
-        abstract
-          functor-compose : {α β γ : Obj}
-                          → {f : Hom α β} {g : Hom β γ} 
-                          → fmap {α} {γ} (_∘_ {α} {β} {γ} g f) ≡ fmap {β} {γ} g ∘F fmap {α} {β} f
-          functor-compose {A , CtA} {B , CtB} {C , CtC} {f , tt} {g , tt} = fun-ext (λ xs → helper xs)
-            where
-              OrdA = proj₁ $ getCt CtA
-              OrdB = proj₁ $ getCt CtB
-              OrdC = proj₁ $ getCt CtC
-              struct-eqA = proj₂ $ getCt CtA
-              struct-eqB = proj₂ $ getCt CtB
-              struct-eqC = proj₂ $ getCt CtC
-              
-              ObjA = A , CtA
-              ObjB = B , CtB
-              ObjC = C , CtC
-              
-              abstract
-                helper : (set : LSet (A , OrdA)) → fmap {ObjA} {ObjC} (g ∘F f , tt) set ≡ fmap {ObjB} {ObjC} (g , tt) (fmap {ObjA} {ObjB} (f , tt) set)
-                helper (lset [] (lift tt)) = refl
-                helper (lset (x ∷ xs) (allX , sortedX)) = lset-eq _ _ _ _ $ begin
-                  insert ((g ∘F f) x) (LSet.xs (mapSet (g ∘F f) (lset xs sortedX)))
-                    ≡⟨ cong (insert (g (f x))) (map-structure (g ∘F f) (lset xs sortedX)) ⟩
-                  insert (g (f x)) (mapList {OrdA = OrdA} (g ∘F f) xs)
-                    ≡⟨ cong (insert (g (f x))) (mapList-compose {OrdA = OrdA} struct-eqB struct-eqC f g xs) ⟩
-                  insert (g (f x)) (mapList {OrdA = OrdB} g (mapList {OrdA = OrdA} f xs))
-                    ≡⟨ sym (map-insert-commute g (f x) (mapList {OrdA = OrdA} f xs) struct-eqB struct-eqC) ⟩
-                  mapList {OrdA = OrdB} g (insert (f x) (mapList {OrdA = OrdA} f xs))
-                    ≡⟨ cong (mapList {OrdA = OrdB} {OrdC} g ∘F insert (f x)) (sym (map-structure f (lset xs sortedX))) ⟩
-                  mapList {OrdA = OrdB} g (insert (f x) (LSet.xs (mapSet f (lset xs sortedX))))
-                    ≡⟨ sym (map-structure g (lset (insert (f x) (LSet.xs (mapSet f (lset xs sortedX)))) (insert-preserves-IsSortedNoDupList (LSet.sorted (mapSet f (lset xs sortedX)))))) ⟩
-                  LSet.xs (mapSet g (lset (insert (f x) (LSet.xs (mapSet f (lset xs sortedX)))) (insert-preserves-IsSortedNoDupList (LSet.sorted (mapSet f (lset xs sortedX)))))) ∎
-
+LSetObj {ℓ} A = Σ (OrdInstance {ℓ} {ℓ} {ℓ} A) (IsStructuralEquality ∘F OrdInstance.eqInstance)
 
 module NotApplicativeReady where
 
@@ -223,7 +125,7 @@ module NotApplicativeReady where
       open DependentCategory CtCat using ( DepCat )
       open Category DepCat
       
-      Obj' : Obj → Σ Type (OrdInstance {ℓ} {zero} {zero})
+      Obj' : Obj → Σ Type (OrdInstance {ℓ} {ℓ} {ℓ})
       Obj' (A , OrdA , _) = (A , OrdA)
   
       F : Obj → Category.Obj Hask
@@ -281,14 +183,14 @@ module NotApplicativeReady where
   FunctorLSet-DependentHomUniqueness (f₁ , tt) (.f₁ , tt) refl = refl
   
   FunctorLSet-DependentObjUniqueness : {ℓ : Level} 
-                                     → ((A : Set ℓ) → ProofIrrelevance (OrdInstance {ℓ} {zero} {zero} A)) 
+                                     → ((A : Set ℓ) → ProofIrrelevance (OrdInstance {ℓ} {ℓ} {ℓ} A)) 
                                      → DependentObjUniqueness (ConstrainedFunctor.Cts (FunctorLSet {ℓ}))
   FunctorLSet-DependentObjUniqueness proof-irr-Ord (a₁ , ord-a₂ , struct-eq-a₂) (.a₁ , ord-b₂ , struct-eq-b₂) refl with proof-irr-Ord a₁ ord-a₂ ord-b₂ 
   FunctorLSet-DependentObjUniqueness proof-irr-Ord (a₁ , ord-a , struct-eq-a₂) (.a₁ , .ord-a , struct-eq-b₂) refl | refl 
     = ≡-to-≅ (cong (_,_ ord-a) (proof-irr-IsStructuralEquality (OrdInstance.eqInstance ord-a) struct-eq-a₂ struct-eq-b₂))
   
   FunctorLSet-UniqueInstances : {ℓ : Level}
-                              → ((A : Set ℓ) → ProofIrrelevance (OrdInstance {ℓ} {zero} {zero} A))
+                              → ((A : Set ℓ) → ProofIrrelevance (OrdInstance {ℓ} {ℓ} {ℓ} A))
                               → UniqueInstances (ConstrainedFunctor.Cts (FunctorLSet {ℓ}))
   FunctorLSet-UniqueInstances {ℓ} proof-irr-ord = unique-type-inst , unique-hom-inst
     where
@@ -314,4 +216,100 @@ module NotApplicativeReady where
   FunctorLSetCodomain-IsConcreteCategory {ℓ} = ConstraintCategory→ConcreteCategory (ConstrainedFunctor.Cts FunctorLSet) (λ {a} {b} → FunctorLSet-DependentHomUniqueness {ℓ} {a} {b})
 
 
-open ApplicativeReadyVersion public
+{-
+module ApplicativeReadyVersion where
+  data Constraint {ℓ₀ ℓ₁ : Level} (Ct : Set ℓ₀ → Set ℓ₁) (Ct-× : {A B : Set ℓ₀} → Ct A → Ct B → Ct (A × B)) : Set ℓ₀ → Set (suc (ℓ₀ ⊔ ℓ₁)) where
+    ProdCt : {A B : Set ℓ₀} → (ct₀ : Constraint Ct Ct-× A) → (ct₁ : Constraint Ct Ct-× B) → Constraint Ct Ct-× (A × B)
+    TheCt : {A : Set ℓ₀} → Ct A → Constraint Ct Ct-× A
+                                                     
+  getCt : {ℓ₀ ℓ₁ : Level} {Ct : Set ℓ₀ → Set ℓ₁} {Ct-× : {A B : Set ℓ₀} → Ct A → Ct B → Ct (A × B)} {A : Set ℓ₀}
+        → Constraint Ct Ct-× A → Ct A
+  getCt {Ct-× = Ct-×} (ProdCt cts₀ cts₁) = Ct-× (getCt cts₀) (getCt cts₁)
+  getCt (TheCt ct) = ct
+                     
+  OrdCt : {ℓ : Level} → Set ℓ → Set (suc (suc ℓ))
+  OrdCt {ℓ} = Constraint (LSetObj {ℓ}) (λ CtA CtB → (OrdInstance-× (proj₁ CtA) (proj₁ CtB)) , IsStructuralEquality-× (proj₁ CtA) (proj₁ CtB) (proj₂ CtA) (proj₂ CtB))
+                                                                                                                                                                
+  ConstraintCategoryLSet : {ℓ : Level} → ConstraintCategory {ℓ}
+  ConstraintCategoryLSet {ℓ} = dependentCategory (OrdCt {ℓ}) (λ _ _ _ → ⊤) (λ _ _ → tt) tt (λ _ _ _ → refl) (λ _ → refl) (λ _ → refl)
+  
+  FunctorLSet : {ℓ : Level} → ConstrainedFunctor (ConstraintCategoryLSet {ℓ})
+  FunctorLSet {ℓ} = record
+    { F = F
+    ; map = λ {α} {β} → fmap {α} {β}
+    ; functor-id = λ {α} → functor-id {α}
+    ; functor-compose = λ {α} {β} {γ} {f} {g} → functor-compose {α} {β} {γ} {f} {g}
+    } where
+      Type = Set ℓ
+      open import Theory.Haskell.Constrained {ℓ}
+  
+      ObjCt = OrdCt {ℓ}
+      
+      HomCt : {A B : Type} → ObjCt A → ObjCt B → (A → B) → Set zero
+      HomCt OrdA OrdB f = ⊤
+      
+      CtCat = ConstraintCategoryLSet {ℓ}
+      
+      open DependentCategory CtCat using ( DepCat )
+      open Category DepCat
+      
+      Obj' : Obj → Σ Type (OrdInstance {ℓ} {ℓ} {ℓ})
+      Obj' (A , Cts) = A , proj₁ (getCt Cts)
+      
+      F : Obj → Category.Obj Hask
+      F A = LSet (Obj' A)
+      
+      fmap : {A B : Obj} → Σ (proj₁ A → proj₁ B) (HomCt (proj₂ A) (proj₂ B)) → F A → F B
+      fmap (f , tt) set = mapSet f set
+      
+      open ≡-Reasoning
+      
+      abstract
+        functor-id : {A : Obj} → fmap {A} {A} (id {A}) ≡ idF
+        functor-id {A} = fun-ext helper
+          where
+            abstract
+              helper : (x : LSet (Obj' A)) → fmap {A} {A} (id {A}) x ≡ idF x
+              helper (lset [] sorted) = refl
+              helper (lset (x ∷ xs) (allX , sortedX)) = lset-eq _ (x ∷ xs) _ (allX , sortedX) $ begin
+                insert {OrdA = proj₂ (Obj' A)} x (LSet.xs (mapSet (λ a → a) (lset xs sortedX)))
+                  ≡⟨ cong (insert {OrdA = proj₂ (Obj' A)} x) (map-structure (λ a → a) (lset xs sortedX)) ⟩
+                insert {OrdA = proj₂ (Obj' A)} x (mapList {OrdA = proj₂ (Obj' A)} {proj₂ (Obj' A)} (λ a → a) xs)
+                  ≡⟨ cong (insert {OrdA = proj₂ (Obj' A)} x) (mapList-id xs sortedX) ⟩
+                insert {OrdA = proj₂ (Obj' A)} x xs
+                  ≡⟨ insert-adds-in-front allX ⟩
+                x ∷ xs ∎
+      
+      abstract
+        functor-compose : {α β γ : Obj}
+                        → {f : Hom α β} {g : Hom β γ} 
+                        → fmap {α} {γ} (_∘_ {α} {β} {γ} g f) ≡ fmap {β} {γ} g ∘F fmap {α} {β} f
+        functor-compose {A , CtA} {B , CtB} {C , CtC} {f , tt} {g , tt} = fun-ext (λ xs → helper xs)
+          where
+            OrdA = proj₁ $ getCt CtA
+            OrdB = proj₁ $ getCt CtB
+            OrdC = proj₁ $ getCt CtC
+            struct-eqA = proj₂ $ getCt CtA
+            struct-eqB = proj₂ $ getCt CtB
+            struct-eqC = proj₂ $ getCt CtC
+            
+            ObjA = A , CtA
+            ObjB = B , CtB
+            ObjC = C , CtC
+            
+            abstract
+              helper : (set : LSet (A , OrdA)) → fmap {ObjA} {ObjC} (g ∘F f , tt) set ≡ fmap {ObjB} {ObjC} (g , tt) (fmap {ObjA} {ObjB} (f , tt) set)
+              helper (lset [] (lift tt)) = refl
+              helper (lset (x ∷ xs) (allX , sortedX)) = lset-eq _ _ _ _ $ begin
+                insert ((g ∘F f) x) (LSet.xs (mapSet (g ∘F f) (lset xs sortedX)))
+                  ≡⟨ cong (insert (g (f x))) (map-structure (g ∘F f) (lset xs sortedX)) ⟩
+                insert (g (f x)) (mapList {OrdA = OrdA} (g ∘F f) xs)
+                  ≡⟨ cong (insert (g (f x))) (mapList-compose {OrdA = OrdA} struct-eqB struct-eqC f g xs) ⟩
+                insert (g (f x)) (mapList {OrdA = OrdB} g (mapList {OrdA = OrdA} f xs))
+                  ≡⟨ sym (map-insert-commute g (f x) (mapList {OrdA = OrdA} f xs) struct-eqB struct-eqC) ⟩
+                mapList {OrdA = OrdB} g (insert (f x) (mapList {OrdA = OrdA} f xs))
+                  ≡⟨ cong (mapList {OrdA = OrdB} {OrdC} g ∘F insert (f x)) (sym (map-structure f (lset xs sortedX))) ⟩
+                mapList {OrdA = OrdB} g (insert (f x) (LSet.xs (mapSet f (lset xs sortedX))))
+                  ≡⟨ sym (map-structure g (lset (insert (f x) (LSet.xs (mapSet f (lset xs sortedX)))) (insert-preserves-IsSortedNoDupList (LSet.sorted (mapSet f (lset xs sortedX)))))) ⟩
+                LSet.xs (mapSet g (lset (insert (f x) (LSet.xs (mapSet f (lset xs sortedX)))) (insert-preserves-IsSortedNoDupList (LSet.sorted (mapSet f (lset xs sortedX)))))) ∎
+-}
