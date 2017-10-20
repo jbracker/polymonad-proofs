@@ -10,6 +10,7 @@ open import Data.Product hiding ( map )
 
 open import Relation.Nullary
 open import Relation.Binary.PropositionalEquality
+open ≡-Reasoning
 
 open import Extensionality
 
@@ -17,7 +18,7 @@ open import Theory.Haskell.Constrained.Examples.SetFunctor.Base
 
 module Theory.Haskell.Constrained.Examples.SetFunctor.Insert {ℓ ℓEq ℓOrd : Level} {A : Set ℓ} {OrdA : OrdInstance {ℓ} {ℓEq} {ℓOrd} A} where 
 
-open OrdInstance OrdA
+open OrdInstance OrdA renaming ( eqInstance to EqA )
 
 private
   Type = Set ℓ
@@ -50,9 +51,6 @@ insert-preserves-IsSortedNoDupList {a} {x ∷ xs} (allX , sorted) | yes a=x = Is
 insert-preserves-IsSortedNoDupList {a} {x ∷ xs} (allX , sorted) | no ¬a=x with dec-ord a x
 insert-preserves-IsSortedNoDupList {a} {x ∷ xs} (allX , sorted) | no ¬a=x | yes a≤x = (a≤x , ¬a=x) ∷ IsSortedNoDupList-replace-ord' OrdA a≤x allX , allX , sorted
 insert-preserves-IsSortedNoDupList {a} {x ∷ xs} (allX , sorted) | no ¬a=x | no ¬a≤x = insert-preserves-IsSortedNoDupList' ¬a≤x ¬a=x allX , insert-preserves-IsSortedNoDupList sorted
-    
-insertSet : (a : A) → LSet (A , OrdA) → LSet (A , OrdA)
-insertSet a (lset xs sorted) = lset (insert a xs) (insert-preserves-IsSortedNoDupList sorted)
 
 abstract
   insert-adds-in-front : {x : A} {xs : List A} → All (λ y → x ≤ y × ¬ (x == y)) xs → insert x xs ≡ x ∷ xs
@@ -218,7 +216,7 @@ abstract
   insert-elim {x} {y} {z ∷ zs} x=y | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | no ¬x=y = ⊥-elim (¬x=y x=y)
 
 abstract
-  insert-elim' : {x y : A} {zs : List A} → IsStructuralEquality eqInstance → x == y → insert y (insert x zs) ≡ insert x zs
+  insert-elim' : {x y : A} {zs : List A} → IsStructuralEquality EqA → x == y → insert y (insert x zs) ≡ insert x zs
   insert-elim' {x} {y} {[]} sEq x=y with dec-eq x y
   insert-elim' {x} {y} {[]} sEq x=y | yes _ with dec-eq y x 
   insert-elim' {x} {y} {[]} sEq x=y | yes _ | yes y=x = cong (λ X → X ∷ []) (sym (sEq x y x=y))
@@ -253,3 +251,42 @@ abstract
   insert-elim' {x} {y} {z ∷ zs} sEq x=y | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | yes _ | no _ | no _ | yes y=x | no _ | no _ = cong (_∷_ z) (insert-elim' {zs = zs} sEq x=y)
   insert-elim' {x} {y} {z ∷ zs} sEq x=y | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | yes _ | no _ | no _ | no ¬y=x = ⊥-elim (¬y=x (sym-eq x=y)) -- 
   insert-elim' {x} {y} {z ∷ zs} sEq x=y | no ¬y=z | no ¬x=z | no ¬y≤z | no ¬x≤z | no ¬x=y = ⊥-elim (¬x=y x=y)
+
+
+insertSet : (a : A) → LSet (A , OrdA) → LSet (A , OrdA)
+insertSet a (lset xs sorted) = lset (insert a xs) (insert-preserves-IsSortedNoDupList sorted)
+
+abstract
+  insertSet-adds-in-front : (x : A) (xs : List A) (sorted : IsSortedNoDupList OrdA (x ∷ xs)) → insertSet x (lset xs (proj₂ sorted)) ≡ lset (x ∷ xs) sorted
+  insertSet-adds-in-front x xs (sortedX , sortedXs) = lset-eq (insert x xs) (x ∷ xs) (insert-preserves-IsSortedNoDupList sortedXs) (sortedX , sortedXs) (insert-adds-in-front sortedX)
+
+abstract
+  insertSet-commute' : (x y : A) → (xs : LSet (A , OrdA)) → ¬ (x == y) → insertSet x (insertSet y xs) ≡ insertSet y (insertSet x xs)
+  insertSet-commute' x y (lset xs sortedXs) ¬x==y = lset-eq (insert x (insert y xs)) (insert y (insert x xs)) 
+                                                            (insert-preserves-IsSortedNoDupList (insert-preserves-IsSortedNoDupList sortedXs)) 
+                                                            (insert-preserves-IsSortedNoDupList (insert-preserves-IsSortedNoDupList sortedXs)) 
+                                                            (insert-commute {xs = xs} ¬x==y)
+
+abstract
+  insertSet-elim : (x y : A) → (xs : LSet (A , OrdA)) → x == y → insertSet x (insertSet y xs) ≡ insertSet x xs
+  insertSet-elim x y (lset xs sortedXs) x==y = lset-eq (insert x (insert y xs)) (insert x xs) 
+                                                       (insert-preserves-IsSortedNoDupList (insert-preserves-IsSortedNoDupList sortedXs)) 
+                                                       (insert-preserves-IsSortedNoDupList sortedXs) 
+                                                       (insert-elim {x = x} {y = y} {zs = xs} x==y) 
+
+abstract
+  insertSet-elim' : (x y : A) (xs : LSet (A , OrdA)) → IsStructuralEquality EqA → x == y → insertSet y (insertSet x xs) ≡ insertSet x xs
+  insertSet-elim' x z (lset xs sortedXs) sEq x==z = lset-eq (insert z (insert x xs)) (insert x xs)
+                                                            (insert-preserves-IsSortedNoDupList (insert-preserves-IsSortedNoDupList sortedXs))
+                                                            (insert-preserves-IsSortedNoDupList sortedXs) 
+                                                            (insert-elim' {x = x} {y = z} {zs = xs} sEq x==z)
+abstract
+  insertSet-commute : (x y : A) → (xs : LSet (A , OrdA)) → IsStructuralEquality EqA → insertSet x (insertSet y xs) ≡ insertSet y (insertSet x xs)
+  insertSet-commute x y xs sEq with dec-eq x y
+  insertSet-commute x y xs sEq | yes x=y = begin
+    insertSet x (insertSet y xs) 
+      ≡⟨ insertSet-elim x y xs x=y ⟩
+    insertSet x xs
+      ≡⟨ sym (insertSet-elim' x y xs sEq x=y) ⟩
+    insertSet y (insertSet x xs) ∎
+  insertSet-commute x y xs sEq | no ¬x=y = insertSet-commute' x y xs ¬x=y
