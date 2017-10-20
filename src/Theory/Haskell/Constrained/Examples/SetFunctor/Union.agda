@@ -78,8 +78,16 @@ union-insert' z (x ∷ xs) ys (sortedZ , sortedXs) = refl
     
 union-insert : (z : A) → (xs ys : LSet (A , OrdA))
              → insertSet z (union xs ys) ≡ union (insertSet z xs) ys
-union-insert z (lset [] sortedXs) ys = {!!}
+union-insert z (lset [] sortedXs) ys = refl
 union-insert z (lset (x ∷ xs) sortedXs) ys = {!!}
+{-
+insertSet z (insertSet x (union (lset xs (proj₂ sortedXs)) ys))
+  ≡ 
+union (insertSet z (insertSet x (lset xs (proj₂ sortedXs)))) ys
+  ≡ 
+union (insertSet z (lset (x ∷ xs) sortedXs)) ys
+-}
+
 
 union-commutative : (as bs : LSet (A , OrdA)) → IsStructuralEquality EqA → union as bs ≡ union bs as
 union-commutative (lset [] _) bs sEq = sym (union-with-empty bs)
@@ -104,12 +112,12 @@ union-commutative (lset (x ∷ xs) (sortedX , sortedXs)) (lset (y ∷ ys) (sorte
     ≡⟨ cong (insertSet y) (union-commutative (lset (x ∷ xs) (sortedX , sortedXs)) (lset ys sortedYs) sEq) ⟩
   insertSet y ( union (lset ys sortedYs) (lset (x ∷ xs) (sortedX , sortedXs)) ) ∎
 
-union-assoc : (xs ys zs : LSet (A , OrdA)) → union xs (union ys zs) ≡ union (union xs ys) zs
-union-assoc (lset [] _) (lset [] _) (lset [] _) = refl
-union-assoc (lset [] _) (lset [] _) (lset (z ∷ zs) sortedZs) = refl
-union-assoc (lset [] _) (lset (y ∷ ys) sortedYs) (lset [] _) = refl
-union-assoc (lset [] _) (lset (y ∷ ys) sortedYs) (lset (z ∷ zs) sortedZs) = refl
-union-assoc (lset (x ∷ xs) sortedXs) (lset [] sortedYs) (lset [] sortedZs) = begin
+union-assoc : (xs ys zs : LSet (A , OrdA)) → IsStructuralEquality EqA → union xs (union ys zs) ≡ union (union xs ys) zs
+union-assoc (lset [] _) (lset [] _) (lset [] _) sEq = refl
+union-assoc (lset [] _) (lset [] _) (lset (z ∷ zs) sortedZs) _sEq = refl
+union-assoc (lset [] _) (lset (y ∷ ys) sortedYs) (lset [] _) _sEq = refl
+union-assoc (lset [] _) (lset (y ∷ ys) sortedYs) (lset (z ∷ zs) sortedZs) _sEq = refl
+union-assoc (lset (x ∷ xs) sortedXs) (lset [] sortedYs) (lset [] sortedZs) _sEq = begin
   insertSet x (union (lset xs (proj₂ sortedXs)) (lset [] (lift tt)))
     ≡⟨ cong (insertSet x) (union-with-empty (lset xs (proj₂ sortedXs))) ⟩
   insertSet x (lset xs (proj₂ sortedXs))
@@ -117,7 +125,7 @@ union-assoc (lset (x ∷ xs) sortedXs) (lset [] sortedYs) (lset [] sortedZs) = b
   insertSet x (union (lset xs (proj₂ sortedXs)) (lset [] sortedYs))
     ≡⟨ sym (union-with-empty (insertSet x (union (lset xs (proj₂ sortedXs)) (lset [] sortedYs)))) ⟩
   union (insertSet x (union (lset xs (proj₂ sortedXs)) (lset [] sortedYs))) (lset [] sortedZs) ∎
-union-assoc (lset (x ∷ xs) sortedXs) (lset [] sortedYs) (lset (z ∷ zs) sortedZs) = begin
+union-assoc (lset (x ∷ xs) sortedXs) (lset [] sortedYs) (lset (z ∷ zs) sortedZs) _sEq = begin
   insertSet x (union (lset xs (proj₂ sortedXs)) (lset (z ∷ zs) sortedZs))
     ≡⟨ union-insert' x xs (lset (z ∷ zs) sortedZs) sortedXs ⟩
   union (lset (x ∷ xs) sortedXs) (lset (z ∷ zs) sortedZs)
@@ -125,7 +133,7 @@ union-assoc (lset (x ∷ xs) sortedXs) (lset [] sortedYs) (lset (z ∷ zs) sorte
   union (insertSet x (lset xs (proj₂ sortedXs))) (lset (z ∷ zs) sortedZs)
     ≡⟨ cong (λ X → union (insertSet x X) (lset (z ∷ zs) sortedZs)) (sym (union-with-empty (lset xs (proj₂ sortedXs)))) ⟩
   union (insertSet x (union (lset xs (proj₂ sortedXs)) (lset [] sortedYs))) (lset (z ∷ zs) sortedZs) ∎
-union-assoc (lset (x ∷ xs) sortedXs) (lset (y ∷ ys) sortedYs) (lset [] sortedZs) = begin
+union-assoc (lset (x ∷ xs) sortedXs) (lset (y ∷ ys) sortedYs) (lset [] sortedZs) _sEq = begin
   insertSet x (union (lset xs (proj₂ sortedXs)) (insertSet y (union (lset ys (proj₂ sortedYs)) (lset [] sortedZs))))
     ≡⟨ cong (λ X → insertSet x (union (lset xs (proj₂ sortedXs)) (insertSet y X))) (union-with-empty (lset ys (proj₂ sortedYs))) ⟩
   insertSet x (union (lset xs (proj₂ sortedXs)) (insertSet y (lset ys (proj₂ sortedYs))))
@@ -133,35 +141,35 @@ union-assoc (lset (x ∷ xs) sortedXs) (lset (y ∷ ys) sortedYs) (lset [] sorte
   insertSet x (union (lset xs (proj₂ sortedXs)) (lset (y ∷ ys) sortedYs))
     ≡⟨ sym (union-with-empty (insertSet x (union (lset xs (proj₂ sortedXs)) (lset (y ∷ ys) sortedYs)))) ⟩
   union (insertSet x (union (lset xs (proj₂ sortedXs)) (lset (y ∷ ys) sortedYs))) (lset [] sortedZs) ∎
-union-assoc (lset (x ∷ xs) sortedXs) (lset (y ∷ ys) sortedYs) (lset (z ∷ zs) sortedZs) = begin
+union-assoc (lset (x ∷ xs) sortedXs) (lset (y ∷ ys) sortedYs) (lset (z ∷ zs) sortedZs)  sEq = begin
   insertSet x (union (lset xs (proj₂ sortedXs)) (insertSet y (union (lset ys (proj₂ sortedYs)) (lset (z ∷ zs) sortedZs))))
-    ≡⟨ {!!} ⟩
+    ≡⟨ cong (insertSet x) (union-commutative (lset xs (proj₂ sortedXs)) (insertSet y (union (lset ys (proj₂ sortedYs)) (lset (z ∷ zs) sortedZs))) sEq) ⟩
   insertSet x (union (insertSet y (union (lset ys (proj₂ sortedYs)) (lset (z ∷ zs) sortedZs))) (lset xs (proj₂ sortedXs)))
     ≡⟨ {!!} ⟩
   insertSet x (insertSet y (union (union (lset ys (proj₂ sortedYs)) (lset (z ∷ zs) sortedZs)) (lset xs (proj₂ sortedXs))))
-    ≡⟨ {!!} ⟩
+    ≡⟨ cong (λ X → insertSet x (insertSet y (union (union (lset ys (proj₂ sortedYs)) X) (lset xs (proj₂ sortedXs))))) (sym (insertSet-adds-in-front z zs sortedZs)) ⟩
   insertSet x (insertSet y (union (union (lset ys (proj₂ sortedYs)) (insertSet z (lset zs (proj₂ sortedZs)))) (lset xs (proj₂ sortedXs))))
-    ≡⟨ {!!} ⟩
+    ≡⟨ cong (λ X → insertSet x (insertSet y (union X (lset xs (proj₂ sortedXs))))) (union-commutative (lset ys (proj₂ sortedYs)) (insertSet z (lset zs (proj₂ sortedZs))) sEq) ⟩
   insertSet x (insertSet y (union (union (insertSet z (lset zs (proj₂ sortedZs))) (lset ys (proj₂ sortedYs))) (lset xs (proj₂ sortedXs))))
     ≡⟨ {!!} ⟩
   insertSet x (insertSet y (union (insertSet z (union (lset zs (proj₂ sortedZs)) (lset ys (proj₂ sortedYs)))) (lset xs (proj₂ sortedXs))))
     ≡⟨ {!!} ⟩
   insertSet x (insertSet y (insertSet z (union (union (lset zs (proj₂ sortedZs)) (lset ys (proj₂ sortedYs))) (lset xs (proj₂ sortedXs)))))
-    ≡⟨ cong (insertSet x ∘F insertSet y ∘F insertSet z) (sym $ union-assoc (lset zs (proj₂ sortedZs)) (lset ys (proj₂ sortedYs)) (lset xs (proj₂ sortedXs))) ⟩
+    ≡⟨ cong (insertSet x ∘F insertSet y ∘F insertSet z) (sym $ union-assoc (lset zs (proj₂ sortedZs)) (lset ys (proj₂ sortedYs)) (lset xs (proj₂ sortedXs)) sEq) ⟩
   insertSet x (insertSet y (insertSet z (union (lset zs (proj₂ sortedZs)) (union (lset ys (proj₂ sortedYs)) (lset xs (proj₂ sortedXs))))))
     ≡⟨ {!!} ⟩
   insertSet x (insertSet y (union (insertSet z (lset zs (proj₂ sortedZs))) (union (lset ys (proj₂ sortedYs)) (lset xs (proj₂ sortedXs)))))
-    ≡⟨ {!!} ⟩
+    ≡⟨ cong (λ X → insertSet x (insertSet y (union X (union (lset ys (proj₂ sortedYs)) (lset xs (proj₂ sortedXs)))))) (insertSet-adds-in-front z zs sortedZs) ⟩
   insertSet x (insertSet y (union (lset (z ∷ zs) sortedZs) (union (lset ys (proj₂ sortedYs)) (lset xs (proj₂ sortedXs)))))
     ≡⟨ {!!} ⟩
   insertSet x (union (lset (z ∷ zs) sortedZs) (insertSet y (union (lset ys (proj₂ sortedYs)) (lset xs (proj₂ sortedXs)))))
     ≡⟨ {!!} ⟩
   insertSet x (union (lset (z ∷ zs) sortedZs) (union (insertSet y (lset ys (proj₂ sortedYs))) (lset xs (proj₂ sortedXs))))
-    ≡⟨ {!!} ⟩
+    ≡⟨ cong (λ X → insertSet x (union (lset (z ∷ zs) sortedZs) (union X (lset xs (proj₂ sortedXs))))) (insertSet-adds-in-front y ys sortedYs) ⟩
   insertSet x (union (lset (z ∷ zs) sortedZs) (union (lset (y ∷ ys) sortedYs) (lset xs (proj₂ sortedXs))))
-    ≡⟨ {!!} ⟩
+    ≡⟨ cong (insertSet x) (union-commutative (lset (z ∷ zs) sortedZs) (union (lset (y ∷ ys) sortedYs) (lset xs (proj₂ sortedXs))) sEq) ⟩
   insertSet x (union (union (lset (y ∷ ys) sortedYs) (lset xs (proj₂ sortedXs))) (lset (z ∷ zs) sortedZs))
-    ≡⟨ {!!} ⟩
+    ≡⟨ cong (λ X → insertSet x (union X (lset (z ∷ zs) sortedZs))) (union-commutative (lset (y ∷ ys) sortedYs) (lset xs (proj₂ sortedXs)) sEq) ⟩
   insertSet x (union (union (lset xs (proj₂ sortedXs)) (lset (y ∷ ys) sortedYs)) (lset (z ∷ zs) sortedZs))
     ≡⟨ {!!} ⟩
   union (insertSet x (union (lset xs (proj₂ sortedXs)) (lset (y ∷ ys) sortedYs))) (lset (z ∷ zs) sortedZs) ∎
