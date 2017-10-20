@@ -72,7 +72,6 @@ MonadLSet = record
       → [ J ]₀ A → LSet₀ A
     η {A} a = lset (a ∷ []) ([] , (lift tt))
     
-    
     kext : {A B : Obj CtCatLSet} → ([ J ]₀ A → LSet₀ B) → LSet₀ A → LSet₀ B
     kext {A} {B} f (lset [] _) = lset [] (lift tt)
     kext {A} {B} f (lset (x ∷ xs) (sortedX , sortedXs)) = union (f x) (kext {A} {B} f (lset xs sortedXs))
@@ -87,9 +86,7 @@ MonadLSet = record
       insertSet kx (union (lset kxs sortedKXs) (lset [] (lift tt)))
         ≡⟨ cong (insertSet kx) (union-with-empty (lset kxs sortedKXs)) ⟩ 
       insertSet kx (lset kxs sortedKXs)
-        ≡⟨ refl ⟩
-      lset (insert kx kxs) (insert-preserves-IsSortedNoDupList sortedKXs) 
-        ≡⟨ lset-eq (insert kx kxs) (kx ∷ kxs) (insert-preserves-IsSortedNoDupList sortedKXs) (sortedKX , sortedKXs) (insert-adds-in-front sortedKX) ⟩ 
+        ≡⟨ insertSet-adds-in-front kx kxs (sortedKX , sortedKXs) ⟩ 
       lset (kx ∷ kxs) (sortedKX , sortedKXs) ∎
     
     l-id : {A : Obj CtCatLSet}
@@ -100,8 +97,14 @@ MonadLSet = record
          insertSet x (kext (η {A}) (lset xs sortedXs))
            ≡⟨ cong (insertSet x) (l-id (lset xs sortedXs)) ⟩
          insertSet x (lset xs sortedXs)
-           ≡⟨ lset-eq (insert x xs) (x ∷ xs) (insert-preserves-IsSortedNoDupList sortedXs) (sortedX , sortedXs) (insert-adds-in-front sortedX) ⟩
+           ≡⟨ insertSet-adds-in-front x xs (sortedX , sortedXs) ⟩
          lset (x ∷ xs) (sortedX , sortedXs) ∎
+    
+    kext-union-dist : {A B : Obj CtCatLSet}
+                    → (f : ty A → LSet₀ B) 
+                    → (xs ys : LSet₀ A)
+                    → kext {A} {B} f (union xs ys) ≡ union (kext {A} {B} f xs) (kext {A} {B} f ys)
+    kext-union-dist f xs ys = {!!}
     
     coher : {A B C : Obj CtCatLSet}
           → (k : [ J ]₀ A → LSet₀ B) 
@@ -116,7 +119,24 @@ MonadLSet = record
       union (kext l (lset kxs sortedKXs)) ((kext (kext l ∘F k)) (lset xs sortedXs))
         ≡⟨ {!!} ⟩
       kext l (insertSet kx (union (lset kxs sortedKXs) (kext k (lset xs sortedXs)))) ∎
-    coher {A} {B} {C} k l (lset (x ∷ xs) (sortedX , sortedXs)) | lset (kx ∷ kxs) (sortedKX , sortedKXs) | lset (lkx ∷ lkxs) sorted = {!!} 
+    coher {A} {B} {C} k l (lset (x ∷ xs) (sortedX , sortedXs)) | lset (kx ∷ kxs) (sortedKX , sortedKXs) | lset (lkx ∷ lkxs) sorted = begin
+      union (insertSet lkx (union (lset lkxs (proj₂ sorted)) (kext l (lset kxs sortedKXs)))) (kext (kext l ∘F k) (lset xs sortedXs))
+        ≡⟨ {!!} ⟩
+      union (union (lset (lkx ∷ lkxs) sorted) (kext {B} {C} l (lset kxs sortedKXs))) (kext {A} {C} (kext {B} {C} l ∘F k) (lset xs sortedXs))
+        ≡⟨ {!!} ⟩
+      union (union (lset (lkx ∷ lkxs) sorted) (kext {B} {C} l (lset kxs sortedKXs))) ((kext {B} {C} l ∘F kext {A} {B} k) (lset xs sortedXs))
+        ≡⟨ {!!} ⟩
+      kext {B} {C} l (union (lset (kx ∷ kxs) (sortedKX , sortedKXs)) (kext {A} {B} k (lset xs sortedXs)))
+        ≡⟨ {!!} ⟩
+      kext {B} {C} l (union (lset (kx ∷ kxs) (sortedKX , sortedKXs)) (kext {A} {B} k (lset xs sortedXs)))
+        ≡⟨ {!!} ⟩
+      kext l (insertSet kx (union (lset kxs sortedKXs) (kext k (lset xs sortedXs)))) ∎ 
+{- (lset
+       (insert kx
+        (LSet.xs (union (lset kxs sortedKXs) (kext k (lset xs sortedXs)))))
+       (insert-preserves-IsSortedNoDupList
+        (LSet.sorted
+         (union (lset kxs sortedKXs) (kext k (lset xs sortedXs)))))) -} 
 
 {- without l kx
 
