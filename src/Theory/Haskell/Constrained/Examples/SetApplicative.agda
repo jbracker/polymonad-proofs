@@ -35,11 +35,12 @@ open import Theory.Haskell.Constrained.Functor
 open import Theory.Haskell.Constrained.Applicative
 
 open import Theory.Haskell.Constrained.Examples.SetFunctor.Base
+open import Theory.Haskell.Constrained.Examples.SetFunctor.Instances
 open import Theory.Haskell.Constrained.Examples.SetFunctor.Product
 open import Theory.Haskell.Constrained.Examples.SetFunctor.Map
 open import Theory.Haskell.Constrained.Examples.SetFunctor.Insert
 open import Theory.Haskell.Constrained.Examples.SetFunctor.Union
-open import Theory.Haskell.Constrained.Examples.SetFunctor.Instances
+open import Theory.Haskell.Constrained.Examples.SetFunctor.Ap
 open import Theory.Haskell.Constrained.Examples.SetFunctor
 
 module Theory.Haskell.Constrained.Examples.SetApplicative {ℓ : Level} where 
@@ -139,17 +140,9 @@ ApplicativeLSet = record
                ≡ (ap' b b' ∘F (λ x → F₁ {a} {b} f (proj₁ x) , F₁ {a'} {b'} f' (proj₂ x))) x
     naturality {a} {a'} {b} {b'} {f} {f'} (lset [] sorted , ys) = refl
     naturality {A} {A'} {B} {B'} {f , tt} {f' , tt} (lset (x ∷ xs) (sortedX , sortedXs) , ys) = begin
-      mapSet {OrdA = ord-× A A'} {ord-× B B'} (f *** f') (ap {A = tyOrd A} {tyOrd A'} (lset (x ∷ xs) (sortedX , sortedXs) , ys))
-        ≡⟨ refl ⟩
-      mapSet {OrdA = ord-× A A'} {ord-× B B'} (f *** f') ( unions (mapSet (λ a → mapSet (λ b → (a , b)) ys) (lset (x ∷ xs) (sortedX , sortedXs))) )
+      (F₁ {A ⊗₀ A'} {B ⊗₀ B'} (_⊗₁_ {A} {B} {A'} {B'} (f , tt) (f' , tt)) ∘F ap' A A') (lset (x ∷ xs) (sortedX , sortedXs) , ys)
         ≡⟨ {!!} ⟩
-      unions ( mapSet {OrdA = ord A} {OrdLSet {A = tyOrd-× B B'}} (λ a → mapSet {OrdA = ord A'} {ord-× B B'} (λ b → (f a , f' b)) ys ) (lset (x ∷ xs) (sortedX , sortedXs)) )
-        ≡⟨ cong (λ X → unions (X (lset (x ∷ xs) (sortedX , sortedXs)))) 
-                (ConstrainedFunctor.functor-compose (FunctorLSet {ℓ}) {α = A} {β = B} {γ = lset-× B B'} {f = f , tt} {g = (λ a → mapSet {OrdA = ord A'} {ord-× B B'} (λ b → (a , f' b)) ys) , tt}) ⟩
-      unions ( mapSet {OrdA = ord B} {OrdLSet {A = tyOrd-× B B'}} (λ a → mapSet {OrdA = ord A'} {ord-× B B'} (λ b → (a , f' b)) ys ) ( mapSet {OrdA = ord A} {ord B} f (lset (x ∷ xs) (sortedX , sortedXs)) ) )
-        ≡⟨ cong (λ X → unions ( mapSet X ( mapSet {OrdA = ord A} {ord B} f (lset (x ∷ xs) (sortedX , sortedXs)) ) )) 
-                (fun-ext λ a → cong (λ X → X ys) (ConstrainedFunctor.functor-compose (FunctorLSet {ℓ}) {α = A'} {β = B'} {γ = all-× B B'} {f = f' , tt} {g = (λ b → (a , b)) , tt})) ⟩
-      unions ( mapSet (λ a → mapSet (λ b → (a , b)) (mapSet {OrdA = ord A'} {ord B'} f' ys) ) ( mapSet {OrdA = ord A} {ord B} f (lset (x ∷ xs) (sortedX , sortedXs)) ) ) ∎
+      (ap' B B' ∘F (λ x → F₁ {A} {B} (f , tt) (proj₁ x) , F₁ {A'} {B'} (f' , tt) (proj₂ x))) (lset (x ∷ xs) (sortedX , sortedXs) , ys) ∎
     
     associativity : (x y z : Obj) 
                   → F₁ {(x ⊗₀ y) ⊗₀ z} {x ⊗₀ (y ⊗₀ z)} (α x y z) ∘F (ap' (x ⊗₀ y) z ∘F (λ a → ap' x y (proj₁ a) , proj₂ a))
