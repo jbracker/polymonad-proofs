@@ -75,3 +75,12 @@ abstract
     union (f x) (union (kext f (lset xs sortedXs)) (kext f ys))
       ≡⟨ union-assoc (f x) (kext f (lset xs sortedXs)) (kext f ys) sEqB ⟩
     union (union (f x) (kext f (lset xs sortedXs))) (kext f ys) ∎
+
+abstract
+  kext-map-eq : (f : A → B) → (xs : LSet (A , OrdA))
+              → kext (singleton (B , OrdB) ∘F f) xs ≡ mapSet f xs
+  kext-map-eq f (lset [] sorted) = refl
+  kext-map-eq f (lset (x ∷ xs) (sortedX , sortedXs)) = begin
+    insertSet (f x) (kext (singleton (B , OrdB) ∘F f) (lset xs sortedXs))
+      ≡⟨ cong (insertSet (f x)) (kext-map-eq f (lset xs sortedXs)) ⟩
+    insertSet (f x) (mapSet f (lset xs sortedXs)) ∎
