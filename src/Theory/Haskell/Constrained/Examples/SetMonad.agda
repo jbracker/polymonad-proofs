@@ -48,6 +48,28 @@ module Theory.Haskell.Constrained.Examples.SetMonad {ℓ : Level} where
 
 open NotApplicativeReady renaming ( FunctorLSet to CtFunctorLSet )
 
+
+abstract
+  kext-coher : {A B C : Set ℓ}
+             → {OrdA : OrdInstance {ℓ} {ℓ} {ℓ} A} {OrdB : OrdInstance {ℓ} {ℓ} {ℓ} B} {OrdC : OrdInstance {ℓ} {ℓ} {ℓ} C}
+             → (k : A → LSet (B , OrdB)) 
+             → (l : B → LSet (C , OrdC))
+             → (xs : LSet (A , OrdA))
+             → IsStructuralEquality (OrdInstance.eqInstance OrdB)
+             → IsStructuralEquality (OrdInstance.eqInstance OrdC)
+             → (kext {OrdA = OrdA} {OrdC} (kext {OrdA = OrdB} {OrdC} l ∘F k)) xs
+             ≡ (kext {OrdA = OrdB} {OrdC} l ∘F kext {OrdA = OrdA} {OrdB} k) xs
+  kext-coher {A} {B} {C} {OrdA} {OrdB} {OrdC} k l (lset [] sorted) sEqB sEqC = refl
+  kext-coher {A} {B} {C} {OrdA} {OrdB} {OrdC} k l (lset (x ∷ xs) (sortedX , sortedXs)) sEqB sEqC = begin
+    union (kext l (k x)) (kext (kext l ∘F k) (lset xs sortedXs))
+      ≡⟨ cong (λ X → union (kext l (k x)) X) (kext-coher k l (lset xs sortedXs) sEqB sEqC) ⟩
+    union (kext l (k x)) ((kext l ∘F kext k) (lset xs sortedXs))
+      ≡⟨ sym (kext-union-dist l (k x) (kext k (lset xs sortedXs)) sEqB sEqC) ⟩
+    kext l (union (k x) (kext k (lset xs sortedXs)))
+      ≡⟨ refl ⟩
+    (kext l ∘F kext k) (lset (x ∷ xs) (sortedX , sortedXs)) ∎
+
+
 private
   FunctorLSet = ConstrainedFunctor.CtFunctor (CtFunctorLSet {ℓ})
   J = DependentCategory.forgetful-functor (ConstraintCategoryLSet {ℓ})
@@ -114,12 +136,4 @@ MonadLSet = record
             → (l : [ J ]₀ B → LSet₀ C)
             → (x : LSet₀ A)
             → (kext {OrdA = ord A} {ord C} (kext {OrdA = ord B} {ord C} l ∘F k)) x ≡ (kext {OrdA = ord B} {ord C} l ∘F kext {OrdA = ord A} {ord B} k) x
-      coher k l (lset [] _) = refl
-      coher {A} {B} {C} k l (lset (x ∷ xs) (sortedX , sortedXs)) = begin
-        union (kext l (k x)) (kext (kext l ∘F k) (lset xs sortedXs))
-          ≡⟨ cong (λ X → union (kext l (k x)) X) (coher {A} {B} {C} k l (lset xs sortedXs)) ⟩
-        union (kext l (k x)) ((kext l ∘F kext k) (lset xs sortedXs))
-          ≡⟨ sym (kext-union-dist l (k x) (kext k (lset xs sortedXs)) (sEq B) (sEq C)) ⟩
-        kext l (union (k x) (kext k (lset xs sortedXs)))
-          ≡⟨ refl ⟩
-        (kext l ∘F kext k) (lset (x ∷ xs) (sortedX , sortedXs)) ∎
+      coher {A} {B} {C} k l xs = kext-coher k l xs (sEq B) (sEq C)
