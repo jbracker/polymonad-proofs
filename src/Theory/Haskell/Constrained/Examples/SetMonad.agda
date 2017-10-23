@@ -48,6 +48,19 @@ module Theory.Haskell.Constrained.Examples.SetMonad {ℓ : Level} where
 
 open NotApplicativeReady renaming ( FunctorLSet to CtFunctorLSet )
 
+abstract
+  kext-right-id : {A B : Set ℓ}
+                → {OrdA : OrdInstance {ℓ} {ℓ} {ℓ} A} {OrdB : OrdInstance {ℓ} {ℓ} {ℓ} B}
+                → (k : A → LSet (B , OrdB)) → (x : A)
+                → (kext {OrdA = OrdA} {OrdB} k ∘F singleton (A , OrdA)) x ≡ k x
+  kext-right-id k x with k x 
+  kext-right-id k x | lset [] _ = refl
+  kext-right-id k x | lset (kx ∷ kxs) (sortedKX , sortedKXs) = begin
+    insertSet kx (union (lset kxs sortedKXs) (lset [] (lift tt)))
+      ≡⟨ cong (insertSet kx) (union-with-empty (lset kxs sortedKXs)) ⟩ 
+    insertSet kx (lset kxs sortedKXs)
+      ≡⟨ insertSet-adds-in-front kx kxs (sortedKX , sortedKXs) ⟩ 
+    lset (kx ∷ kxs) (sortedKX , sortedKXs) ∎
 
 abstract
   kext-coher : {A B C : Set ℓ}
@@ -81,9 +94,9 @@ MonadLSet : RelativeMonad LSet₀ J
 MonadLSet = record
   { η = λ {a} → η {a}
   ; kext = λ {a} {b} → kext {OrdA = ord a} {ord b}
-  ; right-id = λ {A} {B} {k} → fun-ext (r-id {A} {B} k)
+  ; right-id = λ {A} {B} {k} → fun-ext (kext-right-id {A = ty A} {ty B} {ord A} {ord B} k)
   ; left-id = λ {A} → fun-ext (l-id {A})
-  ; coher = λ {A} {B} {C} {k} {l} → fun-ext (coher {A} {B} {C} k l)
+  ; coher = λ {A} {B} {C} {k} {l} → fun-ext (λ xs → kext-coher k l xs (sEq B) (sEq C))
   } where
     CtCatLSet : Category {suc ℓ} {ℓ}
     CtCatLSet = DependentCategory.DepCat (ConstraintCategoryLSet {ℓ})
@@ -103,20 +116,6 @@ MonadLSet = record
     η : {A : Obj CtCatLSet} 
       → [ J ]₀ A → LSet₀ A
     η {A} a = singleton (ty A , ord A) a
-
-    abstract
-      r-id : {A B : Obj CtCatLSet}
-           → (k : [ J ]₀ A → LSet₀ B) 
-           → (x : [ J ]₀ A)
-           → (kext {OrdA = ord A} {ord B} k ∘F η {A}) x ≡ k x
-      r-id k x with k x 
-      r-id k x | lset [] _ = refl
-      r-id k x | lset (kx ∷ kxs) (sortedKX , sortedKXs) = begin
-        insertSet kx (union (lset kxs sortedKXs) (lset [] (lift tt)))
-          ≡⟨ cong (insertSet kx) (union-with-empty (lset kxs sortedKXs)) ⟩ 
-        insertSet kx (lset kxs sortedKXs)
-          ≡⟨ insertSet-adds-in-front kx kxs (sortedKX , sortedKXs) ⟩ 
-        lset (kx ∷ kxs) (sortedKX , sortedKXs) ∎
     
     abstract
       l-id : {A : Obj CtCatLSet}
@@ -129,11 +128,3 @@ MonadLSet = record
            insertSet x (lset xs sortedXs)
              ≡⟨ insertSet-adds-in-front x xs (sortedX , sortedXs) ⟩
            lset (x ∷ xs) (sortedX , sortedXs) ∎
-    
-    abstract
-      coher : {A B C : Obj CtCatLSet}
-            → (k : [ J ]₀ A → LSet₀ B) 
-            → (l : [ J ]₀ B → LSet₀ C)
-            → (x : LSet₀ A)
-            → (kext {OrdA = ord A} {ord C} (kext {OrdA = ord B} {ord C} l ∘F k)) x ≡ (kext {OrdA = ord B} {ord C} l ∘F kext {OrdA = ord A} {ord B} k) x
-      coher {A} {B} {C} k l xs = kext-coher k l xs (sEq B) (sEq C)
