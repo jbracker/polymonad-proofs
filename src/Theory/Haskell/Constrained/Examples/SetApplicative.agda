@@ -40,8 +40,10 @@ open import Theory.Haskell.Constrained.Examples.LSet.Product
 open import Theory.Haskell.Constrained.Examples.LSet.Map
 open import Theory.Haskell.Constrained.Examples.LSet.Insert
 open import Theory.Haskell.Constrained.Examples.LSet.Union
+open import Theory.Haskell.Constrained.Examples.LSet.KleisliExtension
 open import Theory.Haskell.Constrained.Examples.LSet.Ap
 open import Theory.Haskell.Constrained.Examples.SetFunctor
+open import Theory.Haskell.Constrained.Examples.SetMonad using ( kext-coher ; kext-right-id )
 
 module Theory.Haskell.Constrained.Examples.SetApplicative {ℓ : Level} where 
 
@@ -96,7 +98,7 @@ ApplicativeLSet = record
   ; left-unitality = left-unitality
   ; right-unitality = right-unitality
   } where
-    open Functor (ConstrainedFunctor.CtFunctor FunctorLSet)
+    open Functor (ConstrainedFunctor.CtFunctor FunctorLSet) renaming ( id to map-id ; compose to map-compose )
     open MonoidalCategory (DependentMonoidalCategory.DepMonCat ConstraintMonoidalCategoryLSet)
 
     set-α = MonoidalCategory.α SetMonCat'
@@ -108,6 +110,9 @@ ApplicativeLSet = record
 
     ty : Obj → Set ℓ
     ty (A , _) = A
+    
+    ty-× : Obj → Obj → Set ℓ
+    ty-× A B = ty A × ty B
     
     ord : (A : Obj) → OrdInstance {ℓ} {ℓ} {ℓ} (ty A)
     ord (_ , OrdA , _) = OrdA
@@ -133,28 +138,95 @@ ApplicativeLSet = record
     lset-× : Obj → Obj → Obj
     lset-× A B = LSet (tyOrd-× A B) , OrdLSet {A = tyOrd-× A B} , IsStructuralEquality-LSet (ord-× A B) (sEq-× A B)
     
-    naturality : {a a' b b' : Obj}
-               → {f : Hom a b} {f' : Hom a' b'}
-               → (x : F₀ a × F₀ a')
-               → (F₁ {a ⊗₀ a'} {b ⊗₀ b'} (_⊗₁_ {a} {b} {a'} {b'} f f') ∘F ap' a a') x
-               ≡ (ap' b b' ∘F (λ x → F₁ {a} {b} f (proj₁ x) , F₁ {a'} {b'} f' (proj₂ x))) x
-    naturality {a} {a'} {b} {b'} {f} {f'} (lset [] sorted , ys) = refl
-    naturality {A} {A'} {B} {B'} {f , tt} {f' , tt} (lset (x ∷ xs) (sortedX , sortedXs) , ys) = begin
-      (F₁ {A ⊗₀ A'} {B ⊗₀ B'} (_⊗₁_ {A} {B} {A'} {B'} (f , tt) (f' , tt)) ∘F ap' A A') (lset (x ∷ xs) (sortedX , sortedXs) , ys)
-        ≡⟨ {!!} ⟩
-      (ap' B B' ∘F (λ x → F₁ {A} {B} (f , tt) (proj₁ x) , F₁ {A'} {B'} (f' , tt) (proj₂ x))) (lset (x ∷ xs) (sortedX , sortedXs) , ys) ∎
+    pure : (A : Obj) → ty A → LSet (tyOrd A)
+    pure A a = singleton (tyOrd A) a
     
-    associativity : (x y z : Obj) 
-                  → F₁ {(x ⊗₀ y) ⊗₀ z} {x ⊗₀ (y ⊗₀ z)} (α x y z) ∘F (ap' (x ⊗₀ y) z ∘F (λ a → ap' x y (proj₁ a) , proj₂ a))
-                  ≡ ap' x (y ⊗₀ z) ∘F ((λ a → proj₁ a , ap' y z (proj₂ a)) ∘F set-α (F₀ x) (F₀ y) (F₀ z))
-    associativity A B C = {!!}
+    abstract
+      naturality : {a a' b b' : Obj}
+                 → {f : Hom a b} {f' : Hom a' b'}
+                 → (x : F₀ a × F₀ a')
+                 → (F₁ {a ⊗₀ a'} {b ⊗₀ b'} (_⊗₁_ {a} {b} {a'} {b'} f f') ∘F ap' a a') x
+                 ≡ (ap' b b' ∘F (λ x → F₁ {a} {b} f (proj₁ x) , F₁ {a'} {b'} f' (proj₂ x))) x
+      naturality {A} {A'} {B} {B'} {f , tt} {f' , tt} (xs , ys) = {!!} {- begin
+        (F₁ {A ⊗₀ A'} {B ⊗₀ B'} (_⊗₁_ {A} {B} {A'} {B'} (f , tt) (f' , tt)) ∘F ap' A A') (xs , ys)
+          ≡⟨ refl ⟩
+        mapSet {OrdA = ord-× A A'} {ord-× B B'} (f *** f') (ap' A A' (xs , ys))
+          ≡⟨ refl ⟩
+        mapSet {OrdA = ord-× A A'} {ord-× B B'} (f *** f') (kext (λ a → kext (λ b → pure (A ⊗₀ A') (a , b)) ys) xs)
+          ≡⟨ sym (kext-map-eq (f *** f') (kext (λ a → kext (λ b → pure (A ⊗₀ A') (a , b)) ys) xs)) ⟩
+        kext (pure (B ⊗₀ B') ∘F (f *** f')) (kext (λ a → kext (λ b → pure (A ⊗₀ A') (a , b)) ys) xs)
+          ≡⟨ sym (kext-coher (λ a → kext (λ b → pure (A ⊗₀ A') (a , b)) ys) (pure (B ⊗₀ B') ∘F (f *** f')) xs (sEq-× A A') (sEq-× B B')) ⟩
+        kext (kext (pure (B ⊗₀ B') ∘F (f *** f')) ∘F (λ a → kext (λ b → pure (A ⊗₀ A') (a , b)) ys)) xs
+          ≡⟨ refl ⟩
+        kext (λ a → kext (pure (B ⊗₀ B') ∘F (f *** f')) (kext (λ b → pure (A ⊗₀ A') (a , b)) ys)) xs
+          ≡⟨ cong (λ X → kext X xs) (fun-ext p) ⟩
+        kext (kext (λ a → kext (λ b → pure (B ⊗₀ B') (a , b)) (kext (pure B' ∘F f') ys)) ∘F (pure B ∘F f)) xs
+          ≡⟨ kext-coher (pure B ∘F f) (λ a → kext (λ b → pure (B ⊗₀ B') (a , b)) (kext (pure B' ∘F f') ys)) xs (sEq B) (sEq-× B B') ⟩
+        kext (λ a → kext (λ b → pure (B ⊗₀ B') (a , b)) (kext (pure B' ∘F f') ys)) (kext (pure B ∘F f) xs)
+          ≡⟨ cong₂ (λ X Y → kext (λ a → kext (λ b → pure (B ⊗₀ B') (a , b)) X) Y) (kext-map-eq f' ys) (kext-map-eq f xs) ⟩
+        kext (λ a → kext (λ b → pure (B ⊗₀ B') (a , b)) (mapSet {OrdA = ord A'} {ord B'} f' ys)) (mapSet {OrdA = ord A} {ord B} f xs)
+          ≡⟨ refl ⟩
+        ap' B B' (mapSet {OrdA = ord A} {ord B} f xs , mapSet {OrdA = ord A'} {ord B'} f' ys)
+          ≡⟨ refl ⟩
+        (ap' B B' ∘F (λ x → F₁ {A} {B} (f , tt) (proj₁ x) , F₁ {A'} {B'} (f' , tt) (proj₂ x))) (xs , ys) ∎
+          where
+            p : (a : ty A) 
+              → kext (pure (B ⊗₀ B') ∘F (f *** f')) (kext (λ b → pure (A ⊗₀ A') (a , b)) ys)
+              ≡ (kext (λ a → kext (λ b → pure (B ⊗₀ B') (a , b)) (kext (pure B' ∘F f') ys)) ∘F pure B ∘F f) a
+            p a = begin
+              kext (pure (B ⊗₀ B') ∘F (f *** f')) (kext (λ b → pure (A ⊗₀ A') (a , b)) ys)
+                ≡⟨ kext-map-eq (f *** f') (kext (λ b → pure (A ⊗₀ A') (a , b)) ys) ⟩
+              mapSet (f *** f') (kext (λ b → pure (A ⊗₀ A') (a , b)) ys)
+                ≡⟨ cong (mapSet (f *** f')) (kext-map-eq (λ b → (a , b)) ys) ⟩
+              mapSet (f *** f') (mapSet (λ b → (a , b)) ys)
+                ≡⟨ cong (λ X → X ys) (sym (map-compose {a = A'} {all-× A A'} {all-× B B'} {(λ b → (a , b)) , tt} {f *** f' , tt})) ⟩
+              mapSet ((f *** f') ∘F (λ b → (a , b))) ys
+                ≡⟨ cong (λ X → X ys) (map-compose {a = A'} {B'} {all-× B B'} {f' , tt} {(λ b → (f a , b)) , tt} ) ⟩
+              mapSet (λ b → (f a , b)) (mapSet f' ys)
+                ≡⟨ cong (mapSet (λ b → (f a , b))) (sym (kext-map-eq f' ys)) ⟩
+              mapSet (λ b → (f a , b)) (kext (pure B' ∘F f') ys)
+                ≡⟨ sym (kext-map-eq (λ b → (f a , b)) (kext (pure B' ∘F f') ys)) ⟩
+              kext (λ b → pure (B ⊗₀ B') (f a , b)) (kext (pure B' ∘F f') ys)
+                ≡⟨ sym (kext-right-id {OrdA = ord B} (λ a → kext (λ b → pure (B ⊗₀ B') (a , b)) (kext (pure B' ∘F f') ys)) (f a)) ⟩
+              kext (λ a → kext (λ b → pure (B ⊗₀ B') (a , b)) (kext (pure B' ∘F f') ys)) (pure B (f a)) ∎ -}
+
+{-
+(kext (kext l ∘F k)) xs ≡ (kext l ∘F kext k) xs
+
+-}    
+
+
+
+    -- ap {A} {B} (sa , sb) = kext (λ a → kext (λ b → singleton ((proj₁ A × proj₁ B) , (OrdInstance-× (proj₂ A) (proj₂ B))) (a , b)) sb) sa
+
+    abstract
+      associativity : (x y z : Obj) 
+                    → F₁ {(x ⊗₀ y) ⊗₀ z} {x ⊗₀ (y ⊗₀ z)} (α x y z) ∘F (ap' (x ⊗₀ y) z ∘F (λ a → ap' x y (proj₁ a) , proj₂ a))
+                    ≡ ap' x (y ⊗₀ z) ∘F ((λ a → proj₁ a , ap' y z (proj₂ a)) ∘F set-α (F₀ x) (F₀ y) (F₀ z))
+      associativity A B C = {!!}
     
-    left-unitality : (x : Obj)
-                   → set-λ (F₀ x)
-                   ≡ F₁ {unit ⊗₀ x} {x} (λ' x) ∘F (ap' unit x ∘F (λ a → lset [] (lift tt) , proj₂ a))
-    left-unitality A = {!!}
+    abstract
+      left-unitality : (A : Obj)
+                     → set-λ (F₀ A)
+                     ≡ F₁ {unit ⊗₀ A} {A} (λ' A) ∘F (ap' unit A ∘F (λ a → empty (tyOrd unit) , proj₂ a))
+      left-unitality A = fun-ext $ λ x → begin
+        set-λ (F₀ A) x
+          ≡⟨ refl ⟩ 
+        proj₂ x
+          ≡⟨ {!!} ⟩ 
+        mapSet {OrdA = ord-× unit A} proj₂ (kext (λ a → kext (λ b → pure (all-× unit A) (a , b)) (proj₂ x) ) (empty (tyOrd unit)))
+          ≡⟨ refl ⟩ 
+        F₁ {unit ⊗₀ A} {A} (λ' A) (ap' unit A (empty (tyOrd unit) , proj₂ x)) ∎
     
-    right-unitality : (x : Obj) 
-                    → set-ρ (F₀ x)
-                    ≡ F₁ {x ⊗₀ unit} {x} (ρ x) ∘F (ap' x unit ∘F (λ a → proj₁ a , lset [] (lift tt)))
-    right-unitality A = {!!}
+    abstract
+      right-unitality : (A : Obj) 
+                      → set-ρ (F₀ A)
+                      ≡ F₁ {A ⊗₀ unit} {A} (ρ A) ∘F (ap' A unit ∘F (λ a → proj₁ a , empty (tyOrd unit)))
+      right-unitality A = fun-ext $ λ x → begin
+        set-ρ (F₀ A) x
+          ≡⟨ refl ⟩
+        proj₁ x
+          ≡⟨ {!!} ⟩
+        mapSet {OrdA = ord-× A unit} proj₁ (kext (λ a → kext (λ b → pure (all-× A unit) (a , b)) (empty (tyOrd unit))) (proj₁ x))
+          ≡⟨ refl ⟩
+        F₁ {A ⊗₀ unit} {A} (ρ A) (ap' A unit (proj₁ x , empty (tyOrd unit))) ∎
