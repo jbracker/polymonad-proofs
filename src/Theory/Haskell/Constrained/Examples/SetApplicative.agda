@@ -91,19 +91,22 @@ ConstraintMonoidalCategoryLSet = record
 ApplicativeLSet : ConstrainedApplicative ConstraintMonoidalCategoryLSet
 ApplicativeLSet = record
   { CtsFunctor = FunctorLSet
-  ; unit = lset [] (lift tt)
+  ; unit = unit
   ; prod-map = ap'
   ; naturality = λ {a a' b b'} {f} {f'} → fun-ext (naturality {a} {a'} {b} {b'} {f} {f'})
   ; associativity = associativity
-  ; left-unitality = left-unitality
-  ; right-unitality = right-unitality
+  ; left-unitality = {!!} -- left-unitality
+  ; right-unitality = {!!} -- right-unitality
   } where
     open Functor (ConstrainedFunctor.CtFunctor FunctorLSet) renaming ( id to map-id ; compose to map-compose )
-    open MonoidalCategory (DependentMonoidalCategory.DepMonCat ConstraintMonoidalCategoryLSet)
+    open MonoidalCategory (DependentMonoidalCategory.DepMonCat ConstraintMonoidalCategoryLSet) renaming ( unit to Unit )
 
     set-α = MonoidalCategory.α SetMonCat'
     set-λ = MonoidalCategory.λ' SetMonCat'
     set-ρ = MonoidalCategory.ρ SetMonCat'
+    
+    ⊤-Obj : Obj
+    ⊤-Obj = (Lift ⊤ , Ord-⊤ , IsStructuralEquality-⊤)
     
     tyOrd : Obj → Σ (Set ℓ) (OrdInstance {ℓ} {ℓ} {ℓ})
     tyOrd (A , OrdA , StructEqA) = A , OrdA
@@ -140,6 +143,9 @@ ApplicativeLSet = record
     
     pure : (A : Obj) → ty A → LSet (tyOrd A)
     pure A a = singleton (tyOrd A) a
+    
+    unit : LSet (tyOrd Unit)
+    unit = pure ⊤-Obj (lift tt) 
     
     abstract
       naturality : {a a' b b' : Obj}
@@ -208,25 +214,31 @@ ApplicativeLSet = record
     abstract
       left-unitality : (A : Obj)
                      → set-λ (F₀ A)
-                     ≡ F₁ {unit ⊗₀ A} {A} (λ' A) ∘F (ap' unit A ∘F (λ a → empty (tyOrd unit) , proj₂ a))
-      left-unitality A = fun-ext $ λ x → begin
+                     ≡ F₁ {Unit ⊗₀ A} {A} (λ' A) ∘F (ap' Unit A ∘F (λ a → unit , proj₂ a))
+      left-unitality A = fun-ext $ λ {x → begin
         set-λ (F₀ A) x
           ≡⟨ refl ⟩ 
         proj₂ x
           ≡⟨ {!!} ⟩ 
-        mapSet {OrdA = ord-× unit A} proj₂ (kext (λ a → kext (λ b → pure (all-× unit A) (a , b)) (proj₂ x) ) (empty (tyOrd unit)))
+        mapSet {OrdA = ord-× Unit A} proj₂ (union (mapSet (λ b → (lift tt , b)) (proj₂ x)) (empty (tyOrd-× Unit A)))
+          ≡⟨ {!!} ⟩ 
+        mapSet {OrdA = ord-× Unit A} proj₂ (union (mapSet (λ b → (lift tt , b)) (proj₂ x)) (empty (tyOrd-× Unit A)))
+          ≡⟨ cong (λ X → mapSet {OrdA = ord-× Unit A} proj₂ (union X (empty (tyOrd-× Unit A)))) (sym (kext-map-eq (λ b → (lift tt , b)) (proj₂ x))) ⟩
+        mapSet {OrdA = ord-× Unit A} proj₂ (union (kext (λ b → pure (all-× Unit A) (lift tt , b)) (proj₂ x)) (empty (tyOrd-× Unit A)))
           ≡⟨ refl ⟩ 
-        F₁ {unit ⊗₀ A} {A} (λ' A) (ap' unit A (empty (tyOrd unit) , proj₂ x)) ∎
+        mapSet {OrdA = ord-× Unit A} proj₂ (kext (λ a → kext (λ b → pure (all-× Unit A) (a , b)) (proj₂ x) ) unit)
+          ≡⟨ refl ⟩ 
+        F₁ {Unit ⊗₀ A} {A} (λ' A) (ap' Unit A (unit , proj₂ x)) ∎ }
     
     abstract
       right-unitality : (A : Obj) 
                       → set-ρ (F₀ A)
-                      ≡ F₁ {A ⊗₀ unit} {A} (ρ A) ∘F (ap' A unit ∘F (λ a → proj₁ a , empty (tyOrd unit)))
+                      ≡ F₁ {A ⊗₀ Unit} {A} (ρ A) ∘F (ap' A Unit ∘F (λ a → proj₁ a , unit))
       right-unitality A = fun-ext $ λ x → begin
         set-ρ (F₀ A) x
           ≡⟨ refl ⟩
         proj₁ x
           ≡⟨ {!!} ⟩
-        mapSet {OrdA = ord-× A unit} proj₁ (kext (λ a → kext (λ b → pure (all-× A unit) (a , b)) (empty (tyOrd unit))) (proj₁ x))
+        mapSet {OrdA = ord-× A Unit} proj₁ (kext (λ a → kext (λ b → pure (all-× A Unit) (a , b)) unit) (proj₁ x))
           ≡⟨ refl ⟩
-        F₁ {A ⊗₀ unit} {A} (ρ A) (ap' A unit (proj₁ x , empty (tyOrd unit))) ∎
+        F₁ {A ⊗₀ Unit} {A} (ρ A) (ap' A Unit (proj₁ x , unit)) ∎
