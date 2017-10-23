@@ -26,50 +26,52 @@ open import Theory.Haskell.Constrained.Examples.SetFunctor.Insert
 open import Theory.Haskell.Constrained.Examples.SetFunctor.Map
 open import Theory.Haskell.Constrained.Examples.SetFunctor.Union
 
-module Theory.Haskell.Constrained.Examples.SetFunctor.KleisliExtension {A B : Set ℓ} {OrdA : OrdInstance {ℓ} {ℓ} {ℓ} A} {OrdB : OrdInstance {ℓ} {ℓ} {ℓ} B} where
+module Theory.Haskell.Constrained.Examples.SetFunctor.KleisliExtension {ℓ : Level} {A B : Set ℓ} {OrdA : OrdInstance {ℓ} {ℓ} {ℓ} A} {OrdB : OrdInstance {ℓ} {ℓ} {ℓ} B} where
     
-    open OrdInstance OrdA renaming ( eqInstance to EqA )
-    open OrdInstance OrdB renaming ( eqInstance to EqB )
-    
-    kext : (A → LSet (B , OrdB)) → LSet (A , OrdA) → LSet (B , OrdB)
-    kext f (lset [] _) = lset [] (lift tt)
-    kext f (lset (x ∷ xs) (sortedX , sortedXs)) = union (f x) (kext f (lset xs sortedXs))
-    
-    kext-union-shift : (f : A → LSet (B , OrdB)) → (x : A) → (xs : List A) → (sorted : IsSortedNoDupList OrdA (x ∷ xs)) → (ys : LSet (A , OrdA))
-                     → kext f (union (lset (x ∷ xs) sorted) ys) ≡ union (f x) (kext f (union (lset xs (proj₂ sorted)) ys))
-    kext-union-shift f x xs sorted ys = {!!}
-    
-    kext-union-dist : (f : A → LSet (B , OrdB)) 
-                    → (xs ys : LSet (A , OrdA))
-                    → kext f (union xs ys) ≡ union (kext f xs) (kext f ys)
-    kext-union-dist f (lset [] _) ys = refl
-    kext-union-dist f (lset (x ∷ xs) (sortedX , sortedXs)) ys = begin
-      kext f (insertSet x (union (lset xs sortedXs) ys)) 
-        ≡⟨ cong (kext f) (union-insert' x xs ys (sortedX , sortedXs)) ⟩
-      kext f (union (lset (x ∷ xs) (sortedX , sortedXs)) ys)
-        ≡⟨ kext-union-shift f x xs (sortedX , sortedXs) ys ⟩
-      union (f x) (kext f (union (lset xs sortedXs) ys))
-        ≡⟨ cong (union (f x)) (kext-union-dist f (lset xs sortedXs) ys) ⟩
-      union (f x) (union (kext f (lset xs sortedXs)) (kext f ys))
-        ≡⟨ {!!} ⟩
-      union (union (f x) (kext f (lset xs sortedXs))) (kext f ys) ∎
+open OrdInstance OrdA renaming ( eqInstance to EqA ; dec-eq to dec-eqA ; dec-ord to dec-ordA ; refl-eq to refl-eqA )
+open OrdInstance OrdB renaming ( eqInstance to EqB ; dec-eq to dec-eqB ; dec-ord to dec-ordB ; refl-eq to refl-eqB )
 
-{-
-    kext-union-dist f (lset [] sorted) _ = refl
-    kext-union-dist f (lset (x ∷ xs) sortedXs) (lset [] sortedYs) = begin
-      kext f (insertSet x (union (lset xs (proj₂ sortedXs)) (lset [] sortedYs)))
-        ≡⟨ cong (kext f ∘F insertSet x) (union-with-empty (lset xs (proj₂ sortedXs))) ⟩
-      kext f (insertSet x (lset xs (proj₂ sortedXs)))
-        ≡⟨ cong (kext f) (insertSet-adds-in-front x xs sortedXs) ⟩
-      kext f (lset (x ∷ xs) sortedXs)
-        ≡⟨ refl ⟩
-      union (f x) (kext f (lset xs (proj₂ sortedXs)))
-        ≡⟨ sym (union-with-empty (union (f x) (kext f (lset xs (proj₂ sortedXs))))) ⟩
-      union (union (f x) (kext f (lset xs (proj₂ sortedXs)))) (lset [] (lift tt)) ∎
-    kext-union-dist f (lset (x ∷ xs) sortedXs) (lset (y ∷ ys) sortedYs) = begin
-      kext f (insertSet x (union (lset xs (proj₂ sortedXs)) (lset (y ∷ ys) sortedYs)))
-        ≡⟨ cong (kext f) (union-insert' x xs (lset (y ∷ ys) sortedYs) sortedXs) ⟩
-      kext f (union (lset (x ∷ xs) sortedXs) (lset (y ∷ ys) sortedYs))
-        ≡⟨ {!!} ⟩
-      union (union (f x) (kext f (lset xs (proj₂ sortedXs)))) (union (f y) (kext f (lset ys (proj₂ sortedYs)))) ∎
--} 
+open OrdInstance (OrdLSet {A = B , OrdB}) renaming ( eqInstance to EqLSetB ; dec-eq to dec-eqLSetB ; refl-eq to refl-eqLSetB )
+
+kext : (A → LSet (B , OrdB)) → LSet (A , OrdA) → LSet (B , OrdB)
+kext f (lset [] _) = lset [] (lift tt)
+kext f (lset (x ∷ xs) (sortedX , sortedXs)) = union (f x) (kext f (lset xs sortedXs))
+
+abstract
+  kext-insert-swap : (f : A → LSet (B , OrdB)) → (x : A) → (xs : LSet (A , OrdA))
+                   → IsStructuralEquality EqA → IsStructuralEquality EqB
+                   → kext f (insertSet x xs) ≡ union (f x) (kext f xs)
+  kext-insert-swap f x (lset [] sorted) sEqA sEqB = refl
+  kext-insert-swap f z (lset (x ∷ xs) (sortedX , sortedXs)) sEqA sEqB with dec-eqA z x
+  kext-insert-swap f z (lset (x ∷ xs) (sortedX , sortedXs)) sEqA sEqB | yes z=x with sEqA z x z=x
+  kext-insert-swap f z (lset (.z ∷ xs) (sortedX , sortedXs)) sEqA sEqB | yes z=x | refl = begin
+    union (f z) (kext f (lset xs sortedXs))
+      ≡⟨ sym (union-elim (f z) (f z) (kext f (lset xs sortedXs)) (refl-eqLSetB {f z}) sEqB) ⟩
+    union (f z) (union (f z) (kext f (lset xs sortedXs))) ∎
+  kext-insert-swap f z (lset (x ∷ xs) (sortedX , sortedXs)) sEqA sEqB | no ¬z=x with dec-ordA z x
+  kext-insert-swap f z (lset (x ∷ xs) (sortedX , sortedXs)) sEqA sEqB | no ¬z=x | yes z≤x = refl
+  kext-insert-swap f z (lset (x ∷ xs) (sortedX , sortedXs)) sEqA sEqB | no ¬z=x | no ¬z≤x = begin
+    union (f x) (kext f (insertSet z (lset xs sortedXs)) )
+      ≡⟨ cong (union (f x)) (kext-insert-swap f z (lset xs sortedXs) sEqA sEqB) ⟩
+    union (f x) (union (f z) (kext f (lset xs sortedXs)))
+      ≡⟨ union-assoc (f x) (f z) (kext f (lset xs sortedXs)) sEqB ⟩
+    union (union (f x) (f z)) (kext f (lset xs sortedXs))
+      ≡⟨ cong (λ X → union X (kext f (lset xs sortedXs))) (union-commutative (f x) (f z) sEqB) ⟩
+    union (union (f z) (f x)) (kext f (lset xs sortedXs))
+      ≡⟨ sym (union-assoc (f z) (f x) (kext f (lset xs sortedXs)) sEqB) ⟩
+    union (f z) (union (f x) (kext f (lset xs sortedXs))) ∎
+
+abstract
+  kext-union-dist : (f : A → LSet (B , OrdB)) 
+                  → (xs ys : LSet (A , OrdA))
+                  → IsStructuralEquality EqA → IsStructuralEquality EqB
+                  → kext f (union xs ys) ≡ union (kext f xs) (kext f ys)
+  kext-union-dist f (lset [] _) ys sEqA sEqB = refl
+  kext-union-dist f (lset (x ∷ xs) (sortedX , sortedXs)) ys sEqA sEqB = begin
+    kext f (insertSet x (union (lset xs sortedXs) ys))
+      ≡⟨ kext-insert-swap f x (union (lset xs sortedXs) ys) sEqA sEqB ⟩
+    union (f x) (kext f (union (lset xs sortedXs) ys))
+      ≡⟨ cong (union (f x)) (kext-union-dist f (lset xs sortedXs) ys sEqA sEqB) ⟩
+    union (f x) (union (kext f (lset xs sortedXs)) (kext f ys))
+      ≡⟨ union-assoc (f x) (kext f (lset xs sortedXs)) (kext f ys) sEqB ⟩
+    union (union (f x) (kext f (lset xs sortedXs))) (kext f ys) ∎
