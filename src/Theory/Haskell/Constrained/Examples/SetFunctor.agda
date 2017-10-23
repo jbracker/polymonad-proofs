@@ -22,10 +22,10 @@ open import Theory.Category.Concrete
 
 open import Theory.Haskell.Constrained
 open import Theory.Haskell.Constrained.Functor
-open import Theory.Haskell.Constrained.Examples.SetFunctor.Base
-open import Theory.Haskell.Constrained.Examples.SetFunctor.Insert
-open import Theory.Haskell.Constrained.Examples.SetFunctor.Map
-open import Theory.Haskell.Constrained.Examples.SetFunctor.Product
+open import Theory.Haskell.Constrained.Examples.LSet.Base
+open import Theory.Haskell.Constrained.Examples.LSet.Insert
+open import Theory.Haskell.Constrained.Examples.LSet.Map
+open import Theory.Haskell.Constrained.Examples.LSet.Product
 
 module Theory.Haskell.Constrained.Examples.SetFunctor where 
 

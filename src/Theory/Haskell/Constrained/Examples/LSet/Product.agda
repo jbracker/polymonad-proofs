@@ -18,9 +18,10 @@ open import Equality
 open import ProofIrrelevance
 open import Haskell hiding ( Type )
 
-module Theory.Haskell.Constrained.Examples.SetFunctor.Product {ℓA ℓB : Level} {A : Set ℓA} {B : Set ℓB} where 
+open import Theory.Haskell.Constrained.Examples.LSet.Base
 
-open import Theory.Haskell.Constrained.Examples.SetFunctor.Base
+module Theory.Haskell.Constrained.Examples.LSet.Product {ℓA ℓB : Level} {A : Set ℓA} {B : Set ℓB} where 
+
 
 private
   module Eq {ℓEqA ℓEqB : Level} (EqA : EqInstance {ℓEq = ℓEqA} A) (EqB : EqInstance {ℓEq = ℓEqB} B) where

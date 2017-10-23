@@ -14,9 +14,9 @@ open ≡-Reasoning
 
 open import Extensionality
 
-open import Theory.Haskell.Constrained.Examples.SetFunctor.Base
+open import Theory.Haskell.Constrained.Examples.LSet.Base
 
-module Theory.Haskell.Constrained.Examples.SetFunctor.Insert {ℓ ℓEq ℓOrd : Level} {A : Set ℓ} {OrdA : OrdInstance {ℓ} {ℓEq} {ℓOrd} A} where 
+module Theory.Haskell.Constrained.Examples.LSet.Insert {ℓ ℓEq ℓOrd : Level} {A : Set ℓ} {OrdA : OrdInstance {ℓ} {ℓEq} {ℓOrd} A} where 
 
 open OrdInstance OrdA renaming ( eqInstance to EqA )
 

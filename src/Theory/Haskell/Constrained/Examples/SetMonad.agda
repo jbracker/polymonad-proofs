@@ -35,13 +35,13 @@ open import Theory.Haskell.Constrained
 open import Theory.Haskell.Constrained.Functor
 open import Theory.Haskell.Constrained.Applicative
 
-open import Theory.Haskell.Constrained.Examples.SetFunctor.Base
-open import Theory.Haskell.Constrained.Examples.SetFunctor.Instances
-open import Theory.Haskell.Constrained.Examples.SetFunctor.Product
-open import Theory.Haskell.Constrained.Examples.SetFunctor.Map
-open import Theory.Haskell.Constrained.Examples.SetFunctor.Insert
-open import Theory.Haskell.Constrained.Examples.SetFunctor.Union
-open import Theory.Haskell.Constrained.Examples.SetFunctor.KleisliExtension
+open import Theory.Haskell.Constrained.Examples.LSet.Base
+open import Theory.Haskell.Constrained.Examples.LSet.Instances
+open import Theory.Haskell.Constrained.Examples.LSet.Product
+open import Theory.Haskell.Constrained.Examples.LSet.Map
+open import Theory.Haskell.Constrained.Examples.LSet.Insert
+open import Theory.Haskell.Constrained.Examples.LSet.Union
+open import Theory.Haskell.Constrained.Examples.LSet.KleisliExtension
 open import Theory.Haskell.Constrained.Examples.SetFunctor
 
 module Theory.Haskell.Constrained.Examples.SetMonad {ℓ : Level} where  

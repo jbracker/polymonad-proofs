@@ -18,9 +18,9 @@ open import Equality
 open import Extensionality
 open import ProofIrrelevance
 
-open import Theory.Haskell.Constrained.Examples.SetFunctor.Base
+open import Theory.Haskell.Constrained.Examples.LSet.Base
 
-module Theory.Haskell.Constrained.Examples.SetFunctor.Instances where 
+module Theory.Haskell.Constrained.Examples.LSet.Instances where 
 
 -------------------------------------------------------------------------------
 -- Instances of lists in Haskell

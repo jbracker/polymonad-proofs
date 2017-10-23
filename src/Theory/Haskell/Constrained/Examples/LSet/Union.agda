@@ -15,11 +15,11 @@ open import Equality
 open import Extensionality
 open import ProofIrrelevance
 
-open import Theory.Haskell.Constrained.Examples.SetFunctor.Base
-open import Theory.Haskell.Constrained.Examples.SetFunctor.Instances
-open import Theory.Haskell.Constrained.Examples.SetFunctor.Insert
+open import Theory.Haskell.Constrained.Examples.LSet.Base
+open import Theory.Haskell.Constrained.Examples.LSet.Instances
+open import Theory.Haskell.Constrained.Examples.LSet.Insert
 
-module Theory.Haskell.Constrained.Examples.SetFunctor.Union {ℓ : Level} {A : Set ℓ} {OrdA : OrdInstance {ℓ} {ℓ} {ℓ} A} where  
+module Theory.Haskell.Constrained.Examples.LSet.Union {ℓ : Level} {A : Set ℓ} {OrdA : OrdInstance {ℓ} {ℓ} {ℓ} A} where  
 
 private
   Type = Set ℓ
@@ -204,12 +204,4 @@ abstract
     insertSet x (union (lset xs (proj₂ sorted)) (union (lset xs (proj₂ sorted)) zs))
       ≡⟨ cong (insertSet x) (union-elim (lset xs (proj₂ sorted)) (lset xs (proj₂ sorted)) zs (refl-eq-lset {lset xs (proj₂ sorted)}) sEqA) ⟩ 
     insertSet x (union (lset xs (proj₂ sorted)) zs) ∎
-
-{-
-unions : LSet (LSet (A , OrdA) , OrdLSet {ℓ} {(A , OrdA)}) → LSet (A , OrdA)
-unions (lset [] (lift tt)) = lset [] (lift tt)
-unions (lset (ys ∷ yss) (sortedYs , sortedYss)) = union ys (unions (lset yss sortedYss))
--}
-
-
 

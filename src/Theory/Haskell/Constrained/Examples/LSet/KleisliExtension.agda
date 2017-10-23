@@ -19,14 +19,13 @@ open import Equality
 open import Extensionality
 open import ProofIrrelevance
 
-open import Theory.Haskell.Constrained.Examples.SetFunctor.Base
-open import Theory.Haskell.Constrained.Examples.SetFunctor.Instances
-open import Theory.Haskell.Constrained.Examples.SetFunctor.Product
-open import Theory.Haskell.Constrained.Examples.SetFunctor.Insert
-open import Theory.Haskell.Constrained.Examples.SetFunctor.Map
-open import Theory.Haskell.Constrained.Examples.SetFunctor.Union
+open import Theory.Haskell.Constrained.Examples.LSet.Base
+open import Theory.Haskell.Constrained.Examples.LSet.Instances
+open import Theory.Haskell.Constrained.Examples.LSet.Insert
+open import Theory.Haskell.Constrained.Examples.LSet.Map
+open import Theory.Haskell.Constrained.Examples.LSet.Union
 
-module Theory.Haskell.Constrained.Examples.SetFunctor.KleisliExtension {ℓ : Level} {A B : Set ℓ} {OrdA : OrdInstance {ℓ} {ℓ} {ℓ} A} {OrdB : OrdInstance {ℓ} {ℓ} {ℓ} B} where
+module Theory.Haskell.Constrained.Examples.LSet.KleisliExtension {ℓ : Level} {A B : Set ℓ} {OrdA : OrdInstance {ℓ} {ℓ} {ℓ} A} {OrdB : OrdInstance {ℓ} {ℓ} {ℓ} B} where
     
 open OrdInstance OrdA renaming ( eqInstance to EqA ; dec-eq to dec-eqA ; dec-ord to dec-ordA ; refl-eq to refl-eqA )
 open OrdInstance OrdB renaming ( eqInstance to EqB ; dec-eq to dec-eqB ; dec-ord to dec-ordB ; refl-eq to refl-eqB )

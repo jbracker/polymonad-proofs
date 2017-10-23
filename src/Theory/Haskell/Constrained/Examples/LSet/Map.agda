@@ -9,10 +9,10 @@ open import Data.List
 open import Relation.Nullary
 open import Relation.Binary.PropositionalEquality
 
-open import Theory.Haskell.Constrained.Examples.SetFunctor.Base
-open import Theory.Haskell.Constrained.Examples.SetFunctor.Insert
+open import Theory.Haskell.Constrained.Examples.LSet.Base
+open import Theory.Haskell.Constrained.Examples.LSet.Insert
 
-module Theory.Haskell.Constrained.Examples.SetFunctor.Map {ℓA ℓB ℓEqA ℓEqB ℓOrdA ℓOrdB : Level} {A : Set ℓA} {B : Set ℓB} {OrdA : OrdInstance {ℓA} {ℓEqA} {ℓOrdA} A} {OrdB : OrdInstance {ℓB} {ℓEqB} {ℓOrdB} B} where  
+module Theory.Haskell.Constrained.Examples.LSet.Map {ℓA ℓB ℓEqA ℓEqB ℓOrdA ℓOrdB : Level} {A : Set ℓA} {B : Set ℓB} {OrdA : OrdInstance {ℓA} {ℓEqA} {ℓOrdA} A} {OrdB : OrdInstance {ℓB} {ℓEqB} {ℓOrdB} B} where  
 
 open OrdInstance
 open ≡-Reasoning

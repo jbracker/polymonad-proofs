@@ -18,7 +18,7 @@ open import Equality
 open import Extensionality
 open import ProofIrrelevance
 
-module Theory.Haskell.Constrained.Examples.SetFunctor.Base {ℓ : Level} where 
+module Theory.Haskell.Constrained.Examples.LSet.Base {ℓ : Level} where 
 
 private
   Type = Set ℓ
