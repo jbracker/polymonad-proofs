@@ -4,10 +4,8 @@ open import Level
 
 open import Data.Unit hiding ( _≤_ ; _≟_ ; total )
 open import Data.Empty
+open import Data.Product
 open import Data.List
-open import Data.List.All hiding ( map )
-open import Data.Product hiding ( map )
-open import Data.Sum hiding ( map )
 
 open import Relation.Nullary
 open import Relation.Binary using ( IsDecEquivalence ; IsEquivalence ; IsDecTotalOrder ; IsPreorder ; IsPartialOrder )
@@ -25,8 +23,9 @@ open import Theory.Haskell.Constrained.Examples.SetFunctor.Product
 open import Theory.Haskell.Constrained.Examples.SetFunctor.Insert
 open import Theory.Haskell.Constrained.Examples.SetFunctor.Map
 open import Theory.Haskell.Constrained.Examples.SetFunctor.Union
+open import Theory.Haskell.Constrained.Examples.SetFunctor.KleisliExtension
 
-module Theory.Haskell.Constrained.Examples.SetFunctor.Ap {ℓ : Level} {A : Set ℓ} {OrdA : OrdInstance {ℓ} {ℓ} {ℓ} A} where  
+module Theory.Haskell.Constrained.Examples.SetFunctor.Ap {ℓ : Level} where  
 
 ap : {A B : Σ (Set ℓ) (OrdInstance {ℓ} {ℓ} {ℓ})} → LSet A × LSet B → LSet ((proj₁ A × proj₁ B) , (OrdInstance-× (proj₂ A) (proj₂ B)))
-ap {A} {B} (sa , sb) = unions $ mapSet (λ a → mapSet (λ b → (a , b)) sb) sa
+ap {A} {B} (sa , sb) = kext (λ a → kext (λ b → singleton ((proj₁ A × proj₁ B) , (OrdInstance-× (proj₂ A) (proj₂ B))) (a , b)) sb) sa
