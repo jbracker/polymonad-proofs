@@ -32,7 +32,7 @@ HaskellIndexedMonad→IndexedMonad : {ℓIxs : Level} {Ixs : Set ℓIxs}
                                  → (Σ (Ixs → Ixs → TyCon) (IxMonad Ixs))
                                  → (Σ ({i j : Obj (Codisc Ixs)} → Hom (Codisc Ixs) i j → Functor SetCat' SetCat') (IndexedMonad (Codisc Ixs)))
 HaskellIndexedMonad→IndexedMonad {ℓIxs} {Ixs} (M , monad) 
-  = F , indexed-monad η μ μ-coher η-left-coher η-right-coher
+  = F , indexedMonad η μ μ-coher η-left-coher η-right-coher
   where
     open IxMonad monad
     open NaturalTransformation renaming ( η to nat-η )
