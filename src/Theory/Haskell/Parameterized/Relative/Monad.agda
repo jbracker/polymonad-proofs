@@ -1,34 +1,31 @@
- 
-module Theory.Haskell.Parameterized.Relative.Monad where
 
 -- Stdlib
 open import Level
 open import Function hiding ( id ) renaming ( _∘_ to _∘F_ )
-open import Data.Product
-open import Data.Sum
-open import Data.Unit
-open import Data.Empty
 open import Relation.Binary.PropositionalEquality
 open import Relation.Binary.HeterogeneousEquality renaming ( refl to hrefl ; sym to hsym ; trans to htrans ; subst to hsubst ; cong to hcong ; cong₂ to hcong₂ )
 open ≅-Reasoning 
 
 -- Local
-open import Utilities
 open import Congruence
 
 open import Theory.Category.Definition
 open import Theory.Functor.Definition
 open import Theory.Natural.Transformation
 
+module Theory.Haskell.Parameterized.Relative.Monad where
+
 open Category hiding ( right-id ; left-id )
 
 -- -----------------------------------------------------------------------------
--- Definition of a relative monad
+-- Definition of a parameterized relative monad
 -- -----------------------------------------------------------------------------
 record ParameterizedRelativeMonad {ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓI₀ ℓI₁ : Level} 
                                   {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} (I : Category {ℓI₀} {ℓI₁}) 
                                   (T : {i j : Obj I} → Hom I i j → Obj C → Obj D) 
                                   (J : Functor C D) : Set (ℓC₀ ⊔ ℓC₁ ⊔ ℓD₀ ⊔ ℓD₁ ⊔ ℓI₀ ⊔ ℓI₁) where
+  constructor parameterized-relative-monad
+  
   private
     _∘D_ = _∘_ D
     _∘C_ = _∘_ C
