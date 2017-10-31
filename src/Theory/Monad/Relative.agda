@@ -22,6 +22,8 @@ open Category hiding ( right-id ; left-id )
 -- Definition of a relative monad
 -- -----------------------------------------------------------------------------
 record RelativeMonad {ℓC₀ ℓC₁ ℓD₀ ℓD₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} (T : Obj C → Obj D) (J : Functor C D) : Set (ℓC₀ ⊔ ℓC₁ ⊔ ℓD₀ ⊔ ℓD₁) where
+  constructor relative-monad
+  
   private
     _∘D_ = _∘_ D
     _∘C_ = _∘_ C
