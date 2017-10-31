@@ -45,9 +45,9 @@ abstract
                                 → _∘_ C (nat-η (μ₁ f (cat-id I {j})) x) (nat-η (η₁ j) ([ M f ]₀ x)) ≅ nat-η (Id⟨ M f ⟩) x}
                    → (η₀ ≡ η₁)
                    → ((λ {i j k} → μ₀ {i} {j} {k}) ≡ μ₁)
-                   → indexed-monad {C = C} {I = I} {M} η₀ μ₀ μ-coher₀ η-lcoher₀ η-rcoher₀ ≡ indexed-monad {C = C} {I = I} {M} η₁ μ₁ μ-coher₁ η-lcoher₁ η-rcoher₁
+                   → indexedMonad {C = C} {I = I} {M} η₀ μ₀ μ-coher₀ η-lcoher₀ η-rcoher₀ ≡ indexedMonad {C = C} {I = I} {M} η₁ μ₁ μ-coher₁ η-lcoher₁ η-rcoher₁
   indexed-monad-eq {M} {η} {.η} {μ} {.μ} {μ-coher₀} {μ-coher₁} {η-lcoher₀} {η-lcoher₁} {η-rcoher₀} {η-rcoher₁} refl refl
-    = cong₃ (indexed-monad {C = C} {I = I} {M} η μ) eq1 eq2 eq3
+    = cong₃ (indexedMonad {C = C} {I = I} {M} η μ) eq1 eq2 eq3
     where
       abstract
         eq1 : (λ {i j k l} {f} {g} {h} {x} → μ-coher₀ {i} {j} {k} {l} {f} {g} {h} {x}) ≡ μ-coher₁
@@ -99,9 +99,9 @@ abstract
                        → ((λ {i j} → M₀ {i} {j}) ≡ M₁)
                        → (η₀ ≅ η₁)
                        → ((λ {i j k} → μ₀ {i} {j} {k}) ≅ (λ {i j k} → μ₁ {i} {j} {k}))
-                       → indexed-monad {C = C} {I = I} {M₀} η₀ μ₀ μ-coher₀ η-lcoher₀ η-rcoher₀ ≅ indexed-monad {C = C} {I = I} {M₁} η₁ μ₁ μ-coher₁ η-lcoher₁ η-rcoher₁
+                       → indexedMonad {C = C} {I = I} {M₀} η₀ μ₀ μ-coher₀ η-lcoher₀ η-rcoher₀ ≅ indexedMonad {C = C} {I = I} {M₁} η₁ μ₁ μ-coher₁ η-lcoher₁ η-rcoher₁
   het-indexed-monad-eq {M} {.M} {η} {.η} {μ} {.μ} {μ-coher₀} {μ-coher₁} {η-lcoher₀} {η-lcoher₁} {η-rcoher₀} {η-rcoher₁} refl hrefl hrefl
-    = ≡-to-≅ $ cong₃ (indexed-monad {C = C} {I = I} {M} η μ) eq1 eq2 eq3
+    = ≡-to-≅ $ cong₃ (indexedMonad {C = C} {I = I} {M} η μ) eq1 eq2 eq3
     where
       abstract
         eq1 : (λ {i j k l} {f} {g} {h} {x} → μ-coher₀ {i} {j} {k} {l} {f} {g} {h} {x}) ≡ μ-coher₁

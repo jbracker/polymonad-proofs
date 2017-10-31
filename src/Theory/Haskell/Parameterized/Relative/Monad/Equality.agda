@@ -53,10 +53,10 @@ abstract
               → kext₁ f (h ∘I g) ( (kext₁ g h l) ∘D k ) ≅ kext₁ (g ∘I f) h l ∘D kext₁ f g k}
     → (η₀ ≡ η₁)
     → ((λ {i j k} → kext₀ {i} {j} {k}) ≡ kext₁)
-    → parameterized-relative-monad {C = C} {D} {I} {T} {J} η₀ kext₀ right-id₀ left-id₀ coher₀ 
-    ≡ parameterized-relative-monad {C = C} {D} {I} {T} {J} η₁ kext₁ right-id₁ left-id₁ coher₁
+    → parameterizedRelativeMonad {C = C} {D} {I} {T} {J} η₀ kext₀ right-id₀ left-id₀ coher₀ 
+    ≡ parameterizedRelativeMonad {C = C} {D} {I} {T} {J} η₁ kext₁ right-id₁ left-id₁ coher₁
   parameterized-relative-monad-eq {T} {J} {η} {.η} {kext} {.kext} {rid₀} {rid₁} {lid₀} {lid₁} {coher₀} {coher₁} refl refl 
-    = cong₃ (parameterized-relative-monad {C = C} {D} {I} {T} {J} η kext) eq1 eq2 eq3
+    = cong₃ (parameterizedRelativeMonad {C = C} {D} {I} {T} {J} η kext) eq1 eq2 eq3
     where
       abstract
         eq1 : (λ {i j} fI {a b} {f} → rid₀ {i} {j} fI {a} {b} {f}) ≡ rid₁

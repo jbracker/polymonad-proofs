@@ -14,7 +14,7 @@ module Theory.Haskell.Parameterized.Indexed.Monad where
 open Category
 
 record IndexedMonad {ℓI₀ ℓI₁ ℓC₀ ℓC₁ : Level} {C : Category {ℓC₀} {ℓC₁}} (I : Category {ℓI₀} {ℓI₁}) (M : {i j : Obj I} → Hom I i j → Functor C C) : Set (ℓC₀ ⊔ ℓC₁ ⊔ ℓI₀ ⊔ ℓI₁) where
-  constructor indexed-monad
+  constructor indexedMonad
   
   open NaturalTransformation renaming ( η to nat-η )
   

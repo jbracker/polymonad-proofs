@@ -24,7 +24,7 @@ record ParameterizedRelativeMonad {ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓI₀ ℓI�
                                   {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} (I : Category {ℓI₀} {ℓI₁}) 
                                   (T : {i j : Obj I} → Hom I i j → Obj C → Obj D) 
                                   (J : Functor C D) : Set (ℓC₀ ⊔ ℓC₁ ⊔ ℓD₀ ⊔ ℓD₁ ⊔ ℓI₀ ⊔ ℓI₁) where
-  constructor parameterized-relative-monad
+  constructor parameterizedRelativeMonad
   
   private
     _∘D_ = _∘_ D
