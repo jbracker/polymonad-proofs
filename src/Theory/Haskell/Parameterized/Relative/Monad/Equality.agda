@@ -14,7 +14,7 @@ open import Theory.Haskell.Parameterized.Relative.Monad
 
 module Theory.Haskell.Parameterized.Relative.Monad.Equality 
   {ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓI₀ ℓI₁ : Level} 
-  {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} (I : Category {ℓI₀} {ℓI₁})  where 
+  {C : Category {ℓC₀} {ℓC₁}} {D : Category {ℓD₀} {ℓD₁}} {I : Category {ℓI₀} {ℓI₁}}  where 
 
 open Category renaming ( id to cat-id )
 
