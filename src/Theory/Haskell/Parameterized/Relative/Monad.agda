@@ -124,7 +124,7 @@ record ParameterizedRelativeMonad {ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓI₀ ℓI�
 
   NaturalTransformation-η : (i : Obj I)
                           → NaturalTransformation J (FunctorT (id I {i}))
-  NaturalTransformation-η i = naturalTransformation (λ _ → η i) natural
+  NaturalTransformation-η i = naturalTransformation (λ x → η i {x}) natural
     where
       abstract
         natural : {a b : Obj C} {f : Hom C a b} 
