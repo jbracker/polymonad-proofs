@@ -24,6 +24,3 @@ src/Theory/End/Examples.agda
 src/Theory/Functor/Monoidal/Properties/ToMonoidalFunctorIntoDayFunctorCategory.agda
 
 src/Theory/Functor/Profunctor.agda
-
-
-src/Theory/Haskell/Parameterized/Relative/Monad/Properties/ToIndexedMonad.agda
