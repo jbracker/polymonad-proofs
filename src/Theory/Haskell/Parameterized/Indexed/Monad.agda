@@ -27,20 +27,20 @@ record IndexedMonad {ℓI₀ ℓI₁ ℓC₀ ℓC₁ : Level} {C : Category {ℓ
     η : (i : Obj I) → NaturalTransformation (Id[ C ]) (M (id I {i}))
     
     -- join ∷ M i j (M j k α) → M i k α
-    μ : {i j k : Obj I} (f : Hom I i j) (g : Hom I j k) → NaturalTransformation ([ M g ]∘[ M f ]) (M (g ∘I f))
+    μ : {i j k : Obj I} (f : Hom I i j) (g : Hom I j k) → NaturalTransformation ([ M f ]∘[ M g ]) (M (g ∘I f))
   
   field
     -- μ ∘ T₁μ ≡ μ ∘ μT₀
     μ-coher : {i j k l : Obj I} {f : Hom I i j} {g : Hom I j k} {h : Hom I k l} {x : Obj C}
-            → nat-η (μ (g ∘I f) h) x ∘C [ M h ]₁ (nat-η (μ f g) x) ≅ nat-η (μ f (h ∘I g)) x ∘C nat-η (μ g h) ([ M f ]₀ x)
+            → nat-η (μ f (h ∘I g)) x ∘C [ M f ]₁ (nat-η (μ g h) x) ≅ nat-η (μ (g ∘I f) h) x ∘C nat-η (μ f g) ([ M h ]₀ x)
   
   field
     -- μ ∘ Tη ≡ 1ₜ
     η-left-coher : {i j : Obj I} {f : Hom I i j} {x : Obj C}
-                 → nat-η (μ (id I {i}) f) x ∘C [ M f ]₁ (nat-η (η i) x) ≅ nat-η (Id⟨ M f ⟩) x
+                 → nat-η (μ f (id I)) x ∘C [ M f ]₁ (nat-η (η j) x) ≅ nat-η (Id⟨ M f ⟩) x
     
   field
     -- μ ∘ ηT ≡ 1ₜ
     η-right-coher : {i j : Obj I} {f : Hom I i j} {x : Obj C}
-                  → nat-η (μ f (id I {j})) x ∘C nat-η (η j) ([ M f ]₀ x) ≅ nat-η (Id⟨ M f ⟩) x
+                  → nat-η (μ (id I) f) x ∘C nat-η (η i) ([ M f ]₀ x) ≅ nat-η (Id⟨ M f ⟩) x
 
