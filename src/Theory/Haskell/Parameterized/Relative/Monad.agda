@@ -35,57 +35,57 @@ record ParameterizedRelativeMonad {ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓI₀ ℓI�
     η :  (i : Obj I) → {a : Obj C} → Hom D ([ J ]₀ a) (T (id I {i}) a)
     
     kext : {i j k : Obj I} → (f : Hom I i j) (g : Hom I j k) 
-         → {a b : Obj C} → Hom D ([ J ]₀ a) (T g b) → Hom D (T f a) (T (g ∘I f) b)
+         → {a b : Obj C} → Hom D ([ J ]₀ a) (T f b) → Hom D (T g a) (T (g ∘I f) b)
     
     right-id : {i j : Obj I} → (f : Hom I i j) 
              → {a b : Obj C} {k : Hom D ([ J ]₀ a) (T f b)} 
-             → kext (id I) f k ∘D η i ≅ k
+             → kext f (id I) k ∘D η j ≅ k
     
     left-id : {i j : Obj I} → (f : Hom I i j) 
             → {a : Obj C}
-            → kext f (id I) (η j {a}) ≅ id D {a = T f a}
+            → kext (id I) f (η i {a}) ≅ id D {a = T f a}
     
     coher : {i j v w : Obj I} → (f : Hom I i j) → (g : Hom I j v) → (h : Hom I v w) 
-          → {a b c : Obj C} {k : Hom D ([ J ]₀ a) (T g b)} {l : Hom D ([ J ]₀ b) (T h c)} 
-          → kext f (h ∘I g) ( (kext g h l) ∘D k ) ≅ kext (g ∘I f) h l ∘D kext f g k
+          → {a b c : Obj C} {k : Hom D ([ J ]₀ a) (T g b)} {l : Hom D ([ J ]₀ b) (T f c)} 
+          → kext (g ∘I f) h ( (kext f g l) ∘D k ) ≅ kext f (h ∘I g) l ∘D kext g h k
   
   abstract
     functor-kext-compose : {i j : Obj I} → (fI : Hom I i j) 
                          → {a b c : Obj C} {f : Hom C a b} {g : Hom C b c} 
-                         → kext fI (id I) (η j ∘D [ J ]₁ (g ∘C f)) ≅ kext (id I ∘I fI) (id I) (η j ∘D [ J ]₁ g) ∘D (kext fI (id I) (η j ∘D [ J ]₁ f))
+                         → kext (id I) fI (η i ∘D [ J ]₁ (g ∘C f)) ≅ kext (id I) (fI ∘I id I) (η i ∘D [ J ]₁ g) ∘D (kext (id I) fI (η i ∘D [ J ]₁ f))
     functor-kext-compose {i} {j} fI {a} {b} {c} {f} {g} = begin
-      kext fI (id I) (η j ∘D [ J ]₁ (g ∘C f)) 
-        ≡⟨ cong (λ X → kext fI (id I) (η j ∘D X)) (Functor.compose J) ⟩
-      kext fI (id I) (η j ∘D ([ J ]₁ g ∘D [ J ]₁ f))
-        ≡⟨ cong (kext fI (id I)) (assoc D) ⟩
-      kext fI (id I) ((η j ∘D [ J ]₁ g) ∘D [ J ]₁ f)
-        ≅⟨ hcong₂ (λ X Y → kext fI X (Y ∘D [ J ]₁ f)) (≡-to-≅ (sym (Category.right-id I))) (hsym (right-id (id I))) ⟩
-      kext fI (id I ∘I id I) ((kext (id I) (id I) (η j ∘D [ J ]₁ g) ∘D η j) ∘D [ J ]₁ f)
-        ≡⟨ cong (kext fI (id I ∘I id I)) (sym (assoc D)) ⟩
-      kext fI (id I ∘I id I) (kext (id I) (id I) (η j ∘D [ J ]₁ g) ∘D (η j ∘D [ J ]₁ f))
-        ≅⟨ coher fI (id I) (id I) ⟩
-      kext (id I ∘I fI) (id I) (η j ∘D [ J ]₁ g) ∘D (kext fI (id I) (η j ∘D [ J ]₁ f)) ∎
-
+      kext (id I) fI (η i ∘D [ J ]₁ (g ∘C f)) 
+        ≡⟨ cong (λ X → kext (id I) fI (η i ∘D X)) (Functor.compose J) ⟩
+      kext (id I) fI (η i ∘D ([ J ]₁ g ∘D [ J ]₁ f))
+        ≡⟨ cong (kext (id I) fI) (assoc D) ⟩
+      kext (id I) fI ((η i ∘D [ J ]₁ g) ∘D [ J ]₁ f)
+        ≅⟨ hcong₂ (λ X Y → kext X fI (Y ∘D [ J ]₁ f)) (≡-to-≅ (sym (Category.right-id I))) (hsym $ right-id (id I)) ⟩
+      kext (id I ∘I id I) fI ((kext (id I) (id I) (η i ∘D [ J ]₁ g) ∘D η i) ∘D [ J ]₁ f)
+        ≡⟨ cong (kext (id I ∘I id I) fI) (sym (assoc D)) ⟩
+      kext (id I ∘I id I) fI (kext (id I) (id I) (η i ∘D [ J ]₁ g) ∘D (η i ∘D [ J ]₁ f))
+        ≅⟨ coher (id I) (id I) fI ⟩
+      kext (id I) (fI ∘I id I) (η i ∘D [ J ]₁ g) ∘D (kext (id I) fI (η i ∘D [ J ]₁ f)) ∎
+  
   FunctorT : {i j : Obj I} → (f : Hom I i j) → Functor C D
   FunctorT {i} {j} f = functor T₀ T₁ T-id T-compose
     where
       T₀ = T f
       
       T₁ : {a b : Obj C} → Hom C a b → Hom D (T f a) (T f b)
-      T₁ {a} {b} k = subst (λ X → Hom D (T f a) (T X b)) (Category.right-id I) (kext f (id I) (η j ∘D [ J ]₁ k))
+      T₁ {a} {b} k = subst (λ X → Hom D (T f a) (T X b)) (Category.left-id I) (kext (id I) f (η i ∘D [ J ]₁ k))
       
       abstract
-        T-id : {a : Obj C} → T₁ (id C) ≡ id D -- kext {a = a} (η ∘D [ J ]₁ (id C)) ≡ id D
+        T-id : {a : Obj C} → T₁ (id C {a}) ≡ id D
         T-id {a} = ≅-to-≡ $ begin
           T₁ (id C) 
             ≡⟨⟩ 
-          subst (λ X → Hom D (T f a) (T X a)) (Category.right-id I) (kext f (id I) (η j ∘D [ J ]₁ (id C)))
-            ≅⟨ ≡-subst-removable (λ X → Hom D (T f a) (T X a)) (Category.right-id I) (kext f (id I) (η j ∘D [ J ]₁ (id C))) ⟩ 
-          kext f (id I) (η j ∘D [ J ]₁ (id C))
-            ≡⟨ cong (λ X → kext f (id I) (η j ∘D X)) (Functor.id J) ⟩ 
-          kext f (id I) (η j ∘D id D)
-            ≡⟨ cong (kext f (id I)) (Category.left-id D) ⟩ 
-          kext f (id I) (η j)
+          subst (λ X → Hom D (T f a) (T X a)) (Category.left-id I) (kext (id I) f (η i ∘D [ J ]₁ (id C)))
+            ≅⟨ ≡-subst-removable (λ X → Hom D (T f a) (T X a)) (Category.left-id I) (kext (id I) f (η i ∘D [ J ]₁ (id C))) ⟩ 
+          kext (id I) f (η i ∘D [ J ]₁ (id C))
+            ≡⟨ cong (λ X → kext (id I) f (η i ∘D X)) (Functor.id J) ⟩ 
+          kext (id I) f (η i ∘D id D)
+            ≡⟨ cong (kext (id I) f) (Category.left-id D) ⟩ 
+          kext (id I) f (η i)
             ≅⟨ left-id f ⟩
           id D ∎
       
@@ -95,33 +95,33 @@ record ParameterizedRelativeMonad {ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓI₀ ℓI�
         T-compose {a} {b} {c} {g} {h} = ≅-to-≡ $ begin
           T₁ (h ∘C g)
             ≡⟨⟩
-          subst (λ X → Hom D (T f a) (T X c)) (Category.right-id I) (kext f (id I) (η j ∘D [ J ]₁ (h ∘C g)))
-            ≅⟨ ≡-subst-removable (λ X → Hom D (T f a) (T X c)) (Category.right-id I) (kext f (id I) (η j ∘D [ J ]₁ (h ∘C g))) ⟩
-          kext f (id I) (η j ∘D [ J ]₁ (h ∘C g))
+          subst (λ X → Hom D (T f a) (T X c)) (Category.left-id I) (kext (id I) f (η i ∘D [ J ]₁ (h ∘C g)))
+            ≅⟨ ≡-subst-removable (λ X → Hom D (T f a) (T X c)) (Category.left-id I) (kext (id I) f (η i ∘D [ J ]₁ (h ∘C g))) ⟩
+          kext (id I) f (η i ∘D [ J ]₁ (h ∘C g))
             ≅⟨ functor-kext-compose f ⟩
-          kext (id I ∘I f) (id I) (η j ∘D [ J ]₁ h) ∘D kext f (id I) (η j ∘D [ J ]₁ g)
-            ≅⟨ hcong₂ (λ Y Z → kext Y (id I) (η j ∘D [ J ]₁ h) ∘D Z) 
-                      (≡-to-≅ (Category.right-id I)) 
-                      (hsym (≡-subst-removable (λ X → Hom D (T f a) (T X b)) (Category.right-id I) (kext f (id I) (η j ∘D [ J ]₁ g)))) ⟩
-          kext f (id I) (η j ∘D [ J ]₁ h) ∘D subst (λ X → Hom D (T f a) (T X b)) (Category.right-id I) (kext f (id I) (η j ∘D [ J ]₁ g))
-            ≅⟨ hcong₂ (λ Y Z → (Hom D (T f b) (T Y c) ∋ Z) ∘D subst (λ X → Hom D (T f a) (T X b)) (Category.right-id I) (kext f (id I) (η j ∘D [ J ]₁ g))) 
-                      (≡-to-≅ (Category.right-id I)) 
-                      (hsym (≡-subst-removable (λ X → Hom D (T f b) (T X c)) (Category.right-id I) (kext f (id I) (η j ∘D [ J ]₁ h)))) ⟩
-          subst (λ X → Hom D (T f b) (T X c)) (Category.right-id I) (kext f (id I) (η j ∘D [ J ]₁ h)) ∘D subst (λ X → Hom D (T f a) (T X b)) (Category.right-id I) (kext f (id I) (η j ∘D [ J ]₁ g))
+          kext (id I) (f ∘I id I) (η i ∘D [ J ]₁ h) ∘D kext (id I) f (η i ∘D [ J ]₁ g)
+            ≅⟨ hcong₂ (λ Y Z → kext (id I) Y (η i ∘D [ J ]₁ h) ∘D Z) 
+                      (≡-to-≅ (Category.left-id I)) 
+                      (hsym (≡-subst-removable (λ X → Hom D (T f a) (T X b)) (Category.left-id I) (kext (id I) f (η i ∘D [ J ]₁ g)))) ⟩
+          kext (id I) f (η i ∘D [ J ]₁ h) ∘D subst (λ X → Hom D (T f a) (T X b)) (Category.left-id I) (kext (id I) f (η i ∘D [ J ]₁ g))
+            ≅⟨ hcong₂ (λ Y Z → (Hom D (T f b) (T Y c) ∋ Z) ∘D subst (λ X → Hom D (T f a) (T X b)) (Category.left-id I) (kext (id I) f (η i ∘D [ J ]₁ g))) 
+                      (≡-to-≅ (Category.left-id I)) 
+                      (hsym (≡-subst-removable (λ X → Hom D (T f b) (T X c)) (Category.left-id I) (kext (id I) f (η i ∘D [ J ]₁ h)))) ⟩
+          subst (λ X → Hom D (T f b) (T X c)) (Category.left-id I) (kext (id I) f (η i ∘D [ J ]₁ h)) ∘D subst (λ X → Hom D (T f a) (T X b)) (Category.left-id I) (kext (id I) f (η i ∘D [ J ]₁ g))
             ≡⟨⟩
           T₁ h ∘D T₁ g ∎
   
   abstract
     functor-kext-coher : {i j : Obj I} → (fI : Hom I i j)
                        → {a b : Obj C} → (f : Hom C a b)
-                       → [ FunctorT fI ]₁ f ≅ kext fI (id I) (η j ∘D [ J ]₁ f)
+                       → [ FunctorT fI ]₁ f ≅ kext (id I) fI (η i ∘D [ J ]₁ f)
     functor-kext-coher {i} {j} f {a} {b} k = begin
       [ FunctorT f ]₁ k 
         ≡⟨⟩
-      subst (λ X → Hom D (T f a) (T X b)) (Category.right-id I) (kext f (id I) (η j ∘D [ J ]₁ k))
-        ≅⟨ ≡-subst-removable (λ X → Hom D (T f a) (T X b)) (Category.right-id I) (kext f (id I) (η j ∘D [ J ]₁ k)) ⟩
-      kext f (id I) (η j ∘D [ J ]₁ k) ∎
-
+      subst (λ X → Hom D (T f a) (T X b)) (Category.left-id I) (kext (id I) f (η i ∘D [ J ]₁ k))
+        ≅⟨ ≡-subst-removable (λ X → Hom D (T f a) (T X b)) (Category.left-id I) (kext (id I) f (η i ∘D [ J ]₁ k)) ⟩
+      kext (id I) f (η i ∘D [ J ]₁ k) ∎
+  
   NaturalTransformation-η : (i : Obj I)
                           → NaturalTransformation J (FunctorT (id I {i}))
   NaturalTransformation-η i = naturalTransformation (λ x → η i {x}) natural
@@ -132,20 +132,20 @@ record ParameterizedRelativeMonad {ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓI₀ ℓI�
         natural {a} {b} {f} = ≅-to-≡ $ begin
           [ FunctorT (id I) ]₁ f ∘D η i
             ≡⟨⟩
-          subst (λ X → Hom D (T (id I {i}) a) (T X b)) (Category.right-id I {i}) (kext (id I {i}) (id I {i}) (η i ∘D [ J ]₁ f)) ∘D η i 
+          subst (λ X → Hom D (T (id I {i}) a) (T X b)) (Category.left-id I {i}) (kext (id I {i}) (id I {i}) (η i ∘D [ J ]₁ f)) ∘D η i 
             ≅⟨ hcong₂ (λ X Y → (Hom D (T (id I {i}) a) (T X b) ∋ Y) ∘D η i) 
-                      (≡-to-≅ (sym (Category.right-id I {i}))) 
-                      (≡-subst-removable (λ X → Hom D (T (id I {i}) a) (T X b)) (Category.right-id I {i}) (kext (id I {i}) (id I {i}) (η i ∘D [ J ]₁ f))) ⟩
+                      (≡-to-≅ (sym (Category.left-id I {i}))) 
+                      (≡-subst-removable (λ X → Hom D (T (id I {i}) a) (T X b)) (Category.left-id I {i}) (kext (id I {i}) (id I {i}) (η i ∘D [ J ]₁ f))) ⟩
           kext (id I {i}) (id I {i}) (η i ∘D [ J ]₁ f) ∘D η i 
             ≅⟨ right-id (id I {i}) ⟩
           η i ∘D [ J ]₁ f ∎
-
+  
   NaturalTransformation-kext : {i j : Obj I} → (fI : Hom I i j)
                              → NaturalTransformation (FunctorT fI) (FunctorT fI)
   NaturalTransformation-kext {i} {j} fI = naturalTransformation nat-η natural
     where 
       nat-η : (x : Obj C) → Hom D ([ FunctorT fI ]₀ x) ([ FunctorT fI ]₀ x)
-      nat-η x = subst (λ X → Hom D (T fI x) (T X x)) (Category.right-id I) (kext fI (id I) (η j {x}))
+      nat-η x = subst (λ X → Hom D (T fI x) (T X x)) (Category.left-id I) (kext (id I) fI (η i {x}))
 
       abstract
         natural : {a b : Obj C} {f : Hom C a b} 
@@ -153,36 +153,36 @@ record ParameterizedRelativeMonad {ℓC₀ ℓC₁ ℓD₀ ℓD₁ ℓI₀ ℓI�
         natural {a} {b} {f} = ≅-to-≡ $ begin
            [ FunctorT fI ]₁ f ∘D nat-η a 
              ≡⟨⟩
-           subst (λ X → Hom D (T fI a) (T X b)) (Category.right-id I) (kext fI (id I) (η j ∘D [ J ]₁ f)) ∘D subst (λ X → Hom D (T fI a) (T X a)) (Category.right-id I) (kext fI (id I) (η j {a}))
-             ≅⟨ hcong₂ (λ Y Z → (Hom D (T fI a) (T Y b) ∋ Z) ∘D subst (λ X → Hom D (T fI a) (T X a)) (Category.right-id I) (kext fI (id I) (η j {a}))) 
-                       (≡-to-≅ (sym (Category.right-id I))) 
-                       (≡-subst-removable (λ X → Hom D (T fI a) (T X b)) (Category.right-id I) (kext fI (id I) (η j ∘D [ J ]₁ f))) ⟩
-           kext fI (id I) (η j ∘D [ J ]₁ f) ∘D subst (λ X → Hom D (T fI a) (T X a)) (Category.right-id I) (kext fI (id I) (η j {a}))
-             ≅⟨ hcong₂ (λ Y Z → kext Y (id I) (η j ∘D [ J ]₁ f) ∘D Z) 
-                       (≡-to-≅ (sym $ Category.right-id I))
-                       (≡-subst-removable (λ X → Hom D (T fI a) (T X a)) (Category.right-id I) (kext fI (id I) (η j {a}))) ⟩
-           kext (id I ∘I fI) (id I) (η j ∘D [ J ]₁ f) ∘D kext fI (id I) (η j {a})
-             ≅⟨ hcong₂ (λ X Y → kext X (id I) (η j ∘D [ J ]₁ f) ∘D Y) 
-                       (≡-to-≅ (Category.right-id I)) 
+           subst (λ X → Hom D (T fI a) (T X b)) (Category.left-id I) (kext (id I) fI (η i ∘D [ J ]₁ f)) ∘D subst (λ X → Hom D (T fI a) (T X a)) (Category.left-id I) (kext (id I) fI (η i {a}))
+             ≅⟨ hcong₂ (λ Y Z → (Hom D (T fI a) (T Y b) ∋ Z) ∘D subst (λ X → Hom D (T fI a) (T X a)) (Category.left-id I) (kext (id I) fI (η i {a}))) 
+                       (≡-to-≅ (sym (Category.left-id I))) 
+                       (≡-subst-removable (λ X → Hom D (T fI a) (T X b)) (Category.left-id I) (kext (id I) fI (η i ∘D [ J ]₁ f))) ⟩
+           kext (id I) fI (η i ∘D [ J ]₁ f) ∘D subst (λ X → Hom D (T fI a) (T X a)) (Category.left-id I) (kext (id I) fI (η i {a}))
+             ≅⟨ hcong₂ (λ Y Z → kext (id I) Y (η i ∘D [ J ]₁ f) ∘D Z) 
+                       (≡-to-≅ (sym $ Category.left-id I))
+                       (≡-subst-removable (λ X → Hom D (T fI a) (T X a)) (Category.left-id I) (kext (id I) fI (η i {a}))) ⟩
+           kext (id I) (fI ∘I id I) (η i ∘D [ J ]₁ f) ∘D kext (id I) fI (η i {a})
+             ≅⟨ hcong₂ (λ X Y → kext (id I) X (η i ∘D [ J ]₁ f) ∘D Y) 
+                       (≡-to-≅ (Category.left-id I)) 
                        (left-id fI) ⟩
-           kext fI (id I) (η j ∘D [ J ]₁ f) ∘D id D
-             ≅⟨ hcong (λ X → kext X (id I) (η j ∘D [ J ]₁ f) ∘D id D) (≡-to-≅ (sym (Category.right-id I))) ⟩
-           kext (id I ∘I fI) (id I) (η j ∘D [ J ]₁ f) ∘D id D
+           kext (id I) fI (η i ∘D [ J ]₁ f) ∘D id D
+             ≅⟨ hcong (λ X → kext (id I) X (η i ∘D [ J ]₁ f) ∘D id D) (≡-to-≅ (sym (Category.left-id I))) ⟩
+           kext (id I) (fI ∘I id I) (η i ∘D [ J ]₁ f) ∘D id D
              ≡⟨ Category.left-id D ⟩
-           kext (id I ∘I fI) (id I) (η j ∘D [ J ]₁ f)
-             ≅⟨ hcong (λ X → kext X (id I) (η j ∘D [ J ]₁ f)) (≡-to-≅ (Category.right-id I)) ⟩
-           kext fI (id I) (η j ∘D [ J ]₁ f)
+           kext (id I) (fI ∘I id I) (η i ∘D [ J ]₁ f)
+             ≅⟨ hcong (λ X → kext (id I) X (η i ∘D [ J ]₁ f)) (≡-to-≅ (Category.left-id I)) ⟩
+           kext (id I) fI (η i ∘D [ J ]₁ f)
              ≡⟨ sym (Category.right-id D) ⟩
-           id D {T (id I ∘I fI) b} ∘D kext fI (id I) (η j ∘D [ J ]₁ f)
-             ≅⟨ hcong₂ (λ X Y → (Hom D (T fI a) (T X b)) ∋ (Y ∘D kext fI (id I) (η j ∘D [ J ]₁ f))) (≡-to-≅ (sym (Category.right-id I))) (hsym (left-id (id I ∘I fI))) ⟩
-           kext (id I ∘I fI) (id I) (η j {b}) ∘D kext fI (id I) (η j ∘D [ J ]₁ f)
-             ≅⟨ hcong₂ (λ Y Z → kext Y (id I) (η j {b}) ∘D Z) 
-                       (≡-to-≅ (Category.right-id I))
-                       (hsym (≡-subst-removable (λ X → Hom D (T fI a) (T X b)) (Category.right-id I) (kext fI (id I) (η j ∘D [ J ]₁ f)))) ⟩
-           kext fI (id I) (η j {b}) ∘D subst (λ X → Hom D (T fI a) (T X b)) (Category.right-id I) (kext fI (id I) (η j ∘D [ J ]₁ f))
-             ≅⟨ hcong₂ (λ Y Z → (Hom D (T fI b) (T Y b) ∋ Z) ∘D subst (λ X → Hom D (T fI a) (T X b)) (Category.right-id I) (kext fI (id I) (η j ∘D [ J ]₁ f))) 
-                       (≡-to-≅ (Category.right-id I)) 
-                       (hsym (≡-subst-removable (λ X → Hom D (T fI b) (T X b)) (Category.right-id I) (kext fI (id I) (η j {b})))) ⟩
-           subst (λ X → Hom D (T fI b) (T X b)) (Category.right-id I) (kext fI (id I) (η j {b})) ∘D subst (λ X → Hom D (T fI a) (T X b)) (Category.right-id I) (kext fI (id I) (η j ∘D [ J ]₁ f))
+           id D {T (fI ∘I id I) b} ∘D kext (id I) fI (η i ∘D [ J ]₁ f)
+             ≅⟨ hcong₂ (λ X Y → (Hom D (T fI a) (T X b)) ∋ (Y ∘D kext (id I) fI (η i ∘D [ J ]₁ f))) (≡-to-≅ (sym (Category.left-id I))) (hsym (left-id (fI ∘I id I))) ⟩
+           kext (id I) (fI ∘I id I) (η i {b}) ∘D kext (id I) fI (η i ∘D [ J ]₁ f)
+             ≅⟨ hcong₂ (λ Y Z → kext (id I) Y (η i {b}) ∘D Z) 
+                       (≡-to-≅ (Category.left-id I))
+                       (hsym (≡-subst-removable (λ X → Hom D (T fI a) (T X b)) (Category.left-id I) (kext (id I) fI (η i ∘D [ J ]₁ f)))) ⟩
+           kext (id I) fI (η i {b}) ∘D subst (λ X → Hom D (T fI a) (T X b)) (Category.left-id I) (kext (id I) fI (η i ∘D [ J ]₁ f))
+             ≅⟨ hcong₂ (λ Y Z → (Hom D (T fI b) (T Y b) ∋ Z) ∘D subst (λ X → Hom D (T fI a) (T X b)) (Category.left-id I) (kext (id I) fI (η i ∘D [ J ]₁ f))) 
+                       (≡-to-≅ (Category.left-id I)) 
+                       (hsym (≡-subst-removable (λ X → Hom D (T fI b) (T X b)) (Category.left-id I) (kext (id I) fI (η i {b})))) ⟩
+           subst (λ X → Hom D (T fI b) (T X b)) (Category.left-id I) (kext (id I) fI (η i {b})) ∘D subst (λ X → Hom D (T fI a) (T X b)) (Category.left-id I) (kext (id I) fI (η i ∘D [ J ]₁ f))
              ≡⟨⟩
            nat-η b ∘D [ FunctorT fI ]₁ f ∎
