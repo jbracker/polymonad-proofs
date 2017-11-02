@@ -57,7 +57,17 @@ IndexedMonad→ParameterizedRelativeMonad T IM = parameterizedRelativeMonad η' 
         kext (cid I {i}) fI k ∘C η' i {a}
           ≡⟨⟩
         (nat-η (μ (cid I {i}) fI) b ∘C [ T (cid I {i}) ]₁ k) ∘C nat-η (η i) a
-          ≅⟨ {!!} ⟩
+          ≡⟨ sym $ assoc C ⟩
+        nat-η (μ (cid I {i}) fI) b ∘C ([ T (cid I {i}) ]₁ k ∘C nat-η (η i) a)
+          ≡⟨ cong (λ X → nat-η (μ (cid I {i}) fI) b ∘C X) (natural (η i)) ⟩
+        nat-η (μ (cid I {i}) fI) b ∘C (nat-η (η i) ([ T fI ]₀ b) ∘C [ Id[ C ] ]₁ k)
+          ≡⟨ assoc C ⟩
+        (nat-η (μ (cid I {i}) fI) b ∘C nat-η (η i) ([ T fI ]₀ b)) ∘C [ Id[ C ] ]₁ k
+          ≡⟨⟩
+        (nat-η (μ (cid I {i}) fI) b ∘C nat-η (η i) ([ T fI ]₀ b)) ∘C k
+          ≅⟨ hcong₂ (λ X Y → (Hom C ([ T fI ]₀ b) ([ T X ]₀ b) ∋ Y) ∘C k) (≡-to-≅ $ cat-left-id I) η-right-coher ⟩
+        cid C {[ T fI ]₀ b} ∘C k
+          ≡⟨ cat-right-id C ⟩
         k ∎
     
     abstract
@@ -67,7 +77,7 @@ IndexedMonad→ParameterizedRelativeMonad T IM = parameterizedRelativeMonad η' 
         kext fI (cid I {j}) (η' j {a}) 
           ≡⟨⟩
         nat-η (μ fI (cid I {j})) a ∘C [ T fI ]₁ (nat-η (η j) a) -- 
-          ≅⟨ {!!} ⟩
+          ≅⟨ η-left-coher ⟩
         cid C {F₀ (T fI) a} ∎
     
     abstract
@@ -78,7 +88,27 @@ IndexedMonad→ParameterizedRelativeMonad T IM = parameterizedRelativeMonad η' 
         kext fI (hI ∘I gI) (kext gI hI l ∘C k)
           ≡⟨⟩
         nat-η (μ fI (hI ∘I gI)) c ∘C [ T fI ]₁ ((nat-η (μ gI hI) c ∘C [ T gI ]₁ l) ∘C k)
-          ≅⟨ {!!} ⟩
+          ≡⟨ cong (λ X → nat-η (μ fI (hI ∘I gI)) c ∘C X) (Functor.compose (T fI)) ⟩
+        nat-η (μ fI (hI ∘I gI)) c ∘C ([ T fI ]₁ (nat-η (μ gI hI) c ∘C [ T gI ]₁ l) ∘C [ T fI ]₁ k)
+          ≡⟨ cong (λ X → nat-η (μ fI (hI ∘I gI)) c ∘C (X ∘C [ T fI ]₁ k)) (Functor.compose (T fI)) ⟩
+        nat-η (μ fI (hI ∘I gI)) c ∘C (([ T fI ]₁ (nat-η (μ gI hI) c) ∘C [ T fI ]₁ ([ T gI ]₁ l)) ∘C [ T fI ]₁ k)
+          ≡⟨ cong (λ X → nat-η (μ fI (hI ∘I gI)) c ∘C X) (sym $ assoc C) ⟩
+        nat-η (μ fI (hI ∘I gI)) c ∘C ([ T fI ]₁ (nat-η (μ gI hI) c) ∘C ([ T fI ]₁ ([ T gI ]₁ l) ∘C [ T fI ]₁ k))
+          ≡⟨ assoc C ⟩
+        (nat-η (μ fI (hI ∘I gI)) c ∘C [ T fI ]₁ (nat-η (μ gI hI) c)) ∘C ([ T fI ]₁ ([ T gI ]₁ l) ∘C [ T fI ]₁ k)
+          ≅⟨ hcong₂ (λ X Y → (Hom C ([ [ T fI ]∘[ [ T gI ]∘[ T hI ] ] ]₀ c) ([ T X ]₀ c) ∋ Y) ∘C ([ T fI ]₁ ([ T gI ]₁ l) ∘C [ T fI ]₁ k))
+                    (≡-to-≅ $ sym $ assoc I) μ-coher ⟩
+        (nat-η (μ (gI ∘I fI) hI) c ∘C nat-η (μ fI gI) ([ T hI ]₀ c)) ∘C ([ T fI ]₁ ([ T gI ]₁ l) ∘C [ T fI ]₁ k)
+          ≡⟨ sym $ assoc C ⟩
+        nat-η (μ (gI ∘I fI) hI) c ∘C (nat-η (μ fI gI) ([ T hI ]₀ c) ∘C ([ T fI ]₁ ([ T gI ]₁ l) ∘C [ T fI ]₁ k))
+          ≡⟨ cong (λ X → nat-η (μ (gI ∘I fI) hI) c ∘C X) (assoc C) ⟩
+        nat-η (μ (gI ∘I fI) hI) c ∘C ((nat-η (μ fI gI) ([ T hI ]₀ c) ∘C [ T fI ]₁ ([ T gI ]₁ l)) ∘C [ T fI ]₁ k)
+          ≡⟨ cong (λ X → nat-η (μ (gI ∘I fI) hI) c ∘C (X ∘C [ T fI ]₁ k)) (sym $ natural (μ fI gI)) ⟩
+        nat-η (μ (gI ∘I fI) hI) c ∘C (([ T (gI ∘I fI) ]₁ l ∘C nat-η (μ fI gI) b) ∘C [ T fI ]₁ k)
+          ≡⟨ cong (λ X → nat-η (μ (gI ∘I fI) hI) c ∘C X) (sym $ assoc C) ⟩
+        nat-η (μ (gI ∘I fI) hI) c ∘C ([ T (gI ∘I fI) ]₁ l ∘C (nat-η (μ fI gI) b ∘C [ T fI ]₁ k))
+          ≡⟨ assoc C ⟩
         (nat-η (μ (gI ∘I fI) hI) c ∘C [ T (gI ∘I fI) ]₁ l) ∘C (nat-η (μ fI gI) b ∘C [ T fI ]₁ k)
           ≡⟨⟩
         kext (gI ∘I fI) hI l ∘C kext fI gI k ∎
+
