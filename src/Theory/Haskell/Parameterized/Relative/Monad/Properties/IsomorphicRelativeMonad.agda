@@ -41,11 +41,11 @@ ParameterizedRelativeMonad→RelativeMonad PRM =
 
 RelativeMonad→ParameterizedRelativeMonad : RelativeMonad T J → ParameterizedRelativeMonad ⊤-Cat (λ {i} {j} f → T) J
 RelativeMonad→ParameterizedRelativeMonad RM = 
-  parameterized-relative-monad (λ i {a} → η {a}) 
-                               (λ {i j k} f g {a b} → kext {a} {b}) 
-                               (λ {i j} f {a b} {k} → ≡-to-≅ $ right-id {a} {b} {k}) 
-                               (λ {i j} f {a} → ≡-to-≅ $ left-id {a}) 
-                               (λ {i j v w} f g h {a b c} {k} {l} → ≡-to-≅ $ coher {a} {b} {c} {k} {l})
+  parameterizedRelativeMonad (λ i {a} → η {a}) 
+                             (λ {i j k} f g {a b} → kext {a} {b}) 
+                             (λ {i j} f {a b} {k} → ≡-to-≅ $ right-id {a} {b} {k}) 
+                             (λ {i j} f {a} → ≡-to-≅ $ left-id {a}) 
+                             (λ {i j v w} f g h {a b c} {k} {l} → ≡-to-≅ $ coher {a} {b} {c} {k} {l})
   where
     open RelativeMonad RM
 

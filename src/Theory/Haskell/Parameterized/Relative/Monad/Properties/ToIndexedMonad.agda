@@ -40,41 +40,41 @@ ParameterizedRelativeMonad→IndexedMonad T PRM = indexedMonad NaturalTransforma
     open ParameterizedRelativeMonad PRM
         
     μ : {i j k : Obj I} (fI : Hom I i j) (gI : Hom I j k)
-      → (x : Obj C) → Hom C ([ [ FunctorT fI ]∘[ FunctorT gI ] ]₀ x) ([ FunctorT (gI ∘I fI) ]₀ x)
-    μ fI gI x = kext fI gI (cid C {T gI x})
+      → (x : Obj C) → Hom C ([ [ FunctorT gI ]∘[ FunctorT fI ] ]₀ x) ([ FunctorT (gI ∘I fI) ]₀ x)
+    μ fI gI x = kext fI gI (cid C {T fI x})
     
     abstract
       μ-coher : {i j k l : Obj I} {f : Hom I i j} {g : Hom I j k} {h : Hom I k l} {x : Obj C}
-              → μ f (h ∘I g) x ∘C [ FunctorT f ]₁ (μ g h x)
-              ≅ μ (g ∘I f) h x ∘C μ f g ([ FunctorT h ]₀ x)
+              → μ (g ∘I f) h x ∘C [ FunctorT h ]₁ (μ f g x)
+              ≅ μ f (h ∘I g) x ∘C μ g h ([ FunctorT f ]₀ x)
       μ-coher {i} {j} {k} {l} {fI} {gI} {hI} {x} = begin
-        μ fI (hI ∘I gI) x ∘C [ FunctorT fI ]₁ (μ gI hI x)
+        μ (gI ∘I fI) hI x ∘C [ FunctorT hI ]₁ (μ fI gI x)
           ≡⟨⟩
-        kext fI (hI ∘I gI) (cid C {T (hI ∘I gI) x}) ∘C subst (λ X → Hom C (T fI (T gI (T hI x))) (T X (T (hI ∘I gI) x))) (cat-right-id I) (kext fI (cid I) (η j ∘C (kext gI hI (cid C {T hI x}))))
-          ≅⟨ hcong₂ (λ X Y → kext X (hI ∘I gI) (cid C {T (hI ∘I gI) x}) ∘C Y) 
-                    (≡-to-≅ $ sym $ cat-right-id I) 
-                    (≡-subst-removable (λ X → Hom C (T fI (T gI (T hI x))) (T X (T (hI ∘I gI) x))) (cat-right-id I) (kext fI (cid I) (η j ∘C (kext gI hI (cid C {T hI x}))))) ⟩
-        kext (cid I ∘I fI) (hI ∘I gI) (cid C {T (hI ∘I gI) x}) ∘C kext fI (cid I) (η j ∘C (kext gI hI (cid C {T hI x})))
-          ≅⟨ hsym $ coher fI (cid I) (hI ∘I gI) ⟩
-        kext fI ((hI ∘I gI) ∘I cid I) (kext (cid I) (hI ∘I gI) (cid C {T (hI ∘I gI) x}) ∘C (η j ∘C (kext gI hI (cid C {T hI x}))))
-          ≡⟨ cong (kext fI ((hI ∘I gI) ∘I cid I)) (assoc C) ⟩
-        kext fI ((hI ∘I gI) ∘I cid I) ((kext (cid I) (hI ∘I gI) (cid C {T (hI ∘I gI) x}) ∘C η j) ∘C (kext gI hI (cid C {T hI x})))
-          ≅⟨ hcong₂ (λ X Y → kext fI X (Y ∘C (kext gI hI (cid C {T hI x})))) (≡-to-≅ $ cat-left-id I) (right-id (hI ∘I gI)) ⟩
-        kext fI (hI ∘I gI) (cid C {T (hI ∘I gI) x} ∘C (kext gI hI (cid C {T hI x})))
-          ≡⟨ cong (kext fI (hI ∘I gI)) (cat-right-id C) ⟩
-        kext fI (hI ∘I gI) (kext gI hI (cid C {T hI x}))
-          ≡⟨ cong (kext fI (hI ∘I gI)) (sym $ cat-left-id C) ⟩
-        kext fI (hI ∘I gI) (kext gI hI (cid C {T hI x}) ∘C cid C {T gI (T hI x)})
-          ≅⟨ coher fI gI hI ⟩
-        kext (gI ∘I fI) hI (cid C {T hI x}) ∘C kext fI gI (cid C {T gI (T hI x)})
+        kext (gI ∘I fI) hI (cid C {T (gI ∘I fI) x}) ∘C subst (λ X → Hom C (T hI (T gI (T fI x))) (T X (T (gI ∘I fI) x))) (cat-left-id I) (kext (cid I) hI (η k ∘C (kext fI gI (cid C {T fI x}))))
+          ≅⟨ hcong₂ (λ X Y → kext (gI ∘I fI) X (cid C {T (gI ∘I fI) x}) ∘C Y) 
+                    (≡-to-≅ $ sym $ cat-left-id I) 
+                    (≡-subst-removable (λ X → Hom C (T hI (T gI (T fI x))) (T X (T (gI ∘I fI) x))) (cat-left-id I) (kext (cid I) hI (η k ∘C (kext fI gI (cid C {T fI x}))))) ⟩
+        kext (gI ∘I fI) (hI ∘I cid I) (cid C {T (gI ∘I fI) x}) ∘C kext (cid I) hI (η k ∘C (kext fI gI (cid C {T fI x})))
+          ≅⟨ hsym $ coher (gI ∘I fI) (cid I) hI ⟩
+        kext (cid I ∘I (gI ∘I fI)) hI (kext (gI ∘I fI) (cid I) (cid C {T (gI ∘I fI) x}) ∘C (η k ∘C (kext fI gI (cid C {T fI x}))))
+          ≡⟨ cong (kext (cid I ∘I (gI ∘I fI)) hI) (assoc C) ⟩
+        kext (cid I ∘I (gI ∘I fI)) hI ((kext (gI ∘I fI) (cid I) (cid C {T (gI ∘I fI) x}) ∘C η k) ∘C (kext fI gI (cid C {T fI x})))
+          ≅⟨ hcong₂ (λ X Y → kext X hI (Y ∘C (kext fI gI (cid C {T fI x})))) (≡-to-≅ $ cat-right-id I) (right-id (gI ∘I fI)) ⟩
+        kext (gI ∘I fI) hI (cid C {T (gI ∘I fI) x} ∘C (kext fI gI (cid C {T fI x})))
+          ≡⟨ cong (kext (gI ∘I fI) hI) (cat-right-id C) ⟩
+        kext (gI ∘I fI) hI (kext fI gI (cid C {T fI x}))
+          ≡⟨ cong (kext (gI ∘I fI) hI) (sym $ cat-left-id C) ⟩ 
+        kext (gI ∘I fI) hI (kext fI gI (cid C {T fI x}) ∘C cid C {T gI (T fI x)})
+          ≅⟨ coher fI gI hI ⟩ 
+        kext fI (hI ∘I gI) (cid C {T fI x}) ∘C kext gI hI (cid C {T gI (T fI x)})
           ≡⟨⟩
-        μ (gI ∘I fI) hI x ∘C μ fI gI ([ FunctorT hI ]₀ x) ∎
+        μ fI (hI ∘I gI) x ∘C μ gI hI ([ FunctorT fI ]₀ x) ∎
     
     abstract
       η-left-coher : {i j : Obj I} {f : Hom I i j} {x : Obj C} 
-                   → μ f (cid I) x ∘C [ FunctorT f ]₁ (η j {x})
+                   → μ (cid I) f x ∘C [ FunctorT f ]₁ (η i {x})
                    ≅ cid C { [ FunctorT f ]₀ x }
-      η-left-coher {i} {j} {fI} {x} = begin
+      η-left-coher {i} {j} {fI} {x} = {!!} {- begin
         μ fI (cid I) x ∘C [ FunctorT fI ]₁ (η j {x})
           ≡⟨⟩
         kext fI (cid I) (cid C {T (cid I) x}) ∘C subst (λ X → Hom C (T fI x) (T X (T (cid I) x))) (cat-right-id I) (kext fI (cid I) (η j ∘C η j {x}))
@@ -91,21 +91,21 @@ ParameterizedRelativeMonad→IndexedMonad T PRM = indexedMonad NaturalTransforma
           ≡⟨ cong (kext fI (cid I)) (cat-right-id C) ⟩
         kext fI (cid I) (η j {x})
           ≅⟨ left-id fI ⟩
-        cid C { [ FunctorT fI ]₀ x } ∎
+        cid C { [ FunctorT fI ]₀ x } ∎ -}
     
     abstract
       η-right-coher : {i j : Obj I} {f : Hom I i j} {x : Obj C} 
-                    → μ (cid I) f x ∘C (η i {[ FunctorT f ]₀ x})
+                    → μ f (cid I) x ∘C (η j {[ FunctorT f ]₀ x})
                     ≅ cid C { [ FunctorT f ]₀ x }
       η-right-coher {i} {j} {fI} {x} = begin
-        μ (cid I) fI x ∘C η i {[ FunctorT fI ]₀ x}
+        μ fI (cid I) x ∘C η j {[ FunctorT fI ]₀ x}
           ≡⟨⟩
-        kext (cid I) fI (cid C {T fI x}) ∘C η i {[ FunctorT fI ]₀ x}
+        kext fI (cid I) (cid C {T fI x}) ∘C η j {[ FunctorT fI ]₀ x}
           ≅⟨ right-id fI ⟩
         cid C { [ FunctorT fI ]₀ x } ∎
 
-    NatTrans-μ : {i j k : Obj I} (f : Hom I i j) (g : Hom I j k) → NaturalTransformation [ FunctorT f ]∘[ FunctorT g ] (FunctorT ((I ∘ g) f))
-    NatTrans-μ {i} {j} {k} fI gI = naturalTransformation (μ fI gI) nat-μ
+    NatTrans-μ : {i j k : Obj I} (f : Hom I i j) (g : Hom I j k) → NaturalTransformation [ FunctorT g ]∘[ FunctorT f ] (FunctorT ((I ∘ g) f))
+    NatTrans-μ {i} {j} {k} fI gI = naturalTransformation (μ fI gI) {!!} {- nat-μ
       where
         abstract
           nat-μ : {a b : Obj C} {f : Hom C a b}
@@ -149,7 +149,7 @@ ParameterizedRelativeMonad→IndexedMonad T PRM = indexedMonad NaturalTransforma
                         (hsym $ ≡-subst-removable ((λ X → Hom C (T gI a) (T X b))) (cat-right-id I) (kext gI (cid I) (η k ∘C f))) ⟩
             kext fI gI (cid C {T gI b}) ∘C [ FunctorT fI ]₁ (subst (λ X → Hom C (T gI a) (T X b)) (cat-right-id I) (kext gI (cid I) (η k ∘C f)))
               ≡⟨⟩
-            μ fI gI b ∘C [ [ FunctorT fI ]∘[ FunctorT gI ] ]₁ f ∎
+            μ fI gI b ∘C [ [ FunctorT fI ]∘[ FunctorT gI ] ]₁ f ∎ -}
 
 
 

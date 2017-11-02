@@ -30,27 +30,27 @@ abstract
     → {η₀ : (i : Obj I) → {a : Obj C} → Hom D ([ J ]₀ a) (T (cat-id I {i}) a)}
     → {η₁ : (i : Obj I) → {a : Obj C} → Hom D ([ J ]₀ a) (T (cat-id I {i}) a)}
     → {kext₀ : {i j k : Obj I} → (f : Hom I i j) (g : Hom I j k) 
-             → {a b : Obj C} → Hom D ([ J ]₀ a) (T g b) → Hom D (T f a) (T (g ∘I f) b)}
+             → {a b : Obj C} → Hom D ([ J ]₀ a) (T f b) → Hom D (T g a) (T (g ∘I f) b)}
     → {kext₁ : {i j k : Obj I} → (f : Hom I i j) (g : Hom I j k) 
-             → {a b : Obj C} → Hom D ([ J ]₀ a) (T g b) → Hom D (T f a) (T (g ∘I f) b)}
+             → {a b : Obj C} → Hom D ([ J ]₀ a) (T f b) → Hom D (T g a) (T (g ∘I f) b)}
     → {right-id₀ : {i j : Obj I} → (f : Hom I i j) 
                  → {a b : Obj C} {k : Hom D ([ J ]₀ a) (T f b)} 
-                 → kext₀ (cat-id I) f k ∘D η₀ i ≅ k}
+                 → kext₀ f (cat-id I) k ∘D η₀ j ≅ k}
     → {right-id₁ : {i j : Obj I} → (f : Hom I i j) 
                  → {a b : Obj C} {k : Hom D ([ J ]₀ a) (T f b)} 
-                 → kext₁ (cat-id I) f k ∘D η₁ i ≅ k}
+                 → kext₁ f (cat-id I) k ∘D η₁ j ≅ k}
     → {left-id₀ : {i j : Obj I} → (f : Hom I i j) 
                 → {a : Obj C}
-                → kext₀ f (cat-id I) (η₀ j {a}) ≅ cat-id D {a = T f a}}
+                → kext₀ (cat-id I) f (η₀ i {a}) ≅ cat-id D {a = T f a}}
     → {left-id₁ : {i j : Obj I} → (f : Hom I i j) 
                 → {a : Obj C}
-                → kext₁ f (cat-id I) (η₁ j {a}) ≅ cat-id D {a = T f a}}
+                → kext₁ (cat-id I) f (η₁ i {a}) ≅ cat-id D {a = T f a}}
     → {coher₀ : {i j v w : Obj I} → (f : Hom I i j) → (g : Hom I j v) → (h : Hom I v w) 
-              → {a b c : Obj C} {k : Hom D ([ J ]₀ a) (T g b)} {l : Hom D ([ J ]₀ b) (T h c)} 
-              → kext₀ f (h ∘I g) ( (kext₀ g h l) ∘D k ) ≅ kext₀ (g ∘I f) h l ∘D kext₀ f g k}
+              → {a b c : Obj C} {k : Hom D ([ J ]₀ a) (T g b)} {l : Hom D ([ J ]₀ b) (T f c)} 
+              → kext₀ (g ∘I f) h ( (kext₀ f g l) ∘D k ) ≅ kext₀ f (h ∘I g) l ∘D kext₀ g h k}
     → {coher₁ : {i j v w : Obj I} → (f : Hom I i j) → (g : Hom I j v) → (h : Hom I v w) 
-              → {a b c : Obj C} {k : Hom D ([ J ]₀ a) (T g b)} {l : Hom D ([ J ]₀ b) (T h c)} 
-              → kext₁ f (h ∘I g) ( (kext₁ g h l) ∘D k ) ≅ kext₁ (g ∘I f) h l ∘D kext₁ f g k}
+              → {a b c : Obj C} {k : Hom D ([ J ]₀ a) (T g b)} {l : Hom D ([ J ]₀ b) (T f c)} 
+              → kext₁ (g ∘I f) h ( (kext₁ f g l) ∘D k ) ≅ kext₁ f (h ∘I g) l ∘D kext₁ g h k}
     → (η₀ ≡ η₁)
     → ((λ {i j k} → kext₀ {i} {j} {k}) ≡ kext₁)
     → parameterizedRelativeMonad {C = C} {D} {I} {T} {J} η₀ kext₀ right-id₀ left-id₀ coher₀ 
