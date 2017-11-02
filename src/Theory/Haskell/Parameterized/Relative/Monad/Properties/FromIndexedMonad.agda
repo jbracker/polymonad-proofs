@@ -18,10 +18,8 @@ open import Theory.Functor.Composition
 open import Theory.Natural.Transformation
 
 open import Theory.Haskell.Parameterized.Indexed.Monad
-open import Theory.Haskell.Parameterized.Indexed.Monad.Equality
 
 open import Theory.Haskell.Parameterized.Relative.Monad
-open import Theory.Haskell.Parameterized.Relative.Monad.Equality
 
 open Category renaming ( right-id to cat-right-id ; left-id to cat-left-id ; id to cid )
 
