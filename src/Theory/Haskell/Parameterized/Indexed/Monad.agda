@@ -5,7 +5,7 @@ open import Relation.Binary.PropositionalEquality
 open import Relation.Binary.HeterogeneousEquality
 
 open import Theory.Category.Definition
-open import Theory.Functor.Definition
+open import Theory.Functor.Definition hiding ( functor )
 open import Theory.Functor.Composition
 open import Theory.Natural.Transformation
 
@@ -22,6 +22,8 @@ record IndexedMonad {ℓI₀ ℓI₁ ℓC₀ ℓC₁ : Level} {C : Category {ℓ
     _∘I_ = _∘_ I
     _∘C_ = _∘_ C
 
+  functor = M
+  
   field
     -- return ∷ α → M i i α
     η : (i : Obj I) → NaturalTransformation (Id[ C ]) (M (id I {i}))
