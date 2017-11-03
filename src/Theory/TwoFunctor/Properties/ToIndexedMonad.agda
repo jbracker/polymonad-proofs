@@ -42,7 +42,7 @@ LaxTwoFunctor→IndexedMonad
   → {C : Category {ℓC₀} {ℓC₁}}
   → (F : ConstLaxTwoFunctor (discreteHomCatTwoCategory I) (Cat {ℓC₀} {ℓC₁}) C)
   → IndexedMonad I (λ {i j} f → [ ConstLaxTwoFunctor.P₁ F {i} {j} ]₀ f)
-LaxTwoFunctor→IndexedMonad {ℓI₀} {ℓI₁} {ℓC₀} {ℓC₁} {I} {C} F = indexed-monad η' μ' assoc' left-id' right-id'
+LaxTwoFunctor→IndexedMonad {ℓI₀} {ℓI₁} {ℓC₀} {ℓC₁} {I} {C} F = indexedMonad η' μ' assoc' left-id' right-id'
   where
     open ConstLaxTwoFunctor F
     open NaturalTransformation renaming (η to nat-η)
