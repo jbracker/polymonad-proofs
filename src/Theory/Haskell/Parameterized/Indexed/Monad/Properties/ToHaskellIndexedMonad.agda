@@ -33,7 +33,7 @@ IndexedMonad→HaskellIndexedMonad : {ℓIxs : Level} {Ixs : Set ℓIxs}
 IndexedMonad→HaskellIndexedMonad {ℓIxs} {Ixs} (F , monad) 
   = M , indexed-monad _>>=_ return functor law-right-id law-left-id law-assoc law-monad-fmap
   where
-    open IndexedMonad monad
+    open IndexedMonad monad renaming ( functor to ix-functor )
     open NaturalTransformation renaming ( η to nat-η )
     
     I = Codisc Ixs
