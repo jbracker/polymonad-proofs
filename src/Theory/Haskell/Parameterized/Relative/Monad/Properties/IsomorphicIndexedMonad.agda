@@ -67,17 +67,17 @@ IndexedMonad↔ParameterizedRelativeMonad = bijection IM→PRM PRM→IM PRM-id I
             T₁-eq : {i j : Obj I} (fI : Hom I i j)
                   → (λ {a b} f → F₁ (proj₁ (PRM→IM (IM→PRM (T , IM))) {i} {j} fI) {a} {b} f) ≡ F₁ (T fI)
             T₁-eq {i} {j} fI = implicit-fun-ext $ λ a → implicit-fun-ext $ λ b → fun-ext $ λ f → ≅-to-≡ $ begin
-              subst (λ X → Hom C (F₀ (T fI) a) (F₀ (T X) b)) (Category.right-id I) (nat-η (μ IM fI (cid I)) b ∘C [ T fI ]₁ (nat-η (η IM j) b ∘C f))
+              subst (λ X → Hom C (F₀ (T fI) a) (F₀ (T X) b)) (cat-left-id I) (nat-η (μ IM (cid I) fI) b ∘C [ T fI ]₁ (nat-η (η IM i) b ∘C f))
                 ≅⟨ ≡-subst-removable (λ X → Hom C (F₀ (T fI) a) (F₀ (T X) b))
-                                     (Category.right-id I)
-                                     (nat-η (μ IM fI (cid I)) b ∘C [ T fI ]₁ (nat-η (η IM j) b ∘C [ Id[ C ] ]₁ f)) ⟩
-              nat-η (μ IM fI (cid I)) b ∘C [ T fI ]₁ (nat-η (η IM j) b ∘C f)
-                ≡⟨ cong (λ X → nat-η (μ IM fI (cid I)) b ∘C X) (compose (T fI)) ⟩
-              nat-η (μ IM fI (cid I)) b ∘C ([ T fI ]₁ (nat-η (η IM j) b) ∘C [ T fI ]₁ f)
+                                     (cat-left-id I)
+                                     (nat-η (μ IM (cid I) fI) b ∘C [ T fI ]₁ (nat-η (η IM i) b ∘C f)) ⟩
+              nat-η (μ IM (cid I) fI) b ∘C [ T fI ]₁ (nat-η (η IM i) b ∘C f)
+                ≡⟨ cong (λ X → nat-η (μ IM (cid I) fI) b ∘C X) (compose (T fI)) ⟩
+              nat-η (μ IM (cid I) fI) b ∘C ([ T fI ]₁ (nat-η (η IM i) b) ∘C [ T fI ]₁ f)
                 ≡⟨ assoc C ⟩
-              (nat-η (μ IM fI (cid I)) b ∘C [ T fI ]₁ (nat-η (η IM j) b)) ∘C [ T fI ]₁ f
+              (nat-η (μ IM (cid I) fI) b ∘C [ T fI ]₁ (nat-η (η IM i) b)) ∘C [ T fI ]₁ f
                 ≅⟨ hcong₂ (λ X Y → (Hom C (F₀ (T fI) b) (F₀ (T X) b) ∋ Y) ∘C [ T fI ]₁ f)
-                          (≡-to-≅ $ cat-right-id I)
+                          (≡-to-≅ $ cat-left-id I)
                           (η-left-coher IM) ⟩
               cid C ∘C [ T fI ]₁ f
                 ≡⟨ cat-right-id C ⟩
@@ -97,17 +97,17 @@ IndexedMonad↔ParameterizedRelativeMonad = bijection IM→PRM PRM→IM PRM-id I
           
           abstract
             μ-eq : (λ {i j k} fI gI → μ (proj₂ (PRM→IM (IM→PRM (T , IM)))) {i} {j} {k} fI gI) ≅ (λ {i j k} fI gI → μ IM {i} {j} {k} fI gI)
-            μ-eq = het-implicit-fun-ext (hcong (λ X → (λ z → {j k : Obj I} (fI : Hom I z j) (gI : Hom I j k) → NaturalTransformation [ X fI ]∘[ X gI ] (X (gI ∘I fI)))) (≡-to-≅ $ T-eq))
-                 $ λ i → het-implicit-fun-ext (hcong (λ X → (λ z → {k : Obj I} (fI : Hom I i z) (gI : Hom I z k) → NaturalTransformation [ X fI ]∘[ X gI ] (X (gI ∘I fI)))) (≡-to-≅ $ T-eq))
-                 $ λ j → het-implicit-fun-ext (hcong (λ X → (λ z → (fI : Hom I i j) (gI : Hom I j z) → NaturalTransformation [ X fI ]∘[ X gI ] (X (gI ∘I fI)))) (≡-to-≅ $ T-eq))
-                 $ λ k → het-fun-ext (hcong (λ X → (λ z → (gI : Hom I j k) → NaturalTransformation [ X z ]∘[ X gI ] (X (gI ∘I z)))) (≡-to-≅ $ T-eq))
-                 $ λ fI → het-fun-ext (hcong (λ X → (λ z → NaturalTransformation [ X fI ]∘[ X z ] (X (z ∘I fI)))) (≡-to-≅ $ T-eq))
-                 $ λ gI → het-natural-transformation-eq (cong (λ X → [ X fI ]∘[ X gI ]) T-eq) (cong (λ X → X (gI ∘I fI)) T-eq)
-                 $ het-fun-ext (hcong (λ X → (λ z → Hom C ([ [ X fI ]∘[ X gI ] ]₀ z) ([ X (gI ∘I fI) ]₀ z))) (≡-to-≅ $ T-eq))
+            μ-eq = het-implicit-fun-ext (hcong (λ X → (λ z → {j k : Obj I} (fI : Hom I z j) (gI : Hom I j k) → NaturalTransformation [ X gI ]∘[ X fI ] (X (gI ∘I fI)))) (≡-to-≅ $ T-eq))
+                 $ λ i → het-implicit-fun-ext (hcong (λ X → (λ z → {k : Obj I} (fI : Hom I i z) (gI : Hom I z k) → NaturalTransformation [ X gI ]∘[ X fI ] (X (gI ∘I fI)))) (≡-to-≅ $ T-eq))
+                 $ λ j → het-implicit-fun-ext (hcong (λ X → (λ z → (fI : Hom I i j) (gI : Hom I j z) → NaturalTransformation [ X gI ]∘[ X fI ] (X (gI ∘I fI)))) (≡-to-≅ $ T-eq))
+                 $ λ k → het-fun-ext (hcong (λ X → (λ z → (gI : Hom I j k) → NaturalTransformation [ X gI ]∘[ X z ] (X (gI ∘I z)))) (≡-to-≅ $ T-eq))
+                 $ λ fI → het-fun-ext (hcong (λ X → (λ z → NaturalTransformation [ X z ]∘[ X fI ] (X (z ∘I fI)))) (≡-to-≅ $ T-eq))
+                 $ λ gI → het-natural-transformation-eq (cong (λ X → [ X gI ]∘[ X fI ]) T-eq) (cong (λ X → X (gI ∘I fI)) T-eq)
+                 $ het-fun-ext (hcong (λ X → (λ z → Hom C ([ [ X gI ]∘[ X fI ] ]₀ z) ([ X (gI ∘I fI) ]₀ z))) (≡-to-≅ $ T-eq))
                  $ λ x → begin
-                   nat-η (μ IM fI gI) x ∘C [ T fI ]₁ (cid C {F₀ (T gI) x})
-                     ≡⟨ cong (λ X → nat-η (μ IM fI gI) x ∘C X) (fun-id (T fI)) ⟩
-                   nat-η (μ IM fI gI) x ∘C cid C {F₀ (T fI) (F₀ (T gI) x)}
+                   nat-η (μ IM fI gI) x ∘C [ T gI ]₁ (cid C {F₀ (T fI) x})
+                     ≡⟨ cong (λ X → nat-η (μ IM fI gI) x ∘C X) (fun-id (T gI)) ⟩
+                   nat-η (μ IM fI gI) x ∘C cid C {F₀ (T gI) (F₀ (T fI) x)}
                      ≡⟨ cat-left-id C ⟩
                    nat-η (μ IM fI gI) x ∎
     
@@ -123,17 +123,17 @@ IndexedMonad↔ParameterizedRelativeMonad = bijection IM→PRM PRM→IM PRM-id I
                         $ λ a → implicit-fun-ext
                         $ λ b → fun-ext
                         $ λ f → ≅-to-≡ $ begin
-                          kext PRM fI gI (cid C {T₀ gI b}) ∘C subst (λ X → Hom C (T₀ fI a) (T₀ X (T₀ gI b))) (cat-right-id I) (kext PRM fI (cid I) (η PRM j ∘C f))
-                            ≅⟨ hcong₂ (λ X Y → kext PRM X gI (cid C {T₀ gI b}) ∘C Y)
-                                      (≡-to-≅ $ sym $ cat-right-id I)
-                                      (≡-subst-removable (λ X → Hom C (T₀ fI a) (T₀ X (T₀ gI b))) (cat-right-id I) (kext PRM fI (cid I) (η PRM j ∘C f))) ⟩
-                          kext PRM (cid I ∘I fI) gI (cid C {T₀ gI b}) ∘C kext PRM fI (cid I) (η PRM j ∘C f)
-                            ≅⟨ hsym $ coher PRM fI (cid I {j}) gI ⟩
-                          kext PRM fI (gI ∘I cid I) (kext PRM (cid I {j}) gI (cid C {T₀ gI b}) ∘C (η PRM j ∘C f))
-                            ≡⟨ cong (kext PRM fI (gI ∘I cid I)) (assoc C) ⟩
-                          kext PRM fI (gI ∘I cid I) ((kext PRM (cid I {j}) gI (cid C {T₀ gI b}) ∘C η PRM j) ∘C f)
-                            ≅⟨ hcong₂ (λ X Y → kext PRM fI X (Y ∘C f)) (≡-to-≅ $ cat-left-id I) (right-id PRM gI) ⟩
-                          kext PRM fI gI (cid C {T₀ gI b} ∘C f)
+                          kext PRM fI gI (cid C {T₀ fI b}) ∘C subst (λ X → Hom C (T₀ gI a) (T₀ X (T₀ fI b))) (cat-left-id I) (kext PRM (cid I) gI (η PRM j ∘C f))
+                            ≅⟨ hcong₂ (λ X Y → kext PRM fI X (cid C {T₀ fI b}) ∘C Y)
+                                      (≡-to-≅ $ sym $ cat-left-id I)
+                                      (≡-subst-removable (λ X → Hom C (T₀ gI a) (T₀ X (T₀ fI b))) (cat-left-id I) (kext PRM (cid I) gI (η PRM j ∘C f))) ⟩
+                          kext PRM fI (gI ∘I cid I) (cid C {T₀ fI b}) ∘C kext PRM (cid I) gI (η PRM j ∘C f)
+                            ≅⟨ hsym $ coher PRM fI (cid I) gI ⟩
+                          kext PRM (cid I ∘I fI) gI (kext PRM fI (cid I) (cid C {T₀ fI b}) ∘C (η PRM j ∘C f))
+                            ≡⟨ cong (kext PRM (cid I ∘I fI) gI) (assoc C) ⟩
+                          kext PRM (cid I ∘I fI) gI ((kext PRM fI (cid I) (cid C {T₀ fI b}) ∘C η PRM j) ∘C f)
+                            ≅⟨ hcong₂ (λ X Y → kext PRM X gI (Y ∘C f)) (≡-to-≅ $ cat-right-id I) (right-id PRM fI) ⟩ 
+                          kext PRM fI gI (cid C {T₀ fI b} ∘C f)
                             ≡⟨ cong (kext PRM fI gI) (cat-right-id C) ⟩
                           kext PRM fI gI f ∎
         where
