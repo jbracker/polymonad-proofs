@@ -1,5 +1,5 @@
 
-module Theory.Monad.Atkey.Properties.FromIndexedMonad where
+module Theory.Monad.Atkey.Properties.FromHaskellIndexedMonad where
 
 -- Stdlib
 open import Level renaming ( suc to lsuc ; zero to lzero )

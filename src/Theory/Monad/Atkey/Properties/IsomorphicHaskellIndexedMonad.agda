@@ -24,10 +24,10 @@ open import Theory.Category.Examples.Discrete
 open import Theory.Functor.Definition hiding ( functor )
 open import Theory.Monad.Atkey
 open import Theory.Monad.Atkey.Equality
-open import Theory.Monad.Atkey.Properties.FromIndexedMonad
-open import Theory.Monad.Atkey.Properties.ToIndexedMonad
+open import Theory.Monad.Atkey.Properties.FromHaskellIndexedMonad
+open import Theory.Monad.Atkey.Properties.ToHaskellIndexedMonad
 
-module Theory.Monad.Atkey.Properties.IsomorphicIndexedMonad where
+module Theory.Monad.Atkey.Properties.IsomorphicHaskellIndexedMonad where
 
 IxMonad↔AtkeyParameterizedMonad : {ℓ : Level} → (Ixs : Set ℓ)
                                 → (∃ λ (M : Ixs → Ixs → TyCon) → IxMonad Ixs M) ↔ (AtkeyParameterizedMonad (Hask {zero}) (discreteCategory Ixs))

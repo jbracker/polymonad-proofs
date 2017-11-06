@@ -1,5 +1,5 @@
 
-module Theory.Monad.Atkey.Properties.ToIndexedMonad where
+module Theory.Monad.Atkey.Properties.ToHaskellIndexedMonad where
 
 -- Stdlib
 open import Level
