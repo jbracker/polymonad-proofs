@@ -13,7 +13,6 @@ src/Haskell/Parameterized/Indexed/NonPhantomNonPrincipal.agda
 src/Supermonad/Polymonad.agda
 src/Supermonad/DefinitionWithCategory/ToLaxTwoFunctor.agda
 
-src/Theory/TwoFunctor/Properties/FromRelativeMonad.agda
 src/Theory/TwoFunctor/Properties/ToConstZeroCell.agda
 
 src/Theory/Natural/Isomorphism/Examples/DayConvolutionAssociator.agda
