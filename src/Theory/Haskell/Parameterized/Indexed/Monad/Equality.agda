@@ -25,22 +25,6 @@ private
   _∘I_ = _∘_ I
   _∘C_ = _∘_ C
 
-{-
--- μ ∘ T₁μ ≡ μ ∘ μT₀
-    μ-coher : {i j k l : Obj I} {f : Hom I i j} {g : Hom I j k} {h : Hom I k l} {x : Obj C}
-            → nat-η (μ f (h ∘I g)) x ∘C [ M f ]₁ (nat-η (μ g h) x) ≅ nat-η (μ (g ∘I f) h) x ∘C nat-η (μ f g) ([ M h ]₀ x)
-  
-  field
-    -- μ ∘ Tη ≡ 1ₜ
-    η-left-coher : {i j : Obj I} {f : Hom I i j} {x : Obj C}
-                 → nat-η (μ f (id I)) x ∘C [ M f ]₁ (nat-η (η j) x) ≅ nat-η (Id⟨ M f ⟩) x
-    
-  field
-    -- μ ∘ ηT ≡ 1ₜ
-    η-right-coher : {i j : Obj I} {f : Hom I i j} {x : Obj C}
-                  → nat-η (μ (id I) f) x ∘C nat-η (η i) ([ M f ]₀ x) ≅ nat-η (Id⟨ M f ⟩) x
--}
-
 abstract
   indexed-monad-eq : {M : {i j : Obj I} → Hom I i j → Functor C C}
                    → {η₀ : (i : Obj I) → NaturalTransformation (Id[ C ]) (M (cat-id I {i}))}
