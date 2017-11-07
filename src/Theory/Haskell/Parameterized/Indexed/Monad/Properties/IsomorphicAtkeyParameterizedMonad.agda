@@ -91,3 +91,7 @@ IndexedMonad↔AtkeyParameterizedMonad =
                                                   (cong (λ X → X (codisc j k ∘I codisc i j)) F-eq)
                                                   hrefl } }
 
+AtkeyParameterizedMonad↔IndexedMonad
+  : AtkeyParameterizedMonad C (Disc I)
+  ↔ (Σ ({i j : I} → Hom (Codisc I) i j → Functor C C) (IndexedMonad (Codisc I))) 
+AtkeyParameterizedMonad↔IndexedMonad = bsym IndexedMonad↔AtkeyParameterizedMonad
