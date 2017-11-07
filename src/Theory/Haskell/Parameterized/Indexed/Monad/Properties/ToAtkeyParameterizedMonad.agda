@@ -56,14 +56,16 @@ IndexedMonad→AtkeyParameterizedMonad (T , IxMonad) =
         
         F₁ : {a b : Obj ((Disc I op) ×C Disc I ×C C)} → Hom ((Disc I op) ×C Disc I ×C C) a b → Hom C (F₀ a) (F₀ b)
         F₁ {i ,' j ,' a} {.i ,' .j ,' b} (refl ,' refl ,' f) = Functor.F₁ (T (codisc j i)) f
-        
-        F-id : {a : Obj ((Disc I op) ×C Disc I ×C C)} → Functor.F₁ (T (codisc (p₁ a) (p₂ a))) (id C {p₃ a}) ≡ id C
-        F-id {i ,' j ,' a} = Functor.id (T (codisc i j))
-        
-        F-compose : {a b c : Obj ((Disc I op) ×C Disc I ×C C)}
-                  → {f : Hom ((Disc I op) ×C Disc I ×C C) a b} {g : Hom ((Disc I op) ×C Disc I ×C C) b c} 
-                  → F₁ ((((Disc I op) ×C Disc I ×C C) ∘ g) f) ≡ (C ∘ F₁ g) (F₁ f)
-        F-compose {i ,' j ,' a} {.i ,' .j ,' b} {.i ,' .j ,' c} {refl ,' refl ,' f} {refl ,' refl ,' g} = Functor.compose (T (codisc j i))
+
+        abstract
+          F-id : {a : Obj ((Disc I op) ×C Disc I ×C C)} → Functor.F₁ (T (codisc (p₁ a) (p₂ a))) (id C {p₃ a}) ≡ id C
+          F-id {i ,' j ,' a} = Functor.id (T (codisc i j))
+
+        abstract
+          F-compose : {a b c : Obj ((Disc I op) ×C Disc I ×C C)}
+                    → {f : Hom ((Disc I op) ×C Disc I ×C C) a b} {g : Hom ((Disc I op) ×C Disc I ×C C) b c} 
+                    → F₁ ((((Disc I op) ×C Disc I ×C C) ∘ g) f) ≡ (C ∘ F₁ g) (F₁ f)
+          F-compose {i ,' j ,' a} {.i ,' .j ,' b} {.i ,' .j ,' c} {refl ,' refl ,' f} {refl ,' refl ,' g} = Functor.compose (T (codisc j i))
     
     η : {a : Obj C} {s : Obj (Disc I)} → Hom C a ([ F ]₀ (s ,' s ,' a))
     η {a} {i} = nat-η (ix-η i) a
