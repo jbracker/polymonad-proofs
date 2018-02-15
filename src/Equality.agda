@@ -35,3 +35,7 @@ private
          → _,_ {B = B} a₀ b₀ ≅ _,_ {B = B} a₁ b₁
     het-Σ-eq refl hrefl = hrefl
 open Product public
+
+het-proof-irrelevance : ∀ {ℓ} {A B : Set ℓ} {x : A} {y : B}
+                      → (p q : x ≅ y) → p ≅ q
+het-proof-irrelevance hrefl hrefl = hrefl
