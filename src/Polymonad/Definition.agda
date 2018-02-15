@@ -20,6 +20,7 @@ open import Identity
 --------------------------------------------------------------------------------
 
 record Polymonad {l : Level} (TyCons : Set l) (Id : TyCons) : Set (lsuc l) where
+  constructor polymonad
   field
     -- Set of bind-operation names for each combination of type constructors.
     B[_,_]▷_ : (M N P : TyCons) → Set l
