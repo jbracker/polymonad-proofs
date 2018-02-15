@@ -8,14 +8,20 @@ open import Data.Sum
 open import Data.Unit
 open import Data.Empty
 open import Relation.Binary.PropositionalEquality
+open import Relation.Binary.HeterogeneousEquality renaming ( refl to hrefl ; sym to hsym ; trans to htrans ; cong to hcong ; proof-irrelevance to hproof-irrelevance )
 open ≡-Reasoning
 
 -- Local
 open import Utilities
+open import Bijection renaming ( refl to brefl ; sym to bsym ; trans to btrans )
 open import Haskell
 open import Identity
+open import Extensionality
+open import Equality
 open import Polymonad.Definition
+open import Polymonad.Equality
 open import Hicks.Polymonad
+open import Hicks.Equality
 open import Hicks.UniqueBinds using ( uniqueFunctor )
     
 --------------------------------------------------------------------------------
@@ -69,3 +75,21 @@ Polymonad⇒HicksPolymonad pm = record
   ; law-assoc = law-assoc pm
   ; lawClosure = lawClosure pm
   }
+
+Polymonad↔HicksPolymonad : {TyCon : Set} {Id : TyCon} → Polymonad TyCon Id ↔ HicksPolymonad TyCon Id
+Polymonad↔HicksPolymonad {TyCon} {Id} = bijection (Polymonad⇒HicksPolymonad {TyCon} {Id}) (HicksPolymonad⇒Polymonad {TyCon} {Id}) eqHPM eqPM
+  where
+    eqHPM : (b : HicksPolymonad TyCon Id) → Polymonad⇒HicksPolymonad (HicksPolymonad⇒Polymonad b) ≡ b
+    eqHPM hpm = hicks-polymonad-eq refl refl hrefl hrefl 
+                                   (het-fun-ext hrefl 
+                                     (λ M → het-Σ-eq refl (het-implicit-fun-ext hrefl 
+                                     (λ α → het-fun-ext hrefl 
+                                     (λ m → ≡-to-≅ (proof-irrelevance (lawFunctor2 (HicksPolymonad⇒Polymonad hpm) M (lawFunctor1 (HicksPolymonad⇒Polymonad hpm) M) m) (proj₂ (HicksPolymonad.lawFunctor hpm M) m))))))) 
+                                   hrefl hrefl hrefl hrefl hrefl
+    
+    eqPM : (a : Polymonad TyCon Id) → HicksPolymonad⇒Polymonad (Polymonad⇒HicksPolymonad a) ≡ a
+    eqPM pm = polymonad-eq refl refl hrefl hrefl hrefl hrefl hrefl hrefl hrefl hrefl
+
+
+HicksPolymonad↔Polymonad : {TyCon : Set} {Id : TyCon} → HicksPolymonad TyCon Id ↔ Polymonad TyCon Id 
+HicksPolymonad↔Polymonad = bsym Polymonad↔HicksPolymonad
