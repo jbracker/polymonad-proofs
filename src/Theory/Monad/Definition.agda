@@ -1,6 +1,8 @@
 
 -- Stdlib
 open import Level
+open import Function renaming ( id to idF ; _∘_ to _∘F_ )
+
 open import Data.Product
 open import Data.Sum
 open import Data.Unit
@@ -27,6 +29,7 @@ record Monad {ℓC₀ ℓC₁ : Level} {C : Category {ℓC₀} {ℓC₁}} (M : F
   constructor monad
   
   open Category
+  open NaturalTransformation renaming ( η to nat-η )
   private
     _∘C_ = _∘_ C
   
@@ -46,6 +49,18 @@ record Monad {ℓC₀ ℓC₁ : Level} {C : Category {ℓC₀} {ℓC₁}} (M : F
     η-right-coher : {x : Obj C}
                   → nat-η μ x ∘C nat-η η ([ M ]₀ x) ≡ nat-η Id⟨ M ⟩ x
                   -- μ ∘ ηT ≡ 1ₜ
+
+  functor-connection : {α β : Obj C} → (f : Hom C α β) → [ M ]₁ f ≡ nat-η μ β ∘C ([ M ]₁ (nat-η η β ∘C f))
+  functor-connection {α} {β} f = begin
+    [ M ]₁ f
+      ≡⟨ sym $ right-id C ⟩
+    nat-η Id⟨ M ⟩ β ∘C [ M ]₁ f
+      ≡⟨ cong (λ X → X ∘C [ M ]₁ f) $ sym $ η-left-coher ⟩
+    (nat-η μ β ∘C [ M ]₁ (nat-η η β)) ∘C [ M ]₁ f
+      ≡⟨ sym $ assoc C ⟩
+    nat-η μ β ∘C ([ M ]₁ (nat-η η β) ∘C [ M ]₁ f)
+      ≡⟨ cong (λ X → nat-η μ β ∘C X) $ sym $ Functor.compose M ⟩
+    nat-η μ β ∘C ([ M ]₁ (nat-η η β ∘C f)) ∎
 
 -------------------------------------------------------------------------------
 -- Equality of Natural Transformations
