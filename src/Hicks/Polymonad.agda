@@ -21,6 +21,7 @@ open import Identity
 
 -- Polymonads as defined in the paper by Hicks et al. (2014)
 record HicksPolymonad {l : Level} (TyCons : Set l) (Id : TyCons) : Set (lsuc l) where
+  constructor hicksPolymonad
   field
     -- Set of bind operator names for each combination of type constructors
     B[_,_]▷_ : (M N P : TyCons) → Set l

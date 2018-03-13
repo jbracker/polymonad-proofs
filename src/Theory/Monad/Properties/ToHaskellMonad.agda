@@ -109,11 +109,7 @@ Monad→HaskellMonad {M} monad = record
                      → fmap f x ≡ x >>= (return ∘F f)
       law-monad-fmap {α} {β} f x = begin
         [ M ]₁ f x 
-          ≡⟨ cong (λ X → (X ∘F [ M ]₁ f) x) (sym $ Monad.η-left-coher monad) ⟩
-        ((μ β ∘F [ M ]₁ (η β)) ∘F [ M ]₁ f) x
-          ≡⟨ refl ⟩ -- associativity of ∘F
-        (μ β ∘F ([ M ]₁ (η β) ∘F [ M ]₁ f)) x
-          ≡⟨ cong (λ X → (μ β ∘F X) x) (sym $ Functor.compose M) ⟩
+          ≡⟨ cong (λ X → X x) (Monad.functor-connection monad f) ⟩
         (μ β ∘F ([ M ]₁ (η β ∘F f))) x ∎
     
     applicative : HaskellApplicative ([ M ]₀)
