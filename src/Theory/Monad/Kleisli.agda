@@ -9,9 +9,15 @@ open import Data.Sum
 open import Data.Unit
 open import Data.Empty
 open import Relation.Binary.PropositionalEquality
+open import Relation.Binary.HeterogeneousEquality renaming ( refl to hrefl ; sym to hsym ; trans to htrans ; cong to hcong ; proof-irrelevance to het-proof-irrelevance )
 open ≡-Reasoning 
 
 -- Local
+open import Bijection renaming ( refl to brefl ; sym to bsym ; trans to btrans )
+open import Equality
+open import Congruence
+open import Extensionality
+
 open import Theory.Category.Definition
 open import Theory.Functor.Definition
 open import Theory.Functor.Composition
@@ -26,6 +32,8 @@ open NaturalTransformation renaming ( η to nat-η )
 -- Definition of a Kleisli monad/triple
 -- -----------------------------------------------------------------------------
 record KleisliTriple {ℓC₀ ℓC₁ : Level} {C : Category {ℓC₀} {ℓC₁}} (T : Obj C → Obj C) : Set (ℓC₀ ⊔ ℓC₁) where
+  constructor kleisli-triple
+  
   open Category C hiding ( Obj ; Hom ; left-id ; right-id )
   
   field
@@ -33,13 +41,40 @@ record KleisliTriple {ℓC₀ ℓC₁ : Level} {C : Category {ℓC₀} {ℓC₁}
     kext : {a b : Obj C} → (Hom C a (T b)) → (Hom C (T a) (T b))
   
   field
-    right-id : {a b : Obj C} {k : Hom C a (T b)} 
-            → kext k ∘ η ≡ k
+    right-id : {a b : Obj C} {k : Hom C a (T b)} → kext k ∘ η ≡ k
     
     left-id : {a : Obj C} → kext η ≡ id {a = T a}
     
     coher : {a b c : Obj C} {k : Hom C a (T b)} {l : Hom C b (T c)} 
           → kext ( kext l ∘ k ) ≡ kext l ∘ kext k
+
+
+private
+  module KleisliEquality {Cℓ₀ Cℓ₁ : Level} {C : Category {Cℓ₀} {Cℓ₁}} {T : Obj C → Obj C} where
+    _∘_ = Category._∘_ C
+    id = Category.id C
+    
+    abstract
+      kleisli-triple-eq : {η₀ : {a : Obj C} → (Hom C a (T a))}
+                        → {η₁ : {a : Obj C} → (Hom C a (T a))}
+                        → {kext₀ : {a b : Obj C} → (Hom C a (T b)) → (Hom C (T a) (T b))}
+                        → {kext₁ : {a b : Obj C} → (Hom C a (T b)) → (Hom C (T a) (T b))}
+                        → {right-id₀ : {a b : Obj C} {k : Hom C a (T b)} → kext₀ k ∘ η₀ ≡ k}
+                        → {right-id₁ : {a b : Obj C} {k : Hom C a (T b)} → kext₁ k ∘ η₁ ≡ k}
+                        → {left-id₀ : {a : Obj C} → kext₀ η₀ ≡ id {a = T a}}
+                        → {left-id₁ : {a : Obj C} → kext₁ η₁ ≡ id {a = T a}}
+                        → {coher₀ : {a b c : Obj C} {k : Hom C a (T b)} {l : Hom C b (T c)} → kext₀ ( kext₀ l ∘ k ) ≡ kext₀ l ∘ kext₀ k}
+                        → {coher₁ : {a b c : Obj C} {k : Hom C a (T b)} {l : Hom C b (T c)} → kext₁ ( kext₁ l ∘ k ) ≡ kext₁ l ∘ kext₁ k}
+                        → (λ {a} → η₀ {a}) ≡ η₁
+                        → (λ {a} {b} f → kext₀ {a} {b} f) ≡ kext₁
+                        → kleisli-triple {C = C} {T = T} η₀ kext₀ right-id₀ left-id₀ coher₀ ≡ kleisli-triple {T = T} η₁ kext₁ right-id₁ left-id₁ coher₁
+      kleisli-triple-eq {η₀ = η} {.η} {kext} {.kext} {right-id₀} {right-id₁} {left-id₀} {left-id₁} {coher₀} {coher₁} refl refl 
+        = cong₃ (kleisli-triple η kext) 
+                (implicit-fun-ext $ λ a → implicit-fun-ext $ λ b → implicit-fun-ext $ λ k → proof-irrelevance right-id₀ right-id₁)
+                (implicit-fun-ext $ λ a → proof-irrelevance left-id₀ left-id₁)
+                (implicit-fun-ext $ λ a → implicit-fun-ext $ λ b → implicit-fun-ext $ λ c → implicit-fun-ext $ λ k → implicit-fun-ext $ λ l → proof-irrelevance coher₀ coher₁)
+
+open KleisliEquality using ( kleisli-triple-eq ) public
 
 -- -----------------------------------------------------------------------------
 -- Every Kleisli triple gives rise to a functor
@@ -283,3 +318,78 @@ Monad→KleisliTriple {C = C} {T = T} m = record
         (μ ∘ T₁ l) ∘ (μ ∘ T₁ k)
           ≡⟨ refl ⟩
         kext l ∘ kext k ∎
+
+
+Monad↔KleisliTriple : {ℓC₀ ℓC₁ : Level} {C : Category {ℓC₀} {ℓC₁}}
+                    → Σ (Functor C C) Monad
+                    ↔ Σ (Obj C → Obj C) (KleisliTriple {C = C})
+Monad↔KleisliTriple {ℓC₀} {ℓC₁} {C} =
+  bijection m→km km→m
+    (λ x → Σ-eq refl (≡-to-≅ (kleisli-triple-eq refl (implicit-fun-ext $ λ a → implicit-fun-ext $ λ b → fun-ext $ λ f → kext-eq x {a} {b} f))))
+    (λ x → Σ-eq (F-eq x) (het-monad-eq (F-eq x)
+                                       (het-natural-transformation-eq refl (F-eq x) (≡-to-≅ (η-eq x)))
+                                       (het-natural-transformation-eq (cong (λ X → [ X ]∘[ X ]) (F-eq x)) (F-eq x) (≡-to-≅ (μ-eq x)))))
+  where
+    m→km : Σ (Functor C C) Monad → Σ (Obj C → Obj C) (KleisliTriple {C = C})
+    m→km (T , m) = Functor.F₀ T , Monad→KleisliTriple m
+
+    km→m : Σ (Obj C → Obj C) (KleisliTriple {C = C}) → Σ (Functor C C) Monad
+    km→m (T₀ , km) = (KleisliTriple→Functor km) , (KleisliTriple→Monad km)
+
+    open KleisliTriple
+
+    _∘_ = Category._∘_ C
+    id = Category.id C
+    
+    kext-eq : (x : Σ (Obj C → Obj C) KleisliTriple)
+            → {a b : Obj C} (f : Hom C a (proj₁ (m→km (km→m x)) b))
+            → kext (proj₂ (m→km (km→m x))) f ≡ kext (proj₂ x) f
+    kext-eq x f = begin
+      kext (proj₂ (m→km (km→m x))) f
+        ≡⟨ refl ⟩
+      kext km id ∘ kext km (η km ∘ f)
+        ≡⟨ sym $ coher km ⟩
+      kext km (kext km id ∘ (η km ∘ f))
+        ≡⟨ cong (λ X → kext km X) (Category.assoc C) ⟩
+      kext km ((kext km id ∘ η km) ∘ f)
+        ≡⟨ cong (λ X → kext km (X ∘ f)) (right-id km) ⟩
+      kext km (id ∘ f)
+        ≡⟨ cong (kext km) (Category.right-id C) ⟩
+      kext km f ∎
+      where km = proj₂ x
+
+    F₁-eq : (x : Σ (Functor C C) Monad)
+          → {a b : Obj C} (f : Hom C a b)
+          → Functor.F₁ (proj₁ (km→m (m→km x))) f ≡ Functor.F₁ (proj₁ x) f
+    F₁-eq x {a} {b} f = begin
+      Functor.F₁ (proj₁ (km→m (m→km x))) f
+        ≡⟨ refl ⟩
+      nat-η (Monad.μ m) b ∘ [ F ]₁ (nat-η (Monad.η m) b ∘ f)
+        ≡⟨ sym $ Monad.functor-connection m {α = a} {β = b} f ⟩
+      Functor.F₁ F f ∎
+      where m = proj₂ x
+            F = proj₁ x
+
+    F-eq : (x : Σ (Functor C C) Monad) → proj₁ (km→m (m→km x)) ≡ proj₁ x
+    F-eq x = (functor-eq refl (≡-to-≅ (implicit-fun-ext $ λ a → implicit-fun-ext $ λ b → fun-ext $ λ f → F₁-eq x {a} {b} f)))
+
+    η-eq : (x : Σ (Functor C C) Monad) → nat-η (Monad.η (proj₂ (km→m (m→km x)))) ≡ nat-η (Monad.η (proj₂ x))
+    η-eq x = fun-ext $ λ a → refl
+    
+    μ-eq : (x : Σ (Functor C C) Monad) → nat-η (Monad.μ (proj₂ (km→m (m→km x)))) ≡ nat-η (Monad.μ (proj₂ x))
+    μ-eq x = fun-ext $ λ a → begin
+      nat-η (Monad.μ (proj₂ (km→m (m→km x)))) a
+        ≡⟨ refl ⟩
+      nat-η (Monad.μ m) a ∘ [ F ]₁ id 
+        ≡⟨ cong (λ X → nat-η (Monad.μ m) a ∘ X) (Functor.id F) ⟩
+      nat-η (Monad.μ m) a ∘ id 
+        ≡⟨ Category.left-id C ⟩
+      nat-η (Monad.μ m) a ∎
+      where m = proj₂ x
+            F = proj₁ x
+
+KleisliTriple↔Monad : {ℓC₀ ℓC₁ : Level} {C : Category {ℓC₀} {ℓC₁}}
+                    → Σ (Obj C → Obj C) (KleisliTriple {C = C})
+                    ↔ Σ (Functor C C) Monad
+KleisliTriple↔Monad = bsym Monad↔KleisliTriple
+

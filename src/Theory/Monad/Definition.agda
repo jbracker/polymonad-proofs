@@ -8,6 +8,7 @@ open import Data.Sum
 open import Data.Unit
 open import Data.Empty
 open import Relation.Binary.PropositionalEquality
+open import Relation.Binary.HeterogeneousEquality renaming ( refl to hrefl ; sym to hsym ; trans to htrans ; cong to hcong ; proof-irrelevance to het-proof-irrelevance )
 open ≡-Reasoning 
 
 -- Local
@@ -90,7 +91,28 @@ private
                 (implicit-fun-ext (λ x → proof-irrelevance η-left-coher₀ η-left-coher₁))
                 (implicit-fun-ext (λ x → proof-irrelevance η-right-coher₀ η-right-coher₁))
 
-open Equality using ( monad-eq ) public
+      het-monad-eq : {M' : Functor C C}
+                   → {η₀ : NaturalTransformation Id[ C ] M}
+                   → {η₁ : NaturalTransformation Id[ C ] M'}
+                   → {μ₀ : NaturalTransformation [ M ]∘[ M ] M}
+                   → {μ₁ : NaturalTransformation [ M' ]∘[ M' ] M'}
+                   → {μ-coher₀ : {x : Obj} → nat-η μ₀ x ∘ [ M ]₁ (nat-η μ₀ x) ≡ nat-η μ₀ x ∘ nat-η μ₀ ([ M ]₀ x)}
+                   → {μ-coher₁ : {x : Obj} → nat-η μ₁ x ∘ [ M' ]₁ (nat-η μ₁ x) ≡ nat-η μ₁ x ∘ nat-η μ₁ ([ M' ]₀ x)}
+                   → {η-left-coher₀ : {x : Obj} → nat-η μ₀ x ∘ [ M ]₁ (nat-η η₀ x) ≡ nat-η Id⟨ M ⟩ x}
+                   → {η-left-coher₁ : {x : Obj} → nat-η μ₁ x ∘ [ M' ]₁ (nat-η η₁ x) ≡ nat-η Id⟨ M' ⟩ x}
+                   → {η-right-coher₀ : {x : Obj} → nat-η μ₀ x ∘ nat-η η₀ ([ M ]₀ x) ≡ nat-η Id⟨ M ⟩ x}
+                   → {η-right-coher₁ : {x : Obj} → nat-η μ₁ x ∘ nat-η η₁ ([ M' ]₀ x) ≡ nat-η Id⟨ M' ⟩ x}
+                   → M ≡ M'
+                   → η₀ ≅ η₁
+                   → μ₀ ≅ μ₁
+                   → monad {M = M} η₀ μ₀ μ-coher₀ η-left-coher₀ η-right-coher₀ ≅ monad {M = M'} η₁ μ₁ μ-coher₁ η-left-coher₁ η-right-coher₁
+      het-monad-eq {.M} {η₀ = η} {.η} {μ} {.μ} {μ-coher₀} {μ-coher₁} {η-left-coher₀} {η-left-coher₁} {η-right-coher₀} {η-right-coher₁} refl hrefl hrefl
+        = ≡-to-≅ $ cong₃ (monad η μ) 
+                (implicit-fun-ext (λ x → proof-irrelevance μ-coher₀ μ-coher₁)) 
+                (implicit-fun-ext (λ x → proof-irrelevance η-left-coher₀ η-left-coher₁))
+                (implicit-fun-ext (λ x → proof-irrelevance η-right-coher₀ η-right-coher₁))
+
+open Equality using ( monad-eq ; het-monad-eq ) public
 
 -------------------------------------------------------------------------------
 -- The Identity Monad
