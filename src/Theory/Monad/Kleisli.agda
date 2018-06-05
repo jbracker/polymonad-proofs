@@ -48,6 +48,56 @@ record KleisliTriple {ℓC₀ ℓC₁ : Level} {C : Category {ℓC₀} {ℓC₁}
     coher : {a b c : Obj C} {k : Hom C a (T b)} {l : Hom C b (T c)} 
           → kext ( kext l ∘ k ) ≡ kext l ∘ kext k
 
+  TF : Functor C C
+  TF = record 
+    { F₀ = F₀
+    ; F₁ = F₁
+    ; id = idF
+    ; compose = composeF
+    } where
+      F₀ = T
+      
+      F₁ : {a b : Obj C} → Hom C a b → Hom C (F₀ a) (F₀ b)
+      F₁ f = kext (η ∘ f)
+      
+      abstract
+        idF : {a : Obj C} → F₁ {a = a} id ≡ id {T a}
+        idF {a = a} = begin
+          F₁ {a = a} id
+            ≡⟨ refl ⟩ 
+          kext (η ∘ id)
+            ≡⟨ cong (λ X → kext X) (Category.left-id C) ⟩ 
+          kext η
+            ≡⟨ left-id ⟩ 
+          id ∎
+      
+      abstract
+        composeF : {a b c : Obj C} {f : Hom C a b} {g : Hom C b c} 
+                 → F₁ (g ∘ f) ≡ (F₁ g) ∘ (F₁ f)
+        composeF {a = a} {b = b} {c = c} {f = f} {g = g} = begin
+          F₁ (g ∘ f) 
+            ≡⟨ refl ⟩
+          kext ( η ∘ (g ∘ f) )
+            ≡⟨ cong (λ X → kext X) assoc ⟩
+          kext ( (η ∘ g) ∘ f )
+            ≡⟨ cong (λ X → kext (X ∘ f)) (sym right-id) ⟩
+          kext ( (kext (η ∘ g) ∘ η) ∘ f )
+            ≡⟨ cong (λ X → kext X) (sym assoc) ⟩
+          kext ( kext (η ∘ g) ∘ (η ∘ f) )
+            ≡⟨ coher ⟩
+          kext (η ∘ g) ∘ kext (η ∘ f)
+            ≡⟨ refl ⟩
+          (F₁ g) ∘ (F₁ f) ∎
+
+  η-natural : NaturalTransformation Id[ C ] TF
+  η-natural = naturalTransformation (λ x → η {x}) $ λ {a} {b} {f} → begin
+    [ TF ]₁ f ∘ η
+      ≡⟨ refl ⟩
+    kext (η ∘ f) ∘ η
+      ≡⟨ right-id ⟩
+    η ∘ f
+      ≡⟨ refl ⟩
+    η ∘ [ Id[ C ] ]₁ f ∎
 
 private
   module KleisliEquality {Cℓ₀ Cℓ₁ : Level} {C : Category {Cℓ₀} {Cℓ₁}} {T : Obj C → Obj C} where
@@ -81,48 +131,7 @@ open KleisliEquality using ( kleisli-triple-eq ) public
 -- -----------------------------------------------------------------------------
 KleisliTriple→Functor : {ℓC₀ ℓC₁ : Level} {C : Category {ℓC₀} {ℓC₁}} {T : Obj C → Obj C} 
                      → KleisliTriple {C = C} T → Functor C C
-KleisliTriple→Functor {C = C} {T = T} km = record 
-  { F₀ = F₀
-  ; F₁ = F₁
-  ; id = idF
-  ; compose = composeF
-  } where
-    open Category C hiding ( Obj ; Hom )
-    kext = KleisliTriple.kext km
-    η = KleisliTriple.η km
-    F₀ = T
-    
-    F₁ : {a b : Obj C} → Hom C a b → Hom C (F₀ a) (F₀ b)
-    F₁ f = kext (η ∘ f)
-    
-    abstract
-      idF : {a : Obj C} → F₁ {a = a} id ≡ id {T a}
-      idF {a = a} = begin
-        F₁ {a = a} id
-          ≡⟨ refl ⟩ 
-        kext (η ∘ id)
-          ≡⟨ cong (λ X → kext X) (Category.left-id C) ⟩ 
-        kext η
-          ≡⟨ KleisliTriple.left-id km ⟩ 
-        id ∎
-    
-    abstract
-      composeF : {a b c : Obj C} {f : Hom C a b} {g : Hom C b c} 
-               → F₁ (g ∘ f) ≡ (F₁ g) ∘ (F₁ f)
-      composeF {a = a} {b = b} {c = c} {f = f} {g = g} = begin
-        F₁ (g ∘ f) 
-          ≡⟨ refl ⟩
-        kext ( η ∘ (g ∘ f) )
-          ≡⟨ cong (λ X → kext X) assoc ⟩
-        kext ( (η ∘ g) ∘ f )
-          ≡⟨ cong (λ X → kext (X ∘ f)) (sym (KleisliTriple.right-id km)) ⟩
-        kext ( (kext (η ∘ g) ∘ η) ∘ f )
-          ≡⟨ cong (λ X → kext X) (sym assoc) ⟩
-        kext ( kext (η ∘ g) ∘ (η ∘ f) )
-          ≡⟨ KleisliTriple.coher km ⟩
-        kext (η ∘ g) ∘ kext (η ∘ f)
-          ≡⟨ refl ⟩
-        (F₁ g) ∘ (F₁ f) ∎
+KleisliTriple→Functor = KleisliTriple.TF
   
 -- -----------------------------------------------------------------------------
 -- Every Kleisli triple is a monad
