@@ -38,7 +38,7 @@ principalPolymonadUnion : ∀ {TyCons₁ TyCons₂ : Set}
                         --  - F is a subset of (IdTyCons ⊎ TyCons₂)²
                         --  - F contains a pair with a tycon from TyCons₁ and a pair with a tycon from TyCons₂ (could be the same pair).
                         → ( (F : SubsetOf ((IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) × (IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)))) 
-                          → ( ∀ (M M' : IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) 
+                         → ( ∀ (M M' : IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) 
                             → (M , M') ∈ F 
                             → ∃ λ(M₁ : IdTyCons ⊎ TyCons₁) → ∃ λ(M₁' : IdTyCons ⊎ TyCons₁) 
                             → (M ≡ mTyCon₁ M₁) × (M' ≡ mTyCon₁ M₁') )
@@ -50,11 +50,13 @@ principalPolymonadUnion : ∀ {TyCons₁ TyCons₂ : Set}
                             → ∃ λ(M : IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) → ∃ λ(M' : IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) 
                             → ( (inj₂ (inj₁ M₁) , M) ∈ F ⊎ (M , inj₂ (inj₁ M₁)) ∈ F) × ( (inj₂ (inj₂ M₂) , M') ∈ F ⊎ (M' , inj₂ (inj₂ M₂)) ∈ F )  ) )
                         -- We know if either:
-                        --  - F contains at least one element aside of (Id,Id) or
+                        --  - F one element that is not (Id,Id)
                         --  - F = { (Id,Id) }
+                        --  - F = ∅
                         → ( (F : SubsetOf ((IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) × (IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)))) 
                           → ( (∃ λ(M : IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) → ∃ λ(M' : IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) → (M , M') ∈ F × (¬ (M ≡ idTC) ⊎ ¬ (M' ≡ idTC)))
-                            ⊎ ((idTC , idTC) ∈ F × (∀ (M M' : IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) → (¬ (M ≡ idTC) ⊎ ¬ (M' ≡ idTC)) → ¬ ((M , M') ∈ F))) )
+                            ⊎ ( ((idTC , idTC) ∈ F × (∀ (M M' : IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) → (¬ (M ≡ idTC) ⊎ ¬ (M' ≡ idTC)) → ¬ ((M , M') ∈ F)))
+                            ⊎ (∀ (M M' : IdTyCons ⊎ (TyCons₁ ⊎ TyCons₂)) → ¬ (M , M') ∈ F) ) )
                           )
                         → PrincipalPM pm₁
                         → PrincipalPM pm₂
@@ -350,6 +352,7 @@ principalPolymonadUnion {TyCons₁} {TyCons₂} {pm₁} {pm₂} upm₁ upm₂ pa
       = ⊥-elim (union→¬[N,M₂]▷M₁ upm {N = N'} {M₂ = N₂} {M₁ = M₁} (morph₁ N' (mTC₂ N₂) N'N₂∈F))
     princ F (M , M' , MM'∈F) (inj₂ (inj₂ M₁)) M₂ morph₁ morph₂ | inj₁ FmoreThenId | inj₂ (inj₂ (N₁ , N₂ , N , N' , inj₂ NN₁∈F , inj₂ N'N₂∈F))
       = ⊥-elim (union→¬[N,M₁]▷M₂ upm {N = N} {M₁ = N₁} {M₂ = M₁} (morph₁ N (mTC₁ N₁) NN₁∈F))
-    princ F (M , M' , MM'∈F) M₁ M₂ morph₁ morph₂ | inj₂ (IdId∈F , F≡IdId) 
+    princ F (M , M' , MM'∈F) M₁ M₂ morph₁ morph₂ | inj₂ (inj₁ (IdId∈F , F≡IdId)) 
       = idTC , morph₁ idTC idTC IdId∈F , morph₂ idTC idTC IdId∈F , morphId F F≡IdId
+    princ F (M , M' , MM'∈F) M₁ M₂ morph₁ morph₂ | inj₂ (inj₂ Fempty) = ⊥-elim (Fempty M M' MM'∈F) 
 
